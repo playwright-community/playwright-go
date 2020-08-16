@@ -1,6 +1,9 @@
 package playwright
 
 import (
+	"io/ioutil"
+	"os"
+	"path"
 	"testing"
 
 	"github.com/h2non/filetype"
@@ -47,8 +50,21 @@ func TestScreenshot(t *testing.T) {
 	page, err := context.NewPage()
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<h1>foobar</h1>"))
+	tmpfile, err := ioutil.TempDir("", "screenshot")
+	require.NoError(t, err)
+	screenshotPath := path.Join(tmpfile, "image.png")
 	screenshot, err := page.Screenshot()
 	require.NoError(t, err)
 	require.True(t, filetype.IsImage(screenshot))
 	require.Greater(t, len(screenshot), 50)
+
+	screenshot, err = page.Screenshot(&ScreenshotOptions{
+		Path: String(screenshotPath),
+	})
+	require.NoError(t, err)
+	require.True(t, filetype.IsImage(screenshot))
+	require.Greater(t, len(screenshot), 50)
+
+	_, err = os.Stat(screenshotPath)
+	require.NoError(t, err)
 }

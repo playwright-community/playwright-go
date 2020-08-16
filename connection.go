@@ -131,7 +131,7 @@ func (c *Connection) SendMessageToServer(guid string, method string, params inte
 		"id":     id,
 		"guid":   guid,
 		"method": method,
-		"params": c.replaceGuidsWithChannels(params),
+		"params": c.replaceChannelsWithGuids(params),
 	}
 	if _, ok := c.callbacks[id]; !ok {
 		c.callbacks[id] = make(chan interface{})
