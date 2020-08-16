@@ -3,6 +3,7 @@ package playwright
 import (
 	"testing"
 
+	"github.com/h2non/filetype"
 	"github.com/stretchr/testify/require"
 )
 
@@ -34,4 +35,20 @@ func TestPageSetContent(t *testing.T) {
 	content, err := page.Content()
 	require.NoError(t, err)
 	require.Equal(t, content, "<html><head></head><body><h1>foo</h1></body></html>")
+}
+
+func TestScreenshot(t *testing.T) {
+	pw, err := Run()
+	require.NoError(t, err)
+	browser, err := pw.Chromium.Launch()
+	require.NoError(t, err)
+	context, err := browser.NewContext()
+	require.NoError(t, err)
+	page, err := context.NewPage()
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent("<h1>foobar</h1>"))
+	screenshot, err := page.Screenshot()
+	require.NoError(t, err)
+	require.True(t, filetype.IsImage(screenshot))
+	require.Greater(t, len(screenshot), 50)
 }

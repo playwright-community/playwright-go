@@ -53,7 +53,6 @@ func (c *Connection) Dispatch(msg *Message) error {
 		return object.Dispose()
 	}
 	object.channel.Emit(method, c.replaceGuidsWithChannels(msg.Params))
-
 	return nil
 }
 

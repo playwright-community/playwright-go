@@ -1,5 +1,10 @@
 package playwright
 
+import (
+	"encoding/base64"
+	"fmt"
+)
+
 type Page struct {
 	ChannelOwner
 	frames    []*Frame
@@ -8,10 +13,6 @@ type Page struct {
 
 func (b *Page) Goto(url string) error {
 	return b.mainFrame.Goto(url)
-}
-
-func (b *Page) Screenshot(path string) error {
-	return nil
 }
 
 func (b *Page) URL() string {
@@ -24,6 +25,18 @@ func (b *Page) SetContent(content string) error {
 
 func (b *Page) Content() (string, error) {
 	return b.mainFrame.Content()
+}
+
+func (b *Page) Screenshot() ([]byte, error) {
+	data, err := b.channel.Send("screenshot", nil)
+	if err != nil {
+		return nil, fmt.Errorf("could not send message :%v", err)
+	}
+	image, err := base64.StdEncoding.DecodeString(data.(string))
+	if err != nil {
+		return nil, fmt.Errorf("could not decode base64 :%v", err)
+	}
+	return image, nil
 }
 
 func newPage(parent *ChannelOwner, objectType string, guid string, initializer interface{}) *Page {

@@ -19,7 +19,8 @@ func (b *Browser) NewContext() (*BrowserContext, error) {
 }
 
 func (b *Browser) Close() error {
-	return nil
+	_, err := b.channel.Send("close", nil)
+	return err
 }
 
 func (b *Browser) Version() string {
