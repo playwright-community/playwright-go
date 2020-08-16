@@ -13,6 +13,7 @@ type Connection struct {
 	lastID                  int
 	rootObject              *ChannelOwner
 	callbacks               map[int]chan interface{}
+	stopDriver              func() error
 }
 
 func (c *Connection) Start() error {
@@ -21,7 +22,10 @@ func (c *Connection) Start() error {
 }
 
 func (c *Connection) Stop() error {
-	return c.transport.Stop()
+	if err := c.transport.Stop(); err != nil {
+		return fmt.Errorf("could not stop transport: %v", err)
+	}
+	return c.stopDriver()
 }
 
 func (c *Connection) CallOnObjectWithKnownName(name string) (interface{}, error) {
@@ -41,14 +45,14 @@ func (c *Connection) Dispatch(msg *Message) error {
 	object := c.objects[msg.GUID]
 	if method == "__create__" {
 		c.createRemoteObject(
-			object, msg.Params.Type, msg.Params.GUID, msg.Params.Initializer,
+			object, msg.Params["type"].(string), msg.Params["guid"].(string), msg.Params["initializer"],
 		)
 		return nil
 	}
 	if method == "__dispose__" {
-		object.Dispose()
-		return nil
+		return object.Dispose()
 	}
+	object.channel.Emit(method, c.replaceGuidsWithChannels(msg.Params))
 
 	return nil
 }
@@ -139,12 +143,13 @@ func (c *Connection) SendMessageToServer(guid string, method string, params inte
 	return <-c.callbacks[id], nil
 }
 
-func newConnection(stdin io.WriteCloser, stdout io.ReadCloser) *Connection {
+func newConnection(stdin io.WriteCloser, stdout io.ReadCloser, stopDriver func() error) *Connection {
 	connection := &Connection{
 		waitingForRemoteObjects: make(map[string]chan interface{}),
 		transport:               newTransport(stdin, stdout),
 		objects:                 make(map[string]*ChannelOwner),
 		callbacks:               make(map[int]chan interface{}),
+		stopDriver:              stopDriver,
 	}
 	connection.rootObject = newRootChannelOwner(connection)
 	return connection

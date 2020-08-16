@@ -8,9 +8,7 @@ import (
 
 func TestBrowserName(t *testing.T) {
 	pw, err := Run()
-	if err != nil {
-		t.Fatalf("could not launch playwright: %v", err)
-	}
+	require.NoError(t, err)
 	require.Equal(t, pw.Chromium.Name(), "chromium")
 	require.Equal(t, pw.Firefox.Name(), "firefox")
 	require.Equal(t, pw.WebKit.Name(), "webkit")
@@ -18,8 +16,6 @@ func TestBrowserName(t *testing.T) {
 
 func TestExecutablePath(t *testing.T) {
 	pw, err := Run()
-	if err != nil {
-		t.Fatalf("could not launch playwright: %v", err)
-	}
+	require.NoError(t, err)
 	require.Greater(t, len(pw.Chromium.ExecutablePath()), 0)
 }

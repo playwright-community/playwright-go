@@ -7,7 +7,7 @@ type Page struct {
 }
 
 func (b *Page) Goto(url string) error {
-	return nil
+	return b.mainFrame.Goto(url)
 }
 
 func (b *Page) Screenshot(path string) error {
@@ -16,6 +16,14 @@ func (b *Page) Screenshot(path string) error {
 
 func (b *Page) URL() string {
 	return b.mainFrame.URL()
+}
+
+func (b *Page) SetContent(content string) error {
+	return b.mainFrame.SetContent(content)
+}
+
+func (b *Page) Content() (string, error) {
+	return b.mainFrame.Content()
 }
 
 func newPage(parent *ChannelOwner, objectType string, guid string, initializer interface{}) *Page {

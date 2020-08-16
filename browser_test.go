@@ -8,9 +8,7 @@ import (
 
 func TestIsConnected(t *testing.T) {
 	pw, err := Run()
-	if err != nil {
-		t.Fatalf("could not launch playwright: %v", err)
-	}
+	require.NoError(t, err)
 	browser, err := pw.Chromium.Launch()
 	require.NoError(t, err)
 	require.True(t, browser.IsConnected)
@@ -18,9 +16,7 @@ func TestIsConnected(t *testing.T) {
 
 func TestVersion(t *testing.T) {
 	pw, err := Run()
-	if err != nil {
-		t.Fatalf("could not launch playwright: %v", err)
-	}
+	require.NoError(t, err)
 	browser, err := pw.Chromium.Launch()
 	require.NoError(t, err)
 	require.Greater(t, len(browser.Version()), 2)
@@ -28,9 +24,7 @@ func TestVersion(t *testing.T) {
 
 func TestNewContext(t *testing.T) {
 	pw, err := Run()
-	if err != nil {
-		t.Fatalf("could not launch playwright: %v", err)
-	}
+	require.NoError(t, err)
 	browser, err := pw.Chromium.Launch()
 	require.NoError(t, err)
 	context, err := browser.NewContext()

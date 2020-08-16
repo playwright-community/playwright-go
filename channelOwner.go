@@ -1,6 +1,7 @@
 package playwright
 
 type ChannelOwner struct {
+	EventEmitter
 	objectType  string
 	guid        string
 	channel     *Channel
@@ -25,6 +26,7 @@ func (c *ChannelOwner) createChannelOwner(self interface{}, parent *ChannelOwner
 	c.initializer = initializer
 	c.connection.objects[guid] = c
 	c.parent.objects[guid] = c
+	c.initEventEmitter()
 }
 
 func newRootChannelOwner(connection *Connection) *ChannelOwner {
@@ -37,5 +39,6 @@ func newRootChannelOwner(connection *Connection) *ChannelOwner {
 	}
 	c.channel.object = c
 	c.connection.objects[""] = c
+	c.initEventEmitter()
 	return c
 }

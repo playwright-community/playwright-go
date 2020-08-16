@@ -6,6 +6,7 @@ import (
 )
 
 type Channel struct {
+	EventEmitter
 	guid       string
 	connection *Connection
 	object     interface{}
@@ -19,6 +20,9 @@ func (c *Channel) Send(method string, params interface{}) (interface{}, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not send message to server: %v", err)
 	}
+	if result == nil {
+		return nil, nil
+	}
 	if reflect.TypeOf(result).Kind() == reflect.Map {
 		for key := range result.(map[string]interface{}) {
 			return result.(map[string]interface{})[key], nil
@@ -28,8 +32,10 @@ func (c *Channel) Send(method string, params interface{}) (interface{}, error) {
 }
 
 func newChannel(connection *Connection, guid string) *Channel {
-	return &Channel{
+	channel := &Channel{
 		connection: connection,
 		guid:       guid,
 	}
+	channel.initEventEmitter()
+	return channel
 }
