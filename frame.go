@@ -29,10 +29,15 @@ func (b *Frame) Goto(url string) error {
 	return err
 }
 
+func (b *Frame) onFrameNavigated(event ...interface{}) {
+	b.url = event[0].(map[string]interface{})["url"].(string)
+}
+
 func newFrame(parent *ChannelOwner, objectType string, guid string, initializer interface{}) *Frame {
 	bt := &Frame{
 		url: initializer.(map[string]interface{})["url"].(string),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
+	bt.channel.On("navigated", bt.onFrameNavigated)
 	return bt
 }

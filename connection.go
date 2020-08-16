@@ -45,13 +45,14 @@ func (c *Connection) Dispatch(msg *Message) error {
 	object := c.objects[msg.GUID]
 	if method == "__create__" {
 		c.createRemoteObject(
-			object, msg.Params.Type, msg.Params.GUID, msg.Params.Initializer,
+			object, msg.Params["type"].(string), msg.Params["guid"].(string), msg.Params["initializer"],
 		)
 		return nil
 	}
 	if method == "__dispose__" {
 		return object.Dispose()
 	}
+	object.channel.Emit(method, c.replaceGuidsWithChannels(msg.Params))
 
 	return nil
 }

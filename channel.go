@@ -6,6 +6,7 @@ import (
 )
 
 type Channel struct {
+	EventEmitter
 	guid       string
 	connection *Connection
 	object     interface{}
@@ -31,8 +32,10 @@ func (c *Channel) Send(method string, params interface{}) (interface{}, error) {
 }
 
 func newChannel(connection *Connection, guid string) *Channel {
-	return &Channel{
+	channel := &Channel{
 		connection: connection,
 		guid:       guid,
 	}
+	channel.initEventEmitter()
+	return channel
 }

@@ -36,7 +36,8 @@ func (t *Transport) Start() error {
 			return fmt.Errorf("could not parse json: %v", err)
 		}
 		if os.Getenv("DEBUGP") != "" {
-			spew.Dump("RECV>", msg)
+			fmt.Print("RECV>")
+			spew.Dump(msg)
 		}
 		t.dispatch(msg)
 	}
@@ -47,15 +48,11 @@ func (t *Transport) Stop() error {
 }
 
 type Message struct {
-	ID     int    `json:"id"`
-	GUID   string `json:"guid"`
-	Method string `json:"method"`
-	Params struct {
-		Type        string      `json:"type"`
-		GUID        string      `json:"guid"`
-		Initializer interface{} `json:"initializer"`
-	} `json:"params"`
-	Result interface{} `json:"result"`
+	ID     int                    `json:"id"`
+	GUID   string                 `json:"guid"`
+	Method string                 `json:"method"`
+	Params map[string]interface{} `json:"params"`
+	Result interface{}            `json:"result"`
 	Error  struct {
 		Message string `json:"message"`
 		Stack   string `json:"stack"`
@@ -68,7 +65,8 @@ func (t *Transport) Send(message map[string]interface{}) error {
 		return fmt.Errorf("could not marshal json: %v", err)
 	}
 	if os.Getenv("DEBUGP") != "" {
-		spew.Dump("SEND>", message)
+		fmt.Print("SEND>")
+		spew.Dump(message)
 	}
 	b := make([]byte, 4)
 	binary.LittleEndian.PutUint32(b, uint32(len(msg)))
