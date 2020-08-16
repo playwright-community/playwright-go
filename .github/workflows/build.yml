@@ -18,8 +18,9 @@ jobs:
     - name: Download driver
       run: curl -o driver -sf https://storage.googleapis.com/mxschmitt-public-files/playwright-driver-1596843106133-linux
     - name: Install browsers
-      run: chmod +x driver
-          ./driver install
+      run: |
+        chmod +x driver
+        ./driver install
     - name: Get dependencies
       run: |
         go get -v -t -d ./...
