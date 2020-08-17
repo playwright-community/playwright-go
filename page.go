@@ -64,8 +64,8 @@ func (b *Page) Screenshot(options ...*ScreenshotOptions) ([]byte, error) {
 	return image, nil
 }
 
-func newPage(parent *ChannelOwner, objectType string, guid string, initializer interface{}) *Page {
-	channelOwner := (initializer.(map[string]interface{})["mainFrame"]).(*Channel).object
+func newPage(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Page {
+	channelOwner := initializer["mainFrame"].(*Channel).object
 	bt := &Page{
 		mainFrame: channelOwner.(*Frame),
 	}
