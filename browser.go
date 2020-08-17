@@ -24,10 +24,10 @@ func (b *Browser) Close() error {
 }
 
 func (b *Browser) Version() string {
-	return b.initializer.(map[string]interface{})["version"].(string)
+	return b.initializer["version"].(string)
 }
 
-func newBrowser(parent *ChannelOwner, objectType string, guid string, initializer interface{}) *Browser {
+func newBrowser(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Browser {
 	bt := &Browser{
 		IsConnected: true,
 	}

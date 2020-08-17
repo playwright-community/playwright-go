@@ -15,7 +15,7 @@ func (b *BrowserContext) NewPage() (*Page, error) {
 	return channelOwner.(*Channel).object.(*Page), nil
 }
 
-func newBrowserContext(parent *ChannelOwner, objectType string, guid string, initializer interface{}) *BrowserContext {
+func newBrowserContext(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *BrowserContext {
 	bt := &BrowserContext{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	return bt

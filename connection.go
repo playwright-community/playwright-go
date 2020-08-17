@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"sync"
 )
 
 type Connection struct {
-	transport               *Transport
-	waitingForRemoteObjects map[string]chan interface{}
-	objects                 map[string]*ChannelOwner
-	lastID                  int
-	rootObject              *ChannelOwner
-	callbacks               map[int]chan interface{}
-	stopDriver              func() error
+	transport                   *Transport
+	waitingForRemoteObjectsLock sync.Mutex
+	waitingForRemoteObjects     map[string]chan interface{}
+	objects                     map[string]*ChannelOwner
+	lastID                      int
+	rootObject                  *ChannelOwner
+	callbacks                   map[int]chan interface{}
+	stopDriver                  func() error
 }
 
 func (c *Connection) Start() error {
@@ -30,7 +32,9 @@ func (c *Connection) Stop() error {
 
 func (c *Connection) CallOnObjectWithKnownName(name string) (interface{}, error) {
 	if _, ok := c.waitingForRemoteObjects[name]; !ok {
+		c.waitingForRemoteObjectsLock.Lock()
 		c.waitingForRemoteObjects[name] = make(chan interface{})
+		c.waitingForRemoteObjectsLock.Unlock()
 	}
 	return <-c.waitingForRemoteObjects[name], nil
 }
@@ -58,10 +62,13 @@ func (c *Connection) Dispatch(msg *Message) error {
 
 func (c *Connection) createRemoteObject(parent *ChannelOwner, objectType string, guid string, initializer interface{}) interface{} {
 	initializer = c.replaceGuidsWithChannels(initializer)
-	result := createObjectFactory(parent, objectType, guid, initializer)
+	result := createObjectFactory(parent, objectType, guid, initializer.(map[string]interface{}))
+	c.waitingForRemoteObjectsLock.Lock()
 	if _, ok := c.waitingForRemoteObjects[guid]; ok {
 		c.waitingForRemoteObjects[guid] <- result
+		delete(c.waitingForRemoteObjects, guid)
 	}
+	c.waitingForRemoteObjectsLock.Unlock()
 	return result
 }
 
@@ -139,7 +146,9 @@ func (c *Connection) SendMessageToServer(guid string, method string, params inte
 	if err := c.transport.Send(message); err != nil {
 		return nil, fmt.Errorf("could not send message: %v", err)
 	}
-	return <-c.callbacks[id], nil
+	result := <-c.callbacks[id]
+	delete(c.callbacks, id)
+	return result, nil
 }
 
 func newConnection(stdin io.WriteCloser, stdout io.ReadCloser, stopDriver func() error) *Connection {

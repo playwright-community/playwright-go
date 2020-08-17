@@ -1,6 +1,6 @@
 package playwright
 
-func createObjectFactory(parent *ChannelOwner, objectType string, guid string, initializer interface{}) interface{} {
+func createObjectFactory(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) interface{} {
 	switch objectType {
 	case "Playwright":
 		return newPlaywright(parent, objectType, guid, initializer)
