@@ -29,7 +29,7 @@ func (b *Page) Content() (string, error) {
 }
 
 type ScreenshotOptions struct {
-	Path     *string `json:"path,omitempty"`
+	Path     *string `json:"path,-"`
 	Type     *string `json:"type,omitempty"`
 	Quality  *int    `json:"quality,omitempty"`
 	FullPage *bool   `json:"fullPage,omitempty"`

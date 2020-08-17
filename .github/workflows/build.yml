@@ -25,4 +25,7 @@ jobs:
       run: |
         go get -v -t -d ./...
     - name: Test
-      run: go test -v --race .
+      run: |
+        BROWSER=chromium go test -v --race .
+        BROWSER=firefox go test -v --race .
+        BROWSER=webkit go test -v --race .
