@@ -7,27 +7,19 @@ import (
 )
 
 func TestIsConnected(t *testing.T) {
-	pw, err := Run()
-	require.NoError(t, err)
-	browser, err := pw.Chromium.Launch()
-	require.NoError(t, err)
-	require.True(t, browser.IsConnected)
+	helper := NewTestHelper(t)
+	require.True(t, helper.Browser.IsConnected)
+	helper.Close(t)
 }
 
 func TestVersion(t *testing.T) {
-	pw, err := Run()
-	require.NoError(t, err)
-	browser, err := pw.Chromium.Launch()
-	require.NoError(t, err)
-	require.Greater(t, len(browser.Version()), 2)
+	helper := NewTestHelper(t)
+	require.Greater(t, len(helper.Browser.Version()), 2)
+	helper.Close(t)
 }
 
 func TestNewContext(t *testing.T) {
-	pw, err := Run()
-	require.NoError(t, err)
-	browser, err := pw.Chromium.Launch()
-	require.NoError(t, err)
-	context, err := browser.NewContext()
-	require.NoError(t, err)
-	require.Equal(t, len(context.Pages), 0)
+	helper := NewTestHelper(t)
+	require.Equal(t, 0, len(helper.Context.Pages))
+	helper.Close(t)
 }

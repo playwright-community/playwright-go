@@ -47,15 +47,20 @@ func (t *Transport) Stop() error {
 	return nil
 }
 
+type errorPayload struct {
+	Name    string `json:"name"`
+	Message string `json:"message"`
+	Stack   string `json:"stack"`
+}
+
 type Message struct {
 	ID     int                    `json:"id"`
 	GUID   string                 `json:"guid"`
 	Method string                 `json:"method"`
 	Params map[string]interface{} `json:"params"`
 	Result interface{}            `json:"result"`
-	Error  struct {
-		Message string `json:"message"`
-		Stack   string `json:"stack"`
+	Error  *struct {
+		Error errorPayload `json:"error"`
 	} `json:"error"`
 }
 
