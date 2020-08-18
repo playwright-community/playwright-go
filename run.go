@@ -106,6 +106,7 @@ func Run() (*Playwright, error) {
 	}
 
 	cmd := exec.Command(driverPath)
+	cmd.Stderr = os.Stderr
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return nil, fmt.Errorf("could not get stdin pipe: %v", err)
