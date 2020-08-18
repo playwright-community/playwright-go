@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"runtime"
 )
 
@@ -35,7 +35,7 @@ func getDriverURL() (string, string) {
 
 func installDriver() (string, error) {
 	driverURL, driverHash := getDriverURL()
-	driverPath := path.Join(os.TempDir(), "playwright-driver-"+driverHash)
+	driverPath := filepath.Join(os.TempDir(), "playwright-driver-"+driverHash)
 	if _, err := os.Stat(driverPath); os.IsNotExist(err) {
 		log.Println("Downloading driver...")
 		resp, err := http.Get(driverURL)

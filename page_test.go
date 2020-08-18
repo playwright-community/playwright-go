@@ -3,7 +3,7 @@ package playwright
 import (
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -78,7 +78,7 @@ func TestScreenshot(t *testing.T) {
 	require.NoError(t, helper.Page.SetContent("<h1>foobar</h1>"))
 	tmpfile, err := ioutil.TempDir("", "screenshot")
 	require.NoError(t, err)
-	screenshotPath := path.Join(tmpfile, "image.png")
+	screenshotPath := filepath.Join(tmpfile, "image.png")
 	screenshot, err := helper.Page.Screenshot()
 	require.NoError(t, err)
 	require.True(t, filetype.IsImage(screenshot))
