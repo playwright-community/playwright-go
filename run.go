@@ -30,12 +30,12 @@ func getDriverURL() (string, string) {
 	}
 	hash := sha1.New()
 	hash.Write([]byte(version))
-	return fmt.Sprintf("%s%s/%s", baseURL, version, driverName), hex.EncodeToString(hash.Sum(nil))[:5]
+	return fmt.Sprintf("%s%s/%s", baseURL, version, driverName), fmt.Sprintf("%s-%s", driverName, hex.EncodeToString(hash.Sum(nil))[:5])
 }
 
 func installDriver() (string, error) {
-	driverURL, driverHash := getDriverURL()
-	driverPath := filepath.Join(os.TempDir(), "playwright-driver-"+driverHash)
+	driverURL, driverName := getDriverURL()
+	driverPath := filepath.Join(os.TempDir(), driverName)
 	if _, err := os.Stat(driverPath); os.IsNotExist(err) {
 		log.Println("Downloading driver...")
 		resp, err := http.Get(driverURL)
