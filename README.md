@@ -1,1 +1,1 @@
-# playwright-golang
+# Playwright for Go

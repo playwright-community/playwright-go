@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/h2non/filetype"
@@ -83,7 +84,7 @@ func TestScreenshot(t *testing.T) {
 	require.True(t, filetype.IsImage(screenshot))
 	require.Greater(t, len(screenshot), 50)
 
-	screenshot, err = helper.Page.Screenshot(&ScreenshotOptions{
+	screenshot, err = helper.Page.Screenshot(&PageScreenshotOptions{
 		Path: String(screenshotPath),
 	})
 	require.NoError(t, err)
@@ -92,5 +93,30 @@ func TestScreenshot(t *testing.T) {
 
 	_, err = os.Stat(screenshotPath)
 	require.NoError(t, err)
+	helper.Close(t)
+}
+
+func TestPageQuerySelector(t *testing.T) {
+	helper := NewTestHelper(t)
+	require.NoError(t, helper.Page.SetContent(`<div id="one">
+		<span id="two">
+			<div id="three">
+				<span id="four">
+					foobar
+				</span>
+			</div>
+		</span>
+	</div>`))
+	one, err := helper.Page.QuerySelector("div#one")
+	require.NoError(t, err)
+	two, err := one.QuerySelector("span#two")
+	require.NoError(t, err)
+	three, err := two.QuerySelector("div#three")
+	require.NoError(t, err)
+	four, err := three.QuerySelector("span#four")
+	require.NoError(t, err)
+	textContent, err := four.TextContent()
+	require.NoError(t, err)
+	require.Equal(t, strings.TrimSpace(textContent), "foobar")
 	helper.Close(t)
 }

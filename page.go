@@ -28,22 +28,7 @@ func (b *Page) Content() (string, error) {
 	return b.mainFrame.Content()
 }
 
-type ScreenshotOptions struct {
-	Path     *string `json:"path,-"`
-	Type     *string `json:"type,omitempty"`
-	Quality  *int    `json:"quality,omitempty"`
-	FullPage *bool   `json:"fullPage,omitempty"`
-	Clip     *struct {
-		X *int `json:"x,omitempty"`
-		Y *int `json:"y,omitempty"`
-	} `json:"clip,omitempty"`
-	Width          *int  `json:"width,omitempty"`
-	Height         *int  `json:"height,omitempty"`
-	OmitBackground *bool `json:"omitBackground,omitempty"`
-	Timeout        *int  `json:"timeout,omitempty"`
-}
-
-func (b *Page) Screenshot(options ...*ScreenshotOptions) ([]byte, error) {
+func (b *Page) Screenshot(options ...*PageScreenshotOptions) ([]byte, error) {
 	var path *string
 	if len(options) > 0 {
 		path = options[0].Path
@@ -62,6 +47,10 @@ func (b *Page) Screenshot(options ...*ScreenshotOptions) ([]byte, error) {
 		}
 	}
 	return image, nil
+}
+
+func (b *Page) QuerySelector(selector string) (*ElementHandle, error) {
+	return b.mainFrame.QuerySelector(selector)
 }
 
 func newPage(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Page {
