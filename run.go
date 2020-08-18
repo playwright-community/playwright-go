@@ -42,6 +42,9 @@ func installDriver() (string, error) {
 		if err != nil {
 			return "", fmt.Errorf("could not download driver: %v", err)
 		}
+		if resp.StatusCode != http.StatusOK {
+			return "", fmt.Errorf("error: got non 2xx status code: %d (%s)", resp.StatusCode, resp.Status)
+		}
 		outFile, err := os.Create(driverPath)
 		if err != nil {
 			return "", fmt.Errorf("could not create driver: %v", err)
@@ -62,7 +65,7 @@ func installDriver() (string, error) {
 				return "", fmt.Errorf("could not set permissions: %v", err)
 			}
 		}
-		fmt.Println("Downloaded driver successfully")
+		log.Println("Downloaded driver successfully")
 	}
 	return driverPath, nil
 }
