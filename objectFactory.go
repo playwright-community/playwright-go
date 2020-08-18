@@ -18,6 +18,8 @@ func createObjectFactory(parent *ChannelOwner, objectType string, guid string, i
 		return newRequest(parent, objectType, guid, initializer)
 	case "Response":
 		return newResponse(parent, objectType, guid, initializer)
+	case "ElementHandle":
+		return newElementHandle(parent, objectType, guid, initializer)
 	case "Selectors":
 		return nil
 	case "Electron":

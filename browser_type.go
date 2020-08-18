@@ -16,8 +16,8 @@ func (b *BrowserType) ExecutablePath() string {
 	return b.initializer["executablePath"].(string)
 }
 
-func (b *BrowserType) Launch() (*Browser, error) {
-	channelOwner, err := b.channel.Send("launch", nil)
+func (b *BrowserType) Launch(options ...*BrowserTypeLaunchOptions) (*Browser, error) {
+	channelOwner, err := b.channel.Send("launch", options)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %v", err)
 	}

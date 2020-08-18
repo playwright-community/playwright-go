@@ -40,6 +40,16 @@ func (b *Frame) onFrameNavigated(event ...interface{}) {
 	b.Unlock()
 }
 
+func (b *Frame) QuerySelector(selector string) (*ElementHandle, error) {
+	channelOwner, err := b.channel.Send("querySelector", map[string]interface{}{
+		"selector": selector,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return channelOwner.(*Channel).object.(*ElementHandle), nil
+}
+
 func newFrame(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Frame {
 	bt := &Frame{
 		url: initializer["url"].(string),
