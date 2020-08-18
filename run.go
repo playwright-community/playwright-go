@@ -65,11 +65,12 @@ func installDriver() (string, error) {
 		if err != nil {
 			return "", fmt.Errorf("could not create driver: %v", err)
 		}
-		_, err = io.Copy(outFile, resp.Body)
-		if err != nil {
+		if _, err = io.Copy(outFile, resp.Body); err != nil {
 			return "", fmt.Errorf("could not copy response body to file: %v", err)
 		}
-		outFile.Close()
+		if err := outFile.Close(); err != nil {
+			return "", fmt.Errorf("could not close file (driver): %v", err)
+		}
 
 		if runtime.GOOS != "windows" {
 			stats, err := os.Stat(driverPath)
@@ -80,6 +81,7 @@ func installDriver() (string, error) {
 				return "", fmt.Errorf("could not set permissions: %v", err)
 			}
 		}
+		// TODO: rework
 		ioutil.WriteFile(path.Join(os.TempDir(), "browsers.json"), []byte(browsersJSON), 0644)
 		fmt.Println("Downloaded driver successfully")
 	}
@@ -94,6 +96,20 @@ func installBrowsers(driverPath string) error {
 		return fmt.Errorf("could not start driver: %v", err)
 	}
 	return cmd.Wait()
+}
+
+// Install does download the driver and the browsers. If not called manually
+// before playwright.Run() it will get executed there and might take a few seconds
+// to download the Playwright suite.
+func Install() error {
+	driverPath, err := installDriver()
+	if err != nil {
+		return fmt.Errorf("could not install driver: %v", err)
+	}
+	if err := installBrowsers(driverPath); err != nil {
+		return fmt.Errorf("could not install browsers: %v", err)
+	}
+	return nil
 }
 
 func Run() (*Playwright, error) {
