@@ -11,7 +11,6 @@ import (
 	"os/exec"
 	"path"
 	"runtime"
-	"syscall"
 )
 
 func getDriverURL() (string, string) {
@@ -59,7 +58,7 @@ func installDriver() (string, error) {
 			if err != nil {
 				return "", fmt.Errorf("could not stat driver: %v", err)
 			}
-			if err := os.Chmod(driverPath, stats.Mode()|syscall.S_IEXEC); err != nil {
+			if err := os.Chmod(driverPath, stats.Mode()|0x40); err != nil {
 				return "", fmt.Errorf("could not set permissions: %v", err)
 			}
 		}

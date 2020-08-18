@@ -7,7 +7,12 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        browser: [chromium, firefox, webkit]
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: microsoft/playwright-github-action@v1
     - name: Set up Go 1.x
@@ -20,7 +25,6 @@ jobs:
       run: |
         go get -v -t -d ./...
     - name: Test
-      run: |
-        BROWSER=chromium go test -v --race .
-        BROWSER=firefox go test -v --race .
-        BROWSER=webkit go test -v --race .
+      env:
+        BROWSER: ${{ matrix.browser }}
+      run: go test -v --race .
