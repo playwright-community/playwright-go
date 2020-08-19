@@ -138,39 +138,3 @@ func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
 	require.Equal(t, "error", message.Type())
 	helper.Browser.Close()
 }
-
-// func Test_console_should_have_location_for_console_api_calls(page, server):
-//     page.goto(server.EMPTY_PAGE)
-//     with page.expect_console_message() as message:
-//         page.goto(server.PREFIX + "/consolelog.html")
-//     message = message.value
-//     assert message.text == "yellow"
-//     assert message.type == "log"
-//     location = message.location
-//     # Engines have different column notion.
-//     del location["columnNumber"]
-//     assert location == {"url": server.PREFIX + "/consolelog.html", "lineNumber": 7}
-
-// func Test_console_should_not_throw_when_there_are_console_messages_in_detached_iframes(
-//     page: Page, server
-// ):
-//     page.goto(server.EMPTY_PAGE)
-//     with page.expect_popup() as popup:
-//         page.evaluate(
-//             """async() => {
-//                 // 1. Create a popup that Playwright is not connected to.
-//                 const win = window.open('');
-//                 window._popup = win;
-//                 if (window.document.readyState !== 'complete')
-//                 new Promise(f => window.addEventListener('load', f));
-//                 // 2. In this popup, create an iframe that console.logs a message.
-//                 win.document.body.innerHTML = `<iframe src='/consolelog.html'></iframe>`;
-//                 const frame = win.document.querySelector('iframe');
-//                 if (!frame.contentDocument || frame.contentDocument.readyState !== 'complete')
-//                 new Promise(f => frame.addEventListener('load', f));
-//                 // 3. After that, remove the iframe.
-//                 frame.remove();
-//             }"""
-//         )
-//     # 4. Connect to the popup and make sure it doesn't throw.
-//     assert popup.value.evaluate("1 + 1") == 2
