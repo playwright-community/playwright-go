@@ -95,9 +95,10 @@ func (c *Connection) replaceChannelsWithGuids(payload interface{}) interface{} {
 	}
 	v := reflect.ValueOf(payload)
 	if v.Kind() == reflect.Slice {
-		listV := payload.([]interface{})
-		for i := 0; i < len(listV); i++ {
-			listV[i] = c.replaceChannelsWithGuids(listV[i])
+		listV := make([]interface{}, 0)
+		for i := 0; i < v.Len(); i++ {
+			f := v.Field(i)
+			listV = append(listV, c.replaceChannelsWithGuids(f.Interface()))
 		}
 		return listV
 	}

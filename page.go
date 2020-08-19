@@ -28,6 +28,10 @@ func (b *Page) Content() (string, error) {
 	return b.mainFrame.Content()
 }
 
+func (b *Page) Evaluate(expression string, options ...interface{}) (interface{}, error) {
+	return b.mainFrame.Evaluate(expression, options...)
+}
+
 func (b *Page) Screenshot(options ...PageScreenshotOptions) ([]byte, error) {
 	var path *string
 	if len(options) > 0 {
@@ -60,5 +64,8 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 	}
 	bt.frames = []*Frame{bt.mainFrame}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
+	bt.channel.On("console", func(payload ...interface{}) {
+		bt.Emit("console", payload[0].(map[string]interface{})["message"].(*Channel).object)
+	})
 	return bt
 }

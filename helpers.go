@@ -22,19 +22,22 @@ func transformOptions(options ...interface{}) map[string]interface{} {
 		// second one can be a struct or map. It will be then get merged into the first
 		// base map.
 		base = options[0].(map[string]interface{})
-		val := reflect.ValueOf(options[1])
-		if val.Kind() == reflect.Slice {
-			if val.Len() == 0 {
-				return base
-			}
-			option = val.Index(0).Interface()
-		}
+		option = options[1]
+
 	}
+	v := reflect.ValueOf(option)
+	if v.Kind() == reflect.Slice {
+		if v.Len() == 0 {
+			return base
+		}
+		option = v.Index(0).Interface()
+	}
+
 	if option == nil {
 		return base
 	}
+	v = reflect.ValueOf(option)
 
-	v := reflect.ValueOf(option)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
@@ -45,7 +48,10 @@ func transformOptions(options ...interface{}) map[string]interface{} {
 		for i := 0; i < v.NumField(); i++ {
 			fi := typ.Field(i)
 			// Skip the values when the field is a pointer (like *string) and nil.
-			if !(fi.Type.Kind() == reflect.Ptr && v.Field(i).IsNil()) {
+			if !((fi.Type.Kind() == reflect.Ptr ||
+				fi.Type.Kind() == reflect.Interface ||
+				fi.Type.Kind() == reflect.Map ||
+				fi.Type.Kind() == reflect.Slice) && v.Field(i).IsNil()) {
 				// We use the JSON struct fields for getting the original names
 				// out of the field.
 				tagv := fi.Tag.Get("json")
@@ -89,4 +95,11 @@ func remapMapToStruct(ourMap interface{}, structPtr interface{}) {
 			}
 		}
 	}
+}
+
+func isFunctionBody(expression string) bool {
+	expression = strings.TrimSpace(expression)
+	return strings.HasPrefix(expression, "function") ||
+		strings.HasPrefix(expression, "async ") ||
+		strings.Contains(expression, "=> ")
 }

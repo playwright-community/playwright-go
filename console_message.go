@@ -22,8 +22,13 @@ func (c *ConsoleMessage) String() string {
 	return c.Text()
 }
 
-func (c *ConsoleMessage) Args() []JSHandle {
-	return c.initializer["args"].([]JSHandle)
+func (c *ConsoleMessage) Args() []*JSHandle {
+	args := c.initializer["args"].([]interface{})
+	out := []*JSHandle{}
+	for idx := range args {
+		out = append(out, args[idx].(*Channel).object.(*JSHandle))
+	}
+	return out
 }
 
 func (c *ConsoleMessage) Location() ConsoleMessageLocation {
