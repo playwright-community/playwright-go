@@ -5,14 +5,23 @@ on:
   pull_request:
     branches: [ master ]
 jobs:
-  build:
-    name: Build
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v2
+      with:
+        version: v1.30
+  test:
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         browser: [chromium, firefox, webkit]
     runs-on: ${{ matrix.os }}
+    name:  ${{ matrix.browser }} on ${{ matrix.os }}
     steps:
     - uses: microsoft/playwright-github-action@v1
     - uses: actions/checkout@v2
