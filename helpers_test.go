@@ -73,3 +73,14 @@ func TestTransformOptions(t *testing.T) {
 		})
 	}
 }
+
+func TestRemapMapToStruct(t *testing.T) {
+	ourStruct := struct {
+		V1 string `json:"v1"`
+	}{}
+	inMap := map[string]interface{}{
+		"v1": "foobar",
+	}
+	remapMapToStruct(inMap, &ourStruct)
+	require.Equal(t, ourStruct.V1, "foobar")
+}

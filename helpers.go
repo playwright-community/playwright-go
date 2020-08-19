@@ -64,3 +64,29 @@ func transformOptions(options ...interface{}) map[string]interface{} {
 	}
 	return base
 }
+
+func remapMapToStruct(ourMap interface{}, structPtr interface{}) {
+	ourMapV := reflect.ValueOf(ourMap)
+	structV := reflect.ValueOf(structPtr).Elem()
+	structTyp := structV.Type()
+	for i := 0; i < structV.NumField(); i++ {
+		fi := structTyp.Field(i)
+		tagv := fi.Tag.Get("json")
+		key := strings.Split(tagv, ",")[0]
+		for _, e := range ourMapV.MapKeys() {
+			if key == e.String() {
+				value := ourMapV.MapIndex(e).Interface()
+				switch v := value.(type) {
+				case int:
+					structV.Field(i).SetInt(int64(v))
+				case string:
+					structV.Field(i).SetString(v)
+				case bool:
+					structV.Field(i).SetBool(v)
+				default:
+					panic(ourMapV.MapIndex(e).Kind())
+				}
+			}
+		}
+	}
+}
