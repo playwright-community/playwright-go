@@ -14,10 +14,10 @@ import (
 type Transport struct {
 	stdin    io.WriteCloser
 	stdout   io.ReadCloser
-	dispatch func(msg *Message) error
+	dispatch func(msg *Message)
 }
 
-func (t *Transport) SetDispatch(dispatch func(msg *Message) error) {
+func (t *Transport) SetDispatch(dispatch func(msg *Message)) {
 	t.dispatch = dispatch
 }
 
@@ -73,10 +73,14 @@ func (t *Transport) Send(message map[string]interface{}) error {
 		fmt.Print("SEND>")
 		spew.Dump(message)
 	}
-	b := make([]byte, 4)
-	binary.LittleEndian.PutUint32(b, uint32(len(msg)))
-	t.stdin.Write(b)
-	t.stdin.Write(msg)
+	lengthPadding := make([]byte, 4)
+	binary.LittleEndian.PutUint32(lengthPadding, uint32(len(msg)))
+	if _, err = t.stdin.Write(lengthPadding); err != nil {
+		return err
+	}
+	if _, err = t.stdin.Write(msg); err != nil {
+		return err
+	}
 	return nil
 }
 

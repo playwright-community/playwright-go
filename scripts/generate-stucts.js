@@ -11,7 +11,7 @@ const generateStruct = (typeData, structName, makeStructPointer = true) => {
   if (typeName.endsWith("Object")) {
     let structProperties = []
     for (const property in typeData.type.properties) {
-      structProperties.push(generateStruct(typeData.type.properties[property], makePascalCase(property)) + `\`json:"${property},omitempty"\``)
+      structProperties.push(generateStruct(typeData.type.properties[property], makePascalCase(property)) + `\`json:"${property}"\``)
     }
     return `${structName} ${makeStructPointer ? "*" : ""}struct {
         ${structProperties.join("\n")}

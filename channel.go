@@ -12,18 +12,8 @@ type Channel struct {
 	object     interface{}
 }
 
-func (c *Channel) Send(method string, params interface{}) (interface{}, error) {
-	if params == nil {
-		params = make(map[string]interface{})
-	}
-	if reflect.TypeOf(params).Kind() == reflect.Slice {
-		val := reflect.ValueOf(params)
-		if val.Len() == 1 {
-			params = val.Index(0).Interface()
-		} else if val.Len() == 0 {
-			params = make(map[string]interface{})
-		}
-	}
+func (c *Channel) Send(method string, options ...interface{}) (interface{}, error) {
+	params := transformOptions(options...)
 	result, err := c.connection.SendMessageToServer(c.guid, method, params)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message to server: %v", err)

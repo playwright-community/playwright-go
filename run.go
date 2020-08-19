@@ -20,13 +20,10 @@ func getDriverURL() (string, string) {
 	switch runtime.GOOS {
 	case "windows":
 		driverName = "playwright-driver-win.exe"
-		break
 	case "darwin":
 		driverName = "playwright-driver-macos"
-		break
 	case "linux":
 		driverName = "playwright-driver-linux"
-		break
 	}
 	hash := sha1.New()
 	hash.Write([]byte(version))

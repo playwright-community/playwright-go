@@ -11,8 +11,7 @@ type ChannelOwner struct {
 	parent      *ChannelOwner
 }
 
-func (c *ChannelOwner) Dispose() error {
-	return nil
+func (c *ChannelOwner) Dispose() {
 }
 
 func (c *ChannelOwner) createChannelOwner(self interface{}, parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) {

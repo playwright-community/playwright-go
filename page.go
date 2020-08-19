@@ -20,15 +20,15 @@ func (b *Page) URL() string {
 	return b.mainFrame.URL()
 }
 
-func (b *Page) SetContent(content string) error {
-	return b.mainFrame.SetContent(content)
+func (b *Page) SetContent(content string, options ...PageSetContentOptions) error {
+	return b.mainFrame.SetContent(content, options...)
 }
 
 func (b *Page) Content() (string, error) {
 	return b.mainFrame.Content()
 }
 
-func (b *Page) Screenshot(options ...*PageScreenshotOptions) ([]byte, error) {
+func (b *Page) Screenshot(options ...PageScreenshotOptions) ([]byte, error) {
 	var path *string
 	if len(options) > 0 {
 		path = options[0].Path

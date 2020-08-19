@@ -44,7 +44,7 @@ func (c *Connection) CallOnObjectWithKnownName(name string) (interface{}, error)
 	return <-c.waitingForRemoteObjects[name], nil
 }
 
-func (c *Connection) Dispatch(msg *Message) error {
+func (c *Connection) Dispatch(msg *Message) {
 	method := msg.Method
 	if msg.ID != 0 {
 		if msg.Error != nil {
@@ -56,21 +56,20 @@ func (c *Connection) Dispatch(msg *Message) error {
 				Data: c.replaceGuidsWithChannels(msg.Result),
 			}
 		}
-		// TODO: Error handling
-		return nil
+		return
 	}
 	object := c.objects[msg.GUID]
 	if method == "__create__" {
 		c.createRemoteObject(
 			object, msg.Params["type"].(string), msg.Params["guid"].(string), msg.Params["initializer"],
 		)
-		return nil
+		return
 	}
 	if method == "__dispose__" {
-		return object.Dispose()
+		object.Dispose()
+		return
 	}
 	object.channel.Emit(method, c.replaceGuidsWithChannels(msg.Params))
-	return nil
 }
 
 func (c *Connection) createRemoteObject(parent *ChannelOwner, objectType string, guid string, initializer interface{}) interface{} {

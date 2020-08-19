@@ -65,7 +65,10 @@ func TestPageURL(t *testing.T) {
 
 func TestPageSetContent(t *testing.T) {
 	helper := NewTestHelper(t)
-	require.NoError(t, helper.Page.SetContent("<h1>foo</h1>"))
+	require.NoError(t, helper.Page.SetContent("<h1>foo</h1>",
+		PageSetContentOptions{
+			WaitUntil: String("networkidle"),
+		}))
 	content, err := helper.Page.Content()
 	require.NoError(t, err)
 	require.Equal(t, content, "<html><head></head><body><h1>foo</h1></body></html>")
@@ -84,7 +87,7 @@ func TestScreenshot(t *testing.T) {
 	require.True(t, filetype.IsImage(screenshot))
 	require.Greater(t, len(screenshot), 50)
 
-	screenshot, err = helper.Page.Screenshot(&PageScreenshotOptions{
+	screenshot, err = helper.Page.Screenshot(PageScreenshotOptions{
 		Path: String(screenshotPath),
 	})
 	require.NoError(t, err)

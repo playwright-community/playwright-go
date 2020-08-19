@@ -5,7 +5,7 @@ import "sync"
 type Frame struct {
 	ChannelOwner
 	sync.RWMutex
-	page Page
+	page *Page
 	url  string
 }
 
@@ -15,15 +15,15 @@ func (b *Frame) URL() string {
 	return b.url
 }
 
-func (b *Frame) SetContent(content string) error {
+func (b *Frame) SetContent(content string, options ...PageSetContentOptions) error {
 	_, err := b.channel.Send("setContent", map[string]interface{}{
 		"html": content,
-	})
+	}, options)
 	return err
 }
 
 func (b *Frame) Content() (string, error) {
-	content, err := b.channel.Send("content", nil)
+	content, err := b.channel.Send("content")
 	return content.(string), err
 }
 
@@ -32,6 +32,10 @@ func (b *Frame) Goto(url string) error {
 		"url": url,
 	})
 	return err
+}
+
+func (b *Frame) Page() *Page {
+	return b.page
 }
 
 func (b *Frame) onFrameNavigated(event ...interface{}) {
