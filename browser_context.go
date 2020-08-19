@@ -7,7 +7,7 @@ type BrowserContext struct {
 	Pages []Page
 }
 
-func (b *BrowserContext) NewPage(options ...*BrowserNewPageOptions) (*Page, error) {
+func (b *BrowserContext) NewPage(options ...BrowserNewPageOptions) (*Page, error) {
 	channelOwner, err := b.channel.Send("newPage", options)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %v", err)

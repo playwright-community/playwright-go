@@ -8,8 +8,8 @@ type Browser struct {
 	Contexts    []*BrowserContext
 }
 
-func (b *Browser) NewContext() (*BrowserContext, error) {
-	channelOwner, err := b.channel.Send("newContext", nil)
+func (b *Browser) NewContext(options ...BrowserNewContextOptions) (*BrowserContext, error) {
+	channelOwner, err := b.channel.Send("newContext", options)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %v", err)
 	}
@@ -19,7 +19,7 @@ func (b *Browser) NewContext() (*BrowserContext, error) {
 }
 
 func (b *Browser) Close() error {
-	_, err := b.channel.Send("close", nil)
+	_, err := b.channel.Send("close")
 	return err
 }
 

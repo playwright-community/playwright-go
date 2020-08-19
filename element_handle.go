@@ -15,7 +15,7 @@ func (e *ElementHandle) QuerySelector(selector string) (*ElementHandle, error) {
 }
 
 func (e *ElementHandle) TextContent() (string, error) {
-	textContent, err := e.channel.Send("textContent", nil)
+	textContent, err := e.channel.Send("textContent")
 	if err != nil {
 		return "", err
 	}

@@ -16,7 +16,7 @@ func exitIfError(message string, err error) {
 func main() {
 	pw, err := playwright.Run()
 	exitIfError("could not launch playwright: %v", err)
-	browser, err := pw.Chromium.Launch(&playwright.BrowserTypeLaunchOptions{
+	browser, err := pw.Chromium.Launch(playwright.BrowserTypeLaunchOptions{
 		Headless: playwright.Bool(false),
 	})
 	exitIfError("could not launch Chromium: %v", err)
@@ -29,7 +29,7 @@ func main() {
 	content, err := page.Content()
 	exitIfError("could not get content: %v", err)
 	fmt.Println(content)
-	_, err = page.Screenshot(&playwright.PageScreenshotOptions{
+	_, err = page.Screenshot(playwright.PageScreenshotOptions{
 		Path: playwright.String("foo.png"),
 	})
 	exitIfError("could not create screenshot: %v", err)
