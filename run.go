@@ -13,7 +13,7 @@ import (
 	"runtime"
 )
 
-func getDriverURL() (string, string) {
+func getDriverURL() (string, string, error) {
 	const baseURL = "https://storage.googleapis.com/mxschmitt-public-files/"
 	const version = "playwright-driver-1597776060158"
 	driverName := ""
@@ -26,14 +26,19 @@ func getDriverURL() (string, string) {
 		driverName = "playwright-driver-linux"
 	}
 	hash := sha1.New()
-	hash.Write([]byte(version))
-	return fmt.Sprintf("%s%s/%s", baseURL, version, driverName), fmt.Sprintf("%s-%s", driverName, hex.EncodeToString(hash.Sum(nil))[:5])
+	if _, err := hash.Write([]byte(version)); err != nil {
+		return "", "", fmt.Errorf("could not write hash: %v", err)
+	}
+	return fmt.Sprintf("%s%s/%s", baseURL, version, driverName), fmt.Sprintf("%s-%s", driverName, hex.EncodeToString(hash.Sum(nil))[:5]), nil
 }
 
 func installPlaywright() (string, error) {
-	driverURL, driverName := getDriverURL()
+	driverURL, driverName, err := getDriverURL()
+	if err != nil {
+		return "", fmt.Errorf("could not get driver URL: %v", err)
+	}
 	driverPath := filepath.Join(os.TempDir(), driverName)
-	_, err := os.Stat(driverPath)
+	_, err = os.Stat(driverPath)
 	if err == nil {
 		return driverPath, nil
 	}
