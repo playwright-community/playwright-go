@@ -44,13 +44,15 @@ func TestConsoleShouldWork(t *testing.T) {
 
 func TestConsoleShouldEmitSameLogTwice(t *testing.T) {
 	helper := NewTestHelper(t)
-	messages := []string{}
+	messages := make(chan string, 2)
 	helper.Page.On("console", func(args ...interface{}) {
-		messages = append(messages, args[0].(*ConsoleMessage).Text())
+		messages <- args[0].(*ConsoleMessage).Text()
 	})
 	_, err := helper.Page.Evaluate(`() => { for (let i = 0; i < 2; ++i ) console.log("hello"); } `)
 	require.NoError(t, err)
-	require.Equal(t, []string{"hello", "hello"}, messages)
+	m1 := <-messages
+	m2 := <-messages
+	require.Equal(t, []string{"hello", "hello"}, []string{m1, m2})
 	helper.Browser.Close()
 }
 

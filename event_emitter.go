@@ -5,7 +5,7 @@ import "sync"
 type eventHandler = func(payload ...interface{})
 
 type eventRegister struct {
-	sync.RWMutex
+	sync.Mutex
 	once []eventHandler
 	on   []eventHandler
 }
@@ -20,7 +20,7 @@ func (e *EventEmitter) initEventEmitter() {
 
 func (e *EventEmitter) Emit(name string, payload ...interface{}) {
 	if _, ok := e.events[name]; ok {
-		e.events[name].RLock()
+		e.events[name].Lock()
 		for i := 0; i < len(e.events[name].on); i++ {
 			go e.events[name].on[i](payload...)
 		}
@@ -28,7 +28,7 @@ func (e *EventEmitter) Emit(name string, payload ...interface{}) {
 			go e.events[name].once[i](payload...)
 		}
 		e.events[name].once = make([]eventHandler, 0)
-		e.events[name].RUnlock()
+		e.events[name].Unlock()
 	}
 }
 
