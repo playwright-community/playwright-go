@@ -1,8 +1,6 @@
 package playwright
 
 import (
-	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
 	"io"
 	"log"
@@ -13,9 +11,9 @@ import (
 	"runtime"
 )
 
-func getDriverURL() (string, string, error) {
+func getDriverURL() (string, string) {
 	const baseURL = "https://storage.googleapis.com/mxschmitt-public-files/"
-	const version = "playwright-driver-1597776060158"
+	const version = "playwright-driver-1597918805064"
 	driverName := ""
 	switch runtime.GOOS {
 	case "windows":
@@ -25,26 +23,22 @@ func getDriverURL() (string, string, error) {
 	case "linux":
 		driverName = "playwright-driver-linux"
 	}
-	hash := sha1.New()
-	if _, err := hash.Write([]byte(version)); err != nil {
-		return "", "", fmt.Errorf("could not write hash: %v", err)
-	}
-	return fmt.Sprintf("%s%s/%s", baseURL, version, driverName), fmt.Sprintf("%s-%s", driverName, hex.EncodeToString(hash.Sum(nil))[:5]), nil
+	return fmt.Sprintf("%s%s/%s", baseURL, version, driverName), driverName
 }
 
 func installPlaywright() (string, error) {
-	driverURL, driverName, err := getDriverURL()
+	driverURL, driverName := getDriverURL()
+	cwd, err := os.Getwd()
 	if err != nil {
-		return "", fmt.Errorf("could not get driver URL: %v", err)
+		return "", fmt.Errorf("could not get cwd: %v", err)
 	}
-	driverPath := filepath.Join(os.TempDir(), driverName)
-	_, err = os.Stat(driverPath)
-	if err == nil {
-		return driverPath, nil
+	driverFolder := filepath.Join(cwd, ".ms-playwright")
+	if _, err = os.Stat(driverFolder); os.IsNotExist(err) {
+		if err := os.Mkdir(driverFolder, 0777); err != nil {
+			return "", fmt.Errorf("could not create driver folder :%v", err)
+		}
 	}
-	if !os.IsNotExist(err) {
-		return driverName, err
-	}
+	driverPath := filepath.Join(driverFolder, driverName)
 	log.Println("Downloading driver...")
 	resp, err := http.Get(driverURL)
 	if err != nil {
