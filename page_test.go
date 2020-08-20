@@ -41,7 +41,9 @@ func NewTestHelper(t *testing.T) *TestHelperData {
 		browserType = pw.WebKit
 	}
 
-	browser, err := browserType.Launch()
+	browser, err := browserType.Launch(BrowserTypeLaunchOptions{
+		Headless: Bool(os.Getenv("HEADFUL") == ""),
+	})
 	require.NoError(t, err)
 	context, err := browser.NewContext()
 	require.NoError(t, err)

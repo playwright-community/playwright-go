@@ -25,10 +25,6 @@ jobs:
     steps:
     - uses: microsoft/playwright-github-action@v1
     - uses: actions/checkout@v2
-    - name: golangci-lint
-      uses: golangci/golangci-lint-action@v2
-      with:
-        version: v1.30
     - name: Set up Go 1.x
       uses: actions/setup-go@v2
       with:
