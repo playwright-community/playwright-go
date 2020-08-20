@@ -7,15 +7,15 @@ import (
 )
 
 func TestBrowserName(t *testing.T) {
-	pw, err := Run()
-	require.NoError(t, err)
-	require.Equal(t, pw.Chromium.Name(), "chromium")
-	require.Equal(t, pw.Firefox.Name(), "firefox")
-	require.Equal(t, pw.WebKit.Name(), "webkit")
+	helper := NewTestHelper(t)
+	require.Equal(t, helper.Playwright.Chromium.Name(), "chromium")
+	require.Equal(t, helper.Playwright.Firefox.Name(), "firefox")
+	require.Equal(t, helper.Playwright.WebKit.Name(), "webkit")
+	helper.Close(t)
 }
 
 func TestExecutablePath(t *testing.T) {
-	pw, err := Run()
-	require.NoError(t, err)
-	require.Greater(t, len(pw.Chromium.ExecutablePath()), 0)
+	helper := NewTestHelper(t)
+	require.Greater(t, len(helper.Playwright.Chromium.ExecutablePath()), 0)
+	helper.Close(t)
 }

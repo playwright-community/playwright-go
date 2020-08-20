@@ -39,6 +39,9 @@ func installPlaywright() (string, error) {
 		}
 	}
 	driverPath := filepath.Join(driverFolder, driverName)
+	if _, err := os.Stat(driverPath); err == nil {
+		return driverPath, nil
+	}
 	log.Println("Downloading driver...")
 	resp, err := http.Get(driverURL)
 	if err != nil {
