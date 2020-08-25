@@ -3,9 +3,8 @@ package playwright
 import "sync"
 
 type (
-	eventName     string
 	incomingEvent struct {
-		name    eventName
+		name    string
 		payload []interface{}
 	}
 	eventHandler  func(...interface{})
@@ -16,25 +15,25 @@ type (
 	}
 	EventEmitter struct {
 		queue  chan incomingEvent
-		events map[eventName]*eventRegister
+		events map[string]*eventRegister
 	}
 )
 
-func (e *EventEmitter) Emit(name eventName, payload ...interface{}) {
+func (e *EventEmitter) Emit(name string, payload ...interface{}) {
 	if _, ok := e.events[name]; ok {
 		e.queue <- incomingEvent{name, payload}
 	}
 }
 
-func (e *EventEmitter) Once(name eventName, handler eventHandler) {
+func (e *EventEmitter) Once(name string, handler eventHandler) {
 	e.addEvent(name, handler, true)
 }
 
-func (e *EventEmitter) On(name eventName, handler eventHandler) {
+func (e *EventEmitter) On(name string, handler eventHandler) {
 	e.addEvent(name, handler, false)
 }
 
-func (e *EventEmitter) RemoveListener(name eventName, handler eventHandler) {
+func (e *EventEmitter) RemoveListener(name string, handler eventHandler) {
 	if _, ok := e.events[name]; !ok {
 		return
 	}
@@ -68,7 +67,7 @@ func (e *EventEmitter) ListenerCount(name string) int {
 	return count
 }
 
-func (e *EventEmitter) addEvent(name eventName, handler eventHandler, once bool) {
+func (e *EventEmitter) addEvent(name string, handler eventHandler, once bool) {
 	if _, ok := e.events[name]; !ok {
 		e.events[name] = &eventRegister{
 			on:   make([]eventHandler, 0),
@@ -85,7 +84,7 @@ func (e *EventEmitter) addEvent(name eventName, handler eventHandler, once bool)
 }
 
 func (e *EventEmitter) initEventEmitter() {
-	e.events = make(map[eventName]*eventRegister)
+	e.events = make(map[string]*eventRegister)
 	e.queue = make(chan incomingEvent)
 	go e.startEventQueue()
 }
