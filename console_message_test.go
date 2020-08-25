@@ -88,7 +88,7 @@ func TestConsoleShouldUseTextForStr(t *testing.T) {
 
 func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 	helper := NewTestHelper(t)
-	messagesChan := make(chan *ConsoleMessage)
+	messagesChan := make(chan *ConsoleMessage, 6)
 	helper.Page.On("console", func(args ...interface{}) {
 		messagesChan <- args[0].(*ConsoleMessage)
 	})
