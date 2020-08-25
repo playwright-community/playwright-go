@@ -2,49 +2,39 @@ package playwright
 
 import "sync"
 
-type incomingEvent struct {
-	name    string
-	payload []interface{}
-}
+type (
+	eventName     string
+	incomingEvent struct {
+		name    eventName
+		payload []interface{}
+	}
+	eventHandler  func(...interface{})
+	eventRegister struct {
+		sync.Mutex
+		once []eventHandler
+		on   []eventHandler
+	}
+	EventEmitter struct {
+		queue  chan incomingEvent
+		events map[eventName]*eventRegister
+	}
+)
 
-type eventHandler = func(payload ...interface{})
-
-type eventRegister struct {
-	sync.Mutex
-	once []eventHandler
-	on   []eventHandler
-}
-
-type EventEmitter struct {
-	queue  chan incomingEvent
-	events map[string]*eventRegister
-}
-
-func (e *EventEmitter) initEventEmitter() {
-	e.events = make(map[string]*eventRegister)
-	e.queue = make(chan incomingEvent)
-	go e.Start()
-}
-
-func (e *EventEmitter) stopEventEmitter() {
-	close(e.queue)
-}
-
-func (e *EventEmitter) Emit(name string, payload ...interface{}) {
+func (e *EventEmitter) Emit(name eventName, payload ...interface{}) {
 	if _, ok := e.events[name]; ok {
 		e.queue <- incomingEvent{name, payload}
 	}
 }
 
-func (e *EventEmitter) Once(name string, handler eventHandler) {
+func (e *EventEmitter) Once(name eventName, handler eventHandler) {
 	e.addEvent(name, handler, true)
 }
 
-func (e *EventEmitter) On(name string, handler eventHandler) {
+func (e *EventEmitter) On(name eventName, handler eventHandler) {
 	e.addEvent(name, handler, false)
 }
 
-func (e *EventEmitter) RemoveListener(name string, handler eventHandler) {
+func (e *EventEmitter) RemoveListener(name eventName, handler eventHandler) {
 	if _, ok := e.events[name]; !ok {
 		return
 	}
@@ -68,7 +58,17 @@ func (e *EventEmitter) RemoveListener(name string, handler eventHandler) {
 	e.events[name].Unlock()
 }
 
-func (e *EventEmitter) addEvent(name string, handler eventHandler, once bool) {
+func (e *EventEmitter) ListenerCount(name string) int {
+	count := 0
+	for key := range e.events {
+		e.events[key].Lock()
+		count += len(e.events[key].on) + len(e.events[key].once)
+		e.events[key].Unlock()
+	}
+	return count
+}
+
+func (e *EventEmitter) addEvent(name eventName, handler eventHandler, once bool) {
 	if _, ok := e.events[name]; !ok {
 		e.events[name] = &eventRegister{
 			on:   make([]eventHandler, 0),
@@ -84,7 +84,13 @@ func (e *EventEmitter) addEvent(name string, handler eventHandler, once bool) {
 	e.events[name].Unlock()
 }
 
-func (e *EventEmitter) Start() {
+func (e *EventEmitter) initEventEmitter() {
+	e.events = make(map[eventName]*eventRegister)
+	e.queue = make(chan incomingEvent)
+	go e.startEventQueue()
+}
+
+func (e *EventEmitter) startEventQueue() {
 	for {
 		payload, more := <-e.queue
 		if !more {
@@ -106,12 +112,6 @@ func (e *EventEmitter) Start() {
 	}
 }
 
-func (e *EventEmitter) ListenerCount(name string) int {
-	count := 0
-	for key := range e.events {
-		e.events[key].Lock()
-		count += len(e.events[key].on) + len(e.events[key].once)
-		e.events[key].Unlock()
-	}
-	return count
+func (e *EventEmitter) stopEventEmitter() {
+	close(e.queue)
 }
