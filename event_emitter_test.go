@@ -55,12 +55,14 @@ func TestEventEmitterRemove(t *testing.T) {
 	result := <-wasCalled
 	require.Equal(t, 1, handler.ListenerCount(testEventName))
 	require.Equal(t, result.(int), value)
+	handler.Once(testEventName, myHandler)
 	handler.RemoveListener(testEventName, myHandler)
-	require.Equal(t, 1, handler.ListenerCount(testEventName))
+	require.Equal(t, 0, handler.ListenerCount(testEventName))
 }
 
 func TestEventEmitterRemoveEmpty(t *testing.T) {
 	handler := &EventEmitter{}
 	handler.initEventEmitter()
 	handler.RemoveListener(testEventName, func(...interface{}) {})
+	require.Equal(t, 0, handler.ListenerCount(testEventName))
 }

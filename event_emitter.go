@@ -1,6 +1,9 @@
 package playwright
 
-import "sync"
+import (
+	"reflect"
+	"sync"
+)
 
 type (
 	incomingEvent struct {
@@ -37,16 +40,19 @@ func (e *EventEmitter) RemoveListener(name string, handler eventHandler) {
 	if _, ok := e.events[name]; !ok {
 		return
 	}
+	handlerPtr := reflect.ValueOf(handler).Pointer()
 	onHandlers := []eventHandler{}
 	for idx := range e.events[name].on {
-		if &e.events[name].on[idx] != &handler {
+		eventPtr := reflect.ValueOf(e.events[name].on[idx]).Pointer()
+		if eventPtr != handlerPtr {
 			onHandlers = append(onHandlers, e.events[name].on[idx])
 		}
 	}
 
 	onceHandlers := []eventHandler{}
 	for idx := range e.events[name].once {
-		if &e.events[name].once[idx] != &handler {
+		eventPtr := reflect.ValueOf(e.events[name].once[idx]).Pointer()
+		if eventPtr != handlerPtr {
 			onceHandlers = append(onceHandlers, e.events[name].once[idx])
 		}
 	}
