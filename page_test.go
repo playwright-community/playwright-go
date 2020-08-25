@@ -11,52 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type TestHelperData struct {
-	Playwright *Playwright
-	Browser    *Browser
-	Context    *BrowserContext
-	Page       *Page
-}
-
-func (th *TestHelperData) Close(t *testing.T) {
-	require.NoError(t, th.Browser.Close())
-}
-
-var pw *Playwright
-
-func NewTestHelper(t *testing.T) *TestHelperData {
-	if pw == nil {
-		var err error
-		pw, err = Run()
-		require.NoError(t, err)
-	}
-
-	browserName := os.Getenv("BROWSER")
-	var browserType *BrowserType
-	if browserName == "chromium" || browserName == "" {
-		browserType = pw.Chromium
-	} else if browserName == "firefox" {
-		browserType = pw.Firefox
-	} else if browserName == "webkit" {
-		browserType = pw.WebKit
-	}
-
-	browser, err := browserType.Launch(BrowserTypeLaunchOptions{
-		Headless: Bool(os.Getenv("HEADFUL") == ""),
-	})
-	require.NoError(t, err)
-	context, err := browser.NewContext()
-	require.NoError(t, err)
-	page, err := context.NewPage()
-	require.NoError(t, err)
-	return &TestHelperData{
-		Playwright: pw,
-		Browser:    browser,
-		Context:    context,
-		Page:       page,
-	}
-}
-
 func TestPageURL(t *testing.T) {
 	helper := NewTestHelper(t)
 	require.Equal(t, "about:blank", helper.Page.URL())

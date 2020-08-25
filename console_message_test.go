@@ -1,37 +1,10 @@
 package playwright
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
-
-func Map(vs interface{}, f func(interface{}) interface{}) []interface{} {
-	v := reflect.ValueOf(vs)
-	vsm := make([]interface{}, v.Len())
-	for i := 0; i < v.Len(); i++ {
-		vsm[i] = f(v.Index(i).Interface())
-	}
-	return vsm
-}
-
-// ChanToSlice reads all data from ch (which must be a chan), returning a
-// slice of the data. If ch is a 'T chan' then the return value is of type
-// []T inside the returned interface.
-// A typical call would be sl := ChanToSlice(ch).([]int)
-func ChanToSlice(ch interface{}, amount int) interface{} {
-	chv := reflect.ValueOf(ch)
-	slv := reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(ch).Elem()), 0, 0)
-	for i := 0; i < amount; i++ {
-		v, ok := chv.Recv()
-		if !ok {
-			return slv.Interface()
-		}
-		slv = reflect.Append(slv, v)
-	}
-	return slv.Interface()
-}
 
 func TestConsoleShouldWork(t *testing.T) {
 	helper := NewTestHelper(t)

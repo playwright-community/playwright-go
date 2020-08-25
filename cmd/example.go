@@ -33,7 +33,6 @@ func main() {
 		Path: playwright.String("foo.png"),
 	})
 	exitIfError("could not create screenshot: %v", err)
-	exitIfError("could not write file: %v", err)
 	err = browser.Close()
 	exitIfError("could not close browser: %v", err)
 	err = pw.Stop()
