@@ -2,6 +2,8 @@ package playwright
 
 import (
 	"log"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"reflect"
 	"testing"
@@ -25,6 +27,7 @@ func TestMain(m *testing.M) {
 }
 
 type TestHelperData struct {
+	t          *testing.T
 	Playwright *Playwright
 	Browser    *Browser
 	Context    *BrowserContext
@@ -32,10 +35,7 @@ type TestHelperData struct {
 	IsChromium bool
 	IsFirefox  bool
 	IsWebKit   bool
-}
-
-func (th *TestHelperData) Close(t *testing.T) {
-	require.NoError(t, th.Browser.Close())
+	server     *testServer
 }
 
 func NewTestHelper(t *testing.T) *TestHelperData {
@@ -57,7 +57,8 @@ func NewTestHelper(t *testing.T) *TestHelperData {
 	require.NoError(t, err)
 	page, err := context.NewPage()
 	require.NoError(t, err)
-	return &TestHelperData{
+	th := &TestHelperData{
+		t:          t,
 		Playwright: pw,
 		Browser:    browser,
 		Context:    context,
@@ -65,7 +66,46 @@ func NewTestHelper(t *testing.T) *TestHelperData {
 		IsChromium: browserName == "chromium" || browserName == "",
 		IsFirefox:  browserName == "firefox",
 		IsWebKit:   browserName == "webkit",
+		server:     newTestServer(),
 	}
+	return th
+}
+
+func (t *TestHelperData) AfterEach() {
+	if err := t.Browser.Close(); err != nil {
+		t.t.Errorf("could not close browser: %v", err)
+	}
+	t.server.Stop()
+}
+
+func newTestServer() *testServer {
+	ts := &testServer{
+		routes: make(map[string]http.HandlerFunc),
+	}
+	ts.testServer = httptest.NewServer(http.HandlerFunc(ts.serveHTTP))
+	ts.PREFIX = ts.testServer.URL
+	return ts
+}
+
+type testServer struct {
+	testServer *httptest.Server
+	routes     map[string]http.HandlerFunc
+	PREFIX     string
+}
+
+func (t *testServer) Stop() {
+	t.testServer.Close()
+	t.routes = make(map[string]http.HandlerFunc)
+}
+
+func (t *testServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
+	if route, ok := t.routes[r.URL.Path]; ok {
+		route(w, r)
+	}
+}
+
+func (s *testServer) SetRoute(path string, f http.HandlerFunc) {
+	s.routes[path] = f
 }
 
 func Map(vs interface{}, f func(interface{}) interface{}) []interface{} {

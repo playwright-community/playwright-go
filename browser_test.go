@@ -8,18 +8,18 @@ import (
 
 func TestIsConnected(t *testing.T) {
 	helper := NewTestHelper(t)
+	defer helper.AfterEach()
 	require.True(t, helper.Browser.IsConnected)
-	helper.Close(t)
 }
 
 func TestVersion(t *testing.T) {
 	helper := NewTestHelper(t)
+	defer helper.AfterEach()
 	require.Greater(t, len(helper.Browser.Version()), 2)
-	helper.Close(t)
 }
 
 func TestNewContext(t *testing.T) {
 	helper := NewTestHelper(t)
+	defer helper.AfterEach()
 	require.Equal(t, 0, len(helper.Context.Pages))
-	helper.Close(t)
 }

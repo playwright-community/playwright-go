@@ -86,6 +86,10 @@ func (b *Page) QuerySelector(selector string) (*ElementHandle, error) {
 	return b.mainFrame.QuerySelector(selector)
 }
 
+func (p *Page) Click(selector string, options ...PageClickOptions) error {
+	return p.mainFrame.Click(selector, options...)
+}
+
 func newPage(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Page {
 	channelOwner := initializer["mainFrame"].(*Channel).object
 	bt := &Page{
@@ -95,6 +99,9 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.channel.On("console", func(payload ...interface{}) {
 		bt.Emit("console", payload[0].(map[string]interface{})["message"].(*Channel).object)
+	})
+	bt.channel.On("download", func(payload ...interface{}) {
+		bt.Emit("download", payload[0].(map[string]interface{})["download"].(*Channel).object)
 	})
 	return bt
 }
