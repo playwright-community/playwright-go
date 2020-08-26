@@ -1,4 +1,4 @@
-# 🎭 Playwright for <img src="https://user-images.githubusercontent.com/17984549/91302719-343a1d80-e7a7-11ea-8d6a-9448ef598420.png" height="40" />
+# 🎭 Playwright for <img src="https://user-images.githubusercontent.com/17984549/91302719-343a1d80-e7a7-11ea-8d6a-9448ef598420.png" height="35" />
 
 [![PkgGoDev](https://pkg.go.dev/badge/mxschmitt/playwright-golang)](https://pkg.go.dev/mxschmitt/playwright-golang)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](http://opensource.org/licenses/MIT)
@@ -7,7 +7,7 @@
 
 [API reference](https://playwright.dev/#?path=docs/api.md)
 
-Playwright is a Python library to automate [Chromium](https://www.chromium.org/Home), [Firefox](https://www.mozilla.org/en-US/firefox/new/) and [WebKit](https://webkit.org/) with a single API. Playwright is built to enable cross-browser web automation that is **ever-green**, **capable**, **reliable** and **fast**.
+Playwright is a Go library to automate [Chromium](https://www.chromium.org/Home), [Firefox](https://www.mozilla.org/en-US/firefox/new/) and [WebKit](https://webkit.org/) with a single API. Playwright is built to enable cross-browser web automation that is **ever-green**, **capable**, **reliable** and **fast**.
 
 |          | Linux | macOS | Windows |
 |   :---   | :---: | :---: | :---:   |
@@ -35,9 +35,9 @@ Playwright is built to automate the broad and growing set of web browser capabil
 * Native input events for mouse and keyboard
 * Upload and download files
 
-## Is Playwright for Python ready?
+## Is Playwright for Go ready?
 
-We are ready for your feedback, but we are still covering Playwright Python with the tests, so expect a bumpy ride and don't use for production.
+We are ready for your feedback, but we are still covering Playwright Go with the tests, so expect a bumpy ride and don't use for production.
 
 ## Resources
 
