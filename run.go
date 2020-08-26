@@ -126,7 +126,7 @@ func Run() (*Playwright, error) {
 	connection := newConnection(stdin, stdout, cmd.Process.Kill)
 	go func() {
 		if err := connection.Start(); err != nil {
-			log.Printf("could not start connection: %v", err)
+			log.Fatalf("could not start connection: %v", err)
 		}
 	}()
 	obj, err := connection.CallOnObjectWithKnownName("Playwright")

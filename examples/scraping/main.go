@@ -16,23 +16,27 @@ func exitIfError(message string, err error) {
 func main() {
 	pw, err := playwright.Run()
 	exitIfError("could not launch playwright: %v", err)
-	browser, err := pw.Chromium.Launch(playwright.BrowserTypeLaunchOptions{
-		Headless: playwright.Bool(false),
-	})
+	browser, err := pw.Chromium.Launch()
 	exitIfError("could not launch Chromium: %v", err)
 	context, err := browser.NewContext()
 	exitIfError("could not create context: %v", err)
 	page, err := context.NewPage()
 	exitIfError("could not create page: %v", err)
-	err = page.Goto("http://whatsmyuseragent.org/")
+	err = page.Goto("https://news.ycombinator.com")
 	exitIfError("could not goto: %v", err)
-	content, err := page.Content()
-	exitIfError("could not get content: %v", err)
-	fmt.Println(content)
-	_, err = page.Screenshot(playwright.PageScreenshotOptions{
-		Path: playwright.String("foo.png"),
-	})
-	exitIfError("could not create screenshot: %v", err)
+
+	entries, err := page.EvaluateOnSelectorAll(".athing", `elements => [...elements].map(el => {
+      const linkElement = el.children[2].children[0]
+      return {
+        title: linkElement.innerHTML,
+      }
+    })`)
+	exitIfError("could not eval: %v", err)
+
+	for i, entry := range entries.([]interface{}) {
+		title := entry.(map[string]interface{})["title"]
+		fmt.Println(i+1, title)
+	}
 	err = browser.Close()
 	exitIfError("could not close browser: %v", err)
 	err = pw.Stop()
