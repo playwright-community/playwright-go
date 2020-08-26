@@ -77,6 +77,54 @@ func (b *Frame) Evaluate(expression string, options ...interface{}) (interface{}
 	return parseResult(result), nil
 }
 
+func (f *Frame) EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
+	var arg interface{}
+	forceExpression := false
+	if !isFunctionBody(expression) {
+		forceExpression = true
+	}
+	if len(options) == 1 {
+		arg = options[0]
+	} else if len(options) == 2 {
+		arg = options[0]
+		forceExpression = options[1].(bool)
+	}
+	result, err := f.channel.Send("evalOnSelector", map[string]interface{}{
+		"selector":   selector,
+		"expression": expression,
+		"isFunction": !forceExpression,
+		"arg":        serializeArgument(arg),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return parseResult(result), nil
+}
+
+func (f *Frame) EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
+	var arg interface{}
+	forceExpression := false
+	if !isFunctionBody(expression) {
+		forceExpression = true
+	}
+	if len(options) == 1 {
+		arg = options[0]
+	} else if len(options) == 2 {
+		arg = options[0]
+		forceExpression = options[1].(bool)
+	}
+	result, err := f.channel.Send("evalOnSelectorAll", map[string]interface{}{
+		"selector":   selector,
+		"expression": expression,
+		"isFunction": !forceExpression,
+		"arg":        serializeArgument(arg),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return parseResult(result), nil
+}
+
 func newFrame(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Frame {
 	bt := &Frame{
 		url: initializer["url"].(string),

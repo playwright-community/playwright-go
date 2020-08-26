@@ -26,7 +26,9 @@ func (t *Transport) Start() error {
 	for {
 		lengthContent := make([]byte, 4)
 		_, err := io.ReadFull(reader, lengthContent)
-		if err != nil {
+		if err == io.EOF {
+			return nil
+		} else if err != nil {
 			return fmt.Errorf("could not read padding: %v", err)
 		}
 		length := binary.LittleEndian.Uint32(lengthContent)

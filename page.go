@@ -32,6 +32,14 @@ func (b *Page) Evaluate(expression string, options ...interface{}) (interface{},
 	return b.mainFrame.Evaluate(expression, options...)
 }
 
+func (b *Page) EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
+	return b.mainFrame.EvaluateOnSelector(selector, expression, options...)
+}
+
+func (b *Page) EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
+	return b.mainFrame.EvaluateOnSelectorAll(selector, expression, options...)
+}
+
 func (b *Page) Screenshot(options ...PageScreenshotOptions) ([]byte, error) {
 	var path *string
 	if len(options) > 0 {
@@ -51,6 +59,27 @@ func (b *Page) Screenshot(options ...PageScreenshotOptions) ([]byte, error) {
 		}
 	}
 	return image, nil
+}
+
+func (b *Page) PDF(options ...PagePdfOptions) ([]byte, error) {
+	var path *string
+	if len(options) > 0 {
+		path = options[0].Path
+	}
+	data, err := b.channel.Send("pdf", options)
+	if err != nil {
+		return nil, fmt.Errorf("could not send message :%v", err)
+	}
+	pdf, err := base64.StdEncoding.DecodeString(data.(string))
+	if err != nil {
+		return nil, fmt.Errorf("could not decode base64 :%v", err)
+	}
+	if path != nil {
+		if err := ioutil.WriteFile(*path, pdf, 0644); err != nil {
+			return nil, err
+		}
+	}
+	return pdf, nil
 }
 
 func (b *Page) QuerySelector(selector string) (*ElementHandle, error) {

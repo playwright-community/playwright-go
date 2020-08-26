@@ -29,6 +29,9 @@ type TestHelperData struct {
 	Browser    *Browser
 	Context    *BrowserContext
 	Page       *Page
+	IsChromium bool
+	IsFirefox  bool
+	IsWebKit   bool
 }
 
 func (th *TestHelperData) Close(t *testing.T) {
@@ -59,6 +62,9 @@ func NewTestHelper(t *testing.T) *TestHelperData {
 		Browser:    browser,
 		Context:    context,
 		Page:       page,
+		IsChromium: browserName == "chromium" || browserName == "",
+		IsFirefox:  browserName == "firefox",
+		IsWebKit:   browserName == "webkit",
 	}
 }
 
