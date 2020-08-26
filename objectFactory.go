@@ -6,8 +6,6 @@ func createObjectFactory(parent *ChannelOwner, objectType string, guid string, i
 		return newBindingCall(parent, objectType, guid, initializer)
 	case "Browser":
 		return newBrowser(parent, objectType, guid, initializer)
-	case "BrowserServer":
-		return newBrowserServer(parent, objectType, guid, initializer)
 	case "BrowserType":
 		return newBrowserType(parent, objectType, guid, initializer)
 	case "BrowserContext":

@@ -19,9 +19,9 @@ func TestDownloadBasic(t *testing.T) {
 			log.Printf("could not write: %v", err)
 		}
 	})
-	helper.Page.SetContent(
+	require.NoError(t, helper.Page.SetContent(
 		fmt.Sprintf(`<a href="%s/downloadWithFilename">download</a>`, helper.server.PREFIX),
-	)
+	))
 	// TODO: waitForEvent wrapper
 	downloadChan := make(chan *Download, 1)
 	helper.Page.On("download", func(ev ...interface{}) {
@@ -32,4 +32,5 @@ func TestDownloadBasic(t *testing.T) {
 	download := <-downloadChan
 	require.Equal(t, download.URL(), fmt.Sprintf("%s/downloadWithFilename", helper.server.PREFIX))
 	require.Equal(t, download.SuggestedFilename(), "file.txt")
+	require.Equal(t, download.String(), "file.txt")
 }
