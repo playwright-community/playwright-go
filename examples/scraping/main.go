@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/mxschmitt/playwright-golang"
+	"github.com/mxschmitt/playwright-go"
 )
 
 func exitIfErrorf(message string, err error) {
