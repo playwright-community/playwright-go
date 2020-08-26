@@ -1,6 +1,6 @@
 # 🎭 Playwright for <img src="https://user-images.githubusercontent.com/17984549/91302719-343a1d80-e7a7-11ea-8d6a-9448ef598420.png" height="35" />
 
-[![PkgGoDev](https://pkg.go.dev/badge/mxschmitt/playwright-golang)](https://pkg.go.dev/mxschmitt/playwright-golang)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/mxschmitt/playwright-golang)](https://pkg.go.dev/github.com/mxschmitt/playwright-golang)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 ![Build Status](https://github.com/mxschmitt/playwright-golang/workflows/Go/badge.svg)
 [![Join Slack](https://img.shields.io/badge/join-slack-infomational)](https://join.slack.com/t/playwright/shared_invite/enQtOTEyMTUxMzgxMjIwLThjMDUxZmIyNTRiMTJjNjIyMzdmZDA3MTQxZWUwZTFjZjQwNGYxZGM5MzRmNzZlMWI5ZWUyOTkzMjE5Njg1NDg) <!-- GEN:chromium-version-badge -->[![Chromium version](https://img.shields.io/badge/chromium-86.0.4217.0-blue.svg?logo=google-chrome)](https://www.chromium.org/Home)<!-- GEN:stop --> <!-- GEN:firefox-version-badge -->[![Firefox version](https://img.shields.io/badge/firefox-79.0a1-blue.svg?logo=mozilla-firefox)](https://www.mozilla.org/en-US/firefox/new/)<!-- GEN:stop --> [![WebKit version](https://img.shields.io/badge/webkit-14.0-blue.svg?logo=safari)](https://webkit.org/)
