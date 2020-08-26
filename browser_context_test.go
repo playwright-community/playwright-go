@@ -6,5 +6,5 @@ import (
 
 func TestNewPage(t *testing.T) {
 	helper := NewTestHelper(t)
-	helper.Close(t)
+	defer helper.AfterEach()
 }

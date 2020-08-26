@@ -125,6 +125,13 @@ func (f *Frame) EvaluateOnSelectorAll(selector string, expression string, option
 	return parseResult(result), nil
 }
 
+func (f *Frame) Click(selector string, options ...PageClickOptions) error {
+	_, err := f.channel.Send("click", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	return err
+}
+
 func newFrame(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Frame {
 	bt := &Frame{
 		url: initializer["url"].(string),

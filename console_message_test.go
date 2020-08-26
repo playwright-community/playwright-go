@@ -8,6 +8,7 @@ import (
 
 func TestConsoleShouldWork(t *testing.T) {
 	helper := NewTestHelper(t)
+	defer helper.AfterEach()
 	messages := make(chan *ConsoleMessage)
 	helper.Page.Once("console", func(args ...interface{}) {
 		messages <- args[0].(*ConsoleMessage)
@@ -29,11 +30,11 @@ func TestConsoleShouldWork(t *testing.T) {
 	require.Equal(t, map[string]interface{}{
 		"foo": "bar",
 	}, jsonValue3)
-	helper.Browser.Close()
 }
 
 func TestConsoleShouldEmitSameLogTwice(t *testing.T) {
 	helper := NewTestHelper(t)
+	defer helper.AfterEach()
 	messages := make(chan string, 2)
 	helper.Page.On("console", func(args ...interface{}) {
 		messages <- args[0].(*ConsoleMessage).Text()
@@ -43,11 +44,11 @@ func TestConsoleShouldEmitSameLogTwice(t *testing.T) {
 	m1 := <-messages
 	m2 := <-messages
 	require.Equal(t, []string{"hello", "hello"}, []string{m1, m2})
-	helper.Browser.Close()
 }
 
 func TestConsoleShouldUseTextForStr(t *testing.T) {
 	helper := NewTestHelper(t)
+	defer helper.AfterEach()
 	messages := make(chan *ConsoleMessage)
 	helper.Page.On("console", func(args ...interface{}) {
 		messages <- args[0].(*ConsoleMessage)
@@ -56,11 +57,11 @@ func TestConsoleShouldUseTextForStr(t *testing.T) {
 	require.NoError(t, err)
 	message := <-messages
 	require.Equal(t, "Hello world", message.String())
-	helper.Browser.Close()
 }
 
 func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 	helper := NewTestHelper(t)
+	defer helper.AfterEach()
 	messagesChan := make(chan *ConsoleMessage, 6)
 	helper.Page.On("console", func(args ...interface{}) {
 		messagesChan <- args[0].(*ConsoleMessage)
@@ -100,11 +101,11 @@ func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 	}, Map(messages[1:], func(msg interface{}) interface{} {
 		return msg.(*ConsoleMessage).Text()
 	}))
-	helper.Browser.Close()
 }
 
 func TestConsoleShouldNotFailForWindowObjects(t *testing.T) {
 	helper := NewTestHelper(t)
+	defer helper.AfterEach()
 	messages := make(chan *ConsoleMessage)
 	helper.Page.Once("console", func(args ...interface{}) {
 		messages <- args[0].(*ConsoleMessage)
@@ -113,11 +114,11 @@ func TestConsoleShouldNotFailForWindowObjects(t *testing.T) {
 	require.NoError(t, err)
 	message := <-messages
 	require.Equal(t, "JSHandle@object", message.Text())
-	helper.Browser.Close()
 }
 
 func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
 	helper := NewTestHelper(t)
+	defer helper.AfterEach()
 	messages := make(chan *ConsoleMessage)
 	helper.Page.Once("console", func(args ...interface{}) {
 		messages <- args[0].(*ConsoleMessage)
@@ -129,5 +130,4 @@ func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
 	message := <-messages
 	require.Contains(t, message.Text(), "Access-Control-Allow-Origin")
 	require.Equal(t, "error", message.Type())
-	helper.Browser.Close()
 }

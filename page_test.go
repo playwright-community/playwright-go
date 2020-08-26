@@ -14,14 +14,15 @@ import (
 
 func TestPageURL(t *testing.T) {
 	helper := NewTestHelper(t)
+	defer helper.AfterEach()
 	require.Equal(t, "about:blank", helper.Page.URL())
 	require.NoError(t, helper.Page.Goto("https://example.com"))
 	require.Equal(t, "https://example.com/", helper.Page.URL())
-	helper.Close(t)
 }
 
 func TestPageSetContent(t *testing.T) {
 	helper := NewTestHelper(t)
+	defer helper.AfterEach()
 	require.NoError(t, helper.Page.SetContent("<h1>foo</h1>",
 		PageSetContentOptions{
 			WaitUntil: String("networkidle"),
@@ -29,11 +30,11 @@ func TestPageSetContent(t *testing.T) {
 	content, err := helper.Page.Content()
 	require.NoError(t, err)
 	require.Equal(t, content, "<html><head></head><body><h1>foo</h1></body></html>")
-	helper.Close(t)
 }
 
 func TestPageScreenshot(t *testing.T) {
 	helper := NewTestHelper(t)
+	defer helper.AfterEach()
 
 	require.NoError(t, helper.Page.SetContent("<h1>foobar</h1>"))
 	tmpfile, err := ioutil.TempDir("", "screenshot")
@@ -53,13 +54,12 @@ func TestPageScreenshot(t *testing.T) {
 
 	_, err = os.Stat(screenshotPath)
 	require.NoError(t, err)
-	helper.Close(t)
 }
 
 func TestPagePDF(t *testing.T) {
 	helper := NewTestHelper(t)
+	defer helper.AfterEach()
 	if !helper.IsChromium {
-		helper.Close(t)
 		t.Skip("Skipping")
 	}
 	require.NoError(t, helper.Page.SetContent("<h1>foobar</h1>"))
@@ -80,11 +80,11 @@ func TestPagePDF(t *testing.T) {
 
 	_, err = os.Stat(screenshotPath)
 	require.NoError(t, err)
-	helper.Close(t)
 }
 
 func TestPageQuerySelector(t *testing.T) {
 	helper := NewTestHelper(t)
+	defer helper.AfterEach()
 	require.NoError(t, helper.Page.SetContent(`<div id="one">
 		<span id="two">
 			<div id="three">
@@ -105,19 +105,19 @@ func TestPageQuerySelector(t *testing.T) {
 	textContent, err := four.TextContent()
 	require.NoError(t, err)
 	require.Equal(t, strings.TrimSpace(textContent), "foobar")
-	helper.Close(t)
 }
 
 func TestPageEvaluate(t *testing.T) {
 	helper := NewTestHelper(t)
+	defer helper.AfterEach()
 	val, err := helper.Page.Evaluate(`() => 123`)
 	require.NoError(t, err)
 	require.Equal(t, val, 123)
-	helper.Close(t)
 }
 
 func TestPageEvaluateOnSelectorAll(t *testing.T) {
 	helper := NewTestHelper(t)
+	defer helper.AfterEach()
 	err := helper.Page.SetContent(`
 		<div class="foo">1</div>
 		<div class="foo">2</div>
@@ -127,11 +127,11 @@ func TestPageEvaluateOnSelectorAll(t *testing.T) {
 	val, err := helper.Page.EvaluateOnSelectorAll(".foo", `(elements) => elements.map(el => el.textContent)`)
 	require.NoError(t, err)
 	require.Equal(t, val, []interface{}([]interface{}{"1", "2", "3"}))
-	helper.Close(t)
 }
 
 func TestPageEvaluateOnSelector(t *testing.T) {
 	helper := NewTestHelper(t)
+	defer helper.AfterEach()
 	err := helper.Page.SetContent(`
 		<div class="foo">bar</div>
 	`)
@@ -139,5 +139,4 @@ func TestPageEvaluateOnSelector(t *testing.T) {
 	val, err := helper.Page.EvaluateOnSelector(".foo", `(element) => element.textContent`)
 	require.NoError(t, err)
 	require.Equal(t, val, "bar")
-	helper.Close(t)
 }

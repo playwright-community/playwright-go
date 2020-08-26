@@ -1,3 +1,6 @@
+// Package playwright is a library to automate Chromium, Firefox and WebKit with
+// a single API. Playwright is built to enable cross-browser web automation that
+// is ever-green, capable, reliable and fast.
 package playwright
 
 type Playwright struct {
