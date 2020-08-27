@@ -12,20 +12,18 @@ type (
 	}
 	eventHandler  func(...interface{})
 	eventRegister struct {
-		sync.Mutex
 		once []eventHandler
 		on   []eventHandler
 	}
 	EventEmitter struct {
+		sync.Mutex
 		queue  chan incomingEvent
 		events map[string]*eventRegister
 	}
 )
 
 func (e *EventEmitter) Emit(name string, payload ...interface{}) {
-	if _, ok := e.events[name]; ok {
-		e.queue <- incomingEvent{name, payload}
-	}
+	e.queue <- incomingEvent{name, payload}
 }
 
 func (e *EventEmitter) Once(name string, handler eventHandler) {
@@ -37,6 +35,8 @@ func (e *EventEmitter) On(name string, handler eventHandler) {
 }
 
 func (e *EventEmitter) RemoveListener(name string, handler eventHandler) {
+	e.Lock()
+	defer e.Unlock()
 	if _, ok := e.events[name]; !ok {
 		return
 	}
@@ -57,36 +57,34 @@ func (e *EventEmitter) RemoveListener(name string, handler eventHandler) {
 		}
 	}
 
-	e.events[name].Lock()
 	e.events[name].on = onHandlers
 	e.events[name].once = onceHandlers
-	e.events[name].Unlock()
 }
 
 func (e *EventEmitter) ListenerCount(name string) int {
 	count := 0
+	e.Lock()
 	for key := range e.events {
-		e.events[key].Lock()
 		count += len(e.events[key].on) + len(e.events[key].once)
-		e.events[key].Unlock()
 	}
+	e.Unlock()
 	return count
 }
 
 func (e *EventEmitter) addEvent(name string, handler eventHandler, once bool) {
+	e.Lock()
 	if _, ok := e.events[name]; !ok {
 		e.events[name] = &eventRegister{
 			on:   make([]eventHandler, 0),
 			once: make([]eventHandler, 0),
 		}
 	}
-	e.events[name].Lock()
 	if once {
 		e.events[name].once = append(e.events[name].once, handler)
 	} else {
 		e.events[name].on = append(e.events[name].on, handler)
 	}
-	e.events[name].Unlock()
+	e.Unlock()
 }
 
 func (e *EventEmitter) initEventEmitter() {
@@ -101,11 +99,12 @@ func (e *EventEmitter) startEventQueue() {
 		if !more {
 			break
 		}
+		e.Lock()
 		if _, ok := e.events[payload.name]; !ok {
+			e.Unlock()
 			continue
 		}
 
-		e.events[payload.name].Lock()
 		for i := 0; i < len(e.events[payload.name].on); i++ {
 			e.events[payload.name].on[i](payload.payload...)
 		}
@@ -113,7 +112,7 @@ func (e *EventEmitter) startEventQueue() {
 			e.events[payload.name].once[i](payload.payload...)
 		}
 		e.events[payload.name].once = make([]eventHandler, 0)
-		e.events[payload.name].Unlock()
+		e.Unlock()
 	}
 }
 

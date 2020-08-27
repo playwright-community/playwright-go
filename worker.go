@@ -42,7 +42,9 @@ func newWorker(parent *ChannelOwner, objectType string, guid string, initializer
 				workers = append(workers, bt.page.workers[i])
 			}
 		}
+		bt.page.workersLock.Lock()
 		bt.page.workers = workers
+		bt.page.workersLock.Unlock()
 		bt.Emit("close", bt)
 	})
 	return bt

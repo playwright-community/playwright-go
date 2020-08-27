@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"io/ioutil"
 	"reflect"
+	"sync"
 )
 
 type Page struct {
 	ChannelOwner
-	frames    []*Frame
-	workers   []*Worker
-	mainFrame *Frame
+	frames      []*Frame
+	workersLock sync.Mutex
+	workers     []*Worker
+	mainFrame   *Frame
 }
 
 func (b *Page) Goto(url string) error {
@@ -35,6 +37,8 @@ func (b *Page) Title() (string, error) {
 }
 
 func (b *Page) Workers() []*Worker {
+	b.workersLock.Lock()
+	defer b.workersLock.Unlock()
 	return b.workers
 }
 

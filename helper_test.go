@@ -103,6 +103,7 @@ func (t *testServer) Stop() {
 func (t *testServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	if route, ok := t.routes[r.URL.Path]; ok {
 		route(w, r)
+		return
 	}
 	http.FileServer(http.Dir("./tests/assets")).ServeHTTP(w, r)
 }
