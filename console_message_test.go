@@ -117,10 +117,9 @@ func TestConsoleShouldNotFailForWindowObjects(t *testing.T) {
 }
 
 func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
-	t.Skip()
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
-	messages := make(chan *ConsoleMessage)
+	messages := make(chan *ConsoleMessage, 1)
 	helper.Page.Once("console", func(args ...interface{}) {
 		messages <- args[0].(*ConsoleMessage)
 	})
