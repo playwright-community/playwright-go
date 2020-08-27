@@ -31,13 +31,10 @@ func main() {
 	exitIfErrorf("could not goto: %v", err)
 	err = page.SetContent(`<a href="/download" download>download</a>`)
 	exitIfErrorf("could not set content: %v", err)
-	downloadChan := make(chan *playwright.Download, 1)
-	page.On("download", func(ev ...interface{}) {
-		downloadChan <- ev[0].(*playwright.Download)
+	download, err := page.ExpectDownload(func() error {
+		return page.Click("text=download")
 	})
-	err = page.Click("text=download")
-	exitIfErrorf("could not click: %v", err)
-	download := <-downloadChan
+	exitIfErrorf("could not download: %v", err)
 	fmt.Println(download.SuggestedFilename())
 	err = browser.Close()
 	exitIfErrorf("could not close browser: %v", err)

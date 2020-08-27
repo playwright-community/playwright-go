@@ -84,6 +84,7 @@ func newTestServer() *testServer {
 	}
 	ts.testServer = httptest.NewServer(http.HandlerFunc(ts.serveHTTP))
 	ts.PREFIX = ts.testServer.URL
+	ts.EMPTY_PAGE = ts.testServer.URL + "/empty.html"
 	return ts
 }
 
@@ -91,6 +92,7 @@ type testServer struct {
 	testServer *httptest.Server
 	routes     map[string]http.HandlerFunc
 	PREFIX     string
+	EMPTY_PAGE string
 }
 
 func (t *testServer) Stop() {
@@ -102,6 +104,7 @@ func (t *testServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	if route, ok := t.routes[r.URL.Path]; ok {
 		route(w, r)
 	}
+	http.FileServer(http.Dir("./tests/assets")).ServeHTTP(w, r)
 }
 
 func (s *testServer) SetRoute(path string, f http.HandlerFunc) {

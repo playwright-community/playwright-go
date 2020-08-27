@@ -27,6 +27,11 @@ func (b *Frame) Content() (string, error) {
 	return content.(string), err
 }
 
+func (b *Frame) Title() (string, error) {
+	title, err := b.channel.Send("title")
+	return title.(string), err
+}
+
 func (b *Frame) Goto(url string) error {
 	_, err := b.channel.Send("goto", map[string]interface{}{
 		"url": url,
