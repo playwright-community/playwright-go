@@ -41,6 +41,6 @@ We are ready for your feedback, but we are still covering Playwright Go with the
 
 ## Resources
 
-* [Documentation](https://pkg.go.dev/mxschmitt/playwright-golang)
+* [Documentation](https://pkg.go.dev/github.com/mxschmitt/playwright-go)
 * [API reference](https://github.com/microsoft/playwright/blob/master/docs/api.md)
 * [Example recipes](https://github.com/mxschmitt/playwright-go/tree/master/examples)
