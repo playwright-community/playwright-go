@@ -22,14 +22,11 @@ func TestDownloadBasic(t *testing.T) {
 	require.NoError(t, helper.Page.SetContent(
 		fmt.Sprintf(`<a href="%s/downloadWithFilename">download</a>`, helper.server.PREFIX),
 	))
-	// TODO: waitForEvent wrapper
-	downloadChan := make(chan *Download, 1)
-	helper.Page.On("download", func(ev ...interface{}) {
-		downloadChan <- ev[0].(*Download)
+
+	download, err := helper.Page.ExpectDownload(func() error {
+		return helper.Page.Click("a")
 	})
-	err := helper.Page.Click("a")
 	require.NoError(t, err)
-	download := <-downloadChan
 	require.Equal(t, download.URL(), fmt.Sprintf("%s/downloadWithFilename", helper.server.PREFIX))
 	require.Equal(t, download.SuggestedFilename(), "file.txt")
 	require.Equal(t, download.String(), "file.txt")

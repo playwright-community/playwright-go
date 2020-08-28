@@ -27,6 +27,11 @@ func (b *Frame) Content() (string, error) {
 	return content.(string), err
 }
 
+func (b *Frame) Title() (string, error) {
+	title, err := b.channel.Send("title")
+	return title.(string), err
+}
+
 func (b *Frame) Goto(url string) error {
 	_, err := b.channel.Send("goto", map[string]interface{}{
 		"url": url,
@@ -36,6 +41,17 @@ func (b *Frame) Goto(url string) error {
 
 func (b *Frame) Page() *Page {
 	return b.page
+}
+
+func (b *Frame) WaitForLoadState(state string) {
+	succeed := make(chan bool, 1)
+	b.Once("loadstate", func(ev ...interface{}) {
+		gotState := ev[0].(string)
+		if gotState == state {
+			succeed <- true
+		}
+	})
+	<-succeed
 }
 
 func (b *Frame) onFrameNavigated(event ...interface{}) {

@@ -2,7 +2,10 @@ package playwright
 
 import (
 	"reflect"
+	"regexp"
 	"strings"
+
+	"github.com/danwakefield/fnmatch"
 )
 
 // transformOptions handles the parameter data transformation
@@ -102,4 +105,29 @@ func isFunctionBody(expression string) bool {
 	return strings.HasPrefix(expression, "function") ||
 		strings.HasPrefix(expression, "async ") ||
 		strings.Contains(expression, "=> ")
+}
+
+type urlMatcher struct {
+	urlOrPredicate interface{}
+}
+
+func newURLMatcher(urlOrPredicate interface{}) *urlMatcher {
+	return &urlMatcher{
+		urlOrPredicate: urlOrPredicate,
+	}
+}
+
+func (u *urlMatcher) Match(url string) bool {
+	switch v := u.urlOrPredicate.(type) {
+	case *regexp.Regexp:
+		return v.MatchString(url)
+	case string:
+		return fnmatch.Match(v, url, 0)
+	}
+	if reflect.TypeOf(u.urlOrPredicate).Kind() == reflect.Func {
+		function := reflect.ValueOf(u.urlOrPredicate)
+		result := function.Call([]reflect.Value{reflect.ValueOf(url)})
+		return result[0].Bool()
+	}
+	panic(u.urlOrPredicate)
 }

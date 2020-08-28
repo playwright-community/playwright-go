@@ -140,3 +140,99 @@ func TestPageEvaluateOnSelector(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, val, "bar")
 }
+
+func TestPageExpectWorker(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	worker, err := helper.Page.ExpectWorker(func() error {
+		return helper.Page.Goto(helper.server.PREFIX + "/worker/worker.html")
+	})
+	require.NoError(t, err)
+	require.Equal(t, 1, len(helper.Page.Workers()))
+	require.Equal(t, worker, helper.Page.Workers()[0])
+	worker = helper.Page.Workers()[0]
+	require.Contains(t, worker.URL(), "worker.js")
+	res, err := worker.Evaluate(`() => self["workerFunction"]()`)
+	require.NoError(t, err)
+	require.Equal(t, "worker function result", res)
+	require.NoError(t, helper.Page.Goto(helper.server.EMPTY_PAGE))
+	require.Equal(t, 0, len(helper.Page.Workers()))
+}
+
+func TestPageExpectRequest(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	request, err := helper.Page.ExpectRequest("**/*", func() error {
+		return helper.Page.Goto(helper.server.EMPTY_PAGE)
+	})
+	require.NoError(t, err)
+	require.Equal(t, helper.server.EMPTY_PAGE, request.URL())
+	require.Equal(t, "document", request.ResourceType())
+	require.Equal(t, "GET", request.Method())
+}
+
+func TestPageExpectResponse(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	response, err := helper.Page.ExpectResponse("**/*", func() error {
+		return helper.Page.Goto(helper.server.EMPTY_PAGE)
+	})
+	require.NoError(t, err)
+	require.Equal(t, helper.server.EMPTY_PAGE, response.URL())
+	require.True(t, response.Ok())
+	require.Equal(t, 200, response.Status())
+	require.Equal(t, "OK", response.StatusText())
+}
+
+func TestPageExpectPopup(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	require.NoError(t, helper.Page.Goto(helper.server.EMPTY_PAGE))
+	popup, err := helper.Page.ExpectPopup(func() error {
+		_, err := helper.Page.Evaluate(`window._popup = window.open(document.location.href)`)
+		return err
+	})
+	require.NoError(t, err)
+	require.Equal(t, popup.URL(), helper.server.EMPTY_PAGE)
+}
+
+func TestPageExpectNavigation(t *testing.T) {
+	t.Skip()
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+}
+
+func TestPageExpectLoadState(t *testing.T) {
+	t.Skip()
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+}
+
+func TestPageExpectFileChooser(t *testing.T) {
+	t.Skip()
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+}
+
+func TestPageExpectDialog(t *testing.T) {
+	t.Skip()
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+}
+
+func TestPageExpectConsoleMessage(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	message, err := helper.Page.ExpectConsoleMessage(func() error {
+		_, err := helper.Page.Evaluate(`console.log(123, "abc")`)
+		return err
+	})
+	require.NoError(t, err)
+	require.Equal(t, message.Text(), "123 abc")
+}
+
+func TestPageExpectEvent(t *testing.T) {
+	t.Skip()
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+}
