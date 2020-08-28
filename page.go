@@ -20,6 +20,22 @@ func (b *Page) Goto(url string) error {
 	return b.mainFrame.Goto(url)
 }
 
+func (b *Page) Reload(options ...PageReloadOptions) (*Response, error) {
+	response, err := b.channel.Send("reload", options)
+	if err != nil {
+		return nil, err
+	}
+	return response.(*Channel).object.(*Response), err
+}
+
+func (b *Page) Type(selector, text string, options ...PageTypeOptions) error {
+	return b.mainFrame.Type(selector, text, options...)
+}
+
+func (b *Page) Press(selector, key string, options ...PagePressOptions) error {
+	return b.mainFrame.Press(selector, key, options...)
+}
+
 func (b *Page) URL() string {
 	return b.mainFrame.URL()
 }

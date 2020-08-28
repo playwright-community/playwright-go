@@ -39,6 +39,22 @@ func (b *Frame) Goto(url string) error {
 	return err
 }
 
+func (b *Frame) Type(selector, text string, options ...PageTypeOptions) error {
+	_, err := b.channel.Send("type", map[string]interface{}{
+		"selector": selector,
+		"text":     text,
+	}, options)
+	return err
+}
+
+func (b *Frame) Press(selector, key string, options ...PagePressOptions) error {
+	_, err := b.channel.Send("press", map[string]interface{}{
+		"selector": selector,
+		"key":      key,
+	}, options)
+	return err
+}
+
 func (b *Frame) Page() *Page {
 	return b.page
 }
