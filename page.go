@@ -177,15 +177,10 @@ func (p *Page) ExpectFileChooser(cb func() error) (*ConsoleMessage, error) {
 	return response.(*ConsoleMessage), err
 }
 
-// func (p *Page) ExpectLoadState(cb func() error) (*ConsoleMessage, error) {
-// 	response, err := newExpectWrapper(p.WaitForLoadState, []interface{}{"console"}, cb)
-// 	return response.(*ConsoleMessage), err
-// }
-
-// func (p *Page) ExpectNavigation(cb func() error) (*ConsoleMessage, error) {
-// 	response, err := newExpectWrapper(p.WaitForNavigation, []interface{}{"console"}, cb)
-// 	return response.(*ConsoleMessage), err
-// }
+func (p *Page) ExpectLoadState(state string, cb func() error) (*ConsoleMessage, error) {
+	response, err := newExpectWrapper(p.mainFrame.WaitForLoadState, []interface{}{state}, cb)
+	return response.(*ConsoleMessage), err
+}
 
 func (p *Page) ExpectPopup(cb func() error) (*Page, error) {
 	popup, err := newExpectWrapper(p.WaitForEvent, []interface{}{"popup"}, cb)

@@ -43,6 +43,17 @@ func (b *Frame) Page() *Page {
 	return b.page
 }
 
+func (b *Frame) WaitForLoadState(state string) {
+	succeed := make(chan bool, 1)
+	b.Once("loadstate", func(ev ...interface{}) {
+		gotState := ev[0].(string)
+		if gotState == state {
+			succeed <- true
+		}
+	})
+	<-succeed
+}
+
 func (b *Frame) onFrameNavigated(event ...interface{}) {
 	b.Lock()
 	b.url = event[0].(map[string]interface{})["url"].(string)
