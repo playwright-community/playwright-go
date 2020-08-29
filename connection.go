@@ -70,7 +70,7 @@ func (c *Connection) Dispatch(msg *Message) {
 		object.Dispose()
 		return
 	}
-	go object.channel.Emit(method, c.replaceGuidsWithChannels(msg.Params))
+	object.channel.Emit(method, c.replaceGuidsWithChannels(msg.Params))
 }
 
 func (c *Connection) createRemoteObject(parent *ChannelOwner, objectType string, guid string, initializer interface{}) interface{} {
