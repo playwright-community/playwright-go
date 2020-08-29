@@ -25,10 +25,10 @@ func (e *EventEmitter) Emit(name string, payload ...interface{}) {
 	}
 
 	for _, handler := range e.events[name].on {
-		go handler(payload...)
+		handler(payload...)
 	}
 	for _, handler := range e.events[name].once {
-		go handler(payload...)
+		handler(payload...)
 	}
 	e.events[name].once = make([]eventHandler, 0)
 }
@@ -48,6 +48,7 @@ func (e *EventEmitter) RemoveListener(name string, handler eventHandler) {
 		return
 	}
 	handlerPtr := reflect.ValueOf(handler).Pointer()
+
 	onHandlers := []eventHandler{}
 	for idx := range e.events[name].on {
 		eventPtr := reflect.ValueOf(e.events[name].on[idx]).Pointer()
@@ -55,6 +56,7 @@ func (e *EventEmitter) RemoveListener(name string, handler eventHandler) {
 			onHandlers = append(onHandlers, e.events[name].on[idx])
 		}
 	}
+	e.events[name].on = onHandlers
 
 	onceHandlers := []eventHandler{}
 	for idx := range e.events[name].once {
@@ -64,7 +66,6 @@ func (e *EventEmitter) RemoveListener(name string, handler eventHandler) {
 		}
 	}
 
-	e.events[name].on = onHandlers
 	e.events[name].once = onceHandlers
 }
 
