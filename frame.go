@@ -9,59 +9,59 @@ type Frame struct {
 	url  string
 }
 
-func (b *Frame) URL() string {
-	b.RLock()
-	defer b.RUnlock()
-	return b.url
+func (f *Frame) URL() string {
+	f.RLock()
+	defer f.RUnlock()
+	return f.url
 }
 
-func (b *Frame) SetContent(content string, options ...PageSetContentOptions) error {
-	_, err := b.channel.Send("setContent", map[string]interface{}{
+func (f *Frame) SetContent(content string, options ...PageSetContentOptions) error {
+	_, err := f.channel.Send("setContent", map[string]interface{}{
 		"html": content,
 	}, options)
 	return err
 }
 
-func (b *Frame) Content() (string, error) {
-	content, err := b.channel.Send("content")
+func (f *Frame) Content() (string, error) {
+	content, err := f.channel.Send("content")
 	return content.(string), err
 }
 
-func (b *Frame) Title() (string, error) {
-	title, err := b.channel.Send("title")
+func (f *Frame) Title() (string, error) {
+	title, err := f.channel.Send("title")
 	return title.(string), err
 }
 
-func (b *Frame) Goto(url string) error {
-	_, err := b.channel.Send("goto", map[string]interface{}{
+func (f *Frame) Goto(url string) error {
+	_, err := f.channel.Send("goto", map[string]interface{}{
 		"url": url,
 	})
 	return err
 }
 
-func (b *Frame) Type(selector, text string, options ...PageTypeOptions) error {
-	_, err := b.channel.Send("type", map[string]interface{}{
+func (f *Frame) Type(selector, text string, options ...PageTypeOptions) error {
+	_, err := f.channel.Send("type", map[string]interface{}{
 		"selector": selector,
 		"text":     text,
 	}, options)
 	return err
 }
 
-func (b *Frame) Press(selector, key string, options ...PagePressOptions) error {
-	_, err := b.channel.Send("press", map[string]interface{}{
+func (f *Frame) Press(selector, key string, options ...PagePressOptions) error {
+	_, err := f.channel.Send("press", map[string]interface{}{
 		"selector": selector,
 		"key":      key,
 	}, options)
 	return err
 }
 
-func (b *Frame) Page() *Page {
-	return b.page
+func (f *Frame) Page() *Page {
+	return f.page
 }
 
-func (b *Frame) WaitForLoadState(state string) {
+func (f *Frame) WaitForLoadState(state string) {
 	succeed := make(chan bool, 1)
-	b.Once("loadstate", func(ev ...interface{}) {
+	f.Once("loadstate", func(ev ...interface{}) {
 		gotState := ev[0].(string)
 		if gotState == state {
 			succeed <- true
@@ -70,23 +70,23 @@ func (b *Frame) WaitForLoadState(state string) {
 	<-succeed
 }
 
-func (b *Frame) onFrameNavigated(event ...interface{}) {
-	b.Lock()
-	b.url = event[0].(map[string]interface{})["url"].(string)
-	b.Unlock()
+func (f *Frame) onFrameNavigated(event ...interface{}) {
+	f.Lock()
+	f.url = event[0].(map[string]interface{})["url"].(string)
+	f.Unlock()
 }
 
-func (b *Frame) QuerySelector(selector string) (*ElementHandle, error) {
-	channelOwner, err := b.channel.Send("querySelector", map[string]interface{}{
+func (f *Frame) QuerySelector(selector string) (*ElementHandle, error) {
+	channelOwner, err := f.channel.Send("querySelector", map[string]interface{}{
 		"selector": selector,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return channelOwner.(*Channel).object.(*ElementHandle), nil
+	return fromChannel(channelOwner).(*ElementHandle), nil
 }
 
-func (b *Frame) Evaluate(expression string, options ...interface{}) (interface{}, error) {
+func (f *Frame) Evaluate(expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -98,7 +98,7 @@ func (b *Frame) Evaluate(expression string, options ...interface{}) (interface{}
 		arg = options[0]
 		forceExpression = options[1].(bool)
 	}
-	result, err := b.channel.Send("evaluateExpression", map[string]interface{}{
+	result, err := f.channel.Send("evaluateExpression", map[string]interface{}{
 		"expression": expression,
 		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),

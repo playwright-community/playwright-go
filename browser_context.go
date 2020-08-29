@@ -12,7 +12,7 @@ func (b *BrowserContext) NewPage(options ...BrowserNewPageOptions) (*Page, error
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %v", err)
 	}
-	return channelOwner.(*Channel).object.(*Page), nil
+	return fromChannel(channelOwner).(*Page), nil
 }
 
 func newBrowserContext(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *BrowserContext {

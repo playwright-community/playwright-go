@@ -178,3 +178,14 @@ func newConnection(stdin io.WriteCloser, stdout io.ReadCloser, stopDriver func()
 	connection.rootObject = newRootChannelOwner(connection)
 	return connection
 }
+
+func fromChannel(v interface{}) interface{} {
+	return v.(*Channel).object
+}
+
+func fromNullableChannel(v interface{}) interface{} {
+	if v == nil {
+		return nil
+	}
+	return fromChannel(v)
+}

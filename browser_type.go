@@ -21,7 +21,7 @@ func (b *BrowserType) Launch(options ...BrowserTypeLaunchOptions) (*Browser, err
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %v", err)
 	}
-	return channelOwner.(*Channel).object.(*Browser), nil
+	return fromChannel(channelOwner).(*Browser), nil
 }
 
 func newBrowserType(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *BrowserType {

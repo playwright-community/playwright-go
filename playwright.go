@@ -17,9 +17,9 @@ func (p *Playwright) Stop() error {
 func newPlaywright(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Playwright {
 	// TODO: add devices and selectors
 	pw := &Playwright{
-		Chromium: (initializer["chromium"]).(*Channel).object.(*BrowserType),
-		Firefox:  (initializer["firefox"]).(*Channel).object.(*BrowserType),
-		WebKit:   (initializer["webkit"]).(*Channel).object.(*BrowserType),
+		Chromium: fromChannel(initializer["chromium"]).(*BrowserType),
+		Firefox:  fromChannel(initializer["firefox"]).(*BrowserType),
+		WebKit:   fromChannel(initializer["webkit"]).(*BrowserType),
 	}
 	pw.createChannelOwner(pw, parent, objectType, guid, initializer)
 	return pw
