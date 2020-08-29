@@ -26,7 +26,7 @@ func (r *Response) StatusText() string {
 }
 
 func (r *Response) Headers() map[string]string {
-	return r.initializer["headers"].(map[string]string)
+	return parseHeaders(r.initializer["headers"].([]interface{}))
 }
 
 func (r *Response) Finished() error {

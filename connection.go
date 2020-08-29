@@ -98,20 +98,14 @@ func (c *Connection) replaceChannelsWithGuids(payload interface{}) interface{} {
 	if v.Kind() == reflect.Slice {
 		listV := make([]interface{}, 0)
 		for i := 0; i < v.Len(); i++ {
-			f := v.Field(i)
-			listV = append(listV, c.replaceChannelsWithGuids(f.Interface()))
+			listV = append(listV, c.replaceChannelsWithGuids(v.Index(i).Interface()))
 		}
 		return listV
 	}
 	if v.Kind() == reflect.Map {
-		mapV := payload.(map[string]interface{})
-		if guid, hasGUID := mapV["guid"]; hasGUID {
-			if channelOwner, ok := c.objects[guid.(string)]; ok {
-				return channelOwner.channel
-			}
-		}
-		for key := range mapV {
-			mapV[key] = c.replaceChannelsWithGuids(mapV[key])
+		mapV := make(map[string]interface{})
+		for _, key := range v.MapKeys() {
+			mapV[key.String()] = c.replaceChannelsWithGuids(v.MapIndex(key).Interface())
 		}
 		return mapV
 	}

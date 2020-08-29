@@ -23,7 +23,9 @@ type (
 )
 
 func (e *EventEmitter) Emit(name string, payload ...interface{}) {
-	e.queue <- incomingEvent{name, payload}
+	go func() {
+		e.queue <- incomingEvent{name, payload}
+	}()
 }
 
 func (e *EventEmitter) Once(name string, handler eventHandler) {

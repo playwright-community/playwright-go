@@ -50,7 +50,6 @@ func (r *Route) Fulfill(options RouteFulfillOptions) error {
 		options.Body = base64.StdEncoding.EncodeToString(content)
 		isBase64 = true
 		length = len(content)
-		options.Path = nil
 	}
 
 	headers := make(map[string]string)
@@ -58,20 +57,21 @@ func (r *Route) Fulfill(options RouteFulfillOptions) error {
 		for key, val := range options.Headers {
 			headers[strings.ToLower(key)] = val
 		}
-		if options.ContentType != nil {
-			headers["content-type"] = *options.ContentType
-		} else if options.Path != nil {
-			headers["content-type"] = fileContentType
-		}
-		if _, ok := headers["content-length"]; !ok && length > 0 {
-			headers["content-length"] = strconv.Itoa(length)
-		}
+	}
+	if options.ContentType != nil {
+		headers["content-type"] = *options.ContentType
+	} else if options.Path != nil {
+		headers["content-type"] = fileContentType
+	}
+	if _, ok := headers["content-length"]; !ok && length > 0 {
+		headers["content-length"] = strconv.Itoa(length)
 	}
 
-	_, err := r.channel.Send("fulfill", map[string]interface{}{
+	options.Path = nil
+	_, err := r.channel.Send("fulfill", options, map[string]interface{}{
 		"isBase64": isBase64,
 		"headers":  serializeHeaders(headers),
-	}, options)
+	})
 	return err
 }
 
