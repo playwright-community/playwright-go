@@ -14,9 +14,11 @@ type Page struct {
 	workersLock sync.Mutex
 	workers     []*Worker
 	mainFrame   *Frame
+	routesMu    sync.Mutex
+	routes      []*routeHandlerEntry
 }
 
-func (b *Page) Goto(url string) error {
+func (b *Page) Goto(url string) (*Response, error) {
 	return b.mainFrame.Goto(url)
 }
 
@@ -224,10 +226,26 @@ func (p *Page) ExpectWorker(cb func() error) (*Worker, error) {
 	return response.(*Worker), err
 }
 
+func (p *Page) Route(url interface{}, handler routeHandler) error {
+	p.routesMu.Lock()
+	p.routes = append(p.routes, newRouteHandlerEntry(newURLMatcher(url), handler))
+	if len(p.routes) == 1 {
+		_, err := p.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
+			"enabled": true,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	p.routesMu.Unlock()
+	return nil
+}
+
 func newPage(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Page {
 	bt := &Page{
 		mainFrame: fromChannel(initializer["mainFrame"]).(*Frame),
 		workers:   make([]*Worker, 0),
+		routes:    make([]*routeHandlerEntry, 0),
 	}
 	bt.frames = []*Frame{bt.mainFrame}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
@@ -255,7 +273,16 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 		bt.Emit("response", fromChannel(payload[0].(map[string]interface{})["response"]))
 	})
 	bt.channel.On("route", func(payload ...interface{}) {
-		bt.Emit("route", fromChannel(payload[0].(map[string]interface{})["request"]))
+		route := fromChannel(payload[0].(map[string]interface{})["route"]).(*Route)
+		request := fromChannel(payload[0].(map[string]interface{})["request"]).(*Request)
+		bt.routesMu.Lock()
+		for _, handlerEntry := range bt.routes {
+			if handlerEntry.matcher.Match(request.URL()) {
+				handlerEntry.handler(route, request)
+				break
+			}
+		}
+		bt.routesMu.Unlock()
 	})
 	bt.channel.On("worker", func(payload ...interface{}) {
 		worker := fromChannel(payload[0].(map[string]interface{})["worker"]).(*Worker)

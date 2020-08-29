@@ -21,7 +21,7 @@ func main() {
 	exitIfErrorf("could not create context: %v", err)
 	page, err := context.NewPage()
 	exitIfErrorf("could not create page: %v", err)
-	err = page.Goto("https://github.com/microsoft/playwright")
+	_, err = page.Goto("https://github.com/microsoft/playwright")
 	exitIfErrorf("could not goto: %v", err)
 	_, err = page.PDF(playwright.PagePdfOptions{
 		Path: playwright.String("playwright-example.pdf"),

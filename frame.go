@@ -1,6 +1,8 @@
 package playwright
 
-import "sync"
+import (
+	"sync"
+)
 
 type Frame struct {
 	ChannelOwner
@@ -32,11 +34,18 @@ func (f *Frame) Title() (string, error) {
 	return title.(string), err
 }
 
-func (f *Frame) Goto(url string) error {
-	_, err := f.channel.Send("goto", map[string]interface{}{
+func (f *Frame) Goto(url string) (*Response, error) {
+	response, err := f.channel.Send("goto", map[string]interface{}{
 		"url": url,
 	})
-	return err
+	if err != nil {
+		return nil, err
+	}
+	obj := fromNullableChannel(response)
+	if obj == nil {
+		return nil, nil
+	}
+	return obj.(*Response), nil
 }
 
 func (f *Frame) Type(selector, text string, options ...PageTypeOptions) error {

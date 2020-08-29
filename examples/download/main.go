@@ -27,7 +27,7 @@ func main() {
 	exitIfErrorf("could not create context: %v", err)
 	page, err := context.NewPage()
 	exitIfErrorf("could not create page: %v", err)
-	err = page.Goto("http://localhost:1234")
+	_, err = page.Goto("http://localhost:1234")
 	exitIfErrorf("could not goto: %v", err)
 	err = page.SetContent(`<a href="/download" download>download</a>`)
 	exitIfErrorf("could not set content: %v", err)

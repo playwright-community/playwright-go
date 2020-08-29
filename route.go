@@ -81,20 +81,23 @@ type RouteContinueOptions struct {
 	PostData interface{}       `json:"postData"`
 }
 
-func (r *Route) Continue(options RouteContinueOptions) error {
+func (r *Route) Continue(options ...RouteContinueOptions) error {
 	overrides := make(map[string]interface{})
-	if options.Method != nil {
-		overrides["method"] = options.Method
-	}
-	if options.Headers != nil {
-		overrides["headers"] = serializeHeaders(options.Headers)
-	}
-	if options.PostData != nil {
-		switch v := options.PostData.(type) {
-		case string:
-			overrides["postData"] = base64.StdEncoding.EncodeToString([]byte(v))
-		case []byte:
-			overrides["postData"] = base64.StdEncoding.EncodeToString(v)
+	if len(options) == 1 {
+		option := options[0]
+		if option.Method != nil {
+			overrides["method"] = option.Method
+		}
+		if option.Headers != nil {
+			overrides["headers"] = serializeHeaders(option.Headers)
+		}
+		if option.PostData != nil {
+			switch v := option.PostData.(type) {
+			case string:
+				overrides["postData"] = base64.StdEncoding.EncodeToString([]byte(v))
+			case []byte:
+				overrides["postData"] = base64.StdEncoding.EncodeToString(v)
+			}
 		}
 	}
 	_, err := r.channel.Send("continue", overrides)

@@ -123,9 +123,10 @@ func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
 	helper.Page.Once("console", func(args ...interface{}) {
 		messages <- args[0].(*ConsoleMessage)
 	})
-	require.NoError(t, helper.Page.Goto("about:blank"))
+	_, err := helper.Page.Goto("about:blank")
+	require.NoError(t, err)
 	// TODO: use server
-	_, err := helper.Page.Evaluate("url => fetch(url).catch(e => {})", helper.server.EMPTY_PAGE)
+	_, err = helper.Page.Evaluate("url => fetch(url).catch(e => {})", helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
 	message := <-messages
 	require.Contains(t, message.Text(), "Access-Control-Allow-Origin")

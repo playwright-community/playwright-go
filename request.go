@@ -1,6 +1,9 @@
 package playwright
 
-import "encoding/base64"
+import (
+	"encoding/base64"
+	"encoding/json"
+)
 
 type RequestFailure struct {
 	ErrorText string
@@ -38,6 +41,30 @@ func (r *Request) PostData() (string, error) {
 		return "", err
 	}
 	return string(body), err
+}
+
+func (r *Request) PostDataJSON(v interface{}) error {
+	body, err := r.PostDataRaw()
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(body, v)
+}
+
+func (r *Request) Headers() map[string]string {
+	return parseHeaders(r.initializer["headers"].([]interface{}))
+}
+
+func (r *Request) Response() (*Response, error) {
+	resp, err := r.channel.Send("response")
+	if err != nil {
+		return nil, err
+	}
+	resp = fromNullableChannel(resp)
+	if resp == nil {
+		return nil, nil
+	}
+	return resp.(*Response), nil
 }
 
 func (r *Request) Frame() *Frame {

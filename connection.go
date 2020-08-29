@@ -19,7 +19,7 @@ type Connection struct {
 	objects                     map[string]*ChannelOwner
 	lastID                      int
 	rootObject                  *ChannelOwner
-	callbacks                   map[int]chan callback
+	callbacks                   sync.Map
 	stopDriver                  func() error
 }
 
@@ -47,12 +47,13 @@ func (c *Connection) CallOnObjectWithKnownName(name string) (interface{}, error)
 func (c *Connection) Dispatch(msg *Message) {
 	method := msg.Method
 	if msg.ID != 0 {
+		cb, _ := c.callbacks.Load(msg.ID)
 		if msg.Error != nil {
-			c.callbacks[msg.ID] <- callback{
+			cb.(chan callback) <- callback{
 				Error: parseError(msg.Error.Error),
 			}
 		} else {
-			c.callbacks[msg.ID] <- callback{
+			cb.(chan callback) <- callback{
 				Data: c.replaceGuidsWithChannels(msg.Result),
 			}
 		}
@@ -153,14 +154,12 @@ func (c *Connection) SendMessageToServer(guid string, method string, params inte
 		"method": method,
 		"params": c.replaceChannelsWithGuids(params),
 	}
-	if _, ok := c.callbacks[id]; !ok {
-		c.callbacks[id] = make(chan callback)
-	}
+	cb, _ := c.callbacks.LoadOrStore(id, make(chan callback))
 	if err := c.transport.Send(message); err != nil {
 		return nil, fmt.Errorf("could not send message: %v", err)
 	}
-	result := <-c.callbacks[id]
-	delete(c.callbacks, id)
+	result := <-cb.(chan callback)
+	c.callbacks.Delete(id)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -172,7 +171,6 @@ func newConnection(stdin io.WriteCloser, stdout io.ReadCloser, stopDriver func()
 		waitingForRemoteObjects: make(map[string]chan interface{}),
 		transport:               newTransport(stdin, stdout),
 		objects:                 make(map[string]*ChannelOwner),
-		callbacks:               make(map[int]chan callback),
 		stopDriver:              stopDriver,
 	}
 	connection.rootObject = newRootChannelOwner(connection)
