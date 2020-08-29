@@ -12,7 +12,6 @@ type ChannelOwner struct {
 }
 
 func (c *ChannelOwner) Dispose() {
-	c.stopEventEmitter()
 }
 
 func (c *ChannelOwner) createChannelOwner(self interface{}, parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) {

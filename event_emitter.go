@@ -6,10 +6,6 @@ import (
 )
 
 type (
-	incomingEvent struct {
-		name    string
-		payload []interface{}
-	}
 	eventHandler  func(...interface{})
 	eventRegister struct {
 		once []eventHandler
@@ -17,15 +13,24 @@ type (
 	}
 	EventEmitter struct {
 		sync.Mutex
-		queue  chan incomingEvent
 		events map[string]*eventRegister
 	}
 )
 
 func (e *EventEmitter) Emit(name string, payload ...interface{}) {
-	go func() {
-		e.queue <- incomingEvent{name, payload}
-	}()
+	e.Lock()
+	defer e.Unlock()
+	if _, ok := e.events[name]; !ok {
+		return
+	}
+
+	for _, handler := range e.events[name].on {
+		go handler(payload...)
+	}
+	for _, handler := range e.events[name].once {
+		go handler(payload...)
+	}
+	e.events[name].once = make([]eventHandler, 0)
 }
 
 func (e *EventEmitter) Once(name string, handler eventHandler) {
@@ -91,33 +96,4 @@ func (e *EventEmitter) addEvent(name string, handler eventHandler, once bool) {
 
 func (e *EventEmitter) initEventEmitter() {
 	e.events = make(map[string]*eventRegister)
-	e.queue = make(chan incomingEvent)
-	go e.startEventQueue()
-}
-
-func (e *EventEmitter) startEventQueue() {
-	for {
-		payload, more := <-e.queue
-		if !more {
-			break
-		}
-		e.Lock()
-		if _, ok := e.events[payload.name]; !ok {
-			e.Unlock()
-			continue
-		}
-
-		for i := 0; i < len(e.events[payload.name].on); i++ {
-			e.events[payload.name].on[i](payload.payload...)
-		}
-		for i := 0; i < len(e.events[payload.name].once); i++ {
-			e.events[payload.name].once[i](payload.payload...)
-		}
-		e.events[payload.name].once = make([]eventHandler, 0)
-		e.Unlock()
-	}
-}
-
-func (e *EventEmitter) stopEventEmitter() {
-	close(e.queue)
 }

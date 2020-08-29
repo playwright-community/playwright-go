@@ -11,7 +11,7 @@ const testEventName = "foobar"
 func TestEventEmitterOn(t *testing.T) {
 	handler := &EventEmitter{}
 	handler.initEventEmitter()
-	wasCalled := make(chan interface{})
+	wasCalled := make(chan interface{}, 1)
 	require.Nil(t, handler.events[testEventName])
 	handler.On(testEventName, func(payload ...interface{}) {
 		wasCalled <- payload[0]
@@ -27,7 +27,7 @@ func TestEventEmitterOn(t *testing.T) {
 func TestEventEmitterOnce(t *testing.T) {
 	handler := &EventEmitter{}
 	handler.initEventEmitter()
-	wasCalled := make(chan interface{})
+	wasCalled := make(chan interface{}, 1)
 	require.Nil(t, handler.events[testEventName])
 	handler.Once(testEventName, func(payload ...interface{}) {
 		wasCalled <- payload[0]
@@ -43,7 +43,7 @@ func TestEventEmitterOnce(t *testing.T) {
 func TestEventEmitterRemove(t *testing.T) {
 	handler := &EventEmitter{}
 	handler.initEventEmitter()
-	wasCalled := make(chan interface{})
+	wasCalled := make(chan interface{}, 1)
 	require.Nil(t, handler.events[testEventName])
 	myHandler := func(payload ...interface{}) {
 		wasCalled <- payload[0]
