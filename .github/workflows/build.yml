@@ -35,7 +35,7 @@ jobs:
     - name: Test
       env:
         BROWSER: ${{ matrix.browser }}
-      run: go test -v -covermode atomic -coverprofile=covprofile  --race .
+      run: go test -v -covermode atomic -coverprofile=covprofile --race .
     - name: Install goveralls
       env:
         GO111MODULE: off

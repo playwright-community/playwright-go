@@ -12,6 +12,45 @@ type (
 	routeHandler = func(*Route, *Request)
 )
 
+func skipFieldSerialization(val reflect.Value) bool {
+	typ := val.Type()
+	return (typ.Kind() == reflect.Ptr ||
+		typ.Kind() == reflect.Interface ||
+		typ.Kind() == reflect.Map ||
+		typ.Kind() == reflect.Slice) && val.IsNil()
+}
+
+func transformStructIntoMapIfNeeded(inStruct interface{}) map[string]interface{} {
+	out := make(map[string]interface{})
+	v := reflect.ValueOf(inStruct)
+	typ := v.Type()
+	if v.Kind() == reflect.Struct {
+		// Merge into the base map by the JSON struct tag
+		for i := 0; i < v.NumField(); i++ {
+			fi := typ.Field(i)
+			// Skip the values when the field is a pointer (like *string) and nil.
+			if !skipFieldSerialization(v.Field(i)) {
+				// We use the JSON struct fields for getting the original names
+				// out of the field.
+				tagv := fi.Tag.Get("json")
+				key := strings.Split(tagv, ",")[0]
+				if key == "" {
+					key = fi.Name
+				}
+				out[key] = v.Field(i).Interface()
+			}
+		}
+	} else if v.Kind() == reflect.Map {
+		// Merge into the base map
+		for _, key := range v.MapKeys() {
+			if !skipFieldSerialization(v.MapIndex(key)) {
+				out[key.String()] = v.MapIndex(key).Interface()
+			}
+		}
+	}
+	return out
+}
+
 // transformOptions handles the parameter data transformation
 func transformOptions(options ...interface{}) map[string]interface{} {
 	var base map[string]interface{}
@@ -28,9 +67,8 @@ func transformOptions(options ...interface{}) map[string]interface{} {
 		// Case 3: two values are given. The first one needs to be a map and the
 		// second one can be a struct or map. It will be then get merged into the first
 		// base map.
-		base = options[0].(map[string]interface{})
+		base = transformStructIntoMapIfNeeded(options[0])
 		option = options[1]
-
 	}
 	v := reflect.ValueOf(option)
 	if v.Kind() == reflect.Slice {
@@ -49,31 +87,9 @@ func transformOptions(options ...interface{}) map[string]interface{} {
 		v = v.Elem()
 	}
 
-	typ := v.Type()
-	if v.Kind() == reflect.Struct {
-		// Merge into the base map by the JSON struct tag
-		for i := 0; i < v.NumField(); i++ {
-			fi := typ.Field(i)
-			// Skip the values when the field is a pointer (like *string) and nil.
-			if !((fi.Type.Kind() == reflect.Ptr ||
-				fi.Type.Kind() == reflect.Interface ||
-				fi.Type.Kind() == reflect.Map ||
-				fi.Type.Kind() == reflect.Slice) && v.Field(i).IsNil()) {
-				// We use the JSON struct fields for getting the original names
-				// out of the field.
-				tagv := fi.Tag.Get("json")
-				key := strings.Split(tagv, ",")[0]
-				if key == "" {
-					key = fi.Name
-				}
-				base[key] = v.Field(i).Interface()
-			}
-		}
-	} else if v.Kind() == reflect.Map {
-		// Merge into the base map
-		for key, value := range option.(map[string]interface{}) {
-			base[key] = value
-		}
+	optionMap := transformStructIntoMapIfNeeded(v.Interface())
+	for key, value := range optionMap {
+		base[key] = value
 	}
 	return base
 }

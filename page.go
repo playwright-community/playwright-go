@@ -275,14 +275,16 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 	bt.channel.On("route", func(payload ...interface{}) {
 		route := fromChannel(payload[0].(map[string]interface{})["route"]).(*Route)
 		request := fromChannel(payload[0].(map[string]interface{})["request"]).(*Request)
-		bt.routesMu.Lock()
-		for _, handlerEntry := range bt.routes {
-			if handlerEntry.matcher.Match(request.URL()) {
-				handlerEntry.handler(route, request)
-				break
+		go func() {
+			bt.routesMu.Lock()
+			for _, handlerEntry := range bt.routes {
+				if handlerEntry.matcher.Match(request.URL()) {
+					handlerEntry.handler(route, request)
+					break
+				}
 			}
-		}
-		bt.routesMu.Unlock()
+			bt.routesMu.Unlock()
+		}()
 	})
 	bt.channel.On("worker", func(payload ...interface{}) {
 		worker := fromChannel(payload[0].(map[string]interface{})["worker"]).(*Worker)

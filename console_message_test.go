@@ -9,7 +9,7 @@ import (
 func TestConsoleShouldWork(t *testing.T) {
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
-	messages := make(chan *ConsoleMessage)
+	messages := make(chan *ConsoleMessage, 1)
 	helper.Page.Once("console", func(args ...interface{}) {
 		messages <- args[0].(*ConsoleMessage)
 	})
@@ -49,7 +49,7 @@ func TestConsoleShouldEmitSameLogTwice(t *testing.T) {
 func TestConsoleShouldUseTextForStr(t *testing.T) {
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
-	messages := make(chan *ConsoleMessage)
+	messages := make(chan *ConsoleMessage, 1)
 	helper.Page.On("console", func(args ...interface{}) {
 		messages <- args[0].(*ConsoleMessage)
 	})
@@ -106,7 +106,7 @@ func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 func TestConsoleShouldNotFailForWindowObjects(t *testing.T) {
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
-	messages := make(chan *ConsoleMessage)
+	messages := make(chan *ConsoleMessage, 1)
 	helper.Page.Once("console", func(args ...interface{}) {
 		messages <- args[0].(*ConsoleMessage)
 	})

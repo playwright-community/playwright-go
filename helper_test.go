@@ -1,11 +1,14 @@
 package playwright
 
 import (
+	"bytes"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"reflect"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -36,6 +39,7 @@ type TestHelperData struct {
 	IsFirefox  bool
 	IsWebKit   bool
 	server     *testServer
+	assetDir   string
 }
 
 func NewTestHelper(t *testing.T) *TestHelperData {
@@ -67,6 +71,7 @@ func NewTestHelper(t *testing.T) *TestHelperData {
 		IsFirefox:  browserName == "firefox",
 		IsWebKit:   browserName == "webkit",
 		server:     newTestServer(),
+		assetDir:   "tests/assets/",
 	}
 	return th
 }
@@ -80,7 +85,8 @@ func (t *TestHelperData) AfterEach() {
 
 func newTestServer() *testServer {
 	ts := &testServer{
-		routes: make(map[string]http.HandlerFunc),
+		routes:              make(map[string]http.HandlerFunc),
+		requestSubscriberes: make(map[string][]chan *http.Request),
 	}
 	ts.testServer = httptest.NewServer(http.HandlerFunc(ts.serveHTTP))
 	ts.PREFIX = ts.testServer.URL
@@ -89,18 +95,32 @@ func newTestServer() *testServer {
 }
 
 type testServer struct {
-	testServer *httptest.Server
-	routes     map[string]http.HandlerFunc
-	PREFIX     string
-	EMPTY_PAGE string
+	testServer          *httptest.Server
+	routes              map[string]http.HandlerFunc
+	requestSubscriberes map[string][]chan *http.Request
+	PREFIX              string
+	EMPTY_PAGE          string
 }
 
 func (t *testServer) Stop() {
 	t.testServer.Close()
 	t.routes = make(map[string]http.HandlerFunc)
+	t.requestSubscriberes = make(map[string][]chan *http.Request)
 }
 
 func (t *testServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("Error reading body: %v", err)
+		http.Error(w, "can't read body", http.StatusBadRequest)
+		return
+	}
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	if handlers, ok := t.requestSubscriberes[r.URL.Path]; ok {
+		for _, handler := range handlers {
+			handler <- r
+		}
+	}
 	if route, ok := t.routes[r.URL.Path]; ok {
 		route(w, r)
 		return
@@ -110,6 +130,15 @@ func (t *testServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (s *testServer) SetRoute(path string, f http.HandlerFunc) {
 	s.routes[path] = f
+}
+
+func (s *testServer) WaitForRequestChan(path string) <-chan *http.Request {
+	if _, ok := s.requestSubscriberes[path]; !ok {
+		s.requestSubscriberes[path] = make([]chan *http.Request, 0)
+	}
+	channel := make(chan *http.Request, 1)
+	s.requestSubscriberes[path] = append(s.requestSubscriberes[path], channel)
+	return channel
 }
 
 func Map(vs interface{}, f func(interface{}) interface{}) []interface{} {
@@ -136,4 +165,27 @@ func ChanToSlice(ch interface{}, amount int) interface{} {
 		slv = reflect.Append(slv, v)
 	}
 	return slv.Interface()
+}
+
+type syncSlice struct {
+	sync.Mutex
+	slice []interface{}
+}
+
+func (s *syncSlice) Append(v interface{}) {
+	s.Lock()
+	s.slice = append(s.slice, v)
+	s.Unlock()
+}
+
+func (s *syncSlice) Get() interface{} {
+	s.Lock()
+	defer s.Unlock()
+	return s.slice
+}
+
+func newSyncSlice() *syncSlice {
+	return &syncSlice{
+		slice: make([]interface{}, 0),
+	}
 }
