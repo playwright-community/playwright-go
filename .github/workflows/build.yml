@@ -36,4 +36,12 @@ jobs:
     - name: Test
       env:
         BROWSER: ${{ matrix.browser }}
-      run: go test -v --race .
+      run: go test -v -covermode atomic -coverprofile=covprofile  --race .
+    - name: Install goveralls
+      env:
+        GO111MODULE: off
+      run: go get github.com/mattn/goveralls
+    - name: Send coverage
+      env:
+        COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: goveralls -coverprofile=covprofile -service=github
