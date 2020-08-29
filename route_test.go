@@ -88,7 +88,7 @@ func TestRouteContinueOverwriteBodyBytes(t *testing.T) {
 func TestRouteFulfill(t *testing.T) {
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
-	intercepted := make(chan bool, 1)
+	requestsChan := make(chan *Request, 1)
 	err := helper.Page.Route("**/empty.html", func(route *Route, request *Request) {
 		require.Equal(t, route.Request(), request)
 		require.Contains(t, request.URL(), "empty.html")
@@ -109,13 +109,14 @@ func TestRouteFulfill(t *testing.T) {
 				"Foo": "bar",
 			},
 		}))
-		intercepted <- true
+		requestsChan <- request
 	})
 	require.NoError(t, err)
 	response, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.True(t, response.Ok())
-	<-intercepted
+	request := <-requestsChan
+	require.Equal(t, request, response.Request())
 	text, err := response.Text()
 	require.NoError(t, err)
 	require.Equal(t, "123", text)

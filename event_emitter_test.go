@@ -66,3 +66,12 @@ func TestEventEmitterRemoveEmpty(t *testing.T) {
 	handler.RemoveListener(testEventName, func(...interface{}) {})
 	require.Equal(t, 0, handler.ListenerCount(testEventName))
 }
+
+func TestEventEmitterRemoveKeepExisting(t *testing.T) {
+	handler := &EventEmitter{}
+	handler.initEventEmitter()
+	handler.On(testEventName, func(...interface{}) {})
+	handler.Once(testEventName, func(...interface{}) {})
+	handler.RemoveListener("abc123", func(...interface{}) {})
+	require.Equal(t, 2, handler.ListenerCount(testEventName))
+}
