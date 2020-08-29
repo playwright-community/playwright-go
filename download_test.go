@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -30,4 +31,17 @@ func TestDownloadBasic(t *testing.T) {
 	require.Equal(t, download.URL(), fmt.Sprintf("%s/downloadWithFilename", helper.server.PREFIX))
 	require.Equal(t, download.SuggestedFilename(), "file.txt")
 	require.Equal(t, download.String(), "file.txt")
+	require.Nil(t, download.Failure())
+
+	file, err := download.Path()
+	require.NoError(t, err)
+	require.FileExists(t, file)
+
+	tmpFile := filepath.Join(t.TempDir(), download.SuggestedFilename())
+	require.NoFileExists(t, tmpFile)
+	require.NoError(t, download.SaveAs(tmpFile))
+	require.FileExists(t, tmpFile)
+
+	require.NoError(t, download.Delete())
+	require.NoFileExists(t, file)
 }

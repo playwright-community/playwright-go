@@ -57,7 +57,9 @@ func NewTestHelper(t *testing.T) *TestHelperData {
 		Headless: Bool(os.Getenv("HEADFUL") == ""),
 	})
 	require.NoError(t, err)
-	context, err := browser.NewContext()
+	context, err := browser.NewContext(BrowserNewContextOptions{
+		AcceptDownloads: Bool(true),
+	})
 	require.NoError(t, err)
 	page, err := context.NewPage()
 	require.NoError(t, err)
