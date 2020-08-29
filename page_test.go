@@ -16,7 +16,8 @@ func TestPageURL(t *testing.T) {
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
 	require.Equal(t, "about:blank", helper.Page.URL())
-	require.NoError(t, helper.Page.Goto("https://example.com"))
+	_, err := helper.Page.Goto("https://example.com")
+	require.NoError(t, err)
 	require.Equal(t, "https://example.com/", helper.Page.URL())
 }
 
@@ -145,7 +146,8 @@ func TestPageExpectWorker(t *testing.T) {
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
 	worker, err := helper.Page.ExpectWorker(func() error {
-		return helper.Page.Goto(helper.server.PREFIX + "/worker/worker.html")
+		_, err := helper.Page.Goto(helper.server.PREFIX + "/worker/worker.html")
+		return err
 	})
 	require.NoError(t, err)
 	require.Equal(t, 1, len(helper.Page.Workers()))
@@ -155,7 +157,8 @@ func TestPageExpectWorker(t *testing.T) {
 	res, err := worker.Evaluate(`() => self["workerFunction"]()`)
 	require.NoError(t, err)
 	require.Equal(t, "worker function result", res)
-	require.NoError(t, helper.Page.Goto(helper.server.EMPTY_PAGE))
+	_, err = helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
 	require.Equal(t, 0, len(helper.Page.Workers()))
 }
 
@@ -163,7 +166,8 @@ func TestPageExpectRequest(t *testing.T) {
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
 	request, err := helper.Page.ExpectRequest("**/*", func() error {
-		return helper.Page.Goto(helper.server.EMPTY_PAGE)
+		_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+		return err
 	})
 	require.NoError(t, err)
 	require.Equal(t, helper.server.EMPTY_PAGE, request.URL())
@@ -175,7 +179,8 @@ func TestPageExpectResponse(t *testing.T) {
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
 	response, err := helper.Page.ExpectResponse("**/*", func() error {
-		return helper.Page.Goto(helper.server.EMPTY_PAGE)
+		_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+		return err
 	})
 	require.NoError(t, err)
 	require.Equal(t, helper.server.EMPTY_PAGE, response.URL())
@@ -187,7 +192,8 @@ func TestPageExpectResponse(t *testing.T) {
 func TestPageExpectPopup(t *testing.T) {
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
-	require.NoError(t, helper.Page.Goto(helper.server.EMPTY_PAGE))
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
 	popup, err := helper.Page.ExpectPopup(func() error {
 		_, err := helper.Page.Evaluate(`window._popup = window.open(document.location.href)`)
 		return err

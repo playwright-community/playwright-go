@@ -33,7 +33,7 @@ func main() {
 	exitIfErrorf("could not create context: %v", err)
 	page, err := context.NewPage()
 	exitIfErrorf("could not create page: %v", err)
-	err = page.Goto("http://todomvc.com/examples/react/")
+	_, err = page.Goto("http://todomvc.com/examples/react/")
 	exitIfErrorf("could not goto: %v", err)
 
 	// Helper function to get the amount of todos on the page

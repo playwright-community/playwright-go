@@ -11,7 +11,7 @@ func (e *ElementHandle) QuerySelector(selector string) (*ElementHandle, error) {
 	if err != nil {
 		return nil, err
 	}
-	return channelOwner.(*Channel).object.(*ElementHandle), nil
+	return fromChannel(channelOwner).(*ElementHandle), nil
 }
 
 func (e *ElementHandle) TextContent() (string, error) {

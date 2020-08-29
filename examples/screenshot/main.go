@@ -21,7 +21,7 @@ func main() {
 	exitIfErrorf("could not create context: %v", err)
 	page, err := context.NewPage()
 	exitIfErrorf("could not create page: %v", err)
-	err = page.Goto("http://whatsmyuseragent.org/")
+	_, err = page.Goto("http://whatsmyuseragent.org/")
 	exitIfErrorf("could not goto: %v", err)
 	_, err = page.Screenshot(playwright.PageScreenshotOptions{
 		Path: playwright.String("foo.png"),

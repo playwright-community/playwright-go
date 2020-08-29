@@ -9,7 +9,7 @@ func (w *Worker) URL() string {
 	return w.initializer["url"].(string)
 }
 
-func (b *Worker) Evaluate(expression string, options ...interface{}) (interface{}, error) {
+func (w *Worker) Evaluate(expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -21,7 +21,7 @@ func (b *Worker) Evaluate(expression string, options ...interface{}) (interface{
 		arg = options[0]
 		forceExpression = options[1].(bool)
 	}
-	result, err := b.channel.Send("evaluateExpression", map[string]interface{}{
+	result, err := w.channel.Send("evaluateExpression", map[string]interface{}{
 		"expression": expression,
 		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),

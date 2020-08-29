@@ -23,6 +23,9 @@ func (c *Channel) Send(method string, options ...interface{}) (interface{}, erro
 	}
 	if reflect.TypeOf(result).Kind() == reflect.Map {
 		mapV := result.(map[string]interface{})
+		if len(mapV) == 0 {
+			return nil, nil
+		}
 		for key := range mapV {
 			return mapV[key], nil
 		}

@@ -14,9 +14,11 @@ type Page struct {
 	workersLock sync.Mutex
 	workers     []*Worker
 	mainFrame   *Frame
+	routesMu    sync.Mutex
+	routes      []*routeHandlerEntry
 }
 
-func (b *Page) Goto(url string) error {
+func (b *Page) Goto(url string) (*Response, error) {
 	return b.mainFrame.Goto(url)
 }
 
@@ -25,7 +27,7 @@ func (b *Page) Reload(options ...PageReloadOptions) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	return response.(*Channel).object.(*Response), err
+	return fromChannel(response).(*Response), err
 }
 
 func (b *Page) Type(selector, text string, options ...PageTypeOptions) error {
@@ -224,40 +226,66 @@ func (p *Page) ExpectWorker(cb func() error) (*Worker, error) {
 	return response.(*Worker), err
 }
 
+func (p *Page) Route(url interface{}, handler routeHandler) error {
+	p.routesMu.Lock()
+	p.routes = append(p.routes, newRouteHandlerEntry(newURLMatcher(url), handler))
+	if len(p.routes) == 1 {
+		_, err := p.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
+			"enabled": true,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	p.routesMu.Unlock()
+	return nil
+}
+
 func newPage(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Page {
-	channelOwner := initializer["mainFrame"].(*Channel).object
 	bt := &Page{
-		mainFrame: channelOwner.(*Frame),
+		mainFrame: fromChannel(initializer["mainFrame"]).(*Frame),
 		workers:   make([]*Worker, 0),
+		routes:    make([]*routeHandlerEntry, 0),
 	}
 	bt.frames = []*Frame{bt.mainFrame}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.channel.On("console", func(payload ...interface{}) {
-		bt.Emit("console", payload[0].(map[string]interface{})["message"].(*Channel).object)
+		bt.Emit("console", fromChannel(payload[0].(map[string]interface{})["message"]))
 	})
 	bt.channel.On("download", func(payload ...interface{}) {
-		bt.Emit("download", payload[0].(map[string]interface{})["download"].(*Channel).object)
+		bt.Emit("download", fromChannel(payload[0].(map[string]interface{})["download"]))
 	})
 	bt.channel.On("popup", func(payload ...interface{}) {
-		bt.Emit("popup", payload[0].(map[string]interface{})["page"].(*Channel).object)
+		bt.Emit("popup", fromChannel(payload[0].(map[string]interface{})["page"]))
 	})
 	bt.channel.On("request", func(payload ...interface{}) {
-		bt.Emit("request", payload[0].(map[string]interface{})["request"].(*Channel).object)
+		bt.Emit("request", fromChannel(payload[0].(map[string]interface{})["request"]))
 	})
 	bt.channel.On("requestFailed", func(payload ...interface{}) {
-		bt.Emit("requestFailed", payload[0].(map[string]interface{})["request"].(*Channel).object, payload[0].(map[string]interface{})["failureText"])
+		req := fromChannel(payload[0].(map[string]interface{})["request"]).(*Request)
+		req.failureText = payload[0].(map[string]interface{})["failureText"].(string)
+		bt.Emit("requestFailed", req)
 	})
 	bt.channel.On("requestFinished", func(payload ...interface{}) {
-		bt.Emit("requestFinished", payload[0].(map[string]interface{})["request"].(*Channel).object)
+		bt.Emit("requestFinished", fromChannel(payload[0].(map[string]interface{})["request"]))
 	})
 	bt.channel.On("response", func(payload ...interface{}) {
-		bt.Emit("response", payload[0].(map[string]interface{})["response"].(*Channel).object)
+		bt.Emit("response", fromChannel(payload[0].(map[string]interface{})["response"]))
 	})
 	bt.channel.On("route", func(payload ...interface{}) {
-		bt.Emit("route", payload[0].(map[string]interface{})["request"].(*Channel).object)
+		route := fromChannel(payload[0].(map[string]interface{})["route"]).(*Route)
+		request := fromChannel(payload[0].(map[string]interface{})["request"]).(*Request)
+		bt.routesMu.Lock()
+		for _, handlerEntry := range bt.routes {
+			if handlerEntry.matcher.Match(request.URL()) {
+				handlerEntry.handler(route, request)
+				break
+			}
+		}
+		bt.routesMu.Unlock()
 	})
 	bt.channel.On("worker", func(payload ...interface{}) {
-		worker := payload[0].(map[string]interface{})["worker"].(*Channel).object.(*Worker)
+		worker := fromChannel(payload[0].(map[string]interface{})["worker"]).(*Worker)
 		worker.page = bt
 		bt.workers = append(bt.workers, worker)
 		bt.Emit("worker", worker)

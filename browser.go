@@ -13,7 +13,7 @@ func (b *Browser) NewContext(options ...BrowserNewContextOptions) (*BrowserConte
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %v", err)
 	}
-	context := channelOwner.(*Channel).object.(*BrowserContext)
+	context := fromChannel(channelOwner).(*BrowserContext)
 	b.Contexts = append(b.Contexts, context)
 	return context, nil
 }

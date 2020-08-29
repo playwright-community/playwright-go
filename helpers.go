@@ -8,6 +8,10 @@ import (
 	"github.com/danwakefield/fnmatch"
 )
 
+type (
+	routeHandler = func(*Route, *Request)
+)
+
 // transformOptions handles the parameter data transformation
 func transformOptions(options ...interface{}) map[string]interface{} {
 	var base map[string]interface{}
@@ -130,4 +134,16 @@ func (u *urlMatcher) Match(url string) bool {
 		return result[0].Bool()
 	}
 	panic(u.urlOrPredicate)
+}
+
+type routeHandlerEntry struct {
+	matcher *urlMatcher
+	handler routeHandler
+}
+
+func newRouteHandlerEntry(matcher *urlMatcher, handler routeHandler) *routeHandlerEntry {
+	return &routeHandlerEntry{
+		matcher: matcher,
+		handler: handler,
+	}
 }
