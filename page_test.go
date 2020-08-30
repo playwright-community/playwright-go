@@ -282,3 +282,102 @@ func TestPageOpener(t *testing.T) {
 	require.NoError(t, err)
 	require.Nil(t, opener)
 }
+
+func TestPageTitle(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	require.NoError(t, helper.Page.SetContent(`<title>abc</title>`))
+	title, err := helper.Page.Title()
+	require.NoError(t, err)
+	require.Equal(t, "abc", title)
+}
+
+func TestPageWaitForSelector(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	require.NoError(t, helper.Page.SetContent(`<h1>myElement</h1>`))
+	element, err := helper.Page.WaitForSelector("text=myElement")
+	require.NoError(t, err)
+	textContent, err := element.TextContent()
+	require.NoError(t, err)
+	require.Equal(t, "myElement", textContent)
+
+	_, err = helper.Page.WaitForSelector("h1")
+	require.NoError(t, err)
+}
+
+func TestPageDispatchEvent(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.PREFIX + "/input/button.html")
+	require.NoError(t, err)
+	require.NoError(t, helper.Page.DispatchEvent("button", "click"))
+	clicked, err := helper.Page.Evaluate("() => result")
+	require.NoError(t, err)
+	require.Equal(t, "Clicked", clicked)
+}
+
+func TestPageReload(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+	_, err = helper.Page.Evaluate("window._foo = 10")
+	require.NoError(t, err)
+	_, err = helper.Page.Reload()
+	require.NoError(t, err)
+	v, err := helper.Page.Evaluate("window._foo")
+	require.NoError(t, err)
+	require.Nil(t, v)
+}
+
+func TestPageGoBackGoForward(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+	_, err = helper.Page.Goto(helper.server.PREFIX + "/grid.html")
+	require.NoError(t, err)
+	resp, err := helper.Page.GoBack()
+	require.NoError(t, err)
+	require.Equal(t, resp.URL(), helper.server.EMPTY_PAGE)
+
+	resp, err = helper.Page.GoForward()
+	require.NoError(t, err)
+	require.True(t, resp.Ok())
+	require.Contains(t, resp.URL(), "/grid.html")
+
+	resp, err = helper.Page.GoForward()
+	require.NoError(t, err)
+	require.Nil(t, resp)
+}
+
+func TestPageAddScriptTag(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+
+	_, err = helper.Page.AddScriptTag(PageAddScriptTagOptions{
+		Url: String("injectedfile.js"),
+	})
+	require.NoError(t, err)
+	v, err := helper.Page.Evaluate("__injected")
+	require.NoError(t, err)
+	require.Equal(t, 42, v)
+}
+
+func TestPageAddStyleTag(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+
+	_, err = helper.Page.AddStyleTag(PageAddStyleTagOptions{
+		Url: String("injectedstyle.css"),
+	})
+	require.NoError(t, err)
+	v, err := helper.Page.Evaluate("window.getComputedStyle(document.querySelector('body')).getPropertyValue('background-color')")
+	require.NoError(t, err)
+	require.Equal(t, "rgb(255, 0, 0)", v)
+}

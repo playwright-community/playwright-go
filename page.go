@@ -357,6 +357,7 @@ func (p *Page) ExpectWorker(cb func() error) (*Worker, error) {
 
 func (p *Page) Route(url interface{}, handler routeHandler) error {
 	p.routesMu.Lock()
+	defer p.routesMu.Unlock()
 	p.routes = append(p.routes, newRouteHandlerEntry(newURLMatcher(url), handler))
 	if len(p.routes) == 1 {
 		_, err := p.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
@@ -366,7 +367,6 @@ func (p *Page) Route(url interface{}, handler routeHandler) error {
 			return err
 		}
 	}
-	p.routesMu.Unlock()
 	return nil
 }
 
