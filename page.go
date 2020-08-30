@@ -10,74 +10,207 @@ import (
 
 type Page struct {
 	ChannelOwner
-	frames      []*Frame
-	workersLock sync.Mutex
-	workers     []*Worker
-	mainFrame   *Frame
-	routesMu    sync.Mutex
-	routes      []*routeHandlerEntry
+	browserContext *BrowserContext
+	frames         []*Frame
+	workersLock    sync.Mutex
+	workers        []*Worker
+	mainFrame      *Frame
+	routesMu       sync.Mutex
+	routes         []*routeHandlerEntry
+	viewportSize   ViewportSize
 }
 
-func (b *Page) Goto(url string) (*Response, error) {
-	return b.mainFrame.Goto(url)
+func (p *Page) Context() *BrowserContext {
+	return p.browserContext
 }
 
-func (b *Page) Reload(options ...PageReloadOptions) (*Response, error) {
-	response, err := b.channel.Send("reload", options)
+func (p *Page) Opener() (*Page, error) {
+	channel, err := p.channel.Send("opener")
+	if err != nil {
+		return nil, err
+	}
+	channelOwner := fromNullableChannel(channel)
+	if channelOwner == nil {
+		return nil, nil
+	}
+	return channelOwner.(*Page), nil
+}
+
+func (p *Page) MainFrame() *Frame {
+	return p.mainFrame
+}
+
+func (p *Page) Frames() []*Frame {
+	return p.frames
+}
+
+func (p *Page) SetDefaultNavigationTimeout(timeout int) {
+
+}
+
+func (p *Page) SetDefaultTimeout(timeout int) {
+
+}
+
+func (p *Page) QuerySelector(selector string) (*ElementHandle, error) {
+	return p.mainFrame.QuerySelector(selector)
+}
+
+func (p *Page) QuerySelectorAll(selector string) ([]*ElementHandle, error) {
+	return p.mainFrame.QuerySelectorAll(selector)
+}
+
+func (p *Page) WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (*ElementHandle, error) {
+	return p.mainFrame.WaitForSelector(selector, options...)
+}
+
+func (p *Page) DispatchEvent(selector string, typ string, options ...PageDispatchEventOptions) error {
+	return p.mainFrame.DispatchEvent(selector, typ, options...)
+}
+
+func (p *Page) Evaluate(expression string, options ...interface{}) (interface{}, error) {
+	return p.mainFrame.Evaluate(expression, options...)
+}
+
+func (p *Page) EvaluateHandle(expression string, options ...interface{}) (interface{}, error) {
+	return p.mainFrame.EvaluateHandle(expression, options...)
+}
+
+func (p *Page) EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
+	return p.mainFrame.EvaluateOnSelector(selector, expression, options...)
+}
+
+func (p *Page) EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
+	return p.mainFrame.EvaluateOnSelectorAll(selector, expression, options...)
+}
+
+func (p *Page) AddScriptTag(options PageAddScriptTagOptions) (*ElementHandle, error) {
+	return p.mainFrame.AddScriptTag(options)
+
+}
+
+func (p *Page) AddStyleTag(options PageAddStyleTagOptions) (*ElementHandle, error) {
+	return p.mainFrame.AddStyleTag(options)
+}
+
+func (p *Page) SetExtraHTTPHeaders(headers map[string]string) error {
+	_, err := p.channel.Send("setExtraHTTPHeaders", map[string]interface{}{
+		"headers": serializeHeaders(headers),
+	})
+	return err
+}
+
+func (p *Page) URL() string {
+	return p.mainFrame.URL()
+}
+
+func (p *Page) Content() (string, error) {
+	return p.mainFrame.Content()
+}
+
+func (p *Page) SetContent(content string, options ...PageSetContentOptions) error {
+	return p.mainFrame.SetContent(content, options...)
+}
+
+func (p *Page) Goto(url string) (*Response, error) {
+	return p.mainFrame.Goto(url)
+}
+
+func (p *Page) Reload(options ...PageReloadOptions) (*Response, error) {
+	response, err := p.channel.Send("reload", options)
 	if err != nil {
 		return nil, err
 	}
 	return fromChannel(response).(*Response), err
 }
 
-func (b *Page) Type(selector, text string, options ...PageTypeOptions) error {
-	return b.mainFrame.Type(selector, text, options...)
+func (p *Page) WaitForLoadState(state ...string) {
+	p.mainFrame.WaitForLoadState(state...)
 }
 
-func (b *Page) Press(selector, key string, options ...PagePressOptions) error {
-	return b.mainFrame.Press(selector, key, options...)
+func (p *Page) GoBack(options ...PageGoBackOptions) (*Response, error) {
+	channel, err := p.channel.Send("goBack", options)
+	if err != nil {
+		return nil, err
+	}
+	channelOwner := fromNullableChannel(channel)
+	if channelOwner == nil {
+		return nil, nil
+	}
+	return channelOwner.(*Response), nil
 }
 
-func (b *Page) URL() string {
-	return b.mainFrame.URL()
+func (p *Page) GoForward(options ...PageGoForwardOptions) (*Response, error) {
+	resp, err := p.channel.Send("goForward", options)
+	if err != nil {
+		return nil, err
+	}
+	obj := fromNullableChannel(resp)
+	if obj == nil {
+		return nil, nil
+	}
+	return obj.(*Response), nil
 }
 
-func (b *Page) SetContent(content string, options ...PageSetContentOptions) error {
-	return b.mainFrame.SetContent(content, options...)
+func (p *Page) EmulateMedia(options ...PageEmulateMediaOptions) error {
+	_, err := p.channel.Send("emulateMedia", options)
+	if err != nil {
+		return err
+	}
+	return err
 }
 
-func (b *Page) Content() (string, error) {
-	return b.mainFrame.Content()
+type ViewportSize struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
 }
 
-func (b *Page) Title() (string, error) {
-	return b.mainFrame.Title()
+func (p *Page) SetViewportSize(width, height int) error {
+	_, err := p.channel.Send("setViewportSize", map[string]interface{}{
+		"width":  width,
+		"height": height,
+	})
+	if err != nil {
+		return err
+	}
+	p.viewportSize.Height = height
+	p.viewportSize.Width = width
+	return nil
 }
 
-func (b *Page) Workers() []*Worker {
-	b.workersLock.Lock()
-	defer b.workersLock.Unlock()
-	return b.workers
+func (p *Page) ViewportSize() ViewportSize {
+	return p.viewportSize
 }
 
-func (b *Page) Evaluate(expression string, options ...interface{}) (interface{}, error) {
-	return b.mainFrame.Evaluate(expression, options...)
+func (p *Page) BringToFront() error {
+	_, err := p.channel.Send("bringToFront")
+	return err
 }
 
-func (b *Page) EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
-	return b.mainFrame.EvaluateOnSelector(selector, expression, options...)
+func (p *Page) Type(selector, text string, options ...PageTypeOptions) error {
+	return p.mainFrame.Type(selector, text, options...)
 }
 
-func (b *Page) EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
-	return b.mainFrame.EvaluateOnSelectorAll(selector, expression, options...)
+func (p *Page) Press(selector, key string, options ...PagePressOptions) error {
+	return p.mainFrame.Press(selector, key, options...)
 }
 
-func (b *Page) Screenshot(options ...PageScreenshotOptions) ([]byte, error) {
+func (p *Page) Title() (string, error) {
+	return p.mainFrame.Title()
+}
+
+func (p *Page) Workers() []*Worker {
+	p.workersLock.Lock()
+	defer p.workersLock.Unlock()
+	return p.workers
+}
+
+func (p *Page) Screenshot(options ...PageScreenshotOptions) ([]byte, error) {
 	var path *string
 	if len(options) > 0 {
 		path = options[0].Path
 	}
-	data, err := b.channel.Send("screenshot", options)
+	data, err := p.channel.Send("screenshot", options)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message :%v", err)
 	}
@@ -93,12 +226,12 @@ func (b *Page) Screenshot(options ...PageScreenshotOptions) ([]byte, error) {
 	return image, nil
 }
 
-func (b *Page) PDF(options ...PagePdfOptions) ([]byte, error) {
+func (p *Page) PDF(options ...PagePdfOptions) ([]byte, error) {
 	var path *string
 	if len(options) > 0 {
 		path = options[0].Path
 	}
-	data, err := b.channel.Send("pdf", options)
+	data, err := p.channel.Send("pdf", options)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message :%v", err)
 	}
@@ -112,10 +245,6 @@ func (b *Page) PDF(options ...PagePdfOptions) ([]byte, error) {
 		}
 	}
 	return pdf, nil
-}
-
-func (b *Page) QuerySelector(selector string) (*ElementHandle, error) {
-	return b.mainFrame.QuerySelector(selector)
 }
 
 func (p *Page) Click(selector string, options ...PageClickOptions) error {
@@ -228,6 +357,7 @@ func (p *Page) ExpectWorker(cb func() error) (*Worker, error) {
 
 func (p *Page) Route(url interface{}, handler routeHandler) error {
 	p.routesMu.Lock()
+	defer p.routesMu.Unlock()
 	p.routes = append(p.routes, newRouteHandlerEntry(newURLMatcher(url), handler))
 	if len(p.routes) == 1 {
 		_, err := p.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
@@ -237,7 +367,6 @@ func (p *Page) Route(url interface{}, handler routeHandler) error {
 			return err
 		}
 	}
-	p.routesMu.Unlock()
 	return nil
 }
 
@@ -246,6 +375,10 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 		mainFrame: fromChannel(initializer["mainFrame"]).(*Frame),
 		workers:   make([]*Worker, 0),
 		routes:    make([]*routeHandlerEntry, 0),
+		viewportSize: ViewportSize{
+			Height: int(initializer["viewportSize"].(map[string]interface{})["height"].(float64)),
+			Width:  int(initializer["viewportSize"].(map[string]interface{})["height"].(float64)),
+		},
 	}
 	bt.frames = []*Frame{bt.mainFrame}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)

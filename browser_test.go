@@ -21,5 +21,5 @@ func TestVersion(t *testing.T) {
 func TestNewContext(t *testing.T) {
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
-	require.Equal(t, 0, len(helper.Context.Pages))
+	require.Equal(t, 1, len(helper.Context.Pages()))
 }

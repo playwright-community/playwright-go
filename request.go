@@ -56,15 +56,15 @@ func (r *Request) Headers() map[string]string {
 }
 
 func (r *Request) Response() (*Response, error) {
-	resp, err := r.channel.Send("response")
+	channel, err := r.channel.Send("response")
 	if err != nil {
 		return nil, err
 	}
-	resp = fromNullableChannel(resp)
-	if resp == nil {
+	channelOwner := fromNullableChannel(channel)
+	if channelOwner == nil {
 		return nil, nil
 	}
-	return resp.(*Response), nil
+	return channelOwner.(*Response), nil
 }
 
 func (r *Request) Frame() *Frame {

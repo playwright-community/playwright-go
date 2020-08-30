@@ -13,11 +13,15 @@ import (
 func TestRouteContinue(t *testing.T) {
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
+	require.NoError(t, helper.Page.SetExtraHTTPHeaders(map[string]string{
+		"extra-http": "42",
+	}))
 	intercepted := make(chan bool, 1)
 	err := helper.Page.Route("**/empty.html", func(route *Route, request *Request) {
 		require.Equal(t, route.Request(), request)
 		require.Contains(t, request.URL(), "empty.html")
 		require.True(t, len(request.Headers()["user-agent"]) > 5)
+		require.Equal(t, "42", request.Headers()["extra-http"])
 		require.Equal(t, "GET", request.Method())
 
 		postData, err := request.PostData()
@@ -100,7 +104,7 @@ func TestRouteFulfill(t *testing.T) {
 		require.Equal(t, "", postData)
 		require.True(t, request.IsNavigationRequest())
 		require.Equal(t, "document", request.ResourceType())
-		require.Equal(t, request.Frame(), helper.Page.mainFrame)
+		require.Equal(t, request.Frame(), helper.Page.MainFrame())
 		require.Equal(t, "about:blank", request.Frame().URL())
 		require.NoError(t, route.Fulfill(RouteFulfillOptions{
 			Body:        "123",

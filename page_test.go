@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -19,6 +20,8 @@ func TestPageURL(t *testing.T) {
 	_, err := helper.Page.Goto("https://example.com")
 	require.NoError(t, err)
 	require.Equal(t, "https://example.com/", helper.Page.URL())
+	require.Equal(t, helper.Context, helper.Page.Context())
+	require.Equal(t, 1, len(helper.Page.Frames()))
 }
 
 func TestPageSetContent(t *testing.T) {
@@ -106,6 +109,24 @@ func TestPageQuerySelector(t *testing.T) {
 	textContent, err := four.TextContent()
 	require.NoError(t, err)
 	require.Equal(t, strings.TrimSpace(textContent), "foobar")
+}
+
+func TestPageQuerySelectorAll(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	require.NoError(t, helper.Page.SetContent(`
+	<div class="foo">0</div>
+	<div class="foo">1</div>
+	<div class="foo">2</div>
+	`))
+	elements, err := helper.Page.QuerySelectorAll("div.foo")
+	require.NoError(t, err)
+	require.Equal(t, 3, len(elements))
+	for i := 0; i < 3; i++ {
+		textContent, err := elements[i].TextContent()
+		require.NoError(t, err)
+		require.Equal(t, strconv.Itoa(i), textContent)
+	}
 }
 
 func TestPageEvaluate(t *testing.T) {
@@ -241,4 +262,139 @@ func TestPageExpectEvent(t *testing.T) {
 	t.Skip()
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
+}
+
+func TestPageOpener(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	page, err := helper.Context.ExpectEvent("page", func() error {
+		_, err := helper.Page.Goto(helper.server.PREFIX + "/popup/window-open.html")
+		return err
+	})
+	require.NoError(t, err)
+	popup := page.(*Page)
+
+	opener, err := popup.Opener()
+	require.NoError(t, err)
+	require.Equal(t, opener, helper.Page)
+
+	opener, err = helper.Page.Opener()
+	require.NoError(t, err)
+	require.Nil(t, opener)
+}
+
+func TestPageTitle(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	require.NoError(t, helper.Page.SetContent(`<title>abc</title>`))
+	title, err := helper.Page.Title()
+	require.NoError(t, err)
+	require.Equal(t, "abc", title)
+}
+
+func TestPageWaitForSelector(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	require.NoError(t, helper.Page.SetContent(`<h1>myElement</h1>`))
+	element, err := helper.Page.WaitForSelector("text=myElement")
+	require.NoError(t, err)
+	textContent, err := element.TextContent()
+	require.NoError(t, err)
+	require.Equal(t, "myElement", textContent)
+
+	_, err = helper.Page.WaitForSelector("h1")
+	require.NoError(t, err)
+}
+
+func TestPageDispatchEvent(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.PREFIX + "/input/button.html")
+	require.NoError(t, err)
+	require.NoError(t, helper.Page.DispatchEvent("button", "click"))
+	clicked, err := helper.Page.Evaluate("() => result")
+	require.NoError(t, err)
+	require.Equal(t, "Clicked", clicked)
+}
+
+func TestPageReload(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+	_, err = helper.Page.Evaluate("window._foo = 10")
+	require.NoError(t, err)
+	_, err = helper.Page.Reload()
+	require.NoError(t, err)
+	v, err := helper.Page.Evaluate("window._foo")
+	require.NoError(t, err)
+	require.Nil(t, v)
+}
+
+func TestPageGoBackGoForward(t *testing.T) {
+	t.Skip("https://github.com/microsoft/playwright/issues/3693")
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+
+	resp, err := helper.Page.GoBack()
+	require.NoError(t, err)
+	require.Nil(t, resp)
+
+	_, err = helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+	_, err = helper.Page.Goto(helper.server.PREFIX + "/grid.html")
+	require.NoError(t, err)
+
+	resp, err = helper.Page.GoBack()
+	require.NoError(t, err)
+	require.True(t, resp.Ok())
+	require.Equal(t, resp.URL(), helper.server.EMPTY_PAGE)
+
+	resp, err = helper.Page.GoForward()
+	require.NoError(t, err)
+	require.True(t, resp.Ok())
+	require.Contains(t, resp.URL(), "/grid.html")
+
+	resp, err = helper.Page.GoForward()
+	require.NoError(t, err)
+	require.Nil(t, resp)
+}
+
+func TestPageAddScriptTag(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+
+	_, err = helper.Page.AddScriptTag(PageAddScriptTagOptions{
+		Url: String("injectedfile.js"),
+	})
+	require.NoError(t, err)
+	v, err := helper.Page.Evaluate("__injected")
+	require.NoError(t, err)
+	require.Equal(t, 42, v)
+}
+
+func TestPageAddStyleTag(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+
+	_, err = helper.Page.AddStyleTag(PageAddStyleTagOptions{
+		Url: String("injectedstyle.css"),
+	})
+	require.NoError(t, err)
+	v, err := helper.Page.Evaluate("window.getComputedStyle(document.querySelector('body')).getPropertyValue('background-color')")
+	require.NoError(t, err)
+	require.Equal(t, "rgb(255, 0, 0)", v)
+}
+
+func TestPageWaitForLoadState(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.PREFIX + "/one-style.html")
+	require.NoError(t, err)
+	helper.Page.WaitForLoadState()
+	helper.Page.WaitForLoadState("networkidle")
 }
