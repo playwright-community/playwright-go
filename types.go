@@ -107,9 +107,6 @@ type PageDblclickOptions struct {
 	NoWaitAfter *bool       `json:"noWaitAfter"`
 	Timeout     *int        `json:"timeout"`
 }
-type PageDispatchEventOptions struct {
-	Timeout *int `json:"timeout"`
-}
 type PageEmulateMediaOptions struct {
 	Media       interface{} `json:"media"`
 	ColorScheme interface{} `json:"colorScheme"`
