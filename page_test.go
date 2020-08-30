@@ -334,12 +334,19 @@ func TestPageReload(t *testing.T) {
 func TestPageGoBackGoForward(t *testing.T) {
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
-	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+
+	resp, err := helper.Page.GoBack()
+	require.NoError(t, err)
+	require.Nil(t, resp)
+
+	_, err = helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
 	_, err = helper.Page.Goto(helper.server.PREFIX + "/grid.html")
 	require.NoError(t, err)
-	resp, err := helper.Page.GoBack()
+
+	resp, err = helper.Page.GoBack()
 	require.NoError(t, err)
+	require.True(t, resp.Ok())
 	require.Equal(t, resp.URL(), helper.server.EMPTY_PAGE)
 
 	resp, err = helper.Page.GoForward()
@@ -380,4 +387,13 @@ func TestPageAddStyleTag(t *testing.T) {
 	v, err := helper.Page.Evaluate("window.getComputedStyle(document.querySelector('body')).getPropertyValue('background-color')")
 	require.NoError(t, err)
 	require.Equal(t, "rgb(255, 0, 0)", v)
+}
+
+func TestPageWaitForLoadState(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.PREFIX + "/one-style.html")
+	require.NoError(t, err)
+	helper.Page.WaitForLoadState()
+	helper.Page.WaitForLoadState("networkidle")
 }

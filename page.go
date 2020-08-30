@@ -124,20 +124,20 @@ func (p *Page) Reload(options ...PageReloadOptions) (*Response, error) {
 	return fromChannel(response).(*Response), err
 }
 
-func (p *Page) WaitForLoadState(state string) {
-	p.mainFrame.WaitForLoadState(state)
+func (p *Page) WaitForLoadState(state ...string) {
+	p.mainFrame.WaitForLoadState(state...)
 }
 
 func (p *Page) GoBack(options ...PageGoBackOptions) (*Response, error) {
-	resp, err := p.channel.Send("goBack", options)
+	channel, err := p.channel.Send("goBack", options)
 	if err != nil {
 		return nil, err
 	}
-	obj := fromNullableChannel(resp)
-	if obj == nil {
+	channelOwner := fromNullableChannel(channel)
+	if channelOwner == nil {
 		return nil, nil
 	}
-	return obj.(*Response), nil
+	return channelOwner.(*Response), nil
 }
 
 func (p *Page) GoForward(options ...PageGoForwardOptions) (*Response, error) {

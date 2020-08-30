@@ -26,10 +26,10 @@ func parseValue(result interface{}) interface{} {
 		return int(v.(float64))
 	}
 	if v, ok := vMap["s"]; ok {
-		return v
+		return v.(string)
 	}
 	if v, ok := vMap["b"]; ok {
-		return v
+		return v.(bool)
 	}
 	if v, ok := vMap["v"]; ok {
 		if v == "undefined" || v == "null" {

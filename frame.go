@@ -8,8 +8,12 @@ import (
 type Frame struct {
 	ChannelOwner
 	sync.RWMutex
-	page *Page
-	url  string
+	page        *Page
+	name        string
+	url         string
+	parentFrame *Frame
+	childFrames []*Frame
+	loadStates  []string
 }
 
 func (f *Frame) URL() string {
@@ -101,7 +105,16 @@ func (f *Frame) Page() *Page {
 	return f.page
 }
 
-func (f *Frame) WaitForLoadState(state string) {
+func (f *Frame) WaitForLoadState(given ...string) {
+	state := "load"
+	if len(given) == 1 {
+		state = given[0]
+	}
+	for _, prevState := range f.loadStates {
+		if prevState == state {
+			return
+		}
+	}
 	succeed := make(chan bool, 1)
 	f.Once("loadstate", func(ev ...interface{}) {
 		gotState := ev[0].(string)
@@ -275,10 +288,50 @@ func (f *Frame) DispatchEvent(selector, typ string, options ...PageDispatchEvent
 }
 
 func newFrame(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Frame {
+	var loadStates []string
+	if ls, ok := initializer["loadStates"].([]string); ok {
+		loadStates = ls
+	}
 	bt := &Frame{
-		url: initializer["url"].(string),
+		name:       initializer["name"].(string),
+		url:        initializer["url"].(string),
+		loadStates: loadStates,
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
+
+	channelOwner := fromNullableChannel(initializer["parentFrame"])
+	if channelOwner != nil {
+		bt.parentFrame = channelOwner.(*Frame)
+		bt.parentFrame.childFrames = append(bt.parentFrame.childFrames, bt)
+	}
+
 	bt.channel.On("navigated", bt.onFrameNavigated)
+	bt.channel.On("loadstate", func(event ...interface{}) {
+		ev := event[0].(map[string]interface{})
+		if ev["add"] != nil {
+			add := ev["add"].(string)
+			addInLoadStates := false
+			for i := 0; i < len(bt.loadStates); i++ {
+				if bt.loadStates[i] == add {
+					addInLoadStates = true
+				}
+			}
+			if !addInLoadStates {
+				bt.loadStates = append(bt.loadStates, add)
+			}
+			bt.Emit("loadstate", add)
+		} else if ev["remove"] != nil {
+			remove := ev["remove"].(string)
+			newLoadstates := make([]string, 0)
+			for i := 0; i < len(bt.loadStates); i++ {
+				if bt.loadStates[i] != remove {
+					newLoadstates = append(newLoadstates, bt.loadStates[i])
+				}
+			}
+			if len(newLoadstates) != len(bt.loadStates) {
+				bt.loadStates = newLoadstates
+			}
+		}
+	})
 	return bt
 }
