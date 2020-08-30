@@ -332,6 +332,7 @@ func TestPageReload(t *testing.T) {
 }
 
 func TestPageGoBackGoForward(t *testing.T) {
+	t.Skip("https://github.com/microsoft/playwright/issues/3693")
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
 

@@ -5,9 +5,9 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"log"
 	"os"
 
-	"github.com/davecgh/go-spew/spew"
 	"gopkg.in/square/go-jose.v2/json"
 )
 
@@ -39,7 +39,9 @@ func (t *Transport) Start() error {
 		}
 		if os.Getenv("DEBUGP") != "" {
 			fmt.Print("RECV>")
-			spew.Dump(msg)
+			if err := json.NewEncoder(os.Stderr).Encode(msg); err != nil {
+				log.Printf("could not create json: %v", err)
+			}
 		}
 		t.dispatch(msg)
 	}
@@ -73,7 +75,9 @@ func (t *Transport) Send(message map[string]interface{}) error {
 	}
 	if os.Getenv("DEBUGP") != "" {
 		fmt.Print("SEND>")
-		spew.Dump(message)
+		if err := json.NewEncoder(os.Stderr).Encode(message); err != nil {
+			log.Printf("could not create json: %v", err)
+		}
 	}
 	lengthPadding := make([]byte, 4)
 	binary.LittleEndian.PutUint32(lengthPadding, uint32(len(msg)))
