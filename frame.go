@@ -13,7 +13,7 @@ type Frame struct {
 	url         string
 	parentFrame *Frame
 	childFrames []*Frame
-	loadStates  []string
+	loadStates  *safeStringSet
 }
 
 func (f *Frame) URL() string {
@@ -110,10 +110,8 @@ func (f *Frame) WaitForLoadState(given ...string) {
 	if len(given) == 1 {
 		state = given[0]
 	}
-	for _, prevState := range f.loadStates {
-		if prevState == state {
-			return
-		}
+	if f.loadStates.Has(state) {
+		return
 	}
 	succeed := make(chan bool, 1)
 	f.Once("loadstate", func(ev ...interface{}) {
@@ -288,9 +286,11 @@ func (f *Frame) DispatchEvent(selector, typ string, options ...PageDispatchEvent
 }
 
 func newFrame(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Frame {
-	var loadStates []string
+	var loadStates *safeStringSet
 	if ls, ok := initializer["loadStates"].([]string); ok {
-		loadStates = ls
+		loadStates = newSafeStringSet(ls)
+	} else {
+		loadStates = newSafeStringSet([]string{})
 	}
 	bt := &Frame{
 		name:       initializer["name"].(string),
@@ -310,27 +310,13 @@ func newFrame(parent *ChannelOwner, objectType string, guid string, initializer 
 		ev := event[0].(map[string]interface{})
 		if ev["add"] != nil {
 			add := ev["add"].(string)
-			addInLoadStates := false
-			for i := 0; i < len(bt.loadStates); i++ {
-				if bt.loadStates[i] == add {
-					addInLoadStates = true
-				}
-			}
-			if !addInLoadStates {
-				bt.loadStates = append(bt.loadStates, add)
+			if !bt.loadStates.Has(add) {
+				bt.loadStates.Add(add)
 			}
 			bt.Emit("loadstate", add)
 		} else if ev["remove"] != nil {
 			remove := ev["remove"].(string)
-			newLoadstates := make([]string, 0)
-			for i := 0; i < len(bt.loadStates); i++ {
-				if bt.loadStates[i] != remove {
-					newLoadstates = append(newLoadstates, bt.loadStates[i])
-				}
-			}
-			if len(newLoadstates) != len(bt.loadStates) {
-				bt.loadStates = newLoadstates
-			}
+			bt.loadStates.Remove(remove)
 		}
 	})
 	return bt

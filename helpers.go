@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/danwakefield/fnmatch"
 )
@@ -161,5 +162,50 @@ func newRouteHandlerEntry(matcher *urlMatcher, handler routeHandler) *routeHandl
 	return &routeHandlerEntry{
 		matcher: matcher,
 		handler: handler,
+	}
+}
+
+type safeStringSet struct {
+	sync.Mutex
+	v []string
+}
+
+func (s *safeStringSet) Has(expected string) bool {
+	s.Lock()
+	defer s.Unlock()
+	for _, v := range s.v {
+		if v == expected {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *safeStringSet) Add(v string) {
+	if s.Has(v) {
+		return
+	}
+	s.Lock()
+	s.v = append(s.v, v)
+	s.Unlock()
+}
+
+func (s *safeStringSet) Remove(remove string) {
+	s.Lock()
+	defer s.Unlock()
+	newSlice := make([]string, 0)
+	for _, v := range s.v {
+		if v != remove {
+			newSlice = append(newSlice, v)
+		}
+	}
+	if len(s.v) != len(newSlice) {
+		s.v = newSlice
+	}
+}
+
+func newSafeStringSet(v []string) *safeStringSet {
+	return &safeStringSet{
+		v: v,
 	}
 }
