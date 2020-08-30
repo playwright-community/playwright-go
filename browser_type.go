@@ -17,11 +17,11 @@ func (b *BrowserType) ExecutablePath() string {
 }
 
 func (b *BrowserType) Launch(options ...BrowserTypeLaunchOptions) (*Browser, error) {
-	channelOwner, err := b.channel.Send("launch", options)
+	channel, err := b.channel.Send("launch", options)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %v", err)
 	}
-	return fromChannel(channelOwner).(*Browser), nil
+	return fromChannel(channel).(*Browser), nil
 }
 
 func newBrowserType(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *BrowserType {

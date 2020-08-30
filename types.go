@@ -63,6 +63,10 @@ type BrowserNewPageOptions struct {
 type BrowserContextGrantPermissionsOptions struct {
 	Origin *string `json:"origin"`
 }
+type BrowserContextWaitForEventOptions struct {
+	Predicate interface{} `json:"predicate"`
+	Timeout   *int        `json:"timeout"`
+}
 type PageCloseOptions struct {
 	RunBeforeUnload *bool `json:"runBeforeUnload"`
 }
@@ -106,6 +110,10 @@ type PageDblclickOptions struct {
 	Force       *bool       `json:"force"`
 	NoWaitAfter *bool       `json:"noWaitAfter"`
 	Timeout     *int        `json:"timeout"`
+}
+type PageDispatchEventOptions struct {
+	EventInit interface{} `json:"eventInit"`
+	Timeout   *int        `json:"timeout"`
 }
 type PageEmulateMediaOptions struct {
 	Media       interface{} `json:"media"`
@@ -221,12 +229,18 @@ type PageUncheckOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	Timeout     *int  `json:"timeout"`
 }
+type PageWaitForEventOptions struct {
+	Predicate interface{} `json:"predicate"`
+	Timeout   *int        `json:"timeout"`
+}
 type PageWaitForFunctionOptions struct {
+	Arg     interface{} `json:"arg"`
 	Polling interface{} `json:"polling"`
 	Timeout *int        `json:"timeout"`
 }
 type PageWaitForLoadStateOptions struct {
-	Timeout *int `json:"timeout"`
+	State   *string `json:"state"`
+	Timeout *int    `json:"timeout"`
 }
 type PageWaitForNavigationOptions struct {
 	Timeout   *int        `json:"timeout"`
@@ -285,7 +299,8 @@ type FrameDblclickOptions struct {
 	Timeout     *int        `json:"timeout"`
 }
 type FrameDispatchEventOptions struct {
-	Timeout *int `json:"timeout"`
+	EventInit interface{} `json:"eventInit"`
+	Timeout   *int        `json:"timeout"`
 }
 type FrameFillOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
@@ -348,11 +363,13 @@ type FrameUncheckOptions struct {
 	Timeout     *int  `json:"timeout"`
 }
 type FrameWaitForFunctionOptions struct {
+	Arg     interface{} `json:"arg"`
 	Polling interface{} `json:"polling"`
 	Timeout *int        `json:"timeout"`
 }
 type FrameWaitForLoadStateOptions struct {
-	Timeout *int `json:"timeout"`
+	State   *string `json:"state"`
+	Timeout *int    `json:"timeout"`
 }
 type FrameWaitForNavigationOptions struct {
 	Timeout   *int        `json:"timeout"`
@@ -475,6 +492,11 @@ type MouseUpOptions struct {
 type SelectorsRegisterOptions struct {
 	ContentScript *bool `json:"contentScript"`
 }
+type RouteContinueOptions struct {
+	Method   *string           `json:"method"`
+	PostData interface{}       `json:"postData"`
+	Headers  map[string]string `json:"headers"`
+}
 type AccessibilitySnapshotOptions struct {
 	InterestingOnly *bool          `json:"interestingOnly"`
 	Root            *ElementHandle `json:"root"`
@@ -496,18 +518,17 @@ type BrowserTypeLaunchOptions struct {
 		Username *string `json:"username"`
 		Password *string `json:"password"`
 	} `json:"proxy"`
-	DownloadsPath    *string `json:"downloadsPath"`
-	ChromiumSandbox  *bool   `json:"chromiumSandbox"`
-	FirefoxUserPrefs *struct {
-	} `json:"firefoxUserPrefs"`
-	HandleSIGINT  *bool                  `json:"handleSIGINT"`
-	HandleSIGTERM *bool                  `json:"handleSIGTERM"`
-	HandleSIGHUP  *bool                  `json:"handleSIGHUP"`
-	Logger        interface{}            `json:"logger"`
-	Timeout       *int                   `json:"timeout"`
-	Env           map[string]interface{} `json:"env"`
-	Devtools      *bool                  `json:"devtools"`
-	SlowMo        *int                   `json:"slowMo"`
+	DownloadsPath    *string                `json:"downloadsPath"`
+	ChromiumSandbox  *bool                  `json:"chromiumSandbox"`
+	FirefoxUserPrefs interface{}            `json:"firefoxUserPrefs"`
+	HandleSIGINT     *bool                  `json:"handleSIGINT"`
+	HandleSIGTERM    *bool                  `json:"handleSIGTERM"`
+	HandleSIGHUP     *bool                  `json:"handleSIGHUP"`
+	Logger           interface{}            `json:"logger"`
+	Timeout          *int                   `json:"timeout"`
+	Env              map[string]interface{} `json:"env"`
+	Devtools         *bool                  `json:"devtools"`
+	SlowMo           *int                   `json:"slowMo"`
 }
 type BrowserTypeLaunchPersistentContextOptions struct {
 	Headless          *bool       `json:"headless"`
@@ -570,22 +591,22 @@ type BrowserTypeLaunchServerOptions struct {
 		Username *string `json:"username"`
 		Password *string `json:"password"`
 	} `json:"proxy"`
-	DownloadsPath    *string `json:"downloadsPath"`
-	ChromiumSandbox  *bool   `json:"chromiumSandbox"`
-	FirefoxUserPrefs *struct {
-	} `json:"firefoxUserPrefs"`
-	HandleSIGINT  *bool                  `json:"handleSIGINT"`
-	HandleSIGTERM *bool                  `json:"handleSIGTERM"`
-	HandleSIGHUP  *bool                  `json:"handleSIGHUP"`
-	Logger        interface{}            `json:"logger"`
-	Timeout       *int                   `json:"timeout"`
-	Env           map[string]interface{} `json:"env"`
-	Devtools      *bool                  `json:"devtools"`
+	DownloadsPath    *string                `json:"downloadsPath"`
+	ChromiumSandbox  *bool                  `json:"chromiumSandbox"`
+	FirefoxUserPrefs interface{}            `json:"firefoxUserPrefs"`
+	HandleSIGINT     *bool                  `json:"handleSIGINT"`
+	HandleSIGTERM    *bool                  `json:"handleSIGTERM"`
+	HandleSIGHUP     *bool                  `json:"handleSIGHUP"`
+	Logger           interface{}            `json:"logger"`
+	Timeout          *int                   `json:"timeout"`
+	Env              map[string]interface{} `json:"env"`
+	Devtools         *bool                  `json:"devtools"`
 }
 type ChromiumBrowserStartTracingOptions struct {
-	Path        *string  `json:"path"`
-	Screenshots *bool    `json:"screenshots"`
-	Categories  []string `json:"categories"`
+	Page        interface{} `json:"page"`
+	Path        *string     `json:"path"`
+	Screenshots *bool       `json:"screenshots"`
+	Categories  []string    `json:"categories"`
 }
 type ChromiumBrowserNewContextOptions struct {
 	AcceptDownloads   *bool `json:"acceptDownloads"`
@@ -649,6 +670,10 @@ type ChromiumBrowserNewPageOptions struct {
 }
 type ChromiumBrowserContextGrantPermissionsOptions struct {
 	Origin *string `json:"origin"`
+}
+type ChromiumBrowserContextWaitForEventOptions struct {
+	Predicate interface{} `json:"predicate"`
+	Timeout   *int        `json:"timeout"`
 }
 type ChromiumCoverageStartCSSCoverageOptions struct {
 	ResetOnNavigation *bool `json:"resetOnNavigation"`

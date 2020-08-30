@@ -75,12 +75,6 @@ func (r *Route) Fulfill(options RouteFulfillOptions) error {
 	return err
 }
 
-type RouteContinueOptions struct {
-	Method   *string           `json:"method"`
-	Headers  map[string]string `json:"headers"`
-	PostData interface{}       `json:"postData"`
-}
-
 func (r *Route) Continue(options ...RouteContinueOptions) error {
 	overrides := make(map[string]interface{})
 	if len(options) == 1 {

@@ -25,11 +25,15 @@ func (p *Page) Context() *BrowserContext {
 }
 
 func (p *Page) Opener() (*Page, error) {
-	page, err := p.channel.Send("opener")
+	channel, err := p.channel.Send("opener")
 	if err != nil {
 		return nil, err
 	}
-	return page.(*Page), nil
+	channelOwner := fromNullableChannel(channel)
+	if channelOwner == nil {
+		return nil, nil
+	}
+	return channelOwner.(*Page), nil
 }
 
 func (p *Page) MainFrame() *Frame {
@@ -58,11 +62,6 @@ func (p *Page) QuerySelectorAll(selector string) ([]*ElementHandle, error) {
 
 func (p *Page) WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (*ElementHandle, error) {
 	return p.mainFrame.WaitForSelector(selector, options...)
-}
-
-type PageDispatchEventOptions struct {
-	EventInit interface{} `json:"eventInit"`
-	Timeout   *int        `json:"timeout"`
 }
 
 func (p *Page) DispatchEvent(selector string, typ string, options ...PageDispatchEventOptions) error {

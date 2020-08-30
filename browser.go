@@ -9,11 +9,11 @@ type Browser struct {
 }
 
 func (b *Browser) NewContext(options ...BrowserNewContextOptions) (*BrowserContext, error) {
-	channelOwner, err := b.channel.Send("newContext", options)
+	channel, err := b.channel.Send("newContext", options)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %v", err)
 	}
-	context := fromChannel(channelOwner).(*BrowserContext)
+	context := fromChannel(channel).(*BrowserContext)
 	b.Contexts = append(b.Contexts, context)
 	return context, nil
 }

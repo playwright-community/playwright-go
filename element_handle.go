@@ -5,13 +5,13 @@ type ElementHandle struct {
 }
 
 func (e *ElementHandle) QuerySelector(selector string) (*ElementHandle, error) {
-	channelOwner, err := e.channel.Send("querySelector", map[string]interface{}{
+	channel, err := e.channel.Send("querySelector", map[string]interface{}{
 		"selector": selector,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(channelOwner).(*ElementHandle), nil
+	return fromChannel(channel).(*ElementHandle), nil
 }
 
 func (e *ElementHandle) TextContent() (string, error) {

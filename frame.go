@@ -36,17 +36,17 @@ func (f *Frame) Title() (string, error) {
 }
 
 func (f *Frame) Goto(url string) (*Response, error) {
-	response, err := f.channel.Send("goto", map[string]interface{}{
+	channel, err := f.channel.Send("goto", map[string]interface{}{
 		"url": url,
 	})
 	if err != nil {
 		return nil, err
 	}
-	obj := fromNullableChannel(response)
-	if obj == nil {
+	channelOwner := fromNullableChannel(channel)
+	if channelOwner == nil {
 		return nil, nil
 	}
-	return obj.(*Response), nil
+	return channelOwner.(*Response), nil
 }
 
 func (f *Frame) AddScriptTag(options PageAddScriptTagOptions) (*ElementHandle, error) {
@@ -58,11 +58,11 @@ func (f *Frame) AddScriptTag(options PageAddScriptTagOptions) (*ElementHandle, e
 		options.Content = String(string(file))
 		options.Path = nil
 	}
-	channelOwner, err := f.channel.Send("addScriptTag", options)
+	channel, err := f.channel.Send("addScriptTag", options)
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(channelOwner).(*ElementHandle), nil
+	return fromChannel(channel).(*ElementHandle), nil
 }
 
 func (f *Frame) AddStyleTag(options PageAddStyleTagOptions) (*ElementHandle, error) {
@@ -74,11 +74,11 @@ func (f *Frame) AddStyleTag(options PageAddStyleTagOptions) (*ElementHandle, err
 		options.Content = String(string(file))
 		options.Path = nil
 	}
-	channelOwner, err := f.channel.Send("addStyleTag", options)
+	channel, err := f.channel.Send("addStyleTag", options)
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(channelOwner).(*ElementHandle), nil
+	return fromChannel(channel).(*ElementHandle), nil
 }
 
 func (f *Frame) Type(selector, text string, options ...PageTypeOptions) error {
@@ -119,25 +119,25 @@ func (f *Frame) onFrameNavigated(event ...interface{}) {
 }
 
 func (f *Frame) QuerySelector(selector string) (*ElementHandle, error) {
-	channelOwner, err := f.channel.Send("querySelector", map[string]interface{}{
+	channel, err := f.channel.Send("querySelector", map[string]interface{}{
 		"selector": selector,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(channelOwner).(*ElementHandle), nil
+	return fromChannel(channel).(*ElementHandle), nil
 }
 
 func (f *Frame) QuerySelectorAll(selector string) ([]*ElementHandle, error) {
-	channelOwner, err := f.channel.Send("querySelectorAll", map[string]interface{}{
+	channels, err := f.channel.Send("querySelectorAll", map[string]interface{}{
 		"selector": selector,
 	})
 	if err != nil {
 		return nil, err
 	}
 	elements := make([]*ElementHandle, 0)
-	for _, channelOwner := range channelOwner.([]interface{}) {
-		elements = append(elements, fromChannel(channelOwner).(*ElementHandle), nil)
+	for _, channel := range channels.([]interface{}) {
+		elements = append(elements, fromChannel(channel).(*ElementHandle))
 	}
 	return elements, nil
 }
@@ -248,15 +248,15 @@ func (f *Frame) Click(selector string, options ...PageClickOptions) error {
 }
 
 func (f *Frame) WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (*ElementHandle, error) {
-	channelOwner, err := f.channel.Send("waitForSelector", options)
+	channel, err := f.channel.Send("waitForSelector", options)
 	if err != nil {
 		return nil, err
 	}
-	obj := fromNullableChannel(channelOwner)
-	if obj == nil {
+	channelOwner := fromNullableChannel(channel)
+	if channelOwner == nil {
 		return nil, nil
 	}
-	return obj.(*ElementHandle), nil
+	return channelOwner.(*ElementHandle), nil
 }
 
 func (f *Frame) DispatchEvent(selector, typ string, options ...PageDispatchEventOptions) error {

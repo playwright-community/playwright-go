@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -19,6 +20,8 @@ func TestPageURL(t *testing.T) {
 	_, err := helper.Page.Goto("https://example.com")
 	require.NoError(t, err)
 	require.Equal(t, "https://example.com/", helper.Page.URL())
+	require.Equal(t, helper.Context, helper.Page.Context())
+	require.Equal(t, 1, len(helper.Page.Frames()))
 }
 
 func TestPageSetContent(t *testing.T) {
@@ -106,6 +109,24 @@ func TestPageQuerySelector(t *testing.T) {
 	textContent, err := four.TextContent()
 	require.NoError(t, err)
 	require.Equal(t, strings.TrimSpace(textContent), "foobar")
+}
+
+func TestPageQuerySelectorAll(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	require.NoError(t, helper.Page.SetContent(`
+	<div class="foo">0</div>
+	<div class="foo">1</div>
+	<div class="foo">2</div>
+	`))
+	elements, err := helper.Page.QuerySelectorAll("div.foo")
+	require.NoError(t, err)
+	require.Equal(t, 3, len(elements))
+	for i := 0; i < 3; i++ {
+		textContent, err := elements[i].TextContent()
+		require.NoError(t, err)
+		require.Equal(t, strconv.Itoa(i), textContent)
+	}
 }
 
 func TestPageEvaluate(t *testing.T) {
@@ -241,4 +262,23 @@ func TestPageExpectEvent(t *testing.T) {
 	t.Skip()
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
+}
+
+func TestPageOpener(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	page, err := helper.Context.ExpectEvent("page", func() error {
+		_, err := helper.Page.Goto(helper.server.PREFIX + "/popup/window-open.html")
+		return err
+	})
+	require.NoError(t, err)
+	popup := page.(*Page)
+
+	opener, err := popup.Opener()
+	require.NoError(t, err)
+	require.Equal(t, opener, helper.Page)
+
+	opener, err = helper.Page.Opener()
+	require.NoError(t, err)
+	require.Nil(t, opener)
 }
