@@ -67,7 +67,7 @@ func main() {
 	if err != nil {
 		exitIfErrorf("could not get cwd %v", err)
 	}
-	if err := os.Mkdir(filepath.Join(cwd, "out"), os.ModeDir); err != nil && !os.IsExist(err) {
+	if err := os.Mkdir(filepath.Join(cwd, "out"), 0777); err != nil && !os.IsExist(err) {
 		exitIfErrorf("could not create output directory %v", err)
 	}
 
