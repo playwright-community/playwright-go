@@ -39,10 +39,10 @@ func (f *Frame) Title() (string, error) {
 	return title.(string), err
 }
 
-func (f *Frame) Goto(url string) (*Response, error) {
+func (f *Frame) Goto(url string, options ...PageGotoOptions) (*Response, error) {
 	channel, err := f.channel.Send("goto", map[string]interface{}{
 		"url": url,
-	})
+	}, options)
 	if err != nil {
 		return nil, err
 	}
