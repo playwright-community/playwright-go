@@ -22,9 +22,14 @@ func exitIfErrorf(message string, err error) {
 	}
 }
 
-func worker(id int, jobs <-chan string, results chan<- bool, browser *playwright.Browser) {
-	for url := range jobs {
-		fmt.Println("starting", url)
+func worker(id int, jobs chan job, results chan<- bool, browser *playwright.Browser) {
+	for jobPayload := range jobs {
+		if jobPayload.Try > 3 {
+			log.Printf("Stopped with domain %s", jobPayload.URL)
+			results <- true
+			continue
+		}
+		fmt.Printf("starting (%d): %s\n", jobPayload.Try, jobPayload.URL)
 
 		context, err := browser.NewContext(playwright.BrowserNewContextOptions{
 			UserAgent: playwright.String("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36"),
@@ -34,13 +39,16 @@ func worker(id int, jobs <-chan string, results chan<- bool, browser *playwright
 		page, err := context.NewPage()
 		exitIfErrorf("could not create page: %v", err)
 
-		_, err = page.Goto("http://"+url, playwright.PageGotoOptions{
+		_, err = page.Goto("http://"+jobPayload.URL, playwright.PageGotoOptions{
 			WaitUntil: playwright.String("networkidle"),
 		})
 		if err != nil {
-			log.Printf("could not goto: %s: %v", url, err)
+			log.Printf("could not goto: %s: %v", jobPayload.URL, err)
 			context.Close()
-			results <- true
+			jobs <- job{
+				URL: jobPayload.URL,
+				Try: jobPayload.Try + 1,
+			}
 			continue
 		}
 		cwd, err := os.Getwd()
@@ -48,13 +56,18 @@ func worker(id int, jobs <-chan string, results chan<- bool, browser *playwright
 			exitIfErrorf("could not get cwd %v", err)
 		}
 		_, err = page.Screenshot(playwright.PageScreenshotOptions{
-			Path: playwright.String(filepath.Join(cwd, "out", strings.Replace(url, ".", "-", -1)+".png")),
+			Path: playwright.String(filepath.Join(cwd, "out", strings.Replace(jobPayload.URL, ".", "-", -1)+".png")),
 		})
 		exitIfErrorf("could not create screenshot: %v", err)
-		fmt.Println("finish", url)
+		fmt.Println("finish", jobPayload.URL)
 		context.Close()
 		results <- true
 	}
+}
+
+type job struct {
+	URL string
+	Try int
 }
 
 func main() {
@@ -79,15 +92,16 @@ func main() {
 	exitIfErrorf("could not launch Chromium: %v", err)
 
 	const numJobs = 30
-	jobs := make(chan string, numJobs)
+	jobs := make(chan job, numJobs)
 	results := make(chan bool, numJobs)
 	for w := 1; w <= 3; w++ {
 		go worker(w, jobs, results, browser)
 	}
 	for _, url := range topDomains[:numJobs] {
-		jobs <- url
+		jobs <- job{
+			URL: url,
+		}
 	}
-	close(jobs)
 	for a := 1; a <= numJobs; a++ {
 		<-results
 	}
