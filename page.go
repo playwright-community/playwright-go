@@ -24,6 +24,14 @@ func (p *Page) Context() *BrowserContext {
 	return p.browserContext
 }
 
+func (p *Page) Close(options ...PageCloseOptions) error {
+	_, err := p.channel.Send("close", options)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (p *Page) Opener() (*Page, error) {
 	channel, err := p.channel.Send("opener")
 	if err != nil {
@@ -112,8 +120,8 @@ func (p *Page) SetContent(content string, options ...PageSetContentOptions) erro
 	return p.mainFrame.SetContent(content, options...)
 }
 
-func (p *Page) Goto(url string) (*Response, error) {
-	return p.mainFrame.Goto(url)
+func (p *Page) Goto(url string, options ...PageGotoOptions) (*Response, error) {
+	return p.mainFrame.Goto(url, options...)
 }
 
 func (p *Page) Reload(options ...PageReloadOptions) (*Response, error) {

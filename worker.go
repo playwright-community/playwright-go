@@ -37,14 +37,16 @@ func newWorker(parent *ChannelOwner, objectType string, guid string, initializer
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.channel.On("close", func(payload ...interface{}) {
 		workers := make([]*Worker, 0)
-		for i := 0; i < len(bt.page.workers); i++ {
-			if bt.page.workers[i] != bt {
-				workers = append(workers, bt.page.workers[i])
+		if bt.page != nil {
+			for i := 0; i < len(bt.page.workers); i++ {
+				if bt.page.workers[i] != bt {
+					workers = append(workers, bt.page.workers[i])
+				}
 			}
+			bt.page.workersLock.Lock()
+			bt.page.workers = workers
+			bt.page.workersLock.Unlock()
 		}
-		bt.page.workersLock.Lock()
-		bt.page.workers = workers
-		bt.page.workersLock.Unlock()
 		bt.Emit("close", bt)
 	})
 	return bt

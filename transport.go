@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"sync"
 
 	"gopkg.in/square/go-jose.v2/json"
 )
@@ -15,6 +16,7 @@ type Transport struct {
 	stdin    io.WriteCloser
 	stdout   io.ReadCloser
 	dispatch func(msg *Message)
+	rLock    sync.Mutex
 }
 
 func (t *Transport) SetDispatch(dispatch func(msg *Message)) {
@@ -80,6 +82,8 @@ func (t *Transport) Send(message map[string]interface{}) error {
 		}
 	}
 	lengthPadding := make([]byte, 4)
+	t.rLock.Lock()
+	defer t.rLock.Unlock()
 	binary.LittleEndian.PutUint32(lengthPadding, uint32(len(msg)))
 	if _, err = t.stdin.Write(lengthPadding); err != nil {
 		return err
@@ -87,6 +91,7 @@ func (t *Transport) Send(message map[string]interface{}) error {
 	if _, err = t.stdin.Write(msg); err != nil {
 		return err
 	}
+
 	return nil
 }
 

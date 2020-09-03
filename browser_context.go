@@ -45,6 +45,11 @@ func (b *BrowserContext) ExpectEvent(event string, cb func() error) (interface{}
 	return newExpectWrapper(b.WaitForEvent, []interface{}{event}, cb)
 }
 
+func (b *BrowserContext) Close() error {
+	_, err := b.channel.Send("close")
+	return err
+}
+
 func newBrowserContext(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *BrowserContext {
 	bt := &BrowserContext{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
