@@ -9,6 +9,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/mxschmitt/playwright-go"
@@ -24,7 +26,9 @@ func worker(id int, jobs <-chan string, results chan<- bool, browser *playwright
 	for url := range jobs {
 		fmt.Println("starting", url)
 
-		context, err := browser.NewContext()
+		context, err := browser.NewContext(playwright.BrowserNewContextOptions{
+			UserAgent: playwright.String("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36"),
+		})
 		exitIfErrorf("could not create context: %v", err)
 
 		page, err := context.NewPage()
@@ -39,8 +43,12 @@ func worker(id int, jobs <-chan string, results chan<- bool, browser *playwright
 			results <- true
 			continue
 		}
+		cwd, err := os.Getwd()
+		if err != nil {
+			exitIfErrorf("could not get cwd %v", err)
+		}
 		_, err = page.Screenshot(playwright.PageScreenshotOptions{
-			Path: playwright.String("examples/parallel-scraping/out/" + strings.Replace(url, ".", "-", -1) + ".png"),
+			Path: playwright.String(filepath.Join(cwd, "out", strings.Replace(url, ".", "-", -1)+".png")),
 		})
 		exitIfErrorf("could not create screenshot: %v", err)
 		fmt.Println("finish", url)
@@ -55,10 +63,18 @@ func main() {
 	exitIfErrorf("could not get alexa top domains: %v", err)
 	log.Println("Downloaded Alexa top domains successfully")
 
+	cwd, err := os.Getwd()
+	if err != nil {
+		exitIfErrorf("could not get cwd %v", err)
+	}
+	if err := os.Mkdir(filepath.Join(cwd, "out"), os.ModeDir); err != nil && !os.IsExist(err) {
+		exitIfErrorf("could not create output directory %v", err)
+	}
+
 	pw, err := playwright.Run()
 	exitIfErrorf("could not launch playwright: %v", err)
 	browser, err := pw.Chromium.Launch(playwright.BrowserTypeLaunchOptions{
-		Headless: playwright.Bool(false),
+		Headless: playwright.Bool(true),
 	})
 	exitIfErrorf("could not launch Chromium: %v", err)
 
