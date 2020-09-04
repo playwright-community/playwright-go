@@ -95,30 +95,39 @@ func transformOptions(options ...interface{}) map[string]interface{} {
 	return base
 }
 
-func remapMapToStruct(ourMap interface{}, structPtr interface{}) {
-	ourMapV := reflect.ValueOf(ourMap)
-	structV := reflect.ValueOf(structPtr).Elem()
-	structTyp := structV.Type()
-	for i := 0; i < structV.NumField(); i++ {
-		fi := structTyp.Field(i)
-		tagv := fi.Tag.Get("json")
-		key := strings.Split(tagv, ",")[0]
-		for _, e := range ourMapV.MapKeys() {
-			if key == e.String() {
-				value := ourMapV.MapIndex(e).Interface()
-				switch v := value.(type) {
-				case int:
-					structV.Field(i).SetInt(int64(v))
-				case string:
-					structV.Field(i).SetString(v)
-				case bool:
-					structV.Field(i).SetBool(v)
-				default:
-					panic(ourMapV.MapIndex(e).Kind())
+func remapValue(inMapValue reflect.Value, outStructValue reflect.Value) {
+	switch outStructValue.Type().Kind() {
+	case reflect.Bool:
+		outStructValue.SetBool(inMapValue.Bool())
+	case reflect.String:
+		outStructValue.SetString(inMapValue.String())
+	case reflect.Float64:
+		outStructValue.SetFloat(inMapValue.Float())
+	case reflect.Int:
+		outStructValue.SetInt(int64(inMapValue.Float()))
+	case reflect.Map:
+		for _, key := range inMapValue.MapKeys() {
+			remapMapToStruct(inMapValue.MapIndex(key).Interface(), inMapValue.Interface())
+		}
+	case reflect.Struct:
+		structTyp := outStructValue.Type()
+		for i := 0; i < outStructValue.NumField(); i++ {
+			fi := structTyp.Field(i)
+			key := strings.Split(fi.Tag.Get("json"), ",")[0]
+			for _, e := range inMapValue.MapKeys() {
+				if key == e.String() {
+					value := inMapValue.MapIndex(e)
+					remapValue(value.Elem(), outStructValue.Field(i))
 				}
 			}
 		}
+	default:
+		panic(inMapValue.Interface())
 	}
+}
+
+func remapMapToStruct(inputMap interface{}, outStruct interface{}) {
+	remapValue(reflect.ValueOf(inputMap), reflect.ValueOf(outStruct).Elem())
 }
 
 func isFunctionBody(expression string) bool {

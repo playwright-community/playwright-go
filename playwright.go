@@ -3,11 +3,26 @@
 // is ever-green, capable, reliable and fast.
 package playwright
 
+type Size struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+type DeviceDescriptor struct {
+	UserAgent          string `json:"userAgent"`
+	Viewport           Size   `json:"viewport"`
+	DeviceScaleFactor  int    `json:"deviceScaleFactor"`
+	IsMobile           bool   `json:"isMobile"`
+	HasTouch           bool   `json:"hasTouch"`
+	DefaultBrowserType string `json:"defaultBrowserType"`
+}
+
 type Playwright struct {
 	ChannelOwner
 	Chromium *BrowserType
 	Firefox  *BrowserType
 	WebKit   *BrowserType
+	Devices  map[string]*DeviceDescriptor
 }
 
 func (p *Playwright) Stop() error {
@@ -15,11 +30,17 @@ func (p *Playwright) Stop() error {
 }
 
 func newPlaywright(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Playwright {
-	// TODO: add devices and selectors
+	// TODO: add selectors
 	pw := &Playwright{
 		Chromium: fromChannel(initializer["chromium"]).(*BrowserType),
 		Firefox:  fromChannel(initializer["firefox"]).(*BrowserType),
 		WebKit:   fromChannel(initializer["webkit"]).(*BrowserType),
+		Devices:  make(map[string]*DeviceDescriptor),
+	}
+	for _, dd := range initializer["deviceDescriptors"].([]interface{}) {
+		entry := dd.(map[string]interface{})
+		pw.Devices[entry["name"].(string)] = &DeviceDescriptor{}
+		remapMapToStruct(entry["descriptor"], pw.Devices[entry["name"].(string)])
 	}
 	pw.createChannelOwner(pw, parent, objectType, guid, initializer)
 	return pw

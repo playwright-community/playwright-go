@@ -398,3 +398,16 @@ func TestPageWaitForLoadState(t *testing.T) {
 	helper.Page.WaitForLoadState()
 	helper.Page.WaitForLoadState("networkidle")
 }
+
+func TestPlaywrightDevices(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	require.Greater(t, len(helper.Playwright.Devices), 10)
+	for name, device := range helper.Playwright.Devices {
+		require.NotEmpty(t, name)
+		require.NotEmpty(t, device.UserAgent)
+		require.NotEmpty(t, device.Viewport)
+		require.Greater(t, device.DeviceScaleFactor, 0)
+		require.NotEmpty(t, device.DefaultBrowserType)
+	}
+}
