@@ -30,6 +30,9 @@ func (p *Page) Close(options ...PageCloseOptions) error {
 	if err != nil {
 		return err
 	}
+	if p.ownedContext != nil {
+		return p.ownedContext.Close()
+	}
 	return nil
 }
 
@@ -221,11 +224,11 @@ func (p *Page) Screenshot(options ...PageScreenshotOptions) ([]byte, error) {
 	}
 	data, err := p.channel.Send("screenshot", options)
 	if err != nil {
-		return nil, fmt.Errorf("could not send message :%v", err)
+		return nil, fmt.Errorf("could not send message :%w", err)
 	}
 	image, err := base64.StdEncoding.DecodeString(data.(string))
 	if err != nil {
-		return nil, fmt.Errorf("could not decode base64 :%v", err)
+		return nil, fmt.Errorf("could not decode base64 :%w", err)
 	}
 	if path != nil {
 		if err := ioutil.WriteFile(*path, image, 0644); err != nil {
@@ -242,11 +245,11 @@ func (p *Page) PDF(options ...PagePdfOptions) ([]byte, error) {
 	}
 	data, err := p.channel.Send("pdf", options)
 	if err != nil {
-		return nil, fmt.Errorf("could not send message :%v", err)
+		return nil, fmt.Errorf("could not send message :%w", err)
 	}
 	pdf, err := base64.StdEncoding.DecodeString(data.(string))
 	if err != nil {
-		return nil, fmt.Errorf("could not decode base64 :%v", err)
+		return nil, fmt.Errorf("could not decode base64 :%w", err)
 	}
 	if path != nil {
 		if err := ioutil.WriteFile(*path, pdf, 0644); err != nil {

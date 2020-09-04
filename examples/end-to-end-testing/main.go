@@ -24,22 +24,22 @@ const TODO_NAME = "Bake a cake"
 
 func main() {
 	pw, err := playwright.Run()
-	assertErrorToNilf("could not launch playwright: %v", err)
+	assertErrorToNilf("could not launch playwright: %w", err)
 	browser, err := pw.Chromium.Launch(playwright.BrowserTypeLaunchOptions{
 		Headless: playwright.Bool(false),
 	})
-	assertErrorToNilf("could not launch Chromium: %v", err)
+	assertErrorToNilf("could not launch Chromium: %w", err)
 	context, err := browser.NewContext()
-	assertErrorToNilf("could not create context: %v", err)
+	assertErrorToNilf("could not create context: %w", err)
 	page, err := context.NewPage()
-	assertErrorToNilf("could not create page: %v", err)
+	assertErrorToNilf("could not create page: %w", err)
 	_, err = page.Goto("http://todomvc.com/examples/react/")
-	assertErrorToNilf("could not goto: %v", err)
+	assertErrorToNilf("could not goto: %w", err)
 
 	// Helper function to get the amount of todos on the page
 	assertCountOfTodos := func(shouldBeCount int) {
 		count, err := page.EvaluateOnSelectorAll("ul.todo-list > li", "el => el.length")
-		assertErrorToNilf("could not determine todo list count: %v", err)
+		assertErrorToNilf("could not determine todo list count: %w", err)
 		assertEqual(shouldBeCount, count)
 	}
 
@@ -56,12 +56,12 @@ func main() {
 
 	// Here we get the text in the first todo item to see if it"s the same which the user has entered
 	textContentOfFirstTodoEntry, err := page.EvaluateOnSelector("ul.todo-list > li:nth-child(1) label", "el => el.textContent")
-	assertErrorToNilf("could not get first todo entry: %v", err)
+	assertErrorToNilf("could not get first todo entry: %w", err)
 	assertEqual(TODO_NAME, textContentOfFirstTodoEntry)
 
 	// The todo list should be persistent. Here we reload the page and see if the entry is still there
 	_, err = page.Reload()
-	assertErrorToNilf("could not reload: %v", err)
+	assertErrorToNilf("could not reload: %w", err)
 	assertCountOfTodos(1)
 
 	// Set the entry to completed
@@ -80,7 +80,7 @@ func main() {
 	assertCountOfTodos(0)
 
 	err = browser.Close()
-	assertErrorToNilf("could not close browser: %v", err)
+	assertErrorToNilf("could not close browser: %w", err)
 	err = pw.Stop()
-	assertErrorToNilf("could not stop Playwright: %v", err)
+	assertErrorToNilf("could not stop Playwright: %w", err)
 }

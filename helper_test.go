@@ -80,7 +80,7 @@ func NewTestHelper(t *testing.T) *TestHelperData {
 
 func (t *TestHelperData) AfterEach() {
 	if err := t.Browser.Close(); err != nil {
-		t.t.Errorf("could not close browser: %v", err)
+		t.t.Errorf("could not close browser: %w", err)
 	}
 	t.server.Stop()
 }

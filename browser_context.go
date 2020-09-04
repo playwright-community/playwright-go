@@ -39,7 +39,7 @@ func (b *BrowserContext) Pages() []*Page {
 func (b *BrowserContext) NewPage(options ...BrowserNewPageOptions) (*Page, error) {
 	channel, err := b.channel.Send("newPage", options)
 	if err != nil {
-		return nil, fmt.Errorf("could not send message: %v", err)
+		return nil, fmt.Errorf("could not send message: %w", err)
 	}
 	return fromChannel(channel).(*Page), nil
 }
@@ -49,7 +49,7 @@ func (b *BrowserContext) Cookies(urls ...string) ([]*NetworkCookie, error) {
 		"urls": urls,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("could not send message: %v", err)
+		return nil, fmt.Errorf("could not send message: %w", err)
 	}
 	cookies := make([]*NetworkCookie, len(result.([]interface{})))
 	for i, cookie := range result.([]interface{}) {

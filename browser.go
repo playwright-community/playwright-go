@@ -11,7 +11,7 @@ type Browser struct {
 func (b *Browser) NewContext(options ...BrowserNewContextOptions) (*BrowserContext, error) {
 	channel, err := b.channel.Send("newContext", options)
 	if err != nil {
-		return nil, fmt.Errorf("could not send message: %v", err)
+		return nil, fmt.Errorf("could not send message: %w", err)
 	}
 	context := fromChannel(channel).(*BrowserContext)
 	context.browser = b

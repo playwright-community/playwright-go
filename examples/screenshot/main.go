@@ -14,21 +14,21 @@ func assertErrorToNilf(message string, err error) {
 
 func main() {
 	pw, err := playwright.Run()
-	assertErrorToNilf("could not launch playwright: %v", err)
+	assertErrorToNilf("could not launch playwright: %w", err)
 	browser, err := pw.Chromium.Launch()
-	assertErrorToNilf("could not launch Chromium: %v", err)
+	assertErrorToNilf("could not launch Chromium: %w", err)
 	context, err := browser.NewContext()
-	assertErrorToNilf("could not create context: %v", err)
+	assertErrorToNilf("could not create context: %w", err)
 	page, err := context.NewPage()
-	assertErrorToNilf("could not create page: %v", err)
+	assertErrorToNilf("could not create page: %w", err)
 	_, err = page.Goto("http://whatsmyuseragent.org/")
-	assertErrorToNilf("could not goto: %v", err)
+	assertErrorToNilf("could not goto: %w", err)
 	_, err = page.Screenshot(playwright.PageScreenshotOptions{
 		Path: playwright.String("foo.png"),
 	})
-	assertErrorToNilf("could not create screenshot: %v", err)
+	assertErrorToNilf("could not create screenshot: %w", err)
 	err = browser.Close()
-	assertErrorToNilf("could not close browser: %v", err)
+	assertErrorToNilf("could not close browser: %w", err)
 	err = pw.Stop()
-	assertErrorToNilf("could not stop Playwright: %v", err)
+	assertErrorToNilf("could not stop Playwright: %w", err)
 }

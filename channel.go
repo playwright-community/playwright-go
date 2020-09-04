@@ -17,7 +17,7 @@ func (c *Channel) Send(method string, options ...interface{}) (interface{}, erro
 	params := transformOptions(options...)
 	result, err := c.connection.SendMessageToServer(c.guid, method, params)
 	if err != nil {
-		return nil, fmt.Errorf("could not send message to server: %v", err)
+		return nil, fmt.Errorf("could not send message to server: %w", err)
 	}
 	if result == nil {
 		return nil, nil

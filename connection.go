@@ -24,13 +24,12 @@ type Connection struct {
 }
 
 func (c *Connection) Start() error {
-	c.transport.SetDispatch(c.Dispatch)
 	return c.transport.Start()
 }
 
 func (c *Connection) Stop() error {
 	if err := c.transport.Stop(); err != nil {
-		return fmt.Errorf("could not stop transport: %v", err)
+		return fmt.Errorf("could not stop transport: %w", err)
 	}
 	return c.stopDriver()
 }
@@ -150,7 +149,7 @@ func (c *Connection) SendMessageToServer(guid string, method string, params inte
 	}
 	cb, _ := c.callbacks.LoadOrStore(id, make(chan callback))
 	if err := c.transport.Send(message); err != nil {
-		return nil, fmt.Errorf("could not send message: %v", err)
+		return nil, fmt.Errorf("could not send message: %w", err)
 	}
 	result := <-cb.(chan callback)
 	c.callbacks.Delete(id)
@@ -163,10 +162,10 @@ func (c *Connection) SendMessageToServer(guid string, method string, params inte
 func newConnection(stdin io.WriteCloser, stdout io.ReadCloser, stopDriver func() error) *Connection {
 	connection := &Connection{
 		waitingForRemoteObjects: make(map[string]chan interface{}),
-		transport:               newTransport(stdin, stdout),
 		objects:                 make(map[string]*ChannelOwner),
 		stopDriver:              stopDriver,
 	}
+	connection.transport = newTransport(stdin, stdout, connection.Dispatch)
 	connection.rootObject = newRootChannelOwner(connection)
 	return connection
 }
