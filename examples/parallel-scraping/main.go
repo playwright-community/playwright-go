@@ -16,7 +16,7 @@ import (
 	"github.com/mxschmitt/playwright-go"
 )
 
-func exitIfErrorf(message string, err error) {
+func assertErrorToNilf(message string, err error) {
 	if err != nil {
 		log.Fatalf(message, err)
 	}
@@ -34,10 +34,10 @@ func worker(id int, jobs chan job, results chan<- bool, browser *playwright.Brow
 		context, err := browser.NewContext(playwright.BrowserNewContextOptions{
 			UserAgent: playwright.String("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36"),
 		})
-		exitIfErrorf("could not create context: %v", err)
+		assertErrorToNilf("could not create context: %v", err)
 
 		page, err := context.NewPage()
-		exitIfErrorf("could not create page: %v", err)
+		assertErrorToNilf("could not create page: %v", err)
 
 		_, err = page.Goto("http://"+jobPayload.URL, playwright.PageGotoOptions{
 			WaitUntil: playwright.String("networkidle"),
@@ -53,12 +53,12 @@ func worker(id int, jobs chan job, results chan<- bool, browser *playwright.Brow
 		}
 		cwd, err := os.Getwd()
 		if err != nil {
-			exitIfErrorf("could not get cwd %v", err)
+			assertErrorToNilf("could not get cwd %v", err)
 		}
 		_, err = page.Screenshot(playwright.PageScreenshotOptions{
 			Path: playwright.String(filepath.Join(cwd, "out", strings.Replace(jobPayload.URL, ".", "-", -1)+".png")),
 		})
-		exitIfErrorf("could not create screenshot: %v", err)
+		assertErrorToNilf("could not create screenshot: %v", err)
 		fmt.Println("finish", jobPayload.URL)
 		context.Close()
 		results <- true
@@ -73,23 +73,23 @@ type job struct {
 func main() {
 	log.Println("Downloading Alexa top domains")
 	topDomains, err := getAlexaTopDomains()
-	exitIfErrorf("could not get alexa top domains: %v", err)
+	assertErrorToNilf("could not get alexa top domains: %v", err)
 	log.Println("Downloaded Alexa top domains successfully")
 
 	cwd, err := os.Getwd()
 	if err != nil {
-		exitIfErrorf("could not get cwd %v", err)
+		assertErrorToNilf("could not get cwd %v", err)
 	}
 	if err := os.Mkdir(filepath.Join(cwd, "out"), 0777); err != nil && !os.IsExist(err) {
-		exitIfErrorf("could not create output directory %v", err)
+		assertErrorToNilf("could not create output directory %v", err)
 	}
 
 	pw, err := playwright.Run()
-	exitIfErrorf("could not launch playwright: %v", err)
+	assertErrorToNilf("could not launch playwright: %v", err)
 	browser, err := pw.Chromium.Launch(playwright.BrowserTypeLaunchOptions{
 		Headless: playwright.Bool(true),
 	})
-	exitIfErrorf("could not launch Chromium: %v", err)
+	assertErrorToNilf("could not launch Chromium: %v", err)
 
 	const numJobs = 30
 	jobs := make(chan job, numJobs)
@@ -107,9 +107,9 @@ func main() {
 	}
 
 	err = browser.Close()
-	exitIfErrorf("could not close browser: %v", err)
+	assertErrorToNilf("could not close browser: %v", err)
 	err = pw.Stop()
-	exitIfErrorf("could not stop Playwright: %v", err)
+	assertErrorToNilf("could not stop Playwright: %v", err)
 }
 
 func getAlexaTopDomains() ([]string, error) {
