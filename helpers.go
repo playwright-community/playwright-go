@@ -218,3 +218,47 @@ func newSafeStringSet(v []string) *safeStringSet {
 		v: v,
 	}
 }
+
+const DEFAULT_TIMEOUT = 30 * 1000
+
+type timeoutSettings struct {
+	parent            *timeoutSettings
+	timeout           int
+	navigationTimeout int
+}
+
+func (t *timeoutSettings) SetTimeout(timeout int) {
+	t.timeout = timeout
+}
+
+func (t *timeoutSettings) Timeout() int {
+	if t.timeout != 0 {
+		return t.timeout
+	}
+	if t.parent != nil {
+		return t.parent.Timeout()
+	}
+	return DEFAULT_TIMEOUT
+}
+
+func (t *timeoutSettings) SetNavigationTimeout(navigationTimeout int) {
+	t.navigationTimeout = navigationTimeout
+}
+
+func (t *timeoutSettings) NavigationTimeout() int {
+	if t.navigationTimeout != 0 {
+		return t.navigationTimeout
+	}
+	if t.parent != nil {
+		return t.parent.NavigationTimeout()
+	}
+	return DEFAULT_TIMEOUT
+}
+
+func newTimeoutSettings(parent *timeoutSettings) *timeoutSettings {
+	return &timeoutSettings{
+		parent:            parent,
+		timeout:           DEFAULT_TIMEOUT,
+		navigationTimeout: DEFAULT_TIMEOUT,
+	}
+}

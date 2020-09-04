@@ -5,7 +5,7 @@ import "fmt"
 type Browser struct {
 	ChannelOwner
 	IsConnected bool
-	Contexts    []*BrowserContext
+	contexts    []*BrowserContext
 }
 
 func (b *Browser) NewContext(options ...BrowserNewContextOptions) (*BrowserContext, error) {
@@ -14,8 +14,26 @@ func (b *Browser) NewContext(options ...BrowserNewContextOptions) (*BrowserConte
 		return nil, fmt.Errorf("could not send message: %v", err)
 	}
 	context := fromChannel(channel).(*BrowserContext)
-	b.Contexts = append(b.Contexts, context)
+	b.contexts = append(b.contexts, context)
 	return context, nil
+}
+
+func (b *Browser) NewPage(options ...BrowserNewContextOptions) (*Page, error) {
+	context, err := b.NewContext(options...)
+	if err != nil {
+		return nil, err
+	}
+	page, err := context.NewPage()
+	if err != nil {
+		return nil, err
+	}
+	page.ownedContext = context
+	context.ownedPage = page
+	return page, nil
+}
+
+func (b *Browser) Contexts() []*BrowserContext {
+	return b.contexts
 }
 
 func (b *Browser) Close() error {

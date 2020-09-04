@@ -2,6 +2,7 @@ package playwright
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 )
 
@@ -31,6 +32,14 @@ func (c *Channel) Send(method string, options ...interface{}) (interface{}, erro
 		}
 	}
 	return result, nil
+}
+
+func (c *Channel) SendNoReply(method string, options ...interface{}) {
+	params := transformOptions(options...)
+	_, err := c.connection.SendMessageToServer(c.guid, method, params)
+	if err != nil {
+		log.Printf("could not send message to server from noreply: %v", err)
+	}
 }
 
 func newChannel(connection *Connection, guid string) *Channel {

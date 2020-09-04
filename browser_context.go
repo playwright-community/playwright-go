@@ -2,14 +2,32 @@ package playwright
 
 import (
 	"fmt"
+	"io/ioutil"
 	"reflect"
 	"sync"
 )
 
 type BrowserContext struct {
 	ChannelOwner
-	pagesMutex sync.Mutex
-	pages      []*Page
+	timeoutSettings *timeoutSettings
+	pagesMutex      sync.Mutex
+	pages           []*Page
+	ownedPage       *Page
+	browser         *Browser
+}
+
+func (b *BrowserContext) SetDefaultNavigationTimeout(timeout int) {
+	b.timeoutSettings.SetNavigationTimeout(timeout)
+	b.channel.SendNoReply("setDefaultNavigationTimeoutNoReply", map[string]interface{}{
+		"timeout": timeout,
+	})
+}
+
+func (b *BrowserContext) SetDefaultTimeout(timeout int) {
+	b.timeoutSettings.SetTimeout(timeout)
+	b.channel.SendNoReply("setDefaultTimeoutNoReply", map[string]interface{}{
+		"timeout": timeout,
+	})
 }
 
 func (b *BrowserContext) Pages() []*Page {
@@ -24,6 +42,87 @@ func (b *BrowserContext) NewPage(options ...BrowserNewPageOptions) (*Page, error
 		return nil, fmt.Errorf("could not send message: %v", err)
 	}
 	return fromChannel(channel).(*Page), nil
+}
+
+func (b *BrowserContext) Cookies(urls ...string) ([]*NetworkCookie, error) {
+	_, err := b.channel.Send("cookies", map[string]interface{}{
+		"urls": urls,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("could not send message: %v", err)
+	}
+	panic("todo")
+}
+
+func (b *BrowserContext) AddCookies(cookies ...SetNetworkCookieParam) error {
+	_, err := b.channel.Send("addCookies", map[string]interface{}{
+		"cookies": cookies,
+	})
+	return err
+}
+
+func (b *BrowserContext) ClearCookies() error {
+	_, err := b.channel.Send("clearCookies")
+	return err
+}
+
+func (b *BrowserContext) GrantPermissions(permissions []string, options ...BrowserContextGrantPermissionsOptions) error {
+	_, err := b.channel.Send("addCookies", map[string]interface{}{
+		"grantPermissions": permissions,
+	}, options)
+	return err
+}
+
+func (b *BrowserContext) ClearPermissions() error {
+	_, err := b.channel.Send("clearPermissions")
+	return err
+}
+
+type SetGeolocationOptions struct {
+	Longitude int  `json:"longitude"`
+	Latitude  int  `json:"latitude"`
+	Accuracy  *int `json:"accuracy"`
+}
+
+func (b *BrowserContext) SetGeolocation(gelocation *SetGeolocationOptions) error {
+	_, err := b.channel.Send("setGeolocation", map[string]interface{}{
+		"gelocation": gelocation,
+	})
+	return err
+}
+
+func (b *BrowserContext) SetExtraHTTPHeaders(headers map[string]string) error {
+	_, err := b.channel.Send("setExtraHTTPHeaders", map[string]interface{}{
+		"headers": serializeHeaders(headers),
+	})
+	return err
+}
+
+func (b *BrowserContext) SetOffline(offline bool) error {
+	_, err := b.channel.Send("setOffline", map[string]interface{}{
+		"offline": offline,
+	})
+	return err
+}
+
+type BrowserContextAddInitScriptOptions struct {
+	Path   *string
+	Script *string
+}
+
+func (b *BrowserContext) AddInitScript(options BrowserContextAddInitScriptOptions) error {
+	source := *options.Script
+	if options.Path != nil {
+		content, err := ioutil.ReadFile(*options.Path)
+		if err != nil {
+			return err
+		}
+		source = string(content)
+	}
+	_, err := b.channel.Send("addInitScript", map[string]interface{}{
+		"source": source,
+	})
+	return err
 }
 
 func (b *BrowserContext) WaitForEvent(event string, predicate ...interface{}) interface{} {
@@ -51,7 +150,9 @@ func (b *BrowserContext) Close() error {
 }
 
 func newBrowserContext(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *BrowserContext {
-	bt := &BrowserContext{}
+	bt := &BrowserContext{
+		timeoutSettings: newTimeoutSettings(nil),
+	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.channel.On("page", func(payload ...interface{}) {
 		page := fromChannel(payload[0].(map[string]interface{})["page"]).(*Page)
@@ -60,6 +161,18 @@ func newBrowserContext(parent *ChannelOwner, objectType string, guid string, ini
 		bt.pages = append(bt.pages, page)
 		bt.pagesMutex.Unlock()
 		bt.Emit("page", page)
+	})
+	bt.channel.On("close", func(payload ...interface{}) {
+		if bt.browser != nil {
+			contexts := make([]*BrowserContext, 0)
+			for _, context := range bt.browser.contexts {
+				if context != bt {
+					contexts = append(contexts, context)
+				}
+			}
+			bt.browser.contexts = contexts
+		}
+		bt.Emit("close")
 	})
 	return bt
 }

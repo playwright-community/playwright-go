@@ -18,6 +18,7 @@ type Page struct {
 	routesMu       sync.Mutex
 	routes         []*routeHandlerEntry
 	viewportSize   ViewportSize
+	ownedContext   *BrowserContext
 }
 
 func (p *Page) Context() *BrowserContext {
