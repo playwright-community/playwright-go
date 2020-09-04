@@ -1,13 +1,17 @@
 package playwright
 
 import (
+	"fmt"
 	"io/ioutil"
+	"reflect"
 	"sync"
+	"time"
 )
 
 type Frame struct {
 	ChannelOwner
 	sync.RWMutex
+	detached    bool
 	page        *Page
 	name        string
 	url         string
@@ -20,6 +24,12 @@ func (f *Frame) URL() string {
 	f.RLock()
 	defer f.RUnlock()
 	return f.url
+}
+
+func (f *Frame) Name() string {
+	f.RLock()
+	defer f.RUnlock()
+	return f.name
 }
 
 func (f *Frame) SetContent(content string, options ...PageSetContentOptions) error {
@@ -123,10 +133,71 @@ func (f *Frame) WaitForLoadState(given ...string) {
 	<-succeed
 }
 
+func (f *Frame) WaitForEventCh(event string, predicate ...interface{}) <-chan interface{} {
+	evChan := make(chan interface{}, 1)
+	f.Once(event, func(ev ...interface{}) {
+		if len(predicate) == 0 {
+			evChan <- ev[0]
+		} else if len(predicate) == 1 {
+			result := reflect.ValueOf(predicate[0]).Call([]reflect.Value{reflect.ValueOf(ev[0])})
+			if result[0].Bool() {
+				evChan <- ev[0]
+			}
+		}
+	})
+	return evChan
+}
+
+func (f *Frame) WaitForEvent(event string, predicate ...interface{}) interface{} {
+	return <-f.WaitForEventCh(event, predicate...)
+}
+
+func (f *Frame) WaitForNavigation(options ...PageWaitForNavigationOptions) (*Response, error) {
+	option := PageWaitForNavigationOptions{}
+	if len(options) == 1 {
+		option = options[0]
+	}
+	if option.WaitUntil == nil {
+		option.WaitUntil = String("load")
+	}
+	if option.Timeout == nil {
+		option.Timeout = Int(f.page.timeoutSettings.NavigationTimeout())
+	}
+	deadline := time.After(time.Duration(*option.Timeout) * time.Millisecond)
+	var matcher *urlMatcher
+	if option.Url != nil {
+		matcher = newURLMatcher(option.Url)
+	}
+	predicate := func(events ...interface{}) bool {
+		ev := events[0].(map[string]interface{})
+		if ev["error"] != nil {
+			print("error")
+		}
+		return matcher == nil || matcher.Match(ev["url"].(string))
+	}
+	select {
+	case <-deadline:
+		return nil, fmt.Errorf("Timeout %dms exceeded.", *option.Timeout)
+	case eventData := <-f.WaitForEventCh("navigated", predicate):
+		event := eventData.(map[string]interface{})
+		if event["newDocument"] != nil && event["newDocument"].(map[string]interface{})["request"] != nil {
+			request := fromChannel(event["newDocument"].(map[string]interface{})["request"]).(*Request)
+			return request.Response()
+		}
+	}
+	return nil, nil
+}
+
 func (f *Frame) onFrameNavigated(event ...interface{}) {
+	ev := event[0].(map[string]interface{})
 	f.Lock()
-	f.url = event[0].(map[string]interface{})["url"].(string)
+	f.url = ev["url"].(string)
+	f.name = ev["name"].(string)
 	f.Unlock()
+	f.Emit("navigated", event...)
+	if f.page != nil {
+		f.page.Emit("framenavigated", f)
+	}
 }
 
 func (f *Frame) QuerySelector(selector string) (*ElementHandle, error) {
@@ -293,9 +364,10 @@ func newFrame(parent *ChannelOwner, objectType string, guid string, initializer 
 		loadStates = newSafeStringSet([]string{})
 	}
 	bt := &Frame{
-		name:       initializer["name"].(string),
-		url:        initializer["url"].(string),
-		loadStates: loadStates,
+		name:        initializer["name"].(string),
+		url:         initializer["url"].(string),
+		loadStates:  loadStates,
+		childFrames: make([]*Frame, 0),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 
@@ -310,9 +382,7 @@ func newFrame(parent *ChannelOwner, objectType string, guid string, initializer 
 		ev := event[0].(map[string]interface{})
 		if ev["add"] != nil {
 			add := ev["add"].(string)
-			if !bt.loadStates.Has(add) {
-				bt.loadStates.Add(add)
-			}
+			bt.loadStates.Add(add)
 			bt.Emit("loadstate", add)
 		} else if ev["remove"] != nil {
 			remove := ev["remove"].(string)

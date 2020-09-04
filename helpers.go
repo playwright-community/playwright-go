@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/danwakefield/fnmatch"
 )
@@ -25,6 +26,12 @@ func transformStructValues(in interface{}) interface{} {
 	v := reflect.ValueOf(in)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
+	}
+	if _, ok := in.(JSHandle); ok {
+		return in
+	}
+	if _, ok := in.(ElementHandle); ok {
+		return in
 	}
 	if v.Kind() == reflect.Map || v.Kind() == reflect.Struct {
 		return transformStructIntoMapIfNeeded(in)
@@ -284,4 +291,8 @@ func newTimeoutSettings(parent *timeoutSettings) *timeoutSettings {
 		timeout:           DEFAULT_TIMEOUT,
 		navigationTimeout: DEFAULT_TIMEOUT,
 	}
+}
+
+func monotonicTime() int {
+	return int(time.Now().UnixNano())
 }
