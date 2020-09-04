@@ -12,6 +12,7 @@ type testOptionsJSONSerialization struct {
 	WithoutJSONTag string
 	WithJSONTag    string  `json:"withJSONTag"`
 	SkipNilPtrs    *string `json:"skipNilPtrs"`
+	SkipMe         *int    `json:"skipMe"`
 }
 
 func TestTransformOptions(t *testing.T) {

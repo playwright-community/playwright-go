@@ -45,13 +45,18 @@ func (b *BrowserContext) NewPage(options ...BrowserNewPageOptions) (*Page, error
 }
 
 func (b *BrowserContext) Cookies(urls ...string) ([]*NetworkCookie, error) {
-	_, err := b.channel.Send("cookies", map[string]interface{}{
+	result, err := b.channel.Send("cookies", map[string]interface{}{
 		"urls": urls,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %v", err)
 	}
-	panic("todo")
+	cookies := make([]*NetworkCookie, len(result.([]interface{})))
+	for i, cookie := range result.([]interface{}) {
+		cookies[i] = &NetworkCookie{}
+		remapMapToStruct(cookie, cookies[i])
+	}
+	return cookies, nil
 }
 
 func (b *BrowserContext) AddCookies(cookies ...SetNetworkCookieParam) error {
@@ -67,8 +72,8 @@ func (b *BrowserContext) ClearCookies() error {
 }
 
 func (b *BrowserContext) GrantPermissions(permissions []string, options ...BrowserContextGrantPermissionsOptions) error {
-	_, err := b.channel.Send("addCookies", map[string]interface{}{
-		"grantPermissions": permissions,
+	_, err := b.channel.Send("grantPermissions", map[string]interface{}{
+		"permissions": permissions,
 	}, options)
 	return err
 }
@@ -86,7 +91,7 @@ type SetGeolocationOptions struct {
 
 func (b *BrowserContext) SetGeolocation(gelocation *SetGeolocationOptions) error {
 	_, err := b.channel.Send("setGeolocation", map[string]interface{}{
-		"gelocation": gelocation,
+		"geolocation": gelocation,
 	})
 	return err
 }

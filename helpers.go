@@ -21,9 +21,32 @@ func skipFieldSerialization(val reflect.Value) bool {
 		typ.Kind() == reflect.Slice) && val.IsNil()
 }
 
+func transformStructValues(in interface{}) interface{} {
+	v := reflect.ValueOf(in)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	if v.Kind() == reflect.Map || v.Kind() == reflect.Struct {
+		return transformStructIntoMapIfNeeded(in)
+	}
+	if v.Kind() == reflect.Slice {
+		outSlice := []interface{}{}
+		for i := 0; i < v.Len(); i++ {
+			if !skipFieldSerialization(v.Index(i)) {
+				outSlice = append(outSlice, transformStructValues(v.Index(i).Interface()))
+			}
+		}
+		return outSlice
+	}
+	return in
+}
+
 func transformStructIntoMapIfNeeded(inStruct interface{}) map[string]interface{} {
 	out := make(map[string]interface{})
 	v := reflect.ValueOf(inStruct)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
 	typ := v.Type()
 	if v.Kind() == reflect.Struct {
 		// Merge into the base map by the JSON struct tag
@@ -38,14 +61,14 @@ func transformStructIntoMapIfNeeded(inStruct interface{}) map[string]interface{}
 				if key == "" {
 					key = fi.Name
 				}
-				out[key] = v.Field(i).Interface()
+				out[key] = transformStructValues(v.Field(i).Interface())
 			}
 		}
 	} else if v.Kind() == reflect.Map {
 		// Merge into the base map
 		for _, key := range v.MapKeys() {
 			if !skipFieldSerialization(v.MapIndex(key)) {
-				out[key.String()] = v.MapIndex(key).Interface()
+				out[key.String()] = transformStructValues(v.MapIndex(key).Interface())
 			}
 		}
 	}

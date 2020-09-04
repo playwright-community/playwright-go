@@ -379,6 +379,21 @@ func (p *Page) Route(url interface{}, handler routeHandler) error {
 	return nil
 }
 
+func (b *Page) AddInitScript(options BrowserContextAddInitScriptOptions) error {
+	source := *options.Script
+	if options.Path != nil {
+		content, err := ioutil.ReadFile(*options.Path)
+		if err != nil {
+			return err
+		}
+		source = string(content)
+	}
+	_, err := b.channel.Send("addInitScript", map[string]interface{}{
+		"source": source,
+	})
+	return err
+}
+
 func newPage(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Page {
 	bt := &Page{
 		mainFrame: fromChannel(initializer["mainFrame"]).(*Frame),
