@@ -14,6 +14,7 @@ func (b *Browser) NewContext(options ...BrowserNewContextOptions) (*BrowserConte
 		return nil, fmt.Errorf("could not send message: %v", err)
 	}
 	context := fromChannel(channel).(*BrowserContext)
+	context.browser = b
 	b.contexts = append(b.contexts, context)
 	return context, nil
 }

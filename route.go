@@ -57,6 +57,7 @@ func (r *Route) Fulfill(options RouteFulfillOptions) error {
 		for key, val := range options.Headers {
 			headers[strings.ToLower(key)] = val
 		}
+		options.Headers = nil
 	}
 	if options.ContentType != nil {
 		headers["content-type"] = *options.ContentType
