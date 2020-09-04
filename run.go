@@ -13,7 +13,7 @@ import (
 
 func getDriverURL() (string, string) {
 	const baseURL = "https://storage.googleapis.com/mxschmitt-public-files/"
-	const version = "playwright-driver-1598658542214"
+	const version = "playwright-driver-1599218722159"
 	driverName := ""
 	switch runtime.GOOS {
 	case "windows":

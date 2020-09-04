@@ -21,3 +21,26 @@ func parseHeaders(headers []interface{}) map[string]string {
 	}
 	return out
 }
+
+type NetworkCookie struct {
+	Name     string `json:"name"`
+	Value    string `json:"value"`
+	Domain   string `json:"domain"`
+	Path     string `json:"path"`
+	Expires  int    `json:"expires"`
+	HttpOnly bool   `json:"httpOnly"`
+	Secure   bool   `json:"secure"`
+	SameSite string `json:"sameSite"`
+}
+
+type SetNetworkCookieParam struct {
+	Name     string  `json:"name"`
+	Value    string  `json:"value"`
+	URL      *string `json:"url"`
+	Domain   *string `json:"domain"`
+	Path     *string `json:"path"`
+	Expires  *int    `json:"expires"`
+	HttpOnly *bool   `json:"httpOnly"`
+	Secure   *bool   `json:"secure"`
+	SameSite *string `json:"sameSite"`
+}
