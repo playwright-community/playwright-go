@@ -34,10 +34,10 @@ func worker(id int, jobs chan job, results chan<- bool, browser *playwright.Brow
 		context, err := browser.NewContext(playwright.BrowserNewContextOptions{
 			UserAgent: playwright.String("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36"),
 		})
-		assertErrorToNilf("could not create context: %v", err)
+		assertErrorToNilf("could not create context: %w", err)
 
 		page, err := context.NewPage()
-		assertErrorToNilf("could not create page: %v", err)
+		assertErrorToNilf("could not create page: %w", err)
 
 		_, err = page.Goto("http://"+jobPayload.URL, playwright.PageGotoOptions{
 			WaitUntil: playwright.String("networkidle"),
@@ -53,12 +53,12 @@ func worker(id int, jobs chan job, results chan<- bool, browser *playwright.Brow
 		}
 		cwd, err := os.Getwd()
 		if err != nil {
-			assertErrorToNilf("could not get cwd %v", err)
+			assertErrorToNilf("could not get cwd %w", err)
 		}
 		_, err = page.Screenshot(playwright.PageScreenshotOptions{
 			Path: playwright.String(filepath.Join(cwd, "out", strings.Replace(jobPayload.URL, ".", "-", -1)+".png")),
 		})
-		assertErrorToNilf("could not create screenshot: %v", err)
+		assertErrorToNilf("could not create screenshot: %w", err)
 		fmt.Println("finish", jobPayload.URL)
 		context.Close()
 		results <- true
@@ -73,23 +73,23 @@ type job struct {
 func main() {
 	log.Println("Downloading Alexa top domains")
 	topDomains, err := getAlexaTopDomains()
-	assertErrorToNilf("could not get alexa top domains: %v", err)
+	assertErrorToNilf("could not get alexa top domains: %w", err)
 	log.Println("Downloaded Alexa top domains successfully")
 
 	cwd, err := os.Getwd()
 	if err != nil {
-		assertErrorToNilf("could not get cwd %v", err)
+		assertErrorToNilf("could not get cwd %w", err)
 	}
 	if err := os.Mkdir(filepath.Join(cwd, "out"), 0777); err != nil && !os.IsExist(err) {
-		assertErrorToNilf("could not create output directory %v", err)
+		assertErrorToNilf("could not create output directory %w", err)
 	}
 
 	pw, err := playwright.Run()
-	assertErrorToNilf("could not launch playwright: %v", err)
+	assertErrorToNilf("could not launch playwright: %w", err)
 	browser, err := pw.Chromium.Launch(playwright.BrowserTypeLaunchOptions{
 		Headless: playwright.Bool(true),
 	})
-	assertErrorToNilf("could not launch Chromium: %v", err)
+	assertErrorToNilf("could not launch Chromium: %w", err)
 
 	const numJobs = 30
 	jobs := make(chan job, numJobs)
@@ -107,28 +107,28 @@ func main() {
 	}
 
 	err = browser.Close()
-	assertErrorToNilf("could not close browser: %v", err)
+	assertErrorToNilf("could not close browser: %w", err)
 	err = pw.Stop()
-	assertErrorToNilf("could not stop Playwright: %v", err)
+	assertErrorToNilf("could not stop Playwright: %w", err)
 }
 
 func getAlexaTopDomains() ([]string, error) {
 	resp, err := http.Get("http://s3.amazonaws.com/alexa-static/top-1m.csv.zip")
 	if err != nil {
-		return nil, fmt.Errorf("could not get: %v", err)
+		return nil, fmt.Errorf("could not get: %w", err)
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("could not read body: %v", err)
+		return nil, fmt.Errorf("could not read body: %w", err)
 	}
 	defer resp.Body.Close()
 	zipReader, err := zip.NewReader(bytes.NewReader(body), int64(len(body)))
 	if err != nil {
-		return nil, fmt.Errorf("could not create zip reader: %v", err)
+		return nil, fmt.Errorf("could not create zip reader: %w", err)
 	}
 	alexaFile, err := zipReader.File[0].Open()
 	if err != nil {
-		return nil, fmt.Errorf("could not read alexa file: %v", err)
+		return nil, fmt.Errorf("could not read alexa file: %w", err)
 	}
 	defer alexaFile.Close()
 	reader := csv.NewReader(alexaFile)
@@ -139,7 +139,7 @@ func getAlexaTopDomains() ([]string, error) {
 			return out, nil
 		}
 		if err != nil {
-			return nil, fmt.Errorf("could not read csv: %v", err)
+			return nil, fmt.Errorf("could not read csv: %w", err)
 		}
 		out = append(out, record[1])
 	}

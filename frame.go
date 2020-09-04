@@ -259,9 +259,9 @@ func (f *Frame) Click(selector string, options ...PageClickOptions) error {
 }
 
 func (f *Frame) WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (*ElementHandle, error) {
-	channel, err := f.channel.Send("waitForSelector", options, map[string]interface{}{
+	channel, err := f.channel.Send("waitForSelector", map[string]interface{}{
 		"selector": selector,
-	})
+	}, options)
 	if err != nil {
 		return nil, err
 	}

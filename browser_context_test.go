@@ -121,7 +121,7 @@ func TestBrowserContextAddCookies(t *testing.T) {
 func TestBrowserContextAddInitScript(t *testing.T) {
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
-	require.NoError(t, helper.Page.AddInitScript(BrowserContextAddInitScriptOptions{
+	require.NoError(t, helper.Context.AddInitScript(BrowserContextAddInitScriptOptions{
 		Script: String(`window['injected'] = 123;`),
 	}))
 	_, err := helper.Page.Goto(helper.server.PREFIX + "/tamperable.html")

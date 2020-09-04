@@ -1,6 +1,7 @@
 package playwright
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -412,4 +413,29 @@ func TestPlaywrightDevices(t *testing.T) {
 		require.Greater(t, device.DeviceScaleFactor, 0)
 		require.NotEmpty(t, device.DefaultBrowserType)
 	}
+}
+
+func TestPageAddInitScript(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	require.NoError(t, helper.Page.AddInitScript(BrowserContextAddInitScriptOptions{
+		Script: String(`window['injected'] = 123;`),
+	}))
+	_, err := helper.Page.Goto(helper.server.PREFIX + "/tamperable.html")
+	require.NoError(t, err)
+	result, err := helper.Page.Evaluate(`() => window['result']`)
+	require.NoError(t, err)
+	require.Equal(t, 123, result)
+}
+
+func TestPageExpectSelectorTimeout(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+	err = helper.Page.Click("foobar", PageClickOptions{
+		Timeout: Int(500),
+	})
+	timeoutError := errors.Unwrap(err).(*TimeoutError)
+	require.Contains(t, timeoutError.Message, "Timeout 500ms exceeded.")
 }

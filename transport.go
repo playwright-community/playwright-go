@@ -19,10 +19,6 @@ type Transport struct {
 	rLock    sync.Mutex
 }
 
-func (t *Transport) SetDispatch(dispatch func(msg *Message)) {
-	t.dispatch = dispatch
-}
-
 func (t *Transport) Start() error {
 	reader := bufio.NewReader(t.stdout)
 	for {
@@ -31,13 +27,13 @@ func (t *Transport) Start() error {
 		if err == io.EOF {
 			return nil
 		} else if err != nil {
-			return fmt.Errorf("could not read padding: %v", err)
+			return fmt.Errorf("could not read padding: %w", err)
 		}
 		length := binary.LittleEndian.Uint32(lengthContent)
 
 		msg := &Message{}
 		if err := json.NewDecoder(io.LimitReader(reader, int64(length))).Decode(&msg); err != nil {
-			return fmt.Errorf("could not parse json: %v", err)
+			return fmt.Errorf("could not parse json: %w", err)
 		}
 		if os.Getenv("DEBUGP") != "" {
 			fmt.Print("RECV>")
@@ -73,7 +69,7 @@ type Message struct {
 func (t *Transport) Send(message map[string]interface{}) error {
 	msg, err := json.Marshal(message)
 	if err != nil {
-		return fmt.Errorf("could not marshal json: %v", err)
+		return fmt.Errorf("could not marshal json: %w", err)
 	}
 	if os.Getenv("DEBUGP") != "" {
 		fmt.Print("SEND>")
@@ -95,9 +91,10 @@ func (t *Transport) Send(message map[string]interface{}) error {
 	return nil
 }
 
-func newTransport(stdin io.WriteCloser, stdout io.ReadCloser) *Transport {
+func newTransport(stdin io.WriteCloser, stdout io.ReadCloser, dispatch func(msg *Message)) *Transport {
 	return &Transport{
-		stdout: stdout,
-		stdin:  stdin,
+		stdout:   stdout,
+		stdin:    stdin,
+		dispatch: dispatch,
 	}
 }

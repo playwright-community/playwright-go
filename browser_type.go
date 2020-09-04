@@ -19,7 +19,7 @@ func (b *BrowserType) ExecutablePath() string {
 func (b *BrowserType) Launch(options ...BrowserTypeLaunchOptions) (*Browser, error) {
 	channel, err := b.channel.Send("launch", options)
 	if err != nil {
-		return nil, fmt.Errorf("could not send message: %v", err)
+		return nil, fmt.Errorf("could not send message: %w", err)
 	}
 	return fromChannel(channel).(*Browser), nil
 }
