@@ -28,7 +28,7 @@ func (r *Request) Method() string {
 	return r.initializer["method"].(string)
 }
 
-func (r *Request) PostDataRaw() ([]byte, error) {
+func (r *Request) PostDataBuffer() ([]byte, error) {
 	if _, ok := r.initializer["postData"]; !ok {
 		return []byte{}, nil
 	}
@@ -36,7 +36,7 @@ func (r *Request) PostDataRaw() ([]byte, error) {
 }
 
 func (r *Request) PostData() (string, error) {
-	body, err := r.PostDataRaw()
+	body, err := r.PostDataBuffer()
 	if err != nil {
 		return "", err
 	}
@@ -44,7 +44,7 @@ func (r *Request) PostData() (string, error) {
 }
 
 func (r *Request) PostDataJSON(v interface{}) error {
-	body, err := r.PostDataRaw()
+	body, err := r.PostDataBuffer()
 	if err != nil {
 		return err
 	}

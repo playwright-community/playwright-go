@@ -113,7 +113,6 @@ func (p *Page) EvaluateOnSelectorAll(selector string, expression string, options
 
 func (p *Page) AddScriptTag(options PageAddScriptTagOptions) (*ElementHandle, error) {
 	return p.mainFrame.AddScriptTag(options)
-
 }
 
 func (p *Page) AddStyleTag(options PageAddStyleTagOptions) (*ElementHandle, error) {
