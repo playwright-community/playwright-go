@@ -26,6 +26,9 @@ func transformStructValues(in interface{}) interface{} {
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
+	if _, ok := in.(*Channel); ok {
+		return in
+	}
 	if v.Kind() == reflect.Map || v.Kind() == reflect.Struct {
 		return transformStructIntoMapIfNeeded(in)
 	}
@@ -137,10 +140,16 @@ func remapValue(inMapValue reflect.Value, outStructValue reflect.Value) {
 		for i := 0; i < outStructValue.NumField(); i++ {
 			fi := structTyp.Field(i)
 			key := strings.Split(fi.Tag.Get("json"), ",")[0]
+			structField := outStructValue.Field(i)
+			structFieldDeref := outStructValue.Field(i)
+			if structField.Type().Kind() == reflect.Ptr {
+				structField.Set(reflect.New(structField.Type().Elem()))
+				structFieldDeref = structField.Elem()
+			}
 			for _, e := range inMapValue.MapKeys() {
 				if key == e.String() {
 					value := inMapValue.MapIndex(e)
-					remapValue(value.Elem(), outStructValue.Field(i))
+					remapValue(value.Elem(), structFieldDeref)
 				}
 			}
 		}

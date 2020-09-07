@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"reflect"
 	"sync"
 	"testing"
@@ -76,6 +77,14 @@ func NewTestHelper(t *testing.T) *TestHelperData {
 		assetDir:   "tests/assets/",
 	}
 	return th
+}
+
+func (t *TestHelperData) Asset(path string) string {
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	return filepath.Join(cwd, "tests", "assets", path)
 }
 
 func (t *TestHelperData) AfterEach() {

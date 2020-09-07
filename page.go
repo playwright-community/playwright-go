@@ -10,15 +10,16 @@ import (
 
 type Page struct {
 	ChannelOwner
-	browserContext *BrowserContext
-	frames         []*Frame
-	workersLock    sync.Mutex
-	workers        []*Worker
-	mainFrame      *Frame
-	routesMu       sync.Mutex
-	routes         []*routeHandlerEntry
-	viewportSize   ViewportSize
-	ownedContext   *BrowserContext
+	timeoutSettings *timeoutSettings
+	browserContext  *BrowserContext
+	frames          []*Frame
+	workersLock     sync.Mutex
+	workers         []*Worker
+	mainFrame       *Frame
+	routesMu        sync.Mutex
+	routes          []*routeHandlerEntry
+	viewportSize    ViewportSize
+	ownedContext    *BrowserContext
 }
 
 func (p *Page) Context() *BrowserContext {
@@ -57,11 +58,17 @@ func (p *Page) Frames() []*Frame {
 }
 
 func (p *Page) SetDefaultNavigationTimeout(timeout int) {
-
+	p.timeoutSettings.SetNavigationTimeout(timeout)
+	p.channel.SendNoReply("setDefaultNavigationTimeoutNoReply", map[string]interface{}{
+		"timeout": timeout,
+	})
 }
 
 func (p *Page) SetDefaultTimeout(timeout int) {
-
+	p.timeoutSettings.SetTimeout(timeout)
+	p.channel.SendNoReply("setDefaultTimeoutNoReply", map[string]interface{}{
+		"timeout": timeout,
+	})
 }
 
 func (p *Page) QuerySelector(selector string) (*ElementHandle, error) {
@@ -264,8 +271,8 @@ func (p *Page) Click(selector string, options ...PageClickOptions) error {
 }
 
 func (p *Page) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	evChan := make(chan interface{}, 1)
-	p.Once(event, func(ev ...interface{}) {
+	evChan := make(chan interface{})
+	handler := func(ev ...interface{}) {
 		if len(predicate) == 0 {
 			evChan <- ev[0]
 		} else if len(predicate) == 1 {
@@ -274,8 +281,15 @@ func (p *Page) WaitForEvent(event string, predicate ...interface{}) interface{} 
 				evChan <- ev[0]
 			}
 		}
-	})
+	}
+	p.On(event, handler)
+	defer close(evChan)
+	defer p.RemoveListener(event, handler)
 	return <-evChan
+}
+
+func (p *Page) WaitForNavigation(options ...PageWaitForNavigationOptions) (*Response, error) {
+	return p.mainFrame.WaitForNavigation(options...)
 }
 
 func (p *Page) WaitForRequest(url interface{}, options ...interface{}) *Request {
@@ -316,14 +330,23 @@ func (p *Page) ExpectEvent(event string, cb func() error) (interface{}, error) {
 	return newExpectWrapper(p.WaitForEvent, []interface{}{event}, cb)
 }
 
+func (p *Page) ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (*Response, error) {
+	navigationOptions := make([]interface{}, 0)
+	for _, option := range options {
+		navigationOptions = append(navigationOptions, option)
+	}
+	response, err := newExpectWrapper(p.WaitForNavigation, navigationOptions, cb)
+	return response.(*Response), err
+}
+
 func (p *Page) ExpectConsoleMessage(cb func() error) (*ConsoleMessage, error) {
-	response, err := newExpectWrapper(p.WaitForEvent, []interface{}{"console"}, cb)
-	return response.(*ConsoleMessage), err
+	consoleMessage, err := newExpectWrapper(p.WaitForEvent, []interface{}{"console"}, cb)
+	return consoleMessage.(*ConsoleMessage), err
 }
 
 func (p *Page) ExpectedDialog(cb func() error) (*Download, error) {
-	download, err := newExpectWrapper(p.WaitForEvent, []interface{}{"download"}, cb)
-	return download.(*Download), err
+	dialog, err := newExpectWrapper(p.WaitForEvent, []interface{}{"download"}, cb)
+	return dialog.(*Download), err
 }
 
 func (p *Page) ExpectDownload(cb func() error) (*Download, error) {
@@ -406,14 +429,48 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 			Height: int(initializer["viewportSize"].(map[string]interface{})["height"].(float64)),
 			Width:  int(initializer["viewportSize"].(map[string]interface{})["height"].(float64)),
 		},
+		timeoutSettings: newTimeoutSettings(nil),
 	}
 	bt.frames = []*Frame{bt.mainFrame}
+	bt.mainFrame.page = bt
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.channel.On("console", func(payload ...interface{}) {
 		bt.Emit("console", fromChannel(payload[0].(map[string]interface{})["message"]))
 	})
+	bt.channel.On("crash", func(payload ...interface{}) {
+		bt.Emit("crash")
+	})
+	bt.channel.On("dialog", func(payload ...interface{}) {
+		bt.Emit("dialog", fromChannel(payload[0].(map[string]interface{})["dialog"]))
+	})
+	bt.channel.On("domcontentloaded", func(payload ...interface{}) {
+		bt.Emit("domcontentloaded")
+	})
 	bt.channel.On("download", func(payload ...interface{}) {
 		bt.Emit("download", fromChannel(payload[0].(map[string]interface{})["download"]))
+	})
+	bt.channel.On("fileChooser", func(payload ...interface{}) {
+		bt.Emit("fileChooser", newFileChooser(bt, payload[0].(map[string]interface{})["element"].(*ElementHandle), payload[0].(map[string]interface{})["isMultiple"].(bool)))
+	})
+	bt.channel.On("frameAttached", func(payload ...interface{}) {
+		frame := fromChannel(payload[0].(map[string]interface{})["frame"]).(*Frame)
+		frame.page = bt
+		bt.frames = append(bt.frames, frame)
+		bt.Emit("frameAttached", frame)
+	})
+	bt.channel.On("frameDetached", func(payload ...interface{}) {
+		frame := fromChannel(payload[0].(map[string]interface{})["frame"]).(*Frame)
+		frame.detached = true
+		frames := make([]*Frame, 0)
+		for i := 0; i < len(bt.frames); i++ {
+			if bt.frames[i] != frame {
+				frames = append(frames, frame)
+			}
+		}
+		if len(frames) != len(bt.frames) {
+			bt.frames = frames
+		}
+		bt.Emit("frameDetached", frame)
 	})
 	bt.channel.On("popup", func(payload ...interface{}) {
 		bt.Emit("popup", fromChannel(payload[0].(map[string]interface{})["page"]))

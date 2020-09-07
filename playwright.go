@@ -3,18 +3,13 @@
 // is ever-green, capable, reliable and fast.
 package playwright
 
-type Size struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
-}
-
 type DeviceDescriptor struct {
-	UserAgent          string `json:"userAgent"`
-	Viewport           Size   `json:"viewport"`
-	DeviceScaleFactor  int    `json:"deviceScaleFactor"`
-	IsMobile           bool   `json:"isMobile"`
-	HasTouch           bool   `json:"hasTouch"`
-	DefaultBrowserType string `json:"defaultBrowserType"`
+	UserAgent          string                     `json:"userAgent"`
+	Viewport           *BrowserNewContextViewport `json:"viewport"`
+	DeviceScaleFactor  int                        `json:"deviceScaleFactor"`
+	IsMobile           bool                       `json:"isMobile"`
+	HasTouch           bool                       `json:"hasTouch"`
+	DefaultBrowserType string                     `json:"defaultBrowserType"`
 }
 
 type Playwright struct {
@@ -39,7 +34,9 @@ func newPlaywright(parent *ChannelOwner, objectType string, guid string, initial
 	}
 	for _, dd := range initializer["deviceDescriptors"].([]interface{}) {
 		entry := dd.(map[string]interface{})
-		pw.Devices[entry["name"].(string)] = &DeviceDescriptor{}
+		pw.Devices[entry["name"].(string)] = &DeviceDescriptor{
+			Viewport: &BrowserNewContextViewport{},
+		}
 		remapMapToStruct(entry["descriptor"], pw.Devices[entry["name"].(string)])
 	}
 	pw.createChannelOwner(pw, parent, objectType, guid, initializer)
