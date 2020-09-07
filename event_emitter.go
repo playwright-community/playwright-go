@@ -13,7 +13,9 @@ type (
 	}
 	EventEmitter struct {
 		sync.Mutex
-		events map[string]*eventRegister
+		events              map[string]*eventRegister
+		addEventHandlers    []func(name string, handler eventHandler)
+		removeEventHandlers []func(name string, handler eventHandler)
 	}
 )
 
@@ -41,7 +43,18 @@ func (e *EventEmitter) On(name string, handler eventHandler) {
 	e.addEvent(name, handler, false)
 }
 
+func (e *EventEmitter) addEventHandler(handler func(name string, handler eventHandler)) {
+	e.addEventHandlers = append(e.addEventHandlers, handler)
+}
+
+func (e *EventEmitter) removeEventHandler(handler func(name string, handler eventHandler)) {
+	e.removeEventHandlers = append(e.removeEventHandlers, handler)
+}
+
 func (e *EventEmitter) RemoveListener(name string, handler eventHandler) {
+	for _, mitm := range e.removeEventHandlers {
+		mitm(name, handler)
+	}
 	e.Lock()
 	defer e.Unlock()
 	if _, ok := e.events[name]; !ok {
@@ -80,6 +93,9 @@ func (e *EventEmitter) ListenerCount(name string) int {
 }
 
 func (e *EventEmitter) addEvent(name string, handler eventHandler, once bool) {
+	for _, mitm := range e.addEventHandlers {
+		mitm(name, handler)
+	}
 	e.Lock()
 	if _, ok := e.events[name]; !ok {
 		e.events[name] = &eventRegister{

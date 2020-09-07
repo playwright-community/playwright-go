@@ -18,6 +18,7 @@ type Connection struct {
 	waitingForRemoteObjects     map[string]chan interface{}
 	objects                     map[string]*ChannelOwner
 	lastID                      int
+	lastIDLock                  sync.Mutex
 	rootObject                  *ChannelOwner
 	callbacks                   sync.Map
 	stopDriver                  func() error
@@ -139,8 +140,10 @@ func (c *Connection) replaceGuidsWithChannels(payload interface{}) interface{} {
 }
 
 func (c *Connection) SendMessageToServer(guid string, method string, params interface{}) (interface{}, error) {
+	c.lastIDLock.Lock()
 	c.lastID++
 	id := c.lastID
+	c.lastIDLock.Unlock()
 	message := map[string]interface{}{
 		"id":     id,
 		"guid":   guid,
