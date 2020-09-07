@@ -354,9 +354,9 @@ func (p *Page) ExpectDownload(cb func() error) (*Download, error) {
 	return download.(*Download), err
 }
 
-func (p *Page) ExpectFileChooser(cb func() error) (*ConsoleMessage, error) {
-	response, err := newExpectWrapper(p.WaitForEvent, []interface{}{"console"}, cb)
-	return response.(*ConsoleMessage), err
+func (p *Page) ExpectFileChooser(cb func() error) (*FileChooser, error) {
+	response, err := newExpectWrapper(p.WaitForEvent, []interface{}{"filechooser"}, cb)
+	return response.(*FileChooser), err
 }
 
 func (p *Page) ExpectLoadState(state string, cb func() error) (*ConsoleMessage, error) {
@@ -450,7 +450,7 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 		bt.Emit("download", fromChannel(payload[0].(map[string]interface{})["download"]))
 	})
 	bt.channel.On("fileChooser", func(payload ...interface{}) {
-		bt.Emit("fileChooser", newFileChooser(bt, payload[0].(map[string]interface{})["element"].(*ElementHandle), payload[0].(map[string]interface{})["isMultiple"].(bool)))
+		bt.Emit("filechooser", newFileChooser(bt, fromChannel(payload[0].(map[string]interface{})["element"]).(*ElementHandle), payload[0].(map[string]interface{})["isMultiple"].(bool)))
 	})
 	bt.channel.On("frameAttached", func(payload ...interface{}) {
 		frame := fromChannel(payload[0].(map[string]interface{})["frame"]).(*Frame)
@@ -509,5 +509,20 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 		bt.workers = append(bt.workers, worker)
 		bt.Emit("worker", worker)
 	})
+	bt.addEventHandler(func(name string, handler eventHandler) {
+		if name == "filechooser" && bt.ListenerCount(name) == 0 {
+			bt.channel.SendNoReply("setFileChooserInterceptedNoReply", map[string]interface{}{
+				"intercepted": true,
+			})
+		}
+	})
+	bt.removeEventHandler(func(name string, handler eventHandler) {
+		if name == "filechooser" && bt.ListenerCount(name) == 0 {
+			bt.channel.SendNoReply("setFileChooserInterceptedNoReply", map[string]interface{}{
+				"intercepted": false,
+			})
+		}
+	})
+
 	return bt
 }

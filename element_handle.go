@@ -24,6 +24,22 @@ func (e *ElementHandle) TextContent() (string, error) {
 	return textContent.(string), nil
 }
 
+func (e *ElementHandle) InnerText() (string, error) {
+	innerText, err := e.channel.Send("innerText")
+	if err != nil {
+		return "", err
+	}
+	return innerText.(string), nil
+}
+
+func (e *ElementHandle) InnerHTML() (string, error) {
+	innerHTML, err := e.channel.Send("innerHTML")
+	if err != nil {
+		return "", err
+	}
+	return innerHTML.(string), nil
+}
+
 func (e *ElementHandle) SetInputFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error {
 	_, err := e.channel.Send("setInputFiles", map[string]interface{}{
 		"files": normalizeFilePayloads(files),

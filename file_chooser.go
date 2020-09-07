@@ -24,8 +24,8 @@ type InputFile struct {
 	Buffer   []byte
 }
 
-func (f *FileChooser) SetFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error {
-	return f.elementHandle.SetInputFiles(files, options...)
+func (e *FileChooser) setFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error {
+	return e.elementHandle.SetInputFiles(files, options...)
 }
 
 func newFileChooser(page *Page, elementHandle *ElementHandle, isMultiple bool) *FileChooser {
