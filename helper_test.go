@@ -41,6 +41,7 @@ type TestHelperData struct {
 	IsWebKit   bool
 	server     *testServer
 	assetDir   string
+	utils      *testUtils
 }
 
 func NewTestHelper(t *testing.T) *TestHelperData {
@@ -75,6 +76,7 @@ func NewTestHelper(t *testing.T) *TestHelperData {
 		IsWebKit:   browserName == "webkit",
 		server:     newTestServer(),
 		assetDir:   "tests/assets/",
+		utils:      &testUtils{},
 	}
 	return th
 }
@@ -199,4 +201,25 @@ func newSyncSlice() *syncSlice {
 	return &syncSlice{
 		slice: make([]interface{}, 0),
 	}
+}
+
+type testUtils struct {
+}
+
+func (t *testUtils) AttachFrame(page *Page, frameId string, url string) (*Frame, error) {
+	_, err := page.EvaluateHandle(`async ({ frame_id, url }) => {
+		const frame = document.createElement('iframe');
+		frame.src = url;
+		frame.id = frame_id;
+		document.body.appendChild(frame);
+		await new Promise(x => frame.onload = x);
+		return frame;
+	}`, map[string]interface{}{
+		"frame_id": frameId,
+		"url":      url,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
 }

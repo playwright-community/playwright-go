@@ -369,10 +369,11 @@ func TestPageAddScriptTag(t *testing.T) {
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
 
-	_, err = helper.Page.AddScriptTag(PageAddScriptTagOptions{
+	scriptHandle, err := helper.Page.AddScriptTag(PageAddScriptTagOptions{
 		Url: String("injectedfile.js"),
 	})
 	require.NoError(t, err)
+	require.NotNil(t, scriptHandle.AsElement())
 	v, err := helper.Page.Evaluate("__injected")
 	require.NoError(t, err)
 	require.Equal(t, 42, v)

@@ -119,14 +119,17 @@ func serializeValue(value interface{}, handles *[]*Channel, depth int) interface
 		return aV
 	}
 	if refV.Kind() == reflect.Map {
+		out := []interface{}{}
 		vM := value.(map[string]interface{})
 		for key := range vM {
-			vM[key] = map[string]interface{}{
+			out = append(out, map[string]interface{}{
 				"k": key,
 				"v": serializeValue(vM[key], handles, depth+1),
-			}
+			})
 		}
-		return vM
+		return map[string]interface{}{
+			"o": out,
+		}
 	}
 	switch v := value.(type) {
 	case time.Time:

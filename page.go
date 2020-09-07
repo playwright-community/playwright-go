@@ -37,6 +37,14 @@ func (p *Page) Close(options ...PageCloseOptions) error {
 	return nil
 }
 
+func (p *Page) InnerText(selector string, options ...PageInnerTextOptions) (string, error) {
+	return p.mainFrame.InnerText(selector, options...)
+}
+
+func (p *Page) InnerHTML(selector string, options ...PageInnerHTMLOptions) (string, error) {
+	return p.mainFrame.InnerHTML(selector, options...)
+}
+
 func (p *Page) Opener() (*Page, error) {
 	channel, err := p.channel.Send("opener")
 	if err != nil {
@@ -403,6 +411,10 @@ func (p *Page) Route(url interface{}, handler routeHandler) error {
 		}
 	}
 	return nil
+}
+
+func (p *Page) GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error) {
+	return p.mainFrame.GetAttribute(selector, name, options...)
 }
 
 func (b *Page) AddInitScript(options BrowserContextAddInitScriptOptions) error {
