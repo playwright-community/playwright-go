@@ -447,7 +447,7 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 		bt.Emit("download", fromChannel(payload[0].(map[string]interface{})["download"]))
 	})
 	bt.channel.On("fileChooser", func(payload ...interface{}) {
-		bt.Emit("fileChooser", fromChannel(payload[0].(map[string]interface{})["element"]), payload[0].(map[string]interface{})["isMultiple"])
+		bt.Emit("fileChooser", newFileChooser(bt, payload[0].(map[string]interface{})["element"].(*ElementHandle), payload[0].(map[string]interface{})["isMultiple"].(bool)))
 	})
 	bt.channel.On("frameAttached", func(payload ...interface{}) {
 		frame := fromChannel(payload[0].(map[string]interface{})["frame"]).(*Frame)

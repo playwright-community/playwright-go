@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/danwakefield/fnmatch"
 )
@@ -294,8 +293,4 @@ func newTimeoutSettings(parent *timeoutSettings) *timeoutSettings {
 		timeout:           DEFAULT_TIMEOUT,
 		navigationTimeout: DEFAULT_TIMEOUT,
 	}
-}
-
-func monotonicTime() int {
-	return int(time.Now().UnixNano())
 }
