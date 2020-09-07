@@ -13,8 +13,13 @@ func Bool(v bool) *bool {
 }
 
 // Int is a helper routine that allocates a new int32 value
-// to store v and returns a pointer to it, but unlike Int32
-// its argument value is an int.
+// to store v and returns a pointer to it.
 func Int(v int) *int {
+	return &v
+}
+
+// Float is a helper routine that allocates a new float64 value
+// to store v and returns a pointer to it.
+func Float(v float64) *float64 {
 	return &v
 }

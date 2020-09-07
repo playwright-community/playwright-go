@@ -1,15 +1,24 @@
-// https://github.com/microsoft/playwright-python/blob/af97862582125bbcf6d476479342907e33356da6/api.json
-const api = require("./api.json");
+#!/usr/bin/env node
+const { execSync } = require("child_process")
 
-const makePascalCase = (v) => v[0].toUpperCase() + v.slice(1)
+const api = JSON.parse(execSync(".ms-playwright/playwright-driver-macos --print-api", {
+  env: {...process.env, NODE_OPTIONS: undefined}
+}).toString())
 
-const generateStructName = (className, funcName) => className + makePascalCase(funcName) + "Options"
+const makePascalCase = (v) => {
+  v = v.replace("_", "")
+  return v[0].toUpperCase() + v.slice(1)
+}
+
+const generateStructName = (className, funcName) => className + makePascalCase(funcName)
 
 const replaceMethodNames = (funcName) => funcName
   .replace("$$eval", "evalOnSelectorAll")
   .replace("$eval", "evalOnSelector")
 
-const generateStruct = (typeData, structName, makeStructPointer = true) => {
+let appendix = ""
+
+const generateStruct = (typeData, structNamePrefix, structName) => {
   const typeName = typeData.type.name
   const propName = makePascalCase(typeData.name)
   if (typeName.endsWith("Object") && Object.keys(typeData.type.properties).length > 0) {
@@ -17,9 +26,14 @@ const generateStruct = (typeData, structName, makeStructPointer = true) => {
     for (const property in typeData.type.properties) {
       structProperties.push(generateStruct(typeData.type.properties[property], makePascalCase(property)) + `\`json:"${property}"\``)
     }
-    return `${structName} ${makeStructPointer ? "*" : ""}struct {
+    const subStructName = structNamePrefix + structName
+    appendix += `type ${subStructName} struct {
         ${structProperties.join("\n")}
-      }`
+      }\n\n`
+    return `${structName} *${subStructName}`
+  }
+  if (["latitude", "longitude"].includes(typeData.name)) {
+    return `${propName} *float64`
   }
   const mapping = {
     "string": "*string",
@@ -63,14 +77,16 @@ for (const className in api) {
             structProperties.push(generateStruct(optionalParameters[property].type.properties[newProp], makePascalCase(newProp)) + `\`json:"${newProp}"\``)
           }
         } else {
-          structProperties.push(generateStruct(optionalParameters[property], makePascalCase(property)) + `\`json:"${property}"\``)
+          structProperties.push(generateStruct(optionalParameters[property], structName, makePascalCase(property)) + `\`json:"${property}"\``)
         }
       }
       if (structProperties.length > 0) {
-        console.log(`type ${structName} struct {
+        console.log(`type ${structName}Options struct {
         ${structProperties.join("\n")}
       }`)
       }
     }
   }
 }
+
+console.log(appendix)

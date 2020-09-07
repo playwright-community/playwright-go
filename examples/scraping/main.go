@@ -7,38 +7,44 @@ import (
 	"github.com/mxschmitt/playwright-go"
 )
 
-func assertErrorToNilf(message string, err error) {
-	if err != nil {
-		log.Fatalf(message, err)
-	}
-}
-
 func main() {
 	pw, err := playwright.Run()
-	assertErrorToNilf("could not launch playwright: %w", err)
+	if err != nil {
+		log.Fatalf("could not start playwright: %v", err)
+	}
 	browser, err := pw.Chromium.Launch()
-	assertErrorToNilf("could not launch Chromium: %w", err)
-	context, err := browser.NewContext()
-	assertErrorToNilf("could not create context: %w", err)
-	page, err := context.NewPage()
-	assertErrorToNilf("could not create page: %w", err)
+	if err != nil {
+		log.Fatalf("could not launch browser: %v", err)
+	}
+	page, err := browser.NewPage()
+	if err != nil {
+		log.Fatalf("could not create page: %v", err)
+	}
 	_, err = page.Goto("https://news.ycombinator.com")
-	assertErrorToNilf("could not goto: %w", err)
-
-	entries, err := page.EvaluateOnSelectorAll(".athing", `elements => [...elements].map(el => {
-      const linkElement = el.children[2].children[0]
-      return {
-        title: linkElement.innerHTML,
-      }
-    })`)
-	assertErrorToNilf("could not eval: %w", err)
-
-	for i, entry := range entries.([]interface{}) {
-		title := entry.(map[string]interface{})["title"]
-		fmt.Println(i+1, title)
+	if err != nil {
+		log.Fatalf("could not goto: %v", err)
+	}
+	entries, err := page.QuerySelectorAll(".athing")
+	if err != nil {
+		log.Fatalf("could not get entries: %v", err)
+	}
+	for i, entry := range entries {
+		titleElement, err := entry.QuerySelector("td.title > a")
+		if err != nil {
+			log.Fatalf("could not get title element: %v", err)
+		}
+		title, err := titleElement.TextContent()
+		if err != nil {
+			log.Fatalf("could not get title: %v", err)
+		}
+		fmt.Printf("%d: %s\n", i+1, title)
 	}
 	err = browser.Close()
-	assertErrorToNilf("could not close browser: %w", err)
+	if err != nil {
+		log.Fatalf("could not close browser: %v", err)
+	}
 	err = pw.Stop()
-	assertErrorToNilf("could not stop Playwright: %w", err)
+	if err != nil {
+		log.Fatalf("could not stop Playwright: %v", err)
+	}
 }

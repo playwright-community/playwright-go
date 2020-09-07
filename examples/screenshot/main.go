@@ -6,29 +6,37 @@ import (
 	"github.com/mxschmitt/playwright-go"
 )
 
-func assertErrorToNilf(message string, err error) {
-	if err != nil {
-		log.Fatalf(message, err)
-	}
-}
-
 func main() {
 	pw, err := playwright.Run()
-	assertErrorToNilf("could not launch playwright: %w", err)
+	if err != nil {
+		log.Fatalf("could not launch playwright: %v", err)
+	}
 	browser, err := pw.Chromium.Launch()
-	assertErrorToNilf("could not launch Chromium: %w", err)
-	context, err := browser.NewContext()
-	assertErrorToNilf("could not create context: %w", err)
-	page, err := context.NewPage()
-	assertErrorToNilf("could not create page: %w", err)
-	_, err = page.Goto("http://whatsmyuseragent.org/")
-	assertErrorToNilf("could not goto: %w", err)
+	if err != nil {
+		log.Fatalf("could not launch Chromium: %v", err)
+	}
+	page, err := browser.NewPage()
+	if err != nil {
+		log.Fatalf("could not create page: %v", err)
+	}
+	_, err = page.Goto("http://whatsmyuseragent.org/", playwright.PageGotoOptions{
+		WaitUntil: playwright.String("networkidle"),
+	})
+	if err != nil {
+		log.Fatalf("could not goto: %v", err)
+	}
 	_, err = page.Screenshot(playwright.PageScreenshotOptions{
 		Path: playwright.String("foo.png"),
 	})
-	assertErrorToNilf("could not create screenshot: %w", err)
+	if err != nil {
+		log.Fatalf("could not create screenshot: %v", err)
+	}
 	err = browser.Close()
-	assertErrorToNilf("could not close browser: %w", err)
+	if err != nil {
+		log.Fatalf("could not close browser: %v", err)
+	}
 	err = pw.Stop()
-	assertErrorToNilf("could not stop Playwright: %w", err)
+	if err != nil {
+		log.Fatalf("could not stop Playwright: %v", err)
+	}
 }
