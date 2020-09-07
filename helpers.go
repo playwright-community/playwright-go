@@ -27,10 +27,7 @@ func transformStructValues(in interface{}) interface{} {
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
-	if _, ok := in.(JSHandle); ok {
-		return in
-	}
-	if _, ok := in.(ElementHandle); ok {
+	if _, ok := in.(*Channel); ok {
 		return in
 	}
 	if v.Kind() == reflect.Map || v.Kind() == reflect.Struct {

@@ -26,13 +26,13 @@ func TestFileChooser(t *testing.T) {
 	require.NoError(t, err)
 	fileName, err := helper.Page.Evaluate("e => e.files[0].name", input)
 	require.NoError(t, err)
-	require.Equal(t, "fiel-to-upload.txt", fileName)
+	require.Equal(t, "file-to-upload.txt", fileName)
 	content, err := helper.Page.Evaluate(`e => {
         reader = new FileReader()
         promise = new Promise(fulfill => reader.onload = fulfill)
         reader.readAsText(e.files[0])
         return promise.then(() => reader.result)
-    }`)
+    }`, input)
 	require.NoError(t, err)
-	require.Equal(t, "contents of the file\n", content)
+	require.Equal(t, "contents of the file", content)
 }

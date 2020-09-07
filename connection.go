@@ -88,9 +88,9 @@ func (c *Connection) replaceChannelsWithGuids(payload interface{}) interface{} {
 	if payload == nil {
 		return nil
 	}
-	if valA, isChannel := payload.(Channel); isChannel {
+	if channel, isChannel := payload.(*Channel); isChannel {
 		return map[string]string{
-			"guid": valA.guid,
+			"guid": channel.guid,
 		}
 	}
 	v := reflect.ValueOf(payload)
