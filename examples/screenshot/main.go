@@ -31,12 +31,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not create screenshot: %v", err)
 	}
-	err = browser.Close()
-	if err != nil {
+	if err = browser.Close(); err != nil {
 		log.Fatalf("could not close browser: %v", err)
 	}
-	err = pw.Stop()
-	if err != nil {
+
+	if err = pw.Stop(); err != nil {
 		log.Fatalf("could not stop Playwright: %v", err)
 	}
 }

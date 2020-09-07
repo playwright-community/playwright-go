@@ -47,7 +47,7 @@ func TestRouteContinueOverwrite(t *testing.T) {
 	serverRequestChan := helper.server.WaitForRequestChan("/sleep.zzz")
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
-	err = helper.Page.Route("**/*", func(route *Route, request *Request) {
+	require.NoError(t, helper.Page.Route("**/*", func(route *Route, request *Request) {
 		headers := request.Headers()
 		headers["Foo"] = "bar"
 		require.NoError(t, route.Continue(RouteContinueOptions{
@@ -55,8 +55,7 @@ func TestRouteContinueOverwrite(t *testing.T) {
 			Headers:  headers,
 			PostData: "foobar",
 		}))
-	})
-	require.NoError(t, err)
+	}))
 	_, err = helper.Page.Evaluate(`() => fetch("/sleep.zzz")`)
 	require.NoError(t, err)
 	serverRequest := <-serverRequestChan
@@ -73,13 +72,12 @@ func TestRouteContinueOverwriteBodyBytes(t *testing.T) {
 	serverRequestChan := helper.server.WaitForRequestChan("/sleep.zzz")
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
-	err = helper.Page.Route("**/*", func(route *Route, request *Request) {
+	require.NoError(t, helper.Page.Route("**/*", func(route *Route, request *Request) {
 		require.NoError(t, route.Continue(RouteContinueOptions{
 			Method:   String("POST"),
 			PostData: []byte("foobar"),
 		}))
-	})
-	require.NoError(t, err)
+	}))
 	_, err = helper.Page.Evaluate(`() => fetch("/sleep.zzz")`)
 	require.NoError(t, err)
 	serverRequest := <-serverRequestChan
@@ -186,8 +184,7 @@ func TestRequestFinished(t *testing.T) {
 	})
 	response, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
-	err = response.Finished()
-	require.NoError(t, err)
+	require.NoError(t, response.Finished())
 	eventsStorage.Append("requestfinished")
 	require.Equal(t, []interface{}{"request", "response", "requestfinished"}, eventsStorage.Get())
 	require.Equal(t, response.Request(), request)
@@ -236,7 +233,7 @@ func TestRequestPostData(t *testing.T) {
 	})
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
-	err = helper.Page.Route("**/foobar", func(route *Route, request *Request) {
+	require.NoError(t, helper.Page.Route("**/foobar", func(route *Route, request *Request) {
 		var postData map[string]interface{}
 		require.NoError(t, request.PostDataJSON(&postData))
 		require.Equal(t, map[string]interface{}{
@@ -247,8 +244,7 @@ func TestRequestPostData(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, []byte(`{"foo":true,"kek":123}`), raw)
 		require.NoError(t, route.Continue())
-	})
-	require.NoError(t, err)
+	}))
 	_, err = helper.Page.Evaluate(`url => fetch(url, {
 		method: 'POST',
 		headers: {

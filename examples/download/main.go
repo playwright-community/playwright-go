@@ -29,17 +29,14 @@ func main() {
 	assertErrorToNilf("could not create page: %w", err)
 	_, err = page.Goto("http://localhost:1234")
 	assertErrorToNilf("could not goto: %w", err)
-	err = page.SetContent(`<a href="/download" download>download</a>`)
-	assertErrorToNilf("could not set content: %w", err)
+	assertErrorToNilf("could not set content: %w", page.SetContent(`<a href="/download" download>download</a>`))
 	download, err := page.ExpectDownload(func() error {
 		return page.Click("text=download")
 	})
 	assertErrorToNilf("could not download: %w", err)
 	fmt.Println(download.SuggestedFilename())
-	err = browser.Close()
-	assertErrorToNilf("could not close browser: %w", err)
-	err = pw.Stop()
-	assertErrorToNilf("could not stop Playwright: %w", err)
+	assertErrorToNilf("could not close browser: %w", browser.Close())
+	assertErrorToNilf("could not stop Playwright: %w", pw.Stop())
 }
 
 func startHttpServer() {

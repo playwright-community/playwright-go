@@ -12,6 +12,88 @@ type JSHandle struct {
 	ChannelOwner
 }
 
+func (f *JSHandle) Evaluate(expression string, options ...interface{}) (interface{}, error) {
+	var arg interface{}
+	forceExpression := false
+	if !isFunctionBody(expression) {
+		forceExpression = true
+	}
+	if len(options) == 1 {
+		arg = options[0]
+	} else if len(options) == 2 {
+		arg = options[0]
+		forceExpression = options[1].(bool)
+	}
+	result, err := f.channel.Send("evaluateExpression", map[string]interface{}{
+		"expression": expression,
+		"isFunction": !forceExpression,
+		"arg":        serializeArgument(arg),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return parseResult(result), nil
+}
+
+func (f *JSHandle) EvaluateHandle(expression string, options ...interface{}) (interface{}, error) {
+	var arg interface{}
+	forceExpression := false
+	if !isFunctionBody(expression) {
+		forceExpression = true
+	}
+	if len(options) == 1 {
+		arg = options[0]
+	} else if len(options) == 2 {
+		arg = options[0]
+		forceExpression = options[1].(bool)
+	}
+	result, err := f.channel.Send("evaluateExpressionHandle", map[string]interface{}{
+		"expression": expression,
+		"isFunction": !forceExpression,
+		"arg":        serializeArgument(arg),
+	})
+	if err != nil {
+		return nil, err
+	}
+	channelOwner := fromChannel(result)
+	if channelOwner == nil {
+		return nil, nil
+	}
+	return channelOwner.(*JSHandle), nil
+}
+
+func (j *JSHandle) GetProperty(name string) (*JSHandle, error) {
+	channel, err := j.channel.Send("getProperty", map[string]interface{}{
+		"name": name,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return fromChannel(channel).(*JSHandle), nil
+}
+
+func (j *JSHandle) GetProperties() (map[string]*JSHandle, error) {
+	properties, err := j.channel.Send("getPropertyList")
+	if err != nil {
+		return nil, err
+	}
+	propertiesMap := make(map[string]*JSHandle)
+	for _, property := range properties.([]interface{}) {
+		item := property.(map[string]interface{})
+		propertiesMap[item["name"].(string)] = fromChannel(item["value"]).(*JSHandle)
+	}
+	return propertiesMap, nil
+}
+
+func (j *JSHandle) AsElement() *ElementHandle {
+	return nil
+}
+
+func (j *JSHandle) Dispose() error {
+	_, err := j.channel.Send("dispose")
+	return err
+}
+
 func (j *JSHandle) JSONValue() (interface{}, error) {
 	v, err := j.channel.Send("jsonValue")
 	if err != nil {
@@ -119,14 +201,17 @@ func serializeValue(value interface{}, handles *[]*Channel, depth int) interface
 		return aV
 	}
 	if refV.Kind() == reflect.Map {
+		out := []interface{}{}
 		vM := value.(map[string]interface{})
 		for key := range vM {
-			vM[key] = map[string]interface{}{
+			out = append(out, map[string]interface{}{
 				"k": key,
 				"v": serializeValue(vM[key], handles, depth+1),
-			}
+			})
 		}
-		return vM
+		return map[string]interface{}{
+			"o": out,
+		}
 	}
 	switch v := value.(type) {
 	case time.Time:

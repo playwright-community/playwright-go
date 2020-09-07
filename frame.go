@@ -207,6 +207,9 @@ func (f *Frame) QuerySelector(selector string) (*ElementHandle, error) {
 	if err != nil {
 		return nil, err
 	}
+	if channel == nil {
+		return nil, nil
+	}
 	return fromChannel(channel).(*ElementHandle), nil
 }
 
@@ -295,7 +298,7 @@ func (f *Frame) EvaluateOnSelectorAll(selector string, expression string, option
 	return parseResult(result), nil
 }
 
-func (f *Frame) EvaluateHandle(expression string, options ...interface{}) (*JSHandle, error) {
+func (f *Frame) EvaluateHandle(expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -319,7 +322,7 @@ func (f *Frame) EvaluateHandle(expression string, options ...interface{}) (*JSHa
 	if channelOwner == nil {
 		return nil, nil
 	}
-	return channelOwner.(*JSHandle), nil
+	return channelOwner, nil
 }
 
 func (f *Frame) Click(selector string, options ...PageClickOptions) error {
@@ -390,4 +393,35 @@ func newFrame(parent *ChannelOwner, objectType string, guid string, initializer 
 		}
 	})
 	return bt
+}
+
+func (f *Frame) InnerText(selector string, options ...PageInnerTextOptions) (string, error) {
+	innerText, err := f.channel.Send("innerText", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	if err != nil {
+		return "", err
+	}
+	return innerText.(string), nil
+}
+
+func (f *Frame) InnerHTML(selector string, options ...PageInnerHTMLOptions) (string, error) {
+	innerHTML, err := f.channel.Send("innerHTML", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	if err != nil {
+		return "", err
+	}
+	return innerHTML.(string), nil
+}
+
+func (f *Frame) GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error) {
+	attribute, err := f.channel.Send("getAttribute", map[string]interface{}{
+		"selector": selector,
+		"name":     name,
+	}, options)
+	if err != nil {
+		return "", err
+	}
+	return attribute.(string), nil
 }
