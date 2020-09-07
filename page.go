@@ -271,8 +271,8 @@ func (p *Page) Click(selector string, options ...PageClickOptions) error {
 }
 
 func (p *Page) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	evChan := make(chan interface{}, 1)
-	p.Once(event, func(ev ...interface{}) {
+	evChan := make(chan interface{})
+	handler := func(ev ...interface{}) {
 		if len(predicate) == 0 {
 			evChan <- ev[0]
 		} else if len(predicate) == 1 {
@@ -281,7 +281,10 @@ func (p *Page) WaitForEvent(event string, predicate ...interface{}) interface{} 
 				evChan <- ev[0]
 			}
 		}
-	})
+	}
+	p.On(event, handler)
+	defer close(evChan)
+	defer p.RemoveListener(event, handler)
 	return <-evChan
 }
 
