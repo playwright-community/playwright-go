@@ -79,8 +79,6 @@ func main() {
 	assertErrorToNilf("could not click: %v", page.Click("text=Clear completed"))
 	assertCountOfTodos(0)
 
-	err = browser.Close()
-	assertErrorToNilf("could not close browser: %w", err)
-	err = pw.Stop()
-	assertErrorToNilf("could not stop Playwright: %w", err)
+	assertErrorToNilf("could not close browser: %w", browser.Close())
+	assertErrorToNilf("could not stop Playwright: %w", pw.Stop())
 }

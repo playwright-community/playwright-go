@@ -20,8 +20,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not create page: %v", err)
 	}
-	_, err = page.Goto("https://news.ycombinator.com")
-	if err != nil {
+	if _, err = page.Goto("https://news.ycombinator.com"); err != nil {
 		log.Fatalf("could not goto: %v", err)
 	}
 	entries, err := page.QuerySelectorAll(".athing")
@@ -35,16 +34,14 @@ func main() {
 		}
 		title, err := titleElement.TextContent()
 		if err != nil {
-			log.Fatalf("could not get title: %v", err)
+			log.Fatalf("could not get text content: %v", err)
 		}
 		fmt.Printf("%d: %s\n", i+1, title)
 	}
-	err = browser.Close()
-	if err != nil {
+	if err = browser.Close(); err != nil {
 		log.Fatalf("could not close browser: %v", err)
 	}
-	err = pw.Stop()
-	if err != nil {
+	if err = pw.Stop(); err != nil {
 		log.Fatalf("could not stop Playwright: %v", err)
 	}
 }

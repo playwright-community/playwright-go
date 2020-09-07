@@ -433,9 +433,8 @@ func TestPageExpectSelectorTimeout(t *testing.T) {
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
-	err = helper.Page.Click("foobar", PageClickOptions{
+	timeoutError := errors.Unwrap(helper.Page.Click("foobar", PageClickOptions{
 		Timeout: Int(500),
-	})
-	timeoutError := errors.Unwrap(err).(*TimeoutError)
+	})).(*TimeoutError)
 	require.Contains(t, timeoutError.Message, "Timeout 500ms exceeded.")
 }

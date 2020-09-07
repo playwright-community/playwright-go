@@ -106,10 +106,8 @@ func main() {
 		<-results
 	}
 
-	err = browser.Close()
-	assertErrorToNilf("could not close browser: %w", err)
-	err = pw.Stop()
-	assertErrorToNilf("could not stop Playwright: %w", err)
+	assertErrorToNilf("could not close browser: %w", browser.Close())
+	assertErrorToNilf("could not stop Playwright: %w", pw.Stop())
 }
 
 func getAlexaTopDomains() ([]string, error) {

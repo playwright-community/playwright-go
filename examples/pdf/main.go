@@ -27,8 +27,6 @@ func main() {
 		Path: playwright.String("playwright-example.pdf"),
 	})
 	assertErrorToNilf("could not create PDF: %w", err)
-	err = browser.Close()
-	assertErrorToNilf("could not close browser: %w", err)
-	err = pw.Stop()
-	assertErrorToNilf("could not stop Playwright: %w", err)
+	assertErrorToNilf("could not close browser: %w", browser.Close())
+	assertErrorToNilf("could not stop Playwright: %w", pw.Stop())
 }

@@ -16,14 +16,13 @@ func TestFileChooser(t *testing.T) {
 	require.NoError(t, err)
 	file, err := ioutil.ReadFile(helper.Asset("file-to-upload.txt"))
 	require.NoError(t, err)
-	err = input.SetInputFiles([]InputFile{
+	require.NoError(t, input.SetInputFiles([]InputFile{
 		{
 			Name:     "file-to-upload.txt",
 			MimeType: "text/plain",
 			Buffer:   file,
 		},
-	})
-	require.NoError(t, err)
+	}))
 	fileName, err := helper.Page.Evaluate("e => e.files[0].name", input)
 	require.NoError(t, err)
 	require.Equal(t, "file-to-upload.txt", fileName)
@@ -60,14 +59,13 @@ func TestFileChooserShouldEmitEvent(t *testing.T) {
 
 	require.Equal(t, elementHTML, inputElementHTML)
 
-	err = fileChooser.setFiles([]InputFile{
+	require.NoError(t, fileChooser.setFiles([]InputFile{
 		{
 			Name:     "file-to-upload.txt",
 			MimeType: "text/plain",
 			Buffer:   []byte("123"),
 		},
-	})
-	require.NoError(t, err)
+	}))
 	fileName, err := helper.Page.Evaluate("e => e.files[0].name", inputElement)
 	require.NoError(t, err)
 	require.Equal(t, "file-to-upload.txt", fileName)
