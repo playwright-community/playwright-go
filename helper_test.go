@@ -84,7 +84,7 @@ func NewTestHelper(t *testing.T) *TestHelperData {
 func (t *TestHelperData) Asset(path string) string {
 	cwd, err := os.Getwd()
 	if err != nil {
-		panic(err)
+		log.Fatalf("could not get cwd: %v", err)
 	}
 	return filepath.Join(cwd, "tests", "assets", path)
 }
