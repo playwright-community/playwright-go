@@ -418,6 +418,10 @@ func (p *Page) GetAttribute(selector string, name string, options ...PageGetAttr
 	return p.mainFrame.GetAttribute(selector, name, options...)
 }
 
+func (p *Page) Hover(selector string, options ...PageHoverOptions) error {
+	return p.mainFrame.Hover(selector, options...)
+}
+
 func (b *Page) AddInitScript(options BrowserContextAddInitScriptOptions) error {
 	source := *options.Script
 	if options.Path != nil {
