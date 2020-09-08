@@ -532,7 +532,7 @@ func TestPageWaitForTimeout(t *testing.T) {
 	after := time.Now()
 	duration := after.Sub(before)
 	require.True(t, duration > time.Second)
-	require.True(t, duration < time.Second+10*time.Millisecond)
+	require.True(t, duration < time.Second+100*time.Millisecond)
 }
 
 func TestPageWaitForFunction(t *testing.T) {
