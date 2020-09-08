@@ -543,3 +543,37 @@ func TestPageWaitForFunction(t *testing.T) {
 	_, err = helper.Page.WaitForFunction(`window.FOO === true`)
 	require.NoError(t, err)
 }
+
+func TestPageDblClick(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, helper.Page.SetContent(`<button ondblclick="window.clicked=true"/>`))
+	require.NoError(t, helper.Page.DblClick("button"))
+	result, err := helper.Page.Evaluate("window.clicked")
+	require.NoError(t, err)
+	require.True(t, result.(bool))
+}
+
+func TestPageFocus(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, helper.Page.SetContent(`<button onfocus="window.clicked=true"/>`))
+	require.NoError(t, helper.Page.Focus("button"))
+	result, err := helper.Page.Evaluate("window.clicked")
+	require.NoError(t, err)
+	require.True(t, result.(bool))
+}
+
+func TestPageTextContent(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.PREFIX + "/dom.html")
+	require.NoError(t, err)
+	content, err := helper.Page.TextContent("#inner")
+	require.NoError(t, err)
+	require.Equal(t, "Text,\nmore text", content)
+}

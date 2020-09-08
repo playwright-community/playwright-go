@@ -565,3 +565,15 @@ func (p *Page) WaitForTimeout(timeout int) {
 func (p *Page) WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (*JSHandle, error) {
 	return p.mainFrame.WaitForFunction(expression, options...)
 }
+
+func (p *Page) DblClick(expression string, options ...FrameDblclickOptions) error {
+	return p.mainFrame.DblClick(expression, options...)
+}
+
+func (p *Page) Focus(expression string, options ...FrameFocusOptions) error {
+	return p.mainFrame.Focus(expression, options...)
+}
+
+func (p *Page) TextContent(selector string, options ...FrameTextContentOptions) (string, error) {
+	return p.mainFrame.TextContent(selector, options...)
+}

@@ -526,8 +526,10 @@ func (f *Frame) ParentFrame() *Frame {
 	return f.parentFrame
 }
 
-func (f *Frame) TextContent() (string, error) {
-	textContent, err := f.channel.Send("textContent")
+func (f *Frame) TextContent(selector string, options ...FrameTextContentOptions) (string, error) {
+	textContent, err := f.channel.Send("textContent", map[string]interface{}{
+		"selector": selector,
+	}, options)
 	if err != nil {
 		return "", err
 	}
