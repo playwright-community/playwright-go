@@ -16,18 +16,54 @@ import (
 )
 
 var pw *Playwright
+var globalTestHelper *TestHelperData
 
 func TestMain(m *testing.M) {
+	BeforeAll()
+	code := m.Run()
+	AfterAll()
+	os.Exit(code)
+}
+
+func BeforeAll() {
 	var err error
 	pw, err = Run()
 	if err != nil {
 		log.Fatalf("could not start Playwright: %v", err)
 	}
-	code := m.Run()
+	browserName := os.Getenv("BROWSER")
+	var browserType *BrowserType
+	if browserName == "chromium" || browserName == "" {
+		browserType = pw.Chromium
+	} else if browserName == "firefox" {
+		browserType = pw.Firefox
+	} else if browserName == "webkit" {
+		browserType = pw.WebKit
+	}
+
+	browser, err := browserType.Launch(BrowserTypeLaunchOptions{
+		Headless: Bool(os.Getenv("HEADFUL") == ""),
+	})
+	if err != nil {
+		log.Fatalf("could not launch: %v", err)
+	}
+	globalTestHelper = &TestHelperData{
+		Playwright: pw,
+		Browser:    browser,
+		IsChromium: browserName == "chromium" || browserName == "",
+		IsFirefox:  browserName == "firefox",
+		IsWebKit:   browserName == "webkit",
+		server:     newTestServer(),
+		assetDir:   "tests/assets/",
+		utils:      &testUtils{},
+	}
+}
+
+func AfterAll() {
+	globalTestHelper.server.testServer.Close()
 	if err := pw.Stop(); err != nil {
 		log.Fatalf("could not start Playwright: %v", err)
 	}
-	os.Exit(code)
 }
 
 type TestHelperData struct {
@@ -44,51 +80,18 @@ type TestHelperData struct {
 	utils      *testUtils
 }
 
-var globalTestHelper *TestHelperData
-
 var CONTEXT_OPTIONS = BrowserNewContextOptions{
 	AcceptDownloads: Bool(true),
 }
 
-func NewTestHelper(t *testing.T) *TestHelperData {
-	if globalTestHelper != nil {
-		context, err := globalTestHelper.Browser.NewContext(CONTEXT_OPTIONS)
-		require.NoError(t, err)
-		globalTestHelper.Context = context
-		return globalTestHelper
-	}
-	browserName := os.Getenv("BROWSER")
-	var browserType *BrowserType
-	if browserName == "chromium" || browserName == "" {
-		browserType = pw.Chromium
-	} else if browserName == "firefox" {
-		browserType = pw.Firefox
-	} else if browserName == "webkit" {
-		browserType = pw.WebKit
-	}
-
-	browser, err := browserType.Launch(BrowserTypeLaunchOptions{
-		Headless: Bool(os.Getenv("HEADFUL") == ""),
-	})
+func BeforeEach(t *testing.T) *TestHelperData {
+	context, err := globalTestHelper.Browser.NewContext(CONTEXT_OPTIONS)
 	require.NoError(t, err)
-	context, err := browser.NewContext(CONTEXT_OPTIONS)
-	require.NoError(t, err)
+	globalTestHelper.Context = context
 	page, err := context.NewPage()
 	require.NoError(t, err)
-	th := &TestHelperData{
-		t:          t,
-		Playwright: pw,
-		Browser:    browser,
-		Context:    context,
-		Page:       page,
-		IsChromium: browserName == "chromium" || browserName == "",
-		IsFirefox:  browserName == "firefox",
-		IsWebKit:   browserName == "webkit",
-		server:     newTestServer(),
-		assetDir:   "tests/assets/",
-		utils:      &testUtils{},
-	}
-	return th
+	globalTestHelper.Page = page
+	return globalTestHelper
 }
 
 func (t *TestHelperData) Asset(path string) string {
@@ -120,6 +123,7 @@ func newTestServer() *testServer {
 }
 
 type testServer struct {
+	sync.Mutex
 	testServer          *httptest.Server
 	routes              map[string]http.HandlerFunc
 	requestSubscriberes map[string][]chan *http.Request
@@ -128,11 +132,15 @@ type testServer struct {
 }
 
 func (t *testServer) AfterEach() {
+	t.Lock()
 	t.routes = make(map[string]http.HandlerFunc)
 	t.requestSubscriberes = make(map[string][]chan *http.Request)
+	t.Unlock()
 }
 
 func (t *testServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
+	t.Lock()
+	defer t.Unlock()
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("Error reading body: %v", err)

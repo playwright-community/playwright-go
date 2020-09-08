@@ -7,7 +7,7 @@ import (
 )
 
 func TestConsoleShouldWork(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	messages := make(chan *ConsoleMessage, 1)
 	helper.Page.Once("console", func(args ...interface{}) {
@@ -33,7 +33,7 @@ func TestConsoleShouldWork(t *testing.T) {
 }
 
 func TestConsoleShouldEmitSameLogTwice(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	messages := make(chan string, 2)
 	helper.Page.On("console", func(args ...interface{}) {
@@ -47,7 +47,7 @@ func TestConsoleShouldEmitSameLogTwice(t *testing.T) {
 }
 
 func TestConsoleShouldUseTextForStr(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	messages := make(chan *ConsoleMessage, 1)
 	helper.Page.On("console", func(args ...interface{}) {
@@ -60,7 +60,7 @@ func TestConsoleShouldUseTextForStr(t *testing.T) {
 }
 
 func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	messagesChan := make(chan *ConsoleMessage, 6)
 	helper.Page.On("console", func(args ...interface{}) {
@@ -104,7 +104,7 @@ func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 }
 
 func TestConsoleShouldNotFailForWindowObjects(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	messages := make(chan *ConsoleMessage, 1)
 	helper.Page.Once("console", func(args ...interface{}) {
@@ -117,7 +117,7 @@ func TestConsoleShouldNotFailForWindowObjects(t *testing.T) {
 }
 
 func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	messages := make(chan *ConsoleMessage, 1)
 	helper.Page.Once("console", func(args ...interface{}) {

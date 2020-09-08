@@ -7,7 +7,7 @@ import (
 )
 
 func TestMouseMove(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	if helper.IsWebKit {
 		_, err := helper.Page.Evaluate(`() => new Promise(requestAnimationFrame)`)
@@ -30,7 +30,7 @@ func TestMouseMove(t *testing.T) {
 }
 
 func TestMouseDown(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -43,7 +43,7 @@ func TestMouseDown(t *testing.T) {
 }
 
 func TestMouseUp(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -57,7 +57,7 @@ func TestMouseUp(t *testing.T) {
 }
 
 func TestMouseClick(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -70,7 +70,7 @@ func TestMouseClick(t *testing.T) {
 }
 
 func TestMouseDblClick(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -83,7 +83,7 @@ func TestMouseDblClick(t *testing.T) {
 }
 
 func TestKeyboardDown(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -96,7 +96,7 @@ func TestKeyboardDown(t *testing.T) {
 }
 
 func TestKeyboardUp(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -109,7 +109,7 @@ func TestKeyboardUp(t *testing.T) {
 }
 
 func TestKeyboardInsertText(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -122,7 +122,7 @@ func TestKeyboardInsertText(t *testing.T) {
 }
 
 func TestKeyboardType(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -135,7 +135,7 @@ func TestKeyboardType(t *testing.T) {
 }
 
 func TestKeyboardInsertPress(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)

@@ -7,7 +7,7 @@ import (
 )
 
 func TestFrameWaitForNavigationShouldWork(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -21,7 +21,7 @@ func TestFrameWaitForNavigationShouldWork(t *testing.T) {
 }
 
 func TestFrameWaitForNavigationAnchorLinks(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -35,7 +35,7 @@ func TestFrameWaitForNavigationAnchorLinks(t *testing.T) {
 }
 
 func TestFrameInnerHTML(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.PREFIX + "/dom.html")
 	require.NoError(t, err)
@@ -52,7 +52,7 @@ more text</div>`, innerHTML)
 }
 
 func TestFrameSetInputFiles(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)

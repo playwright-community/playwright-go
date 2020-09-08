@@ -11,7 +11,7 @@ import (
 )
 
 func TestRouteContinue(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.NoError(t, helper.Page.SetExtraHTTPHeaders(map[string]string{
 		"extra-http": "42",
@@ -42,7 +42,7 @@ func TestRouteContinue(t *testing.T) {
 }
 
 func TestRouteContinueOverwrite(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	serverRequestChan := helper.server.WaitForRequestChan("/sleep.zzz")
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
@@ -67,7 +67,7 @@ func TestRouteContinueOverwrite(t *testing.T) {
 }
 
 func TestRouteContinueOverwriteBodyBytes(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	serverRequestChan := helper.server.WaitForRequestChan("/sleep.zzz")
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
@@ -88,7 +88,7 @@ func TestRouteContinueOverwriteBodyBytes(t *testing.T) {
 }
 
 func TestRouteFulfill(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	requestsChan := make(chan *Request, 1)
 	err := helper.Page.Route("**/empty.html", func(route *Route, request *Request) {
@@ -128,7 +128,7 @@ func TestRouteFulfill(t *testing.T) {
 }
 
 func TestRouteFulfillByteSlice(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	intercepted := make(chan bool, 1)
 	err := helper.Page.Route("**/empty.html", func(route *Route, request *Request) {
@@ -151,7 +151,7 @@ func TestRouteFulfillByteSlice(t *testing.T) {
 }
 
 func TestRouteFulfillPath(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	intercepted := make(chan bool, 1)
 	err := helper.Page.Route("**/empty.html", func(route *Route, request *Request) {
@@ -172,7 +172,7 @@ func TestRouteFulfillPath(t *testing.T) {
 }
 
 func TestRequestFinished(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	eventsStorage := newSyncSlice()
 	var request *Request
@@ -193,7 +193,7 @@ func TestRequestFinished(t *testing.T) {
 }
 
 func TestResponsePostData(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	requestData := map[string]interface{}{
 		"foo": "bar123",
@@ -210,7 +210,7 @@ func TestResponsePostData(t *testing.T) {
 }
 
 func TestRouteAbort(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	failedRequests := make(chan *Request, 1)
 	helper.Page.Once("requestFailed", func(events ...interface{}) {
@@ -227,7 +227,7 @@ func TestRouteAbort(t *testing.T) {
 }
 
 func TestRequestPostData(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	helper.server.SetRoute("/foobar", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)

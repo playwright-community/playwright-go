@@ -16,7 +16,7 @@ import (
 )
 
 func TestPageURL(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.Equal(t, "about:blank", helper.Page.URL())
 	_, err := helper.Page.Goto("https://example.com")
@@ -27,7 +27,7 @@ func TestPageURL(t *testing.T) {
 }
 
 func TestPageSetContent(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.NoError(t, helper.Page.SetContent("<h1>foo</h1>",
 		PageSetContentOptions{
@@ -39,7 +39,7 @@ func TestPageSetContent(t *testing.T) {
 }
 
 func TestPageScreenshot(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 
 	require.NoError(t, helper.Page.SetContent("<h1>foobar</h1>"))
@@ -63,7 +63,7 @@ func TestPageScreenshot(t *testing.T) {
 }
 
 func TestPagePDF(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	if !helper.IsChromium {
 		t.Skip("Skipping")
@@ -89,7 +89,7 @@ func TestPagePDF(t *testing.T) {
 }
 
 func TestPageQuerySelector(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.NoError(t, helper.Page.SetContent(`<div id="one">
 		<span id="two">
@@ -114,7 +114,7 @@ func TestPageQuerySelector(t *testing.T) {
 }
 
 func TestPageQuerySelectorAll(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.NoError(t, helper.Page.SetContent(`
 	<div class="foo">0</div>
@@ -132,7 +132,7 @@ func TestPageQuerySelectorAll(t *testing.T) {
 }
 
 func TestPageEvaluate(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	val, err := helper.Page.Evaluate(`() => 123`)
 	require.NoError(t, err)
@@ -140,7 +140,7 @@ func TestPageEvaluate(t *testing.T) {
 }
 
 func TestPageEvaluateOnSelectorAll(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	err := helper.Page.SetContent(`
 		<div class="foo">1</div>
@@ -154,7 +154,7 @@ func TestPageEvaluateOnSelectorAll(t *testing.T) {
 }
 
 func TestPageEvaluateOnSelector(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	err := helper.Page.SetContent(`
 		<div class="foo">bar</div>
@@ -166,7 +166,7 @@ func TestPageEvaluateOnSelector(t *testing.T) {
 }
 
 func TestPageExpectWorker(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	worker, err := helper.Page.ExpectWorker(func() error {
 		_, err := helper.Page.Goto(helper.server.PREFIX + "/worker/worker.html")
@@ -186,7 +186,7 @@ func TestPageExpectWorker(t *testing.T) {
 }
 
 func TestPageExpectRequest(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	request, err := helper.Page.ExpectRequest("**/*", func() error {
 		_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
@@ -199,7 +199,7 @@ func TestPageExpectRequest(t *testing.T) {
 }
 
 func TestPageExpectResponse(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	response, err := helper.Page.ExpectResponse("**/*", func() error {
 		_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
@@ -213,7 +213,7 @@ func TestPageExpectResponse(t *testing.T) {
 }
 
 func TestPageExpectPopup(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -227,30 +227,30 @@ func TestPageExpectPopup(t *testing.T) {
 
 func TestPageExpectNavigation(t *testing.T) {
 	t.Skip()
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 }
 
 func TestPageExpectLoadState(t *testing.T) {
 	t.Skip()
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 }
 
 func TestPageExpectFileChooser(t *testing.T) {
 	t.Skip()
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 }
 
 func TestPageExpectDialog(t *testing.T) {
 	t.Skip()
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 }
 
 func TestPageExpectConsoleMessage(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	message, err := helper.Page.ExpectConsoleMessage(func() error {
 		_, err := helper.Page.Evaluate(`console.log(123, "abc")`)
@@ -262,12 +262,12 @@ func TestPageExpectConsoleMessage(t *testing.T) {
 
 func TestPageExpectEvent(t *testing.T) {
 	t.Skip()
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 }
 
 func TestPageOpener(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	page, err := helper.Context.ExpectEvent("page", func() error {
 		_, err := helper.Page.Goto(helper.server.PREFIX + "/popup/window-open.html")
@@ -286,7 +286,7 @@ func TestPageOpener(t *testing.T) {
 }
 
 func TestPageTitle(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.NoError(t, helper.Page.SetContent(`<title>abc</title>`))
 	title, err := helper.Page.Title()
@@ -295,7 +295,7 @@ func TestPageTitle(t *testing.T) {
 }
 
 func TestPageWaitForSelector(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.NoError(t, helper.Page.SetContent(`<h1>myElement</h1>`))
 	element, err := helper.Page.WaitForSelector("text=myElement")
@@ -309,7 +309,7 @@ func TestPageWaitForSelector(t *testing.T) {
 }
 
 func TestPageDispatchEvent(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.PREFIX + "/input/button.html")
 	require.NoError(t, err)
@@ -320,7 +320,7 @@ func TestPageDispatchEvent(t *testing.T) {
 }
 
 func TestPageReload(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -334,7 +334,7 @@ func TestPageReload(t *testing.T) {
 }
 
 func TestPageGoBackGoForward(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	if helper.IsFirefox {
 		t.Skip("https://github.com/microsoft/playwright/issues/3693")
@@ -365,7 +365,7 @@ func TestPageGoBackGoForward(t *testing.T) {
 }
 
 func TestPageAddScriptTag(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -381,7 +381,7 @@ func TestPageAddScriptTag(t *testing.T) {
 }
 
 func TestPageAddScriptTagFile(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -397,7 +397,7 @@ func TestPageAddScriptTagFile(t *testing.T) {
 }
 
 func TestPageAddStyleTag(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -412,7 +412,7 @@ func TestPageAddStyleTag(t *testing.T) {
 }
 
 func TestPageAddStyleTagFile(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -427,7 +427,7 @@ func TestPageAddStyleTagFile(t *testing.T) {
 }
 
 func TestPageWaitForLoadState(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.PREFIX + "/one-style.html")
 	require.NoError(t, err)
@@ -436,7 +436,7 @@ func TestPageWaitForLoadState(t *testing.T) {
 }
 
 func TestPlaywrightDevices(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.Greater(t, len(helper.Playwright.Devices), 10)
 	for name, device := range helper.Playwright.Devices {
@@ -449,7 +449,7 @@ func TestPlaywrightDevices(t *testing.T) {
 }
 
 func TestPageAddInitScript(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.NoError(t, helper.Page.AddInitScript(BrowserContextAddInitScriptOptions{
 		Script: String(`window['injected'] = 123;`),
@@ -462,7 +462,7 @@ func TestPageAddInitScript(t *testing.T) {
 }
 
 func TestPageExpectSelectorTimeout(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -473,7 +473,7 @@ func TestPageExpectSelectorTimeout(t *testing.T) {
 }
 
 func TestPageType(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -486,7 +486,7 @@ func TestPageType(t *testing.T) {
 }
 
 func TestPagePress(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -499,7 +499,7 @@ func TestPagePress(t *testing.T) {
 }
 
 func TestPageCheck(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -511,8 +511,8 @@ func TestPageCheck(t *testing.T) {
 	require.Equal(t, true, value)
 }
 
-func TestPageUnCheck(t *testing.T) {
-	helper := NewTestHelper(t)
+func TestPageUncheck(t *testing.T) {
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -525,7 +525,7 @@ func TestPageUnCheck(t *testing.T) {
 }
 
 func TestPageWaitForTimeout(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	before := time.Now()
 	helper.Page.WaitForTimeout(1000)
@@ -536,7 +536,7 @@ func TestPageWaitForTimeout(t *testing.T) {
 }
 
 func TestPageWaitForFunction(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Evaluate(`() => setTimeout(() => window.FOO = true, 500)`)
 	require.NoError(t, err)
@@ -545,7 +545,7 @@ func TestPageWaitForFunction(t *testing.T) {
 }
 
 func TestPageDblClick(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -557,7 +557,7 @@ func TestPageDblClick(t *testing.T) {
 }
 
 func TestPageFocus(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -569,7 +569,7 @@ func TestPageFocus(t *testing.T) {
 }
 
 func TestPageTextContent(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.PREFIX + "/dom.html")
 	require.NoError(t, err)

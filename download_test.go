@@ -11,7 +11,7 @@ import (
 )
 
 func TestDownloadBasic(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	helper.server.SetRoute("/downloadWithFilename", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/octet-stream")

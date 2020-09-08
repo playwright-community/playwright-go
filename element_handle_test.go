@@ -7,7 +7,7 @@ import (
 )
 
 func TestElementHandleInnerText(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.PREFIX + "/dom.html")
 	require.NoError(t, err)
@@ -22,7 +22,7 @@ func TestElementHandleInnerText(t *testing.T) {
 }
 
 func TestElementHandleOwnerFrame(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -37,7 +37,7 @@ func TestElementHandleOwnerFrame(t *testing.T) {
 	require.Equal(t, "iframe1", ownerFrame.Name())
 }
 func TestElementHandleContentFrame(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -50,7 +50,7 @@ func TestElementHandleContentFrame(t *testing.T) {
 	require.Equal(t, frame, helper.Page.Frames()[1])
 }
 func TestElementHandleGetAttribute(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.PREFIX + "/dom.html")
 	require.NoError(t, err)
@@ -65,7 +65,7 @@ func TestElementHandleGetAttribute(t *testing.T) {
 }
 
 func TestElementHandleDispatchEvent(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.PREFIX + "/input/button.html")
 	require.NoError(t, err)
@@ -76,7 +76,7 @@ func TestElementHandleDispatchEvent(t *testing.T) {
 }
 
 func TestElementHandleHover(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.PREFIX + "/input/scrollable.html")
 	require.NoError(t, err)
@@ -89,7 +89,7 @@ func TestElementHandleHover(t *testing.T) {
 }
 
 func TestElementHandleClick(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.PREFIX + "/input/button.html")
 	require.NoError(t, err)
@@ -102,7 +102,7 @@ func TestElementHandleClick(t *testing.T) {
 }
 
 func TestElementHandleDblClick(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.PREFIX + "/input/button.html")
 	require.NoError(t, err)

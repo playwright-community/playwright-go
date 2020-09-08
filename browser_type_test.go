@@ -7,7 +7,7 @@ import (
 )
 
 func TestBrowserName(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.Equal(t, helper.Playwright.Chromium.Name(), "chromium")
 	require.Equal(t, helper.Playwright.Firefox.Name(), "firefox")
@@ -15,7 +15,7 @@ func TestBrowserName(t *testing.T) {
 }
 
 func TestExecutablePath(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.Greater(t, len(helper.Playwright.Chromium.ExecutablePath()), 0)
 }
