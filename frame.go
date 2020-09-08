@@ -473,7 +473,11 @@ func (f *Frame) WaitForFunction(expression string, options ...FrameWaitForFuncti
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(result).(*JSHandle), nil
+	handle := result.(map[string]interface{})["handle"]
+	if handle == nil {
+		return nil, nil
+	}
+	return handle.(*JSHandle), nil
 }
 
 func (f *Frame) Title() (string, error) {

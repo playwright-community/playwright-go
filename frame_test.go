@@ -33,3 +33,39 @@ func TestFrameWaitForNavigationAnchorLinks(t *testing.T) {
 	require.Nil(t, response)
 	require.Equal(t, helper.server.EMPTY_PAGE+"#foobar", helper.Page.URL())
 }
+
+func TestFrameInnerHTML(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.PREFIX + "/dom.html")
+	require.NoError(t, err)
+	handle, err := helper.Page.QuerySelector("#outer")
+	require.NoError(t, err)
+	innerHTML, err := handle.InnerHTML()
+	require.NoError(t, err)
+	require.Equal(t, `<div id="inner">Text,
+more text</div>`, innerHTML)
+	innerHTML, err = helper.Page.InnerHTML("#outer")
+	require.NoError(t, err)
+	require.Equal(t, `<div id="inner">Text,
+more text</div>`, innerHTML)
+}
+
+func TestFrameSetInputFiles(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, helper.Page.SetContent("<input type=file>"))
+
+	require.NoError(t, helper.Page.SetInputFiles("input", []InputFile{
+		{
+			Name:     "file-to-upload.txt",
+			MimeType: "text/plain",
+			Buffer:   []byte("123"),
+		},
+	}))
+	fileName, err := helper.Page.EvaluateOnSelector("input", "e => e.files[0].name")
+	require.NoError(t, err)
+	require.Equal(t, "file-to-upload.txt", fileName)
+}
