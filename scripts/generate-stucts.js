@@ -1,9 +1,8 @@
 #!/usr/bin/env node
-const { execSync } = require("child_process")
 
-const api = JSON.parse(execSync(".ms-playwright/playwright-driver-macos --print-api", {
-  env: {...process.env, NODE_OPTIONS: undefined}
-}).toString())
+const { getAPIDocs } = require("./helpers")
+
+const api = getAPIDocs()
 
 const makePascalCase = (v) => {
   v = v.replace("_", "")

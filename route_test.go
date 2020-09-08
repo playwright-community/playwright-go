@@ -240,7 +240,7 @@ func TestRequestPostData(t *testing.T) {
 			"foo": true,
 			"kek": float64(123),
 		}, postData)
-		raw, err := request.PostDataRaw()
+		raw, err := request.PostDataBuffer()
 		require.NoError(t, err)
 		require.Equal(t, []byte(`{"foo":true,"kek":123}`), raw)
 		require.NoError(t, route.Continue())

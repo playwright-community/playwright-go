@@ -59,7 +59,7 @@ func TestFileChooserShouldEmitEvent(t *testing.T) {
 
 	require.Equal(t, elementHTML, inputElementHTML)
 
-	require.NoError(t, fileChooser.setFiles([]InputFile{
+	require.NoError(t, fileChooser.SetFiles([]InputFile{
 		{
 			Name:     "file-to-upload.txt",
 			MimeType: "text/plain",

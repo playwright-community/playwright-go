@@ -24,7 +24,7 @@ type InputFile struct {
 	Buffer   []byte
 }
 
-func (e *FileChooser) setFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error {
+func (e *FileChooser) SetFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error {
 	return e.elementHandle.SetInputFiles(files, options...)
 }
 

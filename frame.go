@@ -44,11 +44,6 @@ func (f *Frame) Content() (string, error) {
 	return content.(string), err
 }
 
-func (f *Frame) Title() (string, error) {
-	title, err := f.channel.Send("title")
-	return title.(string), err
-}
-
 func (f *Frame) Goto(url string, options ...PageGotoOptions) (*Response, error) {
 	channel, err := f.channel.Send("goto", map[string]interface{}{
 		"url": url,
@@ -93,22 +88,6 @@ func (f *Frame) AddStyleTag(options PageAddStyleTagOptions) (*ElementHandle, err
 		return nil, err
 	}
 	return fromChannel(channel).(*ElementHandle), nil
-}
-
-func (f *Frame) Type(selector, text string, options ...PageTypeOptions) error {
-	_, err := f.channel.Send("type", map[string]interface{}{
-		"selector": selector,
-		"text":     text,
-	}, options)
-	return err
-}
-
-func (f *Frame) Press(selector, key string, options ...PagePressOptions) error {
-	_, err := f.channel.Send("press", map[string]interface{}{
-		"selector": selector,
-		"key":      key,
-	}, options)
-	return err
 }
 
 func (f *Frame) Page() *Page {
@@ -424,4 +403,73 @@ func (f *Frame) GetAttribute(selector string, name string, options ...PageGetAtt
 		return "", err
 	}
 	return attribute.(string), nil
+}
+
+func (e *Frame) SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error {
+	_, err := e.channel.Send("setInputFiles", map[string]interface{}{
+		"selector": selector,
+		"files":    normalizeFilePayloads(files),
+	}, options)
+	return err
+}
+
+func (f *Frame) Type(selector, text string, options ...PageTypeOptions) error {
+	_, err := f.channel.Send("type", map[string]interface{}{
+		"selector": selector,
+		"text":     text,
+	}, options)
+	return err
+}
+
+func (f *Frame) Press(selector, key string, options ...PagePressOptions) error {
+	_, err := f.channel.Send("press", map[string]interface{}{
+		"selector": selector,
+		"key":      key,
+	}, options)
+	return err
+}
+
+func (f *Frame) Check(selector string, options ...FrameCheckOptions) error {
+	_, err := f.channel.Send("check", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	return err
+}
+
+func (f *Frame) Uncheck(selector string, options ...FrameUncheckOptions) error {
+	_, err := f.channel.Send("uncheck", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	return err
+}
+
+func (f *Frame) WaitForTimeout(timeout int) {
+	time.Sleep(time.Duration(timeout) * time.Millisecond)
+}
+
+func (f *Frame) WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (*JSHandle, error) {
+	var option FrameWaitForFunctionOptions
+	if len(options) == 1 {
+		option = options[0]
+	}
+	forceExpression := false
+	if !isFunctionBody(expression) {
+		forceExpression = true
+	}
+	result, err := f.channel.Send("evaluateExpression", map[string]interface{}{
+		"expression": expression,
+		"isFunction": !forceExpression,
+		"arg":        serializeArgument(option.Arg),
+		"timeout":    option.Timeout,
+		"polling":    option.Polling,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return fromChannel(result).(*JSHandle), nil
+}
+
+func (f *Frame) Title() (string, error) {
+	title, err := f.channel.Send("title")
+	return title.(string), err
 }
