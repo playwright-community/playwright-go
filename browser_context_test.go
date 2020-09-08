@@ -13,7 +13,7 @@ func TestBrowserContextNewPage(t *testing.T) {
 
 func TestBrowserContextClose(t *testing.T) {
 	helper := NewTestHelper(t)
-	defer helper.AfterEach()
+	defer helper.AfterEach(false)
 	context, err := helper.Browser.NewContext()
 	require.NoError(t, err)
 	require.Equal(t, 2, len(helper.Browser.Contexts()))

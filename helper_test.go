@@ -44,7 +44,19 @@ type TestHelperData struct {
 	utils      *testUtils
 }
 
+var globalTestHelper *TestHelperData
+
+var CONTEXT_OPTIONS = BrowserNewContextOptions{
+	AcceptDownloads: Bool(true),
+}
+
 func NewTestHelper(t *testing.T) *TestHelperData {
+	if globalTestHelper != nil {
+		context, err := globalTestHelper.Browser.NewContext(CONTEXT_OPTIONS)
+		require.NoError(t, err)
+		globalTestHelper.Context = context
+		return globalTestHelper
+	}
 	browserName := os.Getenv("BROWSER")
 	var browserType *BrowserType
 	if browserName == "chromium" || browserName == "" {
@@ -59,9 +71,7 @@ func NewTestHelper(t *testing.T) *TestHelperData {
 		Headless: Bool(os.Getenv("HEADFUL") == ""),
 	})
 	require.NoError(t, err)
-	context, err := browser.NewContext(BrowserNewContextOptions{
-		AcceptDownloads: Bool(true),
-	})
+	context, err := browser.NewContext(CONTEXT_OPTIONS)
 	require.NoError(t, err)
 	page, err := context.NewPage()
 	require.NoError(t, err)
@@ -89,11 +99,13 @@ func (t *TestHelperData) Asset(path string) string {
 	return filepath.Join(cwd, "tests", "assets", path)
 }
 
-func (t *TestHelperData) AfterEach() {
-	if err := t.Browser.Close(); err != nil {
-		t.t.Errorf("could not close browser: %w", err)
+func (t *TestHelperData) AfterEach(closeContext ...bool) {
+	if len(closeContext) == 0 {
+		if err := t.Context.Close(); err != nil {
+			t.t.Errorf("could not close context: %v", err)
+		}
 	}
-	t.server.Stop()
+	t.server.AfterEach()
 }
 
 func newTestServer() *testServer {
@@ -115,8 +127,7 @@ type testServer struct {
 	EMPTY_PAGE          string
 }
 
-func (t *testServer) Stop() {
-	t.testServer.Close()
+func (t *testServer) AfterEach() {
 	t.routes = make(map[string]http.HandlerFunc)
 	t.requestSubscriberes = make(map[string][]chan *http.Request)
 }
