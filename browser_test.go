@@ -7,25 +7,25 @@ import (
 )
 
 func TestBrowserIsConnected(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.True(t, helper.Browser.IsConnected)
 }
 
 func TestBrowserVersion(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.Greater(t, len(helper.Browser.Version()), 2)
 }
 
 func TestBrowserNewContext(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.Equal(t, 1, len(helper.Context.Pages()))
 }
 
 func TestBrowserNewPage(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.Equal(t, 1, len(helper.Browser.Contexts()))
 	page, err := helper.Browser.NewPage()

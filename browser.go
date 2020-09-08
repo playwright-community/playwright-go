@@ -1,11 +1,15 @@
 package playwright
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 type Browser struct {
 	ChannelOwner
 	IsConnected bool
 	contexts    []*BrowserContext
+	contextsMu  sync.Mutex
 }
 
 func (b *Browser) NewContext(options ...BrowserNewContextOptions) (*BrowserContext, error) {
@@ -15,7 +19,9 @@ func (b *Browser) NewContext(options ...BrowserNewContextOptions) (*BrowserConte
 	}
 	context := fromChannel(channel).(*BrowserContext)
 	context.browser = b
+	b.contextsMu.Lock()
 	b.contexts = append(b.contexts, context)
+	b.contextsMu.Unlock()
 	return context, nil
 }
 
@@ -34,6 +40,8 @@ func (b *Browser) NewPage(options ...BrowserNewContextOptions) (*Page, error) {
 }
 
 func (b *Browser) Contexts() []*BrowserContext {
+	b.contextsMu.Lock()
+	defer b.contextsMu.Unlock()
 	return b.contexts
 }
 

@@ -12,6 +12,17 @@ type ChannelOwner struct {
 }
 
 func (c *ChannelOwner) Dispose() {
+	// Clean up from parent and connection.
+	if c.parent != nil {
+		delete(c.parent.objects, c.guid)
+	}
+	delete(c.connection.objects, c.guid)
+
+	// Dispose all children.
+	for _, object := range c.objects {
+		object.Dispose()
+	}
+	c.objects = make(map[string]*ChannelOwner)
 }
 
 func (c *ChannelOwner) createChannelOwner(self interface{}, parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) {

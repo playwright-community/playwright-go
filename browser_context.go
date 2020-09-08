@@ -170,12 +170,14 @@ func newBrowserContext(parent *ChannelOwner, objectType string, guid string, ini
 	bt.channel.On("close", func(payload ...interface{}) {
 		if bt.browser != nil {
 			contexts := make([]*BrowserContext, 0)
+			bt.browser.contextsMu.Lock()
 			for _, context := range bt.browser.contexts {
 				if context != bt {
 					contexts = append(contexts, context)
 				}
 			}
 			bt.browser.contexts = contexts
+			bt.browser.contextsMu.Unlock()
 		}
 		bt.Emit("close")
 	})

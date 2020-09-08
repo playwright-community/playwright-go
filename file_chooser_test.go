@@ -8,7 +8,7 @@ import (
 )
 
 func TestFileChooser(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.PREFIX + "/input/fileupload.html")
 	require.NoError(t, err)
@@ -37,7 +37,7 @@ func TestFileChooser(t *testing.T) {
 }
 
 func TestFileChooserShouldEmitEvent(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)

@@ -7,12 +7,12 @@ import (
 )
 
 func TestBrowserContextNewPage(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 }
 
 func TestBrowserContextClose(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach(false)
 	context, err := helper.Browser.NewContext()
 	require.NoError(t, err)
@@ -26,7 +26,7 @@ func TestBrowserContextClose(t *testing.T) {
 }
 
 func TestBrowserContextOffline(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	offline, err := helper.Page.Evaluate("window.navigator.onLine")
 	require.NoError(t, err)
@@ -44,7 +44,7 @@ func TestBrowserContextOffline(t *testing.T) {
 }
 
 func TestBrowserContextSetExtraHTTPHeaders(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.NoError(t, helper.Context.SetExtraHTTPHeaders(map[string]string{
 		"extra-http": "42",
@@ -62,7 +62,7 @@ func TestBrowserContextSetExtraHTTPHeaders(t *testing.T) {
 }
 
 func TestBrowserContextSetGeolocation(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.NoError(t, helper.Context.GrantPermissions([]string{"geolocation"}))
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
@@ -83,7 +83,7 @@ func TestBrowserContextSetGeolocation(t *testing.T) {
 }
 
 func TestBrowserContextAddCookies(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -120,7 +120,7 @@ func TestBrowserContextAddCookies(t *testing.T) {
 }
 
 func TestBrowserContextAddInitScript(t *testing.T) {
-	helper := NewTestHelper(t)
+	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.NoError(t, helper.Context.AddInitScript(BrowserContextAddInitScriptOptions{
 		Script: String(`window['injected'] = 123;`),
