@@ -19,22 +19,19 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not create page: %v", err)
 	}
-	_, err = page.Goto("http://whatsmyuseragent.org/", playwright.PageGotoOptions{
+	if _, err = page.Goto("http://whatsmyuseragent.org/", playwright.PageGotoOptions{
 		WaitUntil: playwright.String("networkidle"),
-	})
-	if err != nil {
+	}); err != nil {
 		log.Fatalf("could not goto: %v", err)
 	}
-	_, err = page.Screenshot(playwright.PageScreenshotOptions{
+	if _, err = page.Screenshot(playwright.PageScreenshotOptions{
 		Path: playwright.String("foo.png"),
-	})
-	if err != nil {
+	}); err != nil {
 		log.Fatalf("could not create screenshot: %v", err)
 	}
 	if err = browser.Close(); err != nil {
 		log.Fatalf("could not close browser: %v", err)
 	}
-
 	if err = pw.Stop(); err != nil {
 		log.Fatalf("could not stop Playwright: %v", err)
 	}
