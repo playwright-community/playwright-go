@@ -28,7 +28,7 @@ func (m *Mouse) Up(options ...MouseUpOptions) error {
 	return err
 }
 
-func (m *Mouse) Click(x, y float64, options MouseClickOptions) error {
+func (m *Mouse) Click(x, y float64, options ...MouseClickOptions) error {
 	_, err := m.channel.Send("mouseClick", map[string]interface{}{
 		"x": x,
 		"y": y,
@@ -42,8 +42,9 @@ func (m *Mouse) DblClick(x, y float64, options ...MouseDblclickOptions) error {
 		option = options[0]
 	}
 	return m.Click(x, y, MouseClickOptions{
-		Button: option.Button,
-		Delay:  option.Delay,
+		ClickCount: Int(2),
+		Button:     option.Button,
+		Delay:      option.Delay,
 	})
 }
 
@@ -78,26 +79,16 @@ func (m *Keyboard) InsertText(text string) error {
 	return err
 }
 
-func (m *Keyboard) Type(text string, delays ...int) error {
-	var delay *int
-	if len(delays) == 1 {
-		delay = &delays[0]
-	}
+func (m *Keyboard) Type(text string, options ...KeyboardTypeOptions) error {
 	_, err := m.channel.Send("keyboardInsertText", map[string]interface{}{
-		"text":  text,
-		"delay": delay,
-	})
+		"text": text,
+	}, options)
 	return err
 }
 
-func (m *Keyboard) Press(key string, delays ...int) error {
-	var delay *int
-	if len(delays) == 1 {
-		delay = &delays[0]
-	}
+func (m *Keyboard) Press(key string, options ...KeyboardPressOptions) error {
 	_, err := m.channel.Send("keyboardPress", map[string]interface{}{
-		"key":   key,
-		"delay": delay,
-	})
+		"key": key,
+	}, options)
 	return err
 }

@@ -405,6 +405,13 @@ func (f *Frame) GetAttribute(selector string, name string, options ...PageGetAtt
 	return attribute.(string), nil
 }
 
+func (f *Frame) Hover(selector string, options ...PageHoverOptions) error {
+	_, err := f.channel.Send("hover", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	return err
+}
+
 func (e *Frame) SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error {
 	_, err := e.channel.Send("setInputFiles", map[string]interface{}{
 		"selector": selector,
