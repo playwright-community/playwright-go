@@ -20,6 +20,42 @@ type Frame struct {
 	loadStates  *safeStringSet
 }
 
+func newFrame(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Frame {
+	var loadStates *safeStringSet
+	if ls, ok := initializer["loadStates"].([]string); ok {
+		loadStates = newSafeStringSet(ls)
+	} else {
+		loadStates = newSafeStringSet([]string{})
+	}
+	bt := &Frame{
+		name:        initializer["name"].(string),
+		url:         initializer["url"].(string),
+		loadStates:  loadStates,
+		childFrames: make([]*Frame, 0),
+	}
+	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
+
+	channelOwner := fromNullableChannel(initializer["parentFrame"])
+	if channelOwner != nil {
+		bt.parentFrame = channelOwner.(*Frame)
+		bt.parentFrame.childFrames = append(bt.parentFrame.childFrames, bt)
+	}
+
+	bt.channel.On("navigated", bt.onFrameNavigated)
+	bt.channel.On("loadstate", func(event ...interface{}) {
+		ev := event[0].(map[string]interface{})
+		if ev["add"] != nil {
+			add := ev["add"].(string)
+			bt.loadStates.Add(add)
+			bt.Emit("loadstate", add)
+		} else if ev["remove"] != nil {
+			remove := ev["remove"].(string)
+			bt.loadStates.Remove(remove)
+		}
+	})
+	return bt
+}
+
 func (f *Frame) URL() string {
 	f.RLock()
 	defer f.RUnlock()
@@ -338,42 +374,6 @@ func (f *Frame) DispatchEvent(selector, typ string, options ...PageDispatchEvent
 	return err
 }
 
-func newFrame(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Frame {
-	var loadStates *safeStringSet
-	if ls, ok := initializer["loadStates"].([]string); ok {
-		loadStates = newSafeStringSet(ls)
-	} else {
-		loadStates = newSafeStringSet([]string{})
-	}
-	bt := &Frame{
-		name:        initializer["name"].(string),
-		url:         initializer["url"].(string),
-		loadStates:  loadStates,
-		childFrames: make([]*Frame, 0),
-	}
-	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
-
-	channelOwner := fromNullableChannel(initializer["parentFrame"])
-	if channelOwner != nil {
-		bt.parentFrame = channelOwner.(*Frame)
-		bt.parentFrame.childFrames = append(bt.parentFrame.childFrames, bt)
-	}
-
-	bt.channel.On("navigated", bt.onFrameNavigated)
-	bt.channel.On("loadstate", func(event ...interface{}) {
-		ev := event[0].(map[string]interface{})
-		if ev["add"] != nil {
-			add := ev["add"].(string)
-			bt.loadStates.Add(add)
-			bt.Emit("loadstate", add)
-		} else if ev["remove"] != nil {
-			remove := ev["remove"].(string)
-			bt.loadStates.Remove(remove)
-		}
-	})
-	return bt
-}
-
 func (f *Frame) InnerText(selector string, options ...PageInnerTextOptions) (string, error) {
 	innerText, err := f.channel.Send("innerText", map[string]interface{}{
 		"selector": selector,
@@ -479,4 +479,53 @@ func (f *Frame) WaitForFunction(expression string, options ...FrameWaitForFuncti
 func (f *Frame) Title() (string, error) {
 	title, err := f.channel.Send("title")
 	return title.(string), err
+}
+
+func (f *Frame) ChildFrames() []*Frame {
+	return f.childFrames
+}
+
+func (f *Frame) DblClick(selector string, options ...FrameDblclickOptions) error {
+	_, err := f.channel.Send("dblclick", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	return err
+}
+
+func (f *Frame) Fill(selector string, options ...FrameFillOptions) error {
+	_, err := f.channel.Send("fill", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	return err
+}
+
+func (f *Frame) Focus(selector string, options ...FrameFocusOptions) error {
+	_, err := f.channel.Send("focus", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	return err
+}
+
+func (f *Frame) FrameElement() (*ElementHandle, error) {
+	elementHandle, err := f.channel.Send("frameElement")
+	if err != nil {
+		return nil, err
+	}
+	return elementHandle.(*ElementHandle), nil
+}
+
+func (f *Frame) IsDetached() bool {
+	return f.detached
+}
+
+func (f *Frame) ParentFrame() *Frame {
+	return f.parentFrame
+}
+
+func (f *Frame) TextContent() (string, error) {
+	textContent, err := f.channel.Send("textContent")
+	if err != nil {
+		return "", err
+	}
+	return textContent.(string), nil
 }
