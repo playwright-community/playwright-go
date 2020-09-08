@@ -79,26 +79,17 @@ func (m *Keyboard) InsertText(text string) error {
 	return err
 }
 
-func (m *Keyboard) Type(text string, delays ...int) error {
-	var delay *int
-	if len(delays) == 1 {
-		delay = &delays[0]
-	}
+func (m *Keyboard) Type(text string, options ...KeyboardTypeOptions) error {
 	_, err := m.channel.Send("keyboardInsertText", map[string]interface{}{
 		"text":  text,
 		"delay": delay,
-	})
+	}, options)
 	return err
 }
 
-func (m *Keyboard) Press(key string, delays ...int) error {
-	var delay *int
-	if len(delays) == 1 {
-		delay = &delays[0]
-	}
+func (m *Keyboard) Press(key string, options ...KeyboardPressOptions) error {
 	_, err := m.channel.Send("keyboardPress", map[string]interface{}{
-		"key":   key,
-		"delay": delay,
-	})
+		"key": key,
+	}, options)
 	return err
 }
