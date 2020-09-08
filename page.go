@@ -545,3 +545,35 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 
 	return bt
 }
+
+func (p *Page) SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error {
+	return p.mainFrame.SetInputFiles(selector, files, options...)
+}
+
+func (p *Page) Check(selector string, options ...FrameCheckOptions) error {
+	return p.mainFrame.Check(selector, options...)
+}
+
+func (p *Page) Uncheck(selector string, options ...FrameUncheckOptions) error {
+	return p.mainFrame.Uncheck(selector, options...)
+}
+
+func (p *Page) WaitForTimeout(timeout int) {
+	p.mainFrame.WaitForTimeout(timeout)
+}
+
+func (p *Page) WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (*JSHandle, error) {
+	return p.mainFrame.WaitForFunction(expression, options...)
+}
+
+func (p *Page) DblClick(expression string, options ...FrameDblclickOptions) error {
+	return p.mainFrame.DblClick(expression, options...)
+}
+
+func (p *Page) Focus(expression string, options ...FrameFocusOptions) error {
+	return p.mainFrame.Focus(expression, options...)
+}
+
+func (p *Page) TextContent(selector string, options ...FrameTextContentOptions) (string, error) {
+	return p.mainFrame.TextContent(selector, options...)
+}

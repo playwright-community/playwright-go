@@ -34,6 +34,7 @@ func TestElementHandleOwnerFrame(t *testing.T) {
 	ownerFrame, err := elementHandle.(*ElementHandle).OwnerFrame()
 	require.NoError(t, err)
 	require.Equal(t, ownerFrame, frame)
+	require.Equal(t, "iframe1", ownerFrame.Name())
 }
 func TestElementHandleContentFrame(t *testing.T) {
 	helper := NewTestHelper(t)

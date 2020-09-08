@@ -102,6 +102,7 @@ func TestRouteFulfill(t *testing.T) {
 		require.Equal(t, "", postData)
 		require.True(t, request.IsNavigationRequest())
 		require.Equal(t, "document", request.ResourceType())
+		require.Equal(t, helper.Page, helper.Page.MainFrame().Page())
 		require.Equal(t, request.Frame(), helper.Page.MainFrame())
 		require.Equal(t, "about:blank", request.Frame().URL())
 		require.NoError(t, route.Fulfill(RouteFulfillOptions{

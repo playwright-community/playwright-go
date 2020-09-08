@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/h2non/filetype"
 	"github.com/stretchr/testify/require"
@@ -379,6 +380,22 @@ func TestPageAddScriptTag(t *testing.T) {
 	require.Equal(t, 42, v)
 }
 
+func TestPageAddScriptTagFile(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+
+	scriptHandle, err := helper.Page.AddScriptTag(PageAddScriptTagOptions{
+		Path: String(helper.Asset("injectedfile.js")),
+	})
+	require.NoError(t, err)
+	require.NotNil(t, scriptHandle.AsElement())
+	v, err := helper.Page.Evaluate("__injected")
+	require.NoError(t, err)
+	require.Equal(t, 42, v)
+}
+
 func TestPageAddStyleTag(t *testing.T) {
 	helper := NewTestHelper(t)
 	defer helper.AfterEach()
@@ -387,6 +404,21 @@ func TestPageAddStyleTag(t *testing.T) {
 
 	_, err = helper.Page.AddStyleTag(PageAddStyleTagOptions{
 		Url: String("injectedstyle.css"),
+	})
+	require.NoError(t, err)
+	v, err := helper.Page.Evaluate("window.getComputedStyle(document.querySelector('body')).getPropertyValue('background-color')")
+	require.NoError(t, err)
+	require.Equal(t, "rgb(255, 0, 0)", v)
+}
+
+func TestPageAddStyleTagFile(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+
+	_, err = helper.Page.AddStyleTag(PageAddStyleTagOptions{
+		Path: String(helper.Asset("injectedstyle.css")),
 	})
 	require.NoError(t, err)
 	v, err := helper.Page.Evaluate("window.getComputedStyle(document.querySelector('body')).getPropertyValue('background-color')")
@@ -438,4 +470,110 @@ func TestPageExpectSelectorTimeout(t *testing.T) {
 		Timeout: Int(500),
 	})).(*TimeoutError)
 	require.Contains(t, timeoutError.Message, "Timeout 500ms exceeded.")
+}
+
+func TestPageType(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, helper.Page.SetContent("<input type='text' />"))
+
+	require.NoError(t, helper.Page.Type("input", "hello"))
+	value, err := helper.Page.EvaluateOnSelector("input", "el => el.value")
+	require.NoError(t, err)
+	require.Equal(t, "hello", value)
+}
+
+func TestPagePress(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, helper.Page.SetContent("<input type='text' />"))
+
+	require.NoError(t, helper.Page.Press("input", "h"))
+	value, err := helper.Page.EvaluateOnSelector("input", "el => el.value")
+	require.NoError(t, err)
+	require.Equal(t, "h", value)
+}
+
+func TestPageCheck(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, helper.Page.SetContent("<input id='checkbox' type='checkbox'></input>"))
+
+	require.NoError(t, helper.Page.Check("input"))
+	value, err := helper.Page.EvaluateOnSelector("input", "el => el.checked")
+	require.NoError(t, err)
+	require.Equal(t, true, value)
+}
+
+func TestPageUnCheck(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, helper.Page.SetContent("<input id='checkbox' type='checkbox' checked></input>"))
+
+	require.NoError(t, helper.Page.Uncheck("input"))
+	value, err := helper.Page.EvaluateOnSelector("input", "el => el.checked")
+	require.NoError(t, err)
+	require.Equal(t, false, value)
+}
+
+func TestPageWaitForTimeout(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	before := time.Now()
+	helper.Page.WaitForTimeout(1000)
+	after := time.Now()
+	duration := after.Sub(before)
+	require.True(t, duration > time.Second)
+	require.True(t, duration < time.Second+100*time.Millisecond)
+}
+
+func TestPageWaitForFunction(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Evaluate(`() => setTimeout(() => window.FOO = true, 500)`)
+	require.NoError(t, err)
+	_, err = helper.Page.WaitForFunction(`window.FOO === true`)
+	require.NoError(t, err)
+}
+
+func TestPageDblClick(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, helper.Page.SetContent(`<button ondblclick="window.clicked=true"/>`))
+	require.NoError(t, helper.Page.DblClick("button"))
+	result, err := helper.Page.Evaluate("window.clicked")
+	require.NoError(t, err)
+	require.True(t, result.(bool))
+}
+
+func TestPageFocus(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, helper.Page.SetContent(`<button onfocus="window.clicked=true"/>`))
+	require.NoError(t, helper.Page.Focus("button"))
+	result, err := helper.Page.Evaluate("window.clicked")
+	require.NoError(t, err)
+	require.True(t, result.(bool))
+}
+
+func TestPageTextContent(t *testing.T) {
+	helper := NewTestHelper(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.PREFIX + "/dom.html")
+	require.NoError(t, err)
+	content, err := helper.Page.TextContent("#inner")
+	require.NoError(t, err)
+	require.Equal(t, "Text,\nmore text", content)
 }
