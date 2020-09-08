@@ -81,8 +81,7 @@ func (m *Keyboard) InsertText(text string) error {
 
 func (m *Keyboard) Type(text string, options ...KeyboardTypeOptions) error {
 	_, err := m.channel.Send("keyboardInsertText", map[string]interface{}{
-		"text":  text,
-		"delay": delay,
+		"text": text,
 	}, options)
 	return err
 }
