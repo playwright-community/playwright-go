@@ -10,6 +10,8 @@ import (
 
 type Page struct {
 	ChannelOwner
+	Mouse           *Mouse
+	Keyboard        *Keyboard
 	timeoutSettings *timeoutSettings
 	browserContext  *BrowserContext
 	frames          []*Frame
@@ -445,6 +447,8 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 	bt.frames = []*Frame{bt.mainFrame}
 	bt.mainFrame.page = bt
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
+	bt.Mouse = newMouse(bt.channel)
+	bt.Keyboard = newKeyboard(bt.channel)
 	bt.channel.On("console", func(payload ...interface{}) {
 		bt.Emit("console", fromChannel(payload[0].(map[string]interface{})["message"]))
 	})
