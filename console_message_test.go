@@ -131,4 +131,5 @@ func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
 	message := <-messages
 	require.Contains(t, message.Text(), "Access-Control-Allow-Origin")
 	require.Equal(t, "error", message.Type())
+	require.Equal(t, "about:blank", message.Location().URL)
 }

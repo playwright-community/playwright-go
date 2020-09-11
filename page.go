@@ -460,7 +460,9 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 		bt.Emit("crash")
 	})
 	bt.channel.On("dialog", func(payload ...interface{}) {
-		bt.Emit("dialog", fromChannel(payload[0].(map[string]interface{})["dialog"]))
+		go func() {
+			bt.Emit("dialog", fromChannel(payload[0].(map[string]interface{})["dialog"]))
+		}()
 	})
 	bt.channel.On("domcontentloaded", func(payload ...interface{}) {
 		bt.Emit("domcontentloaded")
