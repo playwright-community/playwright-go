@@ -41,6 +41,9 @@ func transformStructValues(in interface{}) interface{} {
 		}
 		return outSlice
 	}
+	if v.Interface() == Null() {
+		return "null"
+	}
 	return in
 }
 

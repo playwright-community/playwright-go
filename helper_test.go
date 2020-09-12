@@ -164,6 +164,12 @@ func (s *testServer) SetRoute(path string, f http.HandlerFunc) {
 	s.routes[path] = f
 }
 
+func (s *testServer) SetRedirect(from, to string) {
+	s.SetRoute(from, func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, to, http.StatusFound)
+	})
+}
+
 func (s *testServer) WaitForRequestChan(path string) <-chan *http.Request {
 	if _, ok := s.requestSubscriberes[path]; !ok {
 		s.requestSubscriberes[path] = make([]chan *http.Request, 0)
@@ -241,4 +247,21 @@ func (t *testUtils) AttachFrame(page *Page, frameId string, url string) (*Frame,
 		return nil, err
 	}
 	return nil, nil
+}
+
+func (tu *testUtils) VerifyViewport(t *testing.T, page *Page, width, height int) {
+	require.Equal(t, page.ViewportSize().Width, width)
+	require.Equal(t, page.ViewportSize().Height, height)
+	innerWidth, err := page.Evaluate("window.innerWidth")
+	require.NoError(t, err)
+	require.Equal(t, innerWidth, width)
+	innerHeight, err := page.Evaluate("window.innerHeight")
+	require.NoError(t, err)
+	require.Equal(t, innerHeight, height)
+}
+
+func (tu *testUtils) AssertEval(t *testing.T, page *Page, script string, expected interface{}) {
+	result, err := page.Evaluate(script)
+	require.NoError(t, err)
+	require.Equal(t, expected, result)
 }

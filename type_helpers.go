@@ -23,3 +23,9 @@ func Int(v int) *int {
 func Float(v float64) *float64 {
 	return &v
 }
+
+// Null will be used in certain scenarios where a strict nil pointer
+// check is not possible
+func Null() interface{} {
+	return "PW_NULL"
+}

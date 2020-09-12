@@ -131,3 +131,16 @@ func TestBrowserContextAddInitScript(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 123, result)
 }
+
+func TestBrowserContextAddInitScriptWithPath(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	require.NoError(t, helper.Context.AddInitScript(BrowserContextAddInitScriptOptions{
+		Path: String(helper.Asset("injectedfile.js")),
+	}))
+	_, err := helper.Page.Goto(helper.server.PREFIX + "/tamperable.html")
+	require.NoError(t, err)
+	result, err := helper.Page.Evaluate(`() => window['result']`)
+	require.NoError(t, err)
+	require.Equal(t, 123, result)
+}

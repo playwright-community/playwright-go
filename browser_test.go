@@ -34,3 +34,12 @@ func TestBrowserNewPage(t *testing.T) {
 	require.NoError(t, page.Close())
 	require.Equal(t, 1, len(helper.Browser.Contexts()))
 }
+
+func TestBrowserClose(t *testing.T) {
+	pw, err := Run()
+	require.NoError(t, err)
+	browser, err := pw.Chromium.Launch()
+	require.NoError(t, err)
+	require.NoError(t, browser.Close())
+	require.NoError(t, pw.Stop())
+}

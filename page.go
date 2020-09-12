@@ -195,14 +195,16 @@ type ViewportSize struct {
 
 func (p *Page) SetViewportSize(width, height int) error {
 	_, err := p.channel.Send("setViewportSize", map[string]interface{}{
-		"width":  width,
-		"height": height,
+		"viewportSize": map[string]interface{}{
+			"width":  width,
+			"height": height,
+		},
 	})
 	if err != nil {
 		return err
 	}
-	p.viewportSize.Height = height
 	p.viewportSize.Width = width
+	p.viewportSize.Height = height
 	return nil
 }
 
@@ -427,7 +429,10 @@ func (p *Page) Hover(selector string, options ...PageHoverOptions) error {
 }
 
 func (b *Page) AddInitScript(options BrowserContextAddInitScriptOptions) error {
-	source := *options.Script
+	var source string
+	if options.Script != nil {
+		source = *options.Script
+	}
 	if options.Path != nil {
 		content, err := ioutil.ReadFile(*options.Path)
 		if err != nil {
@@ -448,7 +453,7 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 		routes:    make([]*routeHandlerEntry, 0),
 		viewportSize: ViewportSize{
 			Height: int(initializer["viewportSize"].(map[string]interface{})["height"].(float64)),
-			Width:  int(initializer["viewportSize"].(map[string]interface{})["height"].(float64)),
+			Width:  int(initializer["viewportSize"].(map[string]interface{})["width"].(float64)),
 		},
 		timeoutSettings: newTimeoutSettings(nil),
 	}
@@ -506,10 +511,10 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 	bt.channel.On("requestFailed", func(payload ...interface{}) {
 		req := fromChannel(payload[0].(map[string]interface{})["request"]).(*Request)
 		req.failureText = payload[0].(map[string]interface{})["failureText"].(string)
-		bt.Emit("requestFailed", req)
+		bt.Emit("requestfailed", req)
 	})
 	bt.channel.On("requestFinished", func(payload ...interface{}) {
-		bt.Emit("requestFinished", fromChannel(payload[0].(map[string]interface{})["request"]))
+		bt.Emit("requestfinished", fromChannel(payload[0].(map[string]interface{})["request"]))
 	})
 	bt.channel.On("response", func(payload ...interface{}) {
 		bt.Emit("response", fromChannel(payload[0].(map[string]interface{})["response"]))

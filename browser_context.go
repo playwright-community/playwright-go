@@ -116,7 +116,10 @@ type BrowserContextAddInitScriptOptions struct {
 }
 
 func (b *BrowserContext) AddInitScript(options BrowserContextAddInitScriptOptions) error {
-	source := *options.Script
+	var source string
+	if options.Script != nil {
+		source = *options.Script
+	}
 	if options.Path != nil {
 		content, err := ioutil.ReadFile(*options.Path)
 		if err != nil {

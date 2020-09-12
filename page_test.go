@@ -2,6 +2,7 @@ package playwright
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -605,4 +606,106 @@ func TestPageTextContent(t *testing.T) {
 	content, err := helper.Page.TextContent("#inner")
 	require.NoError(t, err)
 	require.Equal(t, "Text,\nmore text", content)
+}
+
+func TestPageAddInitScriptWithPath(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	require.NoError(t, helper.Page.AddInitScript(BrowserContextAddInitScriptOptions{
+		Path: String(helper.Asset("injectedfile.js")),
+	}))
+	_, err := helper.Page.Goto(helper.server.PREFIX + "/tamperable.html")
+	require.NoError(t, err)
+	result, err := helper.Page.Evaluate(`() => window['result']`)
+	require.NoError(t, err)
+	require.Equal(t, 123, result)
+}
+
+func TestPageSupportNetworkEvents(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	eventsChan := make(chan string, 6)
+	helper.Page.On("request", func(events ...interface{}) {
+		request := events[0].(*Request)
+		eventsChan <- fmt.Sprintf("%s %s", request.Method(), request.URL())
+	})
+	helper.Page.On("response", func(events ...interface{}) {
+		response := events[0].(*Response)
+		eventsChan <- fmt.Sprintf("%d %s", response.Status(), response.URL())
+	})
+	helper.Page.On("requestfinished", func(events ...interface{}) {
+		request := events[0].(*Request)
+		eventsChan <- fmt.Sprintf("DONE %s", request.URL())
+	})
+	helper.Page.On("requestfailed", func(events ...interface{}) {
+		request := events[0].(*Request)
+		eventsChan <- fmt.Sprintf("FAIL %s", request.URL())
+	})
+	helper.server.SetRedirect("/foo.html", "/empty.html")
+	FOO_URL := helper.server.PREFIX + "/foo.html"
+	response, err := helper.Page.Goto(FOO_URL)
+	require.NoError(t, err)
+	require.NoError(t, response.Finished())
+	eventsSlice := ChanToSlice(eventsChan, 6)
+	require.Equal(t, []string{
+		fmt.Sprintf("GET %s", FOO_URL),
+		fmt.Sprintf("302 %s", FOO_URL),
+		fmt.Sprintf("DONE %s", FOO_URL),
+		fmt.Sprintf("GET %s", helper.server.EMPTY_PAGE),
+		fmt.Sprintf("200 %s", helper.server.EMPTY_PAGE),
+		fmt.Sprintf("DONE %s", helper.server.EMPTY_PAGE),
+	}, eventsSlice)
+	redirectedFrom := response.Request().RedirectedFrom()
+	require.Contains(t, redirectedFrom.URL(), "foo.html")
+	require.Nil(t, redirectedFrom.RedirectedFrom())
+	require.Equal(t, redirectedFrom.RedirectedTo(), response.Request())
+}
+
+func TestPageSetViewport(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	helper.utils.VerifyViewport(t, helper.Page, 1280, 720)
+	require.NoError(t, helper.Page.SetViewportSize(123, 456))
+	helper.utils.VerifyViewport(t, helper.Page, 123, 456)
+}
+
+func TestPageEmulateMedia(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	helper.utils.AssertEval(t, helper.Page, "matchMedia('screen').matches", true)
+	helper.utils.AssertEval(t, helper.Page, "matchMedia('print').matches", false)
+	require.NoError(t, helper.Page.EmulateMedia(PageEmulateMediaOptions{
+		Media: "print",
+	}))
+	helper.utils.AssertEval(t, helper.Page, "matchMedia('screen').matches", false)
+	helper.utils.AssertEval(t, helper.Page, "matchMedia('print').matches", true)
+	require.NoError(t, helper.Page.EmulateMedia())
+	helper.utils.AssertEval(t, helper.Page, "matchMedia('screen').matches", false)
+	helper.utils.AssertEval(t, helper.Page, "matchMedia('print').matches", true)
+	require.NoError(t, helper.Page.EmulateMedia(PageEmulateMediaOptions{
+		Media: Null(),
+	}))
+	helper.utils.AssertEval(t, helper.Page, "matchMedia('screen').matches", true)
+	helper.utils.AssertEval(t, helper.Page, "matchMedia('print').matches", false)
+}
+
+func TestPageBringToFront(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	page1, err := helper.Browser.NewPage()
+	require.NoError(t, err)
+	require.NoError(t, page1.SetContent("Page1"))
+	page2, err := helper.Browser.NewPage()
+	require.NoError(t, err)
+	require.NoError(t, page2.SetContent("Page2"))
+
+	require.NoError(t, page1.BringToFront())
+	helper.utils.AssertEval(t, page1, "document.visibilityState", "visible")
+	helper.utils.AssertEval(t, page2, "document.visibilityState", "visible")
+
+	require.NoError(t, page2.BringToFront())
+	helper.utils.AssertEval(t, page1, "document.visibilityState", "visible")
+	helper.utils.AssertEval(t, page2, "document.visibilityState", "visible")
+	require.NoError(t, page1.Close())
+	require.NoError(t, page2.Close())
 }

@@ -213,7 +213,7 @@ func TestRouteAbort(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	failedRequests := make(chan *Request, 1)
-	helper.Page.Once("requestFailed", func(events ...interface{}) {
+	helper.Page.Once("requestfailed", func(events ...interface{}) {
 		failedRequests <- events[0].(*Request)
 	})
 	err := helper.Page.Route("**/empty.html", func(route *Route, request *Request) {
