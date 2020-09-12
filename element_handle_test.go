@@ -125,3 +125,19 @@ func TestElementHandleDblClick(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "Clicked", result)
 }
+
+func TestElementBoundingBox(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	require.NoError(t, helper.Page.SetViewportSize(500, 500))
+	_, err := helper.Page.Goto(helper.server.PREFIX + "/grid.html")
+	require.NoError(t, err)
+	element_handle, err := helper.Page.QuerySelector(".box:nth-of-type(13)")
+	require.NoError(t, err)
+	box, err := element_handle.BoundingBox()
+	require.NoError(t, err)
+	require.Equal(t, 100, box.X)
+	require.Equal(t, 50, box.Y)
+	require.Equal(t, 50, box.Width)
+	require.Equal(t, 50, box.Height)
+}

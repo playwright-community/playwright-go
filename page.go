@@ -10,6 +10,7 @@ import (
 
 type Page struct {
 	ChannelOwner
+	isClosed        bool
 	Mouse           *Mouse
 	Keyboard        *Keyboard
 	timeoutSettings *timeoutSettings
@@ -221,6 +222,10 @@ func (p *Page) Type(selector, text string, options ...PageTypeOptions) error {
 	return p.mainFrame.Type(selector, text, options...)
 }
 
+func (p *Page) Fill(selector, text string, options ...FrameFillOptions) error {
+	return p.mainFrame.Fill(selector, text, options...)
+}
+
 func (p *Page) Press(selector, key string, options ...PagePressOptions) error {
 	return p.mainFrame.Press(selector, key, options...)
 }
@@ -428,6 +433,10 @@ func (p *Page) Hover(selector string, options ...PageHoverOptions) error {
 	return p.mainFrame.Hover(selector, options...)
 }
 
+func (p *Page) Isclosed() bool {
+	return p.isClosed
+}
+
 func (b *Page) AddInitScript(options BrowserContextAddInitScriptOptions) error {
 	var source string
 	if options.Script != nil {
@@ -462,6 +471,10 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.Mouse = newMouse(bt.channel)
 	bt.Keyboard = newKeyboard(bt.channel)
+	bt.channel.On("close", func(ev map[string]interface{}) {
+		bt.isClosed = true
+		bt.Emit("close")
+	})
 	bt.channel.On("console", func(ev map[string]interface{}) {
 		bt.Emit("console", fromChannel(ev["message"]))
 	})

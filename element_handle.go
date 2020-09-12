@@ -1,6 +1,10 @@
 package playwright
 
-import "encoding/base64"
+import (
+	"encoding/base64"
+	"fmt"
+	"io/ioutil"
+)
 
 type ElementHandle struct {
 	JSHandle
@@ -108,6 +112,68 @@ func (e *ElementHandle) QuerySelector(selector string) (*ElementHandle, error) {
 	return fromChannel(channel).(*ElementHandle), nil
 }
 
+func (e *ElementHandle) QuerySelectorAll(selector string) ([]*ElementHandle, error) {
+	channels, err := e.channel.Send("querySelectorAll", map[string]interface{}{
+		"selector": selector,
+	})
+	if err != nil {
+		return nil, err
+	}
+	elements := make([]*ElementHandle, 0)
+	for _, channel := range channels.([]interface{}) {
+		elements = append(elements, fromChannel(channel).(*ElementHandle))
+	}
+	return elements, nil
+}
+
+func (e *ElementHandle) EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
+	var arg interface{}
+	forceExpression := false
+	if !isFunctionBody(expression) {
+		forceExpression = true
+	}
+	if len(options) == 1 {
+		arg = options[0]
+	} else if len(options) == 2 {
+		arg = options[0]
+		forceExpression = options[1].(bool)
+	}
+	result, err := e.channel.Send("evalOnSelector", map[string]interface{}{
+		"selector":   selector,
+		"expression": expression,
+		"isFunction": !forceExpression,
+		"arg":        serializeArgument(arg),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return parseResult(result), nil
+}
+
+func (e *ElementHandle) EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
+	var arg interface{}
+	forceExpression := false
+	if !isFunctionBody(expression) {
+		forceExpression = true
+	}
+	if len(options) == 1 {
+		arg = options[0]
+	} else if len(options) == 2 {
+		arg = options[0]
+		forceExpression = options[1].(bool)
+	}
+	result, err := e.channel.Send("evalOnSelectorAll", map[string]interface{}{
+		"selector":   selector,
+		"expression": expression,
+		"isFunction": !forceExpression,
+		"arg":        serializeArgument(arg),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return parseResult(result), nil
+}
+
 func (e *ElementHandle) ScrollIntoViewIfNeeded(options ...ElementHandleScrollIntoViewIfNeededOptions) error {
 	_, err := e.channel.Send("scrollIntoViewIfNeeded", options)
 	if err != nil {
@@ -121,6 +187,76 @@ func (e *ElementHandle) SetInputFiles(files []InputFile, options ...ElementHandl
 		"files": normalizeFilePayloads(files),
 	}, options)
 	return err
+}
+
+func (e *ElementHandle) BoundingBox() (*Rect, error) {
+	boundingBox, err := e.channel.Send("boundingBox")
+	if err != nil {
+		return nil, err
+	}
+	out := &Rect{}
+	remapMapToStruct(boundingBox, out)
+	return out, nil
+}
+
+func (e *ElementHandle) Check(options ...ElementHandleCheckOptions) error {
+	_, err := e.channel.Send("check", options)
+	return err
+}
+
+func (e *ElementHandle) Uncheck(options ...ElementHandleUncheckOptions) error {
+	_, err := e.channel.Send("uncheck", options)
+	return err
+}
+
+func (e *ElementHandle) Press(options ...ElementHandlePressOptions) error {
+	_, err := e.channel.Send("press", options)
+	return err
+}
+
+func (e *ElementHandle) Fill(value string, options ...ElementHandleFillOptions) error {
+	_, err := e.channel.Send("fill", map[string]interface{}{
+		"value": value,
+	}, options)
+	return err
+}
+
+func (e *ElementHandle) Type(value string, options ...ElementHandleTypeOptions) error {
+	_, err := e.channel.Send("type", map[string]interface{}{
+		"value": value,
+	}, options)
+	return err
+}
+
+func (e *ElementHandle) Focus() error {
+	_, err := e.channel.Send("focus")
+	return err
+}
+
+func (e *ElementHandle) SelectText(options ...ElementHandleSelectTextOptions) error {
+	_, err := e.channel.Send("selectText", options)
+	return err
+}
+
+func (e *ElementHandle) Screenshot(options ...ElementHandleScreenshotOptions) ([]byte, error) {
+	var path *string
+	if len(options) > 0 {
+		path = options[0].Path
+	}
+	data, err := e.channel.Send("screenshot", options)
+	if err != nil {
+		return nil, fmt.Errorf("could not send message :%w", err)
+	}
+	image, err := base64.StdEncoding.DecodeString(data.(string))
+	if err != nil {
+		return nil, fmt.Errorf("could not decode base64 :%w", err)
+	}
+	if path != nil {
+		if err := ioutil.WriteFile(*path, image, 0644); err != nil {
+			return nil, err
+		}
+	}
+	return image, nil
 }
 
 func newElementHandle(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *ElementHandle {

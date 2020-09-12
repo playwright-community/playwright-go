@@ -36,6 +36,7 @@ const transformGoMethodName = v => v
   .replace("$eval", "EvaluateOnSelector")
   .replace("$$", "querySelectorAll")
   .replace("$", "querySelector")
+  .replace("toString", "String")
 
 const denyList = [
   "Selectors.register",
@@ -43,12 +44,13 @@ const denyList = [
   "Browser.isConnected",
   "BrowserType.connect",
   "Download.createReadStream",
-  "ElementHandle.dispose",
+  "ElementHandle.dispose", // start: from JSHandle
   "ElementHandle.evaluate",
   "ElementHandle.evaluateHandle",
   "ElementHandle.getProperties",
   "ElementHandle.getProperty",
   "ElementHandle.jsonValue",
+  "ElementHandle.String", // end: from JSHandle
 ]
 
 let missing = 0
@@ -68,4 +70,4 @@ for (const className of toBeValidated) {
   }
 }
 
-console.log(`${missing / total * 100}% are missing`)
+console.log(`${(missing / total * 100).toFixed(2)}% are missing`)
