@@ -195,14 +195,16 @@ type ViewportSize struct {
 
 func (p *Page) SetViewportSize(width, height int) error {
 	_, err := p.channel.Send("setViewportSize", map[string]interface{}{
-		"width":  width,
-		"height": height,
+		"viewportSize": map[string]interface{}{
+			"width":  width,
+			"height": height,
+		},
 	})
 	if err != nil {
 		return err
 	}
-	p.viewportSize.Height = height
 	p.viewportSize.Width = width
+	p.viewportSize.Height = height
 	return nil
 }
 
@@ -451,7 +453,7 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 		routes:    make([]*routeHandlerEntry, 0),
 		viewportSize: ViewportSize{
 			Height: int(initializer["viewportSize"].(map[string]interface{})["height"].(float64)),
-			Width:  int(initializer["viewportSize"].(map[string]interface{})["height"].(float64)),
+			Width:  int(initializer["viewportSize"].(map[string]interface{})["width"].(float64)),
 		},
 		timeoutSettings: newTimeoutSettings(nil),
 	}

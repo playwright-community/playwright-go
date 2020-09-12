@@ -660,3 +660,11 @@ func TestPageSupportNetworkEvents(t *testing.T) {
 	require.Nil(t, redirectedFrom.RedirectedFrom())
 	require.Equal(t, redirectedFrom.RedirectedTo(), response.Request())
 }
+
+func TestPageSetViewport(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	helper.utils.VerifyViewport(t, helper.Page, 1280, 720)
+	require.NoError(t, helper.Page.SetViewportSize(123, 456))
+	helper.utils.VerifyViewport(t, helper.Page, 123, 456)
+}

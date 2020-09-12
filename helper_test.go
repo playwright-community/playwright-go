@@ -248,3 +248,14 @@ func (t *testUtils) AttachFrame(page *Page, frameId string, url string) (*Frame,
 	}
 	return nil, nil
 }
+
+func (tu *testUtils) VerifyViewport(t *testing.T, page *Page, width, height int) {
+	require.Equal(t, page.ViewportSize().Width, width)
+	require.Equal(t, page.ViewportSize().Height, height)
+	innerWidth, err := page.Evaluate("window.innerWidth")
+	require.NoError(t, err)
+	require.Equal(t, innerWidth, width)
+	innerHeight, err := page.Evaluate("window.innerHeight")
+	require.NoError(t, err)
+	require.Equal(t, innerHeight, height)
+}
