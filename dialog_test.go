@@ -9,8 +9,7 @@ import (
 func TestDialog(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	helper.Page.On("dialog", func(ev ...interface{}) {
-		dialog := ev[0].(*Dialog)
+	helper.Page.On("dialog", func(dialog *Dialog) {
 		require.Equal(t, "alert", dialog.Type())
 		require.Equal(t, "", dialog.DefaultValue())
 		require.Equal(t, "yo", dialog.Message())

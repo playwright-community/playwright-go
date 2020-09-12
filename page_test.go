@@ -625,20 +625,16 @@ func TestPageSupportNetworkEvents(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	eventsChan := make(chan string, 6)
-	helper.Page.On("request", func(events ...interface{}) {
-		request := events[0].(*Request)
+	helper.Page.On("request", func(request *Request) {
 		eventsChan <- fmt.Sprintf("%s %s", request.Method(), request.URL())
 	})
-	helper.Page.On("response", func(events ...interface{}) {
-		response := events[0].(*Response)
+	helper.Page.On("response", func(response *Response) {
 		eventsChan <- fmt.Sprintf("%d %s", response.Status(), response.URL())
 	})
-	helper.Page.On("requestfinished", func(events ...interface{}) {
-		request := events[0].(*Request)
+	helper.Page.On("requestfinished", func(request *Request) {
 		eventsChan <- fmt.Sprintf("DONE %s", request.URL())
 	})
-	helper.Page.On("requestfailed", func(events ...interface{}) {
-		request := events[0].(*Request)
+	helper.Page.On("requestfailed", func(request *Request) {
 		eventsChan <- fmt.Sprintf("FAIL %s", request.URL())
 	})
 	helper.server.SetRedirect("/foo.html", "/empty.html")
