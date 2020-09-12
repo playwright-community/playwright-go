@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -189,6 +190,34 @@ func TestPageExpectRequest(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	request, err := helper.Page.ExpectRequest("**/*", func() error {
+		_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+		return err
+	})
+	require.NoError(t, err)
+	require.Equal(t, helper.server.EMPTY_PAGE, request.URL())
+	require.Equal(t, "document", request.ResourceType())
+	require.Equal(t, "GET", request.Method())
+}
+
+func TestPageExpectRequestRegexp(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	request, err := helper.Page.ExpectRequest(regexp.MustCompile(".*/empty.html"), func() error {
+		_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+		return err
+	})
+	require.NoError(t, err)
+	require.Equal(t, helper.server.EMPTY_PAGE, request.URL())
+	require.Equal(t, "document", request.ResourceType())
+	require.Equal(t, "GET", request.Method())
+}
+
+func TestPageExpectRequestFunc(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	request, err := helper.Page.ExpectRequest(func(url string) bool {
+		return strings.HasSuffix(url, "empty.html")
+	}, func() error {
 		_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 		return err
 	})

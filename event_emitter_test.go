@@ -73,5 +73,6 @@ func TestEventEmitterRemoveKeepExisting(t *testing.T) {
 	handler.On(testEventName, func(...interface{}) {})
 	handler.Once(testEventName, func(...interface{}) {})
 	handler.RemoveListener("abc123", func(...interface{}) {})
+	handler.RemoveListener(testEventName, func(...interface{}) {})
 	require.Equal(t, 2, handler.ListenerCount(testEventName))
 }

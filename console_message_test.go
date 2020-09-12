@@ -125,10 +125,25 @@ func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
 	})
 	_, err := helper.Page.Goto("about:blank")
 	require.NoError(t, err)
-	// TODO: use server
 	_, err = helper.Page.Evaluate("url => fetch(url).catch(e => {})", helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
 	message := <-messages
 	require.Contains(t, message.Text(), "Access-Control-Allow-Origin")
 	require.Equal(t, "error", message.Type())
+}
+
+func TestConsoleShouldHaveLocation(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	messageEvent, err := helper.Page.ExpectEvent("console", func() error {
+		_, err := helper.Page.Goto(helper.server.PREFIX + "/consolelog.html")
+		return err
+	}, func(m *ConsoleMessage) bool {
+		return m.Text() == "yellow"
+	})
+	require.NoError(t, err)
+	message := messageEvent.(*ConsoleMessage)
+	require.Equal(t, message.Type(), "log")
+	require.Equal(t, helper.server.PREFIX+"/consolelog.html", message.Location().URL)
+	require.Equal(t, 7, message.Location().LineNumber)
 }

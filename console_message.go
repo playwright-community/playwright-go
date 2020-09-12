@@ -5,9 +5,9 @@ type ConsoleMessage struct {
 }
 
 type ConsoleMessageLocation struct {
-	URL          string
-	LineNumber   string
-	ColumnNumber string
+	URL          string `json:"url"`
+	LineNumber   int    `json:"lineNumber"`
+	ColumnNumber int    `json:"columnNumber"`
 }
 
 func (c *ConsoleMessage) Type() string {

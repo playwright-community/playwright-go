@@ -27,6 +27,7 @@ func TestTransformOptions(t *testing.T) {
 	}
 	var sizeOneJSONTest []interface{}
 	sizeOneJSONTest = append(sizeOneJSONTest, structVar)
+	var nilStrPtr *string
 	testCases := []struct {
 		name           string
 		baseMap        map[string]interface{}
@@ -36,7 +37,8 @@ func TestTransformOptions(t *testing.T) {
 		{
 			name: "No options supplied",
 			baseMap: map[string]interface{}{
-				"foo": "bar",
+				"1234": nilStrPtr,
+				"foo":  "bar",
 			},
 			optionalStruct: make([]interface{}, 0),
 			expected: map[string]interface{}{
