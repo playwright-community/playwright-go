@@ -24,6 +24,20 @@ func (b *BrowserType) Launch(options ...BrowserTypeLaunchOptions) (*Browser, err
 	return fromChannel(channel).(*Browser), nil
 }
 
+func (b *BrowserType) LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (*BrowserContext, error) {
+	overrides := map[string]interface{}{
+		"userDataDir": userDataDir,
+	}
+	if len(options) == 1 && options[0].ExtraHTTPHeaders != nil {
+		overrides["extraHTTPHeaders"] = serializeHeaders(options[0].ExtraHTTPHeaders)
+	}
+	channel, err := b.channel.Send("launchPersistentContext", options, overrides)
+	if err != nil {
+		return nil, fmt.Errorf("could not send message: %w", err)
+	}
+	return fromChannel(channel).(*BrowserContext), nil
+}
+
 func newBrowserType(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *BrowserType {
 	bt := &BrowserType{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)

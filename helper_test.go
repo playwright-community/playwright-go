@@ -48,14 +48,15 @@ func BeforeAll() {
 		log.Fatalf("could not launch: %v", err)
 	}
 	globalTestHelper = &TestHelperData{
-		Playwright: pw,
-		Browser:    browser,
-		IsChromium: browserName == "chromium" || browserName == "",
-		IsFirefox:  browserName == "firefox",
-		IsWebKit:   browserName == "webkit",
-		server:     newTestServer(),
-		assetDir:   "tests/assets/",
-		utils:      &testUtils{},
+		Playwright:  pw,
+		BrowserType: browserType,
+		Browser:     browser,
+		IsChromium:  browserName == "chromium" || browserName == "",
+		IsFirefox:   browserName == "firefox",
+		IsWebKit:    browserName == "webkit",
+		server:      newTestServer(),
+		assetDir:    "tests/assets/",
+		utils:       &testUtils{},
 	}
 }
 
@@ -67,17 +68,18 @@ func AfterAll() {
 }
 
 type TestHelperData struct {
-	t          *testing.T
-	Playwright *Playwright
-	Browser    *Browser
-	Context    *BrowserContext
-	Page       *Page
-	IsChromium bool
-	IsFirefox  bool
-	IsWebKit   bool
-	server     *testServer
-	assetDir   string
-	utils      *testUtils
+	t           *testing.T
+	Playwright  *Playwright
+	BrowserType *BrowserType
+	Browser     *Browser
+	Context     *BrowserContext
+	Page        *Page
+	IsChromium  bool
+	IsFirefox   bool
+	IsWebKit    bool
+	server      *testServer
+	assetDir    string
+	utils       *testUtils
 }
 
 var CONTEXT_OPTIONS = BrowserNewContextOptions{
