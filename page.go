@@ -462,34 +462,34 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.Mouse = newMouse(bt.channel)
 	bt.Keyboard = newKeyboard(bt.channel)
-	bt.channel.On("console", func(payload ...interface{}) {
-		bt.Emit("console", fromChannel(payload[0].(map[string]interface{})["message"]))
+	bt.channel.On("console", func(ev map[string]interface{}) {
+		bt.Emit("console", fromChannel(ev["message"]))
 	})
-	bt.channel.On("crash", func(payload ...interface{}) {
+	bt.channel.On("crash", func() {
 		bt.Emit("crash")
 	})
-	bt.channel.On("dialog", func(payload ...interface{}) {
+	bt.channel.On("dialog", func(ev map[string]interface{}) {
 		go func() {
-			bt.Emit("dialog", fromChannel(payload[0].(map[string]interface{})["dialog"]))
+			bt.Emit("dialog", fromChannel(ev["dialog"]))
 		}()
 	})
-	bt.channel.On("domcontentloaded", func(payload ...interface{}) {
+	bt.channel.On("domcontentloaded", func() {
 		bt.Emit("domcontentloaded")
 	})
-	bt.channel.On("download", func(payload ...interface{}) {
-		bt.Emit("download", fromChannel(payload[0].(map[string]interface{})["download"]))
+	bt.channel.On("download", func(ev map[string]interface{}) {
+		bt.Emit("download", fromChannel(ev["download"]))
 	})
-	bt.channel.On("fileChooser", func(payload ...interface{}) {
-		bt.Emit("filechooser", newFileChooser(bt, fromChannel(payload[0].(map[string]interface{})["element"]).(*ElementHandle), payload[0].(map[string]interface{})["isMultiple"].(bool)))
+	bt.channel.On("fileChooser", func(ev map[string]interface{}) {
+		bt.Emit("filechooser", newFileChooser(bt, fromChannel(ev["element"]).(*ElementHandle), ev["isMultiple"].(bool)))
 	})
-	bt.channel.On("frameAttached", func(payload ...interface{}) {
-		frame := fromChannel(payload[0].(map[string]interface{})["frame"]).(*Frame)
+	bt.channel.On("frameAttached", func(ev map[string]interface{}) {
+		frame := fromChannel(ev["frame"]).(*Frame)
 		frame.page = bt
 		bt.frames = append(bt.frames, frame)
 		bt.Emit("frameAttached", frame)
 	})
-	bt.channel.On("frameDetached", func(payload ...interface{}) {
-		frame := fromChannel(payload[0].(map[string]interface{})["frame"]).(*Frame)
+	bt.channel.On("frameDetached", func(ev map[string]interface{}) {
+		frame := fromChannel(ev["frame"]).(*Frame)
 		frame.detached = true
 		frames := make([]*Frame, 0)
 		for i := 0; i < len(bt.frames); i++ {
@@ -502,26 +502,26 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 		}
 		bt.Emit("frameDetached", frame)
 	})
-	bt.channel.On("popup", func(payload ...interface{}) {
-		bt.Emit("popup", fromChannel(payload[0].(map[string]interface{})["page"]))
+	bt.channel.On("popup", func(ev map[string]interface{}) {
+		bt.Emit("popup", fromChannel(ev["page"]))
 	})
-	bt.channel.On("request", func(payload ...interface{}) {
-		bt.Emit("request", fromChannel(payload[0].(map[string]interface{})["request"]))
+	bt.channel.On("request", func(ev map[string]interface{}) {
+		bt.Emit("request", fromChannel(ev["request"]))
 	})
-	bt.channel.On("requestFailed", func(payload ...interface{}) {
-		req := fromChannel(payload[0].(map[string]interface{})["request"]).(*Request)
-		req.failureText = payload[0].(map[string]interface{})["failureText"].(string)
+	bt.channel.On("requestFailed", func(ev map[string]interface{}) {
+		req := fromChannel(ev["request"]).(*Request)
+		req.failureText = ev["failureText"].(string)
 		bt.Emit("requestfailed", req)
 	})
-	bt.channel.On("requestFinished", func(payload ...interface{}) {
-		bt.Emit("requestfinished", fromChannel(payload[0].(map[string]interface{})["request"]))
+	bt.channel.On("requestFinished", func(ev map[string]interface{}) {
+		bt.Emit("requestfinished", fromChannel(ev["request"]))
 	})
-	bt.channel.On("response", func(payload ...interface{}) {
-		bt.Emit("response", fromChannel(payload[0].(map[string]interface{})["response"]))
+	bt.channel.On("response", func(ev map[string]interface{}) {
+		bt.Emit("response", fromChannel(ev["response"]))
 	})
-	bt.channel.On("route", func(payload ...interface{}) {
-		route := fromChannel(payload[0].(map[string]interface{})["route"]).(*Route)
-		request := fromChannel(payload[0].(map[string]interface{})["request"]).(*Request)
+	bt.channel.On("route", func(ev map[string]interface{}) {
+		route := fromChannel(ev["route"]).(*Route)
+		request := fromChannel(ev["request"]).(*Request)
 		go func() {
 			bt.routesMu.Lock()
 			for _, handlerEntry := range bt.routes {
@@ -533,20 +533,20 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 			bt.routesMu.Unlock()
 		}()
 	})
-	bt.channel.On("worker", func(payload ...interface{}) {
-		worker := fromChannel(payload[0].(map[string]interface{})["worker"]).(*Worker)
+	bt.channel.On("worker", func(ev map[string]interface{}) {
+		worker := fromChannel(ev["worker"]).(*Worker)
 		worker.page = bt
 		bt.workers = append(bt.workers, worker)
 		bt.Emit("worker", worker)
 	})
-	bt.addEventHandler(func(name string, handler eventHandler) {
+	bt.addEventHandler(func(name string, handler interface{}) {
 		if name == "filechooser" && bt.ListenerCount(name) == 0 {
 			bt.channel.SendNoReply("setFileChooserInterceptedNoReply", map[string]interface{}{
 				"intercepted": true,
 			})
 		}
 	})
-	bt.removeEventHandler(func(name string, handler eventHandler) {
+	bt.removeEventHandler(func(name string, handler interface{}) {
 		if name == "filechooser" && bt.ListenerCount(name) == 0 {
 			bt.channel.SendNoReply("setFileChooserInterceptedNoReply", map[string]interface{}{
 				"intercepted": false,

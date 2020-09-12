@@ -58,7 +58,7 @@ func (w *Worker) EvaluateHandle(expression string, options ...interface{}) (*JSH
 func newWorker(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Worker {
 	bt := &Worker{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
-	bt.channel.On("close", func(payload ...interface{}) {
+	bt.channel.On("close", func() {
 		workers := make([]*Worker, 0)
 		if bt.page != nil {
 			for i := 0; i < len(bt.page.workers); i++ {

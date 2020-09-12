@@ -162,15 +162,15 @@ func newBrowserContext(parent *ChannelOwner, objectType string, guid string, ini
 		timeoutSettings: newTimeoutSettings(nil),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
-	bt.channel.On("page", func(payload ...interface{}) {
-		page := fromChannel(payload[0].(map[string]interface{})["page"]).(*Page)
+	bt.channel.On("page", func(payload map[string]interface{}) {
+		page := fromChannel(payload["page"]).(*Page)
 		page.browserContext = bt
 		bt.pagesMutex.Lock()
 		bt.pages = append(bt.pages, page)
 		bt.pagesMutex.Unlock()
 		bt.Emit("page", page)
 	})
-	bt.channel.On("close", func(payload ...interface{}) {
+	bt.channel.On("close", func() {
 		if bt.browser != nil {
 			contexts := make([]*BrowserContext, 0)
 			bt.browser.contextsMu.Lock()

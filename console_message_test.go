@@ -10,8 +10,8 @@ func TestConsoleShouldWork(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	messages := make(chan *ConsoleMessage, 1)
-	helper.Page.Once("console", func(args ...interface{}) {
-		messages <- args[0].(*ConsoleMessage)
+	helper.Page.Once("console", func(message *ConsoleMessage) {
+		messages <- message
 	})
 	_, err := helper.Page.Evaluate(`() => console.log("hello", 5, {foo: "bar"})`)
 	require.NoError(t, err)
@@ -36,8 +36,8 @@ func TestConsoleShouldEmitSameLogTwice(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	messages := make(chan string, 2)
-	helper.Page.On("console", func(args ...interface{}) {
-		messages <- args[0].(*ConsoleMessage).Text()
+	helper.Page.On("console", func(message *ConsoleMessage) {
+		messages <- message.Text()
 	})
 	_, err := helper.Page.Evaluate(`() => { for (let i = 0; i < 2; ++i ) console.log("hello"); } `)
 	require.NoError(t, err)
@@ -50,8 +50,8 @@ func TestConsoleShouldUseTextForStr(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	messages := make(chan *ConsoleMessage, 1)
-	helper.Page.On("console", func(args ...interface{}) {
-		messages <- args[0].(*ConsoleMessage)
+	helper.Page.On("console", func(message *ConsoleMessage) {
+		messages <- message
 	})
 	_, err := helper.Page.Evaluate(`() => console.log("Hello world")`)
 	require.NoError(t, err)
@@ -63,8 +63,8 @@ func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	messagesChan := make(chan *ConsoleMessage, 6)
-	helper.Page.On("console", func(args ...interface{}) {
-		messagesChan <- args[0].(*ConsoleMessage)
+	helper.Page.On("console", func(message *ConsoleMessage) {
+		messagesChan <- message
 	})
 	// All console events will be reported before 'page.evaluate' is finished.
 	_, err := helper.Page.Evaluate(
@@ -107,8 +107,8 @@ func TestConsoleShouldNotFailForWindowObjects(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	messages := make(chan *ConsoleMessage, 1)
-	helper.Page.Once("console", func(args ...interface{}) {
-		messages <- args[0].(*ConsoleMessage)
+	helper.Page.Once("console", func(message *ConsoleMessage) {
+		messages <- message
 	})
 	_, err := helper.Page.Evaluate("() => console.error(window)")
 	require.NoError(t, err)
@@ -120,8 +120,8 @@ func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	messages := make(chan *ConsoleMessage, 1)
-	helper.Page.Once("console", func(args ...interface{}) {
-		messages <- args[0].(*ConsoleMessage)
+	helper.Page.Once("console", func(message *ConsoleMessage) {
+		messages <- message
 	})
 	_, err := helper.Page.Goto("about:blank")
 	require.NoError(t, err)

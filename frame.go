@@ -42,8 +42,7 @@ func newFrame(parent *ChannelOwner, objectType string, guid string, initializer 
 	}
 
 	bt.channel.On("navigated", bt.onFrameNavigated)
-	bt.channel.On("loadstate", func(event ...interface{}) {
-		ev := event[0].(map[string]interface{})
+	bt.channel.On("loadstate", func(ev map[string]interface{}) {
 		if ev["add"] != nil {
 			add := ev["add"].(string)
 			bt.loadStates.Add(add)
@@ -203,13 +202,12 @@ func (f *Frame) WaitForNavigation(options ...PageWaitForNavigationOptions) (*Res
 	return nil, nil
 }
 
-func (f *Frame) onFrameNavigated(event ...interface{}) {
-	ev := event[0].(map[string]interface{})
+func (f *Frame) onFrameNavigated(ev map[string]interface{}) {
 	f.Lock()
 	f.url = ev["url"].(string)
 	f.name = ev["name"].(string)
 	f.Unlock()
-	f.Emit("navigated", event...)
+	f.Emit("navigated", ev)
 	if f.page != nil {
 		f.page.Emit("framenavigated", f)
 	}
