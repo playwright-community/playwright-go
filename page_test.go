@@ -668,3 +668,44 @@ func TestPageSetViewport(t *testing.T) {
 	require.NoError(t, helper.Page.SetViewportSize(123, 456))
 	helper.utils.VerifyViewport(t, helper.Page, 123, 456)
 }
+
+func TestPageEmulateMedia(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	helper.utils.AssertEval(t, helper.Page, "matchMedia('screen').matches", true)
+	helper.utils.AssertEval(t, helper.Page, "matchMedia('print').matches", false)
+	require.NoError(t, helper.Page.EmulateMedia(PageEmulateMediaOptions{
+		Media: "print",
+	}))
+	helper.utils.AssertEval(t, helper.Page, "matchMedia('screen').matches", false)
+	helper.utils.AssertEval(t, helper.Page, "matchMedia('print').matches", true)
+	require.NoError(t, helper.Page.EmulateMedia())
+	helper.utils.AssertEval(t, helper.Page, "matchMedia('screen').matches", false)
+	helper.utils.AssertEval(t, helper.Page, "matchMedia('print').matches", true)
+	require.NoError(t, helper.Page.EmulateMedia(PageEmulateMediaOptions{
+		Media: Null(),
+	}))
+	helper.utils.AssertEval(t, helper.Page, "matchMedia('screen').matches", true)
+	helper.utils.AssertEval(t, helper.Page, "matchMedia('print').matches", false)
+}
+
+func TestPageBringToFront(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	page1, err := helper.Browser.NewPage()
+	require.NoError(t, err)
+	require.NoError(t, page1.SetContent("Page1"))
+	page2, err := helper.Browser.NewPage()
+	require.NoError(t, err)
+	require.NoError(t, page2.SetContent("Page2"))
+
+	require.NoError(t, page1.BringToFront())
+	helper.utils.AssertEval(t, page1, "document.visibilityState", "visible")
+	helper.utils.AssertEval(t, page2, "document.visibilityState", "visible")
+
+	require.NoError(t, page2.BringToFront())
+	helper.utils.AssertEval(t, page1, "document.visibilityState", "visible")
+	helper.utils.AssertEval(t, page2, "document.visibilityState", "visible")
+	require.NoError(t, page1.Close())
+	require.NoError(t, page2.Close())
+}

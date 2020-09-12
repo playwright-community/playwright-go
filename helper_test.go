@@ -259,3 +259,9 @@ func (tu *testUtils) VerifyViewport(t *testing.T, page *Page, width, height int)
 	require.NoError(t, err)
 	require.Equal(t, innerHeight, height)
 }
+
+func (tu *testUtils) AssertEval(t *testing.T, page *Page, script string, expected interface{}) {
+	result, err := page.Evaluate(script)
+	require.NoError(t, err)
+	require.Equal(t, expected, result)
+}
