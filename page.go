@@ -335,8 +335,12 @@ func (p *Page) WaitForResponse(url interface{}, options ...interface{}) *Respons
 	return p.WaitForEvent("response", predicate).(*Response)
 }
 
-func (p *Page) ExpectEvent(event string, cb func() error) (interface{}, error) {
-	return newExpectWrapper(p.WaitForEvent, []interface{}{event}, cb)
+func (p *Page) ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error) {
+	var predicate interface{}
+	if len(predicates) == 1 {
+		predicate = predicates[0]
+	}
+	return newExpectWrapper(p.WaitForEvent, []interface{}{event, predicate}, cb)
 }
 
 func (p *Page) ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (*Response, error) {
