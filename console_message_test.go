@@ -106,13 +106,11 @@ func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 func TestConsoleShouldNotFailForWindowObjects(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
-	require.NoError(t, err)
 	messages := make(chan *ConsoleMessage, 1)
 	helper.Page.Once("console", func(args ...interface{}) {
 		messages <- args[0].(*ConsoleMessage)
 	})
-	_, err = helper.Page.Evaluate("() => console.error(window)")
+	_, err := helper.Page.Evaluate("() => console.error(window)")
 	require.NoError(t, err)
 	message := <-messages
 	require.Equal(t, "JSHandle@object", message.Text())
