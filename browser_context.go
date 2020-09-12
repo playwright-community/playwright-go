@@ -170,7 +170,7 @@ func newBrowserContext(parent *ChannelOwner, objectType string, guid string, ini
 		bt.pagesMutex.Unlock()
 		bt.Emit("page", page)
 	})
-	bt.channel.On("close", func(payload interface{}) {
+	bt.channel.On("close", func() {
 		if bt.browser != nil {
 			contexts := make([]*BrowserContext, 0)
 			bt.browser.contextsMu.Lock()

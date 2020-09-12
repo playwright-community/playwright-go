@@ -10,8 +10,8 @@ func TestConsoleShouldWork(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	messages := make(chan *ConsoleMessage, 1)
-	helper.Page.Once("console", func(args ...interface{}) {
-		messages <- args[0].(*ConsoleMessage)
+	helper.Page.Once("console", func(message *ConsoleMessage) {
+		messages <- message
 	})
 	_, err := helper.Page.Evaluate(`() => console.log("hello", 5, {foo: "bar"})`)
 	require.NoError(t, err)
@@ -107,8 +107,8 @@ func TestConsoleShouldNotFailForWindowObjects(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	messages := make(chan *ConsoleMessage, 1)
-	helper.Page.Once("console", func(args ...interface{}) {
-		messages <- args[0].(*ConsoleMessage)
+	helper.Page.Once("console", func(message *ConsoleMessage) {
+		messages <- message
 	})
 	_, err := helper.Page.Evaluate("() => console.error(window)")
 	require.NoError(t, err)
@@ -120,8 +120,8 @@ func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	messages := make(chan *ConsoleMessage, 1)
-	helper.Page.Once("console", func(args ...interface{}) {
-		messages <- args[0].(*ConsoleMessage)
+	helper.Page.Once("console", func(message *ConsoleMessage) {
+		messages <- message
 	})
 	_, err := helper.Page.Goto("about:blank")
 	require.NoError(t, err)

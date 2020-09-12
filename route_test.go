@@ -176,11 +176,11 @@ func TestRequestFinished(t *testing.T) {
 	defer helper.AfterEach()
 	eventsStorage := newSyncSlice()
 	var request *Request
-	helper.Page.Once("request", func(events ...interface{}) {
-		request = events[0].(*Request)
+	helper.Page.Once("request", func(r *Request) {
+		request = r
 		eventsStorage.Append("request")
 	})
-	helper.Page.Once("response", func(events ...interface{}) {
+	helper.Page.Once("response", func() {
 		eventsStorage.Append("response")
 	})
 	response, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
@@ -213,8 +213,8 @@ func TestRouteAbort(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	failedRequests := make(chan *Request, 1)
-	helper.Page.Once("requestfailed", func(events ...interface{}) {
-		failedRequests <- events[0].(*Request)
+	helper.Page.Once("requestfailed", func(request *Request) {
+		failedRequests <- request
 	})
 	err := helper.Page.Route("**/empty.html", func(route *Route, request *Request) {
 		require.NoError(t, route.Abort(String("aborted")))
