@@ -427,7 +427,10 @@ func (p *Page) Hover(selector string, options ...PageHoverOptions) error {
 }
 
 func (b *Page) AddInitScript(options BrowserContextAddInitScriptOptions) error {
-	source := *options.Script
+	var source string
+	if options.Script != nil {
+		source = *options.Script
+	}
 	if options.Path != nil {
 		content, err := ioutil.ReadFile(*options.Path)
 		if err != nil {
@@ -506,10 +509,10 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 	bt.channel.On("requestFailed", func(payload ...interface{}) {
 		req := fromChannel(payload[0].(map[string]interface{})["request"]).(*Request)
 		req.failureText = payload[0].(map[string]interface{})["failureText"].(string)
-		bt.Emit("requestFailed", req)
+		bt.Emit("requestfailed", req)
 	})
 	bt.channel.On("requestFinished", func(payload ...interface{}) {
-		bt.Emit("requestFinished", fromChannel(payload[0].(map[string]interface{})["request"]))
+		bt.Emit("requestfinished", fromChannel(payload[0].(map[string]interface{})["request"]))
 	})
 	bt.channel.On("response", func(payload ...interface{}) {
 		bt.Emit("response", fromChannel(payload[0].(map[string]interface{})["response"]))

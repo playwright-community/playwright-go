@@ -164,6 +164,12 @@ func (s *testServer) SetRoute(path string, f http.HandlerFunc) {
 	s.routes[path] = f
 }
 
+func (s *testServer) SetRedirect(from, to string) {
+	s.SetRoute(from, func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, to, http.StatusFound)
+	})
+}
+
 func (s *testServer) WaitForRequestChan(path string) <-chan *http.Request {
 	if _, ok := s.requestSubscriberes[path]; !ok {
 		s.requestSubscriberes[path] = make([]chan *http.Request, 0)
