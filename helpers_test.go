@@ -17,21 +17,17 @@ type testOptionsJSONSerialization struct {
 
 func TestTransformOptions(t *testing.T) {
 	// test data
-	var sizeOneNilSlice []interface{}
-	sizeOneNilSlice = append(sizeOneNilSlice, nil)
 	structVar := &testOptionsJSONSerialization{
 		StringPointer:  String("1"),
 		NormalString:   "2",
 		WithoutJSONTag: "3",
 		WithJSONTag:    "4",
 	}
-	var sizeOneJSONTest []interface{}
-	sizeOneJSONTest = append(sizeOneJSONTest, structVar)
 	var nilStrPtr *string
 	testCases := []struct {
 		name           string
 		baseMap        map[string]interface{}
-		optionalStruct []interface{}
+		optionalStruct interface{}
 		expected       interface{}
 	}{
 		{
@@ -40,7 +36,6 @@ func TestTransformOptions(t *testing.T) {
 				"1234": nilStrPtr,
 				"foo":  "bar",
 			},
-			optionalStruct: make([]interface{}, 0),
 			expected: map[string]interface{}{
 				"foo": "bar",
 			},
@@ -50,7 +45,7 @@ func TestTransformOptions(t *testing.T) {
 			baseMap: map[string]interface{}{
 				"foo": "bar",
 			},
-			optionalStruct: sizeOneNilSlice,
+			optionalStruct: nil,
 			expected: map[string]interface{}{
 				"foo": "bar",
 			},
@@ -60,13 +55,25 @@ func TestTransformOptions(t *testing.T) {
 			baseMap: map[string]interface{}{
 				"foo": "bar",
 			},
-			optionalStruct: sizeOneJSONTest,
+			optionalStruct: structVar,
 			expected: map[string]interface{}{
 				"foo":            "bar",
 				"stringPointer":  String("1"),
 				"normalString":   "2",
 				"WithoutJSONTag": "3",
 				"withJSONTag":    "4",
+			},
+		},
+		{
+			name: "Second overwrites the first one",
+			baseMap: map[string]interface{}{
+				"foo": "1",
+			},
+			optionalStruct: map[string]interface{}{
+				"foo": "2",
+			},
+			expected: map[string]interface{}{
+				"foo": "2",
 			},
 		},
 	}

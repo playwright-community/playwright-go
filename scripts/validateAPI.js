@@ -36,6 +36,22 @@ const transformGoMethodName = v => v
   .replace("$eval", "EvaluateOnSelector")
   .replace("$$", "querySelectorAll")
   .replace("$", "querySelector")
+  .replace("toString", "String")
+
+const denyList = [
+  "Selectors.register",
+  "BrowserType.launchServer",
+  "Browser.isConnected",
+  "BrowserType.connect",
+  "Download.createReadStream",
+  "ElementHandle.dispose", // start: from JSHandle
+  "ElementHandle.evaluate",
+  "ElementHandle.evaluateHandle",
+  "ElementHandle.getProperties",
+  "ElementHandle.getProperty",
+  "ElementHandle.jsonValue",
+  "ElementHandle.String", // end: from JSHandle
+]
 
 let missing = 0
 let total = 0
@@ -44,6 +60,8 @@ for (const className of toBeValidated) {
     if (upstreamAPI[className].members[methodName].kind != "method")
       continue
     const goMethodName = transformGoMethodName(methodName)
+    if (denyList.includes(`${className}.${goMethodName}`))
+      continue
     if (!findings[className] || !findings[className].includes(goMethodName.toLowerCase())) {
       console.warn(`${className}.${goMethodName} does not exist`)
       missing++
@@ -52,4 +70,4 @@ for (const className of toBeValidated) {
   }
 }
 
-console.log(`${missing / total * 100}% are missing`)
+console.log(`${(missing / total * 100).toFixed(2)}% are missing`)

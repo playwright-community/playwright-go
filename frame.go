@@ -494,9 +494,10 @@ func (f *Frame) DblClick(selector string, options ...FrameDblclickOptions) error
 	return err
 }
 
-func (f *Frame) Fill(selector string, options ...FrameFillOptions) error {
+func (f *Frame) Fill(selector string, value string, options ...FrameFillOptions) error {
 	_, err := f.channel.Send("fill", map[string]interface{}{
 		"selector": selector,
+		"value":    value,
 	}, options)
 	return err
 }

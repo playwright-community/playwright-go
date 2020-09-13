@@ -10,6 +10,7 @@ import (
 
 type JSHandle struct {
 	ChannelOwner
+	preview string
 }
 
 func (f *JSHandle) Evaluate(expression string, options ...interface{}) (interface{}, error) {
@@ -92,6 +93,10 @@ func (j *JSHandle) AsElement() *ElementHandle {
 func (j *JSHandle) Dispose() error {
 	_, err := j.channel.Send("dispose")
 	return err
+}
+
+func (j *JSHandle) String() string {
+	return j.preview
 }
 
 func (j *JSHandle) JSONValue() (interface{}, error) {
@@ -250,7 +255,12 @@ func serializeArgument(arg interface{}) interface{} {
 }
 
 func newJSHandle(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *JSHandle {
-	bt := &JSHandle{}
+	bt := &JSHandle{
+		preview: initializer["preview"].(string),
+	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
+	bt.channel.On("previewUpdated", func(ev map[string]interface{}) {
+		bt.preview = ev["preview"].(string)
+	})
 	return bt
 }
