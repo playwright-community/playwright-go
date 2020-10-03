@@ -80,3 +80,37 @@ func TestJSHandleEvaluateHandle(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, value, 2)
 }
+
+func TestJSHandleTypeParsing(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	aHandle, err := helper.Page.EvaluateHandle(`() => ({
+		an_integer: 1,
+		a_float: 2.2222222222,
+		a_string_of_an_integer: "3",
+	})`)
+	require.NoError(t, err)
+	twoHandle, err := aHandle.(*JSHandle).EvaluateHandle("x => x")
+	require.NoError(t, err)
+
+	integerHandle, err := twoHandle.(*JSHandle).GetProperty("an_integer")
+	require.NoError(t, err)
+	intV, err := integerHandle.JSONValue()
+	require.NoError(t, err)
+	_, ok := intV.(int)
+	require.True(t, ok)
+
+	floatHandle, err := twoHandle.(*JSHandle).GetProperty("a_float")
+	require.NoError(t, err)
+	floatV, err := floatHandle.JSONValue()
+	require.NoError(t, err)
+	_, ok = floatV.(float64)
+	require.True(t, ok)
+
+	stringHandle, err := twoHandle.(*JSHandle).GetProperty("a_string_of_an_integer")
+	require.NoError(t, err)
+	stringV, err := stringHandle.JSONValue()
+	require.NoError(t, err)
+	_, ok = stringV.(string)
+	require.True(t, ok)
+}
