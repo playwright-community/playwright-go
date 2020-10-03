@@ -110,7 +110,10 @@ func (j *JSHandle) JSONValue() (interface{}, error) {
 func parseValue(result interface{}) interface{} {
 	vMap := result.(map[string]interface{})
 	if v, ok := vMap["n"]; ok {
-		return int(v.(float64))
+		if math.Ceil(v.(float64))-v.(float64) == 0 {
+			return int(v.(float64))
+		}
+		return v.(float64)
 	}
 	if v, ok := vMap["s"]; ok {
 		return v.(string)
