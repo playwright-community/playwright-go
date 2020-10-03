@@ -99,6 +99,8 @@ func TestJSHandleTypeParsing(t *testing.T) {
 	require.NoError(t, err)
 	_, ok := intV.(int)
 	require.True(t, ok)
+	_, ok = intV.(float64)
+	require.False(t, ok)
 
 	floatHandle, err := twoHandle.(*JSHandle).GetProperty("a_float")
 	require.NoError(t, err)
@@ -106,6 +108,8 @@ func TestJSHandleTypeParsing(t *testing.T) {
 	require.NoError(t, err)
 	_, ok = floatV.(float64)
 	require.True(t, ok)
+	_, ok = floatV.(int)
+	require.False(t, ok)
 
 	stringHandle, err := twoHandle.(*JSHandle).GetProperty("a_string_of_an_integer")
 	require.NoError(t, err)
@@ -113,4 +117,6 @@ func TestJSHandleTypeParsing(t *testing.T) {
 	require.NoError(t, err)
 	_, ok = stringV.(string)
 	require.True(t, ok)
+	_, ok = stringV.(int)
+	require.False(t, ok)
 }
