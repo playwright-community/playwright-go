@@ -36,8 +36,8 @@ func main() {
 
 	fmt.Printf("Lots of type casting, brought to you by %s\n", pageName)
 
-	if err := browser.Stop(); err != nil {
-		log.Fatalf("could not stop browser: %v\n", err)
+	if err := browser.Close(); err != nil {
+		log.Fatalf("could not close browser: %v\n", err)
 	}
 	if err := pw.Stop(); err != nil {
 		log.Fatalf("could not stop Playwright: %v\n", err)
