@@ -26,11 +26,16 @@ func newDriver() (*playwrightDriver, error) {
 	driverFolder := filepath.Join(cwd, ".ms-playwright")
 	driverName := getDriverName()
 	driverPath := filepath.Join(driverFolder, driverName)
+	/**
+	https://playwright.azureedge.net/builds/cli/playwright-cli-0.161.0-mac.zip
+	https://playwright.azureedge.net/builds/cli/playwright-cli-0.161.0-linux.zip
+	https://playwright.azureedge.net/builds/cli/playwright-cli-0.161.0-win32_x64.zip
+	*/
 	return &playwrightDriver{
 		driverPath:   driverPath,
 		driverFolder: driverFolder,
 		driverName:   driverName,
-		version:      "0.151.0",
+		version:      "0.161.0",
 	}, nil
 }
 
