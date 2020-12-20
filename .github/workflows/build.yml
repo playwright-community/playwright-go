@@ -18,8 +18,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        browser: [chromium, firefox, webkit]
+        os: [windows-latest]
+        browser: [firefox]
     runs-on: ${{ matrix.os }}
     name:  ${{ matrix.browser }} on ${{ matrix.os }}
     steps:
@@ -32,6 +32,7 @@ jobs:
       id: go
     - name: Get dependencies
       run: go get -v -t -d ./...
+    - uses: mxschmitt/action-tmate@v3
     - name: Test
       env:
         BROWSER: ${{ matrix.browser }}
