@@ -35,7 +35,7 @@ func newDriver() (*playwrightDriver, error) {
 		driverPath:   driverPath,
 		driverFolder: driverFolder,
 		driverName:   driverName,
-		version:      "0.161.0",
+		version:      "0.170.0-next.1608058598043",
 	}, nil
 }
 
@@ -207,14 +207,14 @@ func getDriverName() string {
 }
 
 func (d *playwrightDriver) getDriverURL() string {
-	driverName := ""
+	platform := ""
 	switch runtime.GOOS {
 	case "windows":
-		driverName = "win32_x64"
+		platform = "win32_x64"
 	case "darwin":
-		driverName = "mac"
+		platform = "mac"
 	case "linux":
-		driverName = "linux"
+		platform = "linux"
 	}
-	return fmt.Sprintf("https://storage.googleapis.com/mxschmitt-public-files/playwright-driver-%s/playwright-cli-%s-%s.zip", d.version, d.version, driverName)
+	return fmt.Sprintf("https://playwright.azureedge.net/builds/cli/next/playwright-cli-%s-%s.zip", d.version, platform)
 }

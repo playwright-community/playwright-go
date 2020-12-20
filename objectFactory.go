@@ -2,6 +2,8 @@ package playwright
 
 func createObjectFactory(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) interface{} {
 	switch objectType {
+	case "Android":
+		return nil
 	case "BindingCall":
 		return newBindingCall(parent, objectType, guid, initializer)
 	case "Browser":

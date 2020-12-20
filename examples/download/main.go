@@ -44,7 +44,7 @@ func startHttpServer() {
 		w.Header().Add("Content-Type", "application/octet-stream")
 		w.Header().Add("Content-Disposition", "attachment; filename=file.txt")
 		if _, err := w.Write([]byte("foobar")); err != nil {
-			log.Printf("could not write: %w", err)
+			log.Printf("could not write: %v", err)
 		}
 	})
 	go func() {
