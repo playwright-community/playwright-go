@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"log"
+	"mime"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -17,6 +18,12 @@ import (
 
 var pw *Playwright
 var globalTestHelper *TestHelperData
+
+func init() {
+	if err := mime.AddExtensionType(".js", "application/javascript"); err != nil {
+		log.Fatalf("could not add mime extension type: %v", err)
+	}
+}
 
 func TestMain(m *testing.M) {
 	BeforeAll()
