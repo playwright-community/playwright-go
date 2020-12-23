@@ -35,7 +35,7 @@ func createObjectFactory(parent *ChannelOwner, objectType string, guid string, i
 	case "Route":
 		return newRoute(parent, objectType, guid, initializer)
 	case "WebSocket":
-		return nil
+		return newWebsocket(parent, objectType, guid, initializer)
 	case "Worker":
 		return newWorker(parent, objectType, guid, initializer)
 	case "Selectors":
