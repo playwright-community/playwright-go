@@ -9,7 +9,7 @@ import (
 func TestBrowserIsConnected(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	require.True(t, helper.Browser.IsConnected)
+	require.True(t, helper.Browser.isConnected)
 }
 
 func TestBrowserVersion(t *testing.T) {
@@ -40,6 +40,14 @@ func TestBrowserClose(t *testing.T) {
 	require.NoError(t, err)
 	browser, err := pw.Chromium.Launch()
 	require.NoError(t, err)
+	onCloseWasCalled := make(chan bool, 1)
+	onClose := func() {
+		onCloseWasCalled <- true
+	}
+	browser.On("close", onClose)
+	require.True(t, browser.IsConnected())
 	require.NoError(t, browser.Close())
+	<-onCloseWasCalled
 	require.NoError(t, pw.Stop())
+	require.False(t, browser.IsConnected())
 }

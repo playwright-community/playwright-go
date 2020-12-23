@@ -7,9 +7,15 @@ import (
 
 type Browser struct {
 	ChannelOwner
-	IsConnected bool
+	isConnected bool
 	contexts    []*BrowserContext
 	contextsMu  sync.Mutex
+}
+
+func (b *Browser) IsConnected() bool {
+	b.Lock()
+	defer b.Unlock()
+	return b.isConnected
 }
 
 func (b *Browser) NewContext(options ...BrowserNewContextOptions) (*BrowserContext, error) {
@@ -56,8 +62,14 @@ func (b *Browser) Version() string {
 
 func newBrowser(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Browser {
 	bt := &Browser{
-		IsConnected: true,
+		isConnected: true,
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
+	bt.channel.On("close", func(ev map[string]interface{}) {
+		bt.Lock()
+		bt.isConnected = false
+		bt.Unlock()
+		bt.Emit("close")
+	})
 	return bt
 }
