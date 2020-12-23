@@ -18,12 +18,19 @@ type playwrightDriver struct {
 	driverName, driverFolder, driverPath, version string
 }
 
-func newDriver() (*playwrightDriver, error) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return nil, fmt.Errorf("could not get cwd: %w", err)
+func newDriver(options *RunOptions) (*playwrightDriver, error) {
+	basePath := ""
+	if options != nil {
+		basePath = options.BasePath
 	}
-	driverFolder := filepath.Join(cwd, ".ms-playwright")
+	if basePath == "" {
+		cwd, err := os.Getwd()
+		if err != nil {
+			return nil, fmt.Errorf("could not get cwd: %w", err)
+		}
+		basePath = cwd
+	}
+	driverFolder := filepath.Join(basePath, ".ms-playwright")
 	driverName := getDriverName()
 	driverPath := filepath.Join(driverFolder, driverName)
 	return &playwrightDriver{
@@ -151,11 +158,15 @@ func installBrowsers(driverPath string) error {
 	return nil
 }
 
+type RunOptions struct {
+	BasePath string
+}
+
 // Install does download the driver and the browsers. If not called manually
 // before playwright.Run() it will get executed there and might take a few seconds
 // to download the Playwright suite.
-func Install() error {
-	driver, err := newDriver()
+func Install(options *RunOptions) error {
+	driver, err := newDriver(options)
 	if err != nil {
 		return fmt.Errorf("could not get driver instance: %w", err)
 	}
@@ -165,8 +176,12 @@ func Install() error {
 	return nil
 }
 
-func Run() (*Playwright, error) {
-	driver, err := newDriver()
+func Run(optionsInput ...*RunOptions) (*Playwright, error) {
+	var options *RunOptions
+	if len(optionsInput) == 1 {
+		options = optionsInput[0]
+	}
+	driver, err := newDriver(options)
 	if err != nil {
 		return nil, fmt.Errorf("could not get driver instance: %w", err)
 	}
