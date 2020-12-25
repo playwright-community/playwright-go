@@ -4,7 +4,7 @@ set -e
 set +x
 
 echo "Generating types"
-node scripts/generate-stucts.js > types.go
+node scripts/generate-structs.js > types.go
 echo "Generated types"
 
 echo "Formatting types"

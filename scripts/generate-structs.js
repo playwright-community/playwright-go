@@ -15,7 +15,7 @@ const replaceMethodNames = (funcName) => funcName
   .replace("$$eval", "evalOnSelectorAll")
   .replace("$eval", "evalOnSelector")
 
-let appendix = ""
+let appendix = new Set()
 
 const generateStruct = (typeData, structNamePrefix, structName) => {
   const typeName = typeData.type.name
@@ -23,13 +23,13 @@ const generateStruct = (typeData, structNamePrefix, structName) => {
   if (typeName.endsWith("Object") && Object.keys(typeData.type.properties).length > 0) {
     let structProperties = []
     for (const property in typeData.type.properties) {
-      structProperties.push(generateStruct(typeData.type.properties[property], makePascalCase(property)) + `\`json:"${property}"\``)
+      structProperties.push(generateStruct(typeData.type.properties[property], structName + makePascalCase(property), makePascalCase(property)) + `\`json:"${property}"\``)
     }
     const subStructName = structNamePrefix + structName
-    appendix += `type ${subStructName} struct {
+    appendix.add(`type ${subStructName} struct {
         ${structProperties.join("\n")}
-      }\n\n`
-    return `${structName} *${subStructName}`
+      }\n\n`)
+    return `${structName || propName} *${subStructName}`
   }
   if (["latitude", "longitude"].includes(typeData.name)) {
     return `${propName} *float64`
@@ -60,10 +60,18 @@ const generateStruct = (typeData, structNamePrefix, structName) => {
   return `${propName} interface{}`
 }
 
+const METHODS_TO_SPREAD = [
+  "Page.addScriptTag",
+  "Page.addStyleTag",
+  "Frame.addScriptTag",
+  "Frame.addStyleTag",
+  "Page.emulateMedia",
+]
+
 console.log("package playwright")
 for (const className in api) {
   for (const funcName in api[className].methods) {
-    let optionalParameters = Object.fromEntries(Object.entries(api[className].methods[funcName].args).filter(([k, v]) => !v.required || v.name.startsWith("option")))
+    let optionalParameters = Object.fromEntries(Object.entries(api[className].methods[funcName].args).filter(([k, v]) => !v.required || v.name.startsWith("option") || METHODS_TO_SPREAD.includes(className + "." + funcName)))
     if (Object.keys(optionalParameters).length > 0) {
       if (Object.keys(optionalParameters).length === 1) {
         optionalParameters = optionalParameters[Object.keys(optionalParameters)[0]].type.properties
@@ -88,4 +96,4 @@ for (const className in api) {
   }
 }
 
-console.log(appendix)
+console.log([...appendix].join("\n"))
