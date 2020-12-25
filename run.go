@@ -3,6 +3,7 @@ package playwright
 import (
 	"archive/zip"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -14,36 +15,59 @@ import (
 	"runtime"
 )
 
+const PLAYWRIGHT_CLI_VERSION = "0.170.0-next.1608058598043"
+
 type playwrightDriver struct {
-	driverName, driverFolder, driverPath, version string
+	driverDirectory, driverBinaryLocation, version string
 }
 
-func newDriver() (*playwrightDriver, error) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return nil, fmt.Errorf("could not get cwd: %w", err)
+func newDriver(options *RunOptions) (*playwrightDriver, error) {
+	baseDriverDirectory := ""
+	if options != nil {
+		baseDriverDirectory = options.DriverDirectory
 	}
-	driverFolder := filepath.Join(cwd, ".ms-playwright")
-	driverName := getDriverName()
-	driverPath := filepath.Join(driverFolder, driverName)
+	if baseDriverDirectory == "" {
+		var err error
+		baseDriverDirectory, err = getDefaultCacheDirectory()
+		if err != nil {
+			return nil, fmt.Errorf("could not get default cache directory: %v", err)
+		}
+	}
+	driverDirectory := filepath.Join(baseDriverDirectory, "playwright-go", PLAYWRIGHT_CLI_VERSION)
+	driverBinaryLocation := filepath.Join(driverDirectory, getDriverName())
 	return &playwrightDriver{
-		driverPath:   driverPath,
-		driverFolder: driverFolder,
-		driverName:   driverName,
-		version:      "0.170.0-next.1608058598043",
+		driverBinaryLocation: driverBinaryLocation,
+		driverDirectory:      driverDirectory,
+		version:              PLAYWRIGHT_CLI_VERSION,
 	}, nil
 }
 
+func getDefaultCacheDirectory() (string, error) {
+	userHomeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("could not get user home directory: %v", err)
+	}
+	switch runtime.GOOS {
+	case "windows":
+		return filepath.Join(userHomeDir, "AppData", "Local", "ms-playwright-go"), nil
+	case "darwin":
+		return filepath.Join(userHomeDir, "Library", "Caches", "ms-playwright-go"), nil
+	case "linux":
+		return filepath.Join(userHomeDir, ".cache", "ms-playwright-go"), nil
+	}
+	return "", errors.New("could not determine cache directory")
+}
+
 func (d *playwrightDriver) isUpToDate() (bool, error) {
-	if _, err := os.Stat(d.driverFolder); os.IsNotExist(err) {
-		if err := os.Mkdir(d.driverFolder, 0777); err != nil {
+	if _, err := os.Stat(d.driverDirectory); os.IsNotExist(err) {
+		if err := os.MkdirAll(d.driverDirectory, 0777); err != nil {
 			return false, fmt.Errorf("could not create driver folder: %w", err)
 		}
 	}
-	if _, err := os.Stat(d.driverPath); os.IsNotExist(err) {
+	if _, err := os.Stat(d.driverBinaryLocation); os.IsNotExist(err) {
 		return false, nil
 	}
-	output, err := exec.Command(d.driverPath, "--version").Output()
+	output, err := exec.Command(d.driverBinaryLocation, "--version").Output()
 	if err != nil {
 		return false, fmt.Errorf("could not run driver: %w", err)
 	}
@@ -83,7 +107,7 @@ func (d *playwrightDriver) install() error {
 	}
 
 	for _, zipFile := range zipReader.File {
-		outFile, err := os.Create(filepath.Join(d.driverFolder, zipFile.Name))
+		outFile, err := os.Create(filepath.Join(d.driverDirectory, zipFile.Name))
 		if err != nil {
 			return fmt.Errorf("could not create driver: %w", err)
 		}
@@ -103,18 +127,18 @@ func (d *playwrightDriver) install() error {
 	}
 
 	if runtime.GOOS != "windows" {
-		stats, err := os.Stat(d.driverPath)
+		stats, err := os.Stat(d.driverBinaryLocation)
 		if err != nil {
 			return fmt.Errorf("could not stat driver: %w", err)
 		}
-		if err := os.Chmod(d.driverPath, stats.Mode()|0x40); err != nil {
+		if err := os.Chmod(d.driverBinaryLocation, stats.Mode()|0x40); err != nil {
 			return fmt.Errorf("could not set permissions: %w", err)
 		}
 	}
 	log.Println("Downloaded driver successfully")
 
 	log.Println("Downloading browsers...")
-	if err := installBrowsers(d.driverPath); err != nil {
+	if err := installBrowsers(d.driverBinaryLocation); err != nil {
 		return fmt.Errorf("could not install browsers: %w", err)
 	}
 	log.Println("Downloaded browsers successfully")
@@ -122,7 +146,7 @@ func (d *playwrightDriver) install() error {
 }
 
 func (d *playwrightDriver) run() (*Connection, error) {
-	cmd := exec.Command(d.driverPath, "run-driver")
+	cmd := exec.Command(d.driverBinaryLocation, "run-driver")
 	cmd.Stderr = os.Stderr
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -151,11 +175,15 @@ func installBrowsers(driverPath string) error {
 	return nil
 }
 
+type RunOptions struct {
+	DriverDirectory string
+}
+
 // Install does download the driver and the browsers. If not called manually
 // before playwright.Run() it will get executed there and might take a few seconds
 // to download the Playwright suite.
-func Install() error {
-	driver, err := newDriver()
+func Install(options *RunOptions) error {
+	driver, err := newDriver(options)
 	if err != nil {
 		return fmt.Errorf("could not get driver instance: %w", err)
 	}
@@ -165,8 +193,12 @@ func Install() error {
 	return nil
 }
 
-func Run() (*Playwright, error) {
-	driver, err := newDriver()
+func Run(optionsInput ...*RunOptions) (*Playwright, error) {
+	var options *RunOptions
+	if len(optionsInput) == 1 {
+		options = optionsInput[0]
+	}
+	driver, err := newDriver(options)
 	if err != nil {
 		return nil, fmt.Errorf("could not get driver instance: %w", err)
 	}
