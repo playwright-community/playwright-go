@@ -13,9 +13,10 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
-const PLAYWRIGHT_CLI_VERSION = "0.170.0-next.1608058598043"
+const PLAYWRIGHT_CLI_VERSION = "0.171.0"
 
 type playwrightDriver struct {
 	driverDirectory, driverBinaryLocation, version string
@@ -33,7 +34,7 @@ func newDriver(options *RunOptions) (*playwrightDriver, error) {
 			return nil, fmt.Errorf("could not get default cache directory: %v", err)
 		}
 	}
-	driverDirectory := filepath.Join(baseDriverDirectory, "playwright-go", PLAYWRIGHT_CLI_VERSION)
+	driverDirectory := filepath.Join(baseDriverDirectory, "ms-playwright-go", PLAYWRIGHT_CLI_VERSION)
 	driverBinaryLocation := filepath.Join(driverDirectory, getDriverName())
 	return &playwrightDriver{
 		driverBinaryLocation: driverBinaryLocation,
@@ -49,11 +50,11 @@ func getDefaultCacheDirectory() (string, error) {
 	}
 	switch runtime.GOOS {
 	case "windows":
-		return filepath.Join(userHomeDir, "AppData", "Local", "ms-playwright-go"), nil
+		return filepath.Join(userHomeDir, "AppData", "Local"), nil
 	case "darwin":
-		return filepath.Join(userHomeDir, "Library", "Caches", "ms-playwright-go"), nil
+		return filepath.Join(userHomeDir, "Library", "Caches"), nil
 	case "linux":
-		return filepath.Join(userHomeDir, ".cache", "ms-playwright-go"), nil
+		return filepath.Join(userHomeDir, ".cache"), nil
 	}
 	return "", errors.New("could not determine cache directory")
 }
@@ -61,7 +62,7 @@ func getDefaultCacheDirectory() (string, error) {
 func (d *playwrightDriver) isUpToDate() (bool, error) {
 	if _, err := os.Stat(d.driverDirectory); os.IsNotExist(err) {
 		if err := os.MkdirAll(d.driverDirectory, 0777); err != nil {
-			return false, fmt.Errorf("could not create driver folder: %w", err)
+			return false, fmt.Errorf("could not create driver directory: %w", err)
 		}
 	}
 	if _, err := os.Stat(d.driverBinaryLocation); os.IsNotExist(err) {
@@ -86,7 +87,7 @@ func (d *playwrightDriver) install() error {
 		return nil
 	}
 
-	log.Println("Downloading driver...")
+	log.Printf("Downloading driver to %s", d.driverDirectory)
 	driverURL := d.getDriverURL()
 	resp, err := http.Get(driverURL)
 	if err != nil {
@@ -243,5 +244,9 @@ func (d *playwrightDriver) getDriverURL() string {
 	case "linux":
 		platform = "linux"
 	}
-	return fmt.Sprintf("https://playwright.azureedge.net/builds/cli/next/playwright-cli-%s-%s.zip", d.version, platform)
+	optionalSubDirectory := ""
+	if strings.Contains(d.version, "next") {
+		optionalSubDirectory = "/next"
+	}
+	return fmt.Sprintf("https://playwright.azureedge.net/builds/cli%s/playwright-cli-%s-%s.zip", optionalSubDirectory, d.version, platform)
 }
