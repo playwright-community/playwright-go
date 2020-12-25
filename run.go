@@ -49,11 +49,11 @@ func getDefaultCacheDirectory() (string, error) {
 	}
 	switch runtime.GOOS {
 	case "windows":
-		return filepath.Join(userHomeDir, "AppData", "Local", "ms-playwright"), nil
+		return filepath.Join(userHomeDir, "AppData", "Local", "ms-playwright-go"), nil
 	case "darwin":
-		return filepath.Join(userHomeDir, "Library", "Caches", "ms-playwright"), nil
+		return filepath.Join(userHomeDir, "Library", "Caches", "ms-playwright-go"), nil
 	case "linux":
-		return filepath.Join(userHomeDir, ".cache", "ms-playwright"), nil
+		return filepath.Join(userHomeDir, ".cache", "ms-playwright-go"), nil
 	}
 	return "", errors.New("could not determine cache directory")
 }
