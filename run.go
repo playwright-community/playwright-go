@@ -183,8 +183,8 @@ type RunOptions struct {
 // Install does download the driver and the browsers. If not called manually
 // before playwright.Run() it will get executed there and might take a few seconds
 // to download the Playwright suite.
-func Install(options *RunOptions) error {
-	driver, err := newDriver(options)
+func Install(options ...*RunOptions) error {
+	driver, err := newDriver(transformRunOptions(options))
 	if err != nil {
 		return fmt.Errorf("could not get driver instance: %w", err)
 	}
@@ -194,12 +194,8 @@ func Install(options *RunOptions) error {
 	return nil
 }
 
-func Run(optionsInput ...*RunOptions) (*Playwright, error) {
-	var options *RunOptions
-	if len(optionsInput) == 1 {
-		options = optionsInput[0]
-	}
-	driver, err := newDriver(options)
+func Run(options ...*RunOptions) (*Playwright, error) {
+	driver, err := newDriver(transformRunOptions(options))
 	if err != nil {
 		return nil, fmt.Errorf("could not get driver instance: %w", err)
 	}
@@ -220,6 +216,13 @@ func Run(optionsInput ...*RunOptions) (*Playwright, error) {
 		return nil, fmt.Errorf("could not call object: %w", err)
 	}
 	return obj.(*Playwright), nil
+}
+
+func transformRunOptions(options []*RunOptions) *RunOptions {
+	if len(options) == 1 {
+		return options[0]
+	}
+	return nil
 }
 
 func getDriverName() string {

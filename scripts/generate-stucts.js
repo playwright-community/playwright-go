@@ -62,8 +62,8 @@ const generateStruct = (typeData, structNamePrefix, structName) => {
 
 console.log("package playwright")
 for (const className in api) {
-  for (const funcName in api[className].members) {
-    let optionalParameters = Object.fromEntries(Object.entries(api[className].members[funcName].args).filter(([k, v]) => !v.required || v.name.startsWith("option")))
+  for (const funcName in api[className].methods) {
+    let optionalParameters = Object.fromEntries(Object.entries(api[className].methods[funcName].args).filter(([k, v]) => !v.required || v.name.startsWith("option")))
     if (Object.keys(optionalParameters).length > 0) {
       if (Object.keys(optionalParameters).length === 1) {
         optionalParameters = optionalParameters[Object.keys(optionalParameters)[0]].type.properties
