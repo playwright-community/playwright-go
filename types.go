@@ -607,14 +607,14 @@ type BrowserNewContextRecordHar struct {
 	Path        *string `json:"path"`
 }
 
-type RecordVideoSizeSize struct {
+type RecordVideoSize struct {
 	Width  *int `json:"width"`
 	Height *int `json:"height"`
 }
 
 type BrowserNewContextRecordVideo struct {
-	Dir  *string              `json:"dir"`
-	Size *RecordVideoSizeSize `json:"size"`
+	Dir  *string          `json:"dir"`
+	Size *RecordVideoSize `json:"size"`
 }
 
 type BrowserNewContextProxy struct {
@@ -656,8 +656,8 @@ type BrowserNewPageRecordHar struct {
 }
 
 type BrowserNewPageRecordVideo struct {
-	Dir  *string              `json:"dir"`
-	Size *RecordVideoSizeSize `json:"size"`
+	Dir  *string          `json:"dir"`
+	Size *RecordVideoSize `json:"size"`
 }
 
 type BrowserNewPageProxy struct {
@@ -787,8 +787,8 @@ type BrowserTypeLaunchPersistentContextRecordHar struct {
 }
 
 type BrowserTypeLaunchPersistentContextRecordVideo struct {
-	Dir  *string              `json:"dir"`
-	Size *RecordVideoSizeSize `json:"size"`
+	Dir  *string          `json:"dir"`
+	Size *RecordVideoSize `json:"size"`
 }
 
 type BrowserTypeLaunchServerProxy struct {

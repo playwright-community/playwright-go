@@ -23,13 +23,13 @@ const generateStruct = (typeData, structNamePrefix, structName) => {
   if (typeName.endsWith("Object") && Object.keys(typeData.type.properties).length > 0) {
     let structProperties = []
     for (const property in typeData.type.properties) {
-      structProperties.push(generateStruct(typeData.type.properties[property], structName + makePascalCase(property), makePascalCase(property)) + `\`json:"${property}"\``)
+      structProperties.push(generateStruct(typeData.type.properties[property], structName, makePascalCase(property)) + `\`json:"${property}"\``)
     }
     const subStructName = structNamePrefix + structName
     appendix.add(`type ${subStructName} struct {
         ${structProperties.join("\n")}
       }\n\n`)
-    return `${structName || propName} *${subStructName}`
+    return `${structName} *${subStructName}`
   }
   if (["latitude", "longitude"].includes(typeData.name)) {
     return `${propName} *float64`
