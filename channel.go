@@ -6,14 +6,14 @@ import (
 	"reflect"
 )
 
-type Channel struct {
+type channel struct {
 	eventEmitter
 	guid       string
-	connection *Connection
+	connection *connection
 	object     interface{}
 }
 
-func (c *Channel) Send(method string, options ...interface{}) (interface{}, error) {
+func (c *channel) Send(method string, options ...interface{}) (interface{}, error) {
 	params := transformOptions(options...)
 	result, err := c.connection.SendMessageToServer(c.guid, method, params)
 	if err != nil {
@@ -34,7 +34,7 @@ func (c *Channel) Send(method string, options ...interface{}) (interface{}, erro
 	return result, nil
 }
 
-func (c *Channel) SendNoReply(method string, options ...interface{}) {
+func (c *channel) SendNoReply(method string, options ...interface{}) {
 	params := transformOptions(options...)
 	_, err := c.connection.SendMessageToServer(c.guid, method, params)
 	if err != nil {
@@ -42,8 +42,8 @@ func (c *Channel) SendNoReply(method string, options ...interface{}) {
 	}
 }
 
-func newChannel(connection *Connection, guid string) *Channel {
-	channel := &Channel{
+func newChannel(connection *connection, guid string) *channel {
+	channel := &channel{
 		connection: connection,
 		guid:       guid,
 	}

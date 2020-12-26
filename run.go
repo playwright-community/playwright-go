@@ -146,7 +146,7 @@ func (d *playwrightDriver) install() error {
 	return nil
 }
 
-func (d *playwrightDriver) run() (*Connection, error) {
+func (d *playwrightDriver) run() (*connection, error) {
 	cmd := exec.Command(d.driverBinaryLocation, "run-driver")
 	cmd.Stderr = os.Stderr
 	stdin, err := cmd.StdinPipe()

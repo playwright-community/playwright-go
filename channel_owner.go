@@ -4,9 +4,9 @@ type channelOwner struct {
 	eventEmitter
 	objectType  string
 	guid        string
-	channel     *Channel
+	channel     *channel
 	objects     map[string]*channelOwner
-	connection  *Connection
+	connection  *connection
 	initializer map[string]interface{}
 	parent      *channelOwner
 }
@@ -39,7 +39,7 @@ func (c *channelOwner) createChannelOwner(self interface{}, parent *channelOwner
 	c.initEventEmitter()
 }
 
-func newRootChannelOwner(connection *Connection) *channelOwner {
+func newRootChannelOwner(connection *connection) *channelOwner {
 	c := &channelOwner{
 		objectType: "",
 		guid:       "",

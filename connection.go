@@ -12,7 +12,7 @@ type callback struct {
 	Error error
 }
 
-type Connection struct {
+type connection struct {
 	transport                   *transport
 	waitingForRemoteObjectsLock sync.Mutex
 	waitingForRemoteObjects     map[string]chan interface{}
@@ -24,18 +24,18 @@ type Connection struct {
 	stopDriver                  func() error
 }
 
-func (c *Connection) Start() error {
+func (c *connection) Start() error {
 	return c.transport.Start()
 }
 
-func (c *Connection) Stop() error {
+func (c *connection) Stop() error {
 	if err := c.transport.Stop(); err != nil {
 		return fmt.Errorf("could not stop transport: %w", err)
 	}
 	return c.stopDriver()
 }
 
-func (c *Connection) CallOnObjectWithKnownName(name string) (interface{}, error) {
+func (c *connection) CallOnObjectWithKnownName(name string) (interface{}, error) {
 	if _, ok := c.waitingForRemoteObjects[name]; !ok {
 		c.waitingForRemoteObjectsLock.Lock()
 		c.waitingForRemoteObjects[name] = make(chan interface{})
@@ -44,7 +44,7 @@ func (c *Connection) CallOnObjectWithKnownName(name string) (interface{}, error)
 	return <-c.waitingForRemoteObjects[name], nil
 }
 
-func (c *Connection) Dispatch(msg *Message) {
+func (c *connection) Dispatch(msg *Message) {
 	method := msg.Method
 	if msg.ID != 0 {
 		cb, _ := c.callbacks.Load(msg.ID)
@@ -73,7 +73,7 @@ func (c *Connection) Dispatch(msg *Message) {
 	object.channel.Emit(method, c.replaceGuidsWithChannels(msg.Params))
 }
 
-func (c *Connection) createRemoteObject(parent *channelOwner, objectType string, guid string, initializer interface{}) interface{} {
+func (c *connection) createRemoteObject(parent *channelOwner, objectType string, guid string, initializer interface{}) interface{} {
 	initializer = c.replaceGuidsWithChannels(initializer)
 	result := createObjectFactory(parent, objectType, guid, initializer.(map[string]interface{}))
 	c.waitingForRemoteObjectsLock.Lock()
@@ -85,11 +85,11 @@ func (c *Connection) createRemoteObject(parent *channelOwner, objectType string,
 	return result
 }
 
-func (c *Connection) replaceChannelsWithGuids(payload interface{}) interface{} {
+func (c *connection) replaceChannelsWithGuids(payload interface{}) interface{} {
 	if payload == nil {
 		return nil
 	}
-	if channel, isChannel := payload.(*Channel); isChannel {
+	if channel, isChannel := payload.(*channel); isChannel {
 		return map[string]string{
 			"guid": channel.guid,
 		}
@@ -112,7 +112,7 @@ func (c *Connection) replaceChannelsWithGuids(payload interface{}) interface{} {
 	return payload
 }
 
-func (c *Connection) replaceGuidsWithChannels(payload interface{}) interface{} {
+func (c *connection) replaceGuidsWithChannels(payload interface{}) interface{} {
 	if payload == nil {
 		return nil
 	}
@@ -139,7 +139,7 @@ func (c *Connection) replaceGuidsWithChannels(payload interface{}) interface{} {
 	return payload
 }
 
-func (c *Connection) SendMessageToServer(guid string, method string, params interface{}) (interface{}, error) {
+func (c *connection) SendMessageToServer(guid string, method string, params interface{}) (interface{}, error) {
 	c.lastIDLock.Lock()
 	c.lastID++
 	id := c.lastID
@@ -162,8 +162,8 @@ func (c *Connection) SendMessageToServer(guid string, method string, params inte
 	return result.Data, nil
 }
 
-func newConnection(stdin io.WriteCloser, stdout io.ReadCloser, stopDriver func() error) *Connection {
-	connection := &Connection{
+func newConnection(stdin io.WriteCloser, stdout io.ReadCloser, stopDriver func() error) *connection {
+	connection := &connection{
 		waitingForRemoteObjects: make(map[string]chan interface{}),
 		objects:                 make(map[string]*channelOwner),
 		stopDriver:              stopDriver,
@@ -174,7 +174,7 @@ func newConnection(stdin io.WriteCloser, stdout io.ReadCloser, stopDriver func()
 }
 
 func fromChannel(v interface{}) interface{} {
-	return v.(*Channel).object
+	return v.(*channel).object
 }
 
 func fromNullableChannel(v interface{}) interface{} {

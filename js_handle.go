@@ -161,7 +161,7 @@ func parseValue(result interface{}) interface{} {
 	panic(fmt.Errorf("Unexpected value: %v", vMap))
 }
 
-func serializeValue(value interface{}, handles *[]*Channel, depth int) interface{} {
+func serializeValue(value interface{}, handles *[]*channel, depth int) interface{} {
 	if handle, ok := value.(*elementHandleImpl); ok {
 		h := len(*handles)
 		*handles = append(*handles, handle.channel)
@@ -249,7 +249,7 @@ func parseResult(result interface{}) interface{} {
 }
 
 func serializeArgument(arg interface{}) interface{} {
-	handles := []*Channel{}
+	handles := []*channel{}
 	value := serializeValue(arg, &handles, 0)
 	return map[string]interface{}{
 		"value":   value,

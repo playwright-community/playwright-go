@@ -1,10 +1,10 @@
 package playwright
 
 type mouseImpl struct {
-	channel *Channel
+	channel *channel
 }
 
-func newMouse(channel *Channel) *mouseImpl {
+func newMouse(channel *channel) *mouseImpl {
 	return &mouseImpl{
 		channel: channel,
 	}
@@ -49,10 +49,10 @@ func (m *mouseImpl) DblClick(x, y float64, options ...MouseDblclickOptions) erro
 }
 
 type keyboardImpl struct {
-	channel *Channel
+	channel *channel
 }
 
-func newKeyboard(channel *Channel) *keyboardImpl {
+func newKeyboard(channel *channel) *keyboardImpl {
 	return &keyboardImpl{
 		channel: channel,
 	}
