@@ -304,7 +304,7 @@ func TestPageOpener(t *testing.T) {
 		return err
 	})
 	require.NoError(t, err)
-	popup := page.(*Page)
+	popup := page.(*pageImpl)
 
 	opener, err := popup.Opener()
 	require.NoError(t, err)
@@ -625,16 +625,16 @@ func TestPageSupportNetworkEvents(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	eventsChan := make(chan string, 6)
-	helper.Page.On("request", func(request *Request) {
+	helper.Page.On("request", func(request *requestImpl) {
 		eventsChan <- fmt.Sprintf("%s %s", request.Method(), request.URL())
 	})
-	helper.Page.On("response", func(response *Response) {
+	helper.Page.On("response", func(response *responseImpl) {
 		eventsChan <- fmt.Sprintf("%d %s", response.Status(), response.URL())
 	})
-	helper.Page.On("requestfinished", func(request *Request) {
+	helper.Page.On("requestfinished", func(request *requestImpl) {
 		eventsChan <- fmt.Sprintf("DONE %s", request.URL())
 	})
-	helper.Page.On("requestfailed", func(request *Request) {
+	helper.Page.On("requestfailed", func(request *requestImpl) {
 		eventsChan <- fmt.Sprintf("FAIL %s", request.URL())
 	})
 	helper.server.SetRedirect("/foo.html", "/empty.html")

@@ -13,10 +13,10 @@ type DeviceDescriptor struct {
 }
 
 type Playwright struct {
-	ChannelOwner
-	Chromium BrowserTypeI
-	Firefox  BrowserTypeI
-	WebKit   BrowserTypeI
+	channelOwner
+	Chromium BrowserType
+	Firefox  BrowserType
+	WebKit   BrowserType
 	Devices  map[string]*DeviceDescriptor
 }
 
@@ -24,12 +24,12 @@ func (p *Playwright) Stop() error {
 	return p.connection.Stop()
 }
 
-func newPlaywright(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Playwright {
+func newPlaywright(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *Playwright {
 	// TODO: add selectors
 	pw := &Playwright{
-		Chromium: fromChannel(initializer["chromium"]).(*BrowserType),
-		Firefox:  fromChannel(initializer["firefox"]).(*BrowserType),
-		WebKit:   fromChannel(initializer["webkit"]).(*BrowserType),
+		Chromium: fromChannel(initializer["chromium"]).(*browserTypeImpl),
+		Firefox:  fromChannel(initializer["firefox"]).(*browserTypeImpl),
+		WebKit:   fromChannel(initializer["webkit"]).(*browserTypeImpl),
 		Devices:  make(map[string]*DeviceDescriptor),
 	}
 	for _, dd := range initializer["deviceDescriptors"].([]interface{}) {

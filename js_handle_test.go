@@ -15,7 +15,7 @@ func TestJSHandleGetProperty(t *testing.T) {
 		three: 3
 	})`)
 	require.NoError(t, err)
-	twoHandle, err := aHandle.(*JSHandle).GetProperty("two")
+	twoHandle, err := aHandle.(*jsHandleImpl).GetProperty("two")
 	require.NoError(t, err)
 	value, err := twoHandle.JSONValue()
 	require.NoError(t, err)
@@ -31,7 +31,7 @@ func TestJSHandleGetProperties(t *testing.T) {
 		three: 3
 	})`)
 	require.NoError(t, err)
-	twoHandle, err := aHandle.(*JSHandle).GetProperties()
+	twoHandle, err := aHandle.(*jsHandleImpl).GetProperties()
 	require.NoError(t, err)
 	v1, err := twoHandle["one"].JSONValue()
 	require.NoError(t, err)
@@ -55,7 +55,7 @@ func TestJSHandleEvaluate(t *testing.T) {
 		three: 3
 	})`)
 	require.NoError(t, err)
-	twoHandle, err := aHandle.(*JSHandle).Evaluate("x => x")
+	twoHandle, err := aHandle.(*jsHandleImpl).Evaluate("x => x")
 	require.NoError(t, err)
 	values := twoHandle.(map[string]interface{})
 	require.Equal(t, 1, values["one"])
@@ -72,11 +72,11 @@ func TestJSHandleEvaluateHandle(t *testing.T) {
 		three: 3
 	})`)
 	require.NoError(t, err)
-	twoHandle, err := aHandle.(*JSHandle).EvaluateHandle("x => x")
+	twoHandle, err := aHandle.(*jsHandleImpl).EvaluateHandle("x => x")
 	require.NoError(t, err)
-	twoHandle, err = twoHandle.(*JSHandle).GetProperty("two")
+	twoHandle, err = twoHandle.(*jsHandleImpl).GetProperty("two")
 	require.NoError(t, err)
-	value, err := twoHandle.(*JSHandle).JSONValue()
+	value, err := twoHandle.(*jsHandleImpl).JSONValue()
 	require.NoError(t, err)
 	require.Equal(t, value, 2)
 }
@@ -90,10 +90,10 @@ func TestJSHandleTypeParsing(t *testing.T) {
 		a_string_of_an_integer: "3",
 	})`)
 	require.NoError(t, err)
-	twoHandle, err := aHandle.(*JSHandle).EvaluateHandle("x => x")
+	twoHandle, err := aHandle.(*jsHandleImpl).EvaluateHandle("x => x")
 	require.NoError(t, err)
 
-	integerHandle, err := twoHandle.(*JSHandle).GetProperty("an_integer")
+	integerHandle, err := twoHandle.(*jsHandleImpl).GetProperty("an_integer")
 	require.NoError(t, err)
 	intV, err := integerHandle.JSONValue()
 	require.NoError(t, err)
@@ -102,7 +102,7 @@ func TestJSHandleTypeParsing(t *testing.T) {
 	_, ok = intV.(float64)
 	require.False(t, ok)
 
-	floatHandle, err := twoHandle.(*JSHandle).GetProperty("a_float")
+	floatHandle, err := twoHandle.(*jsHandleImpl).GetProperty("a_float")
 	require.NoError(t, err)
 	floatV, err := floatHandle.JSONValue()
 	require.NoError(t, err)
@@ -111,7 +111,7 @@ func TestJSHandleTypeParsing(t *testing.T) {
 	_, ok = floatV.(int)
 	require.False(t, ok)
 
-	stringHandle, err := twoHandle.(*JSHandle).GetProperty("a_string_of_an_integer")
+	stringHandle, err := twoHandle.(*jsHandleImpl).GetProperty("a_string_of_an_integer")
 	require.NoError(t, err)
 	stringV, err := stringHandle.JSONValue()
 	require.NoError(t, err)

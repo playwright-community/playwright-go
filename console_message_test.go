@@ -9,8 +9,8 @@ import (
 func TestConsoleShouldWork(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	messages := make(chan *ConsoleMessage, 1)
-	helper.Page.Once("console", func(message *ConsoleMessage) {
+	messages := make(chan *consoleMessageImpl, 1)
+	helper.Page.Once("console", func(message *consoleMessageImpl) {
 		messages <- message
 	})
 	_, err := helper.Page.Evaluate(`() => console.log("hello", 5, {foo: "bar"})`)
@@ -36,7 +36,7 @@ func TestConsoleShouldEmitSameLogTwice(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	messages := make(chan string, 2)
-	helper.Page.On("console", func(message *ConsoleMessage) {
+	helper.Page.On("console", func(message *consoleMessageImpl) {
 		messages <- message.Text()
 	})
 	_, err := helper.Page.Evaluate(`() => { for (let i = 0; i < 2; ++i ) console.log("hello"); } `)
@@ -49,8 +49,8 @@ func TestConsoleShouldEmitSameLogTwice(t *testing.T) {
 func TestConsoleShouldUseTextForStr(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	messages := make(chan *ConsoleMessage, 1)
-	helper.Page.On("console", func(message *ConsoleMessage) {
+	messages := make(chan *consoleMessageImpl, 1)
+	helper.Page.On("console", func(message *consoleMessageImpl) {
 		messages <- message
 	})
 	_, err := helper.Page.Evaluate(`() => console.log("Hello world")`)
@@ -62,8 +62,8 @@ func TestConsoleShouldUseTextForStr(t *testing.T) {
 func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	messagesChan := make(chan *ConsoleMessage, 6)
-	helper.Page.On("console", func(message *ConsoleMessage) {
+	messagesChan := make(chan *consoleMessageImpl, 6)
+	helper.Page.On("console", func(message *consoleMessageImpl) {
 		messagesChan <- message
 	})
 	// All console events will be reported before 'page.evaluate' is finished.
@@ -78,7 +78,7 @@ func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
       console.error('calling console.error');
       console.log(Promise.resolve('should not wait until resolved!'));
 	}`)
-	messages := ChanToSlice(messagesChan, 6).([]*ConsoleMessage)
+	messages := ChanToSlice(messagesChan, 6).([]*consoleMessageImpl)
 	require.NoError(t, err)
 	require.Equal(t, []interface{}{
 		"timeEnd",
@@ -88,7 +88,7 @@ func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 		"error",
 		"log",
 	}, Map(messages, func(msg interface{}) interface{} {
-		return msg.(*ConsoleMessage).Type()
+		return msg.(*consoleMessageImpl).Type()
 	}))
 
 	require.Contains(t, messages[0].Text(), "calling console.time")
@@ -99,15 +99,15 @@ func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 		"calling console.error",
 		"JSHandle@promise",
 	}, Map(messages[1:], func(msg interface{}) interface{} {
-		return msg.(*ConsoleMessage).Text()
+		return msg.(*consoleMessageImpl).Text()
 	}))
 }
 
 func TestConsoleShouldNotFailForWindowObjects(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	messages := make(chan *ConsoleMessage, 1)
-	helper.Page.Once("console", func(message *ConsoleMessage) {
+	messages := make(chan *consoleMessageImpl, 1)
+	helper.Page.Once("console", func(message *consoleMessageImpl) {
 		messages <- message
 	})
 	_, err := helper.Page.Evaluate("() => console.error(window)")
@@ -119,8 +119,8 @@ func TestConsoleShouldNotFailForWindowObjects(t *testing.T) {
 func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	messages := make(chan *ConsoleMessage, 1)
-	helper.Page.Once("console", func(message *ConsoleMessage) {
+	messages := make(chan *consoleMessageImpl, 1)
+	helper.Page.Once("console", func(message *consoleMessageImpl) {
 		messages <- message
 	})
 	_, err := helper.Page.Goto("about:blank")
@@ -138,11 +138,11 @@ func TestConsoleShouldHaveLocation(t *testing.T) {
 	messageEvent, err := helper.Page.ExpectEvent("console", func() error {
 		_, err := helper.Page.Goto(helper.server.PREFIX + "/consolelog.html")
 		return err
-	}, func(m *ConsoleMessage) bool {
+	}, func(m *consoleMessageImpl) bool {
 		return m.Text() == "yellow"
 	})
 	require.NoError(t, err)
-	message := messageEvent.(*ConsoleMessage)
+	message := messageEvent.(*consoleMessageImpl)
 	require.Equal(t, message.Type(), "log")
 	require.Equal(t, helper.server.PREFIX+"/consolelog.html", message.Location().URL)
 	require.Equal(t, 7, message.Location().LineNumber)

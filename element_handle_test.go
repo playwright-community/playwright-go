@@ -31,7 +31,7 @@ func TestElementHandleOwnerFrame(t *testing.T) {
 	frame := helper.Page.Frames()[1]
 	elementHandle, err := frame.EvaluateHandle("document.body")
 	require.NoError(t, err)
-	ownerFrame, err := elementHandle.(*ElementHandle).OwnerFrame()
+	ownerFrame, err := elementHandle.(*elementHandleImpl).OwnerFrame()
 	require.NoError(t, err)
 	require.Equal(t, ownerFrame, frame)
 	require.Equal(t, "iframe1", ownerFrame.Name())

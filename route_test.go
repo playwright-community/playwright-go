@@ -17,7 +17,7 @@ func TestRouteContinue(t *testing.T) {
 		"extra-http": "42",
 	}))
 	intercepted := make(chan bool, 1)
-	err := helper.Page.Route("**/empty.html", func(route *Route, request *Request) {
+	err := helper.Page.Route("**/empty.html", func(route *routeImpl, request *requestImpl) {
 		require.Equal(t, route.Request(), request)
 		require.Contains(t, request.URL(), "empty.html")
 		require.True(t, len(request.Headers()["user-agent"]) > 5)
@@ -47,7 +47,7 @@ func TestRouteContinueOverwrite(t *testing.T) {
 	serverRequestChan := helper.server.WaitForRequestChan("/sleep.zzz")
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, helper.Page.Route("**/*", func(route *Route, request *Request) {
+	require.NoError(t, helper.Page.Route("**/*", func(route *routeImpl, request *requestImpl) {
 		headers := request.Headers()
 		headers["Foo"] = "bar"
 		require.NoError(t, route.Continue(RouteContinueOptions{
@@ -72,7 +72,7 @@ func TestRouteContinueOverwriteBodyBytes(t *testing.T) {
 	serverRequestChan := helper.server.WaitForRequestChan("/sleep.zzz")
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, helper.Page.Route("**/*", func(route *Route, request *Request) {
+	require.NoError(t, helper.Page.Route("**/*", func(route *routeImpl, request *requestImpl) {
 		require.NoError(t, route.Continue(RouteContinueOptions{
 			Method:   String("POST"),
 			PostData: []byte("foobar"),
@@ -90,8 +90,8 @@ func TestRouteContinueOverwriteBodyBytes(t *testing.T) {
 func TestRouteFulfill(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	requestsChan := make(chan *Request, 1)
-	err := helper.Page.Route("**/empty.html", func(route *Route, request *Request) {
+	requestsChan := make(chan *requestImpl, 1)
+	err := helper.Page.Route("**/empty.html", func(route *routeImpl, request *requestImpl) {
 		require.Equal(t, route.Request(), request)
 		require.Contains(t, request.URL(), "empty.html")
 		require.True(t, len(request.Headers()["user-agent"]) > 5)
@@ -131,7 +131,7 @@ func TestRouteFulfillByteSlice(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	intercepted := make(chan bool, 1)
-	err := helper.Page.Route("**/empty.html", func(route *Route, request *Request) {
+	err := helper.Page.Route("**/empty.html", func(route *routeImpl, request *requestImpl) {
 		require.NoError(t, route.Fulfill(RouteFulfillOptions{
 			Body:        []byte("123"),
 			ContentType: String("text/plain"),
@@ -154,7 +154,7 @@ func TestRouteFulfillPath(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	intercepted := make(chan bool, 1)
-	err := helper.Page.Route("**/empty.html", func(route *Route, request *Request) {
+	err := helper.Page.Route("**/empty.html", func(route *routeImpl, request *requestImpl) {
 		require.NoError(t, route.Fulfill(RouteFulfillOptions{
 			Path: String(filepath.Join(helper.assetDir, "pptr.png")),
 		}))
@@ -175,8 +175,8 @@ func TestRequestFinished(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	eventsStorage := newSyncSlice()
-	var request *Request
-	helper.Page.Once("request", func(r *Request) {
+	var request *requestImpl
+	helper.Page.Once("request", func(r *requestImpl) {
 		request = r
 		eventsStorage.Append("request")
 	})
@@ -212,11 +212,11 @@ func TestResponsePostData(t *testing.T) {
 func TestRouteAbort(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	failedRequests := make(chan *Request, 1)
-	helper.Page.Once("requestfailed", func(request *Request) {
+	failedRequests := make(chan *requestImpl, 1)
+	helper.Page.Once("requestfailed", func(request *requestImpl) {
 		failedRequests <- request
 	})
-	err := helper.Page.Route("**/empty.html", func(route *Route, request *Request) {
+	err := helper.Page.Route("**/empty.html", func(route *routeImpl, request *requestImpl) {
 		require.NoError(t, route.Abort(String("aborted")))
 	})
 	require.NoError(t, err)
@@ -234,7 +234,7 @@ func TestRequestPostData(t *testing.T) {
 	})
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, helper.Page.Route("**/foobar", func(route *Route, request *Request) {
+	require.NoError(t, helper.Page.Route("**/foobar", func(route *routeImpl, request *requestImpl) {
 		var postData map[string]interface{}
 		require.NoError(t, request.PostDataJSON(&postData))
 		require.Equal(t, map[string]interface{}{

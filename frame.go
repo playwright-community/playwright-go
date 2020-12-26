@@ -8,37 +8,37 @@ import (
 	"time"
 )
 
-type Frame struct {
-	ChannelOwner
+type frameImpl struct {
+	channelOwner
 	sync.RWMutex
 	detached    bool
-	page        PageI
+	page        Page
 	name        string
 	url         string
-	parentFrame FrameI
-	childFrames []FrameI
+	parentFrame Frame
+	childFrames []Frame
 	loadStates  *safeStringSet
 }
 
-func newFrame(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Frame {
+func newFrame(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *frameImpl {
 	var loadStates *safeStringSet
 	if ls, ok := initializer["loadStates"].([]string); ok {
 		loadStates = newSafeStringSet(ls)
 	} else {
 		loadStates = newSafeStringSet([]string{})
 	}
-	bt := &Frame{
+	bt := &frameImpl{
 		name:        initializer["name"].(string),
 		url:         initializer["url"].(string),
 		loadStates:  loadStates,
-		childFrames: make([]FrameI, 0),
+		childFrames: make([]Frame, 0),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 
 	channelOwner := fromNullableChannel(initializer["parentFrame"])
 	if channelOwner != nil {
-		bt.parentFrame = channelOwner.(*Frame)
-		bt.parentFrame.(*Frame).childFrames = append(bt.parentFrame.(*Frame).childFrames, bt)
+		bt.parentFrame = channelOwner.(*frameImpl)
+		bt.parentFrame.(*frameImpl).childFrames = append(bt.parentFrame.(*frameImpl).childFrames, bt)
 	}
 
 	bt.channel.On("navigated", bt.onFrameNavigated)
@@ -55,31 +55,31 @@ func newFrame(parent *ChannelOwner, objectType string, guid string, initializer 
 	return bt
 }
 
-func (f *Frame) URL() string {
+func (f *frameImpl) URL() string {
 	f.RLock()
 	defer f.RUnlock()
 	return f.url
 }
 
-func (f *Frame) Name() string {
+func (f *frameImpl) Name() string {
 	f.RLock()
 	defer f.RUnlock()
 	return f.name
 }
 
-func (f *Frame) SetContent(content string, options ...PageSetContentOptions) error {
+func (f *frameImpl) SetContent(content string, options ...PageSetContentOptions) error {
 	_, err := f.channel.Send("setContent", map[string]interface{}{
 		"html": content,
 	}, options)
 	return err
 }
 
-func (f *Frame) Content() (string, error) {
+func (f *frameImpl) Content() (string, error) {
 	content, err := f.channel.Send("content")
 	return content.(string), err
 }
 
-func (f *Frame) Goto(url string, options ...PageGotoOptions) (ResponseI, error) {
+func (f *frameImpl) Goto(url string, options ...PageGotoOptions) (Response, error) {
 	channel, err := f.channel.Send("goto", map[string]interface{}{
 		"url": url,
 	}, options)
@@ -90,10 +90,10 @@ func (f *Frame) Goto(url string, options ...PageGotoOptions) (ResponseI, error) 
 	if channelOwner == nil {
 		return nil, nil
 	}
-	return channelOwner.(*Response), nil
+	return channelOwner.(*responseImpl), nil
 }
 
-func (f *Frame) AddScriptTag(options PageAddScriptTagOptions) (ElementHandleI, error) {
+func (f *frameImpl) AddScriptTag(options PageAddScriptTagOptions) (ElementHandle, error) {
 	if options.Path != nil {
 		file, err := ioutil.ReadFile(*options.Path)
 		if err != nil {
@@ -106,10 +106,10 @@ func (f *Frame) AddScriptTag(options PageAddScriptTagOptions) (ElementHandleI, e
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(channel).(*ElementHandle), nil
+	return fromChannel(channel).(*elementHandleImpl), nil
 }
 
-func (f *Frame) AddStyleTag(options PageAddStyleTagOptions) (ElementHandleI, error) {
+func (f *frameImpl) AddStyleTag(options PageAddStyleTagOptions) (ElementHandle, error) {
 	if options.Path != nil {
 		file, err := ioutil.ReadFile(*options.Path)
 		if err != nil {
@@ -122,14 +122,14 @@ func (f *Frame) AddStyleTag(options PageAddStyleTagOptions) (ElementHandleI, err
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(channel).(*ElementHandle), nil
+	return fromChannel(channel).(*elementHandleImpl), nil
 }
 
-func (f *Frame) Page() PageI {
+func (f *frameImpl) Page() Page {
 	return f.page
 }
 
-func (f *Frame) WaitForLoadState(given ...string) {
+func (f *frameImpl) WaitForLoadState(given ...string) {
 	state := "load"
 	if len(given) == 1 {
 		state = given[0]
@@ -147,7 +147,7 @@ func (f *Frame) WaitForLoadState(given ...string) {
 	<-succeed
 }
 
-func (f *Frame) WaitForEventCh(event string, predicate ...interface{}) <-chan interface{} {
+func (f *frameImpl) WaitForEventCh(event string, predicate ...interface{}) <-chan interface{} {
 	evChan := make(chan interface{}, 1)
 	f.Once(event, func(ev ...interface{}) {
 		if len(predicate) == 0 {
@@ -162,11 +162,11 @@ func (f *Frame) WaitForEventCh(event string, predicate ...interface{}) <-chan in
 	return evChan
 }
 
-func (f *Frame) WaitForEvent(event string, predicate ...interface{}) interface{} {
+func (f *frameImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
 	return <-f.WaitForEventCh(event, predicate...)
 }
 
-func (f *Frame) WaitForNavigation(options ...PageWaitForNavigationOptions) (ResponseI, error) {
+func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error) {
 	option := PageWaitForNavigationOptions{}
 	if len(options) == 1 {
 		option = options[0]
@@ -175,7 +175,7 @@ func (f *Frame) WaitForNavigation(options ...PageWaitForNavigationOptions) (Resp
 		option.WaitUntil = String("load")
 	}
 	if option.Timeout == nil {
-		option.Timeout = Int(f.page.(*Page).timeoutSettings.NavigationTimeout())
+		option.Timeout = Int(f.page.(*pageImpl).timeoutSettings.NavigationTimeout())
 	}
 	deadline := time.After(time.Duration(*option.Timeout) * time.Millisecond)
 	var matcher *urlMatcher
@@ -195,14 +195,14 @@ func (f *Frame) WaitForNavigation(options ...PageWaitForNavigationOptions) (Resp
 	case eventData := <-f.WaitForEventCh("navigated", predicate):
 		event := eventData.(map[string]interface{})
 		if event["newDocument"] != nil && event["newDocument"].(map[string]interface{})["request"] != nil {
-			request := fromChannel(event["newDocument"].(map[string]interface{})["request"]).(*Request)
+			request := fromChannel(event["newDocument"].(map[string]interface{})["request"]).(*requestImpl)
 			return request.Response()
 		}
 	}
 	return nil, nil
 }
 
-func (f *Frame) onFrameNavigated(ev map[string]interface{}) {
+func (f *frameImpl) onFrameNavigated(ev map[string]interface{}) {
 	f.Lock()
 	f.url = ev["url"].(string)
 	f.name = ev["name"].(string)
@@ -213,7 +213,7 @@ func (f *Frame) onFrameNavigated(ev map[string]interface{}) {
 	}
 }
 
-func (f *Frame) QuerySelector(selector string) (ElementHandleI, error) {
+func (f *frameImpl) QuerySelector(selector string) (ElementHandle, error) {
 	channel, err := f.channel.Send("querySelector", map[string]interface{}{
 		"selector": selector,
 	})
@@ -223,24 +223,24 @@ func (f *Frame) QuerySelector(selector string) (ElementHandleI, error) {
 	if channel == nil {
 		return nil, nil
 	}
-	return fromChannel(channel).(*ElementHandle), nil
+	return fromChannel(channel).(*elementHandleImpl), nil
 }
 
-func (f *Frame) QuerySelectorAll(selector string) ([]ElementHandleI, error) {
+func (f *frameImpl) QuerySelectorAll(selector string) ([]ElementHandle, error) {
 	channels, err := f.channel.Send("querySelectorAll", map[string]interface{}{
 		"selector": selector,
 	})
 	if err != nil {
 		return nil, err
 	}
-	elements := make([]ElementHandleI, 0)
+	elements := make([]ElementHandle, 0)
 	for _, channel := range channels.([]interface{}) {
-		elements = append(elements, fromChannel(channel).(*ElementHandle))
+		elements = append(elements, fromChannel(channel).(*elementHandleImpl))
 	}
 	return elements, nil
 }
 
-func (f *Frame) Evaluate(expression string, options ...interface{}) (interface{}, error) {
+func (f *frameImpl) Evaluate(expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -263,7 +263,7 @@ func (f *Frame) Evaluate(expression string, options ...interface{}) (interface{}
 	return parseResult(result), nil
 }
 
-func (f *Frame) EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
+func (f *frameImpl) EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -287,7 +287,7 @@ func (f *Frame) EvaluateOnSelector(selector string, expression string, options .
 	return parseResult(result), nil
 }
 
-func (f *Frame) EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
+func (f *frameImpl) EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -311,7 +311,7 @@ func (f *Frame) EvaluateOnSelectorAll(selector string, expression string, option
 	return parseResult(result), nil
 }
 
-func (f *Frame) EvaluateHandle(expression string, options ...interface{}) (interface{}, error) {
+func (f *frameImpl) EvaluateHandle(expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -338,14 +338,14 @@ func (f *Frame) EvaluateHandle(expression string, options ...interface{}) (inter
 	return channelOwner, nil
 }
 
-func (f *Frame) Click(selector string, options ...PageClickOptions) error {
+func (f *frameImpl) Click(selector string, options ...PageClickOptions) error {
 	_, err := f.channel.Send("click", map[string]interface{}{
 		"selector": selector,
 	}, options)
 	return err
 }
 
-func (f *Frame) WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandleI, error) {
+func (f *frameImpl) WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandle, error) {
 	channel, err := f.channel.Send("waitForSelector", map[string]interface{}{
 		"selector": selector,
 	}, options)
@@ -356,10 +356,10 @@ func (f *Frame) WaitForSelector(selector string, options ...PageWaitForSelectorO
 	if channelOwner == nil {
 		return nil, nil
 	}
-	return channelOwner.(*ElementHandle), nil
+	return channelOwner.(*elementHandleImpl), nil
 }
 
-func (f *Frame) DispatchEvent(selector, typ string, options ...PageDispatchEventOptions) error {
+func (f *frameImpl) DispatchEvent(selector, typ string, options ...PageDispatchEventOptions) error {
 	var eventInit interface{}
 	if len(options) == 1 {
 		eventInit = options[0].EventInit
@@ -372,7 +372,7 @@ func (f *Frame) DispatchEvent(selector, typ string, options ...PageDispatchEvent
 	return err
 }
 
-func (f *Frame) InnerText(selector string, options ...PageInnerTextOptions) (string, error) {
+func (f *frameImpl) InnerText(selector string, options ...PageInnerTextOptions) (string, error) {
 	innerText, err := f.channel.Send("innerText", map[string]interface{}{
 		"selector": selector,
 	}, options)
@@ -382,7 +382,7 @@ func (f *Frame) InnerText(selector string, options ...PageInnerTextOptions) (str
 	return innerText.(string), nil
 }
 
-func (f *Frame) InnerHTML(selector string, options ...PageInnerHTMLOptions) (string, error) {
+func (f *frameImpl) InnerHTML(selector string, options ...PageInnerHTMLOptions) (string, error) {
 	innerHTML, err := f.channel.Send("innerHTML", map[string]interface{}{
 		"selector": selector,
 	}, options)
@@ -392,7 +392,7 @@ func (f *Frame) InnerHTML(selector string, options ...PageInnerHTMLOptions) (str
 	return innerHTML.(string), nil
 }
 
-func (f *Frame) GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error) {
+func (f *frameImpl) GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error) {
 	attribute, err := f.channel.Send("getAttribute", map[string]interface{}{
 		"selector": selector,
 		"name":     name,
@@ -403,14 +403,14 @@ func (f *Frame) GetAttribute(selector string, name string, options ...PageGetAtt
 	return attribute.(string), nil
 }
 
-func (f *Frame) Hover(selector string, options ...PageHoverOptions) error {
+func (f *frameImpl) Hover(selector string, options ...PageHoverOptions) error {
 	_, err := f.channel.Send("hover", map[string]interface{}{
 		"selector": selector,
 	}, options)
 	return err
 }
 
-func (e *Frame) SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error {
+func (e *frameImpl) SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error {
 	_, err := e.channel.Send("setInputFiles", map[string]interface{}{
 		"selector": selector,
 		"files":    normalizeFilePayloads(files),
@@ -418,7 +418,7 @@ func (e *Frame) SetInputFiles(selector string, files []InputFile, options ...Fra
 	return err
 }
 
-func (f *Frame) Type(selector, text string, options ...PageTypeOptions) error {
+func (f *frameImpl) Type(selector, text string, options ...PageTypeOptions) error {
 	_, err := f.channel.Send("type", map[string]interface{}{
 		"selector": selector,
 		"text":     text,
@@ -426,7 +426,7 @@ func (f *Frame) Type(selector, text string, options ...PageTypeOptions) error {
 	return err
 }
 
-func (f *Frame) Press(selector, key string, options ...PagePressOptions) error {
+func (f *frameImpl) Press(selector, key string, options ...PagePressOptions) error {
 	_, err := f.channel.Send("press", map[string]interface{}{
 		"selector": selector,
 		"key":      key,
@@ -434,25 +434,25 @@ func (f *Frame) Press(selector, key string, options ...PagePressOptions) error {
 	return err
 }
 
-func (f *Frame) Check(selector string, options ...FrameCheckOptions) error {
+func (f *frameImpl) Check(selector string, options ...FrameCheckOptions) error {
 	_, err := f.channel.Send("check", map[string]interface{}{
 		"selector": selector,
 	}, options)
 	return err
 }
 
-func (f *Frame) Uncheck(selector string, options ...FrameUncheckOptions) error {
+func (f *frameImpl) Uncheck(selector string, options ...FrameUncheckOptions) error {
 	_, err := f.channel.Send("uncheck", map[string]interface{}{
 		"selector": selector,
 	}, options)
 	return err
 }
 
-func (f *Frame) WaitForTimeout(timeout int) {
+func (f *frameImpl) WaitForTimeout(timeout int) {
 	time.Sleep(time.Duration(timeout) * time.Millisecond)
 }
 
-func (f *Frame) WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (JSHandleI, error) {
+func (f *frameImpl) WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (JSHandle, error) {
 	var option FrameWaitForFunctionOptions
 	if len(options) == 1 {
 		option = options[0]
@@ -475,26 +475,26 @@ func (f *Frame) WaitForFunction(expression string, options ...FrameWaitForFuncti
 	if handle == nil {
 		return nil, nil
 	}
-	return handle.(*JSHandle), nil
+	return handle.(*jsHandleImpl), nil
 }
 
-func (f *Frame) Title() (string, error) {
+func (f *frameImpl) Title() (string, error) {
 	title, err := f.channel.Send("title")
 	return title.(string), err
 }
 
-func (f *Frame) ChildFrames() []FrameI {
+func (f *frameImpl) ChildFrames() []Frame {
 	return f.childFrames
 }
 
-func (f *Frame) DblClick(selector string, options ...FrameDblclickOptions) error {
+func (f *frameImpl) DblClick(selector string, options ...FrameDblclickOptions) error {
 	_, err := f.channel.Send("dblclick", map[string]interface{}{
 		"selector": selector,
 	}, options)
 	return err
 }
 
-func (f *Frame) Fill(selector string, value string, options ...FrameFillOptions) error {
+func (f *frameImpl) Fill(selector string, value string, options ...FrameFillOptions) error {
 	_, err := f.channel.Send("fill", map[string]interface{}{
 		"selector": selector,
 		"value":    value,
@@ -502,30 +502,30 @@ func (f *Frame) Fill(selector string, value string, options ...FrameFillOptions)
 	return err
 }
 
-func (f *Frame) Focus(selector string, options ...FrameFocusOptions) error {
+func (f *frameImpl) Focus(selector string, options ...FrameFocusOptions) error {
 	_, err := f.channel.Send("focus", map[string]interface{}{
 		"selector": selector,
 	}, options)
 	return err
 }
 
-func (f *Frame) FrameElement() (ElementHandleI, error) {
+func (f *frameImpl) FrameElement() (ElementHandle, error) {
 	elementHandle, err := f.channel.Send("frameElement")
 	if err != nil {
 		return nil, err
 	}
-	return elementHandle.(*ElementHandle), nil
+	return elementHandle.(*elementHandleImpl), nil
 }
 
-func (f *Frame) IsDetached() bool {
+func (f *frameImpl) IsDetached() bool {
 	return f.detached
 }
 
-func (f *Frame) ParentFrame() FrameI {
+func (f *frameImpl) ParentFrame() Frame {
 	return f.parentFrame
 }
 
-func (f *Frame) TextContent(selector string, options ...FrameTextContentOptions) (string, error) {
+func (f *frameImpl) TextContent(selector string, options ...FrameTextContentOptions) (string, error) {
 	textContent, err := f.channel.Send("textContent", map[string]interface{}{
 		"selector": selector,
 	}, options)

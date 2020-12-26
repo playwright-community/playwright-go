@@ -13,13 +13,13 @@ type callback struct {
 }
 
 type Connection struct {
-	transport                   *Transport
+	transport                   *transport
 	waitingForRemoteObjectsLock sync.Mutex
 	waitingForRemoteObjects     map[string]chan interface{}
-	objects                     map[string]*ChannelOwner
+	objects                     map[string]*channelOwner
 	lastID                      int
 	lastIDLock                  sync.Mutex
-	rootObject                  *ChannelOwner
+	rootObject                  *channelOwner
 	callbacks                   sync.Map
 	stopDriver                  func() error
 }
@@ -73,7 +73,7 @@ func (c *Connection) Dispatch(msg *Message) {
 	object.channel.Emit(method, c.replaceGuidsWithChannels(msg.Params))
 }
 
-func (c *Connection) createRemoteObject(parent *ChannelOwner, objectType string, guid string, initializer interface{}) interface{} {
+func (c *Connection) createRemoteObject(parent *channelOwner, objectType string, guid string, initializer interface{}) interface{} {
 	initializer = c.replaceGuidsWithChannels(initializer)
 	result := createObjectFactory(parent, objectType, guid, initializer.(map[string]interface{}))
 	c.waitingForRemoteObjectsLock.Lock()
@@ -165,7 +165,7 @@ func (c *Connection) SendMessageToServer(guid string, method string, params inte
 func newConnection(stdin io.WriteCloser, stdout io.ReadCloser, stopDriver func() error) *Connection {
 	connection := &Connection{
 		waitingForRemoteObjects: make(map[string]chan interface{}),
-		objects:                 make(map[string]*ChannelOwner),
+		objects:                 make(map[string]*channelOwner),
 		stopDriver:              stopDriver,
 	}
 	connection.transport = newTransport(stdin, stdout, connection.Dispatch)

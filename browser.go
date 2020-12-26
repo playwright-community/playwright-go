@@ -5,25 +5,25 @@ import (
 	"sync"
 )
 
-type Browser struct {
-	ChannelOwner
+type browserImpl struct {
+	channelOwner
 	isConnected bool
-	contexts    []BrowserContextI
+	contexts    []BrowserContext
 	contextsMu  sync.Mutex
 }
 
-func (b *Browser) IsConnected() bool {
+func (b *browserImpl) IsConnected() bool {
 	b.Lock()
 	defer b.Unlock()
 	return b.isConnected
 }
 
-func (b *Browser) NewContext(options ...BrowserNewContextOptions) (BrowserContextI, error) {
+func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserContext, error) {
 	channel, err := b.channel.Send("newContext", options)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
-	context := fromChannel(channel).(*BrowserContext)
+	context := fromChannel(channel).(*browserContextImpl)
 	context.browser = b
 	b.contextsMu.Lock()
 	b.contexts = append(b.contexts, context)
@@ -31,7 +31,7 @@ func (b *Browser) NewContext(options ...BrowserNewContextOptions) (BrowserContex
 	return context, nil
 }
 
-func (b *Browser) NewPage(options ...BrowserNewContextOptions) (PageI, error) {
+func (b *browserImpl) NewPage(options ...BrowserNewContextOptions) (Page, error) {
 	context, err := b.NewContext(options...)
 	if err != nil {
 		return nil, err
@@ -40,28 +40,28 @@ func (b *Browser) NewPage(options ...BrowserNewContextOptions) (PageI, error) {
 	if err != nil {
 		return nil, err
 	}
-	page.(*Page).ownedContext = context
-	context.(*BrowserContext).ownedPage = page
+	page.(*pageImpl).ownedContext = context
+	context.(*browserContextImpl).ownedPage = page
 	return page, nil
 }
 
-func (b *Browser) Contexts() []BrowserContextI {
+func (b *browserImpl) Contexts() []BrowserContext {
 	b.contextsMu.Lock()
 	defer b.contextsMu.Unlock()
 	return b.contexts
 }
 
-func (b *Browser) Close() error {
+func (b *browserImpl) Close() error {
 	_, err := b.channel.Send("close")
 	return err
 }
 
-func (b *Browser) Version() string {
+func (b *browserImpl) Version() string {
 	return b.initializer["version"].(string)
 }
 
-func newBrowser(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Browser {
-	bt := &Browser{
+func newBrowser(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserImpl {
+	bt := &browserImpl{
 		isConnected: true,
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)

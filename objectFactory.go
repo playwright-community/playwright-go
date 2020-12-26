@@ -1,6 +1,6 @@
 package playwright
 
-func createObjectFactory(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) interface{} {
+func createObjectFactory(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) interface{} {
 	switch objectType {
 	case "Android":
 		return nil

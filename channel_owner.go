@@ -1,17 +1,17 @@
 package playwright
 
-type ChannelOwner struct {
-	EventEmitter
+type channelOwner struct {
+	eventEmitter
 	objectType  string
 	guid        string
 	channel     *Channel
-	objects     map[string]*ChannelOwner
+	objects     map[string]*channelOwner
 	connection  *Connection
 	initializer map[string]interface{}
-	parent      *ChannelOwner
+	parent      *channelOwner
 }
 
-func (c *ChannelOwner) Dispose() {
+func (c *channelOwner) Dispose() {
 	// Clean up from parent and connection.
 	if c.parent != nil {
 		delete(c.parent.objects, c.guid)
@@ -22,14 +22,14 @@ func (c *ChannelOwner) Dispose() {
 	for _, object := range c.objects {
 		object.Dispose()
 	}
-	c.objects = make(map[string]*ChannelOwner)
+	c.objects = make(map[string]*channelOwner)
 }
 
-func (c *ChannelOwner) createChannelOwner(self interface{}, parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) {
+func (c *channelOwner) createChannelOwner(self interface{}, parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) {
 	c.objectType = objectType
 	c.guid = guid
 	c.parent = parent
-	c.objects = make(map[string]*ChannelOwner)
+	c.objects = make(map[string]*channelOwner)
 	c.connection = parent.connection
 	c.channel = newChannel(c.connection, guid)
 	c.channel.object = self
@@ -39,12 +39,12 @@ func (c *ChannelOwner) createChannelOwner(self interface{}, parent *ChannelOwner
 	c.initEventEmitter()
 }
 
-func newRootChannelOwner(connection *Connection) *ChannelOwner {
-	c := &ChannelOwner{
+func newRootChannelOwner(connection *Connection) *channelOwner {
+	c := &channelOwner{
 		objectType: "",
 		guid:       "",
 		connection: connection,
-		objects:    make(map[string]*ChannelOwner),
+		objects:    make(map[string]*channelOwner),
 		channel:    newChannel(connection, ""),
 	}
 	c.channel.object = c

@@ -6,15 +6,15 @@ import (
 	"io/ioutil"
 )
 
-type ElementHandle struct {
-	JSHandle
+type elementHandleImpl struct {
+	jsHandleImpl
 }
 
-func (e *ElementHandle) AsElement() ElementHandleI {
+func (e *elementHandleImpl) AsElement() ElementHandle {
 	return e
 }
 
-func (e *ElementHandle) OwnerFrame() (FrameI, error) {
+func (e *elementHandleImpl) OwnerFrame() (Frame, error) {
 	channel, err := e.channel.Send("ownerFrame")
 	if err != nil {
 		return nil, err
@@ -23,10 +23,10 @@ func (e *ElementHandle) OwnerFrame() (FrameI, error) {
 	if channelOwner == nil {
 		return nil, nil
 	}
-	return channelOwner.(*Frame), nil
+	return channelOwner.(*frameImpl), nil
 }
 
-func (e *ElementHandle) ContentFrame() (FrameI, error) {
+func (e *elementHandleImpl) ContentFrame() (Frame, error) {
 	channel, err := e.channel.Send("contentFrame")
 	if err != nil {
 		return nil, err
@@ -35,10 +35,10 @@ func (e *ElementHandle) ContentFrame() (FrameI, error) {
 	if channelOwner == nil {
 		return nil, nil
 	}
-	return channelOwner.(*Frame), nil
+	return channelOwner.(*frameImpl), nil
 }
 
-func (e *ElementHandle) GetAttribute(name string) (string, error) {
+func (e *elementHandleImpl) GetAttribute(name string) (string, error) {
 	attribute, err := e.channel.Send("getAttribute", map[string]interface{}{
 		"name": name,
 	})
@@ -51,7 +51,7 @@ func (e *ElementHandle) GetAttribute(name string) (string, error) {
 	return attribute.(string), nil
 }
 
-func (e *ElementHandle) TextContent() (string, error) {
+func (e *elementHandleImpl) TextContent() (string, error) {
 	textContent, err := e.channel.Send("textContent")
 	if err != nil {
 		return "", err
@@ -59,7 +59,7 @@ func (e *ElementHandle) TextContent() (string, error) {
 	return textContent.(string), nil
 }
 
-func (e *ElementHandle) InnerText() (string, error) {
+func (e *elementHandleImpl) InnerText() (string, error) {
 	innerText, err := e.channel.Send("innerText")
 	if err != nil {
 		return "", err
@@ -67,7 +67,7 @@ func (e *ElementHandle) InnerText() (string, error) {
 	return innerText.(string), nil
 }
 
-func (e *ElementHandle) InnerHTML() (string, error) {
+func (e *elementHandleImpl) InnerHTML() (string, error) {
 	innerHTML, err := e.channel.Send("innerHTML")
 	if err != nil {
 		return "", err
@@ -75,7 +75,7 @@ func (e *ElementHandle) InnerHTML() (string, error) {
 	return innerHTML.(string), nil
 }
 
-func (e *ElementHandle) DispatchEvent(typ string, initObjects ...interface{}) error {
+func (e *elementHandleImpl) DispatchEvent(typ string, initObjects ...interface{}) error {
 	var initObject interface{}
 	if len(initObjects) == 1 {
 		initObject = initObjects[0]
@@ -87,46 +87,46 @@ func (e *ElementHandle) DispatchEvent(typ string, initObjects ...interface{}) er
 	return err
 }
 
-func (e *ElementHandle) Hover(options ...ElementHandleHoverOptions) error {
+func (e *elementHandleImpl) Hover(options ...ElementHandleHoverOptions) error {
 	_, err := e.channel.Send("hover", options)
 	return err
 }
 
-func (e *ElementHandle) Click(options ...ElementHandleClickOptions) error {
+func (e *elementHandleImpl) Click(options ...ElementHandleClickOptions) error {
 	_, err := e.channel.Send("click", options)
 	return err
 }
 
-func (e *ElementHandle) DblClick(options ...ElementHandleDblclickOptions) error {
+func (e *elementHandleImpl) DblClick(options ...ElementHandleDblclickOptions) error {
 	_, err := e.channel.Send("dblclick", options)
 	return err
 }
 
-func (e *ElementHandle) QuerySelector(selector string) (ElementHandleI, error) {
+func (e *elementHandleImpl) QuerySelector(selector string) (ElementHandle, error) {
 	channel, err := e.channel.Send("querySelector", map[string]interface{}{
 		"selector": selector,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(channel).(*ElementHandle), nil
+	return fromChannel(channel).(*elementHandleImpl), nil
 }
 
-func (e *ElementHandle) QuerySelectorAll(selector string) ([]ElementHandleI, error) {
+func (e *elementHandleImpl) QuerySelectorAll(selector string) ([]ElementHandle, error) {
 	channels, err := e.channel.Send("querySelectorAll", map[string]interface{}{
 		"selector": selector,
 	})
 	if err != nil {
 		return nil, err
 	}
-	elements := make([]ElementHandleI, 0)
+	elements := make([]ElementHandle, 0)
 	for _, channel := range channels.([]interface{}) {
-		elements = append(elements, fromChannel(channel).(*ElementHandle))
+		elements = append(elements, fromChannel(channel).(*elementHandleImpl))
 	}
 	return elements, nil
 }
 
-func (e *ElementHandle) EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
+func (e *elementHandleImpl) EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -150,7 +150,7 @@ func (e *ElementHandle) EvaluateOnSelector(selector string, expression string, o
 	return parseResult(result), nil
 }
 
-func (e *ElementHandle) EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
+func (e *elementHandleImpl) EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -174,7 +174,7 @@ func (e *ElementHandle) EvaluateOnSelectorAll(selector string, expression string
 	return parseResult(result), nil
 }
 
-func (e *ElementHandle) ScrollIntoViewIfNeeded(options ...ElementHandleScrollIntoViewIfNeededOptions) error {
+func (e *elementHandleImpl) ScrollIntoViewIfNeeded(options ...ElementHandleScrollIntoViewIfNeededOptions) error {
 	_, err := e.channel.Send("scrollIntoViewIfNeeded", options)
 	if err != nil {
 		return err
@@ -182,14 +182,14 @@ func (e *ElementHandle) ScrollIntoViewIfNeeded(options ...ElementHandleScrollInt
 	return err
 }
 
-func (e *ElementHandle) SetInputFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error {
+func (e *elementHandleImpl) SetInputFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error {
 	_, err := e.channel.Send("setInputFiles", map[string]interface{}{
 		"files": normalizeFilePayloads(files),
 	}, options)
 	return err
 }
 
-func (e *ElementHandle) BoundingBox() (*Rect, error) {
+func (e *elementHandleImpl) BoundingBox() (*Rect, error) {
 	boundingBox, err := e.channel.Send("boundingBox")
 	if err != nil {
 		return nil, err
@@ -199,46 +199,46 @@ func (e *ElementHandle) BoundingBox() (*Rect, error) {
 	return out, nil
 }
 
-func (e *ElementHandle) Check(options ...ElementHandleCheckOptions) error {
+func (e *elementHandleImpl) Check(options ...ElementHandleCheckOptions) error {
 	_, err := e.channel.Send("check", options)
 	return err
 }
 
-func (e *ElementHandle) Uncheck(options ...ElementHandleUncheckOptions) error {
+func (e *elementHandleImpl) Uncheck(options ...ElementHandleUncheckOptions) error {
 	_, err := e.channel.Send("uncheck", options)
 	return err
 }
 
-func (e *ElementHandle) Press(options ...ElementHandlePressOptions) error {
+func (e *elementHandleImpl) Press(options ...ElementHandlePressOptions) error {
 	_, err := e.channel.Send("press", options)
 	return err
 }
 
-func (e *ElementHandle) Fill(value string, options ...ElementHandleFillOptions) error {
+func (e *elementHandleImpl) Fill(value string, options ...ElementHandleFillOptions) error {
 	_, err := e.channel.Send("fill", map[string]interface{}{
 		"value": value,
 	}, options)
 	return err
 }
 
-func (e *ElementHandle) Type(value string, options ...ElementHandleTypeOptions) error {
+func (e *elementHandleImpl) Type(value string, options ...ElementHandleTypeOptions) error {
 	_, err := e.channel.Send("type", map[string]interface{}{
 		"value": value,
 	}, options)
 	return err
 }
 
-func (e *ElementHandle) Focus() error {
+func (e *elementHandleImpl) Focus() error {
 	_, err := e.channel.Send("focus")
 	return err
 }
 
-func (e *ElementHandle) SelectText(options ...ElementHandleSelectTextOptions) error {
+func (e *elementHandleImpl) SelectText(options ...ElementHandleSelectTextOptions) error {
 	_, err := e.channel.Send("selectText", options)
 	return err
 }
 
-func (e *ElementHandle) Screenshot(options ...ElementHandleScreenshotOptions) ([]byte, error) {
+func (e *elementHandleImpl) Screenshot(options ...ElementHandleScreenshotOptions) ([]byte, error) {
 	var path *string
 	if len(options) > 0 {
 		path = options[0].Path
@@ -259,8 +259,8 @@ func (e *ElementHandle) Screenshot(options ...ElementHandleScreenshotOptions) ([
 	return image, nil
 }
 
-func newElementHandle(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *ElementHandle {
-	bt := &ElementHandle{}
+func newElementHandle(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *elementHandleImpl {
+	bt := &elementHandleImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	return bt
 }

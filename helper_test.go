@@ -39,7 +39,7 @@ func BeforeAll() {
 		log.Fatalf("could not start Playwright: %v", err)
 	}
 	browserName := os.Getenv("BROWSER")
-	var browserType BrowserTypeI
+	var browserType BrowserType
 	if browserName == "chromium" || browserName == "" {
 		browserType = pw.Chromium
 	} else if browserName == "firefox" {
@@ -77,10 +77,10 @@ func AfterAll() {
 type TestHelperData struct {
 	t           *testing.T
 	Playwright  *Playwright
-	BrowserType BrowserTypeI
-	Browser     BrowserI
-	Context     BrowserContextI
-	Page        PageI
+	BrowserType BrowserType
+	Browser     Browser
+	Context     BrowserContext
+	Page        Page
 	IsChromium  bool
 	IsFirefox   bool
 	IsWebKit    bool
@@ -240,7 +240,7 @@ func newSyncSlice() *syncSlice {
 type testUtils struct {
 }
 
-func (t *testUtils) AttachFrame(page PageI, frameId string, url string) (*Frame, error) {
+func (t *testUtils) AttachFrame(page Page, frameId string, url string) (*frameImpl, error) {
 	_, err := page.EvaluateHandle(`async ({ frame_id, url }) => {
 		const frame = document.createElement('iframe');
 		frame.src = url;
@@ -258,7 +258,7 @@ func (t *testUtils) AttachFrame(page PageI, frameId string, url string) (*Frame,
 	return nil, nil
 }
 
-func (tu *testUtils) VerifyViewport(t *testing.T, page PageI, width, height int) {
+func (tu *testUtils) VerifyViewport(t *testing.T, page Page, width, height int) {
 	require.Equal(t, page.ViewportSize().Width, width)
 	require.Equal(t, page.ViewportSize().Height, height)
 	innerWidth, err := page.Evaluate("window.innerWidth")
@@ -269,7 +269,7 @@ func (tu *testUtils) VerifyViewport(t *testing.T, page PageI, width, height int)
 	require.Equal(t, innerHeight, height)
 }
 
-func (tu *testUtils) AssertEval(t *testing.T, page PageI, script string, expected interface{}) {
+func (tu *testUtils) AssertEval(t *testing.T, page Page, script string, expected interface{}) {
 	result, err := page.Evaluate(script)
 	require.NoError(t, err)
 	require.Equal(t, expected, result)

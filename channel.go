@@ -7,7 +7,7 @@ import (
 )
 
 type Channel struct {
-	EventEmitter
+	eventEmitter
 	guid       string
 	connection *Connection
 	object     interface{}

@@ -1,7 +1,7 @@
 package playwright
 
-type ConsoleMessage struct {
-	ChannelOwner
+type consoleMessageImpl struct {
+	channelOwner
 }
 
 type ConsoleMessageLocation struct {
@@ -10,35 +10,35 @@ type ConsoleMessageLocation struct {
 	ColumnNumber int    `json:"columnNumber"`
 }
 
-func (c *ConsoleMessage) Type() string {
+func (c *consoleMessageImpl) Type() string {
 	return c.initializer["type"].(string)
 }
 
-func (c *ConsoleMessage) Text() string {
+func (c *consoleMessageImpl) Text() string {
 	return c.initializer["text"].(string)
 }
 
-func (c *ConsoleMessage) String() string {
+func (c *consoleMessageImpl) String() string {
 	return c.Text()
 }
 
-func (c *ConsoleMessage) Args() []JSHandleI {
+func (c *consoleMessageImpl) Args() []JSHandle {
 	args := c.initializer["args"].([]interface{})
-	out := []JSHandleI{}
+	out := []JSHandle{}
 	for idx := range args {
-		out = append(out, fromChannel(args[idx]).(*JSHandle))
+		out = append(out, fromChannel(args[idx]).(*jsHandleImpl))
 	}
 	return out
 }
 
-func (c *ConsoleMessage) Location() ConsoleMessageLocation {
+func (c *consoleMessageImpl) Location() ConsoleMessageLocation {
 	locations := ConsoleMessageLocation{}
 	remapMapToStruct(c.initializer["location"], &locations)
 	return locations
 }
 
-func newConsoleMessage(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *ConsoleMessage {
-	bt := &ConsoleMessage{}
+func newConsoleMessage(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *consoleMessageImpl {
+	bt := &consoleMessageImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	return bt
 }

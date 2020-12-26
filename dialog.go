@@ -1,22 +1,22 @@
 package playwright
 
-type Dialog struct {
-	ChannelOwner
+type dialogImpl struct {
+	channelOwner
 }
 
-func (d *Dialog) Type() string {
+func (d *dialogImpl) Type() string {
 	return d.initializer["type"].(string)
 }
 
-func (d *Dialog) Message() string {
+func (d *dialogImpl) Message() string {
 	return d.initializer["message"].(string)
 }
 
-func (d *Dialog) DefaultValue() string {
+func (d *dialogImpl) DefaultValue() string {
 	return d.initializer["defaultValue"].(string)
 }
 
-func (d *Dialog) Accept(texts ...string) error {
+func (d *dialogImpl) Accept(texts ...string) error {
 	var promptText *string
 	if len(texts) == 1 {
 		promptText = &texts[0]
@@ -27,13 +27,13 @@ func (d *Dialog) Accept(texts ...string) error {
 	return err
 }
 
-func (d *Dialog) Dismiss() error {
+func (d *dialogImpl) Dismiss() error {
 	_, err := d.channel.Send("dismiss")
 	return err
 }
 
-func newDialog(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Dialog {
-	bt := &Dialog{}
+func newDialog(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *dialogImpl {
+	bt := &dialogImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	return bt
 }

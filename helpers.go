@@ -10,7 +10,7 @@ import (
 )
 
 type (
-	routeHandler = func(*Route, *Request)
+	routeHandler = func(*routeImpl, *requestImpl)
 )
 
 func skipFieldSerialization(val reflect.Value) bool {

@@ -50,7 +50,7 @@ func TestBrowserContextSetExtraHTTPHeaders(t *testing.T) {
 		"extra-http": "42",
 	}))
 	intercepted := make(chan bool, 1)
-	err := helper.Page.Route("**/empty.html", func(route *Route, request *Request) {
+	err := helper.Page.Route("**/empty.html", func(route *routeImpl, request *requestImpl) {
 		require.NoError(t, route.Continue())
 		intercepted <- true
 	})

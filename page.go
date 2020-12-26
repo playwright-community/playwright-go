@@ -8,28 +8,28 @@ import (
 	"sync"
 )
 
-type Page struct {
-	ChannelOwner
+type pageImpl struct {
+	channelOwner
 	isClosed        bool
-	mouse           *Mouse
-	keyboard        *Keyboard
+	mouse           *mouseImpl
+	keyboard        *keyboardImpl
 	timeoutSettings *timeoutSettings
-	browserContext  BrowserContextI
-	frames          []FrameI
+	browserContext  BrowserContext
+	frames          []Frame
 	workersLock     sync.Mutex
-	workers         []WorkerI
-	mainFrame       FrameI
+	workers         []Worker
+	mainFrame       Frame
 	routesMu        sync.Mutex
 	routes          []*routeHandlerEntry
 	viewportSize    ViewportSize
-	ownedContext    BrowserContextI
+	ownedContext    BrowserContext
 }
 
-func (p *Page) Context() BrowserContextI {
+func (p *pageImpl) Context() BrowserContext {
 	return p.browserContext
 }
 
-func (p *Page) Close(options ...PageCloseOptions) error {
+func (p *pageImpl) Close(options ...PageCloseOptions) error {
 	_, err := p.channel.Send("close", options)
 	if err != nil {
 		return err
@@ -40,15 +40,15 @@ func (p *Page) Close(options ...PageCloseOptions) error {
 	return nil
 }
 
-func (p *Page) InnerText(selector string, options ...PageInnerTextOptions) (string, error) {
+func (p *pageImpl) InnerText(selector string, options ...PageInnerTextOptions) (string, error) {
 	return p.mainFrame.InnerText(selector, options...)
 }
 
-func (p *Page) InnerHTML(selector string, options ...PageInnerHTMLOptions) (string, error) {
+func (p *pageImpl) InnerHTML(selector string, options ...PageInnerHTMLOptions) (string, error) {
 	return p.mainFrame.InnerHTML(selector, options...)
 }
 
-func (p *Page) Opener() (PageI, error) {
+func (p *pageImpl) Opener() (Page, error) {
 	channel, err := p.channel.Send("opener")
 	if err != nil {
 		return nil, err
@@ -57,107 +57,107 @@ func (p *Page) Opener() (PageI, error) {
 	if channelOwner == nil {
 		return nil, nil
 	}
-	return channelOwner.(*Page), nil
+	return channelOwner.(*pageImpl), nil
 }
 
-func (p *Page) MainFrame() FrameI {
+func (p *pageImpl) MainFrame() Frame {
 	return p.mainFrame
 }
 
-func (p *Page) Frames() []FrameI {
+func (p *pageImpl) Frames() []Frame {
 	return p.frames
 }
 
-func (p *Page) SetDefaultNavigationTimeout(timeout int) {
+func (p *pageImpl) SetDefaultNavigationTimeout(timeout int) {
 	p.timeoutSettings.SetNavigationTimeout(timeout)
 	p.channel.SendNoReply("setDefaultNavigationTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
 	})
 }
 
-func (p *Page) SetDefaultTimeout(timeout int) {
+func (p *pageImpl) SetDefaultTimeout(timeout int) {
 	p.timeoutSettings.SetTimeout(timeout)
 	p.channel.SendNoReply("setDefaultTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
 	})
 }
 
-func (p *Page) QuerySelector(selector string) (ElementHandleI, error) {
+func (p *pageImpl) QuerySelector(selector string) (ElementHandle, error) {
 	return p.mainFrame.QuerySelector(selector)
 }
 
-func (p *Page) QuerySelectorAll(selector string) ([]ElementHandleI, error) {
+func (p *pageImpl) QuerySelectorAll(selector string) ([]ElementHandle, error) {
 	return p.mainFrame.QuerySelectorAll(selector)
 }
 
-func (p *Page) WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandleI, error) {
+func (p *pageImpl) WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandle, error) {
 	return p.mainFrame.WaitForSelector(selector, options...)
 }
 
-func (p *Page) DispatchEvent(selector string, typ string, options ...PageDispatchEventOptions) error {
+func (p *pageImpl) DispatchEvent(selector string, typ string, options ...PageDispatchEventOptions) error {
 	return p.mainFrame.DispatchEvent(selector, typ, options...)
 }
 
-func (p *Page) Evaluate(expression string, options ...interface{}) (interface{}, error) {
+func (p *pageImpl) Evaluate(expression string, options ...interface{}) (interface{}, error) {
 	return p.mainFrame.Evaluate(expression, options...)
 }
 
-func (p *Page) EvaluateHandle(expression string, options ...interface{}) (interface{}, error) {
+func (p *pageImpl) EvaluateHandle(expression string, options ...interface{}) (interface{}, error) {
 	return p.mainFrame.EvaluateHandle(expression, options...)
 }
 
-func (p *Page) EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
+func (p *pageImpl) EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
 	return p.mainFrame.EvaluateOnSelector(selector, expression, options...)
 }
 
-func (p *Page) EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
+func (p *pageImpl) EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
 	return p.mainFrame.EvaluateOnSelectorAll(selector, expression, options...)
 }
 
-func (p *Page) AddScriptTag(options PageAddScriptTagOptions) (ElementHandleI, error) {
+func (p *pageImpl) AddScriptTag(options PageAddScriptTagOptions) (ElementHandle, error) {
 	return p.mainFrame.AddScriptTag(options)
 }
 
-func (p *Page) AddStyleTag(options PageAddStyleTagOptions) (ElementHandleI, error) {
+func (p *pageImpl) AddStyleTag(options PageAddStyleTagOptions) (ElementHandle, error) {
 	return p.mainFrame.AddStyleTag(options)
 }
 
-func (p *Page) SetExtraHTTPHeaders(headers map[string]string) error {
+func (p *pageImpl) SetExtraHTTPHeaders(headers map[string]string) error {
 	_, err := p.channel.Send("setExtraHTTPHeaders", map[string]interface{}{
 		"headers": serializeHeaders(headers),
 	})
 	return err
 }
 
-func (p *Page) URL() string {
+func (p *pageImpl) URL() string {
 	return p.mainFrame.URL()
 }
 
-func (p *Page) Content() (string, error) {
+func (p *pageImpl) Content() (string, error) {
 	return p.mainFrame.Content()
 }
 
-func (p *Page) SetContent(content string, options ...PageSetContentOptions) error {
+func (p *pageImpl) SetContent(content string, options ...PageSetContentOptions) error {
 	return p.mainFrame.SetContent(content, options...)
 }
 
-func (p *Page) Goto(url string, options ...PageGotoOptions) (ResponseI, error) {
+func (p *pageImpl) Goto(url string, options ...PageGotoOptions) (Response, error) {
 	return p.mainFrame.Goto(url, options...)
 }
 
-func (p *Page) Reload(options ...PageReloadOptions) (ResponseI, error) {
+func (p *pageImpl) Reload(options ...PageReloadOptions) (Response, error) {
 	response, err := p.channel.Send("reload", options)
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(response).(*Response), err
+	return fromChannel(response).(*responseImpl), err
 }
 
-func (p *Page) WaitForLoadState(state ...string) {
+func (p *pageImpl) WaitForLoadState(state ...string) {
 	p.mainFrame.WaitForLoadState(state...)
 }
 
-func (p *Page) GoBack(options ...PageGoBackOptions) (ResponseI, error) {
+func (p *pageImpl) GoBack(options ...PageGoBackOptions) (Response, error) {
 	channel, err := p.channel.Send("goBack", options)
 	if err != nil {
 		return nil, err
@@ -166,10 +166,10 @@ func (p *Page) GoBack(options ...PageGoBackOptions) (ResponseI, error) {
 	if channelOwner == nil {
 		return nil, nil
 	}
-	return channelOwner.(*Response), nil
+	return channelOwner.(*responseImpl), nil
 }
 
-func (p *Page) GoForward(options ...PageGoForwardOptions) (ResponseI, error) {
+func (p *pageImpl) GoForward(options ...PageGoForwardOptions) (Response, error) {
 	resp, err := p.channel.Send("goForward", options)
 	if err != nil {
 		return nil, err
@@ -178,10 +178,10 @@ func (p *Page) GoForward(options ...PageGoForwardOptions) (ResponseI, error) {
 	if obj == nil {
 		return nil, nil
 	}
-	return obj.(*Response), nil
+	return obj.(*responseImpl), nil
 }
 
-func (p *Page) EmulateMedia(options ...PageEmulateMediaOptions) error {
+func (p *pageImpl) EmulateMedia(options ...PageEmulateMediaOptions) error {
 	_, err := p.channel.Send("emulateMedia", options)
 	if err != nil {
 		return err
@@ -194,7 +194,7 @@ type ViewportSize struct {
 	Height int `json:"height"`
 }
 
-func (p *Page) SetViewportSize(width, height int) error {
+func (p *pageImpl) SetViewportSize(width, height int) error {
 	_, err := p.channel.Send("setViewportSize", map[string]interface{}{
 		"viewportSize": map[string]interface{}{
 			"width":  width,
@@ -209,38 +209,38 @@ func (p *Page) SetViewportSize(width, height int) error {
 	return nil
 }
 
-func (p *Page) ViewportSize() ViewportSize {
+func (p *pageImpl) ViewportSize() ViewportSize {
 	return p.viewportSize
 }
 
-func (p *Page) BringToFront() error {
+func (p *pageImpl) BringToFront() error {
 	_, err := p.channel.Send("bringToFront")
 	return err
 }
 
-func (p *Page) Type(selector, text string, options ...PageTypeOptions) error {
+func (p *pageImpl) Type(selector, text string, options ...PageTypeOptions) error {
 	return p.mainFrame.Type(selector, text, options...)
 }
 
-func (p *Page) Fill(selector, text string, options ...FrameFillOptions) error {
+func (p *pageImpl) Fill(selector, text string, options ...FrameFillOptions) error {
 	return p.mainFrame.Fill(selector, text, options...)
 }
 
-func (p *Page) Press(selector, key string, options ...PagePressOptions) error {
+func (p *pageImpl) Press(selector, key string, options ...PagePressOptions) error {
 	return p.mainFrame.Press(selector, key, options...)
 }
 
-func (p *Page) Title() (string, error) {
+func (p *pageImpl) Title() (string, error) {
 	return p.mainFrame.Title()
 }
 
-func (p *Page) Workers() []WorkerI {
+func (p *pageImpl) Workers() []Worker {
 	p.workersLock.Lock()
 	defer p.workersLock.Unlock()
 	return p.workers
 }
 
-func (p *Page) Screenshot(options ...PageScreenshotOptions) ([]byte, error) {
+func (p *pageImpl) Screenshot(options ...PageScreenshotOptions) ([]byte, error) {
 	var path *string
 	if len(options) > 0 {
 		path = options[0].Path
@@ -261,7 +261,7 @@ func (p *Page) Screenshot(options ...PageScreenshotOptions) ([]byte, error) {
 	return image, nil
 }
 
-func (p *Page) PDF(options ...PagePdfOptions) ([]byte, error) {
+func (p *pageImpl) PDF(options ...PagePdfOptions) ([]byte, error) {
 	var path *string
 	if len(options) > 0 {
 		path = options[0].Path
@@ -282,11 +282,11 @@ func (p *Page) PDF(options ...PagePdfOptions) ([]byte, error) {
 	return pdf, nil
 }
 
-func (p *Page) Click(selector string, options ...PageClickOptions) error {
+func (p *pageImpl) Click(selector string, options ...PageClickOptions) error {
 	return p.mainFrame.Click(selector, options...)
 }
 
-func (p *Page) WaitForEvent(event string, predicate ...interface{}) interface{} {
+func (p *pageImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
 	evChan := make(chan interface{})
 	handler := func(ev ...interface{}) {
 		if len(predicate) == 0 {
@@ -304,16 +304,16 @@ func (p *Page) WaitForEvent(event string, predicate ...interface{}) interface{} 
 	return <-evChan
 }
 
-func (p *Page) WaitForNavigation(options ...PageWaitForNavigationOptions) (ResponseI, error) {
+func (p *pageImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error) {
 	return p.mainFrame.WaitForNavigation(options...)
 }
 
-func (p *Page) WaitForRequest(url interface{}, options ...interface{}) RequestI {
+func (p *pageImpl) WaitForRequest(url interface{}, options ...interface{}) Request {
 	var matcher *urlMatcher
 	if url != nil {
 		matcher = newURLMatcher(url)
 	}
-	predicate := func(req *Request) bool {
+	predicate := func(req *requestImpl) bool {
 		if matcher != nil {
 			return matcher.Match(req.URL())
 		}
@@ -322,15 +322,15 @@ func (p *Page) WaitForRequest(url interface{}, options ...interface{}) RequestI 
 		}
 		return true
 	}
-	return p.WaitForEvent("request", predicate).(*Request)
+	return p.WaitForEvent("request", predicate).(*requestImpl)
 }
 
-func (p *Page) WaitForResponse(url interface{}, options ...interface{}) ResponseI {
+func (p *pageImpl) WaitForResponse(url interface{}, options ...interface{}) Response {
 	var matcher *urlMatcher
 	if url != nil {
 		matcher = newURLMatcher(url)
 	}
-	predicate := func(req *Response) bool {
+	predicate := func(req *responseImpl) bool {
 		if matcher != nil {
 			return matcher.Match(req.URL())
 		}
@@ -339,10 +339,10 @@ func (p *Page) WaitForResponse(url interface{}, options ...interface{}) Response
 		}
 		return true
 	}
-	return p.WaitForEvent("response", predicate).(*Response)
+	return p.WaitForEvent("response", predicate).(*responseImpl)
 }
 
-func (p *Page) ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error) {
+func (p *pageImpl) ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error) {
 	var predicate interface{}
 	if len(predicates) == 1 {
 		predicate = predicates[0]
@@ -350,7 +350,7 @@ func (p *Page) ExpectEvent(event string, cb func() error, predicates ...interfac
 	return newExpectWrapper(p.WaitForEvent, []interface{}{event, predicate}, cb)
 }
 
-func (p *Page) ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (ResponseI, error) {
+func (p *pageImpl) ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (Response, error) {
 	navigationOptions := make([]interface{}, 0)
 	for _, option := range options {
 		navigationOptions = append(navigationOptions, option)
@@ -359,61 +359,61 @@ func (p *Page) ExpectNavigation(cb func() error, options ...PageWaitForNavigatio
 	if response == nil {
 		return nil, err
 	}
-	return response.(*Response), err
+	return response.(*responseImpl), err
 }
 
-func (p *Page) ExpectConsoleMessage(cb func() error) (ConsoleMessageI, error) {
+func (p *pageImpl) ExpectConsoleMessage(cb func() error) (ConsoleMessage, error) {
 	consoleMessage, err := newExpectWrapper(p.WaitForEvent, []interface{}{"console"}, cb)
-	return consoleMessage.(*ConsoleMessage), err
+	return consoleMessage.(*consoleMessageImpl), err
 }
 
-func (p *Page) ExpectedDialog(cb func() error) (DialogI, error) {
+func (p *pageImpl) ExpectedDialog(cb func() error) (Dialog, error) {
 	dialog, err := newExpectWrapper(p.WaitForEvent, []interface{}{"dialog"}, cb)
-	return dialog.(*Dialog), err
+	return dialog.(*dialogImpl), err
 }
 
-func (p *Page) ExpectDownload(cb func() error) (DownloadI, error) {
+func (p *pageImpl) ExpectDownload(cb func() error) (Download, error) {
 	download, err := newExpectWrapper(p.WaitForEvent, []interface{}{"download"}, cb)
-	return download.(*Download), err
+	return download.(*downloadImpl), err
 }
 
-func (p *Page) ExpectFileChooser(cb func() error) (FileChooserI, error) {
+func (p *pageImpl) ExpectFileChooser(cb func() error) (FileChooser, error) {
 	response, err := newExpectWrapper(p.WaitForEvent, []interface{}{"filechooser"}, cb)
-	return response.(*FileChooser), err
+	return response.(*fileChooserImpl), err
 }
 
-func (p *Page) ExpectLoadState(state string, cb func() error) (ConsoleMessageI, error) {
+func (p *pageImpl) ExpectLoadState(state string, cb func() error) (ConsoleMessage, error) {
 	response, err := newExpectWrapper(p.mainFrame.WaitForLoadState, []interface{}{state}, cb)
-	return response.(*ConsoleMessage), err
+	return response.(*consoleMessageImpl), err
 }
 
-func (p *Page) ExpectPopup(cb func() error) (PageI, error) {
+func (p *pageImpl) ExpectPopup(cb func() error) (Page, error) {
 	popup, err := newExpectWrapper(p.WaitForEvent, []interface{}{"popup"}, cb)
-	return popup.(*Page), err
+	return popup.(*pageImpl), err
 }
 
-func (p *Page) ExpectResponse(url interface{}, cb func() error, options ...interface{}) (ResponseI, error) {
+func (p *pageImpl) ExpectResponse(url interface{}, cb func() error, options ...interface{}) (Response, error) {
 	response, err := newExpectWrapper(p.WaitForResponse, append([]interface{}{url}, options...), cb)
 	if err != nil {
 		return nil, err
 	}
-	return response.(*Response), err
+	return response.(*responseImpl), err
 }
 
-func (p *Page) ExpectRequest(url interface{}, cb func() error, options ...interface{}) (RequestI, error) {
+func (p *pageImpl) ExpectRequest(url interface{}, cb func() error, options ...interface{}) (Request, error) {
 	popup, err := newExpectWrapper(p.WaitForRequest, append([]interface{}{url}, options...), cb)
 	if err != nil {
 		return nil, err
 	}
-	return popup.(*Request), err
+	return popup.(*requestImpl), err
 }
 
-func (p *Page) ExpectWorker(cb func() error) (WorkerI, error) {
+func (p *pageImpl) ExpectWorker(cb func() error) (Worker, error) {
 	response, err := newExpectWrapper(p.WaitForEvent, []interface{}{"worker"}, cb)
-	return response.(*Worker), err
+	return response.(*workerImpl), err
 }
 
-func (p *Page) Route(url interface{}, handler routeHandler) error {
+func (p *pageImpl) Route(url interface{}, handler routeHandler) error {
 	p.routesMu.Lock()
 	defer p.routesMu.Unlock()
 	p.routes = append(p.routes, newRouteHandlerEntry(newURLMatcher(url), handler))
@@ -428,19 +428,19 @@ func (p *Page) Route(url interface{}, handler routeHandler) error {
 	return nil
 }
 
-func (p *Page) GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error) {
+func (p *pageImpl) GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error) {
 	return p.mainFrame.GetAttribute(selector, name, options...)
 }
 
-func (p *Page) Hover(selector string, options ...PageHoverOptions) error {
+func (p *pageImpl) Hover(selector string, options ...PageHoverOptions) error {
 	return p.mainFrame.Hover(selector, options...)
 }
 
-func (p *Page) Isclosed() bool {
+func (p *pageImpl) Isclosed() bool {
 	return p.isClosed
 }
 
-func (b *Page) AddInitScript(options BrowserContextAddInitScriptOptions) error {
+func (b *pageImpl) AddInitScript(options BrowserContextAddInitScriptOptions) error {
 	var source string
 	if options.Script != nil {
 		source = *options.Script
@@ -458,17 +458,17 @@ func (b *Page) AddInitScript(options BrowserContextAddInitScriptOptions) error {
 	return err
 }
 
-func (p *Page) Keyboard() *Keyboard {
+func (p *pageImpl) Keyboard() Keyboard {
 	return p.keyboard
 }
-func (p *Page) Mouse() *Mouse {
+func (p *pageImpl) Mouse() Mouse {
 	return p.mouse
 }
 
-func newPage(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Page {
-	bt := &Page{
-		mainFrame: fromChannel(initializer["mainFrame"]).(*Frame),
-		workers:   make([]WorkerI, 0),
+func newPage(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *pageImpl {
+	bt := &pageImpl{
+		mainFrame: fromChannel(initializer["mainFrame"]).(*frameImpl),
+		workers:   make([]Worker, 0),
 		routes:    make([]*routeHandlerEntry, 0),
 		viewportSize: ViewportSize{
 			Height: int(initializer["viewportSize"].(map[string]interface{})["height"].(float64)),
@@ -476,8 +476,8 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 		},
 		timeoutSettings: newTimeoutSettings(nil),
 	}
-	bt.frames = []FrameI{bt.mainFrame}
-	bt.mainFrame.(*Frame).page = bt
+	bt.frames = []Frame{bt.mainFrame}
+	bt.mainFrame.(*frameImpl).page = bt
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.mouse = newMouse(bt.channel)
 	bt.keyboard = newKeyboard(bt.channel)
@@ -503,18 +503,18 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 		bt.Emit("download", fromChannel(ev["download"]))
 	})
 	bt.channel.On("fileChooser", func(ev map[string]interface{}) {
-		bt.Emit("filechooser", newFileChooser(bt, fromChannel(ev["element"]).(*ElementHandle), ev["isMultiple"].(bool)))
+		bt.Emit("filechooser", newFileChooser(bt, fromChannel(ev["element"]).(*elementHandleImpl), ev["isMultiple"].(bool)))
 	})
 	bt.channel.On("frameAttached", func(ev map[string]interface{}) {
-		frame := fromChannel(ev["frame"]).(*Frame)
+		frame := fromChannel(ev["frame"]).(*frameImpl)
 		frame.page = bt
 		bt.frames = append(bt.frames, frame)
 		bt.Emit("frameAttached", frame)
 	})
 	bt.channel.On("frameDetached", func(ev map[string]interface{}) {
-		frame := fromChannel(ev["frame"]).(*Frame)
+		frame := fromChannel(ev["frame"]).(*frameImpl)
 		frame.detached = true
-		frames := make([]FrameI, 0)
+		frames := make([]Frame, 0)
 		for i := 0; i < len(bt.frames); i++ {
 			if bt.frames[i] != frame {
 				frames = append(frames, frame)
@@ -532,7 +532,7 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 		bt.Emit("request", fromChannel(ev["request"]))
 	})
 	bt.channel.On("requestFailed", func(ev map[string]interface{}) {
-		req := fromChannel(ev["request"]).(*Request)
+		req := fromChannel(ev["request"]).(*requestImpl)
 		req.failureText = ev["failureText"].(string)
 		bt.Emit("requestfailed", req)
 	})
@@ -543,8 +543,8 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 		bt.Emit("response", fromChannel(ev["response"]))
 	})
 	bt.channel.On("route", func(ev map[string]interface{}) {
-		route := fromChannel(ev["route"]).(*Route)
-		request := fromChannel(ev["request"]).(*Request)
+		route := fromChannel(ev["route"]).(*routeImpl)
+		request := fromChannel(ev["request"]).(*requestImpl)
 		go func() {
 			bt.routesMu.Lock()
 			for _, handlerEntry := range bt.routes {
@@ -557,7 +557,7 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 		}()
 	})
 	bt.channel.On("worker", func(ev map[string]interface{}) {
-		worker := fromChannel(ev["worker"]).(*Worker)
+		worker := fromChannel(ev["worker"]).(*workerImpl)
 		worker.page = bt
 		bt.workers = append(bt.workers, worker)
 		bt.Emit("worker", worker)
@@ -580,34 +580,34 @@ func newPage(parent *ChannelOwner, objectType string, guid string, initializer m
 	return bt
 }
 
-func (p *Page) SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error {
+func (p *pageImpl) SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error {
 	return p.mainFrame.SetInputFiles(selector, files, options...)
 }
 
-func (p *Page) Check(selector string, options ...FrameCheckOptions) error {
+func (p *pageImpl) Check(selector string, options ...FrameCheckOptions) error {
 	return p.mainFrame.Check(selector, options...)
 }
 
-func (p *Page) Uncheck(selector string, options ...FrameUncheckOptions) error {
+func (p *pageImpl) Uncheck(selector string, options ...FrameUncheckOptions) error {
 	return p.mainFrame.Uncheck(selector, options...)
 }
 
-func (p *Page) WaitForTimeout(timeout int) {
+func (p *pageImpl) WaitForTimeout(timeout int) {
 	p.mainFrame.WaitForTimeout(timeout)
 }
 
-func (p *Page) WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (JSHandleI, error) {
+func (p *pageImpl) WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (JSHandle, error) {
 	return p.mainFrame.WaitForFunction(expression, options...)
 }
 
-func (p *Page) DblClick(expression string, options ...FrameDblclickOptions) error {
+func (p *pageImpl) DblClick(expression string, options ...FrameDblclickOptions) error {
 	return p.mainFrame.DblClick(expression, options...)
 }
 
-func (p *Page) Focus(expression string, options ...FrameFocusOptions) error {
+func (p *pageImpl) Focus(expression string, options ...FrameFocusOptions) error {
 	return p.mainFrame.Focus(expression, options...)
 }
 
-func (p *Page) TextContent(selector string, options ...FrameTextContentOptions) (string, error) {
+func (p *pageImpl) TextContent(selector string, options ...FrameTextContentOptions) (string, error) {
 	return p.mainFrame.TextContent(selector, options...)
 }

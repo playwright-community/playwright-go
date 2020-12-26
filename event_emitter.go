@@ -10,7 +10,7 @@ type (
 		once []interface{}
 		on   []interface{}
 	}
-	EventEmitter struct {
+	eventEmitter struct {
 		sync.Mutex
 		events              map[string]*eventRegister
 		addEventHandlers    []func(name string, handler interface{})
@@ -18,7 +18,7 @@ type (
 	}
 )
 
-func (e *EventEmitter) Emit(name string, payload ...interface{}) {
+func (e *eventEmitter) Emit(name string, payload ...interface{}) {
 	e.Lock()
 	defer e.Unlock()
 	if _, ok := e.events[name]; !ok {
@@ -42,23 +42,23 @@ func (e *EventEmitter) Emit(name string, payload ...interface{}) {
 	e.events[name].once = make([]interface{}, 0)
 }
 
-func (e *EventEmitter) Once(name string, handler interface{}) {
+func (e *eventEmitter) Once(name string, handler interface{}) {
 	e.addEvent(name, handler, true)
 }
 
-func (e *EventEmitter) On(name string, handler interface{}) {
+func (e *eventEmitter) On(name string, handler interface{}) {
 	e.addEvent(name, handler, false)
 }
 
-func (e *EventEmitter) addEventHandler(handler func(name string, handler interface{})) {
+func (e *eventEmitter) addEventHandler(handler func(name string, handler interface{})) {
 	e.addEventHandlers = append(e.addEventHandlers, handler)
 }
 
-func (e *EventEmitter) removeEventHandler(handler func(name string, handler interface{})) {
+func (e *eventEmitter) removeEventHandler(handler func(name string, handler interface{})) {
 	e.removeEventHandlers = append(e.removeEventHandlers, handler)
 }
 
-func (e *EventEmitter) RemoveListener(name string, handler interface{}) {
+func (e *eventEmitter) RemoveListener(name string, handler interface{}) {
 	for _, mitm := range e.removeEventHandlers {
 		mitm(name, handler)
 	}
@@ -89,7 +89,7 @@ func (e *EventEmitter) RemoveListener(name string, handler interface{}) {
 	e.events[name].once = onceHandlers
 }
 
-func (e *EventEmitter) ListenerCount(name string) int {
+func (e *eventEmitter) ListenerCount(name string) int {
 	count := 0
 	e.Lock()
 	for key := range e.events {
@@ -99,7 +99,7 @@ func (e *EventEmitter) ListenerCount(name string) int {
 	return count
 }
 
-func (e *EventEmitter) addEvent(name string, handler interface{}, once bool) {
+func (e *eventEmitter) addEvent(name string, handler interface{}, once bool) {
 	for _, mitm := range e.addEventHandlers {
 		mitm(name, handler)
 	}
@@ -118,6 +118,6 @@ func (e *EventEmitter) addEvent(name string, handler interface{}, once bool) {
 	e.Unlock()
 }
 
-func (e *EventEmitter) initEventEmitter() {
+func (e *eventEmitter) initEventEmitter() {
 	e.events = make(map[string]*eventRegister)
 }

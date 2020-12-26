@@ -1,17 +1,17 @@
 package playwright
 
-type BrowserI interface {
-	EventEmitterI
+type Browser interface {
+	EventEmitter
 	Close() error
-	Contexts() []BrowserContextI
+	Contexts() []BrowserContext
 	IsConnected() bool
-	NewContext(options ...BrowserNewContextOptions) (BrowserContextI, error)
-	NewPage(options ...BrowserNewContextOptions) (PageI, error)
+	NewContext(options ...BrowserNewContextOptions) (BrowserContext, error)
+	NewPage(options ...BrowserNewContextOptions) (Page, error)
 	Version() string
 }
 
-type BrowserContextI interface {
-	EventEmitterI
+type BrowserContext interface {
+	EventEmitter
 	AddCookies(cookies ...SetNetworkCookieParam) error
 	AddInitScript(options BrowserContextAddInitScriptOptions) error
 	ClearCookies() error
@@ -20,8 +20,8 @@ type BrowserContextI interface {
 	Cookies(urls ...string) ([]*NetworkCookie, error)
 	ExpectEvent(event string, cb func() error) (interface{}, error)
 	GrantPermissions(permissions []string, options ...BrowserContextGrantPermissionsOptions) error
-	NewPage(options ...BrowserNewPageOptions) (PageI, error)
-	Pages() []PageI
+	NewPage(options ...BrowserNewPageOptions) (Page, error)
+	Pages() []Page
 	SetDefaultNavigationTimeout(timeout int)
 	SetDefaultTimeout(timeout int)
 	SetExtraHTTPHeaders(headers map[string]string) error
@@ -30,22 +30,22 @@ type BrowserContextI interface {
 	WaitForEvent(event string, predicate ...interface{}) interface{}
 }
 
-type BrowserTypeI interface {
+type BrowserType interface {
 	ExecutablePath() string
-	Launch(options ...BrowserTypeLaunchOptions) (BrowserI, error)
-	LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (BrowserContextI, error)
+	Launch(options ...BrowserTypeLaunchOptions) (Browser, error)
+	LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (BrowserContext, error)
 	Name() string
 }
 
-type ConsoleMessageI interface {
-	Args() []JSHandleI
+type ConsoleMessage interface {
+	Args() []JSHandle
 	Location() ConsoleMessageLocation
 	String() string
 	Text() string
 	Type() string
 }
 
-type DialogI interface {
+type Dialog interface {
 	Accept(texts ...string) error
 	DefaultValue() string
 	Dismiss() error
@@ -53,7 +53,7 @@ type DialogI interface {
 	Type() string
 }
 
-type DownloadI interface {
+type Download interface {
 	Delete() error
 	Failure() error
 	Path() (string, error)
@@ -63,12 +63,12 @@ type DownloadI interface {
 	URL() string
 }
 
-type ElementHandleI interface {
-	AsElement() ElementHandleI
+type ElementHandle interface {
+	AsElement() ElementHandle
 	BoundingBox() (*Rect, error)
 	Check(options ...ElementHandleCheckOptions) error
 	Click(options ...ElementHandleClickOptions) error
-	ContentFrame() (FrameI, error)
+	ContentFrame() (Frame, error)
 	DblClick(options ...ElementHandleDblclickOptions) error
 	DispatchEvent(typ string, initObjects ...interface{}) error
 	EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
@@ -79,10 +79,10 @@ type ElementHandleI interface {
 	Hover(options ...ElementHandleHoverOptions) error
 	InnerHTML() (string, error)
 	InnerText() (string, error)
-	OwnerFrame() (FrameI, error)
+	OwnerFrame() (Frame, error)
 	Press(options ...ElementHandlePressOptions) error
-	QuerySelector(selector string) (ElementHandleI, error)
-	QuerySelectorAll(selector string) ([]ElementHandleI, error)
+	QuerySelector(selector string) (ElementHandle, error)
+	QuerySelectorAll(selector string) ([]ElementHandle, error)
 	Screenshot(options ...ElementHandleScreenshotOptions) ([]byte, error)
 	ScrollIntoViewIfNeeded(options ...ElementHandleScrollIntoViewIfNeededOptions) error
 	SelectText(options ...ElementHandleSelectTextOptions) error
@@ -92,7 +92,7 @@ type ElementHandleI interface {
 	Uncheck(options ...ElementHandleUncheckOptions) error
 }
 
-type EventEmitterI interface {
+type EventEmitter interface {
 	Emit(name string, payload ...interface{})
 	ListenerCount(name string) int
 	On(name string, handler interface{})
@@ -100,18 +100,18 @@ type EventEmitterI interface {
 	RemoveListener(name string, handler interface{})
 }
 
-type FileChooserI interface {
-	Element() ElementHandleI
+type FileChooser interface {
+	Element() ElementHandle
 	IsMultiple() bool
-	Page() PageI
+	Page() Page
 	SetFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error
 }
 
-type FrameI interface {
-	AddScriptTag(options PageAddScriptTagOptions) (ElementHandleI, error)
-	AddStyleTag(options PageAddStyleTagOptions) (ElementHandleI, error)
+type Frame interface {
+	AddScriptTag(options PageAddScriptTagOptions) (ElementHandle, error)
+	AddStyleTag(options PageAddStyleTagOptions) (ElementHandle, error)
 	Check(selector string, options ...FrameCheckOptions) error
-	ChildFrames() []FrameI
+	ChildFrames() []Frame
 	Click(selector string, options ...PageClickOptions) error
 	Content() (string, error)
 	DblClick(selector string, options ...FrameDblclickOptions) error
@@ -122,19 +122,19 @@ type FrameI interface {
 	EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
 	Fill(selector string, value string, options ...FrameFillOptions) error
 	Focus(selector string, options ...FrameFocusOptions) error
-	FrameElement() (ElementHandleI, error)
+	FrameElement() (ElementHandle, error)
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
-	Goto(url string, options ...PageGotoOptions) (ResponseI, error)
+	Goto(url string, options ...PageGotoOptions) (Response, error)
 	Hover(selector string, options ...PageHoverOptions) error
 	InnerHTML(selector string, options ...PageInnerHTMLOptions) (string, error)
 	InnerText(selector string, options ...PageInnerTextOptions) (string, error)
 	IsDetached() bool
 	Name() string
-	Page() PageI
-	ParentFrame() FrameI
+	Page() Page
+	ParentFrame() Frame
 	Press(selector, key string, options ...PagePressOptions) error
-	QuerySelector(selector string) (ElementHandleI, error)
-	QuerySelectorAll(selector string) ([]ElementHandleI, error)
+	QuerySelector(selector string) (ElementHandle, error)
+	QuerySelectorAll(selector string) ([]ElementHandle, error)
 	SetContent(content string, options ...PageSetContentOptions) error
 	SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error
 	TextContent(selector string, options ...FrameTextContentOptions) (string, error)
@@ -144,25 +144,25 @@ type FrameI interface {
 	Uncheck(selector string, options ...FrameUncheckOptions) error
 	WaitForEvent(event string, predicate ...interface{}) interface{}
 	WaitForEventCh(event string, predicate ...interface{}) <-chan interface{}
-	WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (JSHandleI, error)
+	WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (JSHandle, error)
 	WaitForLoadState(given ...string)
-	WaitForNavigation(options ...PageWaitForNavigationOptions) (ResponseI, error)
-	WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandleI, error)
+	WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error)
+	WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandle, error)
 	WaitForTimeout(timeout int)
 }
 
-type JSHandleI interface {
-	AsElement() ElementHandleI
+type JSHandle interface {
+	AsElement() ElementHandle
 	Dispose() error
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
 	EvaluateHandle(expression string, options ...interface{}) (interface{}, error)
-	GetProperties() (map[string]JSHandleI, error)
-	GetProperty(name string) (JSHandleI, error)
+	GetProperties() (map[string]JSHandle, error)
+	GetProperty(name string) (JSHandle, error)
 	JSONValue() (interface{}, error)
 	String() string
 }
 
-type KeyboardI interface {
+type Keyboard interface {
 	Down(key string) error
 	InsertText(text string) error
 	Press(key string, options ...KeyboardPressOptions) error
@@ -170,7 +170,7 @@ type KeyboardI interface {
 	Up(key string) error
 }
 
-type MouseI interface {
+type Mouse interface {
 	Click(x, y float64, options ...MouseClickOptions) error
 	DblClick(x, y float64, options ...MouseDblclickOptions) error
 	Down(options ...MouseDownOptions) error
@@ -178,19 +178,19 @@ type MouseI interface {
 	Up(options ...MouseUpOptions) error
 }
 
-type PageI interface {
-	Mouse() *Mouse
-	Keyboard() *Keyboard
-	EventEmitterI
+type Page interface {
+	Mouse() Mouse
+	Keyboard() Keyboard
+	EventEmitter
 	AddInitScript(options BrowserContextAddInitScriptOptions) error
-	AddScriptTag(options PageAddScriptTagOptions) (ElementHandleI, error)
-	AddStyleTag(options PageAddStyleTagOptions) (ElementHandleI, error)
+	AddScriptTag(options PageAddScriptTagOptions) (ElementHandle, error)
+	AddStyleTag(options PageAddStyleTagOptions) (ElementHandle, error)
 	BringToFront() error
 	Check(selector string, options ...FrameCheckOptions) error
 	Click(selector string, options ...PageClickOptions) error
 	Close(options ...PageCloseOptions) error
 	Content() (string, error)
-	Context() BrowserContextI
+	Context() BrowserContext
 	DblClick(expression string, options ...FrameDblclickOptions) error
 	DispatchEvent(selector string, typ string, options ...PageDispatchEventOptions) error
 	EmulateMedia(options ...PageEmulateMediaOptions) error
@@ -198,35 +198,35 @@ type PageI interface {
 	EvaluateHandle(expression string, options ...interface{}) (interface{}, error)
 	EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
 	EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
-	ExpectConsoleMessage(cb func() error) (ConsoleMessageI, error)
-	ExpectDownload(cb func() error) (DownloadI, error)
+	ExpectConsoleMessage(cb func() error) (ConsoleMessage, error)
+	ExpectDownload(cb func() error) (Download, error)
 	ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error)
-	ExpectFileChooser(cb func() error) (FileChooserI, error)
-	ExpectLoadState(state string, cb func() error) (ConsoleMessageI, error)
-	ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (ResponseI, error)
-	ExpectPopup(cb func() error) (PageI, error)
-	ExpectRequest(url interface{}, cb func() error, options ...interface{}) (RequestI, error)
-	ExpectResponse(url interface{}, cb func() error, options ...interface{}) (ResponseI, error)
-	ExpectWorker(cb func() error) (WorkerI, error)
-	ExpectedDialog(cb func() error) (DialogI, error)
+	ExpectFileChooser(cb func() error) (FileChooser, error)
+	ExpectLoadState(state string, cb func() error) (ConsoleMessage, error)
+	ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (Response, error)
+	ExpectPopup(cb func() error) (Page, error)
+	ExpectRequest(url interface{}, cb func() error, options ...interface{}) (Request, error)
+	ExpectResponse(url interface{}, cb func() error, options ...interface{}) (Response, error)
+	ExpectWorker(cb func() error) (Worker, error)
+	ExpectedDialog(cb func() error) (Dialog, error)
 	Fill(selector, text string, options ...FrameFillOptions) error
 	Focus(expression string, options ...FrameFocusOptions) error
-	Frames() []FrameI
+	Frames() []Frame
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
-	GoBack(options ...PageGoBackOptions) (ResponseI, error)
-	GoForward(options ...PageGoForwardOptions) (ResponseI, error)
-	Goto(url string, options ...PageGotoOptions) (ResponseI, error)
+	GoBack(options ...PageGoBackOptions) (Response, error)
+	GoForward(options ...PageGoForwardOptions) (Response, error)
+	Goto(url string, options ...PageGotoOptions) (Response, error)
 	Hover(selector string, options ...PageHoverOptions) error
 	InnerHTML(selector string, options ...PageInnerHTMLOptions) (string, error)
 	InnerText(selector string, options ...PageInnerTextOptions) (string, error)
 	Isclosed() bool
-	MainFrame() FrameI
-	Opener() (PageI, error)
+	MainFrame() Frame
+	Opener() (Page, error)
 	PDF(options ...PagePdfOptions) ([]byte, error)
 	Press(selector, key string, options ...PagePressOptions) error
-	QuerySelector(selector string) (ElementHandleI, error)
-	QuerySelectorAll(selector string) ([]ElementHandleI, error)
-	Reload(options ...PageReloadOptions) (ResponseI, error)
+	QuerySelector(selector string) (ElementHandle, error)
+	QuerySelectorAll(selector string) ([]ElementHandle, error)
+	Reload(options ...PageReloadOptions) (Response, error)
 	Route(url interface{}, handler routeHandler) error
 	Screenshot(options ...PageScreenshotOptions) ([]byte, error)
 	SetContent(content string, options ...PageSetContentOptions) error
@@ -242,59 +242,59 @@ type PageI interface {
 	Uncheck(selector string, options ...FrameUncheckOptions) error
 	ViewportSize() ViewportSize
 	WaitForEvent(event string, predicate ...interface{}) interface{}
-	WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (JSHandleI, error)
+	WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (JSHandle, error)
 	WaitForLoadState(state ...string)
-	WaitForNavigation(options ...PageWaitForNavigationOptions) (ResponseI, error)
-	WaitForRequest(url interface{}, options ...interface{}) RequestI
-	WaitForResponse(url interface{}, options ...interface{}) ResponseI
-	WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandleI, error)
+	WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error)
+	WaitForRequest(url interface{}, options ...interface{}) Request
+	WaitForResponse(url interface{}, options ...interface{}) Response
+	WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandle, error)
 	WaitForTimeout(timeout int)
-	Workers() []WorkerI
+	Workers() []Worker
 }
 
-type RequestI interface {
+type Request interface {
 	Failure() *RequestFailure
-	Frame() FrameI
+	Frame() Frame
 	Headers() map[string]string
 	IsNavigationRequest() bool
 	Method() string
 	PostData() (string, error)
 	PostDataBuffer() ([]byte, error)
 	PostDataJSON(v interface{}) error
-	RedirectedFrom() RequestI
-	RedirectedTo() RequestI
+	RedirectedFrom() Request
+	RedirectedTo() Request
 	ResourceType() string
-	Response() (ResponseI, error)
+	Response() (Response, error)
 	URL() string
 }
 
-type ResponseI interface {
+type Response interface {
 	Body() ([]byte, error)
 	Finished() error
-	Frame() FrameI
+	Frame() Frame
 	Headers() map[string]string
 	JSON(v interface{}) error
 	Ok() bool
-	Request() RequestI
+	Request() Request
 	Status() int
 	StatusText() string
 	Text() (string, error)
 	URL() string
 }
 
-type RouteI interface {
+type Route interface {
 	Abort(errorCode *string) error
 	Continue(options ...RouteContinueOptions) error
 	Fulfill(options RouteFulfillOptions) error
-	Request() RequestI
+	Request() Request
 }
 
-type WebSocketI interface {
+type WebSocket interface {
 	URL() string
 }
 
-type WorkerI interface {
+type Worker interface {
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
-	EvaluateHandle(expression string, options ...interface{}) (JSHandleI, error)
+	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	URL() string
 }
