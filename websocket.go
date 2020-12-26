@@ -4,8 +4,8 @@ type webSocketImpl struct {
 	channelOwner
 }
 
-func (r *webSocketImpl) URL() string {
-	return r.initializer["url"].(string)
+func (w *webSocketImpl) URL() string {
+	return w.initializer["url"].(string)
 }
 
 func newWebsocket(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *webSocketImpl {

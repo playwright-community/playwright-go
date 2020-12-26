@@ -1,9 +1,10 @@
-package playwright
+package playwright_test
 
 import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/mxschmitt/playwright-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,7 +17,7 @@ func TestFileChooser(t *testing.T) {
 	require.NoError(t, err)
 	file, err := ioutil.ReadFile(helper.Asset("file-to-upload.txt"))
 	require.NoError(t, err)
-	require.NoError(t, input.SetInputFiles([]InputFile{
+	require.NoError(t, input.SetInputFiles([]playwright.InputFile{
 		{
 			Name:     "file-to-upload.txt",
 			MimeType: "text/plain",
@@ -59,7 +60,7 @@ func TestFileChooserShouldEmitEvent(t *testing.T) {
 
 	require.Equal(t, elementHTML, inputElementHTML)
 
-	require.NoError(t, fileChooser.SetFiles([]InputFile{
+	require.NoError(t, fileChooser.SetFiles([]playwright.InputFile{
 		{
 			Name:     "file-to-upload.txt",
 			MimeType: "text/plain",

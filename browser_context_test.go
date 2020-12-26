@@ -1,8 +1,9 @@
-package playwright
+package playwright_test
 
 import (
 	"testing"
 
+	"github.com/mxschmitt/playwright-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -50,7 +51,7 @@ func TestBrowserContextSetExtraHTTPHeaders(t *testing.T) {
 		"extra-http": "42",
 	}))
 	intercepted := make(chan bool, 1)
-	err := helper.Page.Route("**/empty.html", func(route *routeImpl, request *requestImpl) {
+	err := helper.Page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
 		require.NoError(t, route.Continue())
 		intercepted <- true
 	})
@@ -67,7 +68,7 @@ func TestBrowserContextSetGeolocation(t *testing.T) {
 	require.NoError(t, helper.Context.GrantPermissions([]string{"geolocation"}))
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, helper.Context.SetGeolocation(&SetGeolocationOptions{
+	require.NoError(t, helper.Context.SetGeolocation(&playwright.SetGeolocationOptions{
 		Longitude: 10,
 		Latitude:  10,
 	}))
@@ -87,8 +88,8 @@ func TestBrowserContextAddCookies(t *testing.T) {
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, helper.Context.AddCookies(SetNetworkCookieParam{
-		URL:   String(helper.server.EMPTY_PAGE),
+	require.NoError(t, helper.Context.AddCookies(playwright.SetNetworkCookieParam{
+		URL:   playwright.String(helper.server.EMPTY_PAGE),
 		Name:  "password",
 		Value: "123456",
 	}))
@@ -98,7 +99,7 @@ func TestBrowserContextAddCookies(t *testing.T) {
 
 	cookies, err := helper.Context.Cookies()
 	require.NoError(t, err)
-	require.Equal(t, []*NetworkCookie{
+	require.Equal(t, []*playwright.NetworkCookie{
 		{
 			Name:     "password",
 			Value:    "123456",
@@ -122,8 +123,8 @@ func TestBrowserContextAddCookies(t *testing.T) {
 func TestBrowserContextAddInitScript(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	require.NoError(t, helper.Context.AddInitScript(BrowserContextAddInitScriptOptions{
-		Script: String(`window['injected'] = 123;`),
+	require.NoError(t, helper.Context.AddInitScript(playwright.BrowserContextAddInitScriptOptions{
+		Script: playwright.String(`window['injected'] = 123;`),
 	}))
 	_, err := helper.Page.Goto(helper.server.PREFIX + "/tamperable.html")
 	require.NoError(t, err)
@@ -135,8 +136,8 @@ func TestBrowserContextAddInitScript(t *testing.T) {
 func TestBrowserContextAddInitScriptWithPath(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	require.NoError(t, helper.Context.AddInitScript(BrowserContextAddInitScriptOptions{
-		Path: String(helper.Asset("injectedfile.js")),
+	require.NoError(t, helper.Context.AddInitScript(playwright.BrowserContextAddInitScriptOptions{
+		Path: playwright.String(helper.Asset("injectedfile.js")),
 	}))
 	_, err := helper.Page.Goto(helper.server.PREFIX + "/tamperable.html")
 	require.NoError(t, err)

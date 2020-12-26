@@ -1,8 +1,9 @@
-package playwright
+package playwright_test
 
 import (
 	"testing"
 
+	"github.com/mxschmitt/playwright-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -36,7 +37,7 @@ func TestBrowserNewPage(t *testing.T) {
 }
 
 func TestBrowserClose(t *testing.T) {
-	pw, err := Run()
+	pw, err := playwright.Run()
 	require.NoError(t, err)
 	browser, err := pw.Chromium.Launch()
 	require.NoError(t, err)

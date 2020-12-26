@@ -13,7 +13,7 @@ type jsHandleImpl struct {
 	preview string
 }
 
-func (f *jsHandleImpl) Evaluate(expression string, options ...interface{}) (interface{}, error) {
+func (j *jsHandleImpl) Evaluate(expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -25,7 +25,7 @@ func (f *jsHandleImpl) Evaluate(expression string, options ...interface{}) (inte
 		arg = options[0]
 		forceExpression = options[1].(bool)
 	}
-	result, err := f.channel.Send("evaluateExpression", map[string]interface{}{
+	result, err := j.channel.Send("evaluateExpression", map[string]interface{}{
 		"expression": expression,
 		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
@@ -36,7 +36,7 @@ func (f *jsHandleImpl) Evaluate(expression string, options ...interface{}) (inte
 	return parseResult(result), nil
 }
 
-func (f *jsHandleImpl) EvaluateHandle(expression string, options ...interface{}) (interface{}, error) {
+func (j *jsHandleImpl) EvaluateHandle(expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -48,7 +48,7 @@ func (f *jsHandleImpl) EvaluateHandle(expression string, options ...interface{})
 		arg = options[0]
 		forceExpression = options[1].(bool)
 	}
-	result, err := f.channel.Send("evaluateExpressionHandle", map[string]interface{}{
+	result, err := j.channel.Send("evaluateExpressionHandle", map[string]interface{}{
 		"expression": expression,
 		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),

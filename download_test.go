@@ -1,4 +1,4 @@
-package playwright
+package playwright_test
 
 import (
 	"fmt"

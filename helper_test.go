@@ -1,4 +1,4 @@
-package playwright
+package playwright_test
 
 import (
 	"bytes"
@@ -13,10 +13,11 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/mxschmitt/playwright-go"
 	"github.com/stretchr/testify/require"
 )
 
-var pw *Playwright
+var pw *playwright.Playwright
 var globalTestHelper *TestHelperData
 
 func init() {
@@ -34,12 +35,12 @@ func TestMain(m *testing.M) {
 
 func BeforeAll() {
 	var err error
-	pw, err = Run()
+	pw, err = playwright.Run()
 	if err != nil {
 		log.Fatalf("could not start Playwright: %v", err)
 	}
 	browserName := os.Getenv("BROWSER")
-	var browserType BrowserType
+	var browserType playwright.BrowserType
 	if browserName == "chromium" || browserName == "" {
 		browserType = pw.Chromium
 	} else if browserName == "firefox" {
@@ -48,8 +49,8 @@ func BeforeAll() {
 		browserType = pw.WebKit
 	}
 
-	browser, err := browserType.Launch(BrowserTypeLaunchOptions{
-		Headless: Bool(os.Getenv("HEADFUL") == ""),
+	browser, err := browserType.Launch(playwright.BrowserTypeLaunchOptions{
+		Headless: playwright.Bool(os.Getenv("HEADFUL") == ""),
 	})
 	if err != nil {
 		log.Fatalf("could not launch: %v", err)
@@ -76,11 +77,11 @@ func AfterAll() {
 
 type TestHelperData struct {
 	t           *testing.T
-	Playwright  *Playwright
-	BrowserType BrowserType
-	Browser     Browser
-	Context     BrowserContext
-	Page        Page
+	Playwright  *playwright.Playwright
+	BrowserType playwright.BrowserType
+	Browser     playwright.Browser
+	Context     playwright.BrowserContext
+	Page        playwright.Page
 	IsChromium  bool
 	IsFirefox   bool
 	IsWebKit    bool
@@ -89,8 +90,8 @@ type TestHelperData struct {
 	utils       *testUtils
 }
 
-var CONTEXT_OPTIONS = BrowserNewContextOptions{
-	AcceptDownloads: Bool(true),
+var CONTEXT_OPTIONS = playwright.BrowserNewContextOptions{
+	AcceptDownloads: playwright.Bool(true),
 }
 
 func BeforeEach(t *testing.T) *TestHelperData {
@@ -240,7 +241,7 @@ func newSyncSlice() *syncSlice {
 type testUtils struct {
 }
 
-func (t *testUtils) AttachFrame(page Page, frameId string, url string) (*frameImpl, error) {
+func (t *testUtils) AttachFrame(page playwright.Page, frameId string, url string) (playwright.Frame, error) {
 	_, err := page.EvaluateHandle(`async ({ frame_id, url }) => {
 		const frame = document.createElement('iframe');
 		frame.src = url;
@@ -258,7 +259,7 @@ func (t *testUtils) AttachFrame(page Page, frameId string, url string) (*frameIm
 	return nil, nil
 }
 
-func (tu *testUtils) VerifyViewport(t *testing.T, page Page, width, height int) {
+func (tu *testUtils) VerifyViewport(t *testing.T, page playwright.Page, width, height int) {
 	require.Equal(t, page.ViewportSize().Width, width)
 	require.Equal(t, page.ViewportSize().Height, height)
 	innerWidth, err := page.Evaluate("window.innerWidth")
@@ -269,7 +270,7 @@ func (tu *testUtils) VerifyViewport(t *testing.T, page Page, width, height int) 
 	require.Equal(t, innerHeight, height)
 }
 
-func (tu *testUtils) AssertEval(t *testing.T, page Page, script string, expected interface{}) {
+func (tu *testUtils) AssertEval(t *testing.T, page playwright.Page, script string, expected interface{}) {
 	result, err := page.Evaluate(script)
 	require.NoError(t, err)
 	require.Equal(t, expected, result)

@@ -1,8 +1,9 @@
-package playwright
+package playwright_test
 
 import (
 	"testing"
 
+	"github.com/mxschmitt/playwright-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -21,8 +22,8 @@ func TestMouseMove(t *testing.T) {
     });
   }`)
 	require.NoError(t, err)
-	require.NoError(t, helper.Page.Mouse().Move(200, 300, MouseMoveOptions{
-		Steps: Int(5),
+	require.NoError(t, helper.Page.Mouse().Move(200, 300, playwright.MouseMoveOptions{
+		Steps: playwright.Int(5),
 	}))
 	result, err := helper.Page.Evaluate("result")
 	require.NoError(t, err)

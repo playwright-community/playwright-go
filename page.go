@@ -440,7 +440,7 @@ func (p *pageImpl) Isclosed() bool {
 	return p.isClosed
 }
 
-func (b *pageImpl) AddInitScript(options BrowserContextAddInitScriptOptions) error {
+func (p *pageImpl) AddInitScript(options BrowserContextAddInitScriptOptions) error {
 	var source string
 	if options.Script != nil {
 		source = *options.Script
@@ -452,7 +452,7 @@ func (b *pageImpl) AddInitScript(options BrowserContextAddInitScriptOptions) err
 		}
 		source = string(content)
 	}
-	_, err := b.channel.Send("addInitScript", map[string]interface{}{
+	_, err := p.channel.Send("addInitScript", map[string]interface{}{
 		"source": source,
 	})
 	return err

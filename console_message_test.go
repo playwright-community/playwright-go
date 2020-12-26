@@ -1,16 +1,17 @@
-package playwright
+package playwright_test
 
 import (
 	"testing"
 
+	"github.com/mxschmitt/playwright-go"
 	"github.com/stretchr/testify/require"
 )
 
 func TestConsoleShouldWork(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	messages := make(chan *consoleMessageImpl, 1)
-	helper.Page.Once("console", func(message *consoleMessageImpl) {
+	messages := make(chan playwright.ConsoleMessage, 1)
+	helper.Page.Once("console", func(message playwright.ConsoleMessage) {
 		messages <- message
 	})
 	_, err := helper.Page.Evaluate(`() => console.log("hello", 5, {foo: "bar"})`)
@@ -36,7 +37,7 @@ func TestConsoleShouldEmitSameLogTwice(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	messages := make(chan string, 2)
-	helper.Page.On("console", func(message *consoleMessageImpl) {
+	helper.Page.On("console", func(message playwright.ConsoleMessage) {
 		messages <- message.Text()
 	})
 	_, err := helper.Page.Evaluate(`() => { for (let i = 0; i < 2; ++i ) console.log("hello"); } `)
@@ -49,8 +50,8 @@ func TestConsoleShouldEmitSameLogTwice(t *testing.T) {
 func TestConsoleShouldUseTextForStr(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	messages := make(chan *consoleMessageImpl, 1)
-	helper.Page.On("console", func(message *consoleMessageImpl) {
+	messages := make(chan playwright.ConsoleMessage, 1)
+	helper.Page.On("console", func(message playwright.ConsoleMessage) {
 		messages <- message
 	})
 	_, err := helper.Page.Evaluate(`() => console.log("Hello world")`)
@@ -62,8 +63,8 @@ func TestConsoleShouldUseTextForStr(t *testing.T) {
 func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	messagesChan := make(chan *consoleMessageImpl, 6)
-	helper.Page.On("console", func(message *consoleMessageImpl) {
+	messagesChan := make(chan playwright.ConsoleMessage, 6)
+	helper.Page.On("console", func(message playwright.ConsoleMessage) {
 		messagesChan <- message
 	})
 	// All console events will be reported before 'page.evaluate' is finished.
@@ -78,7 +79,7 @@ func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
       console.error('calling console.error');
       console.log(Promise.resolve('should not wait until resolved!'));
 	}`)
-	messages := ChanToSlice(messagesChan, 6).([]*consoleMessageImpl)
+	messages := ChanToSlice(messagesChan, 6).([]playwright.ConsoleMessage)
 	require.NoError(t, err)
 	require.Equal(t, []interface{}{
 		"timeEnd",
@@ -88,7 +89,7 @@ func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 		"error",
 		"log",
 	}, Map(messages, func(msg interface{}) interface{} {
-		return msg.(*consoleMessageImpl).Type()
+		return msg.(playwright.ConsoleMessage).Type()
 	}))
 
 	require.Contains(t, messages[0].Text(), "calling console.time")
@@ -99,15 +100,15 @@ func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 		"calling console.error",
 		"JSHandle@promise",
 	}, Map(messages[1:], func(msg interface{}) interface{} {
-		return msg.(*consoleMessageImpl).Text()
+		return msg.(playwright.ConsoleMessage).Text()
 	}))
 }
 
 func TestConsoleShouldNotFailForWindowObjects(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	messages := make(chan *consoleMessageImpl, 1)
-	helper.Page.Once("console", func(message *consoleMessageImpl) {
+	messages := make(chan playwright.ConsoleMessage, 1)
+	helper.Page.Once("console", func(message playwright.ConsoleMessage) {
 		messages <- message
 	})
 	_, err := helper.Page.Evaluate("() => console.error(window)")
@@ -119,8 +120,8 @@ func TestConsoleShouldNotFailForWindowObjects(t *testing.T) {
 func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	messages := make(chan *consoleMessageImpl, 1)
-	helper.Page.Once("console", func(message *consoleMessageImpl) {
+	messages := make(chan playwright.ConsoleMessage, 1)
+	helper.Page.Once("console", func(message playwright.ConsoleMessage) {
 		messages <- message
 	})
 	_, err := helper.Page.Goto("about:blank")
@@ -138,11 +139,11 @@ func TestConsoleShouldHaveLocation(t *testing.T) {
 	messageEvent, err := helper.Page.ExpectEvent("console", func() error {
 		_, err := helper.Page.Goto(helper.server.PREFIX + "/consolelog.html")
 		return err
-	}, func(m *consoleMessageImpl) bool {
+	}, func(m playwright.ConsoleMessage) bool {
 		return m.Text() == "yellow"
 	})
 	require.NoError(t, err)
-	message := messageEvent.(*consoleMessageImpl)
+	message := messageEvent.(playwright.ConsoleMessage)
 	require.Equal(t, message.Type(), "log")
 	require.Equal(t, helper.server.PREFIX+"/consolelog.html", message.Location().URL)
 	require.Equal(t, 7, message.Location().LineNumber)

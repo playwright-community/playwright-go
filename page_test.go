@@ -1,4 +1,4 @@
-package playwright
+package playwright_test
 
 import (
 	"errors"
@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/h2non/filetype"
+	"github.com/mxschmitt/playwright-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -32,8 +33,8 @@ func TestPageSetContent(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	require.NoError(t, helper.Page.SetContent("<h1>foo</h1>",
-		PageSetContentOptions{
-			WaitUntil: String("networkidle"),
+		playwright.PageSetContentOptions{
+			WaitUntil: playwright.String("networkidle"),
 		}))
 	content, err := helper.Page.Content()
 	require.NoError(t, err)
@@ -53,8 +54,8 @@ func TestPageScreenshot(t *testing.T) {
 	require.True(t, filetype.IsImage(screenshot))
 	require.Greater(t, len(screenshot), 50)
 
-	screenshot, err = helper.Page.Screenshot(PageScreenshotOptions{
-		Path: String(screenshotPath),
+	screenshot, err = helper.Page.Screenshot(playwright.PageScreenshotOptions{
+		Path: playwright.String(screenshotPath),
 	})
 	require.NoError(t, err)
 	require.True(t, filetype.IsImage(screenshot))
@@ -79,8 +80,8 @@ func TestPagePDF(t *testing.T) {
 	require.Equal(t, "application/pdf", http.DetectContentType(screenshot))
 	require.Greater(t, len(screenshot), 50)
 
-	screenshot, err = helper.Page.PDF(PagePdfOptions{
-		Path: String(screenshotPath),
+	screenshot, err = helper.Page.PDF(playwright.PagePdfOptions{
+		Path: playwright.String(screenshotPath),
 	})
 	require.NoError(t, err)
 	require.Equal(t, "application/pdf", http.DetectContentType(screenshot))
@@ -304,7 +305,7 @@ func TestPageOpener(t *testing.T) {
 		return err
 	})
 	require.NoError(t, err)
-	popup := page.(*pageImpl)
+	popup := page.(playwright.Page)
 
 	opener, err := popup.Opener()
 	require.NoError(t, err)
@@ -400,8 +401,8 @@ func TestPageAddScriptTag(t *testing.T) {
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
 
-	scriptHandle, err := helper.Page.AddScriptTag(PageAddScriptTagOptions{
-		Url: String("injectedfile.js"),
+	scriptHandle, err := helper.Page.AddScriptTag(playwright.PageAddScriptTagOptions{
+		Url: playwright.String("injectedfile.js"),
 	})
 	require.NoError(t, err)
 	require.NotNil(t, scriptHandle.AsElement())
@@ -416,8 +417,8 @@ func TestPageAddScriptTagFile(t *testing.T) {
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
 
-	scriptHandle, err := helper.Page.AddScriptTag(PageAddScriptTagOptions{
-		Path: String(helper.Asset("injectedfile.js")),
+	scriptHandle, err := helper.Page.AddScriptTag(playwright.PageAddScriptTagOptions{
+		Path: playwright.String(helper.Asset("injectedfile.js")),
 	})
 	require.NoError(t, err)
 	require.NotNil(t, scriptHandle.AsElement())
@@ -432,8 +433,8 @@ func TestPageAddStyleTag(t *testing.T) {
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
 
-	_, err = helper.Page.AddStyleTag(PageAddStyleTagOptions{
-		Url: String("injectedstyle.css"),
+	_, err = helper.Page.AddStyleTag(playwright.PageAddStyleTagOptions{
+		Url: playwright.String("injectedstyle.css"),
 	})
 	require.NoError(t, err)
 	v, err := helper.Page.Evaluate("window.getComputedStyle(document.querySelector('body')).getPropertyValue('background-color')")
@@ -447,8 +448,8 @@ func TestPageAddStyleTagFile(t *testing.T) {
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
 
-	_, err = helper.Page.AddStyleTag(PageAddStyleTagOptions{
-		Path: String(helper.Asset("injectedstyle.css")),
+	_, err = helper.Page.AddStyleTag(playwright.PageAddStyleTagOptions{
+		Path: playwright.String(helper.Asset("injectedstyle.css")),
 	})
 	require.NoError(t, err)
 	v, err := helper.Page.Evaluate("window.getComputedStyle(document.querySelector('body')).getPropertyValue('background-color')")
@@ -481,8 +482,8 @@ func TestPlaywrightDevices(t *testing.T) {
 func TestPageAddInitScript(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	require.NoError(t, helper.Page.AddInitScript(BrowserContextAddInitScriptOptions{
-		Script: String(`window['injected'] = 123;`),
+	require.NoError(t, helper.Page.AddInitScript(playwright.BrowserContextAddInitScriptOptions{
+		Script: playwright.String(`window['injected'] = 123;`),
 	}))
 	_, err := helper.Page.Goto(helper.server.PREFIX + "/tamperable.html")
 	require.NoError(t, err)
@@ -496,9 +497,9 @@ func TestPageExpectSelectorTimeout(t *testing.T) {
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
-	timeoutError := errors.Unwrap(helper.Page.Click("foobar", PageClickOptions{
-		Timeout: Int(500),
-	})).(*TimeoutError)
+	timeoutError := errors.Unwrap(helper.Page.Click("foobar", playwright.PageClickOptions{
+		Timeout: playwright.Int(500),
+	})).(*playwright.TimeoutError)
 	require.Contains(t, timeoutError.Message, "Timeout 500ms exceeded.")
 }
 
@@ -611,8 +612,8 @@ func TestPageTextContent(t *testing.T) {
 func TestPageAddInitScriptWithPath(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	require.NoError(t, helper.Page.AddInitScript(BrowserContextAddInitScriptOptions{
-		Path: String(helper.Asset("injectedfile.js")),
+	require.NoError(t, helper.Page.AddInitScript(playwright.BrowserContextAddInitScriptOptions{
+		Path: playwright.String(helper.Asset("injectedfile.js")),
 	}))
 	_, err := helper.Page.Goto(helper.server.PREFIX + "/tamperable.html")
 	require.NoError(t, err)
@@ -625,16 +626,16 @@ func TestPageSupportNetworkEvents(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	eventsChan := make(chan string, 6)
-	helper.Page.On("request", func(request *requestImpl) {
+	helper.Page.On("request", func(request playwright.Request) {
 		eventsChan <- fmt.Sprintf("%s %s", request.Method(), request.URL())
 	})
-	helper.Page.On("response", func(response *responseImpl) {
+	helper.Page.On("response", func(response playwright.Response) {
 		eventsChan <- fmt.Sprintf("%d %s", response.Status(), response.URL())
 	})
-	helper.Page.On("requestfinished", func(request *requestImpl) {
+	helper.Page.On("requestfinished", func(request playwright.Request) {
 		eventsChan <- fmt.Sprintf("DONE %s", request.URL())
 	})
-	helper.Page.On("requestfailed", func(request *requestImpl) {
+	helper.Page.On("requestfailed", func(request playwright.Request) {
 		eventsChan <- fmt.Sprintf("FAIL %s", request.URL())
 	})
 	helper.server.SetRedirect("/foo.html", "/empty.html")
@@ -670,7 +671,7 @@ func TestPageEmulateMedia(t *testing.T) {
 	defer helper.AfterEach()
 	helper.utils.AssertEval(t, helper.Page, "matchMedia('screen').matches", true)
 	helper.utils.AssertEval(t, helper.Page, "matchMedia('print').matches", false)
-	require.NoError(t, helper.Page.EmulateMedia(PageEmulateMediaOptions{
+	require.NoError(t, helper.Page.EmulateMedia(playwright.PageEmulateMediaOptions{
 		Media: "print",
 	}))
 	helper.utils.AssertEval(t, helper.Page, "matchMedia('screen').matches", false)
@@ -678,8 +679,8 @@ func TestPageEmulateMedia(t *testing.T) {
 	require.NoError(t, helper.Page.EmulateMedia())
 	helper.utils.AssertEval(t, helper.Page, "matchMedia('screen').matches", false)
 	helper.utils.AssertEval(t, helper.Page, "matchMedia('print').matches", true)
-	require.NoError(t, helper.Page.EmulateMedia(PageEmulateMediaOptions{
-		Media: Null(),
+	require.NoError(t, helper.Page.EmulateMedia(playwright.PageEmulateMediaOptions{
+		Media: playwright.Null(),
 	}))
 	helper.utils.AssertEval(t, helper.Page, "matchMedia('screen').matches", true)
 	helper.utils.AssertEval(t, helper.Page, "matchMedia('print').matches", false)
