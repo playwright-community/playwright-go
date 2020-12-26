@@ -491,8 +491,8 @@ type WebSocketWaitForEventOptions struct {
 	Timeout   *int        `json:"timeout"`
 }
 type AccessibilitySnapshotOptions struct {
-	InterestingOnly *bool              `json:"interestingOnly"`
-	Root            *elementHandleImpl `json:"root"`
+	InterestingOnly *bool          `json:"interestingOnly"`
+	Root            *ElementHandle `json:"root"`
 }
 type BrowserTypeLaunchOptions struct {
 	Headless          *bool                   `json:"headless"`
