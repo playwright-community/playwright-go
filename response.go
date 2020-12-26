@@ -5,36 +5,36 @@ import (
 	"encoding/json"
 )
 
-type Response struct {
-	ChannelOwner
+type responseImpl struct {
+	channelOwner
 }
 
-func (r *Response) URL() string {
+func (r *responseImpl) URL() string {
 	return r.initializer["url"].(string)
 }
 
-func (r *Response) Ok() bool {
+func (r *responseImpl) Ok() bool {
 	return r.Status() == 0 || (r.Status() >= 200 && r.Status() <= 299)
 }
 
-func (r *Response) Status() int {
+func (r *responseImpl) Status() int {
 	return int(r.initializer["status"].(float64))
 }
 
-func (r *Response) StatusText() string {
+func (r *responseImpl) StatusText() string {
 	return r.initializer["statusText"].(string)
 }
 
-func (r *Response) Headers() map[string]string {
+func (r *responseImpl) Headers() map[string]string {
 	return parseHeaders(r.initializer["headers"].([]interface{}))
 }
 
-func (r *Response) Finished() error {
+func (r *responseImpl) Finished() error {
 	_, err := r.channel.Send("finished")
 	return err
 }
 
-func (r *Response) Body() ([]byte, error) {
+func (r *responseImpl) Body() ([]byte, error) {
 	b64Body, err := r.channel.Send("body")
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func (r *Response) Body() ([]byte, error) {
 	return base64.StdEncoding.DecodeString(b64Body.(string))
 }
 
-func (r *Response) Text() (string, error) {
+func (r *responseImpl) Text() (string, error) {
 	body, err := r.Body()
 	if err != nil {
 		return "", err
@@ -50,7 +50,7 @@ func (r *Response) Text() (string, error) {
 	return string(body), nil
 }
 
-func (r *Response) JSON(v interface{}) error {
+func (r *responseImpl) JSON(v interface{}) error {
 	body, err := r.Body()
 	if err != nil {
 		return err
@@ -58,16 +58,16 @@ func (r *Response) JSON(v interface{}) error {
 	return json.Unmarshal(body, v)
 }
 
-func (r *Response) Request() *Request {
-	return fromChannel(r.initializer["request"]).(*Request)
+func (r *responseImpl) Request() Request {
+	return fromChannel(r.initializer["request"]).(*requestImpl)
 }
 
-func (r *Response) Frame() *Frame {
+func (r *responseImpl) Frame() Frame {
 	return r.Request().Frame()
 }
 
-func newResponse(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Response {
-	resp := &Response{}
+func newResponse(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *responseImpl {
+	resp := &responseImpl{}
 	resp.createChannelOwner(resp, parent, objectType, guid, initializer)
 	return resp
 }

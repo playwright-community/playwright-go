@@ -9,33 +9,33 @@ type RequestFailure struct {
 	ErrorText string
 }
 
-type Request struct {
-	ChannelOwner
-	redirectedFrom *Request
-	redirectedTo   *Request
+type requestImpl struct {
+	channelOwner
+	redirectedFrom Request
+	redirectedTo   Request
 	failureText    string
 }
 
-func (r *Request) URL() string {
+func (r *requestImpl) URL() string {
 	return r.initializer["url"].(string)
 }
 
-func (r *Request) ResourceType() string {
+func (r *requestImpl) ResourceType() string {
 	return r.initializer["resourceType"].(string)
 }
 
-func (r *Request) Method() string {
+func (r *requestImpl) Method() string {
 	return r.initializer["method"].(string)
 }
 
-func (r *Request) PostDataBuffer() ([]byte, error) {
+func (r *requestImpl) PostDataBuffer() ([]byte, error) {
 	if _, ok := r.initializer["postData"]; !ok {
 		return []byte{}, nil
 	}
 	return base64.StdEncoding.DecodeString(r.initializer["postData"].(string))
 }
 
-func (r *Request) PostData() (string, error) {
+func (r *requestImpl) PostData() (string, error) {
 	body, err := r.PostDataBuffer()
 	if err != nil {
 		return "", err
@@ -43,7 +43,7 @@ func (r *Request) PostData() (string, error) {
 	return string(body), err
 }
 
-func (r *Request) PostDataJSON(v interface{}) error {
+func (r *requestImpl) PostDataJSON(v interface{}) error {
 	body, err := r.PostDataBuffer()
 	if err != nil {
 		return err
@@ -51,11 +51,11 @@ func (r *Request) PostDataJSON(v interface{}) error {
 	return json.Unmarshal(body, v)
 }
 
-func (r *Request) Headers() map[string]string {
+func (r *requestImpl) Headers() map[string]string {
 	return parseHeaders(r.initializer["headers"].([]interface{}))
 }
 
-func (r *Request) Response() (*Response, error) {
+func (r *requestImpl) Response() (Response, error) {
 	channel, err := r.channel.Send("response")
 	if err != nil {
 		return nil, err
@@ -64,26 +64,26 @@ func (r *Request) Response() (*Response, error) {
 	if channelOwner == nil {
 		return nil, nil
 	}
-	return channelOwner.(*Response), nil
+	return channelOwner.(*responseImpl), nil
 }
 
-func (r *Request) Frame() *Frame {
-	return fromChannel(r.initializer["frame"]).(*Frame)
+func (r *requestImpl) Frame() Frame {
+	return fromChannel(r.initializer["frame"]).(*frameImpl)
 }
 
-func (r *Request) IsNavigationRequest() bool {
+func (r *requestImpl) IsNavigationRequest() bool {
 	return r.initializer["isNavigationRequest"].(bool)
 }
 
-func (r *Request) RedirectedFrom() *Request {
+func (r *requestImpl) RedirectedFrom() Request {
 	return r.redirectedFrom
 }
 
-func (r *Request) RedirectedTo() *Request {
+func (r *requestImpl) RedirectedTo() Request {
 	return r.redirectedTo
 }
 
-func (r *Request) Failure() *RequestFailure {
+func (r *requestImpl) Failure() *RequestFailure {
 	if r.failureText == "" {
 		return nil
 	}
@@ -92,15 +92,15 @@ func (r *Request) Failure() *RequestFailure {
 	}
 }
 
-func newRequest(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Request {
-	req := &Request{}
+func newRequest(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *requestImpl {
+	req := &requestImpl{}
 	req.createChannelOwner(req, parent, objectType, guid, initializer)
 	redirectedFrom := fromNullableChannel(initializer["redirectedFrom"])
 	if redirectedFrom != nil {
-		req.redirectedFrom = redirectedFrom.(*Request)
+		req.redirectedFrom = redirectedFrom.(*requestImpl)
 	}
 	if req.redirectedFrom != nil {
-		req.redirectedFrom.redirectedTo = req
+		req.redirectedFrom.(*requestImpl).redirectedTo = req
 	}
 	return req
 }

@@ -8,15 +8,15 @@ import (
 	"strings"
 )
 
-type Route struct {
-	ChannelOwner
+type routeImpl struct {
+	channelOwner
 }
 
-func (r *Route) Request() *Request {
-	return fromChannel(r.initializer["request"]).(*Request)
+func (r *routeImpl) Request() Request {
+	return fromChannel(r.initializer["request"]).(*requestImpl)
 }
 
-func (r *Route) Abort(errorCode *string) error {
+func (r *routeImpl) Abort(errorCode *string) error {
 	_, err := r.channel.Send("abort", map[string]*string{
 		"errorCode": errorCode,
 	})
@@ -31,7 +31,7 @@ type RouteFulfillOptions struct {
 	ContentType *string           `json:"contentType"`
 }
 
-func (r *Route) Fulfill(options RouteFulfillOptions) error {
+func (r *routeImpl) Fulfill(options RouteFulfillOptions) error {
 	length := 0
 	isBase64 := false
 	var fileContentType string
@@ -76,7 +76,7 @@ func (r *Route) Fulfill(options RouteFulfillOptions) error {
 	return err
 }
 
-func (r *Route) Continue(options ...RouteContinueOptions) error {
+func (r *routeImpl) Continue(options ...RouteContinueOptions) error {
 	overrides := make(map[string]interface{})
 	if len(options) == 1 {
 		option := options[0]
@@ -99,8 +99,8 @@ func (r *Route) Continue(options ...RouteContinueOptions) error {
 	return err
 }
 
-func newRoute(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Route {
-	bt := &Route{}
+func newRoute(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *routeImpl {
+	bt := &routeImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	return bt
 }

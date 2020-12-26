@@ -1,15 +1,15 @@
 package playwright
 
-type WebSocket struct {
-	ChannelOwner
+type webSocketImpl struct {
+	channelOwner
 }
 
-func (r *WebSocket) URL() string {
-	return r.initializer["url"].(string)
+func (w *webSocketImpl) URL() string {
+	return w.initializer["url"].(string)
 }
 
-func newWebsocket(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *WebSocket {
-	resp := &WebSocket{}
+func newWebsocket(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *webSocketImpl {
+	resp := &webSocketImpl{}
 	resp.createChannelOwner(resp, parent, objectType, guid, initializer)
 	return resp
 }

@@ -2,28 +2,28 @@ package playwright
 
 import "errors"
 
-type Download struct {
-	ChannelOwner
+type downloadImpl struct {
+	channelOwner
 }
 
-func (d *Download) String() string {
+func (d *downloadImpl) String() string {
 	return d.SuggestedFilename()
 }
 
-func (d *Download) URL() string {
+func (d *downloadImpl) URL() string {
 	return d.initializer["url"].(string)
 }
 
-func (d *Download) SuggestedFilename() string {
+func (d *downloadImpl) SuggestedFilename() string {
 	return d.initializer["suggestedFilename"].(string)
 }
 
-func (d *Download) Delete() error {
+func (d *downloadImpl) Delete() error {
 	_, err := d.channel.Send("delete")
 	return err
 }
 
-func (d *Download) Failure() error {
+func (d *downloadImpl) Failure() error {
 	path, err := d.channel.Send("failure")
 	if err != nil {
 		return err
@@ -34,20 +34,20 @@ func (d *Download) Failure() error {
 	return errors.New(path.(string))
 }
 
-func (d *Download) Path() (string, error) {
+func (d *downloadImpl) Path() (string, error) {
 	path, err := d.channel.Send("path")
 	return path.(string), err
 }
 
-func (d *Download) SaveAs(path string) error {
+func (d *downloadImpl) SaveAs(path string) error {
 	_, err := d.channel.Send("saveAs", map[string]interface{}{
 		"path": path,
 	})
 	return err
 }
 
-func newDownload(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Download {
-	bt := &Download{}
+func newDownload(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *downloadImpl {
+	bt := &downloadImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	return bt
 }

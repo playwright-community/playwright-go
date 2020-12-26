@@ -12,14 +12,14 @@ import (
 	"gopkg.in/square/go-jose.v2/json"
 )
 
-type Transport struct {
+type transport struct {
 	stdin    io.WriteCloser
 	stdout   io.ReadCloser
 	dispatch func(msg *Message)
 	rLock    sync.Mutex
 }
 
-func (t *Transport) Start() error {
+func (t *transport) Start() error {
 	reader := bufio.NewReader(t.stdout)
 	for {
 		lengthContent := make([]byte, 4)
@@ -45,7 +45,7 @@ func (t *Transport) Start() error {
 	}
 }
 
-func (t *Transport) Stop() error {
+func (t *transport) Stop() error {
 	return nil
 }
 
@@ -66,7 +66,7 @@ type Message struct {
 	} `json:"error"`
 }
 
-func (t *Transport) Send(message map[string]interface{}) error {
+func (t *transport) Send(message map[string]interface{}) error {
 	msg, err := json.Marshal(message)
 	if err != nil {
 		return fmt.Errorf("could not marshal json: %w", err)
@@ -91,8 +91,8 @@ func (t *Transport) Send(message map[string]interface{}) error {
 	return nil
 }
 
-func newTransport(stdin io.WriteCloser, stdout io.ReadCloser, dispatch func(msg *Message)) *Transport {
-	return &Transport{
+func newTransport(stdin io.WriteCloser, stdout io.ReadCloser, dispatch func(msg *Message)) *transport {
+	return &transport{
 		stdout:   stdout,
 		stdin:    stdin,
 		dispatch: dispatch,

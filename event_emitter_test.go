@@ -9,7 +9,7 @@ import (
 const testEventName = "foobar"
 
 func TestEventEmitterOn(t *testing.T) {
-	handler := &EventEmitter{}
+	handler := &eventEmitter{}
 	handler.initEventEmitter()
 	wasCalled := make(chan interface{}, 1)
 	require.Nil(t, handler.events[testEventName])
@@ -25,7 +25,7 @@ func TestEventEmitterOn(t *testing.T) {
 }
 
 func TestEventEmitterOnce(t *testing.T) {
-	handler := &EventEmitter{}
+	handler := &eventEmitter{}
 	handler.initEventEmitter()
 	wasCalled := make(chan interface{}, 1)
 	require.Nil(t, handler.events[testEventName])
@@ -41,7 +41,7 @@ func TestEventEmitterOnce(t *testing.T) {
 }
 
 func TestEventEmitterRemove(t *testing.T) {
-	handler := &EventEmitter{}
+	handler := &eventEmitter{}
 	handler.initEventEmitter()
 	wasCalled := make(chan interface{}, 1)
 	require.Nil(t, handler.events[testEventName])
@@ -61,14 +61,14 @@ func TestEventEmitterRemove(t *testing.T) {
 }
 
 func TestEventEmitterRemoveEmpty(t *testing.T) {
-	handler := &EventEmitter{}
+	handler := &eventEmitter{}
 	handler.initEventEmitter()
 	handler.RemoveListener(testEventName, func(...interface{}) {})
 	require.Equal(t, 0, handler.ListenerCount(testEventName))
 }
 
 func TestEventEmitterRemoveKeepExisting(t *testing.T) {
-	handler := &EventEmitter{}
+	handler := &eventEmitter{}
 	handler.initEventEmitter()
 	handler.On(testEventName, func(...interface{}) {})
 	handler.Once(testEventName, func(...interface{}) {})

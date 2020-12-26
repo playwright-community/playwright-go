@@ -10,7 +10,7 @@ import (
 )
 
 type (
-	routeHandler = func(*Route, *Request)
+	routeHandler = func(Route, Request)
 )
 
 func skipFieldSerialization(val reflect.Value) bool {
@@ -26,7 +26,7 @@ func transformStructValues(in interface{}) interface{} {
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
-	if _, ok := in.(*Channel); ok {
+	if _, ok := in.(*channel); ok {
 		return in
 	}
 	if v.Kind() == reflect.Map || v.Kind() == reflect.Struct {

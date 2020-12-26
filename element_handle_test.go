@@ -1,8 +1,9 @@
-package playwright
+package playwright_test
 
 import (
 	"testing"
 
+	"github.com/mxschmitt/playwright-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -31,7 +32,7 @@ func TestElementHandleOwnerFrame(t *testing.T) {
 	frame := helper.Page.Frames()[1]
 	elementHandle, err := frame.EvaluateHandle("document.body")
 	require.NoError(t, err)
-	ownerFrame, err := elementHandle.(*ElementHandle).OwnerFrame()
+	ownerFrame, err := elementHandle.(playwright.ElementHandle).OwnerFrame()
 	require.NoError(t, err)
 	require.Equal(t, ownerFrame, frame)
 	require.Equal(t, "iframe1", ownerFrame.Name())

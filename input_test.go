@@ -1,8 +1,9 @@
-package playwright
+package playwright_test
 
 import (
 	"testing"
 
+	"github.com/mxschmitt/playwright-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,7 +14,7 @@ func TestMouseMove(t *testing.T) {
 		_, err := helper.Page.Evaluate(`() => new Promise(requestAnimationFrame)`)
 		require.NoError(t, err)
 	}
-	require.NoError(t, helper.Page.Mouse.Move(100, 100))
+	require.NoError(t, helper.Page.Mouse().Move(100, 100))
 	_, err := helper.Page.Evaluate(`() => {
     window['result'] = [];
     document.addEventListener('mousemove', event => {
@@ -21,8 +22,8 @@ func TestMouseMove(t *testing.T) {
     });
   }`)
 	require.NoError(t, err)
-	require.NoError(t, helper.Page.Mouse.Move(200, 300, MouseMoveOptions{
-		Steps: Int(5),
+	require.NoError(t, helper.Page.Mouse().Move(200, 300, playwright.MouseMoveOptions{
+		Steps: playwright.Int(5),
 	}))
 	result, err := helper.Page.Evaluate("result")
 	require.NoError(t, err)
@@ -36,7 +37,7 @@ func TestMouseDown(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, helper.Page.SetContent(`<button onmousedown="window.clicked=true"/>`))
 	require.NoError(t, helper.Page.Hover("button"))
-	require.NoError(t, helper.Page.Mouse.Down())
+	require.NoError(t, helper.Page.Mouse().Down())
 	result, err := helper.Page.Evaluate("window.clicked")
 	require.NoError(t, err)
 	require.True(t, result.(bool))
@@ -49,8 +50,8 @@ func TestMouseUp(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, helper.Page.SetContent(`<button onmouseup="window.clicked=true"/>`))
 	require.NoError(t, helper.Page.Hover("button"))
-	require.NoError(t, helper.Page.Mouse.Down())
-	require.NoError(t, helper.Page.Mouse.Up())
+	require.NoError(t, helper.Page.Mouse().Down())
+	require.NoError(t, helper.Page.Mouse().Up())
 	result, err := helper.Page.Evaluate("window.clicked")
 	require.NoError(t, err)
 	require.True(t, result.(bool))
@@ -63,7 +64,7 @@ func TestMouseClick(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, helper.Page.SetContent(`<button onclick="window.clicked=true" style="width: 500px; height: 500px;"/>`))
 	require.NoError(t, helper.Page.Hover("button"))
-	require.NoError(t, helper.Page.Mouse.Click(100, 100))
+	require.NoError(t, helper.Page.Mouse().Click(100, 100))
 	result, err := helper.Page.Evaluate("window.clicked")
 	require.NoError(t, err)
 	require.True(t, result.(bool))
@@ -76,7 +77,7 @@ func TestMouseDblClick(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, helper.Page.SetContent(`<button ondblclick="window.clicked=true" style="width: 500px; height: 500px;"/>`))
 	require.NoError(t, helper.Page.Hover("button"))
-	require.NoError(t, helper.Page.Mouse.DblClick(100, 100))
+	require.NoError(t, helper.Page.Mouse().DblClick(100, 100))
 	result, err := helper.Page.Evaluate("window.clicked")
 	require.NoError(t, err)
 	require.True(t, result.(bool))
@@ -89,7 +90,7 @@ func TestKeyboardDown(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, helper.Page.SetContent(`<input onkeydown="window.clicked=true"/>`))
 	require.NoError(t, helper.Page.Click("input"))
-	require.NoError(t, helper.Page.Keyboard.Down("Enter"))
+	require.NoError(t, helper.Page.Keyboard().Down("Enter"))
 	result, err := helper.Page.Evaluate("window.clicked")
 	require.NoError(t, err)
 	require.True(t, result.(bool))
@@ -102,7 +103,7 @@ func TestKeyboardUp(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, helper.Page.SetContent(`<input onkeyup="window.clicked=true"/>`))
 	require.NoError(t, helper.Page.Click("input"))
-	require.NoError(t, helper.Page.Keyboard.Up("Enter"))
+	require.NoError(t, helper.Page.Keyboard().Up("Enter"))
 	result, err := helper.Page.Evaluate("window.clicked")
 	require.NoError(t, err)
 	require.True(t, result.(bool))
@@ -115,7 +116,7 @@ func TestKeyboardInsertText(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, helper.Page.SetContent(`<input oninput="window.clicked=true"/>`))
 	require.NoError(t, helper.Page.Click("input"))
-	require.NoError(t, helper.Page.Keyboard.InsertText("abc123"))
+	require.NoError(t, helper.Page.Keyboard().InsertText("abc123"))
 	result, err := helper.Page.Evaluate("window.clicked")
 	require.NoError(t, err)
 	require.True(t, result.(bool))
@@ -128,7 +129,7 @@ func TestKeyboardType(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, helper.Page.SetContent(`<input oninput="window.clicked=true"/>`))
 	require.NoError(t, helper.Page.Click("input"))
-	require.NoError(t, helper.Page.Keyboard.Type("abc123"))
+	require.NoError(t, helper.Page.Keyboard().Type("abc123"))
 	result, err := helper.Page.Evaluate("window.clicked")
 	require.NoError(t, err)
 	require.True(t, result.(bool))
@@ -141,7 +142,7 @@ func TestKeyboardInsertPress(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, helper.Page.SetContent(`<input onkeydown="window.clicked=true"/>`))
 	require.NoError(t, helper.Page.Click("input"))
-	require.NoError(t, helper.Page.Keyboard.Press("A"))
+	require.NoError(t, helper.Page.Keyboard().Press("A"))
 	result, err := helper.Page.Evaluate("window.clicked")
 	require.NoError(t, err)
 	require.True(t, result.(bool))

@@ -8,12 +8,12 @@ import (
 	"time"
 )
 
-type JSHandle struct {
-	ChannelOwner
+type jsHandleImpl struct {
+	channelOwner
 	preview string
 }
 
-func (f *JSHandle) Evaluate(expression string, options ...interface{}) (interface{}, error) {
+func (j *jsHandleImpl) Evaluate(expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -25,7 +25,7 @@ func (f *JSHandle) Evaluate(expression string, options ...interface{}) (interfac
 		arg = options[0]
 		forceExpression = options[1].(bool)
 	}
-	result, err := f.channel.Send("evaluateExpression", map[string]interface{}{
+	result, err := j.channel.Send("evaluateExpression", map[string]interface{}{
 		"expression": expression,
 		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
@@ -36,7 +36,7 @@ func (f *JSHandle) Evaluate(expression string, options ...interface{}) (interfac
 	return parseResult(result), nil
 }
 
-func (f *JSHandle) EvaluateHandle(expression string, options ...interface{}) (interface{}, error) {
+func (j *jsHandleImpl) EvaluateHandle(expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -48,7 +48,7 @@ func (f *JSHandle) EvaluateHandle(expression string, options ...interface{}) (in
 		arg = options[0]
 		forceExpression = options[1].(bool)
 	}
-	result, err := f.channel.Send("evaluateExpressionHandle", map[string]interface{}{
+	result, err := j.channel.Send("evaluateExpressionHandle", map[string]interface{}{
 		"expression": expression,
 		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
@@ -60,46 +60,46 @@ func (f *JSHandle) EvaluateHandle(expression string, options ...interface{}) (in
 	if channelOwner == nil {
 		return nil, nil
 	}
-	return channelOwner.(*JSHandle), nil
+	return channelOwner.(*jsHandleImpl), nil
 }
 
-func (j *JSHandle) GetProperty(name string) (*JSHandle, error) {
+func (j *jsHandleImpl) GetProperty(name string) (JSHandle, error) {
 	channel, err := j.channel.Send("getProperty", map[string]interface{}{
 		"name": name,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(channel).(*JSHandle), nil
+	return fromChannel(channel).(*jsHandleImpl), nil
 }
 
-func (j *JSHandle) GetProperties() (map[string]*JSHandle, error) {
+func (j *jsHandleImpl) GetProperties() (map[string]JSHandle, error) {
 	properties, err := j.channel.Send("getPropertyList")
 	if err != nil {
 		return nil, err
 	}
-	propertiesMap := make(map[string]*JSHandle)
+	propertiesMap := make(map[string]JSHandle)
 	for _, property := range properties.([]interface{}) {
 		item := property.(map[string]interface{})
-		propertiesMap[item["name"].(string)] = fromChannel(item["value"]).(*JSHandle)
+		propertiesMap[item["name"].(string)] = fromChannel(item["value"]).(*jsHandleImpl)
 	}
 	return propertiesMap, nil
 }
 
-func (j *JSHandle) AsElement() *ElementHandle {
+func (j *jsHandleImpl) AsElement() ElementHandle {
 	return nil
 }
 
-func (j *JSHandle) Dispose() error {
+func (j *jsHandleImpl) Dispose() error {
 	_, err := j.channel.Send("dispose")
 	return err
 }
 
-func (j *JSHandle) String() string {
+func (j *jsHandleImpl) String() string {
 	return j.preview
 }
 
-func (j *JSHandle) JSONValue() (interface{}, error) {
+func (j *jsHandleImpl) JSONValue() (interface{}, error) {
 	v, err := j.channel.Send("jsonValue")
 	if err != nil {
 		return nil, err
@@ -161,8 +161,8 @@ func parseValue(result interface{}) interface{} {
 	panic(fmt.Errorf("Unexpected value: %v", vMap))
 }
 
-func serializeValue(value interface{}, handles *[]*Channel, depth int) interface{} {
-	if handle, ok := value.(*ElementHandle); ok {
+func serializeValue(value interface{}, handles *[]*channel, depth int) interface{} {
+	if handle, ok := value.(*elementHandleImpl); ok {
 		h := len(*handles)
 		*handles = append(*handles, handle.channel)
 		return map[string]interface{}{
@@ -249,7 +249,7 @@ func parseResult(result interface{}) interface{} {
 }
 
 func serializeArgument(arg interface{}) interface{} {
-	handles := []*Channel{}
+	handles := []*channel{}
 	value := serializeValue(arg, &handles, 0)
 	return map[string]interface{}{
 		"value":   value,
@@ -257,8 +257,8 @@ func serializeArgument(arg interface{}) interface{} {
 	}
 }
 
-func newJSHandle(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *JSHandle {
-	bt := &JSHandle{
+func newJSHandle(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *jsHandleImpl {
+	bt := &jsHandleImpl{
 		preview: initializer["preview"].(string),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)

@@ -1,8 +1,9 @@
-package playwright
+package playwright_test
 
 import (
 	"testing"
 
+	"github.com/mxschmitt/playwright-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -58,7 +59,7 @@ func TestFrameSetInputFiles(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, helper.Page.SetContent("<input type=file>"))
 
-	require.NoError(t, helper.Page.SetInputFiles("input", []InputFile{
+	require.NoError(t, helper.Page.SetInputFiles("input", []playwright.InputFile{
 		{
 			Name:     "file-to-upload.txt",
 			MimeType: "text/plain",

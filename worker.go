@@ -1,15 +1,15 @@
 package playwright
 
-type Worker struct {
-	ChannelOwner
-	page *Page
+type workerImpl struct {
+	channelOwner
+	page *pageImpl
 }
 
-func (w *Worker) URL() string {
+func (w *workerImpl) URL() string {
 	return w.initializer["url"].(string)
 }
 
-func (w *Worker) Evaluate(expression string, options ...interface{}) (interface{}, error) {
+func (w *workerImpl) Evaluate(expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -32,7 +32,7 @@ func (w *Worker) Evaluate(expression string, options ...interface{}) (interface{
 	return parseResult(result), nil
 }
 
-func (w *Worker) EvaluateHandle(expression string, options ...interface{}) (*JSHandle, error) {
+func (w *workerImpl) EvaluateHandle(expression string, options ...interface{}) (JSHandle, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -52,17 +52,17 @@ func (w *Worker) EvaluateHandle(expression string, options ...interface{}) (*JSH
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(result).(*JSHandle), nil
+	return fromChannel(result).(*jsHandleImpl), nil
 }
 
-func newWorker(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *Worker {
-	bt := &Worker{}
+func newWorker(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *workerImpl {
+	bt := &workerImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.channel.On("close", func() {
-		workers := make([]*Worker, 0)
+		workers := make([]Worker, 0)
 		if bt.page != nil {
 			for i := 0; i < len(bt.page.workers); i++ {
-				if bt.page.workers[i] != bt {
+				if bt.page.workers[i].(*workerImpl) != bt {
 					workers = append(workers, bt.page.workers[i])
 				}
 			}

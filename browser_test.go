@@ -1,15 +1,16 @@
-package playwright
+package playwright_test
 
 import (
 	"testing"
 
+	"github.com/mxschmitt/playwright-go"
 	"github.com/stretchr/testify/require"
 )
 
 func TestBrowserIsConnected(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	require.True(t, helper.Browser.isConnected)
+	require.True(t, helper.Browser.IsConnected())
 }
 
 func TestBrowserVersion(t *testing.T) {
@@ -36,7 +37,7 @@ func TestBrowserNewPage(t *testing.T) {
 }
 
 func TestBrowserClose(t *testing.T) {
-	pw, err := Run()
+	pw, err := playwright.Run()
 	require.NoError(t, err)
 	browser, err := pw.Chromium.Launch()
 	require.NoError(t, err)

@@ -22,7 +22,7 @@ func assertErrorToNilf(message string, err error) {
 	}
 }
 
-func worker(id int, jobs chan job, results chan<- bool, browser *playwright.Browser) {
+func worker(id int, jobs chan job, results chan<- bool, browser playwright.Browser) {
 	for jobPayload := range jobs {
 		if jobPayload.Try > 3 {
 			log.Printf("Stopped with domain %s", jobPayload.URL)

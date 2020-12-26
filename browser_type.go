@@ -4,27 +4,27 @@ import (
 	"fmt"
 )
 
-type BrowserType struct {
-	ChannelOwner
+type browserTypeImpl struct {
+	channelOwner
 }
 
-func (b *BrowserType) Name() string {
+func (b *browserTypeImpl) Name() string {
 	return b.initializer["name"].(string)
 }
 
-func (b *BrowserType) ExecutablePath() string {
+func (b *browserTypeImpl) ExecutablePath() string {
 	return b.initializer["executablePath"].(string)
 }
 
-func (b *BrowserType) Launch(options ...BrowserTypeLaunchOptions) (*Browser, error) {
+func (b *browserTypeImpl) Launch(options ...BrowserTypeLaunchOptions) (Browser, error) {
 	channel, err := b.channel.Send("launch", options)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
-	return fromChannel(channel).(*Browser), nil
+	return fromChannel(channel).(*browserImpl), nil
 }
 
-func (b *BrowserType) LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (*BrowserContext, error) {
+func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (BrowserContext, error) {
 	overrides := map[string]interface{}{
 		"userDataDir": userDataDir,
 	}
@@ -35,11 +35,11 @@ func (b *BrowserType) LaunchPersistentContext(userDataDir string, options ...Bro
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
-	return fromChannel(channel).(*BrowserContext), nil
+	return fromChannel(channel).(*browserContextImpl), nil
 }
 
-func newBrowserType(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *BrowserType {
-	bt := &BrowserType{}
+func newBrowserType(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserTypeImpl {
+	bt := &browserTypeImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	return bt
 }

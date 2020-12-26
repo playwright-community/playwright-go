@@ -7,44 +7,44 @@ import (
 	"sync"
 )
 
-type BrowserContext struct {
-	ChannelOwner
+type browserContextImpl struct {
+	channelOwner
 	timeoutSettings *timeoutSettings
 	pagesMutex      sync.Mutex
-	pages           []*Page
-	ownedPage       *Page
-	browser         *Browser
+	pages           []Page
+	ownedPage       Page
+	browser         *browserImpl
 }
 
-func (b *BrowserContext) SetDefaultNavigationTimeout(timeout int) {
+func (b *browserContextImpl) SetDefaultNavigationTimeout(timeout int) {
 	b.timeoutSettings.SetNavigationTimeout(timeout)
 	b.channel.SendNoReply("setDefaultNavigationTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
 	})
 }
 
-func (b *BrowserContext) SetDefaultTimeout(timeout int) {
+func (b *browserContextImpl) SetDefaultTimeout(timeout int) {
 	b.timeoutSettings.SetTimeout(timeout)
 	b.channel.SendNoReply("setDefaultTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
 	})
 }
 
-func (b *BrowserContext) Pages() []*Page {
+func (b *browserContextImpl) Pages() []Page {
 	b.pagesMutex.Lock()
 	defer b.pagesMutex.Unlock()
 	return b.pages
 }
 
-func (b *BrowserContext) NewPage(options ...BrowserNewPageOptions) (*Page, error) {
+func (b *browserContextImpl) NewPage(options ...BrowserNewPageOptions) (Page, error) {
 	channel, err := b.channel.Send("newPage", options)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
-	return fromChannel(channel).(*Page), nil
+	return fromChannel(channel).(*pageImpl), nil
 }
 
-func (b *BrowserContext) Cookies(urls ...string) ([]*NetworkCookie, error) {
+func (b *browserContextImpl) Cookies(urls ...string) ([]*NetworkCookie, error) {
 	result, err := b.channel.Send("cookies", map[string]interface{}{
 		"urls": urls,
 	})
@@ -59,26 +59,26 @@ func (b *BrowserContext) Cookies(urls ...string) ([]*NetworkCookie, error) {
 	return cookies, nil
 }
 
-func (b *BrowserContext) AddCookies(cookies ...SetNetworkCookieParam) error {
+func (b *browserContextImpl) AddCookies(cookies ...SetNetworkCookieParam) error {
 	_, err := b.channel.Send("addCookies", map[string]interface{}{
 		"cookies": cookies,
 	})
 	return err
 }
 
-func (b *BrowserContext) ClearCookies() error {
+func (b *browserContextImpl) ClearCookies() error {
 	_, err := b.channel.Send("clearCookies")
 	return err
 }
 
-func (b *BrowserContext) GrantPermissions(permissions []string, options ...BrowserContextGrantPermissionsOptions) error {
+func (b *browserContextImpl) GrantPermissions(permissions []string, options ...BrowserContextGrantPermissionsOptions) error {
 	_, err := b.channel.Send("grantPermissions", map[string]interface{}{
 		"permissions": permissions,
 	}, options)
 	return err
 }
 
-func (b *BrowserContext) ClearPermissions() error {
+func (b *browserContextImpl) ClearPermissions() error {
 	_, err := b.channel.Send("clearPermissions")
 	return err
 }
@@ -89,21 +89,21 @@ type SetGeolocationOptions struct {
 	Accuracy  *int `json:"accuracy"`
 }
 
-func (b *BrowserContext) SetGeolocation(gelocation *SetGeolocationOptions) error {
+func (b *browserContextImpl) SetGeolocation(gelocation *SetGeolocationOptions) error {
 	_, err := b.channel.Send("setGeolocation", map[string]interface{}{
 		"geolocation": gelocation,
 	})
 	return err
 }
 
-func (b *BrowserContext) SetExtraHTTPHeaders(headers map[string]string) error {
+func (b *browserContextImpl) SetExtraHTTPHeaders(headers map[string]string) error {
 	_, err := b.channel.Send("setExtraHTTPHeaders", map[string]interface{}{
 		"headers": serializeHeaders(headers),
 	})
 	return err
 }
 
-func (b *BrowserContext) SetOffline(offline bool) error {
+func (b *browserContextImpl) SetOffline(offline bool) error {
 	_, err := b.channel.Send("setOffline", map[string]interface{}{
 		"offline": offline,
 	})
@@ -115,7 +115,7 @@ type BrowserContextAddInitScriptOptions struct {
 	Script *string
 }
 
-func (b *BrowserContext) AddInitScript(options BrowserContextAddInitScriptOptions) error {
+func (b *browserContextImpl) AddInitScript(options BrowserContextAddInitScriptOptions) error {
 	var source string
 	if options.Script != nil {
 		source = *options.Script
@@ -133,7 +133,7 @@ func (b *BrowserContext) AddInitScript(options BrowserContextAddInitScriptOption
 	return err
 }
 
-func (b *BrowserContext) WaitForEvent(event string, predicate ...interface{}) interface{} {
+func (b *browserContextImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
 	evChan := make(chan interface{}, 1)
 	b.Once(event, func(ev ...interface{}) {
 		if len(predicate) == 0 {
@@ -148,22 +148,22 @@ func (b *BrowserContext) WaitForEvent(event string, predicate ...interface{}) in
 	return <-evChan
 }
 
-func (b *BrowserContext) ExpectEvent(event string, cb func() error) (interface{}, error) {
+func (b *browserContextImpl) ExpectEvent(event string, cb func() error) (interface{}, error) {
 	return newExpectWrapper(b.WaitForEvent, []interface{}{event}, cb)
 }
 
-func (b *BrowserContext) Close() error {
+func (b *browserContextImpl) Close() error {
 	_, err := b.channel.Send("close")
 	return err
 }
 
-func newBrowserContext(parent *ChannelOwner, objectType string, guid string, initializer map[string]interface{}) *BrowserContext {
-	bt := &BrowserContext{
+func newBrowserContext(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserContextImpl {
+	bt := &browserContextImpl{
 		timeoutSettings: newTimeoutSettings(nil),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.channel.On("page", func(payload map[string]interface{}) {
-		page := fromChannel(payload["page"]).(*Page)
+		page := fromChannel(payload["page"]).(*pageImpl)
 		page.browserContext = bt
 		bt.pagesMutex.Lock()
 		bt.pages = append(bt.pages, page)
@@ -172,7 +172,7 @@ func newBrowserContext(parent *ChannelOwner, objectType string, guid string, ini
 	})
 	bt.channel.On("close", func() {
 		if bt.browser != nil {
-			contexts := make([]*BrowserContext, 0)
+			contexts := make([]BrowserContext, 0)
 			bt.browser.contextsMu.Lock()
 			for _, context := range bt.browser.contexts {
 				if context != bt {
