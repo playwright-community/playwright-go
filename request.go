@@ -11,8 +11,8 @@ type RequestFailure struct {
 
 type Request struct {
 	ChannelOwner
-	redirectedFrom *Request
-	redirectedTo   *Request
+	redirectedFrom RequestI
+	redirectedTo   RequestI
 	failureText    string
 }
 
@@ -55,7 +55,7 @@ func (r *Request) Headers() map[string]string {
 	return parseHeaders(r.initializer["headers"].([]interface{}))
 }
 
-func (r *Request) Response() (*Response, error) {
+func (r *Request) Response() (ResponseI, error) {
 	channel, err := r.channel.Send("response")
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func (r *Request) Response() (*Response, error) {
 	return channelOwner.(*Response), nil
 }
 
-func (r *Request) Frame() *Frame {
+func (r *Request) Frame() FrameI {
 	return fromChannel(r.initializer["frame"]).(*Frame)
 }
 
@@ -75,11 +75,11 @@ func (r *Request) IsNavigationRequest() bool {
 	return r.initializer["isNavigationRequest"].(bool)
 }
 
-func (r *Request) RedirectedFrom() *Request {
+func (r *Request) RedirectedFrom() RequestI {
 	return r.redirectedFrom
 }
 
-func (r *Request) RedirectedTo() *Request {
+func (r *Request) RedirectedTo() RequestI {
 	return r.redirectedTo
 }
 
@@ -100,7 +100,7 @@ func newRequest(parent *ChannelOwner, objectType string, guid string, initialize
 		req.redirectedFrom = redirectedFrom.(*Request)
 	}
 	if req.redirectedFrom != nil {
-		req.redirectedFrom.redirectedTo = req
+		req.redirectedFrom.(*Request).redirectedTo = req
 	}
 	return req
 }

@@ -29,7 +29,7 @@ func TestRouteContinue(t *testing.T) {
 		require.Equal(t, "", postData)
 		require.True(t, request.IsNavigationRequest())
 		require.Equal(t, "document", request.ResourceType())
-		require.Equal(t, request.Frame(), helper.Page.mainFrame)
+		require.Equal(t, request.Frame(), helper.Page.MainFrame())
 		require.Equal(t, "about:blank", request.Frame().URL())
 		require.NoError(t, route.Continue())
 		intercepted <- true
@@ -189,7 +189,7 @@ func TestRequestFinished(t *testing.T) {
 	eventsStorage.Append("requestfinished")
 	require.Equal(t, []interface{}{"request", "response", "requestfinished"}, eventsStorage.Get())
 	require.Equal(t, response.Request(), request)
-	require.Equal(t, response.Frame(), helper.Page.mainFrame)
+	require.Equal(t, response.Frame(), helper.Page.MainFrame())
 }
 
 func TestResponsePostData(t *testing.T) {

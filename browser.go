@@ -8,7 +8,7 @@ import (
 type Browser struct {
 	ChannelOwner
 	isConnected bool
-	contexts    []*BrowserContext
+	contexts    []BrowserContextI
 	contextsMu  sync.Mutex
 }
 
@@ -18,7 +18,7 @@ func (b *Browser) IsConnected() bool {
 	return b.isConnected
 }
 
-func (b *Browser) NewContext(options ...BrowserNewContextOptions) (*BrowserContext, error) {
+func (b *Browser) NewContext(options ...BrowserNewContextOptions) (BrowserContextI, error) {
 	channel, err := b.channel.Send("newContext", options)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
@@ -31,7 +31,7 @@ func (b *Browser) NewContext(options ...BrowserNewContextOptions) (*BrowserConte
 	return context, nil
 }
 
-func (b *Browser) NewPage(options ...BrowserNewContextOptions) (*Page, error) {
+func (b *Browser) NewPage(options ...BrowserNewContextOptions) (PageI, error) {
 	context, err := b.NewContext(options...)
 	if err != nil {
 		return nil, err
@@ -40,12 +40,12 @@ func (b *Browser) NewPage(options ...BrowserNewContextOptions) (*Page, error) {
 	if err != nil {
 		return nil, err
 	}
-	page.ownedContext = context
-	context.ownedPage = page
+	page.(*Page).ownedContext = context
+	context.(*BrowserContext).ownedPage = page
 	return page, nil
 }
 
-func (b *Browser) Contexts() []*BrowserContext {
+func (b *Browser) Contexts() []BrowserContextI {
 	b.contextsMu.Lock()
 	defer b.contextsMu.Unlock()
 	return b.contexts

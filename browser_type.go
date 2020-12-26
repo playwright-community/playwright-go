@@ -16,7 +16,7 @@ func (b *BrowserType) ExecutablePath() string {
 	return b.initializer["executablePath"].(string)
 }
 
-func (b *BrowserType) Launch(options ...BrowserTypeLaunchOptions) (*Browser, error) {
+func (b *BrowserType) Launch(options ...BrowserTypeLaunchOptions) (BrowserI, error) {
 	channel, err := b.channel.Send("launch", options)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
@@ -24,7 +24,7 @@ func (b *BrowserType) Launch(options ...BrowserTypeLaunchOptions) (*Browser, err
 	return fromChannel(channel).(*Browser), nil
 }
 
-func (b *BrowserType) LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (*BrowserContext, error) {
+func (b *BrowserType) LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (BrowserContextI, error) {
 	overrides := map[string]interface{}{
 		"userDataDir": userDataDir,
 	}

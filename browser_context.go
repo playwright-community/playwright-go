@@ -11,8 +11,8 @@ type BrowserContext struct {
 	ChannelOwner
 	timeoutSettings *timeoutSettings
 	pagesMutex      sync.Mutex
-	pages           []*Page
-	ownedPage       *Page
+	pages           []PageI
+	ownedPage       PageI
 	browser         *Browser
 }
 
@@ -30,13 +30,13 @@ func (b *BrowserContext) SetDefaultTimeout(timeout int) {
 	})
 }
 
-func (b *BrowserContext) Pages() []*Page {
+func (b *BrowserContext) Pages() []PageI {
 	b.pagesMutex.Lock()
 	defer b.pagesMutex.Unlock()
 	return b.pages
 }
 
-func (b *BrowserContext) NewPage(options ...BrowserNewPageOptions) (*Page, error) {
+func (b *BrowserContext) NewPage(options ...BrowserNewPageOptions) (PageI, error) {
 	channel, err := b.channel.Send("newPage", options)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
@@ -172,7 +172,7 @@ func newBrowserContext(parent *ChannelOwner, objectType string, guid string, ini
 	})
 	bt.channel.On("close", func() {
 		if bt.browser != nil {
-			contexts := make([]*BrowserContext, 0)
+			contexts := make([]BrowserContextI, 0)
 			bt.browser.contextsMu.Lock()
 			for _, context := range bt.browser.contexts {
 				if context != bt {

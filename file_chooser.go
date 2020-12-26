@@ -1,16 +1,16 @@
 package playwright
 
 type FileChooser struct {
-	page          *Page
-	elementHandle *ElementHandle
+	page          PageI
+	elementHandle ElementHandleI
 	isMultiple    bool
 }
 
-func (f *FileChooser) Page() *Page {
+func (f *FileChooser) Page() PageI {
 	return f.page
 }
 
-func (f *FileChooser) Element() *ElementHandle {
+func (f *FileChooser) Element() ElementHandleI {
 	return f.elementHandle
 }
 
@@ -28,7 +28,7 @@ func (e *FileChooser) SetFiles(files []InputFile, options ...ElementHandleSetInp
 	return e.elementHandle.SetInputFiles(files, options...)
 }
 
-func newFileChooser(page *Page, elementHandle *ElementHandle, isMultiple bool) *FileChooser {
+func newFileChooser(page PageI, elementHandle ElementHandleI, isMultiple bool) *FileChooser {
 	return &FileChooser{
 		page:          page,
 		elementHandle: elementHandle,

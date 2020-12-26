@@ -111,7 +111,7 @@ func TestBrowserContextAddCookies(t *testing.T) {
 		},
 	}, cookies)
 
-	require.NoError(t, helper.Page.browserContext.ClearCookies())
+	require.NoError(t, helper.Page.Context().ClearCookies())
 	_, err = helper.Page.Reload()
 	require.NoError(t, err)
 	cookie, err = helper.Page.Evaluate("() => document.cookie")

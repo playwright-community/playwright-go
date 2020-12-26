@@ -32,7 +32,7 @@ func (w *Worker) Evaluate(expression string, options ...interface{}) (interface{
 	return parseResult(result), nil
 }
 
-func (w *Worker) EvaluateHandle(expression string, options ...interface{}) (*JSHandle, error) {
+func (w *Worker) EvaluateHandle(expression string, options ...interface{}) (JSHandleI, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -59,10 +59,10 @@ func newWorker(parent *ChannelOwner, objectType string, guid string, initializer
 	bt := &Worker{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.channel.On("close", func() {
-		workers := make([]*Worker, 0)
+		workers := make([]WorkerI, 0)
 		if bt.page != nil {
 			for i := 0; i < len(bt.page.workers); i++ {
-				if bt.page.workers[i] != bt {
+				if bt.page.workers[i].(*Worker) != bt {
 					workers = append(workers, bt.page.workers[i])
 				}
 			}

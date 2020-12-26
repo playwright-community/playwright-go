@@ -12,7 +12,7 @@ type Route struct {
 	ChannelOwner
 }
 
-func (r *Route) Request() *Request {
+func (r *Route) Request() RequestI {
 	return fromChannel(r.initializer["request"]).(*Request)
 }
 

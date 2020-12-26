@@ -63,7 +63,7 @@ func (f *JSHandle) EvaluateHandle(expression string, options ...interface{}) (in
 	return channelOwner.(*JSHandle), nil
 }
 
-func (j *JSHandle) GetProperty(name string) (*JSHandle, error) {
+func (j *JSHandle) GetProperty(name string) (JSHandleI, error) {
 	channel, err := j.channel.Send("getProperty", map[string]interface{}{
 		"name": name,
 	})
@@ -73,12 +73,12 @@ func (j *JSHandle) GetProperty(name string) (*JSHandle, error) {
 	return fromChannel(channel).(*JSHandle), nil
 }
 
-func (j *JSHandle) GetProperties() (map[string]*JSHandle, error) {
+func (j *JSHandle) GetProperties() (map[string]JSHandleI, error) {
 	properties, err := j.channel.Send("getPropertyList")
 	if err != nil {
 		return nil, err
 	}
-	propertiesMap := make(map[string]*JSHandle)
+	propertiesMap := make(map[string]JSHandleI)
 	for _, property := range properties.([]interface{}) {
 		item := property.(map[string]interface{})
 		propertiesMap[item["name"].(string)] = fromChannel(item["value"]).(*JSHandle)
@@ -86,7 +86,7 @@ func (j *JSHandle) GetProperties() (map[string]*JSHandle, error) {
 	return propertiesMap, nil
 }
 
-func (j *JSHandle) AsElement() *ElementHandle {
+func (j *JSHandle) AsElement() ElementHandleI {
 	return nil
 }
 

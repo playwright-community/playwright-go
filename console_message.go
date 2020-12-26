@@ -22,9 +22,9 @@ func (c *ConsoleMessage) String() string {
 	return c.Text()
 }
 
-func (c *ConsoleMessage) Args() []*JSHandle {
+func (c *ConsoleMessage) Args() []JSHandleI {
 	args := c.initializer["args"].([]interface{})
-	out := []*JSHandle{}
+	out := []JSHandleI{}
 	for idx := range args {
 		out = append(out, fromChannel(args[idx]).(*JSHandle))
 	}

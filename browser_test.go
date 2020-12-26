@@ -9,7 +9,7 @@ import (
 func TestBrowserIsConnected(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
-	require.True(t, helper.Browser.isConnected)
+	require.True(t, helper.Browser.IsConnected())
 }
 
 func TestBrowserVersion(t *testing.T) {

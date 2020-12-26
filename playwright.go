@@ -14,9 +14,9 @@ type DeviceDescriptor struct {
 
 type Playwright struct {
 	ChannelOwner
-	Chromium *BrowserType
-	Firefox  *BrowserType
-	WebKit   *BrowserType
+	Chromium BrowserTypeI
+	Firefox  BrowserTypeI
+	WebKit   BrowserTypeI
 	Devices  map[string]*DeviceDescriptor
 }
 

@@ -12,11 +12,11 @@ type Frame struct {
 	ChannelOwner
 	sync.RWMutex
 	detached    bool
-	page        *Page
+	page        PageI
 	name        string
 	url         string
-	parentFrame *Frame
-	childFrames []*Frame
+	parentFrame FrameI
+	childFrames []FrameI
 	loadStates  *safeStringSet
 }
 
@@ -31,14 +31,14 @@ func newFrame(parent *ChannelOwner, objectType string, guid string, initializer 
 		name:        initializer["name"].(string),
 		url:         initializer["url"].(string),
 		loadStates:  loadStates,
-		childFrames: make([]*Frame, 0),
+		childFrames: make([]FrameI, 0),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 
 	channelOwner := fromNullableChannel(initializer["parentFrame"])
 	if channelOwner != nil {
 		bt.parentFrame = channelOwner.(*Frame)
-		bt.parentFrame.childFrames = append(bt.parentFrame.childFrames, bt)
+		bt.parentFrame.(*Frame).childFrames = append(bt.parentFrame.(*Frame).childFrames, bt)
 	}
 
 	bt.channel.On("navigated", bt.onFrameNavigated)
@@ -79,7 +79,7 @@ func (f *Frame) Content() (string, error) {
 	return content.(string), err
 }
 
-func (f *Frame) Goto(url string, options ...PageGotoOptions) (*Response, error) {
+func (f *Frame) Goto(url string, options ...PageGotoOptions) (ResponseI, error) {
 	channel, err := f.channel.Send("goto", map[string]interface{}{
 		"url": url,
 	}, options)
@@ -93,7 +93,7 @@ func (f *Frame) Goto(url string, options ...PageGotoOptions) (*Response, error) 
 	return channelOwner.(*Response), nil
 }
 
-func (f *Frame) AddScriptTag(options PageAddScriptTagOptions) (*ElementHandle, error) {
+func (f *Frame) AddScriptTag(options PageAddScriptTagOptions) (ElementHandleI, error) {
 	if options.Path != nil {
 		file, err := ioutil.ReadFile(*options.Path)
 		if err != nil {
@@ -109,7 +109,7 @@ func (f *Frame) AddScriptTag(options PageAddScriptTagOptions) (*ElementHandle, e
 	return fromChannel(channel).(*ElementHandle), nil
 }
 
-func (f *Frame) AddStyleTag(options PageAddStyleTagOptions) (*ElementHandle, error) {
+func (f *Frame) AddStyleTag(options PageAddStyleTagOptions) (ElementHandleI, error) {
 	if options.Path != nil {
 		file, err := ioutil.ReadFile(*options.Path)
 		if err != nil {
@@ -125,7 +125,7 @@ func (f *Frame) AddStyleTag(options PageAddStyleTagOptions) (*ElementHandle, err
 	return fromChannel(channel).(*ElementHandle), nil
 }
 
-func (f *Frame) Page() *Page {
+func (f *Frame) Page() PageI {
 	return f.page
 }
 
@@ -166,7 +166,7 @@ func (f *Frame) WaitForEvent(event string, predicate ...interface{}) interface{}
 	return <-f.WaitForEventCh(event, predicate...)
 }
 
-func (f *Frame) WaitForNavigation(options ...PageWaitForNavigationOptions) (*Response, error) {
+func (f *Frame) WaitForNavigation(options ...PageWaitForNavigationOptions) (ResponseI, error) {
 	option := PageWaitForNavigationOptions{}
 	if len(options) == 1 {
 		option = options[0]
@@ -175,7 +175,7 @@ func (f *Frame) WaitForNavigation(options ...PageWaitForNavigationOptions) (*Res
 		option.WaitUntil = String("load")
 	}
 	if option.Timeout == nil {
-		option.Timeout = Int(f.page.timeoutSettings.NavigationTimeout())
+		option.Timeout = Int(f.page.(*Page).timeoutSettings.NavigationTimeout())
 	}
 	deadline := time.After(time.Duration(*option.Timeout) * time.Millisecond)
 	var matcher *urlMatcher
@@ -213,7 +213,7 @@ func (f *Frame) onFrameNavigated(ev map[string]interface{}) {
 	}
 }
 
-func (f *Frame) QuerySelector(selector string) (*ElementHandle, error) {
+func (f *Frame) QuerySelector(selector string) (ElementHandleI, error) {
 	channel, err := f.channel.Send("querySelector", map[string]interface{}{
 		"selector": selector,
 	})
@@ -226,14 +226,14 @@ func (f *Frame) QuerySelector(selector string) (*ElementHandle, error) {
 	return fromChannel(channel).(*ElementHandle), nil
 }
 
-func (f *Frame) QuerySelectorAll(selector string) ([]*ElementHandle, error) {
+func (f *Frame) QuerySelectorAll(selector string) ([]ElementHandleI, error) {
 	channels, err := f.channel.Send("querySelectorAll", map[string]interface{}{
 		"selector": selector,
 	})
 	if err != nil {
 		return nil, err
 	}
-	elements := make([]*ElementHandle, 0)
+	elements := make([]ElementHandleI, 0)
 	for _, channel := range channels.([]interface{}) {
 		elements = append(elements, fromChannel(channel).(*ElementHandle))
 	}
@@ -345,7 +345,7 @@ func (f *Frame) Click(selector string, options ...PageClickOptions) error {
 	return err
 }
 
-func (f *Frame) WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (*ElementHandle, error) {
+func (f *Frame) WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandleI, error) {
 	channel, err := f.channel.Send("waitForSelector", map[string]interface{}{
 		"selector": selector,
 	}, options)
@@ -452,7 +452,7 @@ func (f *Frame) WaitForTimeout(timeout int) {
 	time.Sleep(time.Duration(timeout) * time.Millisecond)
 }
 
-func (f *Frame) WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (*JSHandle, error) {
+func (f *Frame) WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (JSHandleI, error) {
 	var option FrameWaitForFunctionOptions
 	if len(options) == 1 {
 		option = options[0]
@@ -483,7 +483,7 @@ func (f *Frame) Title() (string, error) {
 	return title.(string), err
 }
 
-func (f *Frame) ChildFrames() []*Frame {
+func (f *Frame) ChildFrames() []FrameI {
 	return f.childFrames
 }
 
@@ -509,7 +509,7 @@ func (f *Frame) Focus(selector string, options ...FrameFocusOptions) error {
 	return err
 }
 
-func (f *Frame) FrameElement() (*ElementHandle, error) {
+func (f *Frame) FrameElement() (ElementHandleI, error) {
 	elementHandle, err := f.channel.Send("frameElement")
 	if err != nil {
 		return nil, err
@@ -521,7 +521,7 @@ func (f *Frame) IsDetached() bool {
 	return f.detached
 }
 
-func (f *Frame) ParentFrame() *Frame {
+func (f *Frame) ParentFrame() FrameI {
 	return f.parentFrame
 }
 

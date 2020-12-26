@@ -58,11 +58,11 @@ func (r *Response) JSON(v interface{}) error {
 	return json.Unmarshal(body, v)
 }
 
-func (r *Response) Request() *Request {
+func (r *Response) Request() RequestI {
 	return fromChannel(r.initializer["request"]).(*Request)
 }
 
-func (r *Response) Frame() *Frame {
+func (r *Response) Frame() FrameI {
 	return r.Request().Frame()
 }
 

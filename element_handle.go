@@ -10,11 +10,11 @@ type ElementHandle struct {
 	JSHandle
 }
 
-func (e *ElementHandle) AsElement() *ElementHandle {
+func (e *ElementHandle) AsElement() ElementHandleI {
 	return e
 }
 
-func (e *ElementHandle) OwnerFrame() (*Frame, error) {
+func (e *ElementHandle) OwnerFrame() (FrameI, error) {
 	channel, err := e.channel.Send("ownerFrame")
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func (e *ElementHandle) OwnerFrame() (*Frame, error) {
 	return channelOwner.(*Frame), nil
 }
 
-func (e *ElementHandle) ContentFrame() (*Frame, error) {
+func (e *ElementHandle) ContentFrame() (FrameI, error) {
 	channel, err := e.channel.Send("contentFrame")
 	if err != nil {
 		return nil, err
@@ -102,7 +102,7 @@ func (e *ElementHandle) DblClick(options ...ElementHandleDblclickOptions) error 
 	return err
 }
 
-func (e *ElementHandle) QuerySelector(selector string) (*ElementHandle, error) {
+func (e *ElementHandle) QuerySelector(selector string) (ElementHandleI, error) {
 	channel, err := e.channel.Send("querySelector", map[string]interface{}{
 		"selector": selector,
 	})
@@ -112,14 +112,14 @@ func (e *ElementHandle) QuerySelector(selector string) (*ElementHandle, error) {
 	return fromChannel(channel).(*ElementHandle), nil
 }
 
-func (e *ElementHandle) QuerySelectorAll(selector string) ([]*ElementHandle, error) {
+func (e *ElementHandle) QuerySelectorAll(selector string) ([]ElementHandleI, error) {
 	channels, err := e.channel.Send("querySelectorAll", map[string]interface{}{
 		"selector": selector,
 	})
 	if err != nil {
 		return nil, err
 	}
-	elements := make([]*ElementHandle, 0)
+	elements := make([]ElementHandleI, 0)
 	for _, channel := range channels.([]interface{}) {
 		elements = append(elements, fromChannel(channel).(*ElementHandle))
 	}
