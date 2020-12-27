@@ -68,7 +68,9 @@ func (d *playwrightDriver) isUpToDate() (bool, error) {
 	if _, err := os.Stat(d.driverBinaryLocation); os.IsNotExist(err) {
 		return false, nil
 	}
-	output, err := exec.Command(d.driverBinaryLocation, "--version").Output()
+	cmd := exec.Command(d.driverBinaryLocation, "--version")
+	cmd.Env = d.getDriverEnviron()
+	output, err := cmd.Output()
 	if err != nil {
 		return false, fmt.Errorf("could not run driver: %w", err)
 	}
@@ -139,7 +141,7 @@ func (d *playwrightDriver) install() error {
 	log.Println("Downloaded driver successfully")
 
 	log.Println("Downloading browsers...")
-	if err := installBrowsers(d.driverBinaryLocation); err != nil {
+	if err := d.installBrowsers(d.driverBinaryLocation); err != nil {
 		return fmt.Errorf("could not install browsers: %w", err)
 	}
 	log.Println("Downloaded browsers successfully")
@@ -148,6 +150,7 @@ func (d *playwrightDriver) install() error {
 
 func (d *playwrightDriver) run() (*connection, error) {
 	cmd := exec.Command(d.driverBinaryLocation, "run-driver")
+	cmd.Env = d.getDriverEnviron()
 	cmd.Stderr = os.Stderr
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -163,8 +166,9 @@ func (d *playwrightDriver) run() (*connection, error) {
 	return newConnection(stdin, stdout, cmd.Process.Kill), nil
 }
 
-func installBrowsers(driverPath string) error {
+func (d *playwrightDriver) installBrowsers(driverPath string) error {
 	cmd := exec.Command(driverPath, "install")
+	cmd.Env = d.getDriverEnviron()
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Start(); err != nil {
@@ -252,4 +256,19 @@ func (d *playwrightDriver) getDriverURL() string {
 		optionalSubDirectory = "/next"
 	}
 	return fmt.Sprintf("https://playwright.azureedge.net/builds/cli%s/playwright-cli-%s-%s.zip", optionalSubDirectory, d.version, platform)
+}
+
+func (d *playwrightDriver) getDriverEnviron() []string {
+	environ := os.Environ()
+	unset := func(key string) {
+		for i := range environ {
+			if strings.HasPrefix((environ)[i], key+"=") {
+				(environ)[i] = (environ)[len(environ)-1]
+				environ = (environ)[:len(environ)-1]
+				break
+			}
+		}
+	}
+	unset("NODE_OPTIONS")
+	return environ
 }
