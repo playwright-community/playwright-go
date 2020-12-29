@@ -737,7 +737,7 @@
 			"selector string, options ...PageInnerTextOptions",
 			"(string, error)"
 		],
-		"Isclosed": [
+		"IsClosed": [
 			null,
 			"bool"
 		],

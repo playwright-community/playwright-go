@@ -32,16 +32,20 @@ const getAPIDocs = () => {
   }).toString())
 }
 
-const transformMethodNamesToGo = (funcName) => funcName
-  .replace("$$eval", "evalOnSelectorAll")
-  .replace("$eval", "evalOnSelector")
-  .replace("$$", "querySelectorAll")
-  .replace("$", "querySelector")
-  .replace("pdf", "PDF")
-  .replace("url", "URL")
-  .replace("json", "JSON")
+const transformMethodNamesToGo = (funcName) => {
+  const standardised = funcName
+    .replace("$$eval", "evalOnSelectorAll")
+    .replace("$eval", "evalOnSelector")
+    .replace("$$", "querySelectorAll")
+    .replace("$", "querySelector")
+    .replace("pdf", "PDF")
+    .replace("url", "URL")
+    .replace("json", "JSON")
+
+  return standardised[0].toUpperCase() + standardised.slice(1)
+}
 
 module.exports = {
   getAPIDocs,
-  transformMethodNamesToGo
+  transformMethodNamesToGo,
 }
