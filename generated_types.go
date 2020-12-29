@@ -149,7 +149,7 @@ type PageInnerHTMLOptions struct {
 type PageInnerTextOptions struct {
 	Timeout *int `json:"timeout"`
 }
-type PagePdfOptions struct {
+type PagePDFOptions struct {
 	Path                *string        `json:"path"`
 	Scale               *int           `json:"scale"`
 	DisplayHeaderFooter *bool          `json:"displayHeaderFooter"`
@@ -161,7 +161,7 @@ type PagePdfOptions struct {
 	Format              *string        `json:"format"`
 	Width               interface{}    `json:"width"`
 	Height              interface{}    `json:"height"`
-	Margin              *PagePdfMargin `json:"margin"`
+	Margin              *PagePDFMargin `json:"margin"`
 	PreferCSSPageSize   *bool          `json:"preferCSSPageSize"`
 }
 type PagePressOptions struct {
@@ -687,7 +687,7 @@ type PageHoverPosition struct {
 	Y *int `json:"y"`
 }
 
-type PagePdfMargin struct {
+type PagePDFMargin struct {
 	Top    interface{} `json:"top"`
 	Right  interface{} `json:"right"`
 	Bottom interface{} `json:"bottom"`
