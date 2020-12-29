@@ -212,6 +212,7 @@ type Page interface {
 	ExpectedDialog(cb func() error) (Dialog, error)
 	Fill(selector, text string, options ...FrameFillOptions) error
 	Focus(expression string, options ...FrameFocusOptions) error
+	Frame(name string, url interface{}) Frame
 	Frames() []Frame
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
 	GoBack(options ...PageGoBackOptions) (Response, error)

@@ -705,6 +705,10 @@
 			"expression string, options ...FrameFocusOptions",
 			"error"
 		],
+		"Frame": [
+			"name string, url interface{}",
+			"Frame"
+		],
 		"Frames": [
 			null,
 			"[]Frame"

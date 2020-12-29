@@ -706,3 +706,25 @@ func TestPageBringToFront(t *testing.T) {
 	require.NoError(t, page1.Close())
 	require.NoError(t, page2.Close())
 }
+
+func TestPageFrame(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	err := helper.Page.SetContent(fmt.Sprintf("<iframe name=target src=%s></iframe>", helper.server.EMPTY_PAGE))
+	require.NoError(t, err)
+
+	frame1 := helper.Page.Frame("target", nil)
+	require.Equal(t, "target", frame1.Name())
+	require.Equal(t, helper.server.EMPTY_PAGE, frame1.URL())
+
+	frame2 := helper.Page.Frame("test", helper.server.EMPTY_PAGE)
+	require.Equal(t, "target", frame2.Name())
+	require.Equal(t, helper.server.EMPTY_PAGE, frame2.URL())
+
+	frame3 := helper.Page.Frame("target", helper.server.EMPTY_PAGE)
+	require.Equal(t, "target", frame3.Name())
+	require.Equal(t, helper.server.EMPTY_PAGE, frame3.URL())
+
+	require.Nil(t, helper.Page.Frame("test", "https://example.com"))
+	require.Nil(t, helper.Page.Frame("test", nil))
+}
