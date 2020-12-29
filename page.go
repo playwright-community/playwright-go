@@ -437,7 +437,7 @@ func (p *pageImpl) Hover(selector string, options ...PageHoverOptions) error {
 	return p.mainFrame.Hover(selector, options...)
 }
 
-func (p *pageImpl) Isclosed() bool {
+func (p *pageImpl) IsClosed() bool {
 	return p.isClosed
 }
 
