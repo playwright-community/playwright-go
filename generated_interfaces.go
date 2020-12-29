@@ -542,6 +542,15 @@ type Frame interface {
 	// are resolved relative to the current working directory. For
 	// empty array, clears the selected files.
 	SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error
+	// This method taps an element matching `selector` by performing the following steps:
+	// Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+	// Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+	// Scroll the element into view if needed.
+	// Use page.touchscreen to tap the center of the element, or the specified `position`.
+	// Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+	// When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+	// Passing zero timeout disables this.
+	// **NOTE** `frame.tap()` requires that the `hasTouch` option of the browser context be set to true.
 	Tap(selector string, options ...FrameTapOptions) error
 	// Resolves to the `element.textContent`.
 	TextContent(selector string, options ...FrameTextContentOptions) (string, error)
@@ -840,6 +849,7 @@ type Page interface {
 	// waits until a matching element appears in the DOM.
 	// Shortcut for main frame's frame.focus(selector[, options]).
 	Focus(expression string, options ...FrameFocusOptions) error
+	// Returns frame matching the specified criteria. Either `name` or `url` must be specified.
 	Frame(options PageFrameOptions) Frame
 	// An array of all frames attached to the page.
 	Frames() []Frame
@@ -989,6 +999,16 @@ type Page interface {
 	// `page.setViewportSize` will resize the page. A lot of websites don't expect phones to change size, so you should set the
 	// viewport size before navigating to the page.
 	SetViewportSize(width, height int) error
+	// This method taps an element matching `selector` by performing the following steps:
+	// Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+	// Wait for actionability checks on the matched element, unless `force` option is set. If the element is detached during the checks, the whole action is retried.
+	// Scroll the element into view if needed.
+	// Use page.touchscreen to tap the center of the element, or the specified `position`.
+	// Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+	// When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+	// Passing zero timeout disables this.
+	// **NOTE** `page.tap()` requires that the `hasTouch` option of the browser context be set to true.
+	// Shortcut for main frame's frame.tap(selector[, options]).
 	Tap(selector string, options ...FrameTapOptions) error
 	// Returns `element.textContent`.
 	TextContent(selector string, options ...FrameTextContentOptions) (string, error)
