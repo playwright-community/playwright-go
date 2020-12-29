@@ -241,6 +241,7 @@ type Page interface {
 	Type(selector, text string, options ...PageTypeOptions) error
 	URL() string
 	Uncheck(selector string, options ...FrameUncheckOptions) error
+	Video() Video
 	ViewportSize() ViewportSize
 	WaitForEvent(event string, predicate ...interface{}) interface{}
 	WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (JSHandle, error)
@@ -292,6 +293,10 @@ type Route interface {
 
 type WebSocket interface {
 	URL() string
+}
+
+type Video interface {
+	Path() string
 }
 
 type Worker interface {

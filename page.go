@@ -11,10 +11,11 @@ import (
 type pageImpl struct {
 	channelOwner
 	isClosed        bool
+	video           *videoImpl
 	mouse           *mouseImpl
 	keyboard        *keyboardImpl
 	timeoutSettings *timeoutSettings
-	browserContext  BrowserContext
+	browserContext  *browserContextImpl
 	frames          []Frame
 	workersLock     sync.Mutex
 	workers         []Worker
@@ -556,6 +557,9 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 			bt.routesMu.Unlock()
 		}()
 	})
+	bt.channel.On("video", func(params map[string]interface{}) {
+		bt.Video().(*videoImpl).setRelativePath(params["relativePath"].(string))
+	})
 	bt.channel.On("worker", func(ev map[string]interface{}) {
 		worker := fromChannel(ev["worker"]).(*workerImpl)
 		worker.page = bt
@@ -610,4 +614,18 @@ func (p *pageImpl) Focus(expression string, options ...FrameFocusOptions) error 
 
 func (p *pageImpl) TextContent(selector string, options ...FrameTextContentOptions) (string, error) {
 	return p.mainFrame.TextContent(selector, options...)
+}
+
+func (p *pageImpl) Video() Video {
+	contextOptions := p.browserContext.options
+	if contextOptions.RecordVideo == nil {
+		return nil
+	}
+	if p.video == nil {
+		p.video = newVideo(p)
+		if videoRelativePath, ok := p.initializer["videoRelativePath"]; ok {
+			p.video.setRelativePath(videoRelativePath.(string))
+		}
+	}
+	return p.video
 }

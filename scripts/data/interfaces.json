@@ -821,6 +821,10 @@
 			"selector string, options ...FrameUncheckOptions",
 			"error"
 		],
+		"Video": [
+			null,
+			"Video"
+		],
 		"ViewportSize": [
 			null,
 			"ViewportSize"
@@ -982,6 +986,12 @@
 	},
 	"WebSocket": {
 		"URL": [
+			null,
+			"string"
+		]
+	},
+	"Video": {
+		"Path": [
 			null,
 			"string"
 		]

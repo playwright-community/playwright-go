@@ -9,11 +9,13 @@ import (
 
 type browserContextImpl struct {
 	channelOwner
-	timeoutSettings *timeoutSettings
-	pagesMutex      sync.Mutex
-	pages           []Page
-	ownedPage       Page
-	browser         *browserImpl
+	timeoutSettings   *timeoutSettings
+	isClosedOrClosing bool
+	options           *BrowserNewContextOptions
+	pagesMutex        sync.Mutex
+	pages             []Page
+	ownedPage         Page
+	browser           *browserImpl
 }
 
 func (b *browserContextImpl) Browser() Browser {
@@ -157,6 +159,12 @@ func (b *browserContextImpl) ExpectEvent(event string, cb func() error) (interfa
 }
 
 func (b *browserContextImpl) Close() error {
+	b.Lock()
+	if b.isClosedOrClosing {
+		return nil
+	}
+	b.isClosedOrClosing = true
+	b.Unlock()
 	_, err := b.channel.Send("close")
 	return err
 }
