@@ -17,11 +17,6 @@ const shouldIgnoreClass = ([k]) =>
   !k.startsWith("Firefox") &&
   !k.startsWith("WebKit")
 
-const transformFunctionName = (v) => {
-  v = transformMethodNamesToGo(v)
-  return v[0].toUpperCase() + v.slice(1)
-}
-
 const allowedMissing = [
   "BrowserType.Connect",
   "BrowserType.LaunchServer",
@@ -31,8 +26,8 @@ const allowedMissing = [
 const missingFunctions = []
 
 for (const [className, classData] of Object.entries(api).filter(shouldIgnoreClass)) {
-  for (const [funcName, funcData] of Object.entries(classData.methods)) {
-    const goFuncName = transformFunctionName(funcName)
+  for (const funcName in classData.methods) {
+    const goFuncName = transformMethodNamesToGo(funcName)
     const functionSignature = `${className}.${goFuncName}`;
     if (!interfaceData[className] || !interfaceData[className][goFuncName] && !allowedMissing.includes(functionSignature)) {
       missingFunctions.push(functionSignature)
@@ -42,6 +37,6 @@ for (const [className, classData] of Object.entries(api).filter(shouldIgnoreClas
 
 if (missingFunctions.length > 0) {
   console.log("Missing API interface functions:")
-  console.log(missingFunctions.map(item => `- ${item}`).join("\n"))
+  console.log(missingFunctions.map(item => `- [ ] ${item}`).join("\n"))
   process.exit(1)
 }
