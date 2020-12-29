@@ -80,7 +80,7 @@ func TestPagePDF(t *testing.T) {
 	require.Equal(t, "application/pdf", http.DetectContentType(screenshot))
 	require.Greater(t, len(screenshot), 50)
 
-	screenshot, err = helper.Page.PDF(playwright.PagePdfOptions{
+	screenshot, err = helper.Page.PDF(playwright.PagePDFOptions{
 		Path: playwright.String(screenshotPath),
 	})
 	require.NoError(t, err)

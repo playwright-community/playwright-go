@@ -222,7 +222,7 @@ type Page interface {
 	Isclosed() bool
 	MainFrame() Frame
 	Opener() (Page, error)
-	PDF(options ...PagePdfOptions) ([]byte, error)
+	PDF(options ...PagePDFOptions) ([]byte, error)
 	Press(selector, key string, options ...PagePressOptions) error
 	QuerySelector(selector string) (ElementHandle, error)
 	QuerySelectorAll(selector string) ([]ElementHandle, error)

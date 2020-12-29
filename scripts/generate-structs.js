@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { getAPIDocs } = require("./helpers")
+const { getAPIDocs, transformMethodNamesToGo } = require("./helpers")
 
 const api = getAPIDocs()
 
@@ -11,10 +11,6 @@ const makePascalCase = (v) => {
 
 const generateStructName = (className, funcName) => className + makePascalCase(funcName)
 
-const replaceMethodNames = (funcName) => funcName
-  .replace("$$eval", "evalOnSelectorAll")
-  .replace("$eval", "evalOnSelector")
-
 let appendix = new Set()
 
 const generateStruct = (typeData, structNamePrefix, structName) => {
@@ -23,12 +19,14 @@ const generateStruct = (typeData, structNamePrefix, structName) => {
   if (typeName.endsWith("Object") && Object.keys(typeData.type.properties).length > 0) {
     let structProperties = []
     for (const property in typeData.type.properties) {
-      structProperties.push(generateStruct(typeData.type.properties[property], structName, makePascalCase(property)) + `\`json:"${property}"\``)
+      structProperties.push(
+        generateStruct(typeData.type.properties[property], structName, makePascalCase(property)) +
+        `\`json:"${property}"\``)
     }
     const subStructName = structNamePrefix + structName
     appendix.add(`type ${subStructName} struct {
         ${structProperties.join("\n")}
-      }\n\n`)
+      }\n`)
     return `${structName} *${subStructName}`
   }
   if (["latitude", "longitude"].includes(typeData.name)) {
@@ -69,14 +67,15 @@ const METHODS_TO_SPREAD = [
 ]
 
 console.log("package playwright")
-for (const className in api) {
-  for (const funcName in api[className].methods) {
-    let optionalParameters = Object.fromEntries(Object.entries(api[className].methods[funcName].args).filter(([k, v]) => !v.required || v.name.startsWith("option") || METHODS_TO_SPREAD.includes(className + "." + funcName)))
+
+for (const [className, classData] of Object.entries(api)) {
+  for (const [funcName, funcData] of Object.entries(classData.methods)) {
+    let optionalParameters = Object.fromEntries(Object.entries(funcData.args).filter(([k, v]) => !v.required || v.name.startsWith("option") || METHODS_TO_SPREAD.includes(className + "." + funcName)))
     if (Object.keys(optionalParameters).length > 0) {
       if (Object.keys(optionalParameters).length === 1) {
         optionalParameters = optionalParameters[Object.keys(optionalParameters)[0]].type.properties
       }
-      const structName = generateStructName(className, replaceMethodNames(funcName))
+      const structName = generateStructName(className, transformMethodNamesToGo(funcName))
       let structProperties = []
       for (const property in optionalParameters) {
         if (property.startsWith("option")) {

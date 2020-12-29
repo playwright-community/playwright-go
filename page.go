@@ -261,7 +261,7 @@ func (p *pageImpl) Screenshot(options ...PageScreenshotOptions) ([]byte, error) 
 	return image, nil
 }
 
-func (p *pageImpl) PDF(options ...PagePdfOptions) ([]byte, error) {
+func (p *pageImpl) PDF(options ...PagePDFOptions) ([]byte, error) {
 	var path *string
 	if len(options) > 0 {
 		path = options[0].Path

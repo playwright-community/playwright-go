@@ -1,0 +1,999 @@
+{
+	"Browser": {
+		"EventEmitter": [],
+		"Close": [
+			null,
+			"error"
+		],
+		"Contexts": [
+			null,
+			"[]BrowserContext"
+		],
+		"IsConnected": [
+			null,
+			"bool"
+		],
+		"NewContext": [
+			"options ...BrowserNewContextOptions",
+			"(BrowserContext, error)"
+		],
+		"NewPage": [
+			"options ...BrowserNewContextOptions",
+			"(Page, error)"
+		],
+		"Version": [
+			null,
+			"string"
+		]
+	},
+	"BrowserContext": {
+		"EventEmitter": [],
+		"AddCookies": [
+			"cookies ...SetNetworkCookieParam",
+			"error"
+		],
+		"AddInitScript": [
+			"options BrowserContextAddInitScriptOptions",
+			"error"
+		],
+		"ClearCookies": [
+			null,
+			"error"
+		],
+		"ClearPermissions": [
+			null,
+			"error"
+		],
+		"Close": [
+			null,
+			"error"
+		],
+		"Cookies": [
+			"urls ...string",
+			"([]*NetworkCookie, error)"
+		],
+		"ExpectEvent": [
+			"event string, cb func() error",
+			"(interface{}, error)"
+		],
+		"GrantPermissions": [
+			"permissions []string, options ...BrowserContextGrantPermissionsOptions",
+			"error"
+		],
+		"NewPage": [
+			"options ...BrowserNewPageOptions",
+			"(Page, error)"
+		],
+		"Pages": [
+			null,
+			"[]Page"
+		],
+		"SetDefaultNavigationTimeout": [
+			"timeout int",
+			null
+		],
+		"SetDefaultTimeout": [
+			"timeout int",
+			null
+		],
+		"SetExtraHTTPHeaders": [
+			"headers map[string]string",
+			"error"
+		],
+		"SetGeolocation": [
+			"gelocation *SetGeolocationOptions",
+			"error"
+		],
+		"SetOffline": [
+			"offline bool",
+			"error"
+		],
+		"WaitForEvent": [
+			"event string, predicate ...interface{}",
+			"interface{}"
+		]
+	},
+	"BrowserType": {
+		"ExecutablePath": [
+			null,
+			"string"
+		],
+		"Launch": [
+			"options ...BrowserTypeLaunchOptions",
+			"(Browser, error)"
+		],
+		"LaunchPersistentContext": [
+			"userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions",
+			"(BrowserContext, error)"
+		],
+		"Name": [
+			null,
+			"string"
+		]
+	},
+	"ConsoleMessage": {
+		"Args": [
+			null,
+			"[]JSHandle"
+		],
+		"Location": [
+			null,
+			"ConsoleMessageLocation"
+		],
+		"String": [
+			null,
+			"string"
+		],
+		"Text": [
+			null,
+			"string"
+		],
+		"Type": [
+			null,
+			"string"
+		]
+	},
+	"Dialog": {
+		"Accept": [
+			"texts ...string",
+			"error"
+		],
+		"DefaultValue": [
+			null,
+			"string"
+		],
+		"Dismiss": [
+			null,
+			"error"
+		],
+		"Message": [
+			null,
+			"string"
+		],
+		"Type": [
+			null,
+			"string"
+		]
+	},
+	"Download": {
+		"Delete": [
+			null,
+			"error"
+		],
+		"Failure": [
+			null,
+			"error"
+		],
+		"Path": [
+			null,
+			"(string, error)"
+		],
+		"SaveAs": [
+			"path string",
+			"error"
+		],
+		"String": [
+			null,
+			"string"
+		],
+		"SuggestedFilename": [
+			null,
+			"string"
+		],
+		"URL": [
+			null,
+			"string"
+		]
+	},
+	"ElementHandle": {
+		"AsElement": [
+			null,
+			"ElementHandle"
+		],
+		"BoundingBox": [
+			null,
+			"(*Rect, error)"
+		],
+		"Check": [
+			"options ...ElementHandleCheckOptions",
+			"error"
+		],
+		"Click": [
+			"options ...ElementHandleClickOptions",
+			"error"
+		],
+		"ContentFrame": [
+			null,
+			"Frame, error"
+		],
+		"DblClick": [
+			"options ...ElementHandleDblclickOptions",
+			"error"
+		],
+		"DispatchEvent": [
+			"typ string, initObjects ...interface{}",
+			"error"
+		],
+		"EvaluateOnSelector": [
+			"selector string, expression string, options ...interface{}",
+			"interface{}, error"
+		],
+		"EvaluateOnSelectorAll": [
+			"selector string, expression string, options ...interface{}",
+			"interface{}, error"
+		],
+		"Fill": [
+			"value string, options ...ElementHandleFillOptions",
+			"error"
+		],
+		"Focus": [
+			null,
+			"error"
+		],
+		"GetAttribute": [
+			"name string",
+			"(string, error)"
+		],
+		"Hover": [
+			"options ...ElementHandleHoverOptions",
+			"error"
+		],
+		"InnerHTML": [
+			null,
+			"string, error"
+		],
+		"InnerText": [
+			null,
+			"(string, error)"
+		],
+		"OwnerFrame": [
+			null,
+			"(Frame, error)"
+		],
+		"Press": [
+			"options ...ElementHandlePressOptions",
+			"error"
+		],
+		"QuerySelector": [
+			"selector string",
+			"(ElementHandle, error)"
+		],
+		"QuerySelectorAll": [
+			"selector string",
+			"([]ElementHandle, error)"
+		],
+		"Screenshot": [
+			"options ...ElementHandleScreenshotOptions",
+			"([]byte, error)"
+		],
+		"ScrollIntoViewIfNeeded": [
+			"options ...ElementHandleScrollIntoViewIfNeededOptions",
+			"error"
+		],
+		"SelectText": [
+			"options ...ElementHandleSelectTextOptions",
+			"error"
+		],
+		"SetInputFiles": [
+			"files []InputFile, options ...ElementHandleSetInputFilesOptions",
+			"error"
+		],
+		"TextContent": [
+			null,
+			"(string, error)"
+		],
+		"Type": [
+			"value string, options ...ElementHandleTypeOptions",
+			"error"
+		],
+		"Uncheck": [
+			"options ...ElementHandleUncheckOptions",
+			"error"
+		]
+	},
+	"EventEmitter": {
+		"Emit": [
+			"name string, payload ...interface{}",
+			null
+		],
+		"ListenerCount": [
+			"name string",
+			"int"
+		],
+		"On": [
+			"name string, handler interface{}",
+			null
+		],
+		"Once": [
+			"name string, handler interface{}",
+			null
+		],
+		"RemoveListener": [
+			"name string, handler interface{}",
+			null
+		]
+	},
+	"FileChooser": {
+		"Element": [
+			null,
+			"ElementHandle"
+		],
+		"IsMultiple": [
+			null,
+			"bool"
+		],
+		"Page": [
+			null,
+			"Page"
+		],
+		"SetFiles": [
+			"files []InputFile, options ...ElementHandleSetInputFilesOptions",
+			"error"
+		]
+	},
+	"Frame": {
+		"AddScriptTag": [
+			"options PageAddScriptTagOptions",
+			"(ElementHandle, error)"
+		],
+		"AddStyleTag": [
+			"options PageAddStyleTagOptions",
+			"(ElementHandle, error)"
+		],
+		"Check": [
+			"selector string, options ...FrameCheckOptions",
+			"error"
+		],
+		"ChildFrames": [
+			null,
+			"[]Frame"
+		],
+		"Click": [
+			"selector string, options ...PageClickOptions",
+			"error"
+		],
+		"Content": [
+			null,
+			"(string, error)"
+		],
+		"DblClick": [
+			"selector string, options ...FrameDblclickOptions",
+			"error"
+		],
+		"DispatchEvent": [
+			"selector, typ string, options ...PageDispatchEventOptions",
+			"error"
+		],
+		"Evaluate": [
+			"expression string, options ...interface{}",
+			"interface{}, error"
+		],
+		"EvaluateHandle": [
+			"expression string, options ...interface{}",
+			"interface{}, error"
+		],
+		"EvaluateOnSelector": [
+			"selector string, expression string, options ...interface{}",
+			"(interface{}, error)"
+		],
+		"EvaluateOnSelectorAll": [
+			"selector string, expression string, options ...interface{}",
+			"(interface{}, error)"
+		],
+		"Fill": [
+			"selector string, value string, options ...FrameFillOptions",
+			"error"
+		],
+		"Focus": [
+			"selector string, options ...FrameFocusOptions",
+			"error"
+		],
+		"FrameElement": [
+			null,
+			"ElementHandle, error"
+		],
+		"GetAttribute": [
+			"selector string, name string, options ...PageGetAttributeOptions",
+			"string, error"
+		],
+		"Goto": [
+			"url string, options ...PageGotoOptions",
+			"Response, error"
+		],
+		"Hover": [
+			"selector string, options ...PageHoverOptions",
+			"error"
+		],
+		"InnerHTML": [
+			"selector string, options ...PageInnerHTMLOptions",
+			"string, error"
+		],
+		"InnerText": [
+			"selector string, options ...PageInnerTextOptions",
+			"string, error"
+		],
+		"IsDetached": [
+			null,
+			"bool"
+		],
+		"Name": [
+			null,
+			"string"
+		],
+		"Page": [
+			null,
+			"Page"
+		],
+		"ParentFrame": [
+			null,
+			"Frame"
+		],
+		"Press": [
+			"selector, key string, options ...PagePressOptions",
+			"error"
+		],
+		"QuerySelector": [
+			"selector string",
+			"(ElementHandle, error)"
+		],
+		"QuerySelectorAll": [
+			"selector string",
+			"([]ElementHandle, error)"
+		],
+		"SetContent": [
+			"content string, options ...PageSetContentOptions",
+			"error"
+		],
+		"SetInputFiles": [
+			"selector string, files []InputFile, options ...FrameSetInputFilesOptions",
+			"error"
+		],
+		"TextContent": [
+			"selector string, options ...FrameTextContentOptions",
+			"string, error"
+		],
+		"Title": [
+			null,
+			"string, error"
+		],
+		"Type": [
+			"selector, text string, options ...PageTypeOptions",
+			"error"
+		],
+		"URL": [
+			null,
+			"string"
+		],
+		"Uncheck": [
+			"selector string, options ...FrameUncheckOptions",
+			"error"
+		],
+		"WaitForEvent": [
+			"event string, predicate ...interface{}",
+			"interface{}"
+		],
+		"WaitForEventCh": [
+			"event string, predicate ...interface{}",
+			"<-chan interface{}"
+		],
+		"WaitForFunction": [
+			"expression string, options ...FrameWaitForFunctionOptions",
+			"(JSHandle, error)"
+		],
+		"WaitForLoadState": [
+			"given ...string",
+			null
+		],
+		"WaitForNavigation": [
+			"options ...PageWaitForNavigationOptions",
+			"(Response, error)"
+		],
+		"WaitForSelector": [
+			"selector string, options ...PageWaitForSelectorOptions",
+			"(ElementHandle, error)"
+		],
+		"WaitForTimeout": [
+			"timeout int",
+			null
+		]
+	},
+	"JSHandle": {
+		"AsElement": [
+			null,
+			"ElementHandle"
+		],
+		"Dispose": [
+			null,
+			"error"
+		],
+		"Evaluate": [
+			"expression string, options ...interface{}",
+			"interface{}, error"
+		],
+		"EvaluateHandle": [
+			"expression string, options ...interface{}",
+			"interface{}, error"
+		],
+		"GetProperties": [
+			null,
+			"map[string]JSHandle, error"
+		],
+		"GetProperty": [
+			"name string",
+			"JSHandle, error"
+		],
+		"JSONValue": [
+			null,
+			"interface{}, error"
+		],
+		"String": [
+			null,
+			"string"
+		]
+	},
+	"Keyboard": {
+		"Down": [
+			"key string",
+			"error"
+		],
+		"InsertText": [
+			"text string",
+			"error"
+		],
+		"Press": [
+			"key string, options ...KeyboardPressOptions",
+			"error"
+		],
+		"Type": [
+			"text string, options ...KeyboardTypeOptions",
+			"error"
+		],
+		"Up": [
+			"key string",
+			"error"
+		]
+	},
+	"Mouse": {
+		"Click": [
+			"x, y float64, options ...MouseClickOptions",
+			"error"
+		],
+		"DblClick": [
+			"x, y float64, options ...MouseDblclickOptions",
+			"error"
+		],
+		"Down": [
+			"options ...MouseDownOptions",
+			"error"
+		],
+		"Move": [
+			"x float64, y float64, options ...MouseMoveOptions",
+			"error"
+		],
+		"Up": [
+			"options ...MouseUpOptions",
+			"error"
+		]
+	},
+	"Page": {
+		"Mouse": [
+			null,
+			"Mouse"
+		],
+		"Keyboard": [
+			null,
+			"Keyboard"
+		],
+		"EventEmitter": [],
+		"AddInitScript": [
+			"options BrowserContextAddInitScriptOptions",
+			"error"
+		],
+		"AddScriptTag": [
+			"options PageAddScriptTagOptions",
+			"(ElementHandle, error)"
+		],
+		"AddStyleTag": [
+			"options PageAddStyleTagOptions",
+			"(ElementHandle, error)"
+		],
+		"BringToFront": [
+			null,
+			"error"
+		],
+		"Check": [
+			"selector string, options ...FrameCheckOptions",
+			"error"
+		],
+		"Click": [
+			"selector string, options ...PageClickOptions",
+			"error"
+		],
+		"Close": [
+			"options ...PageCloseOptions",
+			"error"
+		],
+		"Content": [
+			null,
+			"string, error"
+		],
+		"Context": [
+			null,
+			"BrowserContext"
+		],
+		"DblClick": [
+			"expression string, options ...FrameDblclickOptions",
+			"error"
+		],
+		"DispatchEvent": [
+			"selector string, typ string, options ...PageDispatchEventOptions",
+			"error"
+		],
+		"EmulateMedia": [
+			"options ...PageEmulateMediaOptions",
+			"error"
+		],
+		"Evaluate": [
+			"expression string, options ...interface{}",
+			"interface{}, error"
+		],
+		"EvaluateHandle": [
+			"expression string, options ...interface{}",
+			"interface{}, error"
+		],
+		"EvaluateOnSelector": [
+			"selector string, expression string, options ...interface{}",
+			"interface{}, error"
+		],
+		"EvaluateOnSelectorAll": [
+			"selector string, expression string, options ...interface{}",
+			"interface{}, error"
+		],
+		"ExpectConsoleMessage": [
+			"cb func() error",
+			"ConsoleMessage, error"
+		],
+		"ExpectDownload": [
+			"cb func() error",
+			"Download, error"
+		],
+		"ExpectEvent": [
+			"event string, cb func() error, predicates ...interface{}",
+			"interface{}, error"
+		],
+		"ExpectFileChooser": [
+			"cb func() error",
+			"FileChooser, error"
+		],
+		"ExpectLoadState": [
+			"state string, cb func() error",
+			"ConsoleMessage, error"
+		],
+		"ExpectNavigation": [
+			"cb func() error, options ...PageWaitForNavigationOptions",
+			"Response, error"
+		],
+		"ExpectPopup": [
+			"cb func() error",
+			"Page, error"
+		],
+		"ExpectRequest": [
+			"url interface{}, cb func() error, options ...interface{}",
+			"Request, error"
+		],
+		"ExpectResponse": [
+			"url interface{}, cb func() error, options ...interface{}",
+			"Response, error"
+		],
+		"ExpectWorker": [
+			"cb func() error",
+			"Worker, error"
+		],
+		"ExpectedDialog": [
+			"cb func() error",
+			"Dialog, error"
+		],
+		"Fill": [
+			"selector, text string, options ...FrameFillOptions",
+			"error"
+		],
+		"Focus": [
+			"expression string, options ...FrameFocusOptions",
+			"error"
+		],
+		"Frames": [
+			null,
+			"[]Frame"
+		],
+		"GetAttribute": [
+			"selector string, name string, options ...PageGetAttributeOptions",
+			"(string, error)"
+		],
+		"GoBack": [
+			"options ...PageGoBackOptions",
+			"Response, error"
+		],
+		"GoForward": [
+			"options ...PageGoForwardOptions",
+			"(Response, error)"
+		],
+		"Goto": [
+			"url string, options ...PageGotoOptions",
+			"(Response, error)"
+		],
+		"Hover": [
+			"selector string, options ...PageHoverOptions",
+			"error"
+		],
+		"InnerHTML": [
+			"selector string, options ...PageInnerHTMLOptions",
+			"(string, error)"
+		],
+		"InnerText": [
+			"selector string, options ...PageInnerTextOptions",
+			"(string, error)"
+		],
+		"Isclosed": [
+			null,
+			"bool"
+		],
+		"MainFrame": [
+			null,
+			"Frame"
+		],
+		"Opener": [
+			null,
+			"Page, error"
+		],
+		"PDF": [
+			"options ...PagePDFOptions",
+			"[]byte, error"
+		],
+		"Press": [
+			"selector, key string, options ...PagePressOptions",
+			"error"
+		],
+		"QuerySelector": [
+			"selector string",
+			"ElementHandle, error"
+		],
+		"QuerySelectorAll": [
+			"selector string",
+			"[]ElementHandle, error"
+		],
+		"Reload": [
+			"options ...PageReloadOptions",
+			"Response, error"
+		],
+		"Route": [
+			"url interface{}, handler routeHandler",
+			"error"
+		],
+		"Screenshot": [
+			"options ...PageScreenshotOptions",
+			"([]byte, error)"
+		],
+		"SetContent": [
+			"content string, options ...PageSetContentOptions",
+			"error"
+		],
+		"SetDefaultNavigationTimeout": [
+			"timeout int",
+			null
+		],
+		"SetDefaultTimeout": [
+			"timeout int",
+			null
+		],
+		"SetExtraHTTPHeaders": [
+			"headers map[string]string",
+			"error"
+		],
+		"SetInputFiles": [
+			"selector string, files []InputFile, options ...FrameSetInputFilesOptions",
+			"error"
+		],
+		"SetViewportSize": [
+			"width, height int",
+			"error"
+		],
+		"TextContent": [
+			"selector string, options ...FrameTextContentOptions",
+			"(string, error)"
+		],
+		"Title": [
+			null,
+			"(string, error)"
+		],
+		"Type": [
+			"selector, text string, options ...PageTypeOptions",
+			"error"
+		],
+		"URL": [
+			null,
+			"string"
+		],
+		"Uncheck": [
+			"selector string, options ...FrameUncheckOptions",
+			"error"
+		],
+		"ViewportSize": [
+			null,
+			"ViewportSize"
+		],
+		"WaitForEvent": [
+			"event string, predicate ...interface{}",
+			"interface{}"
+		],
+		"WaitForFunction": [
+			"expression string, options ...FrameWaitForFunctionOptions",
+			"(JSHandle, error)"
+		],
+		"WaitForLoadState": [
+			"state ...string",
+			null
+		],
+		"WaitForNavigation": [
+			"options ...PageWaitForNavigationOptions",
+			"(Response, error)"
+		],
+		"WaitForRequest": [
+			"url interface{}, options ...interface{}",
+			"Request"
+		],
+		"WaitForResponse": [
+			"url interface{}, options ...interface{}",
+			"Response"
+		],
+		"WaitForSelector": [
+			"selector string, options ...PageWaitForSelectorOptions",
+			"(ElementHandle, error)"
+		],
+		"WaitForTimeout": [
+			"timeout int",
+			null
+		],
+		"Workers": [
+			null,
+			"[]Worker"
+		]
+	},
+	"Request": {
+		"Failure": [
+			null,
+			"*RequestFailure"
+		],
+		"Frame": [
+			null,
+			"Frame"
+		],
+		"Headers": [
+			null,
+			"map[string]string"
+		],
+		"IsNavigationRequest": [
+			null,
+			"bool"
+		],
+		"Method": [
+			null,
+			"string"
+		],
+		"PostData": [
+			null,
+			"(string, error)"
+		],
+		"PostDataBuffer": [
+			null,
+			"([]byte, error)"
+		],
+		"PostDataJSON": [
+			"v interface{}",
+			"error"
+		],
+		"RedirectedFrom": [
+			null,
+			"Request"
+		],
+		"RedirectedTo": [
+			null,
+			"Request"
+		],
+		"ResourceType": [
+			null,
+			"string"
+		],
+		"Response": [
+			null,
+			"(Response, error)"
+		],
+		"URL": [
+			null,
+			"string"
+		]
+	},
+	"Response": {
+		"Body": [
+			null,
+			"[]byte, error"
+		],
+		"Finished": [
+			null,
+			"error"
+		],
+		"Frame": [
+			null,
+			"Frame"
+		],
+		"Headers": [
+			null,
+			"map[string]string"
+		],
+		"JSON": [
+			"v interface{}",
+			"error"
+		],
+		"Ok": [
+			null,
+			"bool"
+		],
+		"Request": [
+			null,
+			"Request"
+		],
+		"Status": [
+			null,
+			"int"
+		],
+		"StatusText": [
+			null,
+			"string"
+		],
+		"Text": [
+			null,
+			"(string, error)"
+		],
+		"URL": [
+			null,
+			"string"
+		]
+	},
+	"Route": {
+		"Abort": [
+			"errorCode *string",
+			"error"
+		],
+		"Continue": [
+			"options ...RouteContinueOptions",
+			"error"
+		],
+		"Fulfill": [
+			"options RouteFulfillOptions",
+			"error"
+		],
+		"Request": [
+			null,
+			"Request"
+		]
+	},
+	"WebSocket": {
+		"URL": [
+			null,
+			"string"
+		]
+	},
+	"Worker": {
+		"Evaluate": [
+			"expression string, options ...interface{}",
+			"interface{}, error"
+		],
+		"EvaluateHandle": [
+			"expression string, options ...interface{}",
+			"(JSHandle, error)"
+		],
+		"URL": [
+			null,
+			"string"
+		]
+	}
+}
