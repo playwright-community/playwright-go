@@ -534,3 +534,10 @@ func (f *frameImpl) TextContent(selector string, options ...FrameTextContentOpti
 	}
 	return textContent.(string), nil
 }
+
+func (f *frameImpl) Tap(selector string, options ...FrameTapOptions) error {
+	_, err := f.channel.Send("tap", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	return err
+}

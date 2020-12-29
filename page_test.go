@@ -706,3 +706,43 @@ func TestPageBringToFront(t *testing.T) {
 	require.NoError(t, page1.Close())
 	require.NoError(t, page2.Close())
 }
+
+func TestPageFrame(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	err := helper.Page.SetContent(fmt.Sprintf("<iframe name=target src=%s></iframe>", helper.server.EMPTY_PAGE))
+	require.NoError(t, err)
+
+	var name = "target"
+	frame1 := helper.Page.Frame(playwright.PageFrameOptions{Name: &name})
+	require.Equal(t, name, frame1.Name())
+	require.Equal(t, helper.server.EMPTY_PAGE, frame1.URL())
+
+	frame2 := helper.Page.Frame(playwright.PageFrameOptions{URL: helper.server.EMPTY_PAGE})
+	require.Equal(t, name, frame2.Name())
+	require.Equal(t, helper.server.EMPTY_PAGE, frame2.URL())
+
+	var badName = "test"
+	frame3 := helper.Page.Frame(playwright.PageFrameOptions{Name: &badName, URL: helper.server.EMPTY_PAGE})
+	require.Equal(t, name, frame3.Name())
+	require.Equal(t, helper.server.EMPTY_PAGE, frame3.URL())
+
+	require.Nil(t, helper.Page.Frame(playwright.PageFrameOptions{Name: &badName, URL: "https://example.com"}))
+	require.Nil(t, helper.Page.Frame(playwright.PageFrameOptions{Name: &badName}))
+}
+
+func TestPageTap(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, helper.Page.SetContent("<input id='checkbox' type='checkbox'></input>"))
+	value, err := helper.Page.EvalOnSelector("input", "el => el.checked")
+	require.NoError(t, err)
+	require.Equal(t, false, value)
+
+	require.NoError(t, helper.Page.Tap("input"))
+	value, err = helper.Page.EvalOnSelector("input", "el => el.checked")
+	require.NoError(t, err)
+	require.Equal(t, true, value)
+}

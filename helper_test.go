@@ -92,6 +92,7 @@ type TestHelperData struct {
 
 var DEFAULT_CONTEXT_OPTIONS = playwright.BrowserNewContextOptions{
 	AcceptDownloads: playwright.Bool(true),
+	HasTouch:        playwright.Bool(true),
 }
 
 func BeforeEach(t *testing.T) *TestHelperData {

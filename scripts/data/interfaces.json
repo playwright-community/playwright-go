@@ -452,6 +452,10 @@
 			"selector string, files []InputFile, options ...FrameSetInputFilesOptions",
 			"error"
 		],
+		"Tap": [
+			"selector string, options ...FrameTapOptions",
+			"error"
+		],
 		"TextContent": [
 			"selector string, options ...FrameTextContentOptions",
 			"string, error"
@@ -705,6 +709,10 @@
 			"expression string, options ...FrameFocusOptions",
 			"error"
 		],
+		"Frame": [
+			"options PageFrameOptions",
+			"Frame"
+		],
 		"Frames": [
 			null,
 			"[]Frame"
@@ -799,6 +807,10 @@
 		],
 		"SetViewportSize": [
 			"width, height int",
+			"error"
+		],
+		"Tap": [
+			"selector string, options ...FrameTapOptions",
 			"error"
 		],
 		"TextContent": [

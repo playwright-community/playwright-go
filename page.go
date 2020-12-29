@@ -65,6 +65,30 @@ func (p *pageImpl) MainFrame() Frame {
 	return p.mainFrame
 }
 
+type PageFrameOptions struct {
+	Name *string
+	URL  interface{}
+}
+
+func (p *pageImpl) Frame(options PageFrameOptions) Frame {
+	var matcher *urlMatcher
+	if options.URL != nil {
+		matcher = newURLMatcher(options.URL)
+	}
+
+	for _, f := range p.frames {
+		if options.Name != nil && f.Name() == *options.Name {
+			return f
+		}
+
+		if options.URL != nil && matcher != nil && matcher.Match(f.URL()) {
+			return f
+		}
+	}
+
+	return nil
+}
+
 func (p *pageImpl) Frames() []Frame {
 	return p.frames
 }
@@ -628,4 +652,8 @@ func (p *pageImpl) Video() Video {
 		}
 	}
 	return p.video
+}
+
+func (p *pageImpl) Tap(selector string, options ...FrameTapOptions) error {
+	return p.mainFrame.Tap(selector, options...)
 }
