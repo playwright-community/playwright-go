@@ -102,7 +102,7 @@ func TestElementHandleClick(t *testing.T) {
 	require.Equal(t, "Clicked", result)
 }
 
-func TestElementHandleDblClick(t *testing.T) {
+func TestElementHandleDblclick(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.PREFIX + "/input/button.html")
@@ -117,7 +117,7 @@ func TestElementHandleDblClick(t *testing.T) {
 	require.NoError(t, err)
 	btn, err := helper.Page.QuerySelector("button")
 	require.NoError(t, err)
-	require.NoError(t, btn.DblClick())
+	require.NoError(t, btn.Dblclick())
 	result, err := helper.Page.Evaluate("double")
 	require.NoError(t, err)
 	require.Equal(t, true, result)

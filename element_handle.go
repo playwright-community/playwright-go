@@ -97,7 +97,7 @@ func (e *elementHandleImpl) Click(options ...ElementHandleClickOptions) error {
 	return err
 }
 
-func (e *elementHandleImpl) DblClick(options ...ElementHandleDblclickOptions) error {
+func (e *elementHandleImpl) Dblclick(options ...ElementHandleDblclickOptions) error {
 	_, err := e.channel.Send("dblclick", options)
 	return err
 }
@@ -126,7 +126,7 @@ func (e *elementHandleImpl) QuerySelectorAll(selector string) ([]ElementHandle, 
 	return elements, nil
 }
 
-func (e *elementHandleImpl) EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
+func (e *elementHandleImpl) EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -150,7 +150,7 @@ func (e *elementHandleImpl) EvaluateOnSelector(selector string, expression strin
 	return parseResult(result), nil
 }
 
-func (e *elementHandleImpl) EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
+func (e *elementHandleImpl) EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {

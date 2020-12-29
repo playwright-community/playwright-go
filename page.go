@@ -106,12 +106,12 @@ func (p *pageImpl) EvaluateHandle(expression string, options ...interface{}) (in
 	return p.mainFrame.EvaluateHandle(expression, options...)
 }
 
-func (p *pageImpl) EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
-	return p.mainFrame.EvaluateOnSelector(selector, expression, options...)
+func (p *pageImpl) EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
+	return p.mainFrame.EvalOnSelector(selector, expression, options...)
 }
 
-func (p *pageImpl) EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
-	return p.mainFrame.EvaluateOnSelectorAll(selector, expression, options...)
+func (p *pageImpl) EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
+	return p.mainFrame.EvalOnSelectorAll(selector, expression, options...)
 }
 
 func (p *pageImpl) AddScriptTag(options PageAddScriptTagOptions) (ElementHandle, error) {
@@ -600,8 +600,8 @@ func (p *pageImpl) WaitForFunction(expression string, options ...FrameWaitForFun
 	return p.mainFrame.WaitForFunction(expression, options...)
 }
 
-func (p *pageImpl) DblClick(expression string, options ...FrameDblclickOptions) error {
-	return p.mainFrame.DblClick(expression, options...)
+func (p *pageImpl) Dblclick(expression string, options ...FrameDblclickOptions) error {
+	return p.mainFrame.Dblclick(expression, options...)
 }
 
 func (p *pageImpl) Focus(expression string, options ...FrameFocusOptions) error {

@@ -22,13 +22,20 @@ const transformFunctionName = (v) => {
   return v[0].toUpperCase() + v.slice(1)
 }
 
+const allowedMissing = [
+  "BrowserType.Connect",
+  "BrowserType.LaunchServer",
+  "Download.CreateReadStream"
+]
+
 const missingFunctions = []
 
 for (const [className, classData] of Object.entries(api).filter(shouldIgnoreClass)) {
   for (const [funcName, funcData] of Object.entries(classData.methods)) {
     const goFuncName = transformFunctionName(funcName)
-    if (!interfaceData[className] || !interfaceData[className][goFuncName]) {
-      missingFunctions.push(`${className}.${goFuncName}`)
+    const functionSignature = `${className}.${goFuncName}`;
+    if (!interfaceData[className] || !interfaceData[className][goFuncName] && !allowedMissing.includes(functionSignature)) {
+      missingFunctions.push(functionSignature)
     }
   }
 }

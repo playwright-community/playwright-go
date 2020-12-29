@@ -38,7 +38,7 @@ func main() {
 
 	// Helper function to get the amount of todos on the page
 	assertCountOfTodos := func(shouldBeCount int) {
-		count, err := page.EvaluateOnSelectorAll("ul.todo-list > li", "el => el.length")
+		count, err := page.EvalOnSelectorAll("ul.todo-list > li", "el => el.length")
 		assertErrorToNilf("could not determine todo list count: %w", err)
 		assertEqual(shouldBeCount, count)
 	}
@@ -55,7 +55,7 @@ func main() {
 	assertCountOfTodos(1)
 
 	// Here we get the text in the first todo item to see if it"s the same which the user has entered
-	textContentOfFirstTodoEntry, err := page.EvaluateOnSelector("ul.todo-list > li:nth-child(1) label", "el => el.textContent")
+	textContentOfFirstTodoEntry, err := page.EvalOnSelector("ul.todo-list > li:nth-child(1) label", "el => el.textContent")
 	assertErrorToNilf("could not get first todo entry: %w", err)
 	assertEqual(TODO_NAME, textContentOfFirstTodoEntry)
 

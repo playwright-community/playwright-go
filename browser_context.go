@@ -16,6 +16,10 @@ type browserContextImpl struct {
 	browser         *browserImpl
 }
 
+func (b *browserContextImpl) Browser() Browser {
+	return b.browser
+}
+
 func (b *browserContextImpl) SetDefaultNavigationTimeout(timeout int) {
 	b.timeoutSettings.SetNavigationTimeout(timeout)
 	b.channel.SendNoReply("setDefaultNavigationTimeoutNoReply", map[string]interface{}{

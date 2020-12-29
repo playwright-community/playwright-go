@@ -142,7 +142,7 @@ func TestPageEvaluate(t *testing.T) {
 	require.Equal(t, val, 123)
 }
 
-func TestPageEvaluateOnSelectorAll(t *testing.T) {
+func TestPageEvalOnSelectorAll(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	err := helper.Page.SetContent(`
@@ -151,19 +151,19 @@ func TestPageEvaluateOnSelectorAll(t *testing.T) {
 		<div class="foo">3</div>
 	`)
 	require.NoError(t, err)
-	val, err := helper.Page.EvaluateOnSelectorAll(".foo", `(elements) => elements.map(el => el.textContent)`)
+	val, err := helper.Page.EvalOnSelectorAll(".foo", `(elements) => elements.map(el => el.textContent)`)
 	require.NoError(t, err)
 	require.Equal(t, val, []interface{}([]interface{}{"1", "2", "3"}))
 }
 
-func TestPageEvaluateOnSelector(t *testing.T) {
+func TestPageEvalOnSelector(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	err := helper.Page.SetContent(`
 		<div class="foo">bar</div>
 	`)
 	require.NoError(t, err)
-	val, err := helper.Page.EvaluateOnSelector(".foo", `(element) => element.textContent`)
+	val, err := helper.Page.EvalOnSelector(".foo", `(element) => element.textContent`)
 	require.NoError(t, err)
 	require.Equal(t, val, "bar")
 }
@@ -511,7 +511,7 @@ func TestPageType(t *testing.T) {
 	require.NoError(t, helper.Page.SetContent("<input type='text' />"))
 
 	require.NoError(t, helper.Page.Type("input", "hello"))
-	value, err := helper.Page.EvaluateOnSelector("input", "el => el.value")
+	value, err := helper.Page.EvalOnSelector("input", "el => el.value")
 	require.NoError(t, err)
 	require.Equal(t, "hello", value)
 }
@@ -524,7 +524,7 @@ func TestPagePress(t *testing.T) {
 	require.NoError(t, helper.Page.SetContent("<input type='text' />"))
 
 	require.NoError(t, helper.Page.Press("input", "h"))
-	value, err := helper.Page.EvaluateOnSelector("input", "el => el.value")
+	value, err := helper.Page.EvalOnSelector("input", "el => el.value")
 	require.NoError(t, err)
 	require.Equal(t, "h", value)
 }
@@ -537,7 +537,7 @@ func TestPageCheck(t *testing.T) {
 	require.NoError(t, helper.Page.SetContent("<input id='checkbox' type='checkbox'></input>"))
 
 	require.NoError(t, helper.Page.Check("input"))
-	value, err := helper.Page.EvaluateOnSelector("input", "el => el.checked")
+	value, err := helper.Page.EvalOnSelector("input", "el => el.checked")
 	require.NoError(t, err)
 	require.Equal(t, true, value)
 }
@@ -550,7 +550,7 @@ func TestPageUncheck(t *testing.T) {
 	require.NoError(t, helper.Page.SetContent("<input id='checkbox' type='checkbox' checked></input>"))
 
 	require.NoError(t, helper.Page.Uncheck("input"))
-	value, err := helper.Page.EvaluateOnSelector("input", "el => el.checked")
+	value, err := helper.Page.EvalOnSelector("input", "el => el.checked")
 	require.NoError(t, err)
 	require.Equal(t, false, value)
 }
@@ -575,13 +575,13 @@ func TestPageWaitForFunction(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestPageDblClick(t *testing.T) {
+func TestPageDblclick(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, helper.Page.SetContent(`<button ondblclick="window.clicked=true"/>`))
-	require.NoError(t, helper.Page.DblClick("button"))
+	require.NoError(t, helper.Page.Dblclick("button"))
 	result, err := helper.Page.Evaluate("window.clicked")
 	require.NoError(t, err)
 	require.True(t, result.(bool))
