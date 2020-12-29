@@ -26,9 +26,7 @@ func main() {
 	}
 	gotoPage := func(url string) {
 		fmt.Printf("Visiting %s\n", url)
-		if _, err = page.Goto(url, playwright.PageGotoOptions{
-			WaitUntil: playwright.String("networkidle"),
-		}); err != nil {
+		if _, err = page.Goto(url); err != nil {
 			log.Fatalf("could not goto: %v", err)
 		}
 		fmt.Printf("Visited %s\n", url)
