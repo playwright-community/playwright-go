@@ -648,3 +648,7 @@ func (p *pageImpl) Video() Video {
 	}
 	return p.video
 }
+
+func (p *pageImpl) Tap(selector string, options ...FrameTapOptions) error {
+	return p.mainFrame.Tap(selector, options...)
+}

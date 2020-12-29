@@ -728,3 +728,19 @@ func TestPageFrame(t *testing.T) {
 	require.Nil(t, helper.Page.Frame("test", "https://example.com"))
 	require.Nil(t, helper.Page.Frame("test", nil))
 }
+
+func TestPageTap(t *testing.T) {
+	helper := BeforeEach(t)
+	defer helper.AfterEach()
+	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, helper.Page.SetContent("<input id='checkbox' type='checkbox'></input>"))
+	value, err := helper.Page.EvalOnSelector("input", "el => el.checked")
+	require.NoError(t, err)
+	require.Equal(t, false, value)
+
+	require.NoError(t, helper.Page.Tap("input"))
+	value, err = helper.Page.EvalOnSelector("input", "el => el.checked")
+	require.NoError(t, err)
+	require.Equal(t, true, value)
+}

@@ -138,6 +138,7 @@ type Frame interface {
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
 	SetContent(content string, options ...PageSetContentOptions) error
 	SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error
+	Tap(selector string, options ...FrameTapOptions) error
 	TextContent(selector string, options ...FrameTextContentOptions) (string, error)
 	Title() (string, error)
 	Type(selector, text string, options ...PageTypeOptions) error
@@ -237,6 +238,7 @@ type Page interface {
 	SetExtraHTTPHeaders(headers map[string]string) error
 	SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error
 	SetViewportSize(width, height int) error
+	Tap(selector string, options ...FrameTapOptions) error
 	TextContent(selector string, options ...FrameTextContentOptions) (string, error)
 	Title() (string, error)
 	Type(selector, text string, options ...PageTypeOptions) error
