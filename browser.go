@@ -24,6 +24,9 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
 	context := fromChannel(channel).(*browserContextImpl)
+	if len(options) == 1 {
+		context.options = &options[0]
+	}
 	context.browser = b
 	b.contextsMu.Lock()
 	b.contexts = append(b.contexts, context)

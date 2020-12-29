@@ -90,12 +90,16 @@ type TestHelperData struct {
 	utils       *testUtils
 }
 
-var CONTEXT_OPTIONS = playwright.BrowserNewContextOptions{
+var DEFAULT_CONTEXT_OPTIONS = playwright.BrowserNewContextOptions{
 	AcceptDownloads: playwright.Bool(true),
 }
 
 func BeforeEach(t *testing.T) *TestHelperData {
-	context, err := globalTestHelper.Browser.NewContext(CONTEXT_OPTIONS)
+	return newContextWithOptions(t, DEFAULT_CONTEXT_OPTIONS)
+}
+
+func newContextWithOptions(t *testing.T, contextOptions playwright.BrowserNewContextOptions) *TestHelperData {
+	context, err := globalTestHelper.Browser.NewContext(contextOptions)
 	require.NoError(t, err)
 	globalTestHelper.Context = context
 	page, err := context.NewPage()

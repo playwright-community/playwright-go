@@ -14,6 +14,7 @@ type BrowserContext interface {
 	EventEmitter
 	AddCookies(cookies ...SetNetworkCookieParam) error
 	AddInitScript(options BrowserContextAddInitScriptOptions) error
+	Browser() Browser
 	ClearCookies() error
 	ClearPermissions() error
 	Close() error
@@ -69,10 +70,10 @@ type ElementHandle interface {
 	Check(options ...ElementHandleCheckOptions) error
 	Click(options ...ElementHandleClickOptions) error
 	ContentFrame() (Frame, error)
-	DblClick(options ...ElementHandleDblclickOptions) error
+	Dblclick(options ...ElementHandleDblclickOptions) error
 	DispatchEvent(typ string, initObjects ...interface{}) error
-	EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
-	EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
+	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
+	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
 	Fill(value string, options ...ElementHandleFillOptions) error
 	Focus() error
 	GetAttribute(name string) (string, error)
@@ -114,12 +115,12 @@ type Frame interface {
 	ChildFrames() []Frame
 	Click(selector string, options ...PageClickOptions) error
 	Content() (string, error)
-	DblClick(selector string, options ...FrameDblclickOptions) error
+	Dblclick(selector string, options ...FrameDblclickOptions) error
 	DispatchEvent(selector, typ string, options ...PageDispatchEventOptions) error
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
 	EvaluateHandle(expression string, options ...interface{}) (interface{}, error)
-	EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
-	EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
+	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
+	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
 	Fill(selector string, value string, options ...FrameFillOptions) error
 	Focus(selector string, options ...FrameFocusOptions) error
 	FrameElement() (ElementHandle, error)
@@ -172,7 +173,7 @@ type Keyboard interface {
 
 type Mouse interface {
 	Click(x, y float64, options ...MouseClickOptions) error
-	DblClick(x, y float64, options ...MouseDblclickOptions) error
+	Dblclick(x, y float64, options ...MouseDblclickOptions) error
 	Down(options ...MouseDownOptions) error
 	Move(x float64, y float64, options ...MouseMoveOptions) error
 	Up(options ...MouseUpOptions) error
@@ -191,13 +192,13 @@ type Page interface {
 	Close(options ...PageCloseOptions) error
 	Content() (string, error)
 	Context() BrowserContext
-	DblClick(expression string, options ...FrameDblclickOptions) error
+	Dblclick(expression string, options ...FrameDblclickOptions) error
 	DispatchEvent(selector string, typ string, options ...PageDispatchEventOptions) error
 	EmulateMedia(options ...PageEmulateMediaOptions) error
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
 	EvaluateHandle(expression string, options ...interface{}) (interface{}, error)
-	EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
-	EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
+	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
+	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
 	ExpectConsoleMessage(cb func() error) (ConsoleMessage, error)
 	ExpectDownload(cb func() error) (Download, error)
 	ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error)
@@ -240,6 +241,7 @@ type Page interface {
 	Type(selector, text string, options ...PageTypeOptions) error
 	URL() string
 	Uncheck(selector string, options ...FrameUncheckOptions) error
+	Video() Video
 	ViewportSize() ViewportSize
 	WaitForEvent(event string, predicate ...interface{}) interface{}
 	WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (JSHandle, error)
@@ -291,6 +293,10 @@ type Route interface {
 
 type WebSocket interface {
 	URL() string
+}
+
+type Video interface {
+	Path() string
 }
 
 type Worker interface {

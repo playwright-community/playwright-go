@@ -66,7 +66,7 @@ func TestFrameSetInputFiles(t *testing.T) {
 			Buffer:   []byte("123"),
 		},
 	}))
-	fileName, err := helper.Page.EvaluateOnSelector("input", "e => e.files[0].name")
+	fileName, err := helper.Page.EvalOnSelector("input", "e => e.files[0].name")
 	require.NoError(t, err)
 	require.Equal(t, "file-to-upload.txt", fileName)
 }

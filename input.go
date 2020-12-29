@@ -36,7 +36,7 @@ func (m *mouseImpl) Click(x, y float64, options ...MouseClickOptions) error {
 	return err
 }
 
-func (m *mouseImpl) DblClick(x, y float64, options ...MouseDblclickOptions) error {
+func (m *mouseImpl) Dblclick(x, y float64, options ...MouseDblclickOptions) error {
 	var option MouseDblclickOptions
 	if len(options) == 1 {
 		option = options[0]

@@ -263,7 +263,7 @@ func (f *frameImpl) Evaluate(expression string, options ...interface{}) (interfa
 	return parseResult(result), nil
 }
 
-func (f *frameImpl) EvaluateOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
+func (f *frameImpl) EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -287,7 +287,7 @@ func (f *frameImpl) EvaluateOnSelector(selector string, expression string, optio
 	return parseResult(result), nil
 }
 
-func (f *frameImpl) EvaluateOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
+func (f *frameImpl) EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -487,7 +487,7 @@ func (f *frameImpl) ChildFrames() []Frame {
 	return f.childFrames
 }
 
-func (f *frameImpl) DblClick(selector string, options ...FrameDblclickOptions) error {
+func (f *frameImpl) Dblclick(selector string, options ...FrameDblclickOptions) error {
 	_, err := f.channel.Send("dblclick", map[string]interface{}{
 		"selector": selector,
 	}, options)

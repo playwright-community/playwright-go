@@ -110,7 +110,8 @@ func (d *playwrightDriver) install() error {
 	}
 
 	for _, zipFile := range zipReader.File {
-		outFile, err := os.Create(filepath.Join(d.driverDirectory, zipFile.Name))
+		zipFileDiskPath := filepath.Join(d.driverDirectory, zipFile.Name)
+		outFile, err := os.Create(zipFileDiskPath)
 		if err != nil {
 			return fmt.Errorf("could not create driver: %w", err)
 		}
@@ -127,15 +128,16 @@ func (d *playwrightDriver) install() error {
 		if err := file.Close(); err != nil {
 			return fmt.Errorf("could not close file (zip file): %w", err)
 		}
+		if strings.HasPrefix(zipFile.Name, "ffmpeg") {
+			if err := makeFileExecutable(zipFileDiskPath); err != nil {
+				return fmt.Errorf("could not make executable: %w", err)
+			}
+		}
 	}
 
 	if runtime.GOOS != "windows" {
-		stats, err := os.Stat(d.driverBinaryLocation)
-		if err != nil {
-			return fmt.Errorf("could not stat driver: %w", err)
-		}
-		if err := os.Chmod(d.driverBinaryLocation, stats.Mode()|0x40); err != nil {
-			return fmt.Errorf("could not set permissions: %w", err)
+		if err := makeFileExecutable(d.driverBinaryLocation); err != nil {
+			return fmt.Errorf("could not make executable: %w", err)
 		}
 	}
 	log.Println("Downloaded driver successfully")
@@ -271,4 +273,15 @@ func (d *playwrightDriver) getDriverEnviron() []string {
 	}
 	unset("NODE_OPTIONS")
 	return environ
+}
+
+func makeFileExecutable(path string) error {
+	stats, err := os.Stat(path)
+	if err != nil {
+		return fmt.Errorf("could not stat driver: %w", err)
+	}
+	if err := os.Chmod(path, stats.Mode()|0x40); err != nil {
+		return fmt.Errorf("could not set permissions: %w", err)
+	}
+	return nil
 }

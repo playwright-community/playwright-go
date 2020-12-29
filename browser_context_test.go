@@ -10,6 +10,7 @@ import (
 func TestBrowserContextNewPage(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
+	require.Equal(t, helper.Context.Browser(), helper.Browser)
 }
 
 func TestBrowserContextClose(t *testing.T) {

@@ -70,14 +70,14 @@ func TestMouseClick(t *testing.T) {
 	require.True(t, result.(bool))
 }
 
-func TestMouseDblClick(t *testing.T) {
+func TestMouseDblclick(t *testing.T) {
 	helper := BeforeEach(t)
 	defer helper.AfterEach()
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, helper.Page.SetContent(`<button ondblclick="window.clicked=true" style="width: 500px; height: 500px;"/>`))
 	require.NoError(t, helper.Page.Hover("button"))
-	require.NoError(t, helper.Page.Mouse().DblClick(100, 100))
+	require.NoError(t, helper.Page.Mouse().Dblclick(100, 100))
 	result, err := helper.Page.Evaluate("window.clicked")
 	require.NoError(t, err)
 	require.True(t, result.(bool))
