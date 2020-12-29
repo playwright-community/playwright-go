@@ -65,18 +65,23 @@ func (p *pageImpl) MainFrame() Frame {
 	return p.mainFrame
 }
 
-func (p *pageImpl) Frame(name string, url interface{}) Frame {
+type PageFrameOptions struct {
+	Name *string
+	URL  interface{}
+}
+
+func (p *pageImpl) Frame(options PageFrameOptions) Frame {
 	var matcher *urlMatcher
-	if url != nil {
-		matcher = newURLMatcher(url)
+	if options.URL != nil {
+		matcher = newURLMatcher(options.URL)
 	}
 
 	for _, f := range p.frames {
-		if f.Name() == name {
+		if options.Name != nil && f.Name() == *options.Name {
 			return f
 		}
 
-		if url != nil && matcher != nil && matcher.Match(f.URL()) {
+		if options.URL != nil && matcher != nil && matcher.Match(f.URL()) {
 			return f
 		}
 	}

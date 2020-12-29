@@ -710,7 +710,7 @@
 			"error"
 		],
 		"Frame": [
-			"name string, url interface{}",
+			"options PageFrameOptions",
 			"Frame"
 		],
 		"Frames": [

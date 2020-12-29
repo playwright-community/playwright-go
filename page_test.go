@@ -713,20 +713,22 @@ func TestPageFrame(t *testing.T) {
 	err := helper.Page.SetContent(fmt.Sprintf("<iframe name=target src=%s></iframe>", helper.server.EMPTY_PAGE))
 	require.NoError(t, err)
 
-	frame1 := helper.Page.Frame("target", nil)
-	require.Equal(t, "target", frame1.Name())
+	var name = "target"
+	frame1 := helper.Page.Frame(playwright.PageFrameOptions{Name: &name})
+	require.Equal(t, name, frame1.Name())
 	require.Equal(t, helper.server.EMPTY_PAGE, frame1.URL())
 
-	frame2 := helper.Page.Frame("test", helper.server.EMPTY_PAGE)
-	require.Equal(t, "target", frame2.Name())
+	frame2 := helper.Page.Frame(playwright.PageFrameOptions{URL: helper.server.EMPTY_PAGE})
+	require.Equal(t, name, frame2.Name())
 	require.Equal(t, helper.server.EMPTY_PAGE, frame2.URL())
 
-	frame3 := helper.Page.Frame("target", helper.server.EMPTY_PAGE)
-	require.Equal(t, "target", frame3.Name())
+	var badName = "test"
+	frame3 := helper.Page.Frame(playwright.PageFrameOptions{Name: &badName, URL: helper.server.EMPTY_PAGE})
+	require.Equal(t, name, frame3.Name())
 	require.Equal(t, helper.server.EMPTY_PAGE, frame3.URL())
 
-	require.Nil(t, helper.Page.Frame("test", "https://example.com"))
-	require.Nil(t, helper.Page.Frame("test", nil))
+	require.Nil(t, helper.Page.Frame(playwright.PageFrameOptions{Name: &badName, URL: "https://example.com"}))
+	require.Nil(t, helper.Page.Frame(playwright.PageFrameOptions{Name: &badName}))
 }
 
 func TestPageTap(t *testing.T) {
