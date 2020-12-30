@@ -9,14 +9,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: microsoft/playwright-github-action@v1
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: ^1.15.1
       - name: Install Browsers
-        run: go run scripts/installBrowsers.go
+        run: go run scripts/install-browsers/main.go
       - name: Regenerate APIs
-        run: scripts/generate_api.sh
+        run: scripts/generate-api.sh
       - name: Verify API is up to date
         run: |
           if [[ -n $(git status -s) ]]; then
