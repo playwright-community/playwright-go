@@ -3,7 +3,7 @@
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/mxschmitt/playwright-go)](https://pkg.go.dev/github.com/mxschmitt/playwright-go)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 ![Build Status](https://github.com/mxschmitt/playwright-go/workflows/Go/badge.svg)
-[![Join Slack](https://img.shields.io/badge/join-slack-infomational)](https://aka.ms/playwright-slack) [![Coverage Status](https://coveralls.io/repos/github/mxschmitt/playwright-go/badge.svg?branch=master)](https://coveralls.io/github/mxschmitt/playwright-go?branch=master) <!-- GEN:chromium-version-badge -->[![Chromium version](https://img.shields.io/badge/chromium-89.0.4344.0-blue.svg?logo=google-chrome)](https://www.chromium.org/Home)<!-- GEN:stop --> <!-- GEN:firefox-version-badge -->[![Firefox version](https://img.shields.io/badge/firefox-84.0b9-blue.svg?logo=mozilla-firefox)](https://www.mozilla.org/en-US/firefox/new/)<!-- GEN:stop --> [![WebKit version](https://img.shields.io/badge/webkit-14.0-blue.svg?logo=safari)](https://webkit.org/)
+[![Join Slack](https://img.shields.io/badge/join-slack-infomational)](https://aka.ms/playwright-slack) [![Coverage Status](https://coveralls.io/repos/github/mxschmitt/playwright-go/badge.svg?branch=master)](https://coveralls.io/github/mxschmitt/playwright-go?branch=master) <!-- GEN:chromium-version-badge -->[![Chromium version](https://img.shields.io/badge/chromium-89.0.4344.0-blue.svg?logo=google-chrome)](https://www.chromium.org/Home)<!-- GEN:stop --> <!-- GEN:firefox-version-badge -->[![Firefox version](https://img.shields.io/badge/firefox-84.0b9-blue.svg?logo=mozilla-firefox)](https://www.mozilla.org/en-US/firefox/new/)<!-- GEN:stop --> <!-- GEN:webkit-version-badge -->[![WebKit version](https://img.shields.io/badge/webkit-14.1-blue.svg?logo=safari)](https://webkit.org/)<!-- GEN:stop -->
 
 [API reference](https://playwright.dev/#?path=docs/api.md) | [Example recipes](https://github.com/mxschmitt/playwright-go/tree/master/examples)
 
@@ -11,9 +11,9 @@ Playwright is a Go library to automate [Chromium](https://www.chromium.org/Home)
 
 |          | Linux | macOS | Windows |
 |   :---   | :---: | :---: | :---:   |
-| Chromium <!-- GEN:chromium-version -->89.0.4344.0<!-- GEN:stop --> | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| WebKit 14.1 | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Firefox <!-- GEN:firefox-version -->84.0b9<!-- GEN:stop --> | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Chromium <!-- GEN:chromium-version -->89.0.4344.0<!-- GEN:stop --> | ✅ | ✅ | ✅ |
+| WebKit <!-- GEN:webkit-version -->14.1<!-- GEN:stop --> | ✅ | ✅ | ✅ |
+| Firefox <!-- GEN:firefox-version -->84.0b9<!-- GEN:stop --> | ✅ | ✅ | ✅ |
 
 Headless execution is supported for all the browsers on all platforms.
 
