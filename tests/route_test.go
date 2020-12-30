@@ -12,13 +12,13 @@ import (
 )
 
 func TestRouteContinue(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	require.NoError(t, helper.Page.SetExtraHTTPHeaders(map[string]string{
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.SetExtraHTTPHeaders(map[string]string{
 		"extra-http": "42",
 	}))
 	intercepted := make(chan bool, 1)
-	err := helper.Page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	err := page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
 		require.Equal(t, route.Request(), request)
 		require.Contains(t, request.URL(), "empty.html")
 		require.True(t, len(request.Headers()["user-agent"]) > 5)
@@ -30,25 +30,25 @@ func TestRouteContinue(t *testing.T) {
 		require.Equal(t, "", postData)
 		require.True(t, request.IsNavigationRequest())
 		require.Equal(t, "document", request.ResourceType())
-		require.Equal(t, request.Frame(), helper.Page.MainFrame())
+		require.Equal(t, request.Frame(), page.MainFrame())
 		require.Equal(t, "about:blank", request.Frame().URL())
 		require.NoError(t, route.Continue())
 		intercepted <- true
 	})
 	require.NoError(t, err)
-	response, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	response, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.True(t, response.Ok())
 	<-intercepted
 }
 
 func TestRouteContinueOverwrite(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	serverRequestChan := helper.server.WaitForRequestChan("/sleep.zzz")
-	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	BeforeEach(t)
+	defer AfterEach(t)
+	serverRequestChan := server.WaitForRequestChan("/sleep.zzz")
+	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, helper.Page.Route("**/*", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, page.Route("**/*", func(route playwright.Route, request playwright.Request) {
 		headers := request.Headers()
 		headers["Foo"] = "bar"
 		require.NoError(t, route.Continue(playwright.RouteContinueOptions{
@@ -57,7 +57,7 @@ func TestRouteContinueOverwrite(t *testing.T) {
 			PostData: "foobar",
 		}))
 	}))
-	_, err = helper.Page.Evaluate(`() => fetch("/sleep.zzz")`)
+	_, err = page.Evaluate(`() => fetch("/sleep.zzz")`)
 	require.NoError(t, err)
 	serverRequest := <-serverRequestChan
 	require.Equal(t, "POST", serverRequest.Method)
@@ -68,18 +68,18 @@ func TestRouteContinueOverwrite(t *testing.T) {
 }
 
 func TestRouteContinueOverwriteBodyBytes(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	serverRequestChan := helper.server.WaitForRequestChan("/sleep.zzz")
-	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	BeforeEach(t)
+	defer AfterEach(t)
+	serverRequestChan := server.WaitForRequestChan("/sleep.zzz")
+	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, helper.Page.Route("**/*", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, page.Route("**/*", func(route playwright.Route, request playwright.Request) {
 		require.NoError(t, route.Continue(playwright.RouteContinueOptions{
 			Method:   playwright.String("POST"),
 			PostData: []byte("foobar"),
 		}))
 	}))
-	_, err = helper.Page.Evaluate(`() => fetch("/sleep.zzz")`)
+	_, err = page.Evaluate(`() => fetch("/sleep.zzz")`)
 	require.NoError(t, err)
 	serverRequest := <-serverRequestChan
 	require.Equal(t, "POST", serverRequest.Method)
@@ -89,10 +89,10 @@ func TestRouteContinueOverwriteBodyBytes(t *testing.T) {
 }
 
 func TestRouteFulfill(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
+	BeforeEach(t)
+	defer AfterEach(t)
 	requestsChan := make(chan playwright.Request, 1)
-	err := helper.Page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	err := page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
 		require.Equal(t, route.Request(), request)
 		require.Contains(t, request.URL(), "empty.html")
 		require.True(t, len(request.Headers()["user-agent"]) > 5)
@@ -103,8 +103,8 @@ func TestRouteFulfill(t *testing.T) {
 		require.Equal(t, "", postData)
 		require.True(t, request.IsNavigationRequest())
 		require.Equal(t, "document", request.ResourceType())
-		require.Equal(t, helper.Page, helper.Page.MainFrame().Page())
-		require.Equal(t, request.Frame(), helper.Page.MainFrame())
+		require.Equal(t, page, page.MainFrame().Page())
+		require.Equal(t, request.Frame(), page.MainFrame())
 		require.Equal(t, "about:blank", request.Frame().URL())
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
 			Body:        "123",
@@ -116,7 +116,7 @@ func TestRouteFulfill(t *testing.T) {
 		requestsChan <- request
 	})
 	require.NoError(t, err)
-	response, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	response, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.True(t, response.Ok())
 	request := <-requestsChan
@@ -129,10 +129,10 @@ func TestRouteFulfill(t *testing.T) {
 }
 
 func TestRouteFulfillByteSlice(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
+	BeforeEach(t)
+	defer AfterEach(t)
 	intercepted := make(chan bool, 1)
-	err := helper.Page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	err := page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
 			Body:        []byte("123"),
 			ContentType: playwright.String("text/plain"),
@@ -140,7 +140,7 @@ func TestRouteFulfillByteSlice(t *testing.T) {
 		intercepted <- true
 	})
 	require.NoError(t, err)
-	response, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	response, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.True(t, response.Ok())
 	<-intercepted
@@ -152,17 +152,17 @@ func TestRouteFulfillByteSlice(t *testing.T) {
 }
 
 func TestRouteFulfillPath(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
+	BeforeEach(t)
+	defer AfterEach(t)
 	intercepted := make(chan bool, 1)
-	err := helper.Page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	err := page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
-			Path: playwright.String(filepath.Join(helper.assetDir, "pptr.png")),
+			Path: playwright.String(filepath.Join(assetDir, "pptr.png")),
 		}))
 		intercepted <- true
 	})
 	require.NoError(t, err)
-	response, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	response, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.True(t, response.Ok())
 	<-intercepted
@@ -173,37 +173,37 @@ func TestRouteFulfillPath(t *testing.T) {
 }
 
 func TestRequestFinished(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
+	BeforeEach(t)
+	defer AfterEach(t)
 	eventsStorage := newSyncSlice()
 	var request playwright.Request
-	helper.Page.Once("request", func(r playwright.Request) {
+	page.Once("request", func(r playwright.Request) {
 		request = r
 		eventsStorage.Append("request")
 	})
-	helper.Page.Once("response", func() {
+	page.Once("response", func() {
 		eventsStorage.Append("response")
 	})
-	response, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	response, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, response.Finished())
 	eventsStorage.Append("requestfinished")
 	require.Equal(t, []interface{}{"request", "response", "requestfinished"}, eventsStorage.Get())
 	require.Equal(t, response.Request(), request)
-	require.Equal(t, response.Frame(), helper.Page.MainFrame())
+	require.Equal(t, response.Frame(), page.MainFrame())
 }
 
 func TestResponsePostData(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
+	BeforeEach(t)
+	defer AfterEach(t)
 	requestData := map[string]interface{}{
 		"foo": "bar123",
 		"kek": true,
 	}
-	helper.server.SetRoute("/foobar", func(w http.ResponseWriter, r *http.Request) {
+	server.SetRoute("/foobar", func(w http.ResponseWriter, r *http.Request) {
 		require.NoError(t, json.NewEncoder(w).Encode(requestData))
 	})
-	response, err := helper.Page.Goto(helper.server.PREFIX + "/foobar")
+	response, err := page.Goto(server.PREFIX + "/foobar")
 	require.NoError(t, err)
 	var actualResponse map[string]interface{}
 	require.NoError(t, response.JSON(&actualResponse))
@@ -211,31 +211,31 @@ func TestResponsePostData(t *testing.T) {
 }
 
 func TestRouteAbort(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
+	BeforeEach(t)
+	defer AfterEach(t)
 	failedRequests := make(chan playwright.Request, 1)
-	helper.Page.Once("requestfailed", func(request playwright.Request) {
+	page.Once("requestfailed", func(request playwright.Request) {
 		failedRequests <- request
 	})
-	err := helper.Page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	err := page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
 		require.NoError(t, route.Abort(playwright.String("aborted")))
 	})
 	require.NoError(t, err)
-	_, err = helper.Page.Goto(helper.server.EMPTY_PAGE)
+	_, err = page.Goto(server.EMPTY_PAGE)
 	require.Error(t, err)
 	request := <-failedRequests
 	require.True(t, len(request.Failure().ErrorText) > 5)
 }
 
 func TestRequestPostData(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	helper.server.SetRoute("/foobar", func(w http.ResponseWriter, r *http.Request) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	server.SetRoute("/foobar", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 	})
-	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, helper.Page.Route("**/foobar", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, page.Route("**/foobar", func(route playwright.Route, request playwright.Request) {
 		var postData map[string]interface{}
 		require.NoError(t, request.PostDataJSON(&postData))
 		require.Equal(t, map[string]interface{}{
@@ -247,7 +247,7 @@ func TestRequestPostData(t *testing.T) {
 		require.Equal(t, []byte(`{"foo":true,"kek":123}`), raw)
 		require.NoError(t, route.Continue())
 	}))
-	_, err = helper.Page.Evaluate(`url => fetch(url, {
+	_, err = page.Evaluate(`url => fetch(url, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -256,6 +256,6 @@ func TestRequestPostData(t *testing.T) {
 			"foo": true,
 			"kek": 123,
 		})
-	})`, helper.server.PREFIX+"/foobar")
+	})`, server.PREFIX+"/foobar")
 	require.NoError(t, err)
 }

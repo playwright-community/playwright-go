@@ -9,13 +9,13 @@ import (
 )
 
 func TestFileChooser(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	_, err := helper.Page.Goto(helper.server.PREFIX + "/input/fileupload.html")
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.PREFIX + "/input/fileupload.html")
 	require.NoError(t, err)
-	input, err := helper.Page.QuerySelector("input")
+	input, err := page.QuerySelector("input")
 	require.NoError(t, err)
-	file, err := ioutil.ReadFile(helper.Asset("file-to-upload.txt"))
+	file, err := ioutil.ReadFile(Asset("file-to-upload.txt"))
 	require.NoError(t, err)
 	require.NoError(t, input.SetInputFiles([]playwright.InputFile{
 		{
@@ -24,10 +24,10 @@ func TestFileChooser(t *testing.T) {
 			Buffer:   file,
 		},
 	}))
-	fileName, err := helper.Page.Evaluate("e => e.files[0].name", input)
+	fileName, err := page.Evaluate("e => e.files[0].name", input)
 	require.NoError(t, err)
 	require.Equal(t, "file-to-upload.txt", fileName)
-	content, err := helper.Page.Evaluate(`e => {
+	content, err := page.Evaluate(`e => {
         reader = new FileReader()
         promise = new Promise(fulfill => reader.onload = fulfill)
         reader.readAsText(e.files[0])
@@ -38,22 +38,22 @@ func TestFileChooser(t *testing.T) {
 }
 
 func TestFileChooserShouldEmitEvent(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, helper.Page.SetContent("<input type=file>"))
+	require.NoError(t, page.SetContent("<input type=file>"))
 
-	fileChooser, err := helper.Page.ExpectFileChooser(func() error {
-		return helper.Page.Click("input")
+	fileChooser, err := page.ExpectFileChooser(func() error {
+		return page.Click("input")
 	})
 	require.NoError(t, err)
 	require.False(t, fileChooser.IsMultiple())
-	require.Equal(t, helper.Page, fileChooser.Page())
+	require.Equal(t, page, fileChooser.Page())
 	elementHTML, err := fileChooser.Element().InnerHTML()
 	require.NoError(t, err)
 
-	inputElement, err := helper.Page.QuerySelector("input")
+	inputElement, err := page.QuerySelector("input")
 	require.NoError(t, err)
 	inputElementHTML, err := inputElement.InnerHTML()
 	require.NoError(t, err)
@@ -67,7 +67,7 @@ func TestFileChooserShouldEmitEvent(t *testing.T) {
 			Buffer:   []byte("123"),
 		},
 	}))
-	fileName, err := helper.Page.Evaluate("e => e.files[0].name", inputElement)
+	fileName, err := page.Evaluate("e => e.files[0].name", inputElement)
 	require.NoError(t, err)
 	require.Equal(t, "file-to-upload.txt", fileName)
 }

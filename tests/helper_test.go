@@ -18,7 +18,16 @@ import (
 )
 
 var pw *playwright.Playwright
-var globalTestHelper *TestHelperData
+var browser playwright.Browser
+var context playwright.BrowserContext
+var page playwright.Page
+var isChromium bool
+var isFirefox bool
+var isWebKit bool
+var server *testServer
+var browserType playwright.BrowserType
+var assetDir string
+var utils *testUtils
 
 func init() {
 	if err := mime.AddExtensionType(".js", "application/javascript"); err != nil {
@@ -40,7 +49,6 @@ func BeforeAll() {
 		log.Fatalf("could not start Playwright: %v", err)
 	}
 	browserName := os.Getenv("BROWSER")
-	var browserType playwright.BrowserType
 	if browserName == "chromium" || browserName == "" {
 		browserType = pw.Chromium
 	} else if browserName == "firefox" {
@@ -48,46 +56,25 @@ func BeforeAll() {
 	} else if browserName == "webkit" {
 		browserType = pw.WebKit
 	}
-
-	browser, err := browserType.Launch(playwright.BrowserTypeLaunchOptions{
+	browser, err = browserType.Launch(playwright.BrowserTypeLaunchOptions{
 		Headless: playwright.Bool(os.Getenv("HEADFUL") == ""),
 	})
 	if err != nil {
 		log.Fatalf("could not launch: %v", err)
 	}
-	globalTestHelper = &TestHelperData{
-		Playwright:  pw,
-		BrowserType: browserType,
-		Browser:     browser,
-		IsChromium:  browserName == "chromium" || browserName == "",
-		IsFirefox:   browserName == "firefox",
-		IsWebKit:    browserName == "webkit",
-		server:      newTestServer(),
-		assetDir:    "tests/assets/",
-		utils:       &testUtils{},
-	}
+	isChromium = browserName == "chromium" || browserName == ""
+	isFirefox = browserName == "firefox"
+	isWebKit = browserName == "webkit"
+	server = newTestServer()
+	assetDir = "tests/assets/"
+	utils = &testUtils{}
 }
 
 func AfterAll() {
-	globalTestHelper.server.testServer.Close()
+	server.testServer.Close()
 	if err := pw.Stop(); err != nil {
 		log.Fatalf("could not start Playwright: %v", err)
 	}
-}
-
-type TestHelperData struct {
-	t           *testing.T
-	Playwright  *playwright.Playwright
-	BrowserType playwright.BrowserType
-	Browser     playwright.Browser
-	Context     playwright.BrowserContext
-	Page        playwright.Page
-	IsChromium  bool
-	IsFirefox   bool
-	IsWebKit    bool
-	server      *testServer
-	assetDir    string
-	utils       *testUtils
 }
 
 var DEFAULT_CONTEXT_OPTIONS = playwright.BrowserNewContextOptions{
@@ -95,21 +82,19 @@ var DEFAULT_CONTEXT_OPTIONS = playwright.BrowserNewContextOptions{
 	HasTouch:        playwright.Bool(true),
 }
 
-func BeforeEach(t *testing.T) *TestHelperData {
-	return newContextWithOptions(t, DEFAULT_CONTEXT_OPTIONS)
+func BeforeEach(t *testing.T) {
+	newContextWithOptions(t, DEFAULT_CONTEXT_OPTIONS)
 }
 
-func newContextWithOptions(t *testing.T, contextOptions playwright.BrowserNewContextOptions) *TestHelperData {
-	context, err := globalTestHelper.Browser.NewContext(contextOptions)
+func newContextWithOptions(t *testing.T, contextOptions playwright.BrowserNewContextOptions) {
+	var err error
+	context, err = browser.NewContext(contextOptions)
 	require.NoError(t, err)
-	globalTestHelper.Context = context
-	page, err := context.NewPage()
+	page, err = context.NewPage()
 	require.NoError(t, err)
-	globalTestHelper.Page = page
-	return globalTestHelper
 }
 
-func (t *TestHelperData) Asset(path string) string {
+func Asset(path string) string {
 	cwd, err := os.Getwd()
 	if err != nil {
 		log.Fatalf("could not get cwd: %v", err)
@@ -117,13 +102,13 @@ func (t *TestHelperData) Asset(path string) string {
 	return filepath.Join(cwd, "tests", "assets", path)
 }
 
-func (t *TestHelperData) AfterEach(closeContext ...bool) {
+func AfterEach(t *testing.T, closeContext ...bool) {
 	if len(closeContext) == 0 {
-		if err := t.Context.Close(); err != nil {
-			t.t.Errorf("could not close context: %v", err)
+		if err := context.Close(); err != nil {
+			t.Errorf("could not close context: %v", err)
 		}
 	}
-	t.server.AfterEach()
+	server.AfterEach()
 }
 
 func newTestServer() *testServer {

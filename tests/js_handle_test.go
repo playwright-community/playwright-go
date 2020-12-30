@@ -8,9 +8,9 @@ import (
 )
 
 func TestJSHandleGetProperty(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	aHandle, err := helper.Page.EvaluateHandle(`() => ({
+	BeforeEach(t)
+	defer AfterEach(t)
+	aHandle, err := page.EvaluateHandle(`() => ({
 		one: 1,
 		two: 2,
 		three: 3
@@ -24,9 +24,9 @@ func TestJSHandleGetProperty(t *testing.T) {
 }
 
 func TestJSHandleGetProperties(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	aHandle, err := helper.Page.EvaluateHandle(`() => ({
+	BeforeEach(t)
+	defer AfterEach(t)
+	aHandle, err := page.EvaluateHandle(`() => ({
 		one: 1,
 		two: 2,
 		three: 3
@@ -48,9 +48,9 @@ func TestJSHandleGetProperties(t *testing.T) {
 }
 
 func TestJSHandleEvaluate(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	aHandle, err := helper.Page.EvaluateHandle(`() => ({
+	BeforeEach(t)
+	defer AfterEach(t)
+	aHandle, err := page.EvaluateHandle(`() => ({
 		one: 1,
 		two: 2,
 		three: 3
@@ -65,9 +65,9 @@ func TestJSHandleEvaluate(t *testing.T) {
 }
 
 func TestJSHandleEvaluateHandle(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	aHandle, err := helper.Page.EvaluateHandle(`() => ({
+	BeforeEach(t)
+	defer AfterEach(t)
+	aHandle, err := page.EvaluateHandle(`() => ({
 		one: 1,
 		two: 2,
 		three: 3
@@ -83,9 +83,9 @@ func TestJSHandleEvaluateHandle(t *testing.T) {
 }
 
 func TestJSHandleTypeParsing(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	aHandle, err := helper.Page.EvaluateHandle(`() => ({
+	BeforeEach(t)
+	defer AfterEach(t)
+	aHandle, err := page.EvaluateHandle(`() => ({
 		an_integer: 1,
 		a_float: 2.2222222222,
 		a_string_of_an_integer: "3",

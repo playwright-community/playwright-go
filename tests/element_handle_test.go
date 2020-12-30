@@ -8,28 +8,28 @@ import (
 )
 
 func TestElementHandleInnerText(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	_, err := helper.Page.Goto(helper.server.PREFIX + "/dom.html")
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.PREFIX + "/dom.html")
 	require.NoError(t, err)
-	handle, err := helper.Page.QuerySelector("#inner")
+	handle, err := page.QuerySelector("#inner")
 	require.NoError(t, err)
 	t1, err := handle.InnerText()
 	require.NoError(t, err)
 	require.Equal(t, t1, "Text, more text")
-	t2, err := helper.Page.InnerText("#inner")
+	t2, err := page.InnerText("#inner")
 	require.NoError(t, err)
 	require.Equal(t, t2, "Text, more text")
 }
 
 func TestElementHandleOwnerFrame(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	_, err = helper.utils.AttachFrame(helper.Page, "iframe1", helper.server.EMPTY_PAGE)
+	_, err = utils.AttachFrame(page, "iframe1", server.EMPTY_PAGE)
 	require.NoError(t, err)
-	frame := helper.Page.Frames()[1]
+	frame := page.Frames()[1]
 	elementHandle, err := frame.EvaluateHandle("document.body")
 	require.NoError(t, err)
 	ownerFrame, err := elementHandle.(playwright.ElementHandle).OwnerFrame()
@@ -38,76 +38,76 @@ func TestElementHandleOwnerFrame(t *testing.T) {
 	require.Equal(t, "iframe1", ownerFrame.Name())
 }
 func TestElementHandleContentFrame(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	_, err = helper.utils.AttachFrame(helper.Page, "frame1", helper.server.EMPTY_PAGE)
+	_, err = utils.AttachFrame(page, "frame1", server.EMPTY_PAGE)
 	require.NoError(t, err)
-	elementHandle, err := helper.Page.QuerySelector("#frame1")
+	elementHandle, err := page.QuerySelector("#frame1")
 	require.NoError(t, err)
 	frame, err := elementHandle.ContentFrame()
 	require.NoError(t, err)
-	require.Equal(t, frame, helper.Page.Frames()[1])
+	require.Equal(t, frame, page.Frames()[1])
 }
 func TestElementHandleGetAttribute(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	_, err := helper.Page.Goto(helper.server.PREFIX + "/dom.html")
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.PREFIX + "/dom.html")
 	require.NoError(t, err)
-	handle, err := helper.Page.QuerySelector("#outer")
+	handle, err := page.QuerySelector("#outer")
 	require.NoError(t, err)
 	a1, err := handle.GetAttribute("name")
 	require.NoError(t, err)
 	require.Equal(t, "value", a1)
-	a2, err := helper.Page.GetAttribute("#outer", "name")
+	a2, err := page.GetAttribute("#outer", "name")
 	require.NoError(t, err)
 	require.Equal(t, "value", a2)
 }
 
 func TestElementHandleDispatchEvent(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	_, err := helper.Page.Goto(helper.server.PREFIX + "/input/button.html")
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.PREFIX + "/input/button.html")
 	require.NoError(t, err)
-	require.NoError(t, helper.Page.DispatchEvent("button", "click"))
-	result, err := helper.Page.Evaluate("result")
+	require.NoError(t, page.DispatchEvent("button", "click"))
+	result, err := page.Evaluate("result")
 	require.NoError(t, err)
 	require.Equal(t, "Clicked", result)
 }
 
 func TestElementHandleHover(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	_, err := helper.Page.Goto(helper.server.PREFIX + "/input/scrollable.html")
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.PREFIX + "/input/scrollable.html")
 	require.NoError(t, err)
-	btn, err := helper.Page.QuerySelector("#button-6")
+	btn, err := page.QuerySelector("#button-6")
 	require.NoError(t, err)
 	require.NoError(t, btn.Hover())
-	result, err := helper.Page.Evaluate(`document.querySelector("button:hover").id`)
+	result, err := page.Evaluate(`document.querySelector("button:hover").id`)
 	require.NoError(t, err)
 	require.Equal(t, "button-6", result)
 }
 
 func TestElementHandleClick(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	_, err := helper.Page.Goto(helper.server.PREFIX + "/input/button.html")
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.PREFIX + "/input/button.html")
 	require.NoError(t, err)
-	btn, err := helper.Page.QuerySelector("button")
+	btn, err := page.QuerySelector("button")
 	require.NoError(t, err)
 	require.NoError(t, btn.Click())
-	result, err := helper.Page.Evaluate(`result`)
+	result, err := page.Evaluate(`result`)
 	require.NoError(t, err)
 	require.Equal(t, "Clicked", result)
 }
 
 func TestElementHandleDblclick(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	_, err := helper.Page.Goto(helper.server.PREFIX + "/input/button.html")
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.PREFIX + "/input/button.html")
 	require.NoError(t, err)
-	_, err = helper.Page.Evaluate(`() => {
+	_, err = page.Evaluate(`() => {
             window.double = false;
             button = document.querySelector('button');
             button.addEventListener('dblclick', event => {
@@ -115,25 +115,25 @@ func TestElementHandleDblclick(t *testing.T) {
             });
 	}`)
 	require.NoError(t, err)
-	btn, err := helper.Page.QuerySelector("button")
+	btn, err := page.QuerySelector("button")
 	require.NoError(t, err)
 	require.NoError(t, btn.Dblclick())
-	result, err := helper.Page.Evaluate("double")
+	result, err := page.Evaluate("double")
 	require.NoError(t, err)
 	require.Equal(t, true, result)
 
-	result, err = helper.Page.Evaluate(`result`)
+	result, err = page.Evaluate(`result`)
 	require.NoError(t, err)
 	require.Equal(t, "Clicked", result)
 }
 
 func TestElementBoundingBox(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	require.NoError(t, helper.Page.SetViewportSize(500, 500))
-	_, err := helper.Page.Goto(helper.server.PREFIX + "/grid.html")
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.SetViewportSize(500, 500))
+	_, err := page.Goto(server.PREFIX + "/grid.html")
 	require.NoError(t, err)
-	element_handle, err := helper.Page.QuerySelector(".box:nth-of-type(13)")
+	element_handle, err := page.QuerySelector(".box:nth-of-type(13)")
 	require.NoError(t, err)
 	box, err := element_handle.BoundingBox()
 	require.NoError(t, err)
