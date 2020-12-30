@@ -16,14 +16,14 @@ func TestBrowserContextNewPage(t *testing.T) {
 func TestBrowserContextClose(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t, false)
-	context, err := browser.NewContext()
+	context2, err := browser.NewContext()
 	require.NoError(t, err)
 	require.Equal(t, 2, len(browser.Contexts()))
 	require.Equal(t, context, browser.Contexts()[0])
-	require.Equal(t, context, browser.Contexts()[1])
+	require.Equal(t, context2, browser.Contexts()[1])
 	require.NoError(t, context.Close())
 	require.Equal(t, 1, len(browser.Contexts()))
-	require.NoError(t, context.Close())
+	require.NoError(t, context2.Close())
 	require.Equal(t, 0, len(browser.Contexts()))
 }
 
