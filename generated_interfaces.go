@@ -1195,10 +1195,15 @@ type Touchscreen interface {
 
 // The WebSocket class represents websocket connections in the page.
 type WebSocket interface {
+	EventEmitter
 	// Indicates that the web socket has been closed.
 	IsClosed() bool
 	// Contains the URL of the WebSocket.
 	URL() string
+	// Returns the event data value.
+	// Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy
+	// value. Will throw an error if the webSocket is closed before the event is fired.
+	WaitForEvent(event string, predicate ...interface{}) interface{}
 }
 
 // When browser context is created with the `videosPath` option, each page has a video object associated with it.

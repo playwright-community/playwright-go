@@ -35,7 +35,7 @@ jobs:
     - name: Test
       env:
         BROWSER: ${{ matrix.browser }}
-      run: go test -v -covermode atomic -coverprofile=covprofile --race ./...
+      run: go test -v -covermode atomic -coverprofile=covprofile -coverpkg="github.com/mxschmitt/playwright-go" --race ./...
     - name: Send coverage
       env:
         COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
