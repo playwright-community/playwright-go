@@ -120,6 +120,9 @@ func TestWebSocketShouldEmitCloseEvents(t *testing.T) {
 	require.NoError(t, err)
 	ws := wsEvent.(playwright.WebSocket)
 	require.Equal(t, ws.URL(), fmt.Sprintf("ws://localhost:%d/ws", wsServer.PORT))
+	if !ws.IsClosed() {
+		ws.WaitForEvent("close")
+	}
 	require.True(t, ws.IsClosed())
 }
 
