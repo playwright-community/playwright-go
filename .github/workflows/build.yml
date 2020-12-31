@@ -35,11 +35,11 @@ jobs:
     - name: Test
       env:
         BROWSER: ${{ matrix.browser }}
-      run: go test -v -covermode atomic -coverprofile=covprofile --race ./...
+      run: go test -v -covermode atomic -coverprofile=covprofile -coverpkg="github.com/mxschmitt/playwright-go" --race ./...
     - name: Send coverage
       env:
         COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: go run github.com/mattn/goveralls -coverprofile=covprofile -package="github.com/mxschmitt/playwright-go" -service=github -parallel -flagname="${{ matrix.os }}-${{ matrix.browser }}"
+      run: go run github.com/mattn/goveralls -coverprofile=covprofile -service=github -parallel -flagname="${{ matrix.os }}-${{ matrix.browser }}"
   finish:
     needs: test
     runs-on: ubuntu-latest
