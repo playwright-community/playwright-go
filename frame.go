@@ -12,7 +12,7 @@ type frameImpl struct {
 	channelOwner
 	sync.RWMutex
 	detached    bool
-	page        Page
+	page        *pageImpl
 	name        string
 	url         string
 	parentFrame Frame
@@ -175,7 +175,7 @@ func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (
 		option.WaitUntil = String("load")
 	}
 	if option.Timeout == nil {
-		option.Timeout = Int(f.page.(*pageImpl).timeoutSettings.NavigationTimeout())
+		option.Timeout = Int(f.page.timeoutSettings.NavigationTimeout())
 	}
 	deadline := time.After(time.Duration(*option.Timeout) * time.Millisecond)
 	var matcher *urlMatcher

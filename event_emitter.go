@@ -1,6 +1,7 @@
 package playwright
 
 import (
+	"math"
 	"reflect"
 	"sync"
 )
@@ -37,7 +38,7 @@ func (e *eventEmitter) Emit(name string, payload ...interface{}) {
 	}
 	for _, handler := range e.events[name].once {
 		handlerV := reflect.ValueOf(handler)
-		handlerV.Call(payloadV[:handlerV.Type().NumIn()])
+		handlerV.Call(payloadV[:int(math.Min(float64(handlerV.Type().NumIn()), float64(len(payloadV))))])
 	}
 	e.events[name].once = make([]interface{}, 0)
 }

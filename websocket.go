@@ -3,6 +3,7 @@ package playwright
 import (
 	"encoding/base64"
 	"log"
+	"reflect"
 )
 
 type webSocketImpl struct {
@@ -10,8 +11,8 @@ type webSocketImpl struct {
 	isClosed bool
 }
 
-func (w *webSocketImpl) URL() string {
-	return w.initializer["url"].(string)
+func (ws *webSocketImpl) URL() string {
+	return ws.initializer["url"].(string)
 }
 
 func newWebsocket(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *webSocketImpl {
@@ -24,13 +25,13 @@ func newWebsocket(parent *channelOwner, objectType string, guid string, initiali
 	ws.channel.On(
 		"frameSent",
 		func(params map[string]interface{}) {
-			ws.onFrameSent(params["opcode"].(int), params["data"].(string))
+			ws.onFrameSent(params["opcode"].(float64), params["data"].(string))
 		},
 	)
 	ws.channel.On(
 		"frameReceived",
 		func(params map[string]interface{}) {
-			ws.onFrameReceived(params["opcode"].(int), params["data"].(string))
+			ws.onFrameReceived(params["opcode"].(float64), params["data"].(string))
 		},
 	)
 	ws.channel.On(
@@ -42,7 +43,7 @@ func newWebsocket(parent *channelOwner, objectType string, guid string, initiali
 	return ws
 }
 
-func (ws *webSocketImpl) onFrameSent(opcode int, data string) {
+func (ws *webSocketImpl) onFrameSent(opcode float64, data string) {
 	if opcode == 2 {
 		payload, err := base64.StdEncoding.DecodeString(data)
 		if err != nil {
@@ -51,11 +52,11 @@ func (ws *webSocketImpl) onFrameSent(opcode int, data string) {
 		}
 		ws.Emit("framesent", payload)
 	} else {
-		ws.Emit("framesent", data)
+		ws.Emit("framesent", []byte(data))
 	}
 }
 
-func (ws *webSocketImpl) onFrameReceived(opcode int, data string) {
+func (ws *webSocketImpl) onFrameReceived(opcode float64, data string) {
 	if opcode == 2 {
 		payload, err := base64.StdEncoding.DecodeString(data)
 		if err != nil {
@@ -64,8 +65,31 @@ func (ws *webSocketImpl) onFrameReceived(opcode int, data string) {
 		}
 		ws.Emit("framereceived", payload)
 	} else {
-		ws.Emit("framereceived", data)
+		ws.Emit("framereceived", []byte(data))
 	}
+}
+
+func (ws *webSocketImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
+	return <-ws.WaitForEventCh(event, predicate...)
+}
+
+func (ws *webSocketImpl) WaitForEventCh(event string, predicate ...interface{}) <-chan interface{} {
+	evChan := make(chan interface{}, 1)
+	ws.Once(event, func(ev ...interface{}) {
+		if len(predicate) == 0 {
+			if len(ev) == 1 {
+				evChan <- ev[0]
+			} else {
+				evChan <- nil
+			}
+		} else if len(predicate) == 1 {
+			result := reflect.ValueOf(predicate[0]).Call([]reflect.Value{reflect.ValueOf(ev[0])})
+			if result[0].Bool() {
+				evChan <- ev[0]
+			}
+		}
+	})
+	return evChan
 }
 
 func (w *webSocketImpl) IsClosed() bool {

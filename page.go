@@ -369,11 +369,11 @@ func (p *pageImpl) WaitForResponse(url interface{}, options ...interface{}) Resp
 }
 
 func (p *pageImpl) ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error) {
-	var predicate interface{}
+	args := []interface{}{event}
 	if len(predicates) == 1 {
-		predicate = predicates[0]
+		args = append(args, predicates[0])
 	}
-	return newExpectWrapper(p.WaitForEvent, []interface{}{event, predicate}, cb)
+	return newExpectWrapper(p.WaitForEvent, args, cb)
 }
 
 func (p *pageImpl) ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (Response, error) {
@@ -590,6 +590,10 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 	bt.channel.On("video", func(params map[string]interface{}) {
 		bt.Video().(*videoImpl).setRelativePath(params["relativePath"].(string))
 	})
+	bt.channel.On("webSocket", func(ev map[string]interface{}) {
+		bt.Emit("websocket", fromChannel(ev["webSocket"]).(*webSocketImpl))
+	})
+
 	bt.channel.On("worker", func(ev map[string]interface{}) {
 		worker := fromChannel(ev["worker"]).(*workerImpl)
 		worker.page = bt
