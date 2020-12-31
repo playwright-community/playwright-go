@@ -147,3 +147,15 @@ func TestKeyboardInsertPress(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, result.(bool))
 }
+
+func TestTouchscreenTap(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent(`<button onclick="window.clicked=true" style="width: 500px; height: 500px;"/>`))
+	require.NoError(t, page.Touchscreen().Tap(100, 100))
+	result, err := page.Evaluate("window.clicked")
+	require.NoError(t, err)
+	require.True(t, result.(bool))
+}

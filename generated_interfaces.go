@@ -323,8 +323,19 @@ type ElementHandle interface {
 	// are resolved relative to the current working directory. For
 	// empty array, clears the selected files.
 	SetInputFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error
+	// This method taps the element by performing the following steps:
+	// Wait for actionability checks on the element, unless `force` option is set.
+	// Scroll the element into view if needed.
+	// Use page.touchscreen to tap in the center of the element, or the specified `position`.
+	// Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+	// If the element is detached from the DOM at any moment during the action, this method rejects.
+	// When all steps combined have not finished during the specified `timeout`, this method rejects with a TimeoutError.
+	// Passing zero timeout disables this.
+	// **NOTE** `elementHandle.tap()` requires that the `hasTouch` option of the browser context be set to true.
+	Tap(options ...ElementHandleTapOptions) error
 	// Returns the `node.textContent`.
 	TextContent() (string, error)
+	ToString() string
 	// Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
 	// To press a special key, like `Control` or `ArrowDown`, use elementHandle.press(key[, options]).
 	// An example of typing into a text field and then submitting the form:
@@ -718,6 +729,7 @@ type Mouse interface {
 type Page interface {
 	Mouse() Mouse
 	Keyboard() Keyboard
+	Touchscreen() Touchscreen
 	EventEmitter
 	// Adds a script which would be evaluated in one of the following scenarios:
 	// Whenever the page is navigated.
@@ -1174,8 +1186,17 @@ type Route interface {
 	Request() Request
 }
 
+// The Touchscreen class operates in main-frame CSS pixels relative to the top-left corner of the viewport. Methods on the
+// touchscreen can only be used in browser contexts that have been intialized with `hasTouch` set to true.
+type Touchscreen interface {
+	// Dispatches a `touchstart` and `touchend` event with a single touch at the position (`x`,`y`).
+	Tap(x int, y int) error
+}
+
 // The WebSocket class represents websocket connections in the page.
 type WebSocket interface {
+	// Indicates that the web socket has been closed.
+	IsClosed() bool
 	// Contains the URL of the WebSocket.
 	URL() string
 }

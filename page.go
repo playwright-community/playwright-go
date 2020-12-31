@@ -14,6 +14,7 @@ type pageImpl struct {
 	video           *videoImpl
 	mouse           *mouseImpl
 	keyboard        *keyboardImpl
+	touchscreen     *touchscreenImpl
 	timeoutSettings *timeoutSettings
 	browserContext  *browserContextImpl
 	frames          []Frame
@@ -490,6 +491,10 @@ func (p *pageImpl) Mouse() Mouse {
 	return p.mouse
 }
 
+func (p *pageImpl) Touchscreen() Touchscreen {
+	return p.touchscreen
+}
+
 func newPage(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *pageImpl {
 	bt := &pageImpl{
 		mainFrame: fromChannel(initializer["mainFrame"]).(*frameImpl),
@@ -506,6 +511,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.mouse = newMouse(bt.channel)
 	bt.keyboard = newKeyboard(bt.channel)
+	bt.touchscreen = newTouchscreen(bt.channel)
 	bt.channel.On("close", func(ev map[string]interface{}) {
 		bt.isClosed = true
 		bt.Emit("close")

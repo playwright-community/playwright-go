@@ -142,3 +142,21 @@ func TestElementBoundingBox(t *testing.T) {
 	require.Equal(t, 50, box.Width)
 	require.Equal(t, 50, box.Height)
 }
+
+func TestElementHandleTap(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent("<input id='checkbox' type='checkbox'></input>"))
+	value, err := page.EvalOnSelector("input", "el => el.checked")
+	require.NoError(t, err)
+	require.Equal(t, false, value)
+
+	elemHandle, err := page.QuerySelector("#checkbox")
+	require.NoError(t, err)
+	require.NoError(t, elemHandle.Tap())
+	value, err = page.EvalOnSelector("input", "el => el.checked")
+	require.NoError(t, err)
+	require.Equal(t, true, value)
+}

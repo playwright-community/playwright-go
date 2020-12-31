@@ -282,9 +282,17 @@
 			"files []InputFile, options ...ElementHandleSetInputFilesOptions",
 			"error"
 		],
+		"Tap": [
+			"options ...ElementHandleTapOptions",
+			"error"
+		],
 		"TextContent": [
 			null,
 			"(string, error)"
+		],
+		"ToString": [
+			null,
+			"string"
 		],
 		"Type": [
 			"value string, options ...ElementHandleTypeOptions",
@@ -591,6 +599,10 @@
 		"Keyboard": [
 			null,
 			"Keyboard"
+		],
+		"Touchscreen": [
+			null,
+			"Touchscreen"
 		],
 		"EventEmitter": [],
 		"AddInitScript": [
@@ -996,7 +1008,17 @@
 			"Request"
 		]
 	},
+	"Touchscreen": {
+		"Tap": [
+			"x int, y int",
+			"error"
+		]
+	},
 	"WebSocket": {
+		"IsClosed": [
+			null,
+			"bool"
+		],
 		"URL": [
 			null,
 			"string"

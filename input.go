@@ -92,3 +92,18 @@ func (m *keyboardImpl) Press(key string, options ...KeyboardPressOptions) error 
 	}, options)
 	return err
 }
+
+type touchscreenImpl struct {
+	channel *channel
+}
+
+func newTouchscreen(channel *channel) *touchscreenImpl {
+	return &touchscreenImpl{
+		channel: channel,
+	}
+}
+
+func (t *touchscreenImpl) Tap(x int, y int) error {
+	_, err := t.channel.Send("touchscreenTap", map[string]interface{}{"x": x, "y": y})
+	return err
+}
