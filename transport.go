@@ -33,12 +33,12 @@ func (t *transport) Start() error {
 
 		msg := &Message{}
 		if err := json.NewDecoder(io.LimitReader(reader, int64(length))).Decode(&msg); err != nil {
-			return fmt.Errorf("could not parse json: %w", err)
+			return fmt.Errorf("could not decode json: %w", err)
 		}
 		if os.Getenv("DEBUGP") != "" {
 			fmt.Print("RECV>")
 			if err := json.NewEncoder(os.Stderr).Encode(msg); err != nil {
-				log.Printf("could not create json: %v", err)
+				log.Printf("could not encode json: %v", err)
 			}
 		}
 		t.dispatch(msg)
@@ -74,7 +74,7 @@ func (t *transport) Send(message map[string]interface{}) error {
 	if os.Getenv("DEBUGP") != "" {
 		fmt.Print("SEND>")
 		if err := json.NewEncoder(os.Stderr).Encode(message); err != nil {
-			log.Printf("could not create json: %v", err)
+			log.Printf("could not encode json: %v", err)
 		}
 	}
 	lengthPadding := make([]byte, 4)
