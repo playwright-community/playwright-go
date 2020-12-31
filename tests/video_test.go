@@ -12,19 +12,19 @@ import (
 
 func TestVideoShouldWork(t *testing.T) {
 	recordVideoDir := t.TempDir()
-	helper := newContextWithOptions(t, playwright.BrowserNewContextOptions{
+	newContextWithOptions(t, playwright.BrowserNewContextOptions{
 		RecordVideo: &playwright.BrowserNewContextRecordVideo{
 			Dir: playwright.String(recordVideoDir),
 		},
 	})
-	defer helper.AfterEach()
-	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	_, err = helper.Page.Reload()
+	_, err = page.Reload()
 	require.NoError(t, err)
-	_, err = helper.Page.Reload()
+	_, err = page.Reload()
 	require.NoError(t, err)
-	require.NoError(t, helper.Context.Close())
+	require.NoError(t, context.Close())
 
 	files, err := ioutil.ReadDir(recordVideoDir)
 	require.NoError(t, err)

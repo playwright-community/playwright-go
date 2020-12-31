@@ -8,32 +8,32 @@ import (
 )
 
 func TestBrowserIsConnected(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	require.True(t, helper.Browser.IsConnected())
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.True(t, browser.IsConnected())
 }
 
 func TestBrowserVersion(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	require.Greater(t, len(helper.Browser.Version()), 2)
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.Greater(t, len(browser.Version()), 2)
 }
 
 func TestBrowserNewContext(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	require.Equal(t, 1, len(helper.Context.Pages()))
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.Equal(t, 1, len(context.Pages()))
 }
 
 func TestBrowserNewPage(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	require.Equal(t, 1, len(helper.Browser.Contexts()))
-	page, err := helper.Browser.NewPage()
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.Equal(t, 1, len(browser.Contexts()))
+	page, err := browser.NewPage()
 	require.NoError(t, err)
-	require.Equal(t, 2, len(helper.Browser.Contexts()))
+	require.Equal(t, 2, len(browser.Contexts()))
 	require.NoError(t, page.Close())
-	require.Equal(t, 1, len(helper.Browser.Contexts()))
+	require.Equal(t, 1, len(browser.Contexts()))
 }
 
 func TestBrowserClose(t *testing.T) {

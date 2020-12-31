@@ -8,13 +8,13 @@ import (
 )
 
 func TestConsoleShouldWork(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
+	BeforeEach(t)
+	defer AfterEach(t)
 	messages := make(chan playwright.ConsoleMessage, 1)
-	helper.Page.Once("console", func(message playwright.ConsoleMessage) {
+	page.Once("console", func(message playwright.ConsoleMessage) {
 		messages <- message
 	})
-	_, err := helper.Page.Evaluate(`() => console.log("hello", 5, {foo: "bar"})`)
+	_, err := page.Evaluate(`() => console.log("hello", 5, {foo: "bar"})`)
 	require.NoError(t, err)
 	message := <-messages
 	require.Equal(t, message.Text(), "hello 5 JSHandle@object")
@@ -34,13 +34,13 @@ func TestConsoleShouldWork(t *testing.T) {
 }
 
 func TestConsoleShouldEmitSameLogTwice(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
+	BeforeEach(t)
+	defer AfterEach(t)
 	messages := make(chan string, 2)
-	helper.Page.On("console", func(message playwright.ConsoleMessage) {
+	page.On("console", func(message playwright.ConsoleMessage) {
 		messages <- message.Text()
 	})
-	_, err := helper.Page.Evaluate(`() => { for (let i = 0; i < 2; ++i ) console.log("hello"); } `)
+	_, err := page.Evaluate(`() => { for (let i = 0; i < 2; ++i ) console.log("hello"); } `)
 	require.NoError(t, err)
 	m1 := <-messages
 	m2 := <-messages
@@ -48,27 +48,27 @@ func TestConsoleShouldEmitSameLogTwice(t *testing.T) {
 }
 
 func TestConsoleShouldUseTextForStr(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
+	BeforeEach(t)
+	defer AfterEach(t)
 	messages := make(chan playwright.ConsoleMessage, 1)
-	helper.Page.On("console", func(message playwright.ConsoleMessage) {
+	page.On("console", func(message playwright.ConsoleMessage) {
 		messages <- message
 	})
-	_, err := helper.Page.Evaluate(`() => console.log("Hello world")`)
+	_, err := page.Evaluate(`() => console.log("Hello world")`)
 	require.NoError(t, err)
 	message := <-messages
 	require.Equal(t, "Hello world", message.String())
 }
 
 func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
+	BeforeEach(t)
+	defer AfterEach(t)
 	messagesChan := make(chan playwright.ConsoleMessage, 6)
-	helper.Page.On("console", func(message playwright.ConsoleMessage) {
+	page.On("console", func(message playwright.ConsoleMessage) {
 		messagesChan <- message
 	})
 	// All console events will be reported before 'page.evaluate' is finished.
-	_, err := helper.Page.Evaluate(
+	_, err := page.Evaluate(
 		`() => {
       // A pair of time/timeEnd generates only one Console API call.
       console.time('calling console.time');
@@ -105,28 +105,28 @@ func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 }
 
 func TestConsoleShouldNotFailForWindowObjects(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
+	BeforeEach(t)
+	defer AfterEach(t)
 	messages := make(chan playwright.ConsoleMessage, 1)
-	helper.Page.Once("console", func(message playwright.ConsoleMessage) {
+	page.Once("console", func(message playwright.ConsoleMessage) {
 		messages <- message
 	})
-	_, err := helper.Page.Evaluate("() => console.error(window)")
+	_, err := page.Evaluate("() => console.error(window)")
 	require.NoError(t, err)
 	message := <-messages
 	require.Equal(t, "JSHandle@object", message.Text())
 }
 
 func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
+	BeforeEach(t)
+	defer AfterEach(t)
 	messages := make(chan playwright.ConsoleMessage, 1)
-	helper.Page.Once("console", func(message playwright.ConsoleMessage) {
+	page.Once("console", func(message playwright.ConsoleMessage) {
 		messages <- message
 	})
-	_, err := helper.Page.Goto("about:blank")
+	_, err := page.Goto("about:blank")
 	require.NoError(t, err)
-	_, err = helper.Page.Evaluate("url => fetch(url).catch(e => {})", helper.server.EMPTY_PAGE)
+	_, err = page.Evaluate("url => fetch(url).catch(e => {})", server.EMPTY_PAGE)
 	require.NoError(t, err)
 	message := <-messages
 	require.Contains(t, message.Text(), "Access-Control-Allow-Origin")
@@ -134,10 +134,10 @@ func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
 }
 
 func TestConsoleShouldHaveLocation(t *testing.T) {
-	helper := BeforeEach(t)
-	defer helper.AfterEach()
-	messageEvent, err := helper.Page.ExpectEvent("console", func() error {
-		_, err := helper.Page.Goto(helper.server.PREFIX + "/consolelog.html")
+	BeforeEach(t)
+	defer AfterEach(t)
+	messageEvent, err := page.ExpectEvent("console", func() error {
+		_, err := page.Goto(server.PREFIX + "/consolelog.html")
 		return err
 	}, func(m playwright.ConsoleMessage) bool {
 		return m.Text() == "yellow"
@@ -145,6 +145,6 @@ func TestConsoleShouldHaveLocation(t *testing.T) {
 	require.NoError(t, err)
 	message := messageEvent.(playwright.ConsoleMessage)
 	require.Equal(t, message.Type(), "log")
-	require.Equal(t, helper.server.PREFIX+"/consolelog.html", message.Location().URL)
+	require.Equal(t, server.PREFIX+"/consolelog.html", message.Location().URL)
 	require.Equal(t, 7, message.Location().LineNumber)
 }
