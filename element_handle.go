@@ -259,6 +259,15 @@ func (e *elementHandleImpl) Screenshot(options ...ElementHandleScreenshotOptions
 	return image, nil
 }
 
+func (e *elementHandleImpl) Tap(options ...ElementHandleTapOptions) error {
+	_, err := e.channel.Send("tap", options)
+	return err
+}
+
+func (e *elementHandleImpl) ToString() string {
+	return e.jsHandleImpl.String()
+}
+
 func newElementHandle(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *elementHandleImpl {
 	bt := &elementHandleImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
