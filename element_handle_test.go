@@ -149,11 +149,12 @@ func TestElementHandleTap(t *testing.T) {
 	_, err := helper.Page.Goto(helper.server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, helper.Page.SetContent("<input id='checkbox' type='checkbox'></input>"))
-	elemHandle, err := helper.Page.QuerySelector("#checkbox")
 	value, err := helper.Page.EvalOnSelector("input", "el => el.checked")
 	require.NoError(t, err)
 	require.Equal(t, false, value)
 
+	elemHandle, err := helper.Page.QuerySelector("#checkbox")
+	require.NoError(t, err)
 	require.NoError(t, elemHandle.Tap())
 	value, err = helper.Page.EvalOnSelector("input", "el => el.checked")
 	require.NoError(t, err)
