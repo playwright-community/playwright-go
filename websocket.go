@@ -19,7 +19,9 @@ func newWebsocket(parent *channelOwner, objectType string, guid string, initiali
 	ws := &webSocketImpl{}
 	ws.createChannelOwner(ws, parent, objectType, guid, initializer)
 	ws.channel.On("close", func() {
+		ws.Lock()
 		ws.isClosed = true
+		ws.Unlock()
 		ws.Emit("close")
 	})
 	ws.channel.On(
@@ -93,5 +95,7 @@ func (ws *webSocketImpl) WaitForEventCh(event string, predicate ...interface{}) 
 }
 
 func (w *webSocketImpl) IsClosed() bool {
+	w.RLock()
+	defer w.RUnlock()
 	return w.isClosed
 }

@@ -1,6 +1,9 @@
 package playwright
 
+import "sync"
+
 type channelOwner struct {
+	sync.RWMutex
 	eventEmitter
 	objectType  string
 	guid        string
