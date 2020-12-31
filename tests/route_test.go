@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"path/filepath"
 	"testing"
 
 	"github.com/mxschmitt/playwright-go"
@@ -157,7 +156,7 @@ func TestRouteFulfillPath(t *testing.T) {
 	intercepted := make(chan bool, 1)
 	err := page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
-			Path: playwright.String(filepath.Join(assetDir, "pptr.png")),
+			Path: playwright.String(Asset("pptr.png")),
 		}))
 		intercepted <- true
 	})

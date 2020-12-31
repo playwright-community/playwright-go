@@ -26,7 +26,6 @@ var isFirefox bool
 var isWebKit bool
 var server *testServer
 var browserType playwright.BrowserType
-var assetDir string
 var utils *testUtils
 
 func init() {
@@ -66,7 +65,6 @@ func BeforeAll() {
 	isFirefox = browserName == "firefox"
 	isWebKit = browserName == "webkit"
 	server = newTestServer()
-	assetDir = "tests/assets/"
 	utils = &testUtils{}
 }
 
@@ -99,7 +97,7 @@ func Asset(path string) string {
 	if err != nil {
 		log.Fatalf("could not get cwd: %v", err)
 	}
-	return filepath.Join(cwd, "tests", "assets", path)
+	return filepath.Join(cwd, "assets", path)
 }
 
 func AfterEach(t *testing.T, closeContext ...bool) {
@@ -157,7 +155,7 @@ func (t *testServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
 		route(w, r)
 		return
 	}
-	http.FileServer(http.Dir("./tests/assets")).ServeHTTP(w, r)
+	http.FileServer(http.Dir("assets")).ServeHTTP(w, r)
 }
 
 func (s *testServer) SetRoute(path string, f http.HandlerFunc) {
