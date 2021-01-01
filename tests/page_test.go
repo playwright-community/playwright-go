@@ -746,3 +746,16 @@ func TestPageTap(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, true, value)
 }
+
+func TestPagePageError(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	errInterface, err := page.ExpectEvent("pageerror", func() error {
+		_, err := page.Goto(server.PREFIX + "/error.html")
+		return err
+	})
+	require.NoError(t, err)
+	pageError := errInterface.(*playwright.Error)
+	require.Equal(t, "Fancy error!", pageError.Message)
+	require.Contains(t, pageError.Stack, "myscript.js:14:16")
+}
