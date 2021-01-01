@@ -313,21 +313,7 @@ func (p *pageImpl) Click(selector string, options ...PageClickOptions) error {
 }
 
 func (p *pageImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	evChan := make(chan interface{})
-	handler := func(ev ...interface{}) {
-		if len(predicate) == 0 {
-			evChan <- ev[0]
-		} else if len(predicate) == 1 {
-			result := reflect.ValueOf(predicate[0]).Call([]reflect.Value{reflect.ValueOf(ev[0])})
-			if result[0].Bool() {
-				evChan <- ev[0]
-			}
-		}
-	}
-	p.On(event, handler)
-	defer close(evChan)
-	defer p.RemoveListener(event, handler)
-	return <-evChan
+	return <-waitForEvent(p, event, predicate...)
 }
 
 func (p *pageImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error) {

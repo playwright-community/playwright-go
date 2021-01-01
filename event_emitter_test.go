@@ -76,3 +76,15 @@ func TestEventEmitterRemoveKeepExisting(t *testing.T) {
 	handler.RemoveListener(testEventName, func(...interface{}) {})
 	require.Equal(t, 2, handler.ListenerCount(testEventName))
 }
+
+func TestEventEmitterOnLessArgsAcceptingReceiver(t *testing.T) {
+	handler := &eventEmitter{}
+	handler.initEventEmitter()
+	wasCalled := make(chan bool, 1)
+	require.Nil(t, handler.events[testEventName])
+	handler.Once(testEventName, func(ev ...interface{}) {
+		wasCalled <- true
+	})
+	handler.Emit(testEventName)
+	<-wasCalled
+}

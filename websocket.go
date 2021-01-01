@@ -3,7 +3,6 @@ package playwright
 import (
 	"encoding/base64"
 	"log"
-	"reflect"
 )
 
 type webSocketImpl struct {
@@ -72,26 +71,7 @@ func (ws *webSocketImpl) onFrameReceived(opcode float64, data string) {
 }
 
 func (ws *webSocketImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	return <-ws.WaitForEventCh(event, predicate...)
-}
-
-func (ws *webSocketImpl) WaitForEventCh(event string, predicate ...interface{}) <-chan interface{} {
-	evChan := make(chan interface{}, 1)
-	ws.Once(event, func(ev ...interface{}) {
-		if len(predicate) == 0 {
-			if len(ev) == 1 {
-				evChan <- ev[0]
-			} else {
-				evChan <- nil
-			}
-		} else if len(predicate) == 1 {
-			result := reflect.ValueOf(predicate[0]).Call([]reflect.Value{reflect.ValueOf(ev[0])})
-			if result[0].Bool() {
-				evChan <- ev[0]
-			}
-		}
-	})
-	return evChan
+	return <-waitForEvent(ws, event, predicate...)
 }
 
 func (w *webSocketImpl) IsClosed() bool {

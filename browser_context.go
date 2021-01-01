@@ -3,7 +3,6 @@ package playwright
 import (
 	"fmt"
 	"io/ioutil"
-	"reflect"
 	"sync"
 )
 
@@ -140,18 +139,7 @@ func (b *browserContextImpl) AddInitScript(options BrowserContextAddInitScriptOp
 }
 
 func (b *browserContextImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	evChan := make(chan interface{}, 1)
-	b.Once(event, func(ev ...interface{}) {
-		if len(predicate) == 0 {
-			evChan <- ev[0]
-		} else if len(predicate) == 1 {
-			result := reflect.ValueOf(predicate[0]).Call([]reflect.Value{reflect.ValueOf(ev[0])})
-			if result[0].Bool() {
-				evChan <- ev[0]
-			}
-		}
-	})
-	return <-evChan
+	return <-waitForEvent(b, event, predicate...)
 }
 
 func (b *browserContextImpl) ExpectEvent(event string, cb func() error) (interface{}, error) {

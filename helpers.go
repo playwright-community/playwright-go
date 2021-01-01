@@ -297,3 +297,30 @@ func newTimeoutSettings(parent *timeoutSettings) *timeoutSettings {
 		navigationTimeout: DEFAULT_TIMEOUT,
 	}
 }
+
+func waitForEvent(emitter EventEmitter, event string, predicate ...interface{}) <-chan interface{} {
+	evChan := make(chan interface{}, 1)
+	removeHandler := make(chan bool, 1)
+	handler := func(ev ...interface{}) {
+		if len(predicate) == 0 {
+			if len(ev) == 1 {
+				evChan <- ev[0]
+			} else {
+				evChan <- nil
+			}
+			removeHandler <- true
+		} else if len(predicate) == 1 {
+			result := reflect.ValueOf(predicate[0]).Call([]reflect.Value{reflect.ValueOf(ev[0])})
+			if result[0].Bool() {
+				evChan <- ev[0]
+				removeHandler <- true
+			}
+		}
+	}
+	go func() {
+		<-removeHandler
+		emitter.RemoveListener(event, handler)
+	}()
+	emitter.On(event, handler)
+	return evChan
+}
