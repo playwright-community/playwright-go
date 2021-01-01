@@ -757,5 +757,12 @@ func TestPagePageError(t *testing.T) {
 	require.NoError(t, err)
 	pageError := errInterface.(*playwright.Error)
 	require.Equal(t, "Fancy error!", pageError.Message)
-	require.Contains(t, pageError.Stack, "myscript.js:14:16")
+
+	stack, err := page.Evaluate("() => window['e'].stack")
+	require.NoError(t, err)
+	// Note that WebKit reports the stack of the 'throw' statement instead of the Error constructor call.
+	if isWebKit {
+		stack = strings.Replace(stack.(string), "14:25", "15:19", -1)
+	}
+	require.Equal(t, pageError.Stack, stack)
 }
