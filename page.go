@@ -556,6 +556,14 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		}
 		bt.Emit("frameDetached", frame)
 	})
+	bt.channel.On(
+		"pageError",
+		func(params map[string]interface{}) {
+			err := errorPayload{}
+			remapMapToStruct(params["error"].(map[string]interface{})["error"], &err)
+			bt.Emit("pageerror", parseError(err))
+		},
+	)
 	bt.channel.On("popup", func(ev map[string]interface{}) {
 		bt.Emit("popup", fromChannel(ev["page"]))
 	})

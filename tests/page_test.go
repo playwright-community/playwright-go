@@ -746,3 +746,23 @@ func TestPageTap(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, true, value)
 }
+
+func TestPagePageError(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	errInterface, err := page.ExpectEvent("pageerror", func() error {
+		_, err := page.Goto(server.PREFIX + "/error.html")
+		return err
+	})
+	require.NoError(t, err)
+	pageError := errInterface.(*playwright.Error)
+	require.Equal(t, "Fancy error!", pageError.Message)
+
+	stack, err := page.Evaluate("() => window['e'].stack")
+	require.NoError(t, err)
+	// Note that WebKit reports the stack of the 'throw' statement instead of the Error constructor call.
+	if isWebKit {
+		stack = strings.Replace(stack.(string), "14:25", "15:19", -1)
+	}
+	require.Equal(t, pageError.Stack, stack)
+}
