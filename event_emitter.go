@@ -32,14 +32,16 @@ func (e *eventEmitter) Emit(name string, payload ...interface{}) {
 		payloadV = append(payloadV, reflect.ValueOf(p))
 	}
 
-	for _, handler := range e.events[name].on {
-		handlerV := reflect.ValueOf(handler)
-		handlerV.Call(payloadV[:handlerV.Type().NumIn()])
+	callHandlers := func(handlers []interface{}) {
+		for _, handler := range handlers {
+			handlerV := reflect.ValueOf(handler)
+			handlerV.Call(payloadV[:int(math.Min(float64(handlerV.Type().NumIn()), float64(len(payloadV))))])
+		}
 	}
-	for _, handler := range e.events[name].once {
-		handlerV := reflect.ValueOf(handler)
-		handlerV.Call(payloadV[:int(math.Min(float64(handlerV.Type().NumIn()), float64(len(payloadV))))])
-	}
+
+	callHandlers(e.events[name].on)
+	callHandlers(e.events[name].once)
+
 	e.events[name].once = make([]interface{}, 0)
 }
 

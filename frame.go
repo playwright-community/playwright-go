@@ -3,7 +3,6 @@ package playwright
 import (
 	"fmt"
 	"io/ioutil"
-	"reflect"
 	"sync"
 	"time"
 )
@@ -147,23 +146,8 @@ func (f *frameImpl) WaitForLoadState(given ...string) {
 	<-succeed
 }
 
-func (f *frameImpl) WaitForEventCh(event string, predicate ...interface{}) <-chan interface{} {
-	evChan := make(chan interface{}, 1)
-	f.Once(event, func(ev ...interface{}) {
-		if len(predicate) == 0 {
-			evChan <- ev[0]
-		} else if len(predicate) == 1 {
-			result := reflect.ValueOf(predicate[0]).Call([]reflect.Value{reflect.ValueOf(ev[0])})
-			if result[0].Bool() {
-				evChan <- ev[0]
-			}
-		}
-	})
-	return evChan
-}
-
 func (f *frameImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	return <-f.WaitForEventCh(event, predicate...)
+	return <-waitForEvent(f, event, predicate...)
 }
 
 func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error) {
@@ -192,7 +176,7 @@ func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (
 	select {
 	case <-deadline:
 		return nil, fmt.Errorf("Timeout %dms exceeded.", *option.Timeout)
-	case eventData := <-f.WaitForEventCh("navigated", predicate):
+	case eventData := <-waitForEvent(f, "navigated", predicate):
 		event := eventData.(map[string]interface{})
 		if event["newDocument"] != nil && event["newDocument"].(map[string]interface{})["request"] != nil {
 			request := fromChannel(event["newDocument"].(map[string]interface{})["request"]).(*requestImpl)

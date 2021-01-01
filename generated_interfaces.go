@@ -585,7 +585,6 @@ type Frame interface {
 	// Passing zero timeout disables this.
 	Uncheck(selector string, options ...FrameUncheckOptions) error
 	WaitForEvent(event string, predicate ...interface{}) interface{}
-	WaitForEventCh(event string, predicate ...interface{}) <-chan interface{}
 	// Returns when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.
 	// The `waitForFunction` can be used to observe viewport size change:
 	// To pass an argument from Node.js to the predicate of `frame.waitForFunction` function:

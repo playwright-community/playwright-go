@@ -488,10 +488,6 @@
 			"event string, predicate ...interface{}",
 			"interface{}"
 		],
-		"WaitForEventCh": [
-			"event string, predicate ...interface{}",
-			"<-chan interface{}"
-		],
 		"WaitForFunction": [
 			"expression string, options ...FrameWaitForFunctionOptions",
 			"(JSHandle, error)"
