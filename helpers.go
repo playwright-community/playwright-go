@@ -182,7 +182,7 @@ func newURLMatcher(urlOrPredicate interface{}) *urlMatcher {
 	}
 }
 
-func (u *urlMatcher) Match(url string) bool {
+func (u *urlMatcher) Matches(url string) bool {
 	switch v := u.urlOrPredicate.(type) {
 	case *regexp.Regexp:
 		return v.MatchString(url)

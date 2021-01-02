@@ -171,7 +171,7 @@ func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (
 		if ev["error"] != nil {
 			print("error")
 		}
-		return matcher == nil || matcher.Match(ev["url"].(string))
+		return matcher == nil || matcher.Matches(ev["url"].(string))
 	}
 	select {
 	case <-deadline:

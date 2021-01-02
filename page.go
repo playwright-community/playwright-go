@@ -18,7 +18,6 @@ type pageImpl struct {
 	timeoutSettings *timeoutSettings
 	browserContext  *browserContextImpl
 	frames          []Frame
-	workersLock     sync.Mutex
 	workers         []Worker
 	mainFrame       Frame
 	routesMu        sync.Mutex
@@ -82,7 +81,7 @@ func (p *pageImpl) Frame(options PageFrameOptions) Frame {
 			return f
 		}
 
-		if options.URL != nil && matcher != nil && matcher.Match(f.URL()) {
+		if options.URL != nil && matcher != nil && matcher.Matches(f.URL()) {
 			return f
 		}
 	}
@@ -261,8 +260,6 @@ func (p *pageImpl) Title() (string, error) {
 }
 
 func (p *pageImpl) Workers() []Worker {
-	p.workersLock.Lock()
-	defer p.workersLock.Unlock()
 	return p.workers
 }
 
@@ -327,7 +324,7 @@ func (p *pageImpl) WaitForRequest(url interface{}, options ...interface{}) Reque
 	}
 	predicate := func(req *requestImpl) bool {
 		if matcher != nil {
-			return matcher.Match(req.URL())
+			return matcher.Matches(req.URL())
 		}
 		if len(options) == 1 {
 			return reflect.ValueOf(options[0]).Call([]reflect.Value{reflect.ValueOf(req)})[0].Bool()
@@ -344,7 +341,7 @@ func (p *pageImpl) WaitForResponse(url interface{}, options ...interface{}) Resp
 	}
 	predicate := func(req *responseImpl) bool {
 		if matcher != nil {
-			return matcher.Match(req.URL())
+			return matcher.Matches(req.URL())
 		}
 		if len(options) == 1 {
 			return reflect.ValueOf(options[0]).Call([]reflect.Value{reflect.ValueOf(req)})[0].Bool()
@@ -481,6 +478,11 @@ func (p *pageImpl) Touchscreen() Touchscreen {
 	return p.touchscreen
 }
 
+func (p *pageImpl) setBrowserContext(browserContext *browserContextImpl) {
+	p.browserContext = browserContext
+	p.timeoutSettings = newTimeoutSettings(browserContext.timeoutSettings)
+}
+
 func newPage(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *pageImpl {
 	bt := &pageImpl{
 		mainFrame: fromChannel(initializer["mainFrame"]).(*frameImpl),
@@ -573,7 +575,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		go func() {
 			bt.routesMu.Lock()
 			for _, handlerEntry := range bt.routes {
-				if handlerEntry.matcher.Match(request.URL()) {
+				if handlerEntry.matcher.Matches(request.URL()) {
 					handlerEntry.handler(route, request)
 					break
 				}

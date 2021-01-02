@@ -1,4 +1,7 @@
 {
+	"BindingCall": {
+		"Call": ["f BindingCallFunction", null]
+	},
 	"Browser": {
 		"EventEmitter": [],
 		"Close": [
@@ -935,6 +938,10 @@
 			null,
 			"(Response, error)"
 		],
+		"Timing": [
+			null,
+			"*ResourceTiming"
+		],
 		"URL": [
 			null,
 			"string"
@@ -988,7 +995,7 @@
 	},
 	"Route": {
 		"Abort": [
-			"errorCode *string",
+			"options ...RouteAbortOptions",
 			"error"
 		],
 		"Continue": [
@@ -1020,7 +1027,10 @@
 			null,
 			"string"
 		],
-		"WaitForEvent": ["event string, predicate ...interface{}", "interface{}"]
+		"WaitForEvent": [
+			"event string, predicate ...interface{}",
+			"interface{}"
+		]
 	},
 	"Video": {
 		"Path": [

@@ -16,10 +16,10 @@ func (d *dialogImpl) DefaultValue() string {
 	return d.initializer["defaultValue"].(string)
 }
 
-func (d *dialogImpl) Accept(texts ...string) error {
+func (d *dialogImpl) Accept(promptTextInput ...string) error {
 	var promptText *string
-	if len(texts) == 1 {
-		promptText = &texts[0]
+	if len(promptTextInput) == 1 {
+		promptText = &promptTextInput[0]
 	}
 	_, err := d.channel.Send("accept", map[string]interface{}{
 		"promptText": promptText,

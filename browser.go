@@ -7,14 +7,15 @@ import (
 
 type browserImpl struct {
 	channelOwner
-	isConnected bool
-	contexts    []BrowserContext
-	contextsMu  sync.Mutex
+	isConnected       bool
+	isClosedOrClosing bool
+	contexts          []BrowserContext
+	contextsMu        sync.Mutex
 }
 
 func (b *browserImpl) IsConnected() bool {
-	b.Lock()
-	defer b.Unlock()
+	b.RLock()
+	defer b.RUnlock()
 	return b.isConnected
 }
 
@@ -66,13 +67,15 @@ func (b *browserImpl) Version() string {
 func newBrowser(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserImpl {
 	bt := &browserImpl{
 		isConnected: true,
+		contexts:    make([]BrowserContext, 0),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.channel.On("close", func(ev map[string]interface{}) {
 		bt.Lock()
 		bt.isConnected = false
+		bt.isClosedOrClosing = true
 		bt.Unlock()
-		bt.Emit("close")
+		bt.Emit("disconnected")
 	})
 	return bt
 }

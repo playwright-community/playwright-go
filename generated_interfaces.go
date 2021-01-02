@@ -1,5 +1,9 @@
 package playwright
 
+type BindingCall interface {
+	Call(f BindingCallFunction)
+}
+
 // A Browser is created when Playwright connects to a browser instance, either through browserType.launch([options]) or
 // browserType.connect(params).
 // An example of using a Browser to create a Page:
@@ -1139,6 +1143,10 @@ type Request interface {
 	ResourceType() string
 	// Returns the matching Response object, or `null` if the response was not received due to error.
 	Response() (Response, error)
+	// Returns resource timing information for given request. Most of the timing values become available upon the response,
+	// `responseEnd` becomes available when request finishes. Find more information at Resource Timing
+	// API.
+	Timing() *ResourceTiming
 	// URL of the request.
 	URL() string
 }
@@ -1174,7 +1182,7 @@ type Response interface {
 // handle the route.
 type Route interface {
 	// Aborts the route's request.
-	Abort(errorCode *string) error
+	Abort(options ...RouteAbortOptions) error
 	// Continues route's request with optional overrides.
 	Continue(options ...RouteContinueOptions) error
 	// Fulfills route's request with given response.

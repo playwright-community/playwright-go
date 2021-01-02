@@ -3,6 +3,7 @@ package playwright
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"sync"
 )
 
@@ -13,8 +14,11 @@ type browserContextImpl struct {
 	options           *BrowserNewContextOptions
 	pagesMutex        sync.Mutex
 	pages             []Page
+	routes            []*routeHandlerEntry
 	ownedPage         Page
 	browser           *browserImpl
+	serviceWorkers    []*workerImpl
+	bindings          map[string]BindingCallFunction
 }
 
 func (b *browserContextImpl) Browser() Browser {
@@ -157,32 +161,68 @@ func (b *browserContextImpl) Close() error {
 	return err
 }
 
+func (b *browserContextImpl) onBinding(binding *bindingCallImpl) {
+	function := b.bindings[binding.initializer["name"].(string)]
+	if function == nil {
+		return
+	}
+	go binding.Call(function)
+}
+
+func (b *browserContextImpl) onClose() {
+	if b.browser != nil {
+		contexts := make([]BrowserContext, 0)
+		b.browser.contextsMu.Lock()
+		for _, context := range b.browser.contexts {
+			if context != b {
+				contexts = append(contexts, context)
+			}
+		}
+		b.browser.contexts = contexts
+		b.browser.contextsMu.Unlock()
+	}
+	b.Emit("close")
+}
+
+func (b *browserContextImpl) onPage(page *pageImpl) {
+	page.setBrowserContext(b)
+	b.pagesMutex.Lock()
+	b.pages = append(b.pages, page)
+	b.pagesMutex.Unlock()
+	b.Emit("page", page)
+}
+
+func (b *browserContextImpl) onRoute(route *routeImpl, request *requestImpl) {
+	for _, handlerEntry := range b.routes {
+		if handlerEntry.matcher.Matches(request.URL()) {
+			handlerEntry.handler(route, request)
+			break
+		}
+	}
+	go func() {
+		if err := route.Continue(); err != nil {
+			log.Printf("could not continue request: %v", err)
+		}
+	}()
+}
+
 func newBrowserContext(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserContextImpl {
 	bt := &browserContextImpl{
 		timeoutSettings: newTimeoutSettings(nil),
+		pages:           make([]Page, 0),
+		routes:          make([]*routeHandlerEntry, 0),
+		bindings:        make(map[string]BindingCallFunction),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
-	bt.channel.On("page", func(payload map[string]interface{}) {
-		page := fromChannel(payload["page"]).(*pageImpl)
-		page.browserContext = bt
-		bt.pagesMutex.Lock()
-		bt.pages = append(bt.pages, page)
-		bt.pagesMutex.Unlock()
-		bt.Emit("page", page)
+	bt.channel.On("bindingCall", func(params map[string]interface{}) {
+		bt.onBinding(fromChannel(params["binding"]).(*bindingCallImpl))
 	})
-	bt.channel.On("close", func() {
-		if bt.browser != nil {
-			contexts := make([]BrowserContext, 0)
-			bt.browser.contextsMu.Lock()
-			for _, context := range bt.browser.contexts {
-				if context != bt {
-					contexts = append(contexts, context)
-				}
-			}
-			bt.browser.contexts = contexts
-			bt.browser.contextsMu.Unlock()
-		}
-		bt.Emit("close")
+	bt.channel.On("close", bt.onClose)
+	bt.channel.On("page", func(payload map[string]interface{}) {
+		bt.onPage(fromChannel(payload["page"]).(*pageImpl))
+	})
+	bt.channel.On("route", func(params map[string]interface{}) {
+		bt.onRoute(fromChannel(params["route"]).(*routeImpl), fromChannel(params["request"]).(*requestImpl))
 	})
 	return bt
 }

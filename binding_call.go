@@ -1,11 +1,54 @@
 package playwright
 
-type BindingCall struct {
+import "log"
+
+type bindingCallImpl struct {
 	channelOwner
 }
 
-func newBindingCall(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *BindingCall {
-	bt := &BindingCall{}
+type BindingSource struct {
+	Context BrowserContext
+	Page    Page
+	Frame   Frame
+}
+
+type BindingCallFunction = func(source BindingSource, args ...interface{}) interface{}
+
+func (b *bindingCallImpl) Call(f BindingCallFunction) {
+	if r := recover(); r != nil {
+		if _, err := b.channel.Send("reject", map[string]interface{}{
+			"error": serializeError(r.(Error)),
+		}); err != nil {
+			log.Printf("could not resolve BindingCall: %v", err)
+		}
+	}
+	frame := fromChannel(b.initializer["frame"]).(*frameImpl)
+	source := BindingSource{
+		Context: frame.Page().Context(),
+		Page:    frame.Page(),
+		Frame:   frame,
+	}
+	var result interface{}
+	if handle, ok := b.initializer["handle"]; ok {
+		result = f(source, fromChannel(handle))
+	} else {
+		initializerArgs := b.initializer["args"].([]interface{})
+		funcArgs := []interface{}{}
+		for i := 0; i < len(initializerArgs); i++ {
+			funcArgs = append(funcArgs, parseResult(initializerArgs[i]))
+		}
+		result = f(source, funcArgs...)
+	}
+	_, err := b.channel.Send("resolve", map[string]interface{}{
+		"result": serializeArgument(result),
+	})
+	if err != nil {
+		log.Printf("could not resolve BindingCall: %v", err)
+	}
+}
+
+func newBindingCall(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *bindingCallImpl {
+	bt := &bindingCallImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	return bt
 }

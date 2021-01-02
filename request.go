@@ -9,8 +9,22 @@ type RequestFailure struct {
 	ErrorText string
 }
 
+type ResourceTiming struct {
+	StartTime             float64
+	DomainLookupStart     float64
+	DomainLookupEnd       float64
+	ConnectStart          float64
+	SecureConnectionStart float64
+	ConnectEnd            float64
+	RequestStart          float64
+	ResponseStart         float64
+	ResponseEnd           float64
+}
+
 type requestImpl struct {
 	channelOwner
+	timing         *ResourceTiming
+	headers        map[string]string
 	redirectedFrom Request
 	redirectedTo   Request
 	failureText    string
@@ -26,13 +40,6 @@ func (r *requestImpl) ResourceType() string {
 
 func (r *requestImpl) Method() string {
 	return r.initializer["method"].(string)
-}
-
-func (r *requestImpl) PostDataBuffer() ([]byte, error) {
-	if _, ok := r.initializer["postData"]; !ok {
-		return []byte{}, nil
-	}
-	return base64.StdEncoding.DecodeString(r.initializer["postData"].(string))
 }
 
 func (r *requestImpl) PostData() (string, error) {
@@ -51,8 +58,15 @@ func (r *requestImpl) PostDataJSON(v interface{}) error {
 	return json.Unmarshal(body, v)
 }
 
+func (r *requestImpl) PostDataBuffer() ([]byte, error) {
+	if _, ok := r.initializer["postData"]; !ok {
+		return nil, nil
+	}
+	return base64.StdEncoding.DecodeString(r.initializer["postData"].(string))
+}
+
 func (r *requestImpl) Headers() map[string]string {
-	return parseHeaders(r.initializer["headers"].([]interface{}))
+	return r.headers
 }
 
 func (r *requestImpl) Response() (Response, error) {
@@ -92,6 +106,10 @@ func (r *requestImpl) Failure() *RequestFailure {
 	}
 }
 
+func (r *requestImpl) Timing() *ResourceTiming {
+	return r.timing
+}
+
 func newRequest(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *requestImpl {
 	req := &requestImpl{}
 	req.createChannelOwner(req, parent, objectType, guid, initializer)
@@ -102,5 +120,17 @@ func newRequest(parent *channelOwner, objectType string, guid string, initialize
 	if req.redirectedFrom != nil {
 		req.redirectedFrom.(*requestImpl).redirectedTo = req
 	}
+	req.timing = &ResourceTiming{
+		StartTime:             0,
+		DomainLookupStart:     -1,
+		DomainLookupEnd:       -1,
+		ConnectStart:          -1,
+		SecureConnectionStart: -1,
+		ConnectEnd:            -1,
+		RequestStart:          -1,
+		ResponseStart:         -1,
+		ResponseEnd:           -1,
+	}
+	req.headers = parseHeaders(req.initializer["headers"].([]interface{}))
 	return req
 }
