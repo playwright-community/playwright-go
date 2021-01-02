@@ -12,6 +12,7 @@ type BindingSource struct {
 	Frame   Frame
 }
 
+type ExposedFunction = func(args ...interface{}) interface{}
 type BindingCallFunction = func(source BindingSource, args ...interface{}) interface{}
 
 func (b *bindingCallImpl) Call(f BindingCallFunction) {

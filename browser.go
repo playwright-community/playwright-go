@@ -2,7 +2,6 @@ package playwright
 
 import (
 	"fmt"
-	"sync"
 )
 
 type browserImpl struct {
@@ -10,7 +9,6 @@ type browserImpl struct {
 	isConnected       bool
 	isClosedOrClosing bool
 	contexts          []BrowserContext
-	contextsMu        sync.Mutex
 }
 
 func (b *browserImpl) IsConnected() bool {
@@ -29,9 +27,9 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 		context.options = &options[0]
 	}
 	context.browser = b
-	b.contextsMu.Lock()
+	b.Lock()
 	b.contexts = append(b.contexts, context)
-	b.contextsMu.Unlock()
+	b.Unlock()
 	return context, nil
 }
 
@@ -50,8 +48,8 @@ func (b *browserImpl) NewPage(options ...BrowserNewContextOptions) (Page, error)
 }
 
 func (b *browserImpl) Contexts() []BrowserContext {
-	b.contextsMu.Lock()
-	defer b.contextsMu.Unlock()
+	b.Lock()
+	defer b.Unlock()
 	return b.contexts
 }
 

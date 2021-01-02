@@ -65,6 +65,21 @@ type BrowserContext interface {
 	// are returned.
 	Cookies(urls ...string) ([]*NetworkCookie, error)
 	ExpectEvent(event string, cb func() error) (interface{}, error)
+	// The method adds a function called `name` on the `window` object of every frame in every page in the context. When
+	// called, the function executes `playwrightBinding` in Node.js and returns a Promise which resolves to the return value
+	// of `playwrightBinding`. If the `playwrightBinding` returns a Promise, it will be awaited.
+	// The first argument of the `playwrightBinding` function contains information about the caller: `{ browserContext: BrowserContext, page: Page, frame: Frame }`.
+	// See page.exposeBinding(name, playwrightBinding[, options]) for page-only version.
+	// An example of exposing page URL to all frames in all pages in the context:
+	// An example of passing an element handle:
+	ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error
+	// The method adds a function called `name` on the `window` object of every frame in every page in the context. When
+	// called, the function executes `playwrightFunction` in Node.js and returns a Promise which resolves to the return value
+	// of `playwrightFunction`.
+	// If the `playwrightFunction` returns a Promise, it will be awaited.
+	// See page.exposeFunction(name, playwrightFunction) for page-only version.
+	// An example of adding an `md5` function to all pages in the context:
+	ExposeFunction(name string, binding ExposedFunction) error
 	// Grants specified permissions to the browser context. Only grants corresponding permissions to the given origin if
 	// specified.
 	GrantPermissions(permissions []string, options ...BrowserContextGrantPermissionsOptions) error
@@ -96,6 +111,15 @@ type BrowserContext interface {
 	// **NOTE** Consider using browserContext.grantPermissions(permissions[, options]) to grant permissions for the browser context pages to
 	// read its geolocation.
 	SetGeolocation(gelocation *SetGeolocationOptions) error
+	ResetGeolocation() error
+	// Routing provides the capability to modify network requests that are made by any page in the browser context. Once route
+	// is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
+	// An example of a naïve handler that aborts all image requests:
+	// or the same snippet using a regex pattern instead:
+	// Page routes (set up with page.route(url, handler)) take precedence over browser context routes when request matches both
+	// handlers.
+	// **NOTE** Enabling routing disables http cache.
+	Route(url interface{}, handler routeHandler) error
 	SetOffline(offline bool) error
 	// Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy
 	// value. Will throw an error if the context closes before the event is fired. Returns the event data value.

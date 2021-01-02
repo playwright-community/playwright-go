@@ -1,6 +1,9 @@
 {
 	"BindingCall": {
-		"Call": ["f BindingCallFunction", null]
+		"Call": [
+			"f BindingCallFunction",
+			null
+		]
 	},
 	"Browser": {
 		"EventEmitter": [],
@@ -63,6 +66,14 @@
 			"event string, cb func() error",
 			"(interface{}, error)"
 		],
+		"ExposeBinding": [
+			"name string, binding BindingCallFunction, handle ...bool",
+			"error"
+		],
+		"ExposeFunction": [
+			"name string, binding ExposedFunction",
+			"error"
+		],
 		"GrantPermissions": [
 			"permissions []string, options ...BrowserContextGrantPermissionsOptions",
 			"error"
@@ -89,6 +100,14 @@
 		],
 		"SetGeolocation": [
 			"gelocation *SetGeolocationOptions",
+			"error"
+		],
+		"ResetGeolocation": [
+			null,
+			"error"
+		],
+		"Route": [
+			"url interface{}, handler routeHandler",
 			"error"
 		],
 		"SetOffline": [

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"reflect"
-	"sync"
 )
 
 type pageImpl struct {
@@ -20,10 +19,10 @@ type pageImpl struct {
 	frames          []Frame
 	workers         []Worker
 	mainFrame       Frame
-	routesMu        sync.Mutex
 	routes          []*routeHandlerEntry
 	viewportSize    ViewportSize
 	ownedContext    BrowserContext
+	bindings        map[string]BindingCallFunction
 }
 
 func (p *pageImpl) Context() BrowserContext {
@@ -423,8 +422,8 @@ func (p *pageImpl) ExpectWorker(cb func() error) (Worker, error) {
 }
 
 func (p *pageImpl) Route(url interface{}, handler routeHandler) error {
-	p.routesMu.Lock()
-	defer p.routesMu.Unlock()
+	p.Lock()
+	defer p.Unlock()
 	p.routes = append(p.routes, newRouteHandlerEntry(newURLMatcher(url), handler))
 	if len(p.routes) == 1 {
 		_, err := p.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
@@ -573,14 +572,14 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		route := fromChannel(ev["route"]).(*routeImpl)
 		request := fromChannel(ev["request"]).(*requestImpl)
 		go func() {
-			bt.routesMu.Lock()
+			bt.Lock()
 			for _, handlerEntry := range bt.routes {
 				if handlerEntry.matcher.Matches(request.URL()) {
 					handlerEntry.handler(route, request)
 					break
 				}
 			}
-			bt.routesMu.Unlock()
+			bt.Unlock()
 		}()
 	})
 	bt.channel.On("video", func(params map[string]interface{}) {
