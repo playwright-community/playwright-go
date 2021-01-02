@@ -121,6 +121,9 @@ type BrowserContext interface {
 	// **NOTE** Enabling routing disables http cache.
 	Route(url interface{}, handler routeHandler) error
 	SetOffline(offline bool) error
+	// Removes a route created with browserContext.route(url, handler). When `handler` is not specified, removes all routes for the
+	// `url`.
+	Unroute(url interface{}, handler routeHandler) error
 	// Waits for event to fire and passes its value into the predicate function. Resolves when the predicate returns truthy
 	// value. Will throw an error if the context closes before the event is fired. Returns the event data value.
 	WaitForEvent(event string, predicate ...interface{}) interface{}

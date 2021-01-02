@@ -114,6 +114,10 @@
 			"offline bool",
 			"error"
 		],
+		"Unroute": [
+			"url interface{}, handler routeHandler",
+			"error"
+		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
 			"interface{}"
