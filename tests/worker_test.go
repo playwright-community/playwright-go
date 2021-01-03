@@ -101,7 +101,7 @@ func TestWorkershouldReportErrors(t *testing.T) {
 		return err
 	})
 	require.NoError(t, err)
-	require.Equal(t, "this is my error", pageError.(*playwright.Error).Error())
+	require.Contains(t, pageError.(*playwright.Error).Error(), "this is my error")
 }
 
 func TestWorkerShouldClearUponCrossProcessNavigation(t *testing.T) {
