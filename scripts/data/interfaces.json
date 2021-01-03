@@ -671,6 +671,14 @@
 			"selector string, typ string, options ...PageDispatchEventOptions",
 			"error"
 		],
+		"ExposeBinding": [
+			"name string, binding BindingCallFunction, handle ...bool",
+			"error"
+		],
+		"ExposeFunction": [
+			"name string, binding ExposedFunction",
+			"error"
+		],
 		"EmulateMedia": [
 			"options ...PageEmulateMediaOptions",
 			"error"

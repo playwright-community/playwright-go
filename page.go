@@ -487,6 +487,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		mainFrame: fromChannel(initializer["mainFrame"]).(*frameImpl),
 		workers:   make([]Worker, 0),
 		routes:    make([]*routeHandlerEntry, 0),
+		bindings:  make(map[string]BindingCallFunction),
 		viewportSize: ViewportSize{
 			Height: int(initializer["viewportSize"].(map[string]interface{})["height"].(float64)),
 			Width:  int(initializer["viewportSize"].(map[string]interface{})["width"].(float64)),
@@ -709,4 +710,28 @@ func (p *pageImpl) Video() Video {
 
 func (p *pageImpl) Tap(selector string, options ...FrameTapOptions) error {
 	return p.mainFrame.Tap(selector, options...)
+}
+
+func (p *pageImpl) ExposeFunction(name string, binding ExposedFunction) error {
+	return p.ExposeBinding(name, func(source *BindingSource, args ...interface{}) interface{} {
+		return binding(args...)
+	})
+}
+func (p *pageImpl) ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error {
+	needsHandle := false
+	if len(handle) == 1 {
+		needsHandle = handle[0]
+	}
+	if _, ok := p.bindings[name]; ok {
+		return fmt.Errorf("Function '%s' has been already registered", name)
+	}
+	if _, ok := p.browserContext.bindings[name]; ok {
+		return fmt.Errorf("Function '%s' has been already registered in the browser context", name)
+	}
+	p.bindings[name] = binding
+	_, err := p.channel.Send("exposeBinding", map[string]interface{}{
+		"name":        name,
+		"needsHandle": needsHandle,
+	})
+	return err
 }
