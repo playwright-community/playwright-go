@@ -38,7 +38,7 @@ func (j *jsHandleImpl) Evaluate(expression string, options ...interface{}) (inte
 	return parseResult(result), nil
 }
 
-func (j *jsHandleImpl) EvaluateHandle(expression string, options ...interface{}) (interface{}, error) {
+func (j *jsHandleImpl) EvaluateHandle(expression string, options ...interface{}) (JSHandle, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {

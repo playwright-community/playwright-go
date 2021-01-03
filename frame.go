@@ -297,7 +297,7 @@ func (f *frameImpl) EvalOnSelectorAll(selector string, expression string, option
 	return parseResult(result), nil
 }
 
-func (f *frameImpl) EvaluateHandle(expression string, options ...interface{}) (interface{}, error) {
+func (f *frameImpl) EvaluateHandle(expression string, options ...interface{}) (JSHandle, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -321,7 +321,7 @@ func (f *frameImpl) EvaluateHandle(expression string, options ...interface{}) (i
 	if channelOwner == nil {
 		return nil, nil
 	}
-	return channelOwner, nil
+	return channelOwner.(JSHandle), nil
 }
 
 func (f *frameImpl) Click(selector string, options ...PageClickOptions) error {

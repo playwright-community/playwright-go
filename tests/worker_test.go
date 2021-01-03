@@ -1,7 +1,6 @@
 package playwright_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/mxschmitt/playwright-go"
@@ -119,7 +118,6 @@ func TestWorkerShouldClearUponCrossProcessNavigation(t *testing.T) {
 	worker.On("close", func() {
 		destroyed = true
 	})
-	fmt.Println(server.PREFIX, server.CROSS_PROCESS_PREFIX)
 	_, err = page.Goto(server.CROSS_PROCESS_PREFIX + "/empty.html")
 	require.NoError(t, err)
 	require.True(t, destroyed)

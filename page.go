@@ -126,7 +126,7 @@ func (p *pageImpl) Evaluate(expression string, options ...interface{}) (interfac
 	return p.mainFrame.Evaluate(expression, options...)
 }
 
-func (p *pageImpl) EvaluateHandle(expression string, options ...interface{}) (interface{}, error) {
+func (p *pageImpl) EvaluateHandle(expression string, options ...interface{}) (JSHandle, error) {
 	return p.mainFrame.EvaluateHandle(expression, options...)
 }
 

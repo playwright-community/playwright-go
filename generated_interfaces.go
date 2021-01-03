@@ -486,7 +486,7 @@ type Frame interface {
 	// the promise to resolve and return its value.
 	// A string can also be passed in instead of a function.
 	// JSHandle instances can be passed as an argument to the `frame.evaluateHandle`:
-	EvaluateHandle(expression string, options ...interface{}) (interface{}, error)
+	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	// Returns the return value of `pageFunction`
 	// The method finds an element matching the specified selector within the frame and passes it as a first argument to
 	// `pageFunction`. See Working with selectors for more details. If no elements match the
@@ -669,7 +669,7 @@ type JSHandle interface {
 	// If the function passed to the `jsHandle.evaluateHandle` returns a Promise, then `jsHandle.evaluateHandle` would wait
 	// for the promise to resolve and return its value.
 	// See page.evaluateHandle(pageFunction[, arg]) for more details.
-	EvaluateHandle(expression string, options ...interface{}) (interface{}, error)
+	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	// The method returns a map with **own property names** as keys and JSHandle instances for the property values.
 	GetProperties() (map[string]JSHandle, error)
 	// Fetches a single property from the referenced object.
@@ -875,7 +875,7 @@ type Page interface {
 	// promise to resolve and return its value.
 	// A string can also be passed in instead of a function:
 	// JSHandle instances can be passed as an argument to the `page.evaluateHandle`:
-	EvaluateHandle(expression string, options ...interface{}) (interface{}, error)
+	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	// The method finds an element matching the specified selector within the page and passes it as a first argument to
 	// `pageFunction`. If no elements match the selector, the method throws an error. Returns the value of `pageFunction`.
 	// If `pageFunction` returns a Promise, then `page.$eval` would wait for the promise to resolve and return its value.

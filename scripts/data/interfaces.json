@@ -408,7 +408,7 @@
 		],
 		"EvaluateHandle": [
 			"expression string, options ...interface{}",
-			"interface{}, error"
+			"JSHandle, error"
 		],
 		"EvalOnSelector": [
 			"selector string, expression string, options ...interface{}",
@@ -550,7 +550,7 @@
 		],
 		"EvaluateHandle": [
 			"expression string, options ...interface{}",
-			"interface{}, error"
+			"JSHandle, error"
 		],
 		"GetProperties": [
 			null,
@@ -689,7 +689,7 @@
 		],
 		"EvaluateHandle": [
 			"expression string, options ...interface{}",
-			"interface{}, error"
+			"JSHandle, error"
 		],
 		"EvalOnSelector": [
 			"selector string, expression string, options ...interface{}",

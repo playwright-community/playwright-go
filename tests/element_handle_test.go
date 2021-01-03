@@ -240,3 +240,15 @@ func TestElementHandleEvalOnSelectorAll(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, []interface{}([]interface{}{"foobar", "foobar"}), classNames)
 }
+
+func TestElementHandleString(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	numberHandle, err := page.EvaluateHandle("() => 2")
+	require.NoError(t, err)
+	require.Equal(t, "JSHandle@2", numberHandle.String())
+
+	stringHandle, err := page.EvaluateHandle("() => 'a'")
+	require.NoError(t, err)
+	require.Equal(t, "JSHandle@a", stringHandle.String())
+}
