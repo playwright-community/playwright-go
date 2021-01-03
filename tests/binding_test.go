@@ -1,6 +1,8 @@
 package playwright_test
 
 import (
+	"errors"
+	"strings"
 	"testing"
 
 	"github.com/mxschmitt/playwright-go"
@@ -54,4 +56,27 @@ func TestBrowserContextExposeFunction(t *testing.T) {
 	require.Equal(t, 36, resultMap["mul"])
 	require.Equal(t, 13, resultMap["add"])
 	require.Equal(t, 5, resultMap["sub"])
+}
+
+func TestBrowserContextExposeBindingPanic(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	err := context.ExposeBinding("woof", func(source *playwright.BindingSource, args ...interface{}) interface{} {
+		panic(errors.New("WOOF WOOF"))
+	})
+	require.NoError(t, err)
+	page, err := context.NewPage()
+	require.NoError(t, err)
+	result, err := page.Evaluate(`async () => {
+		try {
+		  await window['woof']();
+		} catch (e) {
+		  return {message: e.message, stack: e.stack};
+		}
+	  }`)
+	require.NoError(t, err)
+	innerError := result.(map[string]interface{})
+	require.Equal(t, innerError["message"], "WOOF WOOF")
+	stack := strings.Split(innerError["stack"].(string), "\n")
+	require.Contains(t, stack[len(stack)-1], "binding_test.go")
 }
