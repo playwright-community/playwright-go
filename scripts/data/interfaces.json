@@ -6,7 +6,9 @@
 		]
 	},
 	"Browser": {
-		"EventEmitter": [],
+		"extends": [
+			"EventEmitter"
+		],
 		"Close": [
 			null,
 			"error"
@@ -33,7 +35,9 @@
 		]
 	},
 	"BrowserContext": {
-		"EventEmitter": [],
+		"extends": [
+			"EventEmitter"
+		],
 		"AddCookies": [
 			"cookies ...SetNetworkCookieParam",
 			"error"
@@ -216,9 +220,8 @@
 		]
 	},
 	"ElementHandle": {
-		"AsElement": [
-			null,
-			"ElementHandle"
+		"extends": [
+			"JSHandle"
 		],
 		"BoundingBox": [
 			null,
@@ -243,26 +246,6 @@
 		"DispatchEvent": [
 			"typ string, initObjects ...interface{}",
 			"error"
-		],
-		"Dispose": [
-			null,
-			"error"
-		],
-		"Evaluate": [
-			"expression string, options ...interface{}",
-			"interface{}, error"
-		],
-		"EvaluateHandle": [
-			"expression string, options ...interface{}",
-			"JSHandle, error"
-		],
-		"GetProperties": [
-			null,
-			"map[string]JSHandle, error"
-		],
-		"GetProperty": [
-			"name string",
-			"JSHandle, error"
 		],
 		"EvalOnSelector": [
 			"selector string, expression string, options ...interface{}",
@@ -295,10 +278,6 @@
 		"InnerText": [
 			null,
 			"(string, error)"
-		],
-		"JSONValue": [
-			null,
-			"interface{}, error"
 		],
 		"OwnerFrame": [
 			null,
@@ -638,6 +617,9 @@
 		]
 	},
 	"Page": {
+		"extends": [
+			"EventEmitter"
+		],
 		"Mouse": [
 			null,
 			"Mouse"
@@ -650,7 +632,6 @@
 			null,
 			"Touchscreen"
 		],
-		"EventEmitter": [],
 		"AddInitScript": [
 			"options BrowserContextAddInitScriptOptions",
 			"error"
@@ -1073,7 +1054,9 @@
 		]
 	},
 	"WebSocket": {
-		"EventEmitter": [],
+		"extends": [
+			"EventEmitter"
+		],
 		"IsClosed": [
 			null,
 			"bool"
@@ -1094,7 +1077,9 @@
 		]
 	},
 	"Worker": {
-		"EventEmitter": [],
+		"extends": [
+			"EventEmitter"
+		],
 		"Evaluate": [
 			"expression string, options ...interface{}",
 			"interface{}, error"

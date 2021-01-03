@@ -48,8 +48,9 @@ for (const [className, methods] of Object.entries(interfaceData)) {
     writeComment(api[className].comment)
   console.log(`type ${className} interface {`)
   for (const [funcName, funcData] of Object.entries(methods)) {
-    if (funcData.length === 0) {
-      console.log(funcName)
+    if (funcName === "extends") {
+      for (const inheritedInterface of funcData)
+        console.log(inheritedInterface)
     } else {
       const apiFunc = api[className] && Object.entries(api[className].methods).find(([item]) => transformMethodNamesToGo(item) === funcName)
       if (apiFunc && apiFunc[1].comment)

@@ -213,7 +213,7 @@ type Download interface {
 // ElementHandles are auto-disposed when their origin frame gets navigated.
 // ElementHandle instances can be used as an argument in page.$eval(selector, pageFunction[, arg]) and page.evaluate(pageFunction[, arg]) methods.
 type ElementHandle interface {
-	AsElement() ElementHandle
+	JSHandle
 	// This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
 	// calculated relative to the main frame viewport - which is usually the same as the browser window.
 	// Scrolling affects the returned bonding box, similarly to
@@ -271,11 +271,6 @@ type ElementHandle interface {
 	// Event
 	// You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 	DispatchEvent(typ string, initObjects ...interface{}) error
-	Dispose() error
-	Evaluate(expression string, options ...interface{}) (interface{}, error)
-	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
-	GetProperties() (map[string]JSHandle, error)
-	GetProperty(name string) (JSHandle, error)
 	// Returns the return value of `pageFunction`
 	// The method finds an element matching the specified selector in the `ElementHandle`s subtree and passes it as a first
 	// argument to `pageFunction`. See Working with selectors for more details. If no elements match
@@ -317,7 +312,6 @@ type ElementHandle interface {
 	InnerHTML() (string, error)
 	// Returns the `element.innerText`.
 	InnerText() (string, error)
-	JSONValue() (interface{}, error)
 	// Returns the frame containing the given element.
 	OwnerFrame() (Frame, error)
 	// Focuses the element, and then uses keyboard.down(key) and keyboard.up(key).
@@ -763,10 +757,10 @@ type Mouse interface {
 // This example logs a message for a single page `load` event:
 // To unsubscribe from events use the `removeListener` method:
 type Page interface {
+	EventEmitter
 	Mouse() Mouse
 	Keyboard() Keyboard
 	Touchscreen() Touchscreen
-	EventEmitter
 	// Adds a script which would be evaluated in one of the following scenarios:
 	// Whenever the page is navigated.
 	// Whenever the child frame is attached or navigated. In this case, the script is evaluated in the context of the newly attached frame.
