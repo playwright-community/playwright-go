@@ -109,11 +109,8 @@ func TestWebSocketShouldEmitCloseEvents(t *testing.T) {
 	defer wsServer.Stop()
 	wsEvent, err := page.ExpectEvent("websocket", func() error {
 		_, err := page.Evaluate(`port => {
-            let cb;
-            const result = new Promise(f => cb = f);
             const ws = new WebSocket('ws://localhost:' + port + '/ws');
-            ws.addEventListener('message', data => { ws.close(); cb(data.data); });
-            return result;
+            ws.addEventListener('message', data => { ws.close() });
         }`, wsServer.PORT)
 		return err
 	})
