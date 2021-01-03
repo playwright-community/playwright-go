@@ -29,7 +29,9 @@ func TestVideoShouldWork(t *testing.T) {
 	files, err := ioutil.ReadDir(recordVideoDir)
 	require.NoError(t, err)
 	require.Equal(t, len(files), 1)
-	content, err := ioutil.ReadFile(filepath.Join(recordVideoDir, files[0].Name()))
+	videoFileLocation := filepath.Join(recordVideoDir, files[0].Name())
+	require.Equal(t, videoFileLocation, page.Video().Path())
+	content, err := ioutil.ReadFile(videoFileLocation)
 	require.NoError(t, err)
 	require.True(t, filetype.IsVideo(content))
 }

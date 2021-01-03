@@ -38,7 +38,7 @@ func (j *jsHandleImpl) Evaluate(expression string, options ...interface{}) (inte
 	return parseResult(result), nil
 }
 
-func (j *jsHandleImpl) EvaluateHandle(expression string, options ...interface{}) (interface{}, error) {
+func (j *jsHandleImpl) EvaluateHandle(expression string, options ...interface{}) (JSHandle, error) {
 	var arg interface{}
 	forceExpression := false
 	if !isFunctionBody(expression) {
@@ -165,6 +165,13 @@ func parseValue(result interface{}) interface{} {
 
 func serializeValue(value interface{}, handles *[]*channel, depth int) interface{} {
 	if handle, ok := value.(*elementHandleImpl); ok {
+		h := len(*handles)
+		*handles = append(*handles, handle.channel)
+		return map[string]interface{}{
+			"h": h,
+		}
+	}
+	if handle, ok := value.(*jsHandleImpl); ok {
 		h := len(*handles)
 		*handles = append(*handles, handle.channel)
 		return map[string]interface{}{

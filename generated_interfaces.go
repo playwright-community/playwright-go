@@ -213,7 +213,7 @@ type Download interface {
 // ElementHandles are auto-disposed when their origin frame gets navigated.
 // ElementHandle instances can be used as an argument in page.$eval(selector, pageFunction[, arg]) and page.evaluate(pageFunction[, arg]) methods.
 type ElementHandle interface {
-	AsElement() ElementHandle
+	JSHandle
 	// This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
 	// calculated relative to the main frame viewport - which is usually the same as the browser window.
 	// Scrolling affects the returned bonding box, similarly to
@@ -486,7 +486,7 @@ type Frame interface {
 	// the promise to resolve and return its value.
 	// A string can also be passed in instead of a function.
 	// JSHandle instances can be passed as an argument to the `frame.evaluateHandle`:
-	EvaluateHandle(expression string, options ...interface{}) (interface{}, error)
+	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	// Returns the return value of `pageFunction`
 	// The method finds an element matching the specified selector within the frame and passes it as a first argument to
 	// `pageFunction`. See Working with selectors for more details. If no elements match the
@@ -669,7 +669,7 @@ type JSHandle interface {
 	// If the function passed to the `jsHandle.evaluateHandle` returns a Promise, then `jsHandle.evaluateHandle` would wait
 	// for the promise to resolve and return its value.
 	// See page.evaluateHandle(pageFunction[, arg]) for more details.
-	EvaluateHandle(expression string, options ...interface{}) (interface{}, error)
+	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	// The method returns a map with **own property names** as keys and JSHandle instances for the property values.
 	GetProperties() (map[string]JSHandle, error)
 	// Fetches a single property from the referenced object.
@@ -757,10 +757,10 @@ type Mouse interface {
 // This example logs a message for a single page `load` event:
 // To unsubscribe from events use the `removeListener` method:
 type Page interface {
+	EventEmitter
 	Mouse() Mouse
 	Keyboard() Keyboard
 	Touchscreen() Touchscreen
-	EventEmitter
 	// Adds a script which would be evaluated in one of the following scenarios:
 	// Whenever the page is navigated.
 	// Whenever the child frame is attached or navigated. In this case, the script is evaluated in the context of the newly attached frame.
@@ -875,7 +875,7 @@ type Page interface {
 	// promise to resolve and return its value.
 	// A string can also be passed in instead of a function:
 	// JSHandle instances can be passed as an argument to the `page.evaluateHandle`:
-	EvaluateHandle(expression string, options ...interface{}) (interface{}, error)
+	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	// The method finds an element matching the specified selector within the page and passes it as a first argument to
 	// `pageFunction`. If no elements match the selector, the method throws an error. Returns the value of `pageFunction`.
 	// If `pageFunction` returns a Promise, then `page.$eval` would wait for the promise to resolve and return its value.
@@ -891,7 +891,7 @@ type Page interface {
 	ExpectDownload(cb func() error) (Download, error)
 	ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error)
 	ExpectFileChooser(cb func() error) (FileChooser, error)
-	ExpectLoadState(state string, cb func() error) (ConsoleMessage, error)
+	ExpectLoadState(state string, cb func() error) error
 	ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (Response, error)
 	ExpectPopup(cb func() error) (Page, error)
 	ExpectRequest(url interface{}, cb func() error, options ...interface{}) (Request, error)
@@ -1269,6 +1269,7 @@ type Video interface {
 // event is emitted on the page object to signal a worker creation. `close` event is emitted on the worker object when the
 // worker is gone.
 type Worker interface {
+	EventEmitter
 	// Returns the return value of `pageFunction`
 	// If the function passed to the `worker.evaluate` returns a Promise, then `worker.evaluate` would wait for the promise
 	// to resolve and return its value.
@@ -1283,4 +1284,6 @@ type Worker interface {
 	// the promise to resolve and return its value.
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	URL() string
+	WaitForEvent(event string, predicate ...interface{}) interface{}
+	ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error)
 }

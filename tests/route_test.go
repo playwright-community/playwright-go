@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRouteContinue(t *testing.T) {
+func TestPageRouteContinue(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	require.NoError(t, page.SetExtraHTTPHeaders(map[string]string{

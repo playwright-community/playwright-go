@@ -80,3 +80,25 @@ func TestBrowserContextExposeBindingPanic(t *testing.T) {
 	stack := strings.Split(innerError["stack"].(string), "\n")
 	require.Contains(t, stack[len(stack)-1], "binding_test.go")
 }
+
+func TestBrowserContextExposeBindingHandleShouldWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	targets := []playwright.JSHandle{}
+
+	logme := func(t interface{}) int {
+		targets = append(targets, t.(playwright.JSHandle))
+		return 17
+	}
+
+	err := page.ExposeBinding("logme", func(source *playwright.BindingSource, args ...interface{}) interface{} {
+		return logme(args[0])
+	}, true)
+	require.NoError(t, err)
+	result, err := page.Evaluate("logme({ foo: 42 })")
+	require.NoError(t, err)
+	require.Equal(t, result, 17)
+	res, err := targets[0].Evaluate("x => x.foo")
+	require.NoError(t, err)
+	require.Equal(t, 42, res)
+}

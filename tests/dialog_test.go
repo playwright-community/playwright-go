@@ -19,3 +19,25 @@ func TestDialog(t *testing.T) {
 	_, err := page.Evaluate("alert('yo')")
 	require.NoError(t, err)
 }
+
+func TestDialogDismiss(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	page.On("dialog", func(dialog playwright.Dialog) {
+		require.NoError(t, dialog.Dismiss())
+	})
+	result, err := page.Evaluate("prompt('question?')")
+	require.NoError(t, err)
+	require.Equal(t, result, nil)
+}
+
+func TestDialogAcceptWithText(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	page.On("dialog", func(dialog playwright.Dialog) {
+		require.NoError(t, dialog.Accept("hey foobar"))
+	})
+	result, err := page.Evaluate("prompt('question?')")
+	require.NoError(t, err)
+	require.Equal(t, result, "hey foobar")
+}

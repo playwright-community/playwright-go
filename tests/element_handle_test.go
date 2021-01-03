@@ -70,10 +70,28 @@ func TestElementHandleDispatchEvent(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Goto(server.PREFIX + "/input/button.html")
 	require.NoError(t, err)
-	require.NoError(t, page.DispatchEvent("button", "click"))
-	result, err := page.Evaluate("result")
+	element, err := page.QuerySelector("button")
+	require.NoError(t, err)
+	require.NoError(t, element.DispatchEvent("click"))
+	result, err := page.Evaluate("() => result")
 	require.NoError(t, err)
 	require.Equal(t, "Clicked", result)
+}
+
+func TestElementHandleDispatchEventInitObject(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	err := page.SetContent(`
+	<button onclick="window.eventBubbles = event.bubbles">ok</button>`)
+	require.NoError(t, err)
+	element, err := page.QuerySelector("button")
+	require.NoError(t, err)
+	require.NoError(t, element.DispatchEvent("click", map[string]interface{}{
+		"bubbles": true,
+	}))
+	result, err := page.Evaluate("() => window.eventBubbles")
+	require.NoError(t, err)
+	require.Equal(t, true, result)
 }
 
 func TestElementHandleHover(t *testing.T) {
@@ -159,4 +177,109 @@ func TestElementHandleTap(t *testing.T) {
 	value, err = page.EvalOnSelector("input", "el => el.checked")
 	require.NoError(t, err)
 	require.Equal(t, true, value)
+}
+
+func TestElementHandleQuerySelectorAll(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent(`
+	<div id="a1">
+		<div class="foobar">
+		</div>
+		<div class="foobar">
+		</div>
+	</div>
+	`))
+	rootElement, err := page.QuerySelector("#a1")
+	require.NoError(t, err)
+	elements, err := rootElement.QuerySelectorAll(".foobar")
+	require.NoError(t, err)
+	require.Equal(t, 2, len(elements))
+	className, err := elements[0].GetAttribute("class")
+	require.NoError(t, err)
+	require.Equal(t, "foobar", className)
+}
+
+func TestElementHandleEvalOnSelector(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent(`
+	<div id="a1">
+		<div id="a2">
+			foobar
+		</div>
+	</div>
+	`))
+	rootElement, err := page.QuerySelector("#a1")
+	require.NoError(t, err)
+	innerText, err := rootElement.EvalOnSelector("#a2", "e => e.innerText")
+	require.NoError(t, err)
+	require.Equal(t, "foobar", innerText)
+}
+
+func TestElementHandleEvalOnSelectorAll(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent(`
+	<div id="a1">
+		<div class="foobar">
+		</div>
+		<div class="foobar">
+		</div>
+	</div>
+	`))
+	rootElement, err := page.QuerySelector("#a1")
+	require.NoError(t, err)
+	classNames, err := rootElement.EvalOnSelectorAll(".foobar", "elements => [...elements].map(e => e.getAttribute('class'))")
+	require.NoError(t, err)
+	require.Equal(t, []interface{}([]interface{}{"foobar", "foobar"}), classNames)
+}
+
+func TestElementHandleString(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	numberHandle, err := page.EvaluateHandle("() => 2")
+	require.NoError(t, err)
+	require.Equal(t, "JSHandle@2", numberHandle.String())
+
+	stringHandle, err := page.EvaluateHandle("() => 'a'")
+	require.NoError(t, err)
+	require.Equal(t, "JSHandle@a", stringHandle.String())
+}
+
+func TestElementHandleCheck(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.SetContent(`
+		<input type="checkbox"/>
+	`))
+	inputElement, err := page.QuerySelector("input")
+	require.NoError(t, err)
+	isChecked, err := inputElement.Evaluate("e => e.checked")
+	require.NoError(t, err)
+	require.Equal(t, false, isChecked)
+	require.NoError(t, inputElement.Check())
+	isChecked, err = inputElement.Evaluate("e => e.checked")
+	require.NoError(t, err)
+	require.Equal(t, true, isChecked)
+}
+
+func TestElementHandleUnCheck(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.SetContent(`
+		<input type="checkbox" checked/>
+	`))
+	inputElement, err := page.QuerySelector("input")
+	require.NoError(t, err)
+	require.NoError(t, inputElement.Uncheck())
+	isChecked, err := inputElement.Evaluate("e => e.checked")
+	require.NoError(t, err)
+	require.Equal(t, false, isChecked)
 }

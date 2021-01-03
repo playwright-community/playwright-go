@@ -6,7 +6,9 @@
 		]
 	},
 	"Browser": {
-		"EventEmitter": [],
+		"extends": [
+			"EventEmitter"
+		],
 		"Close": [
 			null,
 			"error"
@@ -33,7 +35,9 @@
 		]
 	},
 	"BrowserContext": {
-		"EventEmitter": [],
+		"extends": [
+			"EventEmitter"
+		],
 		"AddCookies": [
 			"cookies ...SetNetworkCookieParam",
 			"error"
@@ -216,9 +220,8 @@
 		]
 	},
 	"ElementHandle": {
-		"AsElement": [
-			null,
-			"ElementHandle"
+		"extends": [
+			"JSHandle"
 		],
 		"BoundingBox": [
 			null,
@@ -408,7 +411,7 @@
 		],
 		"EvaluateHandle": [
 			"expression string, options ...interface{}",
-			"interface{}, error"
+			"JSHandle, error"
 		],
 		"EvalOnSelector": [
 			"selector string, expression string, options ...interface{}",
@@ -550,7 +553,7 @@
 		],
 		"EvaluateHandle": [
 			"expression string, options ...interface{}",
-			"interface{}, error"
+			"JSHandle, error"
 		],
 		"GetProperties": [
 			null,
@@ -614,6 +617,9 @@
 		]
 	},
 	"Page": {
+		"extends": [
+			"EventEmitter"
+		],
 		"Mouse": [
 			null,
 			"Mouse"
@@ -626,7 +632,6 @@
 			null,
 			"Touchscreen"
 		],
-		"EventEmitter": [],
 		"AddInitScript": [
 			"options BrowserContextAddInitScriptOptions",
 			"error"
@@ -689,7 +694,7 @@
 		],
 		"EvaluateHandle": [
 			"expression string, options ...interface{}",
-			"interface{}, error"
+			"JSHandle, error"
 		],
 		"EvalOnSelector": [
 			"selector string, expression string, options ...interface{}",
@@ -717,7 +722,7 @@
 		],
 		"ExpectLoadState": [
 			"state string, cb func() error",
-			"ConsoleMessage, error"
+			"error"
 		],
 		"ExpectNavigation": [
 			"cb func() error, options ...PageWaitForNavigationOptions",
@@ -1049,7 +1054,9 @@
 		]
 	},
 	"WebSocket": {
-		"EventEmitter": [],
+		"extends": [
+			"EventEmitter"
+		],
 		"IsClosed": [
 			null,
 			"bool"
@@ -1070,6 +1077,9 @@
 		]
 	},
 	"Worker": {
+		"extends": [
+			"EventEmitter"
+		],
 		"Evaluate": [
 			"expression string, options ...interface{}",
 			"interface{}, error"
@@ -1081,6 +1091,14 @@
 		"URL": [
 			null,
 			"string"
+		],
+		"WaitForEvent": [
+			"event string, predicate ...interface{}",
+			"interface{}"
+		],
+		"ExpectEvent": [
+			"event string, cb func() error, predicates ...interface{}",
+			"(interface{}, error)"
 		]
 	}
 }

@@ -277,7 +277,6 @@ func newElementHandle(parent *channelOwner, objectType string, guid string, init
 func normalizeFilePayloads(files []InputFile) []map[string]string {
 	out := make([]map[string]string, 0)
 	for _, file := range files {
-		// file.Buffer
 		out = append(out, map[string]string{
 			"name":     file.Name,
 			"mimeType": file.MimeType,
