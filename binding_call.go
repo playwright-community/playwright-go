@@ -1,6 +1,8 @@
 package playwright
 
-import "log"
+import (
+	"log"
+)
 
 type bindingCallImpl struct {
 	channelOwner
@@ -13,18 +15,21 @@ type BindingSource struct {
 }
 
 type ExposedFunction = func(args ...interface{}) interface{}
-type BindingCallFunction = func(source BindingSource, args ...interface{}) interface{}
+type BindingCallFunction = func(source *BindingSource, args ...interface{}) interface{}
 
 func (b *bindingCallImpl) Call(f BindingCallFunction) {
-	if r := recover(); r != nil {
-		if _, err := b.channel.Send("reject", map[string]interface{}{
-			"error": serializeError(r.(Error)),
-		}); err != nil {
-			log.Printf("could not resolve BindingCall: %v", err)
+	defer func() {
+		if r := recover(); r != nil {
+			if _, err := b.channel.Send("reject", map[string]interface{}{
+				"error": serializeError(r.(error)),
+			}); err != nil {
+				log.Printf("could not reject BindingCall: %v", err)
+			}
 		}
-	}
+	}()
+
 	frame := fromChannel(b.initializer["frame"]).(*frameImpl)
-	source := BindingSource{
+	source := &BindingSource{
 		Context: frame.Page().Context(),
 		Page:    frame.Page(),
 		Frame:   frame,

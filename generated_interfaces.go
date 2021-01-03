@@ -838,6 +838,24 @@ type Page interface {
 	// Event
 	// You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 	DispatchEvent(selector string, typ string, options ...PageDispatchEventOptions) error
+	// The method adds a function called `name` on the `window` object of every frame in this page. When called, the function
+	// executes `playwrightBinding` in Node.js and returns a Promise which resolves to the return value of
+	// `playwrightBinding`. If the `playwrightBinding` returns a Promise, it will be awaited.
+	// The first argument of the `playwrightBinding` function contains information about the caller: `{ browserContext: BrowserContext, page: Page, frame: Frame }`.
+	// See browserContext.exposeBinding(name, playwrightBinding[, options]) for the context-wide version.
+	// **NOTE** Functions installed via `page.exposeBinding` survive navigations.
+	// An example of exposing page URL to all frames in a page:
+	// An example of passing an element handle:
+	ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error
+	// The method adds a function called `name` on the `window` object of every frame in the page. When called, the function
+	// executes `playwrightFunction` in Node.js and returns a Promise which resolves to the return value of
+	// `playwrightFunction`.
+	// If the `playwrightFunction` returns a Promise, it will be awaited.
+	// See browserContext.exposeFunction(name, playwrightFunction) for context-wide exposed function.
+	// **NOTE** Functions installed via `page.exposeFunction` survive navigations.
+	// An example of adding an `md5` function to the page:
+	// An example of adding a `window.readfile` function to the page:
+	ExposeFunction(name string, binding ExposedFunction) error
 	EmulateMedia(options ...PageEmulateMediaOptions) error
 	// Returns the value of the `pageFunction` invacation.
 	// If the function passed to the `page.evaluate` returns a Promise, then `page.evaluate` would wait for the promise to

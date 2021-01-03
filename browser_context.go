@@ -172,7 +172,7 @@ func (b *browserContextImpl) ExposeBinding(name string, binding BindingCallFunct
 }
 
 func (b *browserContextImpl) ExposeFunction(name string, binding ExposedFunction) error {
-	return b.ExposeBinding(name, func(source BindingSource, args ...interface{}) interface{} {
+	return b.ExposeBinding(name, func(source *BindingSource, args ...interface{}) interface{} {
 		return binding(args...)
 	})
 }

@@ -487,6 +487,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		mainFrame: fromChannel(initializer["mainFrame"]).(*frameImpl),
 		workers:   make([]Worker, 0),
 		routes:    make([]*routeHandlerEntry, 0),
+		bindings:  make(map[string]BindingCallFunction),
 		viewportSize: ViewportSize{
 			Height: int(initializer["viewportSize"].(map[string]interface{})["height"].(float64)),
 			Width:  int(initializer["viewportSize"].(map[string]interface{})["width"].(float64)),
@@ -499,10 +500,10 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 	bt.mouse = newMouse(bt.channel)
 	bt.keyboard = newKeyboard(bt.channel)
 	bt.touchscreen = newTouchscreen(bt.channel)
-	bt.channel.On("close", func(ev map[string]interface{}) {
-		bt.isClosed = true
-		bt.Emit("close")
+	bt.channel.On("bindingCall", func(params map[string]interface{}) {
+		bt.onBinding(fromChannel(params["binding"]).(*bindingCallImpl))
 	})
+	bt.channel.On("close", bt.onClose)
 	bt.channel.On("console", func(ev map[string]interface{}) {
 		bt.Emit("console", fromChannel(ev["message"]))
 	})
@@ -524,25 +525,17 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		bt.Emit("filechooser", newFileChooser(bt, fromChannel(ev["element"]).(*elementHandleImpl), ev["isMultiple"].(bool)))
 	})
 	bt.channel.On("frameAttached", func(ev map[string]interface{}) {
-		frame := fromChannel(ev["frame"]).(*frameImpl)
-		frame.page = bt
-		bt.frames = append(bt.frames, frame)
-		bt.Emit("frameAttached", frame)
+		bt.onFrameAttached(fromChannel(ev["frame"]).(*frameImpl))
 	})
 	bt.channel.On("frameDetached", func(ev map[string]interface{}) {
-		frame := fromChannel(ev["frame"]).(*frameImpl)
-		frame.detached = true
-		frames := make([]Frame, 0)
-		for i := 0; i < len(bt.frames); i++ {
-			if bt.frames[i] != frame {
-				frames = append(frames, frame)
-			}
-		}
-		if len(frames) != len(bt.frames) {
-			bt.frames = frames
-		}
-		bt.Emit("frameDetached", frame)
+		bt.onFrameDetached(fromChannel(ev["frame"]).(*frameImpl))
 	})
+	bt.channel.On(
+		"load",
+		func(params map[string]interface{}) {
+			bt.Emit("load")
+		},
+	)
 	bt.channel.On(
 		"pageError",
 		func(params map[string]interface{}) {
@@ -558,29 +551,16 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		bt.Emit("request", fromChannel(ev["request"]))
 	})
 	bt.channel.On("requestFailed", func(ev map[string]interface{}) {
-		req := fromChannel(ev["request"]).(*requestImpl)
-		req.failureText = ev["failureText"].(string)
-		bt.Emit("requestfailed", req)
+		bt.onRequestFailed(fromChannel(ev["request"]).(*requestImpl), ev["responseEndTiming"].(float64), ev["failureText"].(string))
 	})
 	bt.channel.On("requestFinished", func(ev map[string]interface{}) {
-		bt.Emit("requestfinished", fromChannel(ev["request"]))
+		bt.onRequestFinished(fromChannel(ev["request"]).(*requestImpl), ev["responseEndTiming"].(float64))
 	})
 	bt.channel.On("response", func(ev map[string]interface{}) {
 		bt.Emit("response", fromChannel(ev["response"]))
 	})
 	bt.channel.On("route", func(ev map[string]interface{}) {
-		route := fromChannel(ev["route"]).(*routeImpl)
-		request := fromChannel(ev["request"]).(*requestImpl)
-		go func() {
-			bt.Lock()
-			for _, handlerEntry := range bt.routes {
-				if handlerEntry.matcher.Matches(request.URL()) {
-					handlerEntry.handler(route, request)
-					break
-				}
-			}
-			bt.Unlock()
-		}()
+		bt.onRoute(fromChannel(ev["route"]).(*routeImpl), fromChannel(ev["request"]).(*requestImpl))
 	})
 	bt.channel.On("video", func(params map[string]interface{}) {
 		bt.Video().(*videoImpl).setRelativePath(params["relativePath"].(string))
@@ -590,10 +570,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 	})
 
 	bt.channel.On("worker", func(ev map[string]interface{}) {
-		worker := fromChannel(ev["worker"]).(*workerImpl)
-		worker.page = bt
-		bt.workers = append(bt.workers, worker)
-		bt.Emit("worker", worker)
+		bt.onWorker(fromChannel(ev["worker"]).(*workerImpl))
 	})
 	bt.addEventHandler(func(name string, handler interface{}) {
 		if name == "filechooser" && bt.ListenerCount(name) == 0 {
@@ -611,6 +588,78 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 	})
 
 	return bt
+}
+
+func (p *pageImpl) onBinding(binding *bindingCallImpl) {
+	function := p.bindings[binding.initializer["name"].(string)]
+	if function == nil {
+		return
+	}
+	go binding.Call(function)
+}
+
+func (p *pageImpl) onRequestFailed(req *requestImpl, responseEndTiming float64, failureText string) {
+	req.failureText = failureText
+	req.timing.ResponseEnd = responseEndTiming
+	p.Emit("requestfailed", req)
+}
+
+func (p *pageImpl) onRequestFinished(req *requestImpl, responseEndTiming float64) {
+	req.timing.ResponseEnd = responseEndTiming
+	p.Emit("requestfinished", req)
+}
+
+func (p *pageImpl) onFrameAttached(frame *frameImpl) {
+	frame.page = p
+	p.frames = append(p.frames, frame)
+	p.Emit("frameattached", frame)
+}
+
+func (p *pageImpl) onFrameDetached(frame *frameImpl) {
+	frame.detached = true
+	frames := make([]Frame, 0)
+	for i := 0; i < len(p.frames); i++ {
+		if p.frames[i] != frame {
+			frames = append(frames, frame)
+		}
+	}
+	if len(frames) != len(p.frames) {
+		p.frames = frames
+	}
+	p.Emit("framedetached", frame)
+}
+
+func (p *pageImpl) onRoute(route *routeImpl, request *requestImpl) {
+	go func() {
+		p.Lock()
+		for _, handlerEntry := range p.routes {
+			if handlerEntry.matcher.Matches(request.URL()) {
+				handlerEntry.handler(route, request)
+				break
+			}
+		}
+		p.Unlock()
+	}()
+}
+
+func (p *pageImpl) onWorker(worker *workerImpl) {
+	p.workers = append(p.workers, worker)
+	worker.page = p
+	p.Emit("worker", worker)
+}
+
+func (p *pageImpl) onClose() {
+	p.isClosed = true
+	newPages := []Page{}
+	p.browserContext.Lock()
+	for _, page := range p.browserContext.pages {
+		if page != p {
+			newPages = append(newPages, page)
+		}
+	}
+	p.browserContext.pages = newPages
+	p.browserContext.Unlock()
+	p.Emit("close")
 }
 
 func (p *pageImpl) SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error {
@@ -661,4 +710,28 @@ func (p *pageImpl) Video() Video {
 
 func (p *pageImpl) Tap(selector string, options ...FrameTapOptions) error {
 	return p.mainFrame.Tap(selector, options...)
+}
+
+func (p *pageImpl) ExposeFunction(name string, binding ExposedFunction) error {
+	return p.ExposeBinding(name, func(source *BindingSource, args ...interface{}) interface{} {
+		return binding(args...)
+	})
+}
+func (p *pageImpl) ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error {
+	needsHandle := false
+	if len(handle) == 1 {
+		needsHandle = handle[0]
+	}
+	if _, ok := p.bindings[name]; ok {
+		return fmt.Errorf("Function '%s' has been already registered", name)
+	}
+	if _, ok := p.browserContext.bindings[name]; ok {
+		return fmt.Errorf("Function '%s' has been already registered in the browser context", name)
+	}
+	p.bindings[name] = binding
+	_, err := p.channel.Send("exposeBinding", map[string]interface{}{
+		"name":        name,
+		"needsHandle": needsHandle,
+	})
+	return err
 }
