@@ -891,7 +891,7 @@ type Page interface {
 	ExpectDownload(cb func() error) (Download, error)
 	ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error)
 	ExpectFileChooser(cb func() error) (FileChooser, error)
-	ExpectLoadState(state string, cb func() error) (ConsoleMessage, error)
+	ExpectLoadState(state string, cb func() error) error
 	ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (Response, error)
 	ExpectPopup(cb func() error) (Page, error)
 	ExpectRequest(url interface{}, cb func() error, options ...interface{}) (Request, error)

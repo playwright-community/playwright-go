@@ -717,7 +717,7 @@
 		],
 		"ExpectLoadState": [
 			"state string, cb func() error",
-			"ConsoleMessage, error"
+			"error"
 		],
 		"ExpectNavigation": [
 			"cb func() error, options ...PageWaitForNavigationOptions",

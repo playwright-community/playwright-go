@@ -32,7 +32,9 @@ func TestBrowserNewPage(t *testing.T) {
 	page, err := browser.NewPage()
 	require.NoError(t, err)
 	require.Equal(t, 2, len(browser.Contexts()))
+	require.False(t, page.IsClosed())
 	require.NoError(t, page.Close())
+	require.True(t, page.IsClosed())
 	require.Equal(t, 1, len(browser.Contexts()))
 }
 

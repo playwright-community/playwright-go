@@ -390,9 +390,9 @@ func (p *pageImpl) ExpectFileChooser(cb func() error) (FileChooser, error) {
 	return response.(*fileChooserImpl), err
 }
 
-func (p *pageImpl) ExpectLoadState(state string, cb func() error) (ConsoleMessage, error) {
-	response, err := newExpectWrapper(p.mainFrame.WaitForLoadState, []interface{}{state}, cb)
-	return response.(*consoleMessageImpl), err
+func (p *pageImpl) ExpectLoadState(state string, cb func() error) error {
+	_, err := newExpectWrapper(p.mainFrame.WaitForLoadState, []interface{}{state}, cb)
+	return err
 }
 
 func (p *pageImpl) ExpectPopup(cb func() error) (Page, error) {
