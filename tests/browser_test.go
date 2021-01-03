@@ -36,6 +36,17 @@ func TestBrowserNewPage(t *testing.T) {
 	require.Equal(t, 1, len(browser.Contexts()))
 }
 
+func TestBrowserShouldErrorUponSecondCreateNewPage(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	page, err := browser.NewPage()
+	require.NoError(t, err)
+	_, err = page.Context().NewPage()
+	require.Error(t, err)
+	require.Equal(t, "Please use browser.NewContext()", err.Error())
+	require.NoError(t, page.Close())
+}
+
 func TestBrowserClose(t *testing.T) {
 	pw, err := playwright.Run()
 	require.NoError(t, err)

@@ -41,16 +41,7 @@ func newFrame(parent *channelOwner, objectType string, guid string, initializer 
 	}
 
 	bt.channel.On("navigated", bt.onFrameNavigated)
-	bt.channel.On("loadstate", func(ev map[string]interface{}) {
-		if ev["add"] != nil {
-			add := ev["add"].(string)
-			bt.loadStates.Add(add)
-			bt.Emit("loadstate", add)
-		} else if ev["remove"] != nil {
-			remove := ev["remove"].(string)
-			bt.loadStates.Remove(remove)
-		}
-	})
+	bt.channel.On("loadstate", bt.onLoadState)
 	return bt
 }
 
@@ -194,6 +185,17 @@ func (f *frameImpl) onFrameNavigated(ev map[string]interface{}) {
 	f.Emit("navigated", ev)
 	if f.page != nil {
 		f.page.Emit("framenavigated", f)
+	}
+}
+
+func (f *frameImpl) onLoadState(ev map[string]interface{}) {
+	if ev["add"] != nil {
+		add := ev["add"].(string)
+		f.loadStates.Add(add)
+		f.Emit("loadstate", add)
+	} else if ev["remove"] != nil {
+		remove := ev["remove"].(string)
+		f.loadStates.Remove(remove)
 	}
 }
 

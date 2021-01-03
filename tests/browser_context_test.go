@@ -13,6 +13,20 @@ func TestBrowserContextNewPage(t *testing.T) {
 	require.Equal(t, context.Browser(), browser)
 }
 
+func TestBrowserContextNewContext(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.Equal(t, 1, len(browser.Contexts()))
+	context2, err := browser.NewContext()
+	require.NoError(t, err)
+	require.Equal(t, 2, len(browser.Contexts()))
+	require.Equal(t, browser.Contexts()[1], context2)
+	require.Equal(t, context2.Browser(), browser)
+	require.NoError(t, context2.Close())
+	require.Equal(t, 1, len(browser.Contexts()))
+	require.Equal(t, context.Browser(), browser)
+}
+
 func TestBrowserContextClose(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t, false)
@@ -145,4 +159,18 @@ func TestBrowserContextAddInitScriptWithPath(t *testing.T) {
 	result, err := page.Evaluate(`() => window['result']`)
 	require.NoError(t, err)
 	require.Equal(t, 123, result)
+}
+
+func TestBrowserContextWindowOpenshouldUseParentTabContext(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	popupEvent, err := page.ExpectEvent("popup", func() error {
+		_, err := page.Evaluate("url => window.open(url)", server.EMPTY_PAGE)
+		return err
+	})
+	require.NoError(t, err)
+	popup := popupEvent.(playwright.Page)
+	require.Equal(t, popup.Context(), context)
 }
