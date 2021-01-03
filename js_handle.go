@@ -171,6 +171,13 @@ func serializeValue(value interface{}, handles *[]*channel, depth int) interface
 			"h": h,
 		}
 	}
+	if handle, ok := value.(*jsHandleImpl); ok {
+		h := len(*handles)
+		*handles = append(*handles, handle.channel)
+		return map[string]interface{}{
+			"h": h,
+		}
+	}
 	if depth > 100 {
 		panic(errors.New("Maximum argument depth exceeded"))
 	}

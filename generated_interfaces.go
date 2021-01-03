@@ -1269,6 +1269,7 @@ type Video interface {
 // event is emitted on the page object to signal a worker creation. `close` event is emitted on the worker object when the
 // worker is gone.
 type Worker interface {
+	EventEmitter
 	// Returns the return value of `pageFunction`
 	// If the function passed to the `worker.evaluate` returns a Promise, then `worker.evaluate` would wait for the promise
 	// to resolve and return its value.
@@ -1283,4 +1284,6 @@ type Worker interface {
 	// the promise to resolve and return its value.
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	URL() string
+	WaitForEvent(event string, predicate ...interface{}) interface{}
+	ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error)
 }

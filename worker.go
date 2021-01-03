@@ -82,6 +82,18 @@ func (w *workerImpl) onClose() {
 	w.Emit("close", w)
 }
 
+func (w *workerImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
+	return <-waitForEvent(w, event, predicate...)
+}
+
+func (w *workerImpl) ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error) {
+	args := []interface{}{event}
+	if len(predicates) == 1 {
+		args = append(args, predicates[0])
+	}
+	return newExpectWrapper(w.WaitForEvent, args, cb)
+}
+
 func newWorker(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *workerImpl {
 	bt := &workerImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)

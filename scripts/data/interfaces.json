@@ -1070,6 +1070,7 @@
 		]
 	},
 	"Worker": {
+		"EventEmitter": [],
 		"Evaluate": [
 			"expression string, options ...interface{}",
 			"interface{}, error"
@@ -1081,6 +1082,14 @@
 		"URL": [
 			null,
 			"string"
+		],
+		"WaitForEvent": [
+			"event string, predicate ...interface{}",
+			"interface{}"
+		],
+		"ExpectEvent": [
+			"event string, cb func() error, predicates ...interface{}",
+			"(interface{}, error)"
 		]
 	}
 }

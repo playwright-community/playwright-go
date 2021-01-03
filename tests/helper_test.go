@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"sync"
 	"testing"
 
@@ -117,16 +118,18 @@ func newTestServer() *testServer {
 	ts.testServer = httptest.NewServer(http.HandlerFunc(ts.serveHTTP))
 	ts.PREFIX = ts.testServer.URL
 	ts.EMPTY_PAGE = ts.testServer.URL + "/empty.html"
+	ts.CROSS_PROCESS_PREFIX = strings.Replace(ts.testServer.URL, "127.0.0.1", "localhost", 1)
 	return ts
 }
 
 type testServer struct {
 	sync.Mutex
-	testServer          *httptest.Server
-	routes              map[string]http.HandlerFunc
-	requestSubscriberes map[string][]chan *http.Request
-	PREFIX              string
-	EMPTY_PAGE          string
+	testServer           *httptest.Server
+	routes               map[string]http.HandlerFunc
+	requestSubscriberes  map[string][]chan *http.Request
+	PREFIX               string
+	EMPTY_PAGE           string
+	CROSS_PROCESS_PREFIX string
 }
 
 func (t *testServer) AfterEach() {
