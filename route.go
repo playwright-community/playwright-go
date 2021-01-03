@@ -16,10 +16,12 @@ func (r *routeImpl) Request() Request {
 	return fromChannel(r.initializer["request"]).(*requestImpl)
 }
 
-func (r *routeImpl) Abort(errorCode *string) error {
-	_, err := r.channel.Send("abort", map[string]*string{
-		"errorCode": errorCode,
-	})
+type RouteAbortOptions struct {
+	ErrorCode *string `json:"errorCode"`
+}
+
+func (r *routeImpl) Abort(options ...RouteAbortOptions) error {
+	_, err := r.channel.Send("abort", options)
 	return err
 }
 
@@ -80,6 +82,9 @@ func (r *routeImpl) Continue(options ...RouteContinueOptions) error {
 	overrides := make(map[string]interface{})
 	if len(options) == 1 {
 		option := options[0]
+		if option.Url != nil {
+			overrides["url"] = option.Url
+		}
 		if option.Method != nil {
 			overrides["method"] = option.Method
 		}

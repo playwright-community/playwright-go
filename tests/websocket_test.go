@@ -135,15 +135,14 @@ func TestWebSocketShouldEmitFrameEvents(t *testing.T) {
 	sent := [][]byte{}
 	received := [][]byte{}
 
-	onWebSocket := func(ws playwright.WebSocket) {
+	page.Once("websocket", func(ws playwright.WebSocket) {
 		ws.On("framesent", func(payload []byte) {
 			sent = append(sent, payload)
 		})
 		ws.On("framereceived", func(payload []byte) {
 			received = append(received, payload)
 		})
-	}
-	page.On("websocket", onWebSocket)
+	})
 	wsEvent, err := page.ExpectEvent("websocket", func() error {
 		_, err := page.Evaluate(`port => {
             const ws = new WebSocket('ws://localhost:' + port + '/ws');
@@ -172,15 +171,14 @@ func TestWebSocketShouldEmitBinaryFrameEvents(t *testing.T) {
 	sent := [][]byte{}
 	received := [][]byte{}
 
-	onWebSocket := func(ws playwright.WebSocket) {
+	page.Once("websocket", func(ws playwright.WebSocket) {
 		ws.On("framesent", func(payload []byte) {
 			sent = append(sent, payload)
 		})
 		ws.On("framereceived", func(payload []byte) {
 			received = append(received, payload)
 		})
-	}
-	page.On("websocket", onWebSocket)
+	})
 	wsEvent, err := page.ExpectEvent("websocket", func() error {
 		_, err := page.Evaluate(`port => {
             const ws = new WebSocket('ws://localhost:' + port + '/ws');

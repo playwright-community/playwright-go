@@ -2,19 +2,18 @@ package playwright
 
 import (
 	"fmt"
-	"sync"
 )
 
 type browserImpl struct {
 	channelOwner
-	isConnected bool
-	contexts    []BrowserContext
-	contextsMu  sync.Mutex
+	isConnected       bool
+	isClosedOrClosing bool
+	contexts          []BrowserContext
 }
 
 func (b *browserImpl) IsConnected() bool {
-	b.Lock()
-	defer b.Unlock()
+	b.RLock()
+	defer b.RUnlock()
 	return b.isConnected
 }
 
@@ -28,9 +27,9 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 		context.options = &options[0]
 	}
 	context.browser = b
-	b.contextsMu.Lock()
+	b.Lock()
 	b.contexts = append(b.contexts, context)
-	b.contextsMu.Unlock()
+	b.Unlock()
 	return context, nil
 }
 
@@ -49,8 +48,8 @@ func (b *browserImpl) NewPage(options ...BrowserNewContextOptions) (Page, error)
 }
 
 func (b *browserImpl) Contexts() []BrowserContext {
-	b.contextsMu.Lock()
-	defer b.contextsMu.Unlock()
+	b.Lock()
+	defer b.Unlock()
 	return b.contexts
 }
 
@@ -66,13 +65,15 @@ func (b *browserImpl) Version() string {
 func newBrowser(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserImpl {
 	bt := &browserImpl{
 		isConnected: true,
+		contexts:    make([]BrowserContext, 0),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.channel.On("close", func(ev map[string]interface{}) {
 		bt.Lock()
 		bt.isConnected = false
+		bt.isClosedOrClosing = true
 		bt.Unlock()
-		bt.Emit("close")
+		bt.Emit("disconnected")
 	})
 	return bt
 }

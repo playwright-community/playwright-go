@@ -7,6 +7,7 @@ import (
 
 type responseImpl struct {
 	channelOwner
+	request *requestImpl
 }
 
 func (r *responseImpl) URL() string {
@@ -59,15 +60,28 @@ func (r *responseImpl) JSON(v interface{}) error {
 }
 
 func (r *responseImpl) Request() Request {
-	return fromChannel(r.initializer["request"]).(*requestImpl)
+	return r.request
 }
 
 func (r *responseImpl) Frame() Frame {
-	return r.Request().Frame()
+	return r.request.Frame()
 }
 
 func newResponse(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *responseImpl {
 	resp := &responseImpl{}
 	resp.createChannelOwner(resp, parent, objectType, guid, initializer)
+	timing := resp.initializer["timing"].(map[string]interface{})
+	resp.request = fromChannel(resp.initializer["request"]).(*requestImpl)
+	resp.request.timing = &ResourceTiming{
+		StartTime:             timing["startTime"].(float64),
+		DomainLookupStart:     timing["domainLookupStart"].(float64),
+		DomainLookupEnd:       timing["domainLookupEnd"].(float64),
+		ConnectStart:          timing["connectStart"].(float64),
+		SecureConnectionStart: timing["secureConnectionStart"].(float64),
+		ConnectEnd:            timing["connectEnd"].(float64),
+		RequestStart:          timing["requestStart"].(float64),
+		ResponseStart:         timing["responseStart"].(float64),
+	}
+	resp.request.headers = parseHeaders(resp.initializer["requestHeaders"].([]interface{}))
 	return resp
 }

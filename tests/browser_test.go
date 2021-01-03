@@ -45,7 +45,7 @@ func TestBrowserClose(t *testing.T) {
 	onClose := func() {
 		onCloseWasCalled <- true
 	}
-	browser.On("close", onClose)
+	browser.On("disconnected", onClose)
 	require.True(t, browser.IsConnected())
 	require.NoError(t, browser.Close())
 	<-onCloseWasCalled

@@ -1,4 +1,10 @@
 {
+	"BindingCall": {
+		"Call": [
+			"f BindingCallFunction",
+			null
+		]
+	},
 	"Browser": {
 		"EventEmitter": [],
 		"Close": [
@@ -60,6 +66,14 @@
 			"event string, cb func() error",
 			"(interface{}, error)"
 		],
+		"ExposeBinding": [
+			"name string, binding BindingCallFunction, handle ...bool",
+			"error"
+		],
+		"ExposeFunction": [
+			"name string, binding ExposedFunction",
+			"error"
+		],
 		"GrantPermissions": [
 			"permissions []string, options ...BrowserContextGrantPermissionsOptions",
 			"error"
@@ -88,8 +102,20 @@
 			"gelocation *SetGeolocationOptions",
 			"error"
 		],
+		"ResetGeolocation": [
+			null,
+			"error"
+		],
+		"Route": [
+			"url interface{}, handler routeHandler",
+			"error"
+		],
 		"SetOffline": [
 			"offline bool",
+			"error"
+		],
+		"Unroute": [
+			"url interface{}, handler routeHandler",
 			"error"
 		],
 		"WaitForEvent": [
@@ -935,6 +961,10 @@
 			null,
 			"(Response, error)"
 		],
+		"Timing": [
+			null,
+			"*ResourceTiming"
+		],
 		"URL": [
 			null,
 			"string"
@@ -988,7 +1018,7 @@
 	},
 	"Route": {
 		"Abort": [
-			"errorCode *string",
+			"options ...RouteAbortOptions",
 			"error"
 		],
 		"Continue": [
@@ -1020,7 +1050,10 @@
 			null,
 			"string"
 		],
-		"WaitForEvent": ["event string, predicate ...interface{}", "interface{}"]
+		"WaitForEvent": [
+			"event string, predicate ...interface{}",
+			"interface{}"
+		]
 	},
 	"Video": {
 		"Path": [

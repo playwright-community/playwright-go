@@ -257,6 +257,14 @@ func serializeArgument(arg interface{}) interface{} {
 	}
 }
 
+func serializeError(err Error) *errorPayload {
+	return &errorPayload{
+		Name:    "Playwright for Go Error",
+		Message: err.Message,
+		Stack:   err.Stack,
+	}
+}
+
 func newJSHandle(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *jsHandleImpl {
 	bt := &jsHandleImpl{
 		preview: initializer["preview"].(string),
