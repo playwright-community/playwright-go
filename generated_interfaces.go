@@ -271,6 +271,11 @@ type ElementHandle interface {
 	// Event
 	// You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 	DispatchEvent(typ string, initObjects ...interface{}) error
+	Dispose() error
+	Evaluate(expression string, options ...interface{}) (interface{}, error)
+	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
+	GetProperties() (map[string]JSHandle, error)
+	GetProperty(name string) (JSHandle, error)
 	// Returns the return value of `pageFunction`
 	// The method finds an element matching the specified selector in the `ElementHandle`s subtree and passes it as a first
 	// argument to `pageFunction`. See Working with selectors for more details. If no elements match
@@ -312,6 +317,7 @@ type ElementHandle interface {
 	InnerHTML() (string, error)
 	// Returns the `element.innerText`.
 	InnerText() (string, error)
+	JSONValue() (interface{}, error)
 	// Returns the frame containing the given element.
 	OwnerFrame() (Frame, error)
 	// Focuses the element, and then uses keyboard.down(key) and keyboard.up(key).

@@ -252,3 +252,34 @@ func TestElementHandleString(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "JSHandle@a", stringHandle.String())
 }
+
+func TestElementHandleCheck(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.SetContent(`
+		<input type="checkbox"/>
+	`))
+	inputElement, err := page.QuerySelector("input")
+	require.NoError(t, err)
+	isChecked, err := inputElement.Evaluate("e => e.checked")
+	require.NoError(t, err)
+	require.Equal(t, false, isChecked)
+	require.NoError(t, inputElement.Check())
+	isChecked, err = inputElement.Evaluate("e => e.checked")
+	require.NoError(t, err)
+	require.Equal(t, true, isChecked)
+}
+
+func TestElementHandleUnCheck(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.SetContent(`
+		<input type="checkbox" checked/>
+	`))
+	inputElement, err := page.QuerySelector("input")
+	require.NoError(t, err)
+	require.NoError(t, inputElement.Uncheck())
+	isChecked, err := inputElement.Evaluate("e => e.checked")
+	require.NoError(t, err)
+	require.Equal(t, false, isChecked)
+}
