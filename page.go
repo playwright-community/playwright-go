@@ -735,3 +735,7 @@ func (p *pageImpl) ExposeBinding(name string, binding BindingCallFunction, handl
 	})
 	return err
 }
+
+func (p *pageImpl) SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error) {
+	return p.mainFrame.SelectOption(selector, values, options...)
+}

@@ -324,3 +324,52 @@ func waitForEvent(emitter EventEmitter, event string, predicate ...interface{}) 
 	emitter.On(event, handler)
 	return evChan
 }
+
+type SelectOptionValues struct {
+	Value      *[]string
+	Index      *[]int
+	Label      *[]string
+	ElemHandle *[]ElementHandle
+}
+
+func ConvertSelectOptionSet(values SelectOptionValues) map[string]interface{} {
+	out := make(map[string]interface{})
+	if values == (SelectOptionValues{}) {
+		return out
+	}
+
+	var o []map[string]interface{}
+	if values.Value != nil {
+		for _, v := range *values.Value {
+			m := map[string]interface{}{"Value": v}
+			o = append(o, m)
+		}
+	}
+	if values.Index != nil {
+		for _, i := range *values.Index {
+			m := map[string]interface{}{"Index": i}
+			o = append(o, m)
+		}
+	}
+	if values.Label != nil {
+		for _, l := range *values.Label {
+			m := map[string]interface{}{"Label": l}
+			o = append(o, m)
+		}
+	}
+	if o != nil {
+		out["options"] = o
+	}
+
+	var e []channel
+	if values.ElemHandle != nil {
+		for _, eh := range *values.ElemHandle {
+			e = append(e, *eh.Channel())
+		}
+	}
+	if e != nil {
+		out["elements"] = e
+	}
+
+	return out
+}

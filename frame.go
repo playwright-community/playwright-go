@@ -527,3 +527,23 @@ func (f *frameImpl) Tap(selector string, options ...FrameTapOptions) error {
 	}, options)
 	return err
 }
+
+func (f *frameImpl) SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error) {
+	opts := ConvertSelectOptionSet(values)
+
+	m := make(map[string]interface{})
+	m["selector"] = selector
+	for k, v := range opts {
+		m[k] = v
+	}
+	selected, err := f.channel.Send("selectOption", m, options)
+	if err != nil {
+		return nil, err
+	}
+
+	out, err := transformToStringList(selected)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}

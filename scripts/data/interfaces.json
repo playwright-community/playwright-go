@@ -227,6 +227,10 @@
 			null,
 			"(*Rect, error)"
 		],
+		"Channel": [
+			null,
+			"*channel"
+		],
 		"Check": [
 			"options ...ElementHandleCheckOptions",
 			"error"
@@ -302,6 +306,10 @@
 		"ScrollIntoViewIfNeeded": [
 			"options ...ElementHandleScrollIntoViewIfNeededOptions",
 			"error"
+		],
+		"SelectOption": [
+			"values SelectOptionValues, options ...ElementHandleSelectOptionOptions",
+			"([]string, error)"
 		],
 		"SelectText": [
 			"options ...ElementHandleSelectTextOptions",
@@ -484,6 +492,10 @@
 		"SetContent": [
 			"content string, options ...PageSetContentOptions",
 			"error"
+		],
+		"SelectOption": [
+			"selector string, values SelectOptionValues, options ...FrameSelectOptionOptions",
+			"([]string, error)"
 		],
 		"SetInputFiles": [
 			"selector string, files []InputFile, options ...FrameSetInputFilesOptions",
@@ -831,6 +843,10 @@
 		"Screenshot": [
 			"options ...PageScreenshotOptions",
 			"([]byte, error)"
+		],
+		"SelectOption": [
+			"selector string, values SelectOptionValues, options ...FrameSelectOptionOptions",
+			"([]string, error)"
 		],
 		"SetContent": [
 			"content string, options ...PageSetContentOptions",

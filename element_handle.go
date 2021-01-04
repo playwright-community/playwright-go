@@ -268,6 +268,24 @@ func (e *elementHandleImpl) ToString() string {
 	return e.jsHandleImpl.String()
 }
 
+func (e *elementHandleImpl) Channel() *channel {
+	return e.channel
+}
+
+func (e *elementHandleImpl) SelectOption(values SelectOptionValues, options ...ElementHandleSelectOptionOptions) ([]string, error) {
+	opts := ConvertSelectOptionSet(values)
+	selected, err := e.channel.Send("selectOption", opts, options)
+	if err != nil {
+		return nil, err
+	}
+
+	out, err := transformToStringList(selected)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func newElementHandle(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *elementHandleImpl {
 	bt := &elementHandleImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
@@ -284,4 +302,14 @@ func normalizeFilePayloads(files []InputFile) []map[string]string {
 		})
 	}
 	return out
+}
+
+func transformToStringList(in interface{}) ([]string, error) {
+	s := in.([]interface{})
+
+	var out []string
+	for _, v := range s {
+		out = append(out, v.(string))
+	}
+	return out, nil
 }

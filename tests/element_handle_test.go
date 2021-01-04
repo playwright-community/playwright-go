@@ -283,3 +283,19 @@ func TestElementHandleUnCheck(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, false, isChecked)
 }
+
+func TestElementHandleSelectOption(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent("<select id='lang'><option value='go'>go</option><option value='python'>python</option></select>"))
+	elemHandle, err := page.QuerySelector("#lang")
+	require.NoError(t, err)
+	selected, err := elemHandle.SelectOption(playwright.SelectOptionValues{
+		Value: &[]string{"go"},
+	})
+	require.NoError(t, err)
+	require.Equal(t, 1, len(selected))
+	require.Equal(t, "go", selected[0])
+}

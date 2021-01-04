@@ -266,3 +266,46 @@ func (tu *testUtils) AssertEval(t *testing.T, page playwright.Page, script strin
 	require.NoError(t, err)
 	require.Equal(t, expected, result)
 }
+
+func TestConvertSelectOptionSet(t *testing.T) {
+	testCases := []struct {
+		name         string
+		optionValues playwright.SelectOptionValues
+		expected     interface{}
+	}{
+		{
+			name:         "SelectOptionValues is nil",
+			optionValues: playwright.SelectOptionValues{},
+			expected:     make(map[string]interface{}),
+		},
+		{
+			name: "SelectOptionValues is supplied",
+			optionValues: playwright.SelectOptionValues{
+				Value: &[]string{"a", "b"},
+				Index: &[]int{1},
+				Label: &[]string{"x"},
+			},
+			expected: map[string]interface{}{
+				"options": []map[string]interface{}{
+					{"Value": "a"}, {"Value": "b"}, {"Index": 1}, {"Label": "x"},
+				},
+			},
+		},
+		{
+			name: "Only value is supplied",
+			optionValues: playwright.SelectOptionValues{
+				Value: &[]string{"a", "b"},
+			},
+			expected: map[string]interface{}{
+				"options": []map[string]interface{}{
+					{"Value": "a"}, {"Value": "b"},
+				},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, tc.expected, playwright.ConvertSelectOptionSet(tc.optionValues))
+		})
+	}
+}
