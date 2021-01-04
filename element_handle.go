@@ -279,11 +279,7 @@ func (e *elementHandleImpl) SelectOption(values SelectOptionValues, options ...E
 		return nil, err
 	}
 
-	out, err := transformToStringList(selected)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
+	return transformToStringList(selected), nil
 }
 
 func newElementHandle(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *elementHandleImpl {
@@ -304,12 +300,12 @@ func normalizeFilePayloads(files []InputFile) []map[string]string {
 	return out
 }
 
-func transformToStringList(in interface{}) ([]string, error) {
+func transformToStringList(in interface{}) []string {
 	s := in.([]interface{})
 
 	var out []string
 	for _, v := range s {
 		out = append(out, v.(string))
 	}
-	return out, nil
+	return out
 }

@@ -541,9 +541,5 @@ func (f *frameImpl) SelectOption(selector string, values SelectOptionValues, opt
 		return nil, err
 	}
 
-	out, err := transformToStringList(selected)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
+	return transformToStringList(selected), nil
 }
