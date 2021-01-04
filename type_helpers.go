@@ -30,6 +30,22 @@ func Null() interface{} {
 	return "PW_NULL"
 }
 
+// StringSlice is a helper routine that allocates a new StringSlice value
+// to store v and returns a pointer to it.
+func StringSlice(v ...string) *[]string {
+	var o []string
+	o = append(o, v...)
+	return &o
+}
+
+// IntSlice is a helper routine that allocates a new IntSlice value
+// to store v and returns a pointer to it.
+func IntSlice(v ...int) *[]int {
+	var o []int
+	o = append(o, v...)
+	return &o
+}
+
 type Rect struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`

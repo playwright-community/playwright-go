@@ -774,7 +774,7 @@ func TestPageSelectOption(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<select id='lang'><option value='go'>go</option><option value='python'>python</option></select>"))
 	selected, err := page.SelectOption("#lang", playwright.SelectOptionValues{
-		Value: &[]string{"go"},
+		Value: playwright.StringSlice("go"),
 	})
 	require.NoError(t, err)
 	require.Equal(t, 1, len(selected))

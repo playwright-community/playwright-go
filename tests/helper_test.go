@@ -281,9 +281,9 @@ func TestConvertSelectOptionSet(t *testing.T) {
 		{
 			name: "SelectOptionValues is supplied",
 			optionValues: playwright.SelectOptionValues{
-				Value: &[]string{"a", "b"},
-				Index: &[]int{1},
-				Label: &[]string{"x"},
+				Value: playwright.StringSlice("a", "b"),
+				Index: playwright.IntSlice(1),
+				Label: playwright.StringSlice("x"),
 			},
 			expected: map[string]interface{}{
 				"options": []map[string]interface{}{
@@ -294,7 +294,7 @@ func TestConvertSelectOptionSet(t *testing.T) {
 		{
 			name: "Only value is supplied",
 			optionValues: playwright.SelectOptionValues{
-				Value: &[]string{"a", "b"},
+				Value: playwright.StringSlice("a", "b"),
 			},
 			expected: map[string]interface{}{
 				"options": []map[string]interface{}{
