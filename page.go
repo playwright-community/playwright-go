@@ -22,7 +22,7 @@ type pageImpl struct {
 	routes          []*routeHandlerEntry
 	viewportSize    ViewportSize
 	ownedContext    BrowserContext
-	bindings        map[string]bindingCallFunction
+	bindings        map[string]BindingCallFunction
 }
 
 func (p *pageImpl) Context() BrowserContext {
@@ -489,7 +489,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		mainFrame: fromChannel(initializer["mainFrame"]).(*frameImpl),
 		workers:   make([]Worker, 0),
 		routes:    make([]*routeHandlerEntry, 0),
-		bindings:  make(map[string]bindingCallFunction),
+		bindings:  make(map[string]BindingCallFunction),
 		viewportSize: ViewportSize{
 			Height: int(initializer["viewportSize"].(map[string]interface{})["height"].(float64)),
 			Width:  int(initializer["viewportSize"].(map[string]interface{})["width"].(float64)),
@@ -714,12 +714,12 @@ func (p *pageImpl) Tap(selector string, options ...FrameTapOptions) error {
 	return p.mainFrame.Tap(selector, options...)
 }
 
-func (p *pageImpl) ExposeFunction(name string, binding exposedFunction) error {
+func (p *pageImpl) ExposeFunction(name string, binding ExposedFunction) error {
 	return p.ExposeBinding(name, func(source *BindingSource, args ...interface{}) interface{} {
 		return binding(args...)
 	})
 }
-func (p *pageImpl) ExposeBinding(name string, binding bindingCallFunction, handle ...bool) error {
+func (p *pageImpl) ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error {
 	needsHandle := false
 	if len(handle) == 1 {
 		needsHandle = handle[0]

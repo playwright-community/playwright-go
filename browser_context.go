@@ -18,7 +18,7 @@ type browserContextImpl struct {
 	ownedPage         Page
 	browser           *browserImpl
 	serviceWorkers    []*workerImpl
-	bindings          map[string]bindingCallFunction
+	bindings          map[string]BindingCallFunction
 }
 
 func (b *browserContextImpl) SetDefaultNavigationTimeout(timeout int) {
@@ -177,7 +177,7 @@ func (b *browserContextImpl) AddInitScript(options BrowserContextAddInitScriptOp
 	return err
 }
 
-func (b *browserContextImpl) ExposeBinding(name string, binding bindingCallFunction, handle ...bool) error {
+func (b *browserContextImpl) ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error {
 	needsHandle := false
 	if len(handle) == 1 {
 		needsHandle = handle[0]
@@ -198,7 +198,7 @@ func (b *browserContextImpl) ExposeBinding(name string, binding bindingCallFunct
 	return err
 }
 
-func (b *browserContextImpl) ExposeFunction(name string, binding exposedFunction) error {
+func (b *browserContextImpl) ExposeFunction(name string, binding ExposedFunction) error {
 	return b.ExposeBinding(name, func(source *BindingSource, args ...interface{}) interface{} {
 		return binding(args...)
 	})
@@ -313,7 +313,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 		timeoutSettings: newTimeoutSettings(nil),
 		pages:           make([]Page, 0),
 		routes:          make([]*routeHandlerEntry, 0),
-		bindings:        make(map[string]bindingCallFunction),
+		bindings:        make(map[string]BindingCallFunction),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.channel.On("bindingCall", func(params map[string]interface{}) {
