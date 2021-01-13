@@ -18,7 +18,7 @@ type browserContextImpl struct {
 	ownedPage         Page
 	browser           *browserImpl
 	serviceWorkers    []*workerImpl
-	bindings          map[string]BindingCallFunction
+	bindings          map[string]bindingCallFunction
 }
 
 func (b *browserContextImpl) SetDefaultNavigationTimeout(timeout int) {
@@ -56,6 +56,18 @@ func (b *browserContextImpl) NewPage(options ...BrowserNewPageOptions) (Page, er
 	return fromChannel(channel).(*pageImpl), nil
 }
 
+// NetworkCookie is the return structure of BrowserContext.Cookies()
+type NetworkCookie struct {
+	Name     string `json:"name"`
+	Value    string `json:"value"`
+	Domain   string `json:"domain"`
+	Path     string `json:"path"`
+	Expires  int    `json:"expires"`
+	HttpOnly bool   `json:"httpOnly"`
+	Secure   bool   `json:"secure"`
+	SameSite string `json:"sameSite"`
+}
+
 func (b *browserContextImpl) Cookies(urls ...string) ([]*NetworkCookie, error) {
 	result, err := b.channel.Send("cookies", map[string]interface{}{
 		"urls": urls,
@@ -69,6 +81,19 @@ func (b *browserContextImpl) Cookies(urls ...string) ([]*NetworkCookie, error) {
 		remapMapToStruct(cookie, cookies[i])
 	}
 	return cookies, nil
+}
+
+// SetNetworkCookieParam is used to filter cookies in BrowserContext.AddCookies()
+type SetNetworkCookieParam struct {
+	Name     string  `json:"name"`
+	Value    string  `json:"value"`
+	URL      *string `json:"url"`
+	Domain   *string `json:"domain"`
+	Path     *string `json:"path"`
+	Expires  *int    `json:"expires"`
+	HttpOnly *bool   `json:"httpOnly"`
+	Secure   *bool   `json:"secure"`
+	SameSite *string `json:"sameSite"`
 }
 
 func (b *browserContextImpl) AddCookies(cookies ...SetNetworkCookieParam) error {
@@ -95,6 +120,7 @@ func (b *browserContextImpl) ClearPermissions() error {
 	return err
 }
 
+// SetGeolocationOptions represents the options for BrowserContext.SetGeolocation()
 type SetGeolocationOptions struct {
 	Longitude int  `json:"longitude"`
 	Latitude  int  `json:"latitude"`
@@ -127,6 +153,7 @@ func (b *browserContextImpl) SetOffline(offline bool) error {
 	return err
 }
 
+// BrowserContextAddInitScriptOptions represents the options for BrowserContext.AddInitScript()
 type BrowserContextAddInitScriptOptions struct {
 	Path   *string
 	Script *string
@@ -150,7 +177,7 @@ func (b *browserContextImpl) AddInitScript(options BrowserContextAddInitScriptOp
 	return err
 }
 
-func (b *browserContextImpl) ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error {
+func (b *browserContextImpl) ExposeBinding(name string, binding bindingCallFunction, handle ...bool) error {
 	needsHandle := false
 	if len(handle) == 1 {
 		needsHandle = handle[0]
@@ -171,7 +198,7 @@ func (b *browserContextImpl) ExposeBinding(name string, binding BindingCallFunct
 	return err
 }
 
-func (b *browserContextImpl) ExposeFunction(name string, binding ExposedFunction) error {
+func (b *browserContextImpl) ExposeFunction(name string, binding exposedFunction) error {
 	return b.ExposeBinding(name, func(source *BindingSource, args ...interface{}) interface{} {
 		return binding(args...)
 	})
@@ -286,7 +313,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 		timeoutSettings: newTimeoutSettings(nil),
 		pages:           make([]Page, 0),
 		routes:          make([]*routeHandlerEntry, 0),
-		bindings:        make(map[string]BindingCallFunction),
+		bindings:        make(map[string]bindingCallFunction),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.channel.On("bindingCall", func(params map[string]interface{}) {

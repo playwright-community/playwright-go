@@ -8,16 +8,17 @@ type bindingCallImpl struct {
 	channelOwner
 }
 
+// BindingSource is the value passed to a binding call execution
 type BindingSource struct {
 	Context BrowserContext
 	Page    Page
 	Frame   Frame
 }
 
-type ExposedFunction = func(args ...interface{}) interface{}
-type BindingCallFunction = func(source *BindingSource, args ...interface{}) interface{}
+type exposedFunction = func(args ...interface{}) interface{}
+type bindingCallFunction = func(source *BindingSource, args ...interface{}) interface{}
 
-func (b *bindingCallImpl) Call(f BindingCallFunction) {
+func (b *bindingCallImpl) Call(f bindingCallFunction) {
 	defer func() {
 		if r := recover(); r != nil {
 			if _, err := b.channel.Send("reject", map[string]interface{}{

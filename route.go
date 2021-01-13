@@ -16,6 +16,7 @@ func (r *routeImpl) Request() Request {
 	return fromChannel(r.initializer["request"]).(*requestImpl)
 }
 
+// RouteAbortOptions is the option struct for Route.Abort()
 type RouteAbortOptions struct {
 	ErrorCode *string `json:"errorCode"`
 }
@@ -25,6 +26,7 @@ func (r *routeImpl) Abort(options ...RouteAbortOptions) error {
 	return err
 }
 
+// RouteAbortOptions is the option struct for Route.Fulfill()
 type RouteFulfillOptions struct {
 	Status      *int              `json:"status"`
 	Headers     map[string]string `json:"headers"`

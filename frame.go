@@ -396,8 +396,8 @@ func (f *frameImpl) Hover(selector string, options ...PageHoverOptions) error {
 	return err
 }
 
-func (e *frameImpl) SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error {
-	_, err := e.channel.Send("setInputFiles", map[string]interface{}{
+func (f *frameImpl) SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error {
+	_, err := f.channel.Send("setInputFiles", map[string]interface{}{
 		"selector": selector,
 		"files":    normalizeFilePayloads(files),
 	}, options)

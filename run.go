@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-const PLAYWRIGHT_CLI_VERSION = "0.171.0"
+const playwrightCliVersion = "0.171.0"
 
 type playwrightDriver struct {
 	driverDirectory, driverBinaryLocation, version string
@@ -34,12 +34,12 @@ func newDriver(options *RunOptions) (*playwrightDriver, error) {
 			return nil, fmt.Errorf("could not get default cache directory: %v", err)
 		}
 	}
-	driverDirectory := filepath.Join(baseDriverDirectory, "ms-playwright-go", PLAYWRIGHT_CLI_VERSION)
+	driverDirectory := filepath.Join(baseDriverDirectory, "ms-playwright-go", playwrightCliVersion)
 	driverBinaryLocation := filepath.Join(driverDirectory, getDriverName())
 	return &playwrightDriver{
 		driverBinaryLocation: driverBinaryLocation,
 		driverDirectory:      driverDirectory,
-		version:              PLAYWRIGHT_CLI_VERSION,
+		version:              playwrightCliVersion,
 	}, nil
 }
 
@@ -182,6 +182,7 @@ func (d *playwrightDriver) installBrowsers(driverPath string) error {
 	return nil
 }
 
+// RunOptions are custom options to run the driver
 type RunOptions struct {
 	DriverDirectory string
 }
@@ -200,6 +201,7 @@ func Install(options ...*RunOptions) error {
 	return nil
 }
 
+// Run starts a Playwright instance
 func Run(options ...*RunOptions) (*Playwright, error) {
 	driver, err := newDriver(transformRunOptions(options))
 	if err != nil {

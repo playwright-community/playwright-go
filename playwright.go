@@ -3,6 +3,7 @@
 // is ever-green, capable, reliable and fast.
 package playwright
 
+// DeviceDescriptor represents a single device
 type DeviceDescriptor struct {
 	UserAgent          string                     `json:"userAgent"`
 	Viewport           *BrowserNewContextViewport `json:"viewport"`
@@ -12,6 +13,7 @@ type DeviceDescriptor struct {
 	DefaultBrowserType string                     `json:"defaultBrowserType"`
 }
 
+// Playwright represents a Playwright instance
 type Playwright struct {
 	channelOwner
 	Chromium BrowserType
@@ -20,6 +22,7 @@ type Playwright struct {
 	Devices  map[string]*DeviceDescriptor
 }
 
+// Stop stops the Playwright instance
 func (p *Playwright) Stop() error {
 	return p.connection.Stop()
 }

@@ -22,7 +22,7 @@ type pageImpl struct {
 	routes          []*routeHandlerEntry
 	viewportSize    ViewportSize
 	ownedContext    BrowserContext
-	bindings        map[string]BindingCallFunction
+	bindings        map[string]bindingCallFunction
 }
 
 func (p *pageImpl) Context() BrowserContext {
@@ -64,6 +64,7 @@ func (p *pageImpl) MainFrame() Frame {
 	return p.mainFrame
 }
 
+// PageFrameOptions is the option struct for Page.Frame()
 type PageFrameOptions struct {
 	Name *string
 	URL  interface{}
@@ -213,6 +214,7 @@ func (p *pageImpl) EmulateMedia(options ...PageEmulateMediaOptions) error {
 	return err
 }
 
+// ViewportSize represents the viewport size
 type ViewportSize struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
@@ -487,7 +489,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		mainFrame: fromChannel(initializer["mainFrame"]).(*frameImpl),
 		workers:   make([]Worker, 0),
 		routes:    make([]*routeHandlerEntry, 0),
-		bindings:  make(map[string]BindingCallFunction),
+		bindings:  make(map[string]bindingCallFunction),
 		viewportSize: ViewportSize{
 			Height: int(initializer["viewportSize"].(map[string]interface{})["height"].(float64)),
 			Width:  int(initializer["viewportSize"].(map[string]interface{})["width"].(float64)),
@@ -712,12 +714,12 @@ func (p *pageImpl) Tap(selector string, options ...FrameTapOptions) error {
 	return p.mainFrame.Tap(selector, options...)
 }
 
-func (p *pageImpl) ExposeFunction(name string, binding ExposedFunction) error {
+func (p *pageImpl) ExposeFunction(name string, binding exposedFunction) error {
 	return p.ExposeBinding(name, func(source *BindingSource, args ...interface{}) interface{} {
 		return binding(args...)
 	})
 }
-func (p *pageImpl) ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error {
+func (p *pageImpl) ExposeBinding(name string, binding bindingCallFunction, handle ...bool) error {
 	needsHandle := false
 	if len(handle) == 1 {
 		needsHandle = handle[0]

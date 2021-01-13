@@ -1,7 +1,7 @@
 package playwright
 
 type BindingCall interface {
-	Call(f BindingCallFunction)
+	Call(f bindingCallFunction)
 }
 
 // A Browser is created when Playwright connects to a browser instance, either through browserType.launch([options]) or
@@ -72,14 +72,14 @@ type BrowserContext interface {
 	// See page.exposeBinding(name, playwrightBinding[, options]) for page-only version.
 	// An example of exposing page URL to all frames in all pages in the context:
 	// An example of passing an element handle:
-	ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error
+	ExposeBinding(name string, binding bindingCallFunction, handle ...bool) error
 	// The method adds a function called `name` on the `window` object of every frame in every page in the context. When
 	// called, the function executes `playwrightFunction` in Node.js and returns a Promise which resolves to the return value
 	// of `playwrightFunction`.
 	// If the `playwrightFunction` returns a Promise, it will be awaited.
 	// See page.exposeFunction(name, playwrightFunction) for page-only version.
 	// An example of adding an `md5` function to all pages in the context:
-	ExposeFunction(name string, binding ExposedFunction) error
+	ExposeFunction(name string, binding exposedFunction) error
 	// Grants specified permissions to the browser context. Only grants corresponding permissions to the given origin if
 	// specified.
 	GrantPermissions(permissions []string, options ...BrowserContextGrantPermissionsOptions) error
@@ -846,7 +846,7 @@ type Page interface {
 	// **NOTE** Functions installed via `page.exposeBinding` survive navigations.
 	// An example of exposing page URL to all frames in a page:
 	// An example of passing an element handle:
-	ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error
+	ExposeBinding(name string, binding bindingCallFunction, handle ...bool) error
 	// The method adds a function called `name` on the `window` object of every frame in the page. When called, the function
 	// executes `playwrightFunction` in Node.js and returns a Promise which resolves to the return value of
 	// `playwrightFunction`.
@@ -855,7 +855,7 @@ type Page interface {
 	// **NOTE** Functions installed via `page.exposeFunction` survive navigations.
 	// An example of adding an `md5` function to the page:
 	// An example of adding a `window.readfile` function to the page:
-	ExposeFunction(name string, binding ExposedFunction) error
+	ExposeFunction(name string, binding exposedFunction) error
 	EmulateMedia(options ...PageEmulateMediaOptions) error
 	// Returns the value of the `pageFunction` invacation.
 	// If the function passed to the `page.evaluate` returns a Promise, then `page.evaluate` would wait for the promise to

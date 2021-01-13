@@ -29,10 +29,3 @@ func Float(v float64) *float64 {
 func Null() interface{} {
 	return "PW_NULL"
 }
-
-type Rect struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
-	X      int `json:"x"`
-	Y      int `json:"y"`
-}
