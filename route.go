@@ -26,7 +26,7 @@ func (r *routeImpl) Abort(options ...RouteAbortOptions) error {
 	return err
 }
 
-// RouteAbortOptions is the option struct for Route.Fulfill()
+// RouteFulfillOptions is the option struct for Route.Fulfill()
 type RouteFulfillOptions struct {
 	Status      *int              `json:"status"`
 	Headers     map[string]string `json:"headers"`

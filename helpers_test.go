@@ -94,3 +94,46 @@ func TestRemapMapToStruct(t *testing.T) {
 	remapMapToStruct(inMap, &ourStruct)
 	require.Equal(t, ourStruct.V1, "foobar")
 }
+
+func TestConvertSelectOptionSet(t *testing.T) {
+	testCases := []struct {
+		name         string
+		optionValues SelectOptionValues
+		expected     interface{}
+	}{
+		{
+			name:         "SelectOptionValues is nil",
+			optionValues: SelectOptionValues{},
+			expected:     make(map[string]interface{}),
+		},
+		{
+			name: "SelectOptionValues is supplied",
+			optionValues: SelectOptionValues{
+				Values:  StringSlice("a", "b"),
+				Indexes: IntSlice(1),
+				Labels:  StringSlice("x"),
+			},
+			expected: map[string]interface{}{
+				"options": []map[string]interface{}{
+					{"value": "a"}, {"value": "b"}, {"index": 1}, {"label": "x"},
+				},
+			},
+		},
+		{
+			name: "Only value is supplied",
+			optionValues: SelectOptionValues{
+				Values: StringSlice("a", "b"),
+			},
+			expected: map[string]interface{}{
+				"options": []map[string]interface{}{
+					{"value": "a"}, {"value": "b"},
+				},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, tc.expected, convertSelectOptionSet(tc.optionValues))
+		})
+	}
+}

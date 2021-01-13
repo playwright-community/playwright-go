@@ -766,3 +766,17 @@ func TestPagePageError(t *testing.T) {
 	}
 	require.Equal(t, pageError.Stack, stack)
 }
+
+func TestPageSelectOption(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent("<select id='lang'><option value='go'>go</option><option value='python'>python</option></select>"))
+	selected, err := page.SelectOption("#lang", playwright.SelectOptionValues{
+		Values: playwright.StringSlice("python"),
+	})
+	require.NoError(t, err)
+	require.Equal(t, 1, len(selected))
+	require.Equal(t, "python", selected[0])
+}

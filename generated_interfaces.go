@@ -345,6 +345,10 @@ type ElementHandle interface {
 	// Throws when `elementHandle` does not point to an element
 	// connected to a Document or a ShadowRoot.
 	ScrollIntoViewIfNeeded(options ...ElementHandleScrollIntoViewIfNeededOptions) error
+	// Returns the array of option values that have been successfully selected.
+	// Triggers a `change` and `input` event once all the provided options have been selected. If element is not a `<select>`
+	// element, the method throws an error.
+	SelectOption(values SelectOptionValues, options ...ElementHandleSelectOptionOptions) ([]string, error)
 	// This method waits for actionability checks, then focuses the element and selects all its text
 	// content.
 	SelectText(options ...ElementHandleSelectTextOptions) error
@@ -578,6 +582,10 @@ type Frame interface {
 	// `[]`.
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
 	SetContent(content string, options ...PageSetContentOptions) error
+	// Returns the array of option values that have been successfully selected.
+	// Triggers a `change` and `input` event once all the provided options have been selected. If there's no `<select>` element
+	// matching `selector`, the method throws an error.
+	SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error)
 	// This method expects `selector` to point to an input
 	// element.
 	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
@@ -1031,6 +1039,11 @@ type Page interface {
 	// **NOTE** Screenshots take at least 1/6 second on Chromium OS X and Chromium Windows. See https://crbug.com/741689 for
 	// discussion.
 	Screenshot(options ...PageScreenshotOptions) ([]byte, error)
+	// Returns the array of option values that have been successfully selected.
+	// Triggers a `change` and `input` event once all the provided options have been selected. If there's no `<select>` element
+	// matching `selector`, the method throws an error.
+	// Shortcut for main frame's frame.selectOption(selector, values[, options])
+	SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error)
 	SetContent(content string, options ...PageSetContentOptions) error
 	// This setting will change the default maximum navigation time for the following methods and related shortcuts:
 	// page.goBack([options])

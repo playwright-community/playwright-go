@@ -324,3 +324,53 @@ func waitForEvent(emitter EventEmitter, event string, predicate ...interface{}) 
 	emitter.On(event, handler)
 	return evChan
 }
+
+// SelectOptionValues is the option struct for ElementHandle.Select() etc.
+type SelectOptionValues struct {
+	Values   *[]string
+	Indexes  *[]int
+	Labels   *[]string
+	Elements *[]ElementHandle
+}
+
+func convertSelectOptionSet(values SelectOptionValues) map[string]interface{} {
+	out := make(map[string]interface{})
+	if values == (SelectOptionValues{}) {
+		return out
+	}
+
+	var o []map[string]interface{}
+	if values.Values != nil {
+		for _, v := range *values.Values {
+			m := map[string]interface{}{"value": v}
+			o = append(o, m)
+		}
+	}
+	if values.Indexes != nil {
+		for _, i := range *values.Indexes {
+			m := map[string]interface{}{"index": i}
+			o = append(o, m)
+		}
+	}
+	if values.Labels != nil {
+		for _, l := range *values.Labels {
+			m := map[string]interface{}{"label": l}
+			o = append(o, m)
+		}
+	}
+	if o != nil {
+		out["options"] = o
+	}
+
+	var e []*channel
+	if values.Elements != nil {
+		for _, eh := range *values.Elements {
+			e = append(e, eh.(*elementHandleImpl).channel)
+		}
+	}
+	if e != nil {
+		out["elements"] = e
+	}
+
+	return out
+}
