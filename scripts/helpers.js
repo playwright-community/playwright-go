@@ -5,7 +5,7 @@ const child_process = require("child_process")
 
 const getCliVersion = () => {
   const runGoContent = fs.readFileSync(path.join(__dirname, "..", "run.go")).toString()
-  const findings = /PLAYWRIGHT_CLI_VERSION = "(.*)"/.exec(runGoContent)
+  const findings = /playwrightCliVersion = "(.*)"/.exec(runGoContent)
   return findings[1]
 }
 

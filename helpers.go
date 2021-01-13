@@ -254,7 +254,7 @@ func newSafeStringSet(v []string) *safeStringSet {
 	}
 }
 
-const DEFAULT_TIMEOUT = 30 * 1000
+const defaultTimeout = 30 * 1000
 
 type timeoutSettings struct {
 	parent            *timeoutSettings
@@ -273,7 +273,7 @@ func (t *timeoutSettings) Timeout() int {
 	if t.parent != nil {
 		return t.parent.Timeout()
 	}
-	return DEFAULT_TIMEOUT
+	return defaultTimeout
 }
 
 func (t *timeoutSettings) SetNavigationTimeout(navigationTimeout int) {
@@ -287,14 +287,14 @@ func (t *timeoutSettings) NavigationTimeout() int {
 	if t.parent != nil {
 		return t.parent.NavigationTimeout()
 	}
-	return DEFAULT_TIMEOUT
+	return defaultTimeout
 }
 
 func newTimeoutSettings(parent *timeoutSettings) *timeoutSettings {
 	return &timeoutSettings{
 		parent:            parent,
-		timeout:           DEFAULT_TIMEOUT,
-		navigationTimeout: DEFAULT_TIMEOUT,
+		timeout:           defaultTimeout,
+		navigationTimeout: defaultTimeout,
 	}
 }
 

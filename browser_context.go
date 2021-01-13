@@ -56,6 +56,18 @@ func (b *browserContextImpl) NewPage(options ...BrowserNewPageOptions) (Page, er
 	return fromChannel(channel).(*pageImpl), nil
 }
 
+// NetworkCookie is the return structure of BrowserContext.Cookies()
+type NetworkCookie struct {
+	Name     string `json:"name"`
+	Value    string `json:"value"`
+	Domain   string `json:"domain"`
+	Path     string `json:"path"`
+	Expires  int    `json:"expires"`
+	HttpOnly bool   `json:"httpOnly"`
+	Secure   bool   `json:"secure"`
+	SameSite string `json:"sameSite"`
+}
+
 func (b *browserContextImpl) Cookies(urls ...string) ([]*NetworkCookie, error) {
 	result, err := b.channel.Send("cookies", map[string]interface{}{
 		"urls": urls,
@@ -69,6 +81,19 @@ func (b *browserContextImpl) Cookies(urls ...string) ([]*NetworkCookie, error) {
 		remapMapToStruct(cookie, cookies[i])
 	}
 	return cookies, nil
+}
+
+// SetNetworkCookieParam is used to filter cookies in BrowserContext.AddCookies()
+type SetNetworkCookieParam struct {
+	Name     string  `json:"name"`
+	Value    string  `json:"value"`
+	URL      *string `json:"url"`
+	Domain   *string `json:"domain"`
+	Path     *string `json:"path"`
+	Expires  *int    `json:"expires"`
+	HttpOnly *bool   `json:"httpOnly"`
+	Secure   *bool   `json:"secure"`
+	SameSite *string `json:"sameSite"`
 }
 
 func (b *browserContextImpl) AddCookies(cookies ...SetNetworkCookieParam) error {
@@ -95,6 +120,7 @@ func (b *browserContextImpl) ClearPermissions() error {
 	return err
 }
 
+// SetGeolocationOptions represents the options for BrowserContext.SetGeolocation()
 type SetGeolocationOptions struct {
 	Longitude int  `json:"longitude"`
 	Latitude  int  `json:"latitude"`
@@ -127,6 +153,7 @@ func (b *browserContextImpl) SetOffline(offline bool) error {
 	return err
 }
 
+// BrowserContextAddInitScriptOptions represents the options for BrowserContext.AddInitScript()
 type BrowserContextAddInitScriptOptions struct {
 	Path   *string
 	Script *string

@@ -189,6 +189,14 @@ func (e *elementHandleImpl) SetInputFiles(files []InputFile, options ...ElementH
 	return err
 }
 
+// Rect is the return structure for ElementHandle.BoundingBox()
+type Rect struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+	X      int `json:"x"`
+	Y      int `json:"y"`
+}
+
 func (e *elementHandleImpl) BoundingBox() (*Rect, error) {
 	boundingBox, err := e.channel.Send("boundingBox")
 	if err != nil {

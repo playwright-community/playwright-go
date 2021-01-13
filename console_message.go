@@ -4,6 +4,7 @@ type consoleMessageImpl struct {
 	channelOwner
 }
 
+// ConsoleMessageLocation represents where a console message was logged in the browser
 type ConsoleMessageLocation struct {
 	URL          string `json:"url"`
 	LineNumber   int    `json:"lineNumber"`

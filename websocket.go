@@ -74,8 +74,8 @@ func (ws *webSocketImpl) WaitForEvent(event string, predicate ...interface{}) in
 	return <-waitForEvent(ws, event, predicate...)
 }
 
-func (w *webSocketImpl) IsClosed() bool {
-	w.RLock()
-	defer w.RUnlock()
-	return w.isClosed
+func (ws *webSocketImpl) IsClosed() bool {
+	ws.RLock()
+	defer ws.RUnlock()
+	return ws.isClosed
 }

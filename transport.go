@@ -15,7 +15,7 @@ import (
 type transport struct {
 	stdin    io.WriteCloser
 	stdout   io.ReadCloser
-	dispatch func(msg *Message)
+	dispatch func(msg *message)
 	rLock    sync.Mutex
 }
 
@@ -31,7 +31,7 @@ func (t *transport) Start() error {
 		}
 		length := binary.LittleEndian.Uint32(lengthContent)
 
-		msg := &Message{}
+		msg := &message{}
 		if err := json.NewDecoder(io.LimitReader(reader, int64(length))).Decode(&msg); err != nil {
 			return fmt.Errorf("could not decode json: %w", err)
 		}
@@ -55,7 +55,7 @@ type errorPayload struct {
 	Stack   string `json:"stack"`
 }
 
-type Message struct {
+type message struct {
 	ID     int                    `json:"id"`
 	GUID   string                 `json:"guid"`
 	Method string                 `json:"method"`
@@ -91,7 +91,7 @@ func (t *transport) Send(message map[string]interface{}) error {
 	return nil
 }
 
-func newTransport(stdin io.WriteCloser, stdout io.ReadCloser, dispatch func(msg *Message)) *transport {
+func newTransport(stdin io.WriteCloser, stdout io.ReadCloser, dispatch func(msg *message)) *transport {
 	return &transport{
 		stdout:   stdout,
 		stdin:    stdin,

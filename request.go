@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 )
 
+// RequestFailure represents a request failure
 type RequestFailure struct {
 	ErrorText string
 }
 
+// ResourceTiming represents the resource timing
 type ResourceTiming struct {
 	StartTime             float64
 	DomainLookupStart     float64

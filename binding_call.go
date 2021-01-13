@@ -8,13 +8,17 @@ type bindingCallImpl struct {
 	channelOwner
 }
 
+// BindingSource is the value passed to a binding call execution
 type BindingSource struct {
 	Context BrowserContext
 	Page    Page
 	Frame   Frame
 }
 
+// ExposedFunction represents the func signature of an exposed function
 type ExposedFunction = func(args ...interface{}) interface{}
+
+// BindingCallFunction represents the func signature of an exposed binding call func
 type BindingCallFunction = func(source *BindingSource, args ...interface{}) interface{}
 
 func (b *bindingCallImpl) Call(f BindingCallFunction) {
