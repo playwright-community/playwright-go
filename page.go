@@ -64,6 +64,7 @@ func (p *pageImpl) MainFrame() Frame {
 	return p.mainFrame
 }
 
+// PageFrameOptions is the option struct for Page.Frame()
 type PageFrameOptions struct {
 	Name *string
 	URL  interface{}
@@ -213,6 +214,7 @@ func (p *pageImpl) EmulateMedia(options ...PageEmulateMediaOptions) error {
 	return err
 }
 
+// ViewportSize represents the viewport size
 type ViewportSize struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`

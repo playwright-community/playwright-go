@@ -45,10 +45,3 @@ func IntSlice(v ...int) *[]int {
 	o = append(o, v...)
 	return &o
 }
-
-type Rect struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
-	X      int `json:"x"`
-	Y      int `json:"y"`
-}

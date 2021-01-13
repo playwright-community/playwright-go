@@ -20,7 +20,7 @@ func assertEqual(expected, actual interface{}) {
 	}
 }
 
-const TODO_NAME = "Bake a cake"
+const todoName = "Bake a cake"
 
 func main() {
 	pw, err := playwright.Run()
@@ -48,7 +48,7 @@ func main() {
 
 	// Adding a todo entry (click in the input, enter the todo title and press the Enter key)
 	assertErrorToNilf("could not click: %v", page.Click("input.new-todo"))
-	assertErrorToNilf("could not type: %v", page.Type("input.new-todo", TODO_NAME))
+	assertErrorToNilf("could not type: %v", page.Type("input.new-todo", todoName))
 	assertErrorToNilf("could not press: %v", page.Press("input.new-todo", "Enter"))
 
 	// After adding 1 there should be 1 entry in the list
@@ -57,7 +57,7 @@ func main() {
 	// Here we get the text in the first todo item to see if it"s the same which the user has entered
 	textContentOfFirstTodoEntry, err := page.EvalOnSelector("ul.todo-list > li:nth-child(1) label", "el => el.textContent")
 	assertErrorToNilf("could not get first todo entry: %w", err)
-	assertEqual(TODO_NAME, textContentOfFirstTodoEntry)
+	assertEqual(todoName, textContentOfFirstTodoEntry)
 
 	// The todo list should be persistent. Here we reload the page and see if the entry is still there
 	_, err = page.Reload()

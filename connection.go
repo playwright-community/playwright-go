@@ -44,7 +44,7 @@ func (c *connection) CallOnObjectWithKnownName(name string) (interface{}, error)
 	return <-c.waitingForRemoteObjects[name], nil
 }
 
-func (c *connection) Dispatch(msg *Message) {
+func (c *connection) Dispatch(msg *message) {
 	method := msg.Method
 	if msg.ID != 0 {
 		cb, _ := c.callbacks.Load(msg.ID)

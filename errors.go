@@ -5,10 +5,12 @@ type Error struct {
 	Stack   string
 }
 
+// Error represents a Playwright error
 func (e *Error) Error() string {
 	return e.Message
 }
 
+// TimeoutError represents a Playwright TimeoutError
 type TimeoutError Error
 
 func (e *TimeoutError) Error() string {
