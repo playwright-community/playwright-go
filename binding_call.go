@@ -15,10 +15,13 @@ type BindingSource struct {
 	Frame   Frame
 }
 
-type exposedFunction = func(args ...interface{}) interface{}
-type bindingCallFunction = func(source *BindingSource, args ...interface{}) interface{}
+// ExposedFunction represents the func signature of an exposed function
+type ExposedFunction = func(args ...interface{}) interface{}
 
-func (b *bindingCallImpl) Call(f bindingCallFunction) {
+// BindingCallFunction represents the func signature of an exposed binding call func
+type BindingCallFunction = func(source *BindingSource, args ...interface{}) interface{}
+
+func (b *bindingCallImpl) Call(f BindingCallFunction) {
 	defer func() {
 		if r := recover(); r != nil {
 			if _, err := b.channel.Send("reject", map[string]interface{}{
