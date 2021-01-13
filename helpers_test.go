@@ -115,7 +115,7 @@ func TestConvertSelectOptionSet(t *testing.T) {
 			},
 			expected: map[string]interface{}{
 				"options": []map[string]interface{}{
-					{"Value": "a"}, {"Value": "b"}, {"Index": 1}, {"Label": "x"},
+					{"value": "a"}, {"value": "b"}, {"index": 1}, {"label": "x"},
 				},
 			},
 		},
@@ -126,7 +126,7 @@ func TestConvertSelectOptionSet(t *testing.T) {
 			},
 			expected: map[string]interface{}{
 				"options": []map[string]interface{}{
-					{"Value": "a"}, {"Value": "b"},
+					{"value": "a"}, {"value": "b"},
 				},
 			},
 		},

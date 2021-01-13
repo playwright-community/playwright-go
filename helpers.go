@@ -325,6 +325,7 @@ func waitForEvent(emitter EventEmitter, event string, predicate ...interface{}) 
 	return evChan
 }
 
+// SelectOptionValues is the option struct for ElementHandle.Select() etc.
 type SelectOptionValues struct {
 	Value      *[]string
 	Index      *[]int
