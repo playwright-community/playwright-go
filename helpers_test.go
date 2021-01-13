@@ -109,9 +109,9 @@ func TestConvertSelectOptionSet(t *testing.T) {
 		{
 			name: "SelectOptionValues is supplied",
 			optionValues: SelectOptionValues{
-				Value: StringSlice("a", "b"),
-				Index: IntSlice(1),
-				Label: StringSlice("x"),
+				Values:  StringSlice("a", "b"),
+				Indexes: IntSlice(1),
+				Labels:  StringSlice("x"),
 			},
 			expected: map[string]interface{}{
 				"options": []map[string]interface{}{
@@ -122,7 +122,7 @@ func TestConvertSelectOptionSet(t *testing.T) {
 		{
 			name: "Only value is supplied",
 			optionValues: SelectOptionValues{
-				Value: StringSlice("a", "b"),
+				Values: StringSlice("a", "b"),
 			},
 			expected: map[string]interface{}{
 				"options": []map[string]interface{}{

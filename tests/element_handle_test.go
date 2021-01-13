@@ -293,9 +293,27 @@ func TestElementHandleSelectOption(t *testing.T) {
 	elemHandle, err := page.QuerySelector("#lang")
 	require.NoError(t, err)
 	selected, err := elemHandle.SelectOption(playwright.SelectOptionValues{
-		Value: playwright.StringSlice("go"),
+		Values: playwright.StringSlice("go"),
 	})
 	require.NoError(t, err)
 	require.Equal(t, 1, len(selected))
 	require.Equal(t, "go", selected[0])
+}
+
+func TestElementHandleSelectOptionOverElementHandle(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent("<select id='lang'><option value='go'>go</option><option value='python'>python</option></select>"))
+
+	pythonOption, err := page.QuerySelector("option[value=python]")
+	require.NoError(t, err)
+
+	selected, err := page.SelectOption("#lang", playwright.SelectOptionValues{
+		Elements: &[]playwright.ElementHandle{pythonOption},
+	})
+	require.NoError(t, err)
+	require.Equal(t, 1, len(selected))
+	require.Equal(t, "python", selected[0])
 }

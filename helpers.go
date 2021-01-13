@@ -327,10 +327,10 @@ func waitForEvent(emitter EventEmitter, event string, predicate ...interface{}) 
 
 // SelectOptionValues is the option struct for ElementHandle.Select() etc.
 type SelectOptionValues struct {
-	Value      *[]string
-	Index      *[]int
-	Label      *[]string
-	ElemHandle *[]ElementHandle
+	Values   *[]string
+	Indexes  *[]int
+	Labels   *[]string
+	Elements *[]ElementHandle
 }
 
 func convertSelectOptionSet(values SelectOptionValues) map[string]interface{} {
@@ -340,20 +340,20 @@ func convertSelectOptionSet(values SelectOptionValues) map[string]interface{} {
 	}
 
 	var o []map[string]interface{}
-	if values.Value != nil {
-		for _, v := range *values.Value {
+	if values.Values != nil {
+		for _, v := range *values.Values {
 			m := map[string]interface{}{"value": v}
 			o = append(o, m)
 		}
 	}
-	if values.Index != nil {
-		for _, i := range *values.Index {
+	if values.Indexes != nil {
+		for _, i := range *values.Indexes {
 			m := map[string]interface{}{"index": i}
 			o = append(o, m)
 		}
 	}
-	if values.Label != nil {
-		for _, l := range *values.Label {
+	if values.Labels != nil {
+		for _, l := range *values.Labels {
 			m := map[string]interface{}{"label": l}
 			o = append(o, m)
 		}
@@ -363,8 +363,8 @@ func convertSelectOptionSet(values SelectOptionValues) map[string]interface{} {
 	}
 
 	var e []*channel
-	if values.ElemHandle != nil {
-		for _, eh := range *values.ElemHandle {
+	if values.Elements != nil {
+		for _, eh := range *values.Elements {
 			e = append(e, eh.(*elementHandleImpl).channel)
 		}
 	}

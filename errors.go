@@ -1,11 +1,11 @@
 package playwright
 
+// Error represents a Playwright error
 type Error struct {
 	Message string
 	Stack   string
 }
 
-// Error represents a Playwright error
 func (e *Error) Error() string {
 	return e.Message
 }
