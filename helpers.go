@@ -332,7 +332,7 @@ type SelectOptionValues struct {
 	ElemHandle *[]ElementHandle
 }
 
-func ConvertSelectOptionSet(values SelectOptionValues) map[string]interface{} {
+func convertSelectOptionSet(values SelectOptionValues) map[string]interface{} {
 	out := make(map[string]interface{})
 	if values == (SelectOptionValues{}) {
 		return out
@@ -341,19 +341,19 @@ func ConvertSelectOptionSet(values SelectOptionValues) map[string]interface{} {
 	var o []map[string]interface{}
 	if values.Value != nil {
 		for _, v := range *values.Value {
-			m := map[string]interface{}{"Value": v}
+			m := map[string]interface{}{"value": v}
 			o = append(o, m)
 		}
 	}
 	if values.Index != nil {
 		for _, i := range *values.Index {
-			m := map[string]interface{}{"Index": i}
+			m := map[string]interface{}{"index": i}
 			o = append(o, m)
 		}
 	}
 	if values.Label != nil {
 		for _, l := range *values.Label {
-			m := map[string]interface{}{"Label": l}
+			m := map[string]interface{}{"label": l}
 			o = append(o, m)
 		}
 	}
@@ -361,10 +361,10 @@ func ConvertSelectOptionSet(values SelectOptionValues) map[string]interface{} {
 		out["options"] = o
 	}
 
-	var e []channel
+	var e []*channel
 	if values.ElemHandle != nil {
 		for _, eh := range *values.ElemHandle {
-			e = append(e, *eh.Channel())
+			e = append(e, eh.(*elementHandleImpl).channel)
 		}
 	}
 	if e != nil {

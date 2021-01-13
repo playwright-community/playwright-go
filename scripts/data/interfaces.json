@@ -227,10 +227,6 @@
 			null,
 			"(*Rect, error)"
 		],
-		"Channel": [
-			null,
-			"*channel"
-		],
 		"Check": [
 			"options ...ElementHandleCheckOptions",
 			"error"

@@ -293,7 +293,7 @@ func TestElementHandleSelectOption(t *testing.T) {
 	elemHandle, err := page.QuerySelector("#lang")
 	require.NoError(t, err)
 	selected, err := elemHandle.SelectOption(playwright.SelectOptionValues{
-		Value: &[]string{"go"},
+		Value: playwright.StringSlice("go"),
 	})
 	require.NoError(t, err)
 	require.Equal(t, 1, len(selected))

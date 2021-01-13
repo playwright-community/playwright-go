@@ -224,7 +224,6 @@ type ElementHandle interface {
 	// Assuming the page is static, it is safe to use bounding box coordinates to perform input. For example, the following
 	// snippet should click the center of the element.
 	BoundingBox() (*Rect, error)
-	Channel() *channel
 	// This method checks the element by performing the following steps:
 	// Ensure that element is a checkbox or a radio input. If not, this method rejects. If the element is already checked, this method returns immediately.
 	// Wait for actionability checks on the element, unless `force` option is set.

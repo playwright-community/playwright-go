@@ -268,12 +268,8 @@ func (e *elementHandleImpl) ToString() string {
 	return e.jsHandleImpl.String()
 }
 
-func (e *elementHandleImpl) Channel() *channel {
-	return e.channel
-}
-
 func (e *elementHandleImpl) SelectOption(values SelectOptionValues, options ...ElementHandleSelectOptionOptions) ([]string, error) {
-	opts := ConvertSelectOptionSet(values)
+	opts := convertSelectOptionSet(values)
 	selected, err := e.channel.Send("selectOption", opts, options)
 	if err != nil {
 		return nil, err
