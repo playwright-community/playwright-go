@@ -19,7 +19,7 @@ type BrowserNewContextOptions struct {
 	Locale            *string                           `json:"locale"`
 	Logger            interface{}                       `json:"logger"`
 	Offline           *bool                             `json:"offline"`
-	Permissions       interface{}                       `json:"permissions"`
+	Permissions       []string                          `json:"permissions"`
 	Proxy             *BrowserNewContextProxy           `json:"proxy"`
 	RecordHar         *BrowserNewContextRecordHar       `json:"recordHar"`
 	RecordVideo       *BrowserNewContextRecordVideo     `json:"recordVideo"`
@@ -45,7 +45,7 @@ type BrowserNewPageOptions struct {
 	Locale            *string                        `json:"locale"`
 	Logger            interface{}                    `json:"logger"`
 	Offline           *bool                          `json:"offline"`
-	Permissions       interface{}                    `json:"permissions"`
+	Permissions       []string                       `json:"permissions"`
 	Proxy             *BrowserNewPageProxy           `json:"proxy"`
 	RecordHar         *BrowserNewPageRecordHar       `json:"recordHar"`
 	RecordVideo       *BrowserNewPageRecordVideo     `json:"recordVideo"`
@@ -80,7 +80,7 @@ type BrowserContextWaitForEventOptions struct {
 	OptionsOrPredicate *BrowserContextWaitForEventOptionsOrPredicate `json:"optionsOrPredicate"`
 }
 type BrowserTypeLaunchOptions struct {
-	Args              interface{}             `json:"args"`
+	Args              []string                `json:"args"`
 	ChromiumSandbox   *bool                   `json:"chromiumSandbox"`
 	Devtools          *bool                   `json:"devtools"`
 	DownloadsPath     *string                 `json:"downloadsPath"`
@@ -99,7 +99,7 @@ type BrowserTypeLaunchOptions struct {
 }
 type BrowserTypeLaunchPersistentContextOptions struct {
 	AcceptDownloads   *bool                                              `json:"acceptDownloads"`
-	Args              interface{}                                        `json:"args"`
+	Args              []string                                           `json:"args"`
 	BypassCSP         *bool                                              `json:"bypassCSP"`
 	ChromiumSandbox   *bool                                              `json:"chromiumSandbox"`
 	ColorScheme       *string                                            `json:"colorScheme"`
@@ -123,7 +123,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	Locale            *string                                            `json:"locale"`
 	Logger            interface{}                                        `json:"logger"`
 	Offline           *bool                                              `json:"offline"`
-	Permissions       interface{}                                        `json:"permissions"`
+	Permissions       []string                                           `json:"permissions"`
 	Proxy             *BrowserTypeLaunchPersistentContextProxy           `json:"proxy"`
 	RecordHar         *BrowserTypeLaunchPersistentContextRecordHar       `json:"recordHar"`
 	RecordVideo       *BrowserTypeLaunchPersistentContextRecordVideo     `json:"recordVideo"`
@@ -136,7 +136,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	Viewport          *BrowserTypeLaunchPersistentContextViewport        `json:"viewport"`
 }
 type BrowserTypeLaunchServerOptions struct {
-	Args              interface{}                   `json:"args"`
+	Args              []string                      `json:"args"`
 	ChromiumSandbox   *bool                         `json:"chromiumSandbox"`
 	Devtools          *bool                         `json:"devtools"`
 	DownloadsPath     *string                       `json:"downloadsPath"`
@@ -158,7 +158,7 @@ type CDPSessionSendOptions struct {
 }
 type ChromiumBrowserStartTracingOptions struct {
 	Page        interface{} `json:"page"`
-	Categories  interface{} `json:"categories"`
+	Categories  []string    `json:"categories"`
 	Path        *string     `json:"path"`
 	Screenshots *bool       `json:"screenshots"`
 }

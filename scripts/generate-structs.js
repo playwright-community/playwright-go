@@ -37,6 +37,14 @@ const generateStruct = (typeData, structNamePrefix, structName) => {
   if (["latitude", "longitude"].includes(typeData.name)) {
     return `${propName} *float64`
   }
+  const expressionMapping = {
+    "[Array]<[string]>": "[]string",
+  }
+  if (expressionMapping[typeData.type.expression]) {
+    return `${propName} ${expressionMapping[typeData.type.expression]}`
+  }
+  if (typeData.type.name === "Object" && typeData.type.expression === "[Object]<[string], [string]>")
+    return `${propName} map[string]string`
   const mapping = {
     "path": "*string",
     "string": "*string",
@@ -44,11 +52,8 @@ const generateStruct = (typeData, structNamePrefix, structName) => {
     "int": "*int",
     "float": "*float64",
     "ElementHandle": "*ElementHandle",
-    "Array<string>": "[]string",
     "Object<string, string>": "map[string]string"
   }
-  if (typeData.type.name === "Object" && typeData.type.expression === "[Object]<[string], [string]>")
-    return `${propName} map[string]string`
   if (mapping[typeName]) {
     return `${propName} ${mapping[typeName]}`
   }
