@@ -166,7 +166,7 @@ func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (
 	}
 	select {
 	case <-deadline:
-		return nil, fmt.Errorf("Timeout %fms exceeded.", *option.Timeout)
+		return nil, fmt.Errorf("Timeout %.2fms exceeded.", *option.Timeout)
 	case eventData := <-waitForEvent(f, "navigated", predicate):
 		event := eventData.(map[string]interface{})
 		if event["newDocument"] != nil && event["newDocument"].(map[string]interface{})["request"] != nil {

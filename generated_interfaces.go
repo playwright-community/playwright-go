@@ -45,10 +45,6 @@ type BrowserContext interface {
 	// The script is evaluated after the document was created but before any of its scripts were run. This is useful to amend
 	// the JavaScript environment, e.g. to seed `Math.random`.
 	// An example of overriding `Math.random` before the page loads:
-	// ```js browser
-	// // preload.js
-	// Math.random = () => 42;
-	// ```
 	// > NOTE: The order of evaluation of multiple scripts installed via BrowserContext.addInitScript() and
 	// Page.addInitScript() is not defined.
 	AddInitScript(options BrowserContextAddInitScriptOptions) error
@@ -803,10 +799,6 @@ type Page interface {
 	// The script is evaluated after the document was created but before any of its scripts were run. This is useful to amend
 	// the JavaScript environment, e.g. to seed `Math.random`.
 	// An example of overriding `Math.random` before the page loads:
-	// ```js browser
-	// // preload.js
-	// Math.random = () => 42;
-	// ```
 	// > NOTE: The order of evaluation of multiple scripts installed via BrowserContext.addInitScript() and
 	// Page.addInitScript() is not defined.
 	AddInitScript(options BrowserContextAddInitScriptOptions) error

@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-const { debug } = require("console")
 const { getAPIDocs, transformMethodNamesToGo } = require("./helpers")
 
 const api = getAPIDocs()

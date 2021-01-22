@@ -31,7 +31,7 @@ const writeComment = (comment) => {
       lastWasBlank = true
       continue
     }
-    if (["js", "python sync", "python async"].includes(line.trim().substr(3)) && line.trim().startsWith("```"))
+    if (["js", "js browser", "python sync", "python async"].includes(line.trim().substr(3)) && line.trim().startsWith("```"))
       inExample = true
     if (!inExample) {
       if (lastWasBlank)
