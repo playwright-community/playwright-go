@@ -776,17 +776,7 @@ type Mouse interface {
 // [`EventEmitter`](https://nodejs.org/api/events.html#events_class_eventemitter) methods, such as `on`, `once` or
 // `removeListener`.
 // This example logs a message for a single page `load` event:
-// ```py
-// page.once("load", lambda: print("page loaded!"))
-// ```
 // To unsubscribe from events use the `removeListener` method:
-// ```py
-// def log_request(intercepted_request):
-// print("a request was made:", intercepted_request.url)
-// page.on("request", log_request)
-// # sometime later...
-// page.remove_listener("request", log_request)
-// ```
 type Page interface {
 	EventEmitter
 	Mouse() Mouse
@@ -963,12 +953,6 @@ type Page interface {
 	// Shortcut for main frame's Frame.focus().
 	Focus(expression string, options ...FrameFocusOptions) error
 	// Returns frame matching the specified criteria. Either `name` or `url` must be specified.
-	// ```py
-	// frame = page.frame(name="frame-name")
-	// ```
-	// ```py
-	// frame = page.frame(url=r".*domain.*")
-	// ```
 	Frame(options PageFrameOptions) Frame
 	// An array of all frames attached to the page.
 	Frames() []Frame
@@ -1220,9 +1204,6 @@ type Page interface {
 type Request interface {
 	// The method returns `null` unless this request has failed, as reported by `requestfailed` event.
 	// Example of logging of all the failed requests:
-	// ```py
-	// page.on("requestfailed", lambda request: print(request.url + " " + request.failure))
-	// ```
 	Failure() *RequestFailure
 	// Returns the `Frame` that initiated this request.
 	Frame() Frame
@@ -1249,9 +1230,6 @@ type Request interface {
 	RedirectedFrom() Request
 	// New request issued by the browser if the server responded with redirect.
 	// This method is the opposite of Request.redirectedFrom():
-	// ```py
-	// assert request.redirected_from.redirected_to == request
-	// ```
 	RedirectedTo() Request
 	// Contains the request's resource type as it was perceived by the rendering engine. ResourceType will be one of the
 	// following: `document`, `stylesheet`, `image`, `media`, `font`, `script`, `texttrack`, `xhr`, `fetch`, `eventsource`,
@@ -1338,15 +1316,6 @@ type Video interface {
 // The Worker class represents a [WebWorker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API). `worker`
 // event is emitted on the page object to signal a worker creation. `close` event is emitted on the worker object when the
 // worker is gone.
-// ```py
-// def handle_worker(worker):
-// print("worker created: " + worker.url)
-// worker.on("close", lambda: print("worker destroyed: " + worker.url))
-// page.on('worker', handle_worker)
-// print("current workers:")
-// for worker in page.workers:
-// print("    " + worker.url)
-// ```
 type Worker interface {
 	EventEmitter
 	// Returns the return value of `pageFunction`

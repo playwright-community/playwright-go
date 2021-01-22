@@ -52,17 +52,14 @@ const generateStruct = (typeData, structNamePrefix, structName) => {
   if (mapping[typeName]) {
     return `${propName} ${mapping[typeName]}`
   }
-  if (!typeName.startsWith("Object<")) {
-    if (typeName.includes("|")) {
-      const orTypes = typeName.split("|")
-      if (orTypes.every(el => el.startsWith('"') && el.endsWith('"'))) {
+  if (typeName === "union") {
+    if (typeData.type.expression.includes("|")) {
+      if (typeData.type.expression.split("|").every(u => u.startsWith('"') && u.endsWith('"'))) {
         return `${propName} *string`
       } else {
         return `${propName} interface{}`
       }
     }
-  } else {
-    return `${propName} map[string]interface{}`
   }
   return `${propName} interface{}`
 }

@@ -7,7 +7,7 @@ type AccessibilitySnapshotOptions struct {
 type BrowserNewContextOptions struct {
 	AcceptDownloads   *bool                             `json:"acceptDownloads"`
 	BypassCSP         *bool                             `json:"bypassCSP"`
-	ColorScheme       interface{}                       `json:"colorScheme"`
+	ColorScheme       *string                           `json:"colorScheme"`
 	DeviceScaleFactor *float64                          `json:"deviceScaleFactor"`
 	ExtraHTTPHeaders  map[string]string                 `json:"extraHTTPHeaders"`
 	Geolocation       *BrowserNewContextGeolocation     `json:"geolocation"`
@@ -33,7 +33,7 @@ type BrowserNewContextOptions struct {
 type BrowserNewPageOptions struct {
 	AcceptDownloads   *bool                          `json:"acceptDownloads"`
 	BypassCSP         *bool                          `json:"bypassCSP"`
-	ColorScheme       interface{}                    `json:"colorScheme"`
+	ColorScheme       *string                        `json:"colorScheme"`
 	DeviceScaleFactor *float64                       `json:"deviceScaleFactor"`
 	ExtraHTTPHeaders  map[string]string              `json:"extraHTTPHeaders"`
 	Geolocation       *BrowserNewPageGeolocation     `json:"geolocation"`
@@ -102,7 +102,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	Args              interface{}                                        `json:"args"`
 	BypassCSP         *bool                                              `json:"bypassCSP"`
 	ChromiumSandbox   *bool                                              `json:"chromiumSandbox"`
-	ColorScheme       interface{}                                        `json:"colorScheme"`
+	ColorScheme       *string                                            `json:"colorScheme"`
 	DeviceScaleFactor *float64                                           `json:"deviceScaleFactor"`
 	Devtools          *bool                                              `json:"devtools"`
 	DownloadsPath     *string                                            `json:"downloadsPath"`
@@ -186,7 +186,7 @@ type ElementHandleCheckOptions struct {
 	Timeout     *float64 `json:"timeout"`
 }
 type ElementHandleClickOptions struct {
-	Button      interface{}                 `json:"button"`
+	Button      *string                     `json:"button"`
 	ClickCount  *int                        `json:"clickCount"`
 	Delay       *float64                    `json:"delay"`
 	Force       *bool                       `json:"force"`
@@ -196,7 +196,7 @@ type ElementHandleClickOptions struct {
 	Timeout     *float64                    `json:"timeout"`
 }
 type ElementHandleDblclickOptions struct {
-	Button      interface{}                    `json:"button"`
+	Button      *string                        `json:"button"`
 	Delay       *float64                       `json:"delay"`
 	Force       *bool                          `json:"force"`
 	Modifiers   interface{}                    `json:"modifiers"`
@@ -223,11 +223,11 @@ type ElementHandlePressOptions struct {
 	Timeout     *float64 `json:"timeout"`
 }
 type ElementHandleScreenshotOptions struct {
-	OmitBackground *bool       `json:"omitBackground"`
-	Path           *string     `json:"path"`
-	Quality        *int        `json:"quality"`
-	Timeout        *float64    `json:"timeout"`
-	Type           interface{} `json:"type"`
+	OmitBackground *bool    `json:"omitBackground"`
+	Path           *string  `json:"path"`
+	Quality        *int     `json:"quality"`
+	Timeout        *float64 `json:"timeout"`
+	Type           *string  `json:"type"`
 }
 type ElementHandleScrollIntoViewIfNeededOptions struct {
 	Timeout *float64 `json:"timeout"`
@@ -268,8 +268,8 @@ type ElementHandleWaitForElementStateOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandleWaitForSelectorOptions struct {
-	State   interface{} `json:"state"`
-	Timeout *float64    `json:"timeout"`
+	State   *string  `json:"state"`
+	Timeout *float64 `json:"timeout"`
 }
 type FileChooserSetFilesOptions struct {
 	NoWaitAfter *bool    `json:"noWaitAfter"`
@@ -300,7 +300,7 @@ type FrameCheckOptions struct {
 	Timeout     *float64 `json:"timeout"`
 }
 type FrameClickOptions struct {
-	Button      interface{}         `json:"button"`
+	Button      *string             `json:"button"`
 	ClickCount  *int                `json:"clickCount"`
 	Delay       *float64            `json:"delay"`
 	Force       *bool               `json:"force"`
@@ -310,7 +310,7 @@ type FrameClickOptions struct {
 	Timeout     *float64            `json:"timeout"`
 }
 type FrameDblclickOptions struct {
-	Button      interface{}            `json:"button"`
+	Button      *string                `json:"button"`
 	Delay       *float64               `json:"delay"`
 	Force       *bool                  `json:"force"`
 	Modifiers   interface{}            `json:"modifiers"`
@@ -341,9 +341,9 @@ type FrameGetAttributeOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type FrameGotoOptions struct {
-	Referer   *string     `json:"referer"`
-	Timeout   *float64    `json:"timeout"`
-	WaitUntil interface{} `json:"waitUntil"`
+	Referer   *string  `json:"referer"`
+	Timeout   *float64 `json:"timeout"`
+	WaitUntil *string  `json:"waitUntil"`
 }
 type FrameHoverOptions struct {
 	Force     *bool               `json:"force"`
@@ -389,8 +389,8 @@ type FrameSelectOptionOptions struct {
 	Label       interface{} `json:"label"`
 }
 type FrameSetContentOptions struct {
-	Timeout   *float64    `json:"timeout"`
-	WaitUntil interface{} `json:"waitUntil"`
+	Timeout   *float64 `json:"timeout"`
+	WaitUntil *string  `json:"waitUntil"`
 }
 type FrameSetInputFilesOptions struct {
 	NoWaitAfter *bool    `json:"noWaitAfter"`
@@ -423,17 +423,17 @@ type FrameWaitForFunctionOptions struct {
 	Forceexpr *bool       `json:"force_expr"`
 }
 type FrameWaitForLoadStateOptions struct {
-	State   interface{} `json:"state"`
-	Timeout *float64    `json:"timeout"`
+	State   *string  `json:"state"`
+	Timeout *float64 `json:"timeout"`
 }
 type FrameWaitForNavigationOptions struct {
 	Timeout   *float64    `json:"timeout"`
 	URL       interface{} `json:"url"`
-	WaitUntil interface{} `json:"waitUntil"`
+	WaitUntil *string     `json:"waitUntil"`
 }
 type FrameWaitForSelectorOptions struct {
-	State   interface{} `json:"state"`
-	Timeout *float64    `json:"timeout"`
+	State   *string  `json:"state"`
+	Timeout *float64 `json:"timeout"`
 }
 type JSHandleEvaluateOptions struct {
 	Arg       interface{} `json:"arg"`
@@ -450,24 +450,24 @@ type KeyboardTypeOptions struct {
 	Delay *float64 `json:"delay"`
 }
 type MouseClickOptions struct {
-	Button     interface{} `json:"button"`
-	ClickCount *int        `json:"clickCount"`
-	Delay      *float64    `json:"delay"`
+	Button     *string  `json:"button"`
+	ClickCount *int     `json:"clickCount"`
+	Delay      *float64 `json:"delay"`
 }
 type MouseDblclickOptions struct {
-	Button interface{} `json:"button"`
-	Delay  *float64    `json:"delay"`
+	Button *string  `json:"button"`
+	Delay  *float64 `json:"delay"`
 }
 type MouseDownOptions struct {
-	Button     interface{} `json:"button"`
-	ClickCount *int        `json:"clickCount"`
+	Button     *string `json:"button"`
+	ClickCount *int    `json:"clickCount"`
 }
 type MouseMoveOptions struct {
 	Steps *int `json:"steps"`
 }
 type MouseUpOptions struct {
-	Button     interface{} `json:"button"`
-	ClickCount *int        `json:"clickCount"`
+	Button     *string `json:"button"`
+	ClickCount *int    `json:"clickCount"`
 }
 type PageEvalOnSelectorOptions struct {
 	Arg       interface{} `json:"arg"`
@@ -499,7 +499,7 @@ type PageCheckOptions struct {
 	Timeout     *float64 `json:"timeout"`
 }
 type PageClickOptions struct {
-	Button      interface{}        `json:"button"`
+	Button      *string            `json:"button"`
 	ClickCount  *int               `json:"clickCount"`
 	Delay       *float64           `json:"delay"`
 	Force       *bool              `json:"force"`
@@ -512,7 +512,7 @@ type PageCloseOptions struct {
 	RunBeforeUnload *bool `json:"runBeforeUnload"`
 }
 type PageDblclickOptions struct {
-	Button      interface{}           `json:"button"`
+	Button      *string               `json:"button"`
 	Delay       *float64              `json:"delay"`
 	Force       *bool                 `json:"force"`
 	Modifiers   interface{}           `json:"modifiers"`
@@ -551,17 +551,17 @@ type PageGetAttributeOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type PageGoBackOptions struct {
-	Timeout   *float64    `json:"timeout"`
-	WaitUntil interface{} `json:"waitUntil"`
+	Timeout   *float64 `json:"timeout"`
+	WaitUntil *string  `json:"waitUntil"`
 }
 type PageGoForwardOptions struct {
-	Timeout   *float64    `json:"timeout"`
-	WaitUntil interface{} `json:"waitUntil"`
+	Timeout   *float64 `json:"timeout"`
+	WaitUntil *string  `json:"waitUntil"`
 }
 type PageGotoOptions struct {
-	Referer   *string     `json:"referer"`
-	Timeout   *float64    `json:"timeout"`
-	WaitUntil interface{} `json:"waitUntil"`
+	Referer   *string  `json:"referer"`
+	Timeout   *float64 `json:"timeout"`
+	WaitUntil *string  `json:"waitUntil"`
 }
 type PageHoverOptions struct {
 	Force     *bool              `json:"force"`
@@ -614,8 +614,8 @@ type PagePressOptions struct {
 	Timeout     *float64 `json:"timeout"`
 }
 type PageReloadOptions struct {
-	Timeout   *float64    `json:"timeout"`
-	WaitUntil interface{} `json:"waitUntil"`
+	Timeout   *float64 `json:"timeout"`
+	WaitUntil *string  `json:"waitUntil"`
 }
 type PageScreenshotOptions struct {
 	Clip           *PageScreenshotClip `json:"clip"`
@@ -624,7 +624,7 @@ type PageScreenshotOptions struct {
 	Path           *string             `json:"path"`
 	Quality        *int                `json:"quality"`
 	Timeout        *float64            `json:"timeout"`
-	Type           interface{}         `json:"type"`
+	Type           *string             `json:"type"`
 }
 type PageSelectOptionOptions struct {
 	NoWaitAfter *bool       `json:"noWaitAfter"`
@@ -635,8 +635,8 @@ type PageSelectOptionOptions struct {
 	Label       interface{} `json:"label"`
 }
 type PageSetContentOptions struct {
-	Timeout   *float64    `json:"timeout"`
-	WaitUntil interface{} `json:"waitUntil"`
+	Timeout   *float64 `json:"timeout"`
+	WaitUntil *string  `json:"waitUntil"`
 }
 type PageSetInputFilesOptions struct {
 	NoWaitAfter *bool    `json:"noWaitAfter"`
@@ -675,13 +675,13 @@ type PageWaitForFunctionOptions struct {
 	Forceexpr *bool       `json:"force_expr"`
 }
 type PageWaitForLoadStateOptions struct {
-	State   interface{} `json:"state"`
-	Timeout *float64    `json:"timeout"`
+	State   *string  `json:"state"`
+	Timeout *float64 `json:"timeout"`
 }
 type PageWaitForNavigationOptions struct {
 	Timeout   *float64    `json:"timeout"`
 	URL       interface{} `json:"url"`
-	WaitUntil interface{} `json:"waitUntil"`
+	WaitUntil *string     `json:"waitUntil"`
 }
 type PageWaitForRequestOptions struct {
 	Timeout *float64 `json:"timeout"`
@@ -690,8 +690,8 @@ type PageWaitForResponseOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type PageWaitForSelectorOptions struct {
-	State   interface{} `json:"state"`
-	Timeout *float64    `json:"timeout"`
+	State   *string  `json:"state"`
+	Timeout *float64 `json:"timeout"`
 }
 type RouteAbortOptions struct {
 	ErrorCode *string `json:"errorCode"`
