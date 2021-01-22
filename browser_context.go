@@ -21,14 +21,14 @@ type browserContextImpl struct {
 	bindings          map[string]BindingCallFunction
 }
 
-func (b *browserContextImpl) SetDefaultNavigationTimeout(timeout int) {
+func (b *browserContextImpl) SetDefaultNavigationTimeout(timeout float64) {
 	b.timeoutSettings.SetNavigationTimeout(timeout)
 	b.channel.SendNoReply("setDefaultNavigationTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
 	})
 }
 
-func (b *browserContextImpl) SetDefaultTimeout(timeout int) {
+func (b *browserContextImpl) SetDefaultTimeout(timeout float64) {
 	b.timeoutSettings.SetTimeout(timeout)
 	b.channel.SendNoReply("setDefaultTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
@@ -151,12 +151,6 @@ func (b *browserContextImpl) SetOffline(offline bool) error {
 		"offline": offline,
 	})
 	return err
-}
-
-// BrowserContextAddInitScriptOptions represents the options for BrowserContext.AddInitScript()
-type BrowserContextAddInitScriptOptions struct {
-	Path   *string
-	Script *string
 }
 
 func (b *browserContextImpl) AddInitScript(options BrowserContextAddInitScriptOptions) error {

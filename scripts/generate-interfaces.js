@@ -16,7 +16,12 @@ const transformReturnParameters = (input) => {
   return `(${input})`
 }
 
+/**
+ * @param {string} comment
+ */
 const writeComment = (comment) => {
+  comment = comment.replace(/\[`method: (.*)`\]/g, "$1()")
+    .replace(/- extends: .*\n\n/, "")
   const lines = comment.split("\n")
   let inExample = false
   let lastWasBlank = true
@@ -26,7 +31,7 @@ const writeComment = (comment) => {
       lastWasBlank = true
       continue
     }
-    if (line.trim() === "```js")
+    if (["js", "python sync", "python async"].includes(line.trim().substr(3)) && line.trim().startsWith("```"))
       inExample = true
     if (!inExample) {
       if (lastWasBlank)
@@ -44,17 +49,18 @@ const writeComment = (comment) => {
 console.log("package playwright")
 
 for (const [className, methods] of Object.entries(interfaceData)) {
-  if (api[className])
-    writeComment(api[className].comment)
+  const apiClass = api.find(classes => classes.name === className)
+  if (apiClass)
+    writeComment(apiClass.comment)
   console.log(`type ${className} interface {`)
   for (const [funcName, funcData] of Object.entries(methods)) {
     if (funcName === "extends") {
       for (const inheritedInterface of funcData)
         console.log(inheritedInterface)
     } else {
-      const apiFunc = api[className] && Object.entries(api[className].methods).find(([item]) => transformMethodNamesToGo(item) === funcName)
-      if (apiFunc && apiFunc[1].comment)
-        writeComment(apiFunc[1].comment)
+      const apiFunc = apiClass?.members.find(member => member.kind === "method" && funcName === transformMethodNamesToGo(member.name))
+      if (apiFunc && apiFunc.comment)
+        writeComment(apiFunc.comment)
 
       const [inputTypes, returnTypes] = funcData
       console.log(`${funcName}(${transformInputParameters(inputTypes)}) ${transformReturnParameters(returnTypes)}`)

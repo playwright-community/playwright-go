@@ -150,12 +150,12 @@ func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (
 		option.WaitUntil = String("load")
 	}
 	if option.Timeout == nil {
-		option.Timeout = Int(f.page.timeoutSettings.NavigationTimeout())
+		option.Timeout = Float(f.page.timeoutSettings.NavigationTimeout())
 	}
 	deadline := time.After(time.Duration(*option.Timeout) * time.Millisecond)
 	var matcher *urlMatcher
-	if option.Url != nil {
-		matcher = newURLMatcher(option.Url)
+	if option.URL != nil {
+		matcher = newURLMatcher(option.URL)
 	}
 	predicate := func(events ...interface{}) bool {
 		ev := events[0].(map[string]interface{})
@@ -166,7 +166,7 @@ func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (
 	}
 	select {
 	case <-deadline:
-		return nil, fmt.Errorf("Timeout %dms exceeded.", *option.Timeout)
+		return nil, fmt.Errorf("Timeout %fms exceeded.", *option.Timeout)
 	case eventData := <-waitForEvent(f, "navigated", predicate):
 		event := eventData.(map[string]interface{})
 		if event["newDocument"] != nil && event["newDocument"].(map[string]interface{})["request"] != nil {
@@ -434,7 +434,7 @@ func (f *frameImpl) Uncheck(selector string, options ...FrameUncheckOptions) err
 	return err
 }
 
-func (f *frameImpl) WaitForTimeout(timeout int) {
+func (f *frameImpl) WaitForTimeout(timeout float64) {
 	time.Sleep(time.Duration(timeout) * time.Millisecond)
 }
 

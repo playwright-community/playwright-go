@@ -91,11 +91,11 @@
 			"[]Page"
 		],
 		"SetDefaultNavigationTimeout": [
-			"timeout int",
+			"timeout float64",
 			null
 		],
 		"SetDefaultTimeout": [
-			"timeout int",
+			"timeout float64",
 			null
 		],
 		"SetExtraHTTPHeaders": [
@@ -542,7 +542,7 @@
 			"(ElementHandle, error)"
 		],
 		"WaitForTimeout": [
-			"timeout int",
+			"timeout float64",
 			null
 		]
 	},
@@ -849,11 +849,11 @@
 			"error"
 		],
 		"SetDefaultNavigationTimeout": [
-			"timeout int",
+			"timeout float64",
 			null
 		],
 		"SetDefaultTimeout": [
-			"timeout int",
+			"timeout float64",
 			null
 		],
 		"SetExtraHTTPHeaders": [
@@ -929,7 +929,7 @@
 			"(ElementHandle, error)"
 		],
 		"WaitForTimeout": [
-			"timeout int",
+			"timeout float64",
 			null
 		],
 		"Workers": [
