@@ -158,6 +158,30 @@ func (p *pageImpl) URL() string {
 	return p.mainFrame.URL()
 }
 
+func (p *pageImpl) Unroute(url interface{}, handler routeHandler) error {
+	p.Lock()
+	defer p.Unlock()
+	handlerPtr := reflect.ValueOf(handler).Pointer()
+	routes := make([]*routeHandlerEntry, 0)
+	for _, route := range p.routes {
+		routeHandlerPtr := reflect.ValueOf(route.handler).Pointer()
+		if route.matcher.urlOrPredicate != url.(interface{}) ||
+			(handler != nil && routeHandlerPtr != handlerPtr) {
+			routes = append(routes, route)
+		}
+	}
+	p.routes = routes
+	if len(p.routes) == 0 {
+		_, err := p.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
+			"enabled": false,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (p *pageImpl) Content() (string, error) {
 	return p.mainFrame.Content()
 }
@@ -740,4 +764,28 @@ func (p *pageImpl) ExposeBinding(name string, binding BindingCallFunction, handl
 
 func (p *pageImpl) SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error) {
 	return p.mainFrame.SelectOption(selector, values, options...)
+}
+
+func (p *pageImpl) IsChecked(selector string, options ...FrameIsCheckedOptions) (bool, error) {
+	return p.mainFrame.IsChecked(selector, options...)
+}
+
+func (p *pageImpl) IsDisabled(selector string, options ...FrameIsDisabledOptions) (bool, error) {
+	return p.mainFrame.IsDisabled(selector, options...)
+}
+
+func (p *pageImpl) IsEditable(selector string, options ...FrameIsEditableOptions) (bool, error) {
+	return p.mainFrame.IsEditable(selector, options...)
+}
+
+func (p *pageImpl) IsEnabled(selector string, options ...FrameIsEnabledOptions) (bool, error) {
+	return p.mainFrame.IsEnabled(selector, options...)
+}
+
+func (p *pageImpl) IsHidden(selector string, options ...FrameIsHiddenOptions) (bool, error) {
+	return p.mainFrame.IsHidden(selector, options...)
+}
+
+func (p *pageImpl) IsVisible(selector string, options ...FrameIsVisibleOptions) (bool, error) {
+	return p.mainFrame.IsVisible(selector, options...)
 }

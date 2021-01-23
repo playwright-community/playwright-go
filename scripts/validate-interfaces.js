@@ -28,9 +28,13 @@ const missingFunctions = []
 for (const classData of api.filter(shouldIgnoreClass)) {
   const className = classData.name
   for (const funcData of classData.members.filter(member => member.kind === "method")) {
+    if (funcData?.langs?.only?.includes("python"))
+      continue
     const funcName = funcData.name
     const goFuncName = transformMethodNamesToGo(funcName)
     const functionSignature = `${className}.${goFuncName}`;
+    if (functionSignature === "WebSocket.WaitForEvent2")
+      debugger
     if (!interfaceData[className] || !interfaceData[className][goFuncName] && !allowedMissing.includes(functionSignature)) {
       missingFunctions.push(functionSignature)
     }

@@ -314,6 +314,18 @@ type ElementHandle interface {
 	InnerHTML() (string, error)
 	// Returns the `element.innerText`.
 	InnerText() (string, error)
+	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
+	IsChecked() (bool, error)
+	// Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
+	IsDisabled() (bool, error)
+	// Returns whether the element is [editable](./actionability.md#editable).
+	IsEditable() (bool, error)
+	// Returns whether the element is [enabled](./actionability.md#enabled).
+	IsEnabled() (bool, error)
+	// Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+	IsHidden() (bool, error)
+	// Returns whether the element is [visible](./actionability.md#visible).
+	IsVisible() (bool, error)
 	// Returns the frame containing the given element.
 	OwnerFrame() (Frame, error)
 	// Focuses the element, and then uses Keyboard.down`] and [`method: Keyboard.up().
@@ -561,6 +573,18 @@ type Frame interface {
 	InnerText(selector string, options ...PageInnerTextOptions) (string, error)
 	// Returns `true` if the frame has been detached, or `false` otherwise.
 	IsDetached() bool
+	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
+	IsChecked(selector string, options ...FrameIsCheckedOptions) (bool, error)
+	// Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
+	IsDisabled(selector string, options ...FrameIsDisabledOptions) (bool, error)
+	// Returns whether the element is [editable](./actionability.md#editable).
+	IsEditable(selector string, options ...FrameIsEditableOptions) (bool, error)
+	// Returns whether the element is [enabled](./actionability.md#enabled).
+	IsEnabled(selector string, options ...FrameIsEnabledOptions) (bool, error)
+	// Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+	IsHidden(selector string, options ...FrameIsHiddenOptions) (bool, error)
+	// Returns whether the element is [visible](./actionability.md#visible).
+	IsVisible(selector string, options ...FrameIsVisibleOptions) (bool, error)
 	// Returns frame's name attribute as specified in the tag.
 	// If the name is empty, returns the id attribute instead.
 	// > NOTE: This value is calculated once when the frame is created, and will not update if the attribute is changed later.
@@ -1000,6 +1024,18 @@ type Page interface {
 	InnerText(selector string, options ...PageInnerTextOptions) (string, error)
 	// Indicates that the page has been closed.
 	IsClosed() bool
+	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
+	IsChecked(selector string, options ...FrameIsCheckedOptions) (bool, error)
+	// Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
+	IsDisabled(selector string, options ...FrameIsDisabledOptions) (bool, error)
+	// Returns whether the element is [editable](./actionability.md#editable).
+	IsEditable(selector string, options ...FrameIsEditableOptions) (bool, error)
+	// Returns whether the element is [enabled](./actionability.md#enabled).
+	IsEnabled(selector string, options ...FrameIsEnabledOptions) (bool, error)
+	// Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+	IsHidden(selector string, options ...FrameIsHiddenOptions) (bool, error)
+	// Returns whether the element is [visible](./actionability.md#visible).
+	IsVisible(selector string, options ...FrameIsVisibleOptions) (bool, error)
 	// The page's main frame. Page is guaranteed to have a main frame which persists during navigations.
 	MainFrame() Frame
 	// Returns the opener for popup pages and `null` for others. If the opener has been closed already the returns `null`.
@@ -1143,6 +1179,8 @@ type Page interface {
 	// Passing zero timeout disables this.
 	// Shortcut for main frame's Frame.uncheck().
 	Uncheck(selector string, options ...FrameUncheckOptions) error
+	// Removes a route created with Page.route(). When `handler` is not specified, removes all routes for the `url`.
+	Unroute(url interface{}, handler routeHandler) error
 	// Video object associated with this page.
 	Video() Video
 	ViewportSize() ViewportSize
