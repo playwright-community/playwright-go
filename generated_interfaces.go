@@ -119,7 +119,7 @@ type BrowserContext interface {
 	SetOffline(offline bool) error
 	// Removes a route created with BrowserContext.route(). When `handler` is not specified, removes all routes for
 	// the `url`.
-	Unroute(url interface{}, handler routeHandler) error
+	Unroute(url interface{}, handler ...routeHandler) error
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the context closes before the event is fired. Returns the event data value.
 	WaitForEvent(event string, predicate ...interface{}) interface{}
@@ -384,7 +384,6 @@ type ElementHandle interface {
 	Tap(options ...ElementHandleTapOptions) error
 	// Returns the `node.textContent`.
 	TextContent() (string, error)
-	ToString() string
 	// Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
 	// To press a special key, like `Control` or `ArrowDown`, use ElementHandle.press().
 	// An example of typing into a text field and then submitting the form:
@@ -1180,7 +1179,7 @@ type Page interface {
 	// Shortcut for main frame's Frame.uncheck().
 	Uncheck(selector string, options ...FrameUncheckOptions) error
 	// Removes a route created with Page.route(). When `handler` is not specified, removes all routes for the `url`.
-	Unroute(url interface{}, handler routeHandler) error
+	Unroute(url interface{}, handler ...routeHandler) error
 	// Video object associated with this page.
 	Video() Video
 	ViewportSize() ViewportSize

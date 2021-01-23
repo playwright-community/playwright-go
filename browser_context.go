@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"reflect"
 )
 
 type browserContextImpl struct {
@@ -213,27 +212,16 @@ func (b *browserContextImpl) Route(url interface{}, handler routeHandler) error 
 	return nil
 }
 
-func (b *browserContextImpl) Unroute(url interface{}, handler routeHandler) error {
+func (b *browserContextImpl) Unroute(url interface{}, handlers ...routeHandler) error {
 	b.Lock()
 	defer b.Unlock()
-	handlerPtr := reflect.ValueOf(handler).Pointer()
-	routes := make([]*routeHandlerEntry, 0)
-	for _, route := range b.routes {
-		routeHandlerPtr := reflect.ValueOf(route.handler).Pointer()
-		if route.matcher.urlOrPredicate != url.(interface{}) ||
-			(handler != nil && routeHandlerPtr != handlerPtr) {
-			routes = append(routes, route)
-		}
+
+	routes, err := unroute(b.channel, b.routes, url, handlers...)
+	if err != nil {
+		return err
 	}
 	b.routes = routes
-	if len(b.routes) == 0 {
-		_, err := b.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
-			"enabled": false,
-		})
-		if err != nil {
-			return err
-		}
-	}
+
 	return nil
 }
 
@@ -289,13 +277,13 @@ func (b *browserContextImpl) onPage(page *pageImpl) {
 }
 
 func (b *browserContextImpl) onRoute(route *routeImpl, request *requestImpl) {
-	for _, handlerEntry := range b.routes {
-		if handlerEntry.matcher.Matches(request.URL()) {
-			handlerEntry.handler(route, request)
-			break
-		}
-	}
 	go func() {
+		for _, handlerEntry := range b.routes {
+			if handlerEntry.matcher.Matches(request.URL()) {
+				handlerEntry.handler(route, request)
+				return
+			}
+		}
 		if err := route.Continue(); err != nil {
 			log.Printf("could not continue request: %v", err)
 		}

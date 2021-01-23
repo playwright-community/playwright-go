@@ -158,27 +158,16 @@ func (p *pageImpl) URL() string {
 	return p.mainFrame.URL()
 }
 
-func (p *pageImpl) Unroute(url interface{}, handler routeHandler) error {
+func (p *pageImpl) Unroute(url interface{}, handlers ...routeHandler) error {
 	p.Lock()
 	defer p.Unlock()
-	handlerPtr := reflect.ValueOf(handler).Pointer()
-	routes := make([]*routeHandlerEntry, 0)
-	for _, route := range p.routes {
-		routeHandlerPtr := reflect.ValueOf(route.handler).Pointer()
-		if route.matcher.urlOrPredicate != url.(interface{}) ||
-			(handler != nil && routeHandlerPtr != handlerPtr) {
-			routes = append(routes, route)
-		}
+
+	routes, err := unroute(p.channel, p.routes, url, handlers...)
+	if err != nil {
+		return err
 	}
 	p.routes = routes
-	if len(p.routes) == 0 {
-		_, err := p.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
-			"enabled": false,
-		})
-		if err != nil {
-			return err
-		}
-	}
+
 	return nil
 }
 
@@ -657,14 +646,13 @@ func (p *pageImpl) onFrameDetached(frame *frameImpl) {
 
 func (p *pageImpl) onRoute(route *routeImpl, request *requestImpl) {
 	go func() {
-		p.Lock()
 		for _, handlerEntry := range p.routes {
 			if handlerEntry.matcher.Matches(request.URL()) {
 				handlerEntry.handler(route, request)
-				break
+				return
 			}
 		}
-		p.Unlock()
+		p.browserContext.onRoute(route, request)
 	}()
 }
 

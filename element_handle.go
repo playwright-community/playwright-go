@@ -272,10 +272,6 @@ func (e *elementHandleImpl) Tap(options ...ElementHandleTapOptions) error {
 	return err
 }
 
-func (e *elementHandleImpl) ToString() string {
-	return e.jsHandleImpl.String()
-}
-
 func (e *elementHandleImpl) SelectOption(values SelectOptionValues, options ...ElementHandleSelectOptionOptions) ([]string, error) {
 	opts := convertSelectOptionSet(values)
 	selected, err := e.channel.Send("selectOption", opts, options)

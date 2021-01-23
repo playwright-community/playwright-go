@@ -780,3 +780,42 @@ func TestPageSelectOption(t *testing.T) {
 	require.Equal(t, 1, len(selected))
 	require.Equal(t, "python", selected[0])
 }
+
+func TestPageUnrouteShouldWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	intercepted := []int{}
+	handler1 := func(route playwright.Route, request playwright.Request) {
+		intercepted = append(intercepted, 1)
+		require.NoError(t, route.Continue())
+	}
+	require.NoError(t, page.Route("**/empty.html", handler1))
+	require.NoError(t, page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+		intercepted = append(intercepted, 2)
+		require.NoError(t, route.Continue())
+	}))
+	require.NoError(t, page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+		intercepted = append(intercepted, 3)
+		require.NoError(t, route.Continue())
+	}))
+	require.NoError(t, page.Route("**/*", func(route playwright.Route, request playwright.Request) {
+		intercepted = append(intercepted, 4)
+		require.NoError(t, route.Continue())
+	}))
+
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.Equal(t, []int{1}, intercepted)
+
+	intercepted = []int{}
+	require.NoError(t, page.Unroute("**/empty.html", handler1))
+	_, err = page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.Equal(t, []int{2}, intercepted)
+
+	intercepted = []int{}
+	require.NoError(t, page.Unroute("**/empty.html"))
+	_, err = page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.Equal(t, []int{4}, intercepted)
+}

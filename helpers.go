@@ -374,3 +374,31 @@ func convertSelectOptionSet(values SelectOptionValues) map[string]interface{} {
 
 	return out
 }
+
+func unroute(channel *channel, inRoutes []*routeHandlerEntry, url interface{}, handlers ...routeHandler) ([]*routeHandlerEntry, error) {
+	var handler routeHandler
+	if len(handlers) == 1 {
+		handler = handlers[0]
+	}
+	handlerPtr := reflect.ValueOf(handler).Pointer()
+
+	routes := make([]*routeHandlerEntry, 0)
+
+	for _, route := range inRoutes {
+		routeHandlerPtr := reflect.ValueOf(route.handler).Pointer()
+		if route.matcher.urlOrPredicate != url.(interface{}) ||
+			(handler != nil && routeHandlerPtr != handlerPtr) {
+			routes = append(routes, route)
+		}
+	}
+
+	if len(routes) == 0 {
+		_, err := channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
+			"enabled": false,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+	return routes, nil
+}
