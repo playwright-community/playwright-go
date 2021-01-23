@@ -543,3 +543,63 @@ func (f *frameImpl) SelectOption(selector string, values SelectOptionValues, opt
 
 	return transformToStringList(selected), nil
 }
+
+func (f *frameImpl) IsChecked(selector string, options ...FrameIsCheckedOptions) (bool, error) {
+	checked, err := f.channel.Send("isChecked", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	if err != nil {
+		return false, err
+	}
+	return checked.(bool), nil
+}
+
+func (f *frameImpl) IsDisabled(selector string, options ...FrameIsDisabledOptions) (bool, error) {
+	disabled, err := f.channel.Send("isDisabled", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	if err != nil {
+		return false, err
+	}
+	return disabled.(bool), nil
+}
+
+func (f *frameImpl) IsEditable(selector string, options ...FrameIsEditableOptions) (bool, error) {
+	editable, err := f.channel.Send("isEditable", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	if err != nil {
+		return false, err
+	}
+	return editable.(bool), nil
+}
+
+func (f *frameImpl) IsEnabled(selector string, options ...FrameIsEnabledOptions) (bool, error) {
+	enabled, err := f.channel.Send("isEnabled", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	if err != nil {
+		return false, err
+	}
+	return enabled.(bool), nil
+}
+
+func (f *frameImpl) IsHidden(selector string, options ...FrameIsHiddenOptions) (bool, error) {
+	hidden, err := f.channel.Send("isHidden", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	if err != nil {
+		return false, err
+	}
+	return hidden.(bool), nil
+}
+
+func (f *frameImpl) IsVisible(selector string, options ...FrameIsVisibleOptions) (bool, error) {
+	visible, err := f.channel.Send("isVisible", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	if err != nil {
+		return false, err
+	}
+	return visible.(bool), nil
+}
