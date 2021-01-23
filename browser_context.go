@@ -1,10 +1,12 @@
 package playwright
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 )
 
 type browserContextImpl struct {
@@ -242,6 +244,51 @@ func (b *browserContextImpl) Close() error {
 	b.Unlock()
 	_, err := b.channel.Send("close")
 	return err
+}
+
+type StorageState struct {
+	Cookies []Cookie       `json:"cookies"`
+	Origins []OriginsState `json:"origins"`
+}
+
+type Cookie struct {
+	Name     string  `json:"name"`
+	Value    string  `json:"value"`
+	URL      string  `json:"url"`
+	Domain   string  `json:"domain"`
+	Path     string  `json:"path"`
+	Expires  float64 `json:"expires"`
+	HttpOnly bool    `json:"httpOnly"`
+	Secure   bool    `json:"secure"`
+	SameSite string  `json:"sameSite"`
+}
+type OriginsState struct {
+	Origin       string              `json:"origin"`
+	LocalStorage []LocalStorageEntry `json:"localStorage"`
+}
+
+type LocalStorageEntry struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+func (b *browserContextImpl) StorageState(paths ...string) (*StorageState, error) {
+	result, err := b.channel.SendReturnAsDict("storageState")
+	if err != nil {
+		return nil, err
+	}
+	if len(paths) == 1 {
+		file, err := os.Open(paths[0])
+		if err != nil {
+			return nil, err
+		}
+		if err := json.NewDecoder(file).Decode(result); err != nil {
+			return nil, err
+		}
+	}
+	var storageState StorageState
+	remapMapToStruct(result, &storageState)
+	return &storageState, nil
 }
 
 func (b *browserContextImpl) onBinding(binding *bindingCallImpl) {

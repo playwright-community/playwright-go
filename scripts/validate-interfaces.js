@@ -20,7 +20,8 @@ const shouldIgnoreClass = ({ name }) =>
 const allowedMissing = [
   "BrowserType.Connect",
   "BrowserType.LaunchServer",
-  "Download.CreateReadStream"
+  "Download.CreateReadStream",
+  "BrowserContext.SetHTTPCredentials",
 ]
 
 const missingFunctions = []

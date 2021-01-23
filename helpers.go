@@ -134,9 +134,10 @@ func remapValue(inMapValue reflect.Value, outStructValue reflect.Value) {
 		outStructValue.SetFloat(inMapValue.Float())
 	case reflect.Int:
 		outStructValue.SetInt(int64(inMapValue.Float()))
-	case reflect.Map:
-		for _, key := range inMapValue.MapKeys() {
-			remapMapToStruct(inMapValue.MapIndex(key).Interface(), inMapValue.Interface())
+	case reflect.Slice:
+		outStructValue.Set(reflect.MakeSlice(outStructValue.Type(), inMapValue.Len(), inMapValue.Cap()))
+		for i := 0; i < inMapValue.Len(); i++ {
+			remapValue(inMapValue.Index(i).Elem(), outStructValue.Index(i))
 		}
 	case reflect.Struct:
 		structTyp := outStructValue.Type()

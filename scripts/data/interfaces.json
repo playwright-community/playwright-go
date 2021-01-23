@@ -118,6 +118,10 @@
 			"offline bool",
 			"error"
 		],
+		"StorageState": [
+			"path ...string",
+			"*StorageState, error"
+		],
 		"Unroute": [
 			"url interface{}, handler ...routeHandler",
 			"error"
