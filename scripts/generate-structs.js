@@ -5,7 +5,7 @@ const { getAPIDocs, transformMethodNamesToGo } = require("./helpers")
 const api = getAPIDocs()
 
 const makePascalCase = (v) => {
-  v = v.replace("_", "")
+  v = transformMethodNamesToGo(v.replace("_", ""))
   return v[0].toUpperCase() + v.slice(1)
 }
 
@@ -16,12 +16,17 @@ let appendix = new Set()
 const generateStruct = (typeData, structNamePrefix, structName) => {
   const typeName = typeData.type.name
   const propName = makePascalCase(typeData.name)
-  if (typeName.endsWith("Object") && Object.keys(typeData.type.properties).length > 0) {
+  let unionType
+  if (typeData.type.name === "union" && typeData.type.expression.includes("Object"))
+    unionType = typeData.type.union.find(t => t.name === "Object")
+  else if (typeData.type.name === "Object" && typeData.type.properties)
+    unionType = typeData.type
+  if (unionType) {
     let structProperties = []
-    for (const property in typeData.type.properties) {
+    for (const property of unionType.properties) {
       structProperties.push(
-        generateStruct(typeData.type.properties[property], structName, makePascalCase(property)) +
-        `\`json:"${property}"\``)
+        generateStruct(property, structName, makePascalCase(property.name)) +
+        `\`json:"${property.name}"\``)
     }
     const subStructName = structNamePrefix + structName
     appendix.add(`type ${subStructName} struct {
@@ -32,28 +37,34 @@ const generateStruct = (typeData, structNamePrefix, structName) => {
   if (["latitude", "longitude"].includes(typeData.name)) {
     return `${propName} *float64`
   }
+  const expressionMapping = {
+    "[Array]<[string]>": "[]string",
+  }
+  if (expressionMapping[typeData.type.expression]) {
+    return `${propName} ${expressionMapping[typeData.type.expression]}`
+  }
+  if (typeData.type.name === "Object" && typeData.type.expression === "[Object]<[string], [string]>")
+    return `${propName} map[string]string`
   const mapping = {
+    "path": "*string",
     "string": "*string",
     "boolean": "*bool",
-    "number": "*int",
+    "int": "*int",
+    "float": "*float64",
     "ElementHandle": "*ElementHandle",
-    "Array<string>": "[]string",
     "Object<string, string>": "map[string]string"
   }
   if (mapping[typeName]) {
     return `${propName} ${mapping[typeName]}`
   }
-  if (!typeName.startsWith("Object<")) {
-    if (typeName.includes("|")) {
-      const orTypes = typeName.split("|")
-      if (orTypes.every(el => el.startsWith('"') && el.endsWith('"'))) {
+  if (typeName === "union") {
+    if (typeData.type.expression.includes("|")) {
+      if (typeData.type.expression.split("|").every(u => u.startsWith('"') && u.endsWith('"'))) {
         return `${propName} *string`
       } else {
         return `${propName} interface{}`
       }
     }
-  } else {
-    return `${propName} map[string]interface{}`
   }
   return `${propName} interface{}`
 }
@@ -68,22 +79,26 @@ const METHODS_TO_SPREAD = [
 
 console.log("package playwright")
 
-for (const [className, classData] of Object.entries(api)) {
-  for (const [funcName, funcData] of Object.entries(classData.methods)) {
-    let optionalParameters = Object.fromEntries(Object.entries(funcData.args).filter(([k, v]) => !v.required || v.name.startsWith("option") || METHODS_TO_SPREAD.includes(className + "." + funcName)))
-    if (Object.keys(optionalParameters).length > 0) {
-      if (Object.keys(optionalParameters).length === 1) {
-        optionalParameters = optionalParameters[Object.keys(optionalParameters)[0]].type.properties
+for (const classData of api) {
+  const className = classData.name
+  for (const funcData of classData.members.filter(member => member.kind === "method")) {
+    const funcName = funcData.name
+    let optionalParameters = funcData.args.filter(v => !v.required || v.name.startsWith("option") || METHODS_TO_SPREAD.includes(className + "." + funcName))
+    if (optionalParameters.length > 0) {
+      if (optionalParameters.length === 1 && optionalParameters[0].type.name === "object") {
+        optionalParameters = optionalParameters[0].type.properties
       }
       const structName = generateStructName(className, transformMethodNamesToGo(funcName))
       let structProperties = []
-      for (const property in optionalParameters) {
-        if (property.startsWith("option")) {
-          for (const newProp in optionalParameters[property].type.properties) {
-            structProperties.push(generateStruct(optionalParameters[property].type.properties[newProp], makePascalCase(newProp)) + `\`json:"${newProp}"\``)
+      for (const property of optionalParameters) {
+        if (property.name.startsWith("option") && property.type.properties) {
+          for (const newProp of property.type.properties) {
+            if (newProp?.langs?.only?.includes("python"))
+              continue
+            structProperties.push(generateStruct(newProp, structName, makePascalCase(newProp.name)) + `\`json:"${newProp.name}"\``)
           }
         } else {
-          structProperties.push(generateStruct(optionalParameters[property], structName, makePascalCase(property)) + `\`json:"${property}"\``)
+          structProperties.push(generateStruct(property, structName, makePascalCase(property.name)) + `\`json:"${property.name}"\``)
         }
       }
       if (structProperties.length > 0) {

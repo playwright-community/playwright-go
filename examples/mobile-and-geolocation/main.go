@@ -26,7 +26,7 @@ func main() {
 		Permissions:       []string{"geolocation"},
 		Viewport:          device.Viewport,
 		UserAgent:         playwright.String(device.UserAgent),
-		DeviceScaleFactor: playwright.Int(device.DeviceScaleFactor),
+		DeviceScaleFactor: playwright.Float(device.DeviceScaleFactor),
 		IsMobile:          playwright.Bool(device.IsMobile),
 		HasTouch:          playwright.Bool(device.HasTouch),
 	})

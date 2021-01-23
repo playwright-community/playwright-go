@@ -258,15 +258,15 @@ const defaultTimeout = 30 * 1000
 
 type timeoutSettings struct {
 	parent            *timeoutSettings
-	timeout           int
-	navigationTimeout int
+	timeout           float64
+	navigationTimeout float64
 }
 
-func (t *timeoutSettings) SetTimeout(timeout int) {
+func (t *timeoutSettings) SetTimeout(timeout float64) {
 	t.timeout = timeout
 }
 
-func (t *timeoutSettings) Timeout() int {
+func (t *timeoutSettings) Timeout() float64 {
 	if t.timeout != 0 {
 		return t.timeout
 	}
@@ -276,11 +276,11 @@ func (t *timeoutSettings) Timeout() int {
 	return defaultTimeout
 }
 
-func (t *timeoutSettings) SetNavigationTimeout(navigationTimeout int) {
+func (t *timeoutSettings) SetNavigationTimeout(navigationTimeout float64) {
 	t.navigationTimeout = navigationTimeout
 }
 
-func (t *timeoutSettings) NavigationTimeout() int {
+func (t *timeoutSettings) NavigationTimeout() float64 {
 	if t.navigationTimeout != 0 {
 		return t.navigationTimeout
 	}

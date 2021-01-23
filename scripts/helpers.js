@@ -23,7 +23,7 @@ const getCacheDirectory = () => {
 const getCliLocation = () => {
   const cacheDirectory = getCacheDirectory()
   const cliVersion = getCliVersion()
-  return path.join(cacheDirectory, "ms-playwright-go", cliVersion, "playwright-cli")
+  return path.join(cacheDirectory, "ms-playwright-go", cliVersion, "playwright.sh")
 }
 
 const getAPIDocs = () => {

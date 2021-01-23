@@ -93,14 +93,14 @@ func (p *pageImpl) Frames() []Frame {
 	return p.frames
 }
 
-func (p *pageImpl) SetDefaultNavigationTimeout(timeout int) {
+func (p *pageImpl) SetDefaultNavigationTimeout(timeout float64) {
 	p.timeoutSettings.SetNavigationTimeout(timeout)
 	p.channel.SendNoReply("setDefaultNavigationTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
 	})
 }
 
-func (p *pageImpl) SetDefaultTimeout(timeout int) {
+func (p *pageImpl) SetDefaultTimeout(timeout float64) {
 	p.timeoutSettings.SetTimeout(timeout)
 	p.channel.SendNoReply("setDefaultTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
@@ -676,7 +676,7 @@ func (p *pageImpl) Uncheck(selector string, options ...FrameUncheckOptions) erro
 	return p.mainFrame.Uncheck(selector, options...)
 }
 
-func (p *pageImpl) WaitForTimeout(timeout int) {
+func (p *pageImpl) WaitForTimeout(timeout float64) {
 	p.mainFrame.WaitForTimeout(timeout)
 }
 

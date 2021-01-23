@@ -11,11 +11,11 @@ const IGNORE_CLASSES = [
   "Accessibility",
   "TimeoutError"
 ]
-const shouldIgnoreClass = ([k]) =>
-  !IGNORE_CLASSES.includes(k) &&
-  !k.startsWith("Chromium") &&
-  !k.startsWith("Firefox") &&
-  !k.startsWith("WebKit")
+const shouldIgnoreClass = ({ name }) =>
+  !IGNORE_CLASSES.includes(name) &&
+  !name.startsWith("Chromium") &&
+  !name.startsWith("Firefox") &&
+  !name.startsWith("WebKit")
 
 const allowedMissing = [
   "BrowserType.Connect",
@@ -25,8 +25,10 @@ const allowedMissing = [
 
 const missingFunctions = []
 
-for (const [className, classData] of Object.entries(api).filter(shouldIgnoreClass)) {
-  for (const funcName in classData.methods) {
+for (const classData of api.filter(shouldIgnoreClass)) {
+  const className = classData.name
+  for (const funcData of classData.members.filter(member => member.kind === "method")) {
+    const funcName = funcData.name
     const goFuncName = transformMethodNamesToGo(funcName)
     const functionSignature = `${className}.${goFuncName}`;
     if (!interfaceData[className] || !interfaceData[className][goFuncName] && !allowedMissing.includes(functionSignature)) {
