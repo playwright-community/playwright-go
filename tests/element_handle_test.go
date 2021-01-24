@@ -503,5 +503,6 @@ func TestElementHandleWaitForSelector(t *testing.T) {
 	handle, err := div.WaitForSelector("#result", playwright.ElementHandleWaitForSelectorOptions{State: &state})
 	require.NoError(t, err)
 	text, err := handle.InnerText()
+	require.NoError(t, err)
 	require.Equal(t, "test result", text)
 }
