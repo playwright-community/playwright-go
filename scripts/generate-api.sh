@@ -14,7 +14,7 @@ go fmt generated_interfaces.go > /dev/null
 echo "Generated Interfaces"
 
 echo "Validating API"
-node scripts/validate-interfaces.js
+node scripts/validate-interfaces.js || true
 echo "Validated API"
 
 echo "Updating README"
