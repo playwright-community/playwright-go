@@ -402,6 +402,27 @@ type ElementHandle interface {
 	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
 	// Passing zero timeout disables this.
 	Uncheck(options ...ElementHandleUncheckOptions) error
+	// Returns when the element satisfies the `state`.
+	// Depending on the `state` parameter, this method waits for one of the [actionability](./actionability.md) checks to pass.
+	// This method throws when the element is detached while waiting, unless waiting for the `"hidden"` state.
+	// - `"visible"` Wait until the element is [visible](./actionability.md#visible).
+	// - `"hidden"` Wait until the element is [not visible](./actionability.md#visible) or
+	// [not attached](./actionability.md#attached). Note that waiting for hidden does not throw when the element detaches.
+	// - `"stable"` Wait until the element is both [visible](./actionability.md#visible) and
+	// [stable](./actionability.md#stable).
+	// - `"enabled"` Wait until the element is [enabled](./actionability.md#enabled).
+	// - `"disabled"` Wait until the element is [not enabled](./actionability.md#enabled).
+	// - `"editable"` Wait until the element is [editable](./actionability.md#editable).
+	// If the element does not satisfy the condition for the `timeout` milliseconds, this method will throw.
+	WaitForElementState(state string, options ...ElementHandleWaitForElementStateOptions) error
+	// Returns element specified by selector when it satisfies `state` option. Returns `null` if waiting for `hidden` or
+	// `detached`.
+	// Wait for the `selector` relative to the element handle to satisfy `state` option (either appear/disappear from dom, or
+	// become visible/hidden). If at the moment of calling the method `selector` already satisfies the condition, the method
+	// will return immediately. If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will
+	// throw.
+	// > NOTE: This method does not work across navigations, use Page.waitForSelector() instead.
+	WaitForSelector(selector string, options ...ElementHandleWaitForSelectorOptions) (ElementHandle, error)
 }
 
 type EventEmitter interface {
