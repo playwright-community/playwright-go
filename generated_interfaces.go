@@ -117,6 +117,8 @@ type BrowserContext interface {
 	// > NOTE: Enabling routing disables http cache.
 	Route(url interface{}, handler routeHandler) error
 	SetOffline(offline bool) error
+	// Returns storage state for this browser context, contains current cookies and local storage snapshot.
+	StorageState(path ...string) (*StorageState, error)
 	// Removes a route created with BrowserContext.route(). When `handler` is not specified, removes all routes for
 	// the `url`.
 	Unroute(url interface{}, handler ...routeHandler) error

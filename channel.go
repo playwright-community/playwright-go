@@ -14,6 +14,14 @@ type channel struct {
 }
 
 func (c *channel) Send(method string, options ...interface{}) (interface{}, error) {
+	return c.innerSend(method, false, options...)
+}
+
+func (c *channel) SendReturnAsDict(method string, options ...interface{}) (interface{}, error) {
+	return c.innerSend(method, true, options...)
+}
+
+func (c *channel) innerSend(method string, returnAsDict bool, options ...interface{}) (interface{}, error) {
 	params := transformOptions(options...)
 	result, err := c.connection.SendMessageToServer(c.guid, method, params)
 	if err != nil {
@@ -21,6 +29,9 @@ func (c *channel) Send(method string, options ...interface{}) (interface{}, erro
 	}
 	if result == nil {
 		return nil, nil
+	}
+	if returnAsDict {
+		return result, nil
 	}
 	if reflect.TypeOf(result).Kind() == reflect.Map {
 		mapV := result.(map[string]interface{})
