@@ -317,3 +317,33 @@ func TestElementHandleSelectOptionOverElementHandle(t *testing.T) {
 	require.Equal(t, 1, len(selected))
 	require.Equal(t, "python", selected[0])
 }
+
+func TestElementHandleWaitForElementState(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent("<div><p id='result'>test result</p></div>"))
+
+	handle, err := page.QuerySelector("#result")
+	require.NoError(t, err)
+	err = handle.WaitForElementState("visible")
+	require.NoError(t, err)
+}
+
+func TestElementHandleWaitForSelector(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent("<div><p id='result'>test result</p></div>"))
+
+	div, err := page.QuerySelector("div")
+	require.NoError(t, err)
+
+	state := "attached"
+	handle, err := div.WaitForSelector("#result", playwright.ElementHandleWaitForSelectorOptions{State: &state})
+	require.NoError(t, err)
+	text, err := handle.InnerText()
+	require.Equal(t, "test result", text)
+}
