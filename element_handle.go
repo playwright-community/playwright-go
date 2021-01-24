@@ -330,6 +330,31 @@ func (e *elementHandleImpl) IsVisible() (bool, error) {
 	return visible.(bool), nil
 }
 
+func (e *elementHandleImpl) WaitForElementState(state string, options ...ElementHandleWaitForElementStateOptions) error {
+	_, err := e.channel.Send("waitForElementState", map[string]interface{}{
+		"state": state,
+	}, options)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (e *elementHandleImpl) WaitForSelector(selector string, options ...ElementHandleWaitForSelectorOptions) (ElementHandle, error) {
+	ch, err := e.channel.Send("waitForSelector", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	if err != nil {
+		return nil, err
+	}
+
+	channelOwner := fromNullableChannel(ch)
+	if channelOwner == nil {
+		return nil, nil
+	}
+	return channelOwner.(*elementHandleImpl), nil
+}
+
 func newElementHandle(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *elementHandleImpl {
 	bt := &elementHandleImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)

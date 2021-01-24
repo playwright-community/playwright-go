@@ -354,6 +354,14 @@
 		"Uncheck": [
 			"options ...ElementHandleUncheckOptions",
 			"error"
+		],
+		"WaitForElementState": [
+			"state string, options ...ElementHandleWaitForElementStateOptions",
+			"error"
+		],
+		"WaitForSelector": [
+			"selector string, options ...ElementHandleWaitForSelectorOptions",
+			"(ElementHandle, error)"
 		]
 	},
 	"EventEmitter": {
