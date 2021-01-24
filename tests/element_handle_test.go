@@ -318,6 +318,164 @@ func TestElementHandleSelectOptionOverElementHandle(t *testing.T) {
 	require.Equal(t, "python", selected[0])
 }
 
+func TestElementHandleIsVisibleAndIsHiddenShouldWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.SetContent(`<div>Hi</div><span></span>`))
+	div, err := page.QuerySelector("div")
+	require.NoError(t, err)
+	isVisible, err := div.IsVisible()
+	require.NoError(t, err)
+	require.True(t, isVisible)
+	isHidden, err := div.IsHidden()
+	require.NoError(t, err)
+	require.False(t, isHidden)
+
+	isVisible, err = page.IsVisible("div")
+	require.NoError(t, err)
+	require.True(t, isVisible)
+	isHidden, err = page.IsHidden("div")
+	require.NoError(t, err)
+	require.False(t, isHidden)
+
+	span, err := page.QuerySelector("span")
+	require.NoError(t, err)
+	isVisible, err = span.IsVisible()
+	require.NoError(t, err)
+	require.False(t, isVisible)
+	isHidden, err = span.IsHidden()
+	require.NoError(t, err)
+	require.True(t, isHidden)
+
+	isVisible, err = page.IsVisible("span")
+	require.NoError(t, err)
+	require.False(t, isVisible)
+	isHidden, err = page.IsHidden("span")
+	require.NoError(t, err)
+	require.True(t, isHidden)
+}
+
+func TestElementHandleIsEnabledAndIsDisabledshouldWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.SetContent(`
+		<button disabled>button1</button>
+		<button>button2</button>
+		<div>div</div>
+	`))
+	div, err := page.QuerySelector("div")
+	require.NoError(t, err)
+	isEnabled, err := div.IsEnabled()
+	require.NoError(t, err)
+	require.True(t, isEnabled)
+	isDisabled, err := div.IsDisabled()
+	require.NoError(t, err)
+	require.False(t, isDisabled)
+
+	isEnabled, err = page.IsEnabled("div")
+	require.NoError(t, err)
+	require.True(t, isEnabled)
+	isDisabled, err = page.IsDisabled("div")
+	require.NoError(t, err)
+	require.False(t, isDisabled)
+
+	button1, err := page.QuerySelector(":text('button1')")
+	require.NoError(t, err)
+	isEnabled, err = button1.IsEnabled()
+	require.NoError(t, err)
+	require.False(t, isEnabled)
+	isDisabled, err = button1.IsDisabled()
+	require.NoError(t, err)
+	require.True(t, isDisabled)
+
+	isEnabled, err = page.IsEnabled(":text('button1')")
+	require.NoError(t, err)
+	require.False(t, isEnabled)
+	isDisabled, err = page.IsDisabled(":text('button1')")
+	require.NoError(t, err)
+	require.True(t, isDisabled)
+
+	button2, err := page.QuerySelector(":text('button2')")
+	require.NoError(t, err)
+	isEnabled, err = button2.IsEnabled()
+	require.NoError(t, err)
+	require.True(t, isEnabled)
+	isDisabled, err = button2.IsDisabled()
+	require.NoError(t, err)
+	require.False(t, isDisabled)
+
+	isEnabled, err = page.IsEnabled(":text('button2')")
+	require.NoError(t, err)
+	require.True(t, isEnabled)
+	isDisabled, err = page.IsDisabled(":text('button2')")
+	require.NoError(t, err)
+	require.False(t, isDisabled)
+}
+
+func TestElementHandleIsEditableShouldWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.SetContent(`
+		<input id=input1 disabled><textarea></textarea><input id=input2>
+	`))
+	_, err := page.EvalOnSelector("textarea", "t => t.readOnly = true")
+	require.NoError(t, err)
+	input1, err := page.QuerySelector("#input1")
+	require.NoError(t, err)
+	isEditable, err := input1.IsEditable()
+	require.NoError(t, err)
+	require.False(t, isEditable)
+	isEditable, err = page.IsEditable("#input1")
+	require.NoError(t, err)
+	require.False(t, isEditable)
+
+	input2, err := page.QuerySelector("#input2")
+	require.NoError(t, err)
+	isEditable, err = input2.IsEditable()
+	require.NoError(t, err)
+	require.True(t, isEditable)
+	isEditable, err = page.IsEditable("#input2")
+	require.NoError(t, err)
+	require.True(t, isEditable)
+
+	textarea, err := page.QuerySelector("textarea")
+	require.NoError(t, err)
+	isEditable, err = textarea.IsEditable()
+	require.NoError(t, err)
+	require.False(t, isEditable)
+	isEditable, err = page.IsEditable("textarea")
+	require.NoError(t, err)
+	require.False(t, isEditable)
+}
+
+func TestElementHandleIsCheckedShouldWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.SetContent(`
+		<input type="checkbox" checked><div>Not a checkbox</div>
+	`))
+	handle, err := page.QuerySelector("input")
+	require.NoError(t, err)
+	isChecked, err := handle.IsChecked()
+	require.NoError(t, err)
+	require.True(t, isChecked)
+	isChecked, err = page.IsChecked("input")
+	require.NoError(t, err)
+	require.True(t, isChecked)
+
+	_, err = handle.Evaluate("input => input.checked = false")
+	require.NoError(t, err)
+	isChecked, err = handle.IsChecked()
+	require.NoError(t, err)
+	require.False(t, isChecked)
+	isChecked, err = page.IsChecked("input")
+	require.NoError(t, err)
+	require.False(t, isChecked)
+
+	_, err = page.IsChecked("div")
+	require.Contains(t, err.Error(), "Not a checkbox or radio button")
+}
+
 func TestElementHandleWaitForElementState(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)

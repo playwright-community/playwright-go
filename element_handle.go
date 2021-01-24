@@ -272,10 +272,6 @@ func (e *elementHandleImpl) Tap(options ...ElementHandleTapOptions) error {
 	return err
 }
 
-func (e *elementHandleImpl) ToString() string {
-	return e.jsHandleImpl.String()
-}
-
 func (e *elementHandleImpl) SelectOption(values SelectOptionValues, options ...ElementHandleSelectOptionOptions) ([]string, error) {
 	opts := convertSelectOptionSet(values)
 	selected, err := e.channel.Send("selectOption", opts, options)
@@ -284,6 +280,54 @@ func (e *elementHandleImpl) SelectOption(values SelectOptionValues, options ...E
 	}
 
 	return transformToStringList(selected), nil
+}
+
+func (e *elementHandleImpl) IsChecked() (bool, error) {
+	checked, err := e.channel.Send("isChecked")
+	if err != nil {
+		return false, err
+	}
+	return checked.(bool), nil
+}
+
+func (e *elementHandleImpl) IsDisabled() (bool, error) {
+	disabled, err := e.channel.Send("isDisabled")
+	if err != nil {
+		return false, err
+	}
+	return disabled.(bool), nil
+}
+
+func (e *elementHandleImpl) IsEditable() (bool, error) {
+	editable, err := e.channel.Send("isEditable")
+	if err != nil {
+		return false, err
+	}
+	return editable.(bool), nil
+}
+
+func (e *elementHandleImpl) IsEnabled() (bool, error) {
+	enabled, err := e.channel.Send("isEnabled")
+	if err != nil {
+		return false, err
+	}
+	return enabled.(bool), nil
+}
+
+func (e *elementHandleImpl) IsHidden() (bool, error) {
+	hidden, err := e.channel.Send("isHidden")
+	if err != nil {
+		return false, err
+	}
+	return hidden.(bool), nil
+}
+
+func (e *elementHandleImpl) IsVisible() (bool, error) {
+	visible, err := e.channel.Send("isVisible")
+	if err != nil {
+		return false, err
+	}
+	return visible.(bool), nil
 }
 
 func (e *elementHandleImpl) WaitForElementState(state string, options ...ElementHandleWaitForElementStateOptions) error {

@@ -150,12 +150,12 @@ func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (
 		option.WaitUntil = String("load")
 	}
 	if option.Timeout == nil {
-		option.Timeout = Int(f.page.timeoutSettings.NavigationTimeout())
+		option.Timeout = Float(f.page.timeoutSettings.NavigationTimeout())
 	}
 	deadline := time.After(time.Duration(*option.Timeout) * time.Millisecond)
 	var matcher *urlMatcher
-	if option.Url != nil {
-		matcher = newURLMatcher(option.Url)
+	if option.URL != nil {
+		matcher = newURLMatcher(option.URL)
 	}
 	predicate := func(events ...interface{}) bool {
 		ev := events[0].(map[string]interface{})
@@ -166,7 +166,7 @@ func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (
 	}
 	select {
 	case <-deadline:
-		return nil, fmt.Errorf("Timeout %dms exceeded.", *option.Timeout)
+		return nil, fmt.Errorf("Timeout %.2fms exceeded.", *option.Timeout)
 	case eventData := <-waitForEvent(f, "navigated", predicate):
 		event := eventData.(map[string]interface{})
 		if event["newDocument"] != nil && event["newDocument"].(map[string]interface{})["request"] != nil {
@@ -434,7 +434,7 @@ func (f *frameImpl) Uncheck(selector string, options ...FrameUncheckOptions) err
 	return err
 }
 
-func (f *frameImpl) WaitForTimeout(timeout int) {
+func (f *frameImpl) WaitForTimeout(timeout float64) {
 	time.Sleep(time.Duration(timeout) * time.Millisecond)
 }
 
@@ -542,4 +542,64 @@ func (f *frameImpl) SelectOption(selector string, values SelectOptionValues, opt
 	}
 
 	return transformToStringList(selected), nil
+}
+
+func (f *frameImpl) IsChecked(selector string, options ...FrameIsCheckedOptions) (bool, error) {
+	checked, err := f.channel.Send("isChecked", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	if err != nil {
+		return false, err
+	}
+	return checked.(bool), nil
+}
+
+func (f *frameImpl) IsDisabled(selector string, options ...FrameIsDisabledOptions) (bool, error) {
+	disabled, err := f.channel.Send("isDisabled", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	if err != nil {
+		return false, err
+	}
+	return disabled.(bool), nil
+}
+
+func (f *frameImpl) IsEditable(selector string, options ...FrameIsEditableOptions) (bool, error) {
+	editable, err := f.channel.Send("isEditable", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	if err != nil {
+		return false, err
+	}
+	return editable.(bool), nil
+}
+
+func (f *frameImpl) IsEnabled(selector string, options ...FrameIsEnabledOptions) (bool, error) {
+	enabled, err := f.channel.Send("isEnabled", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	if err != nil {
+		return false, err
+	}
+	return enabled.(bool), nil
+}
+
+func (f *frameImpl) IsHidden(selector string, options ...FrameIsHiddenOptions) (bool, error) {
+	hidden, err := f.channel.Send("isHidden", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	if err != nil {
+		return false, err
+	}
+	return hidden.(bool), nil
+}
+
+func (f *frameImpl) IsVisible(selector string, options ...FrameIsVisibleOptions) (bool, error) {
+	visible, err := f.channel.Send("isVisible", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	if err != nil {
+		return false, err
+	}
+	return visible.(bool), nil
 }

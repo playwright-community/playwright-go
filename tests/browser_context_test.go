@@ -174,3 +174,46 @@ func TestBrowserContextWindowOpenshouldUseParentTabContext(t *testing.T) {
 	popup := popupEvent.(playwright.Page)
 	require.Equal(t, popup.Context(), context)
 }
+
+func TestBrowserContextUnrouteShouldWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	newPage, err := context.NewPage()
+	require.NoError(t, err)
+	page = newPage
+
+	intercepted := []int{}
+	handler1 := func(route playwright.Route, request playwright.Request) {
+		intercepted = append(intercepted, 1)
+		require.NoError(t, route.Continue())
+	}
+	require.NoError(t, context.Route("**/empty.html", handler1))
+	require.NoError(t, context.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+		intercepted = append(intercepted, 2)
+		require.NoError(t, route.Continue())
+	}))
+	require.NoError(t, context.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+		intercepted = append(intercepted, 3)
+		require.NoError(t, route.Continue())
+	}))
+	require.NoError(t, context.Route("**/*", func(route playwright.Route, request playwright.Request) {
+		intercepted = append(intercepted, 4)
+		require.NoError(t, route.Continue())
+	}))
+
+	_, err = page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.Equal(t, []int{1}, intercepted)
+
+	intercepted = []int{}
+	require.NoError(t, context.Unroute("**/empty.html", handler1))
+	_, err = page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.Equal(t, []int{2}, intercepted)
+
+	intercepted = []int{}
+	require.NoError(t, context.Unroute("**/empty.html"))
+	_, err = page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.Equal(t, []int{4}, intercepted)
+}

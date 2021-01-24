@@ -402,7 +402,7 @@ func TestPageAddScriptTag(t *testing.T) {
 	require.NoError(t, err)
 
 	scriptHandle, err := page.AddScriptTag(playwright.PageAddScriptTagOptions{
-		Url: playwright.String("injectedfile.js"),
+		URL: playwright.String("injectedfile.js"),
 	})
 	require.NoError(t, err)
 	require.NotNil(t, scriptHandle.AsElement())
@@ -434,7 +434,7 @@ func TestPageAddStyleTag(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = page.AddStyleTag(playwright.PageAddStyleTagOptions{
-		Url: playwright.String("injectedstyle.css"),
+		URL: playwright.String("injectedstyle.css"),
 	})
 	require.NoError(t, err)
 	v, err := page.Evaluate("window.getComputedStyle(document.querySelector('body')).getPropertyValue('background-color')")
@@ -474,7 +474,7 @@ func TestPlaywrightDevices(t *testing.T) {
 		require.NotEmpty(t, name)
 		require.NotEmpty(t, device.UserAgent)
 		require.NotEmpty(t, device.Viewport)
-		require.Greater(t, device.DeviceScaleFactor, 0)
+		require.Greater(t, device.DeviceScaleFactor, float64(0))
 		require.NotEmpty(t, device.DefaultBrowserType)
 	}
 }
@@ -498,7 +498,7 @@ func TestPageExpectSelectorTimeout(t *testing.T) {
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	timeoutError := errors.Unwrap(page.Click("foobar", playwright.PageClickOptions{
-		Timeout: playwright.Int(500),
+		Timeout: playwright.Float(500),
 	})).(*playwright.TimeoutError)
 	require.Contains(t, timeoutError.Message, "Timeout 500ms exceeded.")
 }
@@ -779,4 +779,43 @@ func TestPageSelectOption(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 1, len(selected))
 	require.Equal(t, "python", selected[0])
+}
+
+func TestPageUnrouteShouldWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	intercepted := []int{}
+	handler1 := func(route playwright.Route, request playwright.Request) {
+		intercepted = append(intercepted, 1)
+		require.NoError(t, route.Continue())
+	}
+	require.NoError(t, page.Route("**/empty.html", handler1))
+	require.NoError(t, page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+		intercepted = append(intercepted, 2)
+		require.NoError(t, route.Continue())
+	}))
+	require.NoError(t, page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+		intercepted = append(intercepted, 3)
+		require.NoError(t, route.Continue())
+	}))
+	require.NoError(t, page.Route("**/*", func(route playwright.Route, request playwright.Request) {
+		intercepted = append(intercepted, 4)
+		require.NoError(t, route.Continue())
+	}))
+
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.Equal(t, []int{1}, intercepted)
+
+	intercepted = []int{}
+	require.NoError(t, page.Unroute("**/empty.html", handler1))
+	_, err = page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.Equal(t, []int{2}, intercepted)
+
+	intercepted = []int{}
+	require.NoError(t, page.Unroute("**/empty.html"))
+	_, err = page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.Equal(t, []int{4}, intercepted)
 }

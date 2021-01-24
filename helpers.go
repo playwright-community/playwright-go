@@ -258,15 +258,15 @@ const defaultTimeout = 30 * 1000
 
 type timeoutSettings struct {
 	parent            *timeoutSettings
-	timeout           int
-	navigationTimeout int
+	timeout           float64
+	navigationTimeout float64
 }
 
-func (t *timeoutSettings) SetTimeout(timeout int) {
+func (t *timeoutSettings) SetTimeout(timeout float64) {
 	t.timeout = timeout
 }
 
-func (t *timeoutSettings) Timeout() int {
+func (t *timeoutSettings) Timeout() float64 {
 	if t.timeout != 0 {
 		return t.timeout
 	}
@@ -276,11 +276,11 @@ func (t *timeoutSettings) Timeout() int {
 	return defaultTimeout
 }
 
-func (t *timeoutSettings) SetNavigationTimeout(navigationTimeout int) {
+func (t *timeoutSettings) SetNavigationTimeout(navigationTimeout float64) {
 	t.navigationTimeout = navigationTimeout
 }
 
-func (t *timeoutSettings) NavigationTimeout() int {
+func (t *timeoutSettings) NavigationTimeout() float64 {
 	if t.navigationTimeout != 0 {
 		return t.navigationTimeout
 	}
@@ -373,4 +373,32 @@ func convertSelectOptionSet(values SelectOptionValues) map[string]interface{} {
 	}
 
 	return out
+}
+
+func unroute(channel *channel, inRoutes []*routeHandlerEntry, url interface{}, handlers ...routeHandler) ([]*routeHandlerEntry, error) {
+	var handler routeHandler
+	if len(handlers) == 1 {
+		handler = handlers[0]
+	}
+	handlerPtr := reflect.ValueOf(handler).Pointer()
+
+	routes := make([]*routeHandlerEntry, 0)
+
+	for _, route := range inRoutes {
+		routeHandlerPtr := reflect.ValueOf(route.handler).Pointer()
+		if route.matcher.urlOrPredicate != url.(interface{}) ||
+			(handler != nil && routeHandlerPtr != handlerPtr) {
+			routes = append(routes, route)
+		}
+	}
+
+	if len(routes) == 0 {
+		_, err := channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
+			"enabled": false,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+	return routes, nil
 }

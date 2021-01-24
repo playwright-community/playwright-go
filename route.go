@@ -16,23 +16,9 @@ func (r *routeImpl) Request() Request {
 	return fromChannel(r.initializer["request"]).(*requestImpl)
 }
 
-// RouteAbortOptions is the option struct for Route.Abort()
-type RouteAbortOptions struct {
-	ErrorCode *string `json:"errorCode"`
-}
-
 func (r *routeImpl) Abort(options ...RouteAbortOptions) error {
 	_, err := r.channel.Send("abort", options)
 	return err
-}
-
-// RouteFulfillOptions is the option struct for Route.Fulfill()
-type RouteFulfillOptions struct {
-	Status      *int              `json:"status"`
-	Headers     map[string]string `json:"headers"`
-	Body        interface{}       `json:"body"`
-	Path        *string           `json:"path"`
-	ContentType *string           `json:"contentType"`
 }
 
 func (r *routeImpl) Fulfill(options RouteFulfillOptions) error {
@@ -84,8 +70,8 @@ func (r *routeImpl) Continue(options ...RouteContinueOptions) error {
 	overrides := make(map[string]interface{})
 	if len(options) == 1 {
 		option := options[0]
-		if option.Url != nil {
-			overrides["url"] = option.Url
+		if option.URL != nil {
+			overrides["url"] = option.URL
 		}
 		if option.Method != nil {
 			overrides["method"] = option.Method

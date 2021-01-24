@@ -91,11 +91,11 @@
 			"[]Page"
 		],
 		"SetDefaultNavigationTimeout": [
-			"timeout int",
+			"timeout float64",
 			null
 		],
 		"SetDefaultTimeout": [
-			"timeout int",
+			"timeout float64",
 			null
 		],
 		"SetExtraHTTPHeaders": [
@@ -119,7 +119,7 @@
 			"error"
 		],
 		"Unroute": [
-			"url interface{}, handler routeHandler",
+			"url interface{}, handler ...routeHandler",
 			"error"
 		],
 		"WaitForEvent": [
@@ -279,6 +279,30 @@
 			null,
 			"(string, error)"
 		],
+		"IsChecked": [
+			null,
+			"bool, error"
+		],
+		"IsDisabled": [
+			null,
+			"bool, error"
+		],
+		"IsEditable": [
+			null,
+			"bool, error"
+		],
+		"IsEnabled": [
+			null,
+			"bool, error"
+		],
+		"IsHidden": [
+			null,
+			"bool, error"
+		],
+		"IsVisible": [
+			null,
+			"bool, error"
+		],
 		"OwnerFrame": [
 			null,
 			"(Frame, error)"
@@ -322,10 +346,6 @@
 		"TextContent": [
 			null,
 			"(string, error)"
-		],
-		"ToString": [
-			null,
-			"string"
 		],
 		"Type": [
 			"value string, options ...ElementHandleTypeOptions",
@@ -469,6 +489,30 @@
 			null,
 			"bool"
 		],
+		"IsChecked": [
+			"selector string, options ...FrameIsCheckedOptions",
+			"bool, error"
+		],
+		"IsDisabled": [
+			"selector string, options ...FrameIsDisabledOptions",
+			"bool, error"
+		],
+		"IsEditable": [
+			"selector string, options ...FrameIsEditableOptions",
+			"bool, error"
+		],
+		"IsEnabled": [
+			"selector string, options ...FrameIsEnabledOptions",
+			"bool, error"
+		],
+		"IsHidden": [
+			"selector string, options ...FrameIsHiddenOptions",
+			"bool, error"
+		],
+		"IsVisible": [
+			"selector string, options ...FrameIsVisibleOptions",
+			"bool, error"
+		],
 		"Name": [
 			null,
 			"string"
@@ -550,7 +594,7 @@
 			"(ElementHandle, error)"
 		],
 		"WaitForTimeout": [
-			"timeout int",
+			"timeout float64",
 			null
 		]
 	},
@@ -812,6 +856,30 @@
 			null,
 			"bool"
 		],
+		"IsChecked": [
+			"selector string, options ...FrameIsCheckedOptions",
+			"bool, error"
+		],
+		"IsDisabled": [
+			"selector string, options ...FrameIsDisabledOptions",
+			"bool, error"
+		],
+		"IsEditable": [
+			"selector string, options ...FrameIsEditableOptions",
+			"bool, error"
+		],
+		"IsEnabled": [
+			"selector string, options ...FrameIsEnabledOptions",
+			"bool, error"
+		],
+		"IsHidden": [
+			"selector string, options ...FrameIsHiddenOptions",
+			"bool, error"
+		],
+		"IsVisible": [
+			"selector string, options ...FrameIsVisibleOptions",
+			"bool, error"
+		],
 		"MainFrame": [
 			null,
 			"Frame"
@@ -857,11 +925,11 @@
 			"error"
 		],
 		"SetDefaultNavigationTimeout": [
-			"timeout int",
+			"timeout float64",
 			null
 		],
 		"SetDefaultTimeout": [
-			"timeout int",
+			"timeout float64",
 			null
 		],
 		"SetExtraHTTPHeaders": [
@@ -898,6 +966,10 @@
 		],
 		"Uncheck": [
 			"selector string, options ...FrameUncheckOptions",
+			"error"
+		],
+		"Unroute": [
+			"url interface{}, handler ...routeHandler",
 			"error"
 		],
 		"Video": [
@@ -937,7 +1009,7 @@
 			"(ElementHandle, error)"
 		],
 		"WaitForTimeout": [
-			"timeout int",
+			"timeout float64",
 			null
 		],
 		"Workers": [

@@ -93,14 +93,14 @@ func (p *pageImpl) Frames() []Frame {
 	return p.frames
 }
 
-func (p *pageImpl) SetDefaultNavigationTimeout(timeout int) {
+func (p *pageImpl) SetDefaultNavigationTimeout(timeout float64) {
 	p.timeoutSettings.SetNavigationTimeout(timeout)
 	p.channel.SendNoReply("setDefaultNavigationTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
 	})
 }
 
-func (p *pageImpl) SetDefaultTimeout(timeout int) {
+func (p *pageImpl) SetDefaultTimeout(timeout float64) {
 	p.timeoutSettings.SetTimeout(timeout)
 	p.channel.SendNoReply("setDefaultTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
@@ -156,6 +156,19 @@ func (p *pageImpl) SetExtraHTTPHeaders(headers map[string]string) error {
 
 func (p *pageImpl) URL() string {
 	return p.mainFrame.URL()
+}
+
+func (p *pageImpl) Unroute(url interface{}, handlers ...routeHandler) error {
+	p.Lock()
+	defer p.Unlock()
+
+	routes, err := unroute(p.channel, p.routes, url, handlers...)
+	if err != nil {
+		return err
+	}
+	p.routes = routes
+
+	return nil
 }
 
 func (p *pageImpl) Content() (string, error) {
@@ -633,14 +646,13 @@ func (p *pageImpl) onFrameDetached(frame *frameImpl) {
 
 func (p *pageImpl) onRoute(route *routeImpl, request *requestImpl) {
 	go func() {
-		p.Lock()
 		for _, handlerEntry := range p.routes {
 			if handlerEntry.matcher.Matches(request.URL()) {
 				handlerEntry.handler(route, request)
-				break
+				return
 			}
 		}
-		p.Unlock()
+		p.browserContext.onRoute(route, request)
 	}()
 }
 
@@ -676,7 +688,7 @@ func (p *pageImpl) Uncheck(selector string, options ...FrameUncheckOptions) erro
 	return p.mainFrame.Uncheck(selector, options...)
 }
 
-func (p *pageImpl) WaitForTimeout(timeout int) {
+func (p *pageImpl) WaitForTimeout(timeout float64) {
 	p.mainFrame.WaitForTimeout(timeout)
 }
 
@@ -740,4 +752,28 @@ func (p *pageImpl) ExposeBinding(name string, binding BindingCallFunction, handl
 
 func (p *pageImpl) SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error) {
 	return p.mainFrame.SelectOption(selector, values, options...)
+}
+
+func (p *pageImpl) IsChecked(selector string, options ...FrameIsCheckedOptions) (bool, error) {
+	return p.mainFrame.IsChecked(selector, options...)
+}
+
+func (p *pageImpl) IsDisabled(selector string, options ...FrameIsDisabledOptions) (bool, error) {
+	return p.mainFrame.IsDisabled(selector, options...)
+}
+
+func (p *pageImpl) IsEditable(selector string, options ...FrameIsEditableOptions) (bool, error) {
+	return p.mainFrame.IsEditable(selector, options...)
+}
+
+func (p *pageImpl) IsEnabled(selector string, options ...FrameIsEnabledOptions) (bool, error) {
+	return p.mainFrame.IsEnabled(selector, options...)
+}
+
+func (p *pageImpl) IsHidden(selector string, options ...FrameIsHiddenOptions) (bool, error) {
+	return p.mainFrame.IsHidden(selector, options...)
+}
+
+func (p *pageImpl) IsVisible(selector string, options ...FrameIsVisibleOptions) (bool, error) {
+	return p.mainFrame.IsVisible(selector, options...)
 }

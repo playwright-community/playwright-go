@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-const playwrightCliVersion = "0.171.0"
+const playwrightCliVersion = "1.8.0"
 
 type playwrightDriver struct {
 	driverDirectory, driverBinaryLocation, version string
@@ -111,6 +111,13 @@ func (d *playwrightDriver) install() error {
 
 	for _, zipFile := range zipReader.File {
 		zipFileDiskPath := filepath.Join(d.driverDirectory, zipFile.Name)
+		if zipFile.FileInfo().IsDir() {
+			if err := os.MkdirAll(zipFileDiskPath, os.ModePerm); err != nil {
+				return fmt.Errorf("could not create directory: %w", err)
+			}
+			continue
+		}
+
 		outFile, err := os.Create(zipFileDiskPath)
 		if err != nil {
 			return fmt.Errorf("could not create driver: %w", err)
@@ -128,18 +135,13 @@ func (d *playwrightDriver) install() error {
 		if err := file.Close(); err != nil {
 			return fmt.Errorf("could not close file (zip file): %w", err)
 		}
-		if strings.HasPrefix(zipFile.Name, "ffmpeg") {
+		if zipFile.Mode().Perm()&0100 != 0 && runtime.GOOS != "windows" {
 			if err := makeFileExecutable(zipFileDiskPath); err != nil {
 				return fmt.Errorf("could not make executable: %w", err)
 			}
 		}
 	}
 
-	if runtime.GOOS != "windows" {
-		if err := makeFileExecutable(d.driverBinaryLocation); err != nil {
-			return fmt.Errorf("could not make executable: %w", err)
-		}
-	}
 	log.Println("Downloaded driver successfully")
 
 	log.Println("Downloading browsers...")
@@ -236,11 +238,11 @@ func transformRunOptions(options []*RunOptions) *RunOptions {
 func getDriverName() string {
 	switch runtime.GOOS {
 	case "windows":
-		return "playwright-cli.exe"
+		return "playwright.cmd"
 	case "darwin":
-		return "playwright-cli"
+		return "playwright.sh"
 	case "linux":
-		return "playwright-cli"
+		return "playwright.sh"
 	}
 	panic("Not supported OS!")
 }
@@ -259,7 +261,7 @@ func (d *playwrightDriver) getDriverURL() string {
 	if strings.Contains(d.version, "next") {
 		optionalSubDirectory = "/next"
 	}
-	return fmt.Sprintf("https://playwright.azureedge.net/builds/cli%s/playwright-cli-%s-%s.zip", optionalSubDirectory, d.version, platform)
+	return fmt.Sprintf("https://playwright.azureedge.net/builds/driver%s/playwright-%s-%s.zip", optionalSubDirectory, d.version, platform)
 }
 
 func (d *playwrightDriver) getDriverEnviron() []string {

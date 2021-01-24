@@ -7,7 +7,7 @@ package playwright
 type DeviceDescriptor struct {
 	UserAgent          string                     `json:"userAgent"`
 	Viewport           *BrowserNewContextViewport `json:"viewport"`
-	DeviceScaleFactor  int                        `json:"deviceScaleFactor"`
+	DeviceScaleFactor  float64                    `json:"deviceScaleFactor"`
 	IsMobile           bool                       `json:"isMobile"`
 	HasTouch           bool                       `json:"hasTouch"`
 	DefaultBrowserType string                     `json:"defaultBrowserType"`
