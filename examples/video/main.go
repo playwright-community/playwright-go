@@ -34,6 +34,9 @@ func main() {
 	gotoPage("http://whatsmyuseragent.org")
 	gotoPage("https://github.com")
 	gotoPage("https://microsoft.com")
+	if err := page.Close(); err != nil {
+		log.Fatalf("failed to close page: %v", err)
+	}
 	fmt.Printf("Saved to %s\n", page.Video().Path())
 	if err = browser.Close(); err != nil {
 		log.Fatalf("could not close browser: %v", err)
