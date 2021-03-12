@@ -20,7 +20,7 @@ func main() {
 		log.Fatalf("could not create page: %v", err)
 	}
 	if _, err = page.Goto("http://whatsmyuseragent.org/", playwright.PageGotoOptions{
-		WaitUntil: playwright.String("networkidle"),
+		WaitUntil: playwright.WaitUntilStateNetworkidle,
 	}); err != nil {
 		log.Fatalf("could not goto: %v", err)
 	}

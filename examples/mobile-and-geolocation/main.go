@@ -19,7 +19,7 @@ func main() {
 	device := pw.Devices["iPhone 11 Pro"]
 	context, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		Locale: playwright.String("en-US"),
-		Geolocation: &playwright.BrowserNewContextGeolocation{
+		Geolocation: &playwright.BrowserNewContextOptionsGeolocation{
 			Longitude: playwright.Float(12.492507),
 			Latitude:  playwright.Float(41.889938),
 		},

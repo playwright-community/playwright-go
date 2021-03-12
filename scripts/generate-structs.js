@@ -93,7 +93,7 @@ for (const classData of api) {
       for (const property of optionalParameters) {
         if (property.name.startsWith("option") && property.type.properties) {
           for (const newProp of property.type.properties) {
-            if (newProp?.langs?.only?.includes("python"))
+            if (!newProp?.langs?.only?.includes("js"))
               continue
             structProperties.push(generateStruct(newProp, structName, makePascalCase(newProp.name)) + `\`json:"${newProp.name}"\``)
           }

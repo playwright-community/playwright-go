@@ -499,8 +499,9 @@ func TestElementHandleWaitForSelector(t *testing.T) {
 	div, err := page.QuerySelector("div")
 	require.NoError(t, err)
 
-	state := "attached"
-	handle, err := div.WaitForSelector("#result", playwright.ElementHandleWaitForSelectorOptions{State: &state})
+	handle, err := div.WaitForSelector("#result", playwright.ElementHandleWaitForSelectorOptions{
+		State: playwright.WaitForSelectorStateAttached,
+	})
 	require.NoError(t, err)
 	text, err := handle.InnerText()
 	require.NoError(t, err)

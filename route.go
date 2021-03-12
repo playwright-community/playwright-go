@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -16,8 +17,21 @@ func (r *routeImpl) Request() Request {
 	return fromChannel(r.initializer["request"]).(*requestImpl)
 }
 
-func (r *routeImpl) Abort(options ...RouteAbortOptions) error {
-	_, err := r.channel.Send("abort", options)
+func unpackOptionalArgument(input interface{}) interface{} {
+	inputValue := reflect.ValueOf(input)
+	if inputValue.Kind() != reflect.Slice {
+		panic("Needs to be a slice")
+	}
+	if inputValue.Len() == 0 {
+		return Null()
+	}
+	return inputValue.Index(0).Interface()
+}
+
+func (r *routeImpl) Abort(errorCode ...string) error {
+	_, err := r.channel.Send("abort", map[string]interface{}{
+		"errorCode": unpackOptionalArgument(errorCode),
+	})
 	return err
 }
 

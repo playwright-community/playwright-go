@@ -18,7 +18,9 @@ func (b *browserImpl) IsConnected() bool {
 }
 
 func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserContext, error) {
-	channel, err := b.channel.Send("newContext", options)
+	channel, err := b.channel.Send("newContext", options, map[string]interface{}{
+		"sdkLanguage": "javascript",
+	})
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}

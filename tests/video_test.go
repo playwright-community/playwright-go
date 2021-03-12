@@ -13,7 +13,7 @@ import (
 func TestVideoShouldWork(t *testing.T) {
 	recordVideoDir := t.TempDir()
 	newContextWithOptions(t, playwright.BrowserNewContextOptions{
-		RecordVideo: &playwright.BrowserNewContextRecordVideo{
+		RecordVideo: &playwright.BrowserNewContextOptionsRecordVideo{
 			Dir: playwright.String(recordVideoDir),
 		},
 	})

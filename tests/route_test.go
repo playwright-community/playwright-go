@@ -217,9 +217,7 @@ func TestRouteAbort(t *testing.T) {
 		failedRequests <- request
 	})
 	err := page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
-		require.NoError(t, route.Abort(playwright.RouteAbortOptions{
-			ErrorCode: playwright.String("aborted"),
-		}))
+		require.NoError(t, route.Abort("aborted"))
 	})
 	require.NoError(t, err)
 	_, err = page.Goto(server.EMPTY_PAGE)

@@ -28,7 +28,7 @@ const getCliLocation = () => {
 
 const getAPIDocs = () => {
   return JSON.parse(child_process.execSync(`${getCliLocation()} print-api-json`, {
-    env: { ...process.env, NODE_OPTIONS: undefined }
+    maxBuffer: 1024 * 1024 * 10,
   }).toString())
 }
 

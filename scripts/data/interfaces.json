@@ -43,7 +43,7 @@
 			"error"
 		],
 		"AddInitScript": [
-			"options BrowserContextAddInitScriptOptions",
+			"script BrowserContextAddInitScriptOptions",
 			"error"
 		],
 		"Browser": [
@@ -438,7 +438,7 @@
 			"error"
 		],
 		"DispatchEvent": [
-			"selector, typ string, options ...PageDispatchEventOptions",
+			"selector, typ string, eventInit interface{}, options ...PageDispatchEventOptions",
 			"error"
 		],
 		"Evaluate": [
@@ -582,7 +582,7 @@
 			"interface{}"
 		],
 		"WaitForFunction": [
-			"expression string, options ...FrameWaitForFunctionOptions",
+			"expression string, arg interface{}, options ...FrameWaitForFunctionOptions",
 			"(JSHandle, error)"
 		],
 		"WaitForLoadState": [
@@ -697,7 +697,7 @@
 			"Touchscreen"
 		],
 		"AddInitScript": [
-			"options BrowserContextAddInitScriptOptions",
+			"script PageAddInitScriptOptions",
 			"error"
 		],
 		"AddScriptTag": [
@@ -893,7 +893,7 @@
 			"Page, error"
 		],
 		"PDF": [
-			"options ...PagePDFOptions",
+			"options ...PagePdfOptions",
 			"[]byte, error"
 		],
 		"Press": [
@@ -989,7 +989,7 @@
 			"interface{}"
 		],
 		"WaitForFunction": [
-			"expression string, options ...FrameWaitForFunctionOptions",
+			"expression string, arg interface{}, options ...FrameWaitForFunctionOptions",
 			"(JSHandle, error)"
 		],
 		"WaitForLoadState": [
@@ -1127,7 +1127,7 @@
 	},
 	"Route": {
 		"Abort": [
-			"options ...RouteAbortOptions",
+			"errorCode ...string",
 			"error"
 		],
 		"Continue": [

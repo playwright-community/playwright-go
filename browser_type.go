@@ -28,8 +28,8 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 	overrides := map[string]interface{}{
 		"userDataDir": userDataDir,
 	}
-	if len(options) == 1 && options[0].ExtraHTTPHeaders != nil {
-		overrides["extraHTTPHeaders"] = serializeHeaders(options[0].ExtraHTTPHeaders)
+	if len(options) == 1 && options[0].ExtraHttpHeaders != nil {
+		overrides["extraHTTPHeaders"] = serializeHeaders(options[0].ExtraHttpHeaders)
 	}
 	channel, err := b.channel.Send("launchPersistentContext", options, overrides)
 	if err != nil {
