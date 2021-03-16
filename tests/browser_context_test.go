@@ -178,9 +178,6 @@ func TestBrowserContextWindowOpenshouldUseParentTabContext(t *testing.T) {
 func TestBrowserContextUnrouteShouldWork(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	newPage, err := context.NewPage()
-	require.NoError(t, err)
-	page = newPage
 
 	intercepted := []int{}
 	handler1 := func(route playwright.Route, request playwright.Request) {
@@ -201,7 +198,7 @@ func TestBrowserContextUnrouteShouldWork(t *testing.T) {
 		require.NoError(t, route.Continue())
 	}))
 
-	_, err = page.Goto(server.EMPTY_PAGE)
+	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.Equal(t, []int{1}, intercepted)
 
