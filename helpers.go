@@ -41,7 +41,7 @@ func transformStructValues(in interface{}) interface{} {
 		}
 		return outSlice
 	}
-	if v.Interface() == Null() {
+	if v.Interface() == Null() || (v.Kind() == reflect.String && v.String() == Null().(string)) {
 		return "null"
 	}
 	return in

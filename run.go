@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-const playwrightCliVersion = "1.8.0"
+const playwrightCliVersion = "1.10.0-next-1615230258000"
 
 type playwrightDriver struct {
 	driverDirectory, driverBinaryLocation, version string
@@ -59,7 +59,7 @@ func getDefaultCacheDirectory() (string, error) {
 	return "", errors.New("could not determine cache directory")
 }
 
-func (d *playwrightDriver) isUpToDate() (bool, error) {
+func (d *playwrightDriver) isUpToDateDriver() (bool, error) {
 	if _, err := os.Stat(d.driverDirectory); os.IsNotExist(err) {
 		if err := os.MkdirAll(d.driverDirectory, 0777); err != nil {
 			return false, fmt.Errorf("could not create driver directory: %w", err)
@@ -81,7 +81,19 @@ func (d *playwrightDriver) isUpToDate() (bool, error) {
 }
 
 func (d *playwrightDriver) install() error {
-	up2Date, err := d.isUpToDate()
+	if err := d.installDriver(); err != nil {
+		return fmt.Errorf("could not install driver: %w", err)
+	}
+
+	log.Println("Downloading browsers...")
+	if err := d.installBrowsers(d.driverBinaryLocation); err != nil {
+		return fmt.Errorf("could not install browsers: %w", err)
+	}
+	log.Println("Downloaded browsers successfully")
+	return nil
+}
+func (d *playwrightDriver) installDriver() error {
+	up2Date, err := d.isUpToDateDriver()
 	if err != nil {
 		return fmt.Errorf("could not check if driver is up2date: %w", err)
 	}
@@ -143,12 +155,6 @@ func (d *playwrightDriver) install() error {
 	}
 
 	log.Println("Downloaded driver successfully")
-
-	log.Println("Downloading browsers...")
-	if err := d.installBrowsers(d.driverBinaryLocation); err != nil {
-		return fmt.Errorf("could not install browsers: %w", err)
-	}
-	log.Println("Downloaded browsers successfully")
 	return nil
 }
 

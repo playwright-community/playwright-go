@@ -5,12 +5,12 @@ package playwright
 
 // DeviceDescriptor represents a single device
 type DeviceDescriptor struct {
-	UserAgent          string                     `json:"userAgent"`
-	Viewport           *BrowserNewContextViewport `json:"viewport"`
-	DeviceScaleFactor  float64                    `json:"deviceScaleFactor"`
-	IsMobile           bool                       `json:"isMobile"`
-	HasTouch           bool                       `json:"hasTouch"`
-	DefaultBrowserType string                     `json:"defaultBrowserType"`
+	UserAgent          string                            `json:"userAgent"`
+	Viewport           *BrowserNewContextOptionsViewport `json:"viewport"`
+	DeviceScaleFactor  float64                           `json:"deviceScaleFactor"`
+	IsMobile           bool                              `json:"isMobile"`
+	HasTouch           bool                              `json:"hasTouch"`
+	DefaultBrowserType string                            `json:"defaultBrowserType"`
 }
 
 // Playwright represents a Playwright instance
@@ -37,7 +37,7 @@ func newPlaywright(parent *channelOwner, objectType string, guid string, initial
 	for _, dd := range initializer["deviceDescriptors"].([]interface{}) {
 		entry := dd.(map[string]interface{})
 		pw.Devices[entry["name"].(string)] = &DeviceDescriptor{
-			Viewport: &BrowserNewContextViewport{},
+			Viewport: &BrowserNewContextOptionsViewport{},
 		}
 		remapMapToStruct(entry["descriptor"], pw.Devices[entry["name"].(string)])
 	}

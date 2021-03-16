@@ -120,7 +120,7 @@ func (p *pageImpl) WaitForSelector(selector string, options ...PageWaitForSelect
 }
 
 func (p *pageImpl) DispatchEvent(selector string, typ string, options ...PageDispatchEventOptions) error {
-	return p.mainFrame.DispatchEvent(selector, typ, options...)
+	return p.mainFrame.DispatchEvent(selector, typ, nil, options...)
 }
 
 func (p *pageImpl) Evaluate(expression string, options ...interface{}) (interface{}, error) {
@@ -219,6 +219,8 @@ func (p *pageImpl) GoForward(options ...PageGoForwardOptions) (Response, error) 
 	return obj.(*responseImpl), nil
 }
 
+var MediaNull = getMedia(Null().(string))
+
 func (p *pageImpl) EmulateMedia(options ...PageEmulateMediaOptions) error {
 	_, err := p.channel.Send("emulateMedia", options)
 	if err != nil {
@@ -298,7 +300,7 @@ func (p *pageImpl) Screenshot(options ...PageScreenshotOptions) ([]byte, error) 
 	return image, nil
 }
 
-func (p *pageImpl) PDF(options ...PagePDFOptions) ([]byte, error) {
+func (p *pageImpl) PDF(options ...PagePdfOptions) ([]byte, error) {
 	var path *string
 	if len(options) > 0 {
 		path = options[0].Path
@@ -463,7 +465,7 @@ func (p *pageImpl) IsClosed() bool {
 	return p.isClosed
 }
 
-func (p *pageImpl) AddInitScript(options BrowserContextAddInitScriptOptions) error {
+func (p *pageImpl) AddInitScript(options PageAddInitScriptOptions) error {
 	var source string
 	if options.Script != nil {
 		source = *options.Script
@@ -692,8 +694,8 @@ func (p *pageImpl) WaitForTimeout(timeout float64) {
 	p.mainFrame.WaitForTimeout(timeout)
 }
 
-func (p *pageImpl) WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (JSHandle, error) {
-	return p.mainFrame.WaitForFunction(expression, options...)
+func (p *pageImpl) WaitForFunction(expression string, arg interface{}, options ...FrameWaitForFunctionOptions) (JSHandle, error) {
+	return p.mainFrame.WaitForFunction(expression, arg, options...)
 }
 
 func (p *pageImpl) Dblclick(expression string, options ...FrameDblclickOptions) error {

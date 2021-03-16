@@ -27,11 +27,12 @@ func (b *browserTypeImpl) Launch(options ...BrowserTypeLaunchOptions) (Browser, 
 func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (BrowserContext, error) {
 	overrides := map[string]interface{}{
 		"userDataDir": userDataDir,
+		"sdkLanguage": "javascript",
 	}
-	if len(options) == 1 && options[0].ExtraHTTPHeaders != nil {
-		overrides["extraHTTPHeaders"] = serializeHeaders(options[0].ExtraHTTPHeaders)
+	if len(options) == 1 && options[0].ExtraHttpHeaders != nil {
+		overrides["extraHTTPHeaders"] = serializeHeaders(options[0].ExtraHttpHeaders)
 	}
-	channel, err := b.channel.Send("launchPersistentContext", options, overrides)
+	channel, err := b.channel.Send("launchPersistentContext", overrides, options)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}

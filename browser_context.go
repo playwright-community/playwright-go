@@ -200,8 +200,6 @@ func (b *browserContextImpl) ExposeFunction(name string, binding ExposedFunction
 }
 
 func (b *browserContextImpl) Route(url interface{}, handler routeHandler) error {
-	b.Lock()
-	defer b.Unlock()
 	b.routes = append(b.routes, newRouteHandlerEntry(newURLMatcher(url), handler))
 	if len(b.routes) == 1 {
 		_, err := b.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{

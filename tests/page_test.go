@@ -34,7 +34,7 @@ func TestPageSetContent(t *testing.T) {
 	defer AfterEach(t)
 	require.NoError(t, page.SetContent("<h1>foo</h1>",
 		playwright.PageSetContentOptions{
-			WaitUntil: playwright.String("networkidle"),
+			WaitUntil: playwright.WaitUntilStateNetworkidle,
 		}))
 	content, err := page.Content()
 	require.NoError(t, err)
@@ -80,7 +80,7 @@ func TestPagePDF(t *testing.T) {
 	require.Equal(t, "application/pdf", http.DetectContentType(screenshot))
 	require.Greater(t, len(screenshot), 50)
 
-	screenshot, err = page.PDF(playwright.PagePDFOptions{
+	screenshot, err = page.PDF(playwright.PagePdfOptions{
 		Path: playwright.String(screenshotPath),
 	})
 	require.NoError(t, err)
@@ -482,7 +482,7 @@ func TestPlaywrightDevices(t *testing.T) {
 func TestPageAddInitScript(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	require.NoError(t, page.AddInitScript(playwright.BrowserContextAddInitScriptOptions{
+	require.NoError(t, page.AddInitScript(playwright.PageAddInitScriptOptions{
 		Script: playwright.String(`window['injected'] = 123;`),
 	}))
 	_, err := page.Goto(server.PREFIX + "/tamperable.html")
@@ -571,7 +571,7 @@ func TestPageWaitForFunction(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Evaluate(`() => setTimeout(() => window.FOO = true, 500)`)
 	require.NoError(t, err)
-	_, err = page.WaitForFunction(`window.FOO === true`)
+	_, err = page.WaitForFunction(`window.FOO === true`, nil)
 	require.NoError(t, err)
 }
 
@@ -612,7 +612,7 @@ func TestPageTextContent(t *testing.T) {
 func TestPageAddInitScriptWithPath(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	require.NoError(t, page.AddInitScript(playwright.BrowserContextAddInitScriptOptions{
+	require.NoError(t, page.AddInitScript(playwright.PageAddInitScriptOptions{
 		Path: playwright.String(Asset("injectedfile.js")),
 	}))
 	_, err := page.Goto(server.PREFIX + "/tamperable.html")
@@ -672,7 +672,7 @@ func TestPageEmulateMedia(t *testing.T) {
 	utils.AssertEval(t, page, "matchMedia('screen').matches", true)
 	utils.AssertEval(t, page, "matchMedia('print').matches", false)
 	require.NoError(t, page.EmulateMedia(playwright.PageEmulateMediaOptions{
-		Media: "print",
+		Media: playwright.MediaPrint,
 	}))
 	utils.AssertEval(t, page, "matchMedia('screen').matches", false)
 	utils.AssertEval(t, page, "matchMedia('print').matches", true)
@@ -680,7 +680,7 @@ func TestPageEmulateMedia(t *testing.T) {
 	utils.AssertEval(t, page, "matchMedia('screen').matches", false)
 	utils.AssertEval(t, page, "matchMedia('print').matches", true)
 	require.NoError(t, page.EmulateMedia(playwright.PageEmulateMediaOptions{
-		Media: playwright.Null(),
+		Media: playwright.MediaNull,
 	}))
 	utils.AssertEval(t, page, "matchMedia('screen').matches", true)
 	utils.AssertEval(t, page, "matchMedia('print').matches", false)

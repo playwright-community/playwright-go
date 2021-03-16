@@ -23,7 +23,7 @@ func main() {
 	assertErrorToNilf("could not create page: %w", err)
 	_, err = page.Goto("https://github.com/microsoft/playwright")
 	assertErrorToNilf("could not goto: %w", err)
-	_, err = page.PDF(playwright.PagePDFOptions{
+	_, err = page.PDF(playwright.PagePdfOptions{
 		Path: playwright.String("playwright-example.pdf"),
 	})
 	assertErrorToNilf("could not create PDF: %w", err)

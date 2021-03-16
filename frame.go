@@ -147,7 +147,7 @@ func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (
 		option = options[0]
 	}
 	if option.WaitUntil == nil {
-		option.WaitUntil = String("load")
+		option.WaitUntil = WaitUntilStateLoad
 	}
 	if option.Timeout == nil {
 		option.Timeout = Float(f.page.timeoutSettings.NavigationTimeout())
@@ -345,11 +345,7 @@ func (f *frameImpl) WaitForSelector(selector string, options ...PageWaitForSelec
 	return channelOwner.(*elementHandleImpl), nil
 }
 
-func (f *frameImpl) DispatchEvent(selector, typ string, options ...PageDispatchEventOptions) error {
-	var eventInit interface{}
-	if len(options) == 1 {
-		eventInit = options[0].EventInit
-	}
+func (f *frameImpl) DispatchEvent(selector, typ string, eventInit interface{}, options ...PageDispatchEventOptions) error {
 	_, err := f.channel.Send("dispatchEvent", map[string]interface{}{
 		"selector":  selector,
 		"type":      typ,
@@ -438,7 +434,7 @@ func (f *frameImpl) WaitForTimeout(timeout float64) {
 	time.Sleep(time.Duration(timeout) * time.Millisecond)
 }
 
-func (f *frameImpl) WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (JSHandle, error) {
+func (f *frameImpl) WaitForFunction(expression string, arg interface{}, options ...FrameWaitForFunctionOptions) (JSHandle, error) {
 	var option FrameWaitForFunctionOptions
 	if len(options) == 1 {
 		option = options[0]
@@ -450,7 +446,7 @@ func (f *frameImpl) WaitForFunction(expression string, options ...FrameWaitForFu
 	result, err := f.channel.Send("evaluateExpression", map[string]interface{}{
 		"expression": expression,
 		"isFunction": !forceExpression,
-		"arg":        serializeArgument(option.Arg),
+		"arg":        serializeArgument(arg),
 		"timeout":    option.Timeout,
 		"polling":    option.Polling,
 	})

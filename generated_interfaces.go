@@ -4,7 +4,7 @@ type BindingCall interface {
 	Call(f BindingCallFunction)
 }
 
-// A Browser is created via BrowserType.launch(). An example of using a `Browser` to create a [Page]:
+// A Browser is created via BrowserType.launch(). An example of using a `Browser` to create a `Page`:
 type Browser interface {
 	EventEmitter
 	// In case this browser is obtained using BrowserType.launch(), closes the browser and all of its pages (if any
@@ -47,7 +47,7 @@ type BrowserContext interface {
 	// An example of overriding `Math.random` before the page loads:
 	// > NOTE: The order of evaluation of multiple scripts installed via BrowserContext.addInitScript() and
 	// Page.addInitScript() is not defined.
-	AddInitScript(options BrowserContextAddInitScriptOptions) error
+	AddInitScript(script BrowserContextAddInitScriptOptions) error
 	// Returns the browser instance of the context. If it was launched as a persistent context null gets returned.
 	Browser() Browser
 	// Clears context cookies.
@@ -81,8 +81,7 @@ type BrowserContext interface {
 	GrantPermissions(permissions []string, options ...BrowserContextGrantPermissionsOptions) error
 	// Creates a new page in the browser context.
 	NewPage(options ...BrowserNewPageOptions) (Page, error)
-	// Returns all open pages in the context. Non visible pages, such as `"background_page"`, will not be listed here. You can
-	// find them using ChromiumBrowserContext.backgroundPages().
+	// Returns all open pages in the context.
 	Pages() []Page
 	// This setting will change the default maximum navigation time for the following methods and related shortcuts:
 	// - Page.goBack()
@@ -134,19 +133,19 @@ type BrowserType interface {
 	ExecutablePath() string
 	// Returns the browser instance.
 	// You can use `ignoreDefaultArgs` to filter out `--mute-audio` from default arguments:
-	// > **Chromium-only** Playwright can also be used to control the Chrome browser, but it works best with the version of
-	// Chromium it is bundled with. There is no guarantee it will work with any other version. Use `executablePath` option with
-	// extreme caution.
+	// > **Chromium-only** Playwright can also be used to control the Google Chrome or Microsoft Edge browsers, but it works
+	// best with the version of Chromium it is bundled with. There is no guarantee it will work with any other version. Use
+	// `executablePath` option with extreme caution.
 	// >
 	// > If Google Chrome (rather than Chromium) is preferred, a
 	// [Chrome Canary](https://www.google.com/chrome/browser/canary.html) or
 	// [Dev Channel](https://www.chromium.org/getting-involved/dev-channel) build is suggested.
 	// >
-	// > In BrowserType.launch() above, any mention of Chromium also applies to Chrome.
-	// >
-	// > See [`this article`](https://www.howtogeek.com/202825/what%E2%80%99s-the-difference-between-chromium-and-chrome/) for
-	// a description of the differences between Chromium and Chrome.
-	// [`This article`](https://chromium.googlesource.com/chromium/src/+/lkgr/docs/chromium_browser_vs_google_chrome.md)
+	// > Stock browsers like Google Chrome and Microsoft Edge are suitable for tests that require proprietary media codecs for
+	// video playback. See
+	// [this article](https://www.howtogeek.com/202825/what%E2%80%99s-the-difference-between-chromium-and-chrome/) for other
+	// differences between Chromium and Chrome.
+	// [This article](https://chromium.googlesource.com/chromium/src/+/lkgr/docs/chromium_browser_vs_google_chrome.md)
 	// describes some differences for Linux users.
 	Launch(options ...BrowserTypeLaunchOptions) (Browser, error)
 	// Returns the persistent browser context instance.
@@ -171,6 +170,10 @@ type ConsoleMessage interface {
 
 // `Dialog` objects are dispatched by page via the [`event: Page.dialog`] event.
 // An example of using `Dialog` class:
+// > NOTE: Dialogs are dismissed automatically, unless there is a [`event: Page.dialog`] listener. When listener is
+// present, it **must** either Dialog.accept`] or [`method: Dialog.dismiss() the dialog - otherwise the page will
+// [freeze](https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop#never_blocking) waiting for the dialog, and
+// actions like click will never finish.
 type Dialog interface {
 	// Returns when the dialog has been accepted.
 	Accept(texts ...string) error
@@ -210,10 +213,12 @@ type Download interface {
 	URL() string
 }
 
-// ElementHandle represents an in-page DOM element. ElementHandles can be created with the Page.$() method.
+// ElementHandle represents an in-page DOM element. ElementHandles can be created with the Page.querySelector()
+// method.
 // ElementHandle prevents DOM element from garbage collection unless the handle is disposed with
 // JSHandle.dispose(). ElementHandles are auto-disposed when their origin frame gets navigated.
-// ElementHandle instances can be used as an argument in Page.$eval`] and [`method: Page.evaluate() methods.
+// ElementHandle instances can be used as an argument in Page.evalOnSelector`] and [`method: Page.evaluate()
+// methods.
 type ElementHandle interface {
 	JSHandle
 	// This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
@@ -275,18 +280,19 @@ type ElementHandle interface {
 	// - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
 	// You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 	DispatchEvent(typ string, initObjects ...interface{}) error
-	// Returns the return value of `pageFunction`
+	// Returns the return value of `expression`.
 	// The method finds an element matching the specified selector in the `ElementHandle`s subtree and passes it as a first
-	// argument to `pageFunction`. See [Working with selectors](./selectors.md#working-with-selectors) for more details. If no
-	// elements match the selector, the method throws an error.
-	// If `pageFunction` returns a [Promise], then `frame.$eval` would wait for the promise to resolve and return its value.
+	// argument to `expression`. See [Working with selectors](./selectors.md) for more details. If no elements match the
+	// selector, the method throws an error.
+	// If `expression` returns a [Promise], then ElementHandle.evalOnSelector() would wait for the promise to resolve
+	// and return its value.
 	// Examples:
 	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
-	// Returns the return value of `pageFunction`
+	// Returns the return value of `expression`.
 	// The method finds all elements matching the specified selector in the `ElementHandle`'s subtree and passes an array of
-	// matched elements as a first argument to `pageFunction`. See
-	// [Working with selectors](./selectors.md#working-with-selectors) for more details.
-	// If `pageFunction` returns a [Promise], then `frame.$$eval` would wait for the promise to resolve and return its value.
+	// matched elements as a first argument to `expression`. See [Working with selectors](./selectors.md) for more details.
+	// If `expression` returns a [Promise], then ElementHandle.evalOnSelectorAll() would wait for the promise to
+	// resolve and return its value.
 	// Examples:
 	// ```html
 	// <div class="feed">
@@ -296,8 +302,10 @@ type ElementHandle interface {
 	// ```
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
 	// This method waits for [actionability](./actionability.md) checks, focuses the element, fills it and triggers an `input`
-	// event after filling. If the element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws
-	// an error. Note that you can pass an empty string to clear the input field.
+	// event after filling. If the element is inside the `<label>` element that has associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), that control will be filled
+	// instead. If the element to be filled is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method
+	// throws an error. Note that you can pass an empty string to clear the input field.
 	Fill(value string, options ...ElementHandleFillOptions) error
 	// Calls [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the element.
 	Focus() error
@@ -344,12 +352,10 @@ type ElementHandle interface {
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	Press(options ...ElementHandlePressOptions) error
 	// The method finds an element matching the specified selector in the `ElementHandle`'s subtree. See
-	// [Working with selectors](./selectors.md#working-with-selectors) for more details. If no elements match the selector,
-	// returns `null`.
+	// [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns `null`.
 	QuerySelector(selector string) (ElementHandle, error)
 	// The method finds all elements matching the specified selector in the `ElementHandle`s subtree. See
-	// [Working with selectors](./selectors.md#working-with-selectors) for more details. If no elements match the selector,
-	// returns empty array.
+	// [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns empty array.
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
 	// Returns the buffer with the captured screenshot.
 	// This method waits for the [actionability](./actionability.md) checks, then scrolls element into view before taking a
@@ -433,7 +439,7 @@ type EventEmitter interface {
 	RemoveListener(name string, handler interface{})
 }
 
-// `FileChooser` objects are dispatched by the page in the [`event: Page.filechooser`] event.
+// `FileChooser` objects are dispatched by the page in the [`event: Page.fileChooser`] event.
 type FileChooser interface {
 	// Returns input element associated with this file chooser.
 	Element() ElementHandle
@@ -449,10 +455,10 @@ type FileChooser interface {
 // At every point of time, page exposes its current frame tree via the Page.mainFrame() and
 // Frame.childFrames() methods.
 // `Frame` object's lifecycle is controlled by three events, dispatched on the page object:
-// - [`event: Page.frameattached`] - fired when the frame gets attached to the page. A Frame can be attached to the page
+// - [`event: Page.frameAttached`] - fired when the frame gets attached to the page. A Frame can be attached to the page
 // only once.
-// - [`event: Page.framenavigated`] - fired when the frame commits navigation to a different URL.
-// - [`event: Page.framedetached`] - fired when the frame gets detached from the page.  A Frame can be detached from the
+// - [`event: Page.frameNavigated`] - fired when the frame commits navigation to a different URL.
+// - [`event: Page.frameDetached`] - fired when the frame gets detached from the page.  A Frame can be detached from the
 // page only once.
 // An example of dumping frame tree:
 type Frame interface {
@@ -515,42 +521,44 @@ type Frame interface {
 	// - [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)
 	// - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
 	// You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
-	DispatchEvent(selector, typ string, options ...PageDispatchEventOptions) error
-	// Returns the return value of `pageFunction`
+	DispatchEvent(selector, typ string, eventInit interface{}, options ...PageDispatchEventOptions) error
+	// Returns the return value of `expression`.
 	// If the function passed to the Frame.evaluate`] returns a [Promise], then [`method: Frame.evaluate() would wait
 	// for the promise to resolve and return its value.
-	// If the function passed to the Frame.evaluate() returns a non-[Serializable] value,
-	// then[ method: `Frame.evaluate`] returns `undefined`. DevTools Protocol also supports transferring some additional values
-	// that are not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
+	// If the function passed to the Frame.evaluate() returns a non-[Serializable] value, then
+	// Frame.evaluate() returns `undefined`. Playwright also supports transferring some additional values that are
+	// not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`.
 	// A string can also be passed in instead of a function.
 	// `ElementHandle` instances can be passed as an argument to the Frame.evaluate():
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
-	// Returns the return value of `pageFunction` as in-page object (JSHandle).
-	// The only difference between Frame.evaluate`] and [`method: Frame.evaluateHandle() is
-	// that[ method: Fframe.evaluateHandle`] returns in-page object (JSHandle).
-	// If the function, passed to the Frame.evaluateHandle(), returns a [Promise],
-	// then[ method: Fframe.evaluateHandle`] would wait for the promise to resolve and return its value.
+	// Returns the return value of `expression` as a `JSHandle`.
+	// The only difference between Frame.evaluate`] and [`method: Frame.evaluateHandle() is that
+	// Frame.evaluateHandle() returns `JSHandle`.
+	// If the function, passed to the Frame.evaluateHandle(), returns a [Promise], then
+	// Frame.evaluateHandle() would wait for the promise to resolve and return its value.
 	// A string can also be passed in instead of a function.
 	// `JSHandle` instances can be passed as an argument to the Frame.evaluateHandle():
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
-	// Returns the return value of `pageFunction`
+	// Returns the return value of `expression`.
 	// The method finds an element matching the specified selector within the frame and passes it as a first argument to
-	// `pageFunction`. See [Working with selectors](./selectors.md#working-with-selectors) for more details. If no elements
-	// match the selector, the method throws an error.
-	// If `pageFunction` returns a [Promise], then `frame.$eval` would wait for the promise to resolve and return its value.
+	// `expression`. See [Working with selectors](./selectors.md) for more details. If no elements match the selector, the
+	// method throws an error.
+	// If `expression` returns a [Promise], then Frame.evalOnSelector() would wait for the promise to resolve and
+	// return its value.
 	// Examples:
 	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
-	// Returns the return value of `pageFunction`
+	// Returns the return value of `expression`.
 	// The method finds all elements matching the specified selector within the frame and passes an array of matched elements
-	// as a first argument to `pageFunction`. See [Working with selectors](./selectors.md#working-with-selectors) for more
-	// details.
-	// If `pageFunction` returns a [Promise], then `frame.$$eval` would wait for the promise to resolve and return its value.
+	// as a first argument to `expression`. See [Working with selectors](./selectors.md) for more details.
+	// If `expression` returns a [Promise], then Frame.evalOnSelectorAll() would wait for the promise to resolve and
+	// return its value.
 	// Examples:
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
 	// This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, focuses the
-	// element, fills it and triggers an `input` event after filling. If the element matching `selector` is not an `<input>`,
-	// `<textarea>` or `[contenteditable]` element, this method throws an error. Note that you can pass an empty string to
-	// clear the input field.
+	// element, fills it and triggers an `input` event after filling. If the element is inside the `<label>` element that has
+	// associated [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), that control will be
+	// filled instead. If the element to be filled is not an `<input>`, `<textarea>` or `[contenteditable]` element, this
+	// method throws an error. Note that you can pass an empty string to clear the input field.
 	// To send fine-grained keyboard events, use Frame.type().
 	Fill(selector string, value string, options ...FrameFillOptions) error
 	// This method fetches an element with `selector` and focuses it. If there's no element matching `selector`, the method
@@ -603,9 +611,11 @@ type Frame interface {
 	IsEditable(selector string, options ...FrameIsEditableOptions) (bool, error)
 	// Returns whether the element is [enabled](./actionability.md#enabled).
 	IsEnabled(selector string, options ...FrameIsEnabledOptions) (bool, error)
-	// Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+	// Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).  `selector` that does not
+	// match any elements is considered hidden.
 	IsHidden(selector string, options ...FrameIsHiddenOptions) (bool, error)
-	// Returns whether the element is [visible](./actionability.md#visible).
+	// Returns whether the element is [visible](./actionability.md#visible). `selector` that does not match any elements is
+	// considered not visible.
 	IsVisible(selector string, options ...FrameIsVisibleOptions) (bool, error)
 	// Returns frame's name attribute as specified in the tag.
 	// If the name is empty, returns the id attribute instead.
@@ -629,13 +639,11 @@ type Frame interface {
 	Press(selector, key string, options ...PagePressOptions) error
 	// Returns the ElementHandle pointing to the frame element.
 	// The method finds an element matching the specified selector within the frame. See
-	// [Working with selectors](./selectors.md#working-with-selectors) for more details. If no elements match the selector,
-	// returns `null`.
+	// [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns `null`.
 	QuerySelector(selector string) (ElementHandle, error)
 	// Returns the ElementHandles pointing to the frame elements.
 	// The method finds all elements matching the specified selector within the frame. See
-	// [Working with selectors](./selectors.md#working-with-selectors) for more details. If no elements match the selector,
-	// returns empty array.
+	// [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns empty array.
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
 	SetContent(content string, options ...PageSetContentOptions) error
 	// Returns the array of option values that have been successfully selected.
@@ -683,10 +691,10 @@ type Frame interface {
 	// Passing zero timeout disables this.
 	Uncheck(selector string, options ...FrameUncheckOptions) error
 	WaitForEvent(event string, predicate ...interface{}) interface{}
-	// Returns when the `pageFunction` returns a truthy value, returns that value.
-	// The `waitForFunction` can be used to observe viewport size change:
+	// Returns when the `expression` returns a truthy value, returns that value.
+	// The Frame.waitForFunction() can be used to observe viewport size change:
 	// To pass an argument to the predicate of `frame.waitForFunction` function:
-	WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (JSHandle, error)
+	WaitForFunction(expression string, arg interface{}, options ...FrameWaitForFunctionOptions) (JSHandle, error)
 	// Waits for the required load state to be reached.
 	// This returns when the frame reaches a required load state, `load` by default. The navigation must have been committed
 	// when this method is called. If current document has already reached the required state, resolves immediately.
@@ -717,23 +725,22 @@ type Frame interface {
 // JSHandle prevents the referenced JavaScript object being garbage collected unless the handle is exposed with
 // JSHandle.dispose(). JSHandles are auto-disposed when their origin frame gets navigated or the parent context
 // gets destroyed.
-// JSHandle instances can be used as an argument in Page.$eval`], [`method: Page.evaluate() and
+// JSHandle instances can be used as an argument in Page.evalOnSelector`], [`method: Page.evaluate() and
 // Page.evaluateHandle() methods.
 type JSHandle interface {
 	// Returns either `null` or the object handle itself, if the object handle is an instance of `ElementHandle`.
 	AsElement() ElementHandle
 	// The `jsHandle.dispose` method stops referencing the element handle.
 	Dispose() error
-	// Returns the return value of `pageFunction`
-	// This method passes this handle as the first argument to `pageFunction`.
-	// If `pageFunction` returns a [Promise], then `handle.evaluate` would wait for the promise to resolve and return its
-	// value.
+	// Returns the return value of `expression`.
+	// This method passes this handle as the first argument to `expression`.
+	// If `expression` returns a [Promise], then `handle.evaluate` would wait for the promise to resolve and return its value.
 	// Examples:
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
-	// Returns the return value of `pageFunction` as in-page object (JSHandle).
-	// This method passes this handle as the first argument to `pageFunction`.
+	// Returns the return value of `expression` as a `JSHandle`.
+	// This method passes this handle as the first argument to `expression`.
 	// The only difference between `jsHandle.evaluate` and `jsHandle.evaluateHandle` is that `jsHandle.evaluateHandle` returns
-	// in-page object (JSHandle).
+	// `JSHandle`.
 	// If the function passed to the `jsHandle.evaluateHandle` returns a [Promise], then `jsHandle.evaluateHandle` would wait
 	// for the promise to resolve and return its value.
 	// See Page.evaluateHandle() for more details.
@@ -800,6 +807,15 @@ type Keyboard interface {
 
 // The Mouse class operates in main-frame CSS pixels relative to the top-left corner of the viewport.
 // Every `page` object has its own Mouse, accessible with [`property: Page.mouse`].
+// ```csharp
+// await Page.Mouse.MoveAsync(0, 0);
+// await Page.Mouse.DownAsync();
+// await Page.Mouse.MoveAsync(0, 100);
+// await Page.Mouse.MoveAsync(100, 100);
+// await Page.Mouse.MoveAsync(100, 0);
+// await Page.Mouse.MoveAsync(0, 0);
+// await Page.Mouse.UpAsync();
+// ```
 type Mouse interface {
 	// Shortcut for Mouse.move`], [`method: Mouse.down`], [`method: Mouse.up().
 	Click(x, y float64, options ...MouseClickOptions) error
@@ -815,8 +831,8 @@ type Mouse interface {
 }
 
 // Page provides methods to interact with a single tab in a `Browser`, or an
-// [extension background page](https://developer.chrome.com/extensions/background_pages) in Chromium. One [Browser]
-// instance might have multiple [Page] instances.
+// [extension background page](https://developer.chrome.com/extensions/background_pages) in Chromium. One `Browser`
+// instance might have multiple `Page` instances.
 // This example creates a page, navigates it to a URL, and then saves a screenshot:
 // The Page class emits various events (described below) which can be handled using any of Node's native
 // [`EventEmitter`](https://nodejs.org/api/events.html#events_class_eventemitter) methods, such as `on`, `once` or
@@ -837,7 +853,7 @@ type Page interface {
 	// An example of overriding `Math.random` before the page loads:
 	// > NOTE: The order of evaluation of multiple scripts installed via BrowserContext.addInitScript() and
 	// Page.addInitScript() is not defined.
-	AddInitScript(options BrowserContextAddInitScriptOptions) error
+	AddInitScript(script PageAddInitScriptOptions) error
 	// Adds a `<script>` tag into the page with the desired url or content. Returns the added tag when the script's onload
 	// fires or when the script content was injected into frame.
 	// Shortcut for main frame's Frame.addScriptTag().
@@ -929,68 +945,54 @@ type Page interface {
 	// An example of adding an `sha1` function to the page:
 	ExposeFunction(name string, binding ExposedFunction) error
 	EmulateMedia(options ...PageEmulateMediaOptions) error
-	// Returns the value of the `pageFunction` invocation.
+	// Returns the value of the `expression` invocation.
 	// If the function passed to the Page.evaluate`] returns a [Promise], then [`method: Page.evaluate() would wait
 	// for the promise to resolve and return its value.
-	// If the function passed to the Page.evaluate() returns a non-[Serializable] value,
-	// then[ method: `Page.evaluate`] resolves to `undefined`. DevTools Protocol also supports transferring some additional
-	// values that are not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
-	// Passing argument to `pageFunction`:
+	// If the function passed to the Page.evaluate() returns a non-[Serializable] value, then
+	// Page.evaluate() resolves to `undefined`. Playwright also supports transferring some additional values that are
+	// not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`.
+	// Passing argument to `expression`:
 	// A string can also be passed in instead of a function:
 	// `ElementHandle` instances can be passed as an argument to the Page.evaluate():
 	// Shortcut for main frame's Frame.evaluate().
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
-	// Returns the value of the `pageFunction` invocation as in-page object (JSHandle).
+	// Returns the value of the `expression` invocation as a `JSHandle`.
 	// The only difference between Page.evaluate`] and [`method: Page.evaluateHandle() is that
-	// Page.evaluateHandle() returns in-page object (JSHandle).
+	// Page.evaluateHandle() returns `JSHandle`.
 	// If the function passed to the Page.evaluateHandle`] returns a [Promise], then [`method: Page.evaluateHandle()
 	// would wait for the promise to resolve and return its value.
 	// A string can also be passed in instead of a function:
 	// `JSHandle` instances can be passed as an argument to the Page.evaluateHandle():
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	// The method finds an element matching the specified selector within the page and passes it as a first argument to
-	// `pageFunction`. If no elements match the selector, the method throws an error. Returns the value of `pageFunction`.
-	// If `pageFunction` returns a [Promise], then Page.$eval() would wait for the promise to resolve and return its
-	// value.
+	// `expression`. If no elements match the selector, the method throws an error. Returns the value of `expression`.
+	// If `expression` returns a [Promise], then Page.evalOnSelector() would wait for the promise to resolve and
+	// return its value.
 	// Examples:
-	// Shortcut for main frame's Frame.$eval().
+	// Shortcut for main frame's Frame.evalOnSelector().
 	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
 	// The method finds all elements matching the specified selector within the page and passes an array of matched elements as
-	// a first argument to `pageFunction`. Returns the result of `pageFunction` invocation.
-	// If `pageFunction` returns a [Promise], then Page.$$eval() would wait for the promise to resolve and return its
-	// value.
+	// a first argument to `expression`. Returns the result of `expression` invocation.
+	// If `expression` returns a [Promise], then Page.evalOnSelectorAll() would wait for the promise to resolve and
+	// return its value.
 	// Examples:
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
-	// Performs action and waits for `console` event to fire. If predicate is provided, it passes `ConsoleMessage` value into
-	// the `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
-	// closed before the worker event is fired.
 	ExpectConsoleMessage(cb func() error) (ConsoleMessage, error)
-	// Performs action and waits for `download` event to fire. If predicate is provided, it passes `Download` value into the
-	// `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
-	// closed before the download event is fired.
 	ExpectDownload(cb func() error) (Download, error)
 	ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error)
-	// Performs action and waits for `filechooser` event to fire. If predicate is provided, it passes `FileChooser` value into
-	// the `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
-	// closed before the worker event is fired.
 	ExpectFileChooser(cb func() error) (FileChooser, error)
 	ExpectLoadState(state string, cb func() error) error
 	ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (Response, error)
-	// Performs action and waits for `popup` event to fire. If predicate is provided, it passes [Popup] value into the
-	// `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
-	// closed before the popup event is fired.
 	ExpectPopup(cb func() error) (Page, error)
 	ExpectRequest(url interface{}, cb func() error, options ...interface{}) (Request, error)
 	ExpectResponse(url interface{}, cb func() error, options ...interface{}) (Response, error)
-	// Performs action and waits for `worker` event to fire. If predicate is provided, it passes `Worker` value into the
-	// `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is
-	// closed before the worker event is fired.
 	ExpectWorker(cb func() error) (Worker, error)
 	ExpectedDialog(cb func() error) (Dialog, error)
 	// This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, focuses the
-	// element, fills it and triggers an `input` event after filling. If the element matching `selector` is not an `<input>`,
-	// `<textarea>` or `[contenteditable]` element, this method throws an error. Note that you can pass an empty string to
-	// clear the input field.
+	// element, fills it and triggers an `input` event after filling. If the element is inside the `<label>` element that has
+	// associated [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), that control will be
+	// filled instead. If the element to be filled is not an `<input>`, `<textarea>` or `[contenteditable]` element, this
+	// method throws an error. Note that you can pass an empty string to clear the input field.
 	// To send fine-grained keyboard events, use Page.type().
 	// Shortcut for main frame's Frame.fill()
 	Fill(selector, text string, options ...FrameFillOptions) error
@@ -1054,9 +1056,11 @@ type Page interface {
 	IsEditable(selector string, options ...FrameIsEditableOptions) (bool, error)
 	// Returns whether the element is [enabled](./actionability.md#enabled).
 	IsEnabled(selector string, options ...FrameIsEnabledOptions) (bool, error)
-	// Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+	// Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).  `selector` that does not
+	// match any elements is considered hidden.
 	IsHidden(selector string, options ...FrameIsHiddenOptions) (bool, error)
-	// Returns whether the element is [visible](./actionability.md#visible).
+	// Returns whether the element is [visible](./actionability.md#visible). `selector` that does not match any elements is
+	// considered not visible.
 	IsVisible(selector string, options ...FrameIsVisibleOptions) (bool, error)
 	// The page's main frame. Page is guaranteed to have a main frame which persists during navigations.
 	MainFrame() Frame
@@ -1093,7 +1097,7 @@ type Page interface {
 	// - `A6`: 4.13in x 5.83in
 	// > NOTE: `headerTemplate` and `footerTemplate` markup have the following limitations: > 1. Script tags inside templates
 	// are not evaluated. > 2. Page styles are not visible inside templates.
-	PDF(options ...PagePDFOptions) ([]byte, error)
+	PDF(options ...PagePdfOptions) ([]byte, error)
 	// Focuses the element, and then uses Keyboard.down`] and [`method: Keyboard.up().
 	// `key` can specify the intended [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key)
 	// value or a single character to generate the text for. A superset of the `key` values can be found
@@ -1109,11 +1113,11 @@ type Page interface {
 	Press(selector, key string, options ...PagePressOptions) error
 	// The method finds an element matching the specified selector within the page. If no elements match the selector, the
 	// return value resolves to `null`.
-	// Shortcut for main frame's Frame.$().
+	// Shortcut for main frame's Frame.querySelector().
 	QuerySelector(selector string) (ElementHandle, error)
 	// The method finds all elements matching the specified selector within the page. If no elements match the selector, the
 	// return value resolves to `[]`.
-	// Shortcut for main frame's Frame.$$().
+	// Shortcut for main frame's Frame.querySelectorAll().
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
 	// last redirect.
@@ -1209,11 +1213,11 @@ type Page interface {
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the page is closed before the event is fired. Returns the event data value.
 	WaitForEvent(event string, predicate ...interface{}) interface{}
-	// Returns when the `pageFunction` returns a truthy value. It resolves to a JSHandle of the truthy value.
-	// The `waitForFunction` can be used to observe viewport size change:
+	// Returns when the `expression` returns a truthy value. It resolves to a JSHandle of the truthy value.
+	// The Page.waitForFunction() can be used to observe viewport size change:
 	// To pass an argument to the predicate of Page.waitForFunction() function:
 	// Shortcut for main frame's Frame.waitForFunction().
-	WaitForFunction(expression string, options ...FrameWaitForFunctionOptions) (JSHandle, error)
+	WaitForFunction(expression string, arg interface{}, options ...FrameWaitForFunctionOptions) (JSHandle, error)
 	// Returns when the required load state has been reached.
 	// This resolves when the page reaches a required load state, `load` by default. The navigation must have been committed
 	// when this method is called. If current document has already reached the required state, resolves immediately.
@@ -1254,9 +1258,9 @@ type Page interface {
 // Whenever the page sends a request for a network resource the following sequence of events are emitted by `Page`:
 // - [`event: Page.request`] emitted when the request is issued by the page.
 // - [`event: Page.response`] emitted when/if the response status and headers are received for the request.
-// - [`event: Page.requestfinished`] emitted when the response body is downloaded and the request is complete.
+// - [`event: Page.requestFinished`] emitted when the response body is downloaded and the request is complete.
 // If request fails at some point, then instead of `'requestfinished'` event (and possibly instead of 'response' event),
-// the  [`event: Page.requestfailed`] event is emitted.
+// the  [`event: Page.requestFailed`] event is emitted.
 // > NOTE: HTTP Error responses, such as 404 or 503, are still successful responses from HTTP standpoint, so request will
 // complete with `'requestfinished'` event.
 // If request gets a 'redirect' response, the request is successfully finished with the 'requestfinished' event, and a new
@@ -1336,7 +1340,7 @@ type Response interface {
 // allows to handle the route.
 type Route interface {
 	// Aborts the route's request.
-	Abort(options ...RouteAbortOptions) error
+	Abort(errorCode ...string) error
 	// Continues route's request with optional overrides.
 	Continue(options ...RouteContinueOptions) error
 	// Fulfills route's request with given response.
@@ -1376,20 +1380,32 @@ type Video interface {
 // The Worker class represents a [WebWorker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API). `worker`
 // event is emitted on the page object to signal a worker creation. `close` event is emitted on the worker object when the
 // worker is gone.
+// ```csharp
+// Page.Worker += (_, worker) =>
+// {
+// Console.WriteLine($"Worker created: {worker.Url}");
+// worker.Close += (_, _) => Console.WriteLine($"Worker closed {worker.Url}");
+// };
+// Console.WriteLine("Current Workers:");
+// foreach(var pageWorker in Page.Workers)
+// {
+// Console.WriteLine($"\tWorker: {pageWorker.Url}");
+// }
+// ```
 type Worker interface {
 	EventEmitter
-	// Returns the return value of `pageFunction`
-	// If the function passed to the `worker.evaluate` returns a [Promise], then `worker.evaluate` would wait for the promise
-	// to resolve and return its value.
-	// If the function passed to the `worker.evaluate` returns a non-[Serializable] value, then `worker.evaluate` returns
-	// `undefined`. DevTools Protocol also supports transferring some additional values that are not serializable by `JSON`:
-	// `-0`, `NaN`, `Infinity`, `-Infinity`, and bigint literals.
+	// Returns the return value of `expression`.
+	// If the function passed to the Worker.evaluate`] returns a [Promise], then [`method: Worker.evaluate() would
+	// wait for the promise to resolve and return its value.
+	// If the function passed to the Worker.evaluate() returns a non-[Serializable] value, then
+	// Worker.evaluate() returns `undefined`. Playwright also supports transferring some additional values that are
+	// not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`.
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
-	// Returns the return value of `pageFunction` as in-page object (JSHandle).
-	// The only difference between `worker.evaluate` and `worker.evaluateHandle` is that `worker.evaluateHandle` returns
-	// in-page object (JSHandle).
-	// If the function passed to the `worker.evaluateHandle` returns a [Promise], then `worker.evaluateHandle` would wait for
-	// the promise to resolve and return its value.
+	// Returns the return value of `expression` as a `JSHandle`.
+	// The only difference between Worker.evaluate`] and [`method: Worker.evaluateHandle() is that
+	// Worker.evaluateHandle() returns `JSHandle`.
+	// If the function passed to the Worker.evaluateHandle() returns a [Promise], then
+	// Worker.evaluateHandle() would wait for the promise to resolve and return its value.
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	URL() string
 	WaitForEvent(event string, predicate ...interface{}) interface{}

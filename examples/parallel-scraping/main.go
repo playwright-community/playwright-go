@@ -40,7 +40,7 @@ func worker(id int, jobs chan job, results chan<- bool, browser playwright.Brows
 		assertErrorToNilf("could not create page: %w", err)
 
 		_, err = page.Goto("http://"+jobPayload.URL, playwright.PageGotoOptions{
-			WaitUntil: playwright.String("networkidle"),
+			WaitUntil: playwright.WaitUntilStateNetworkidle,
 		})
 		if err != nil {
 			log.Printf("could not goto: %s: %v", jobPayload.URL, err)

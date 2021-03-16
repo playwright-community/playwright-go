@@ -26,3 +26,5 @@
 covprofile
 .idea/
 .DS_Store
+
+api.json
