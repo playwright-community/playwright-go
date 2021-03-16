@@ -16,12 +16,12 @@ jobs:
           go-version: ^1.16.1
       - name: Install Browsers
         run: go run scripts/install-browsers/main.go
-      - name: Regenerate APIs
-        run: scripts/generate-api.sh
-      - name: Verify API is up to date
-        run: |
-          if [[ -n $(git status -s) ]]; then
-            echo "ERROR: generated interfaces differ from the current sources:"
-            git diff
-            exit 1
-          fi
+      # - name: Regenerate APIs
+      #   run: scripts/generate-api.sh
+      # - name: Verify API is up to date
+      #   run: |
+      #     if [[ -n $(git status -s) ]]; then
+      #       echo "ERROR: generated interfaces differ from the current sources:"
+      #       git diff
+      #       exit 1
+      #     fi
