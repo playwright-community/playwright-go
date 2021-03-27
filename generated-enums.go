@@ -26,6 +26,24 @@ var (
 	ColorSchemeNoPreference              = getColorScheme("no-preference")
 )
 
+func getBrowserChannel(in string) *BrowserChannel {
+	v := BrowserChannel(in)
+	return &v
+}
+
+type BrowserChannel string
+
+var (
+	BrowserChannelChrome       *BrowserChannel = getBrowserChannel("chrome")
+	BrowserChannelChromeBeta                   = getBrowserChannel("chrome-beta")
+	BrowserChannelChromeDev                    = getBrowserChannel("chrome-dev")
+	BrowserChannelChromeCanary                 = getBrowserChannel("chrome-canary")
+	BrowserChannelMsedge                       = getBrowserChannel("msedge")
+	BrowserChannelMsedgeBeta                   = getBrowserChannel("msedge-beta")
+	BrowserChannelMsedgeDev                    = getBrowserChannel("msedge-dev")
+	BrowserChannelMsedgeCanary                 = getBrowserChannel("msedge-canary")
+)
+
 func getMouseButton(in string) *MouseButton {
 	v := MouseButton(in)
 	return &v
