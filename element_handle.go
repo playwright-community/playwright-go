@@ -109,6 +109,9 @@ func (e *elementHandleImpl) QuerySelector(selector string) (ElementHandle, error
 	if err != nil {
 		return nil, err
 	}
+	if channel == nil {
+		return nil, nil
+	}
 	return fromChannel(channel).(*elementHandleImpl), nil
 }
 
