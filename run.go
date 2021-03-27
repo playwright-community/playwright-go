@@ -20,13 +20,11 @@ const playwrightCliVersion = "1.10.0"
 
 type playwrightDriver struct {
 	driverDirectory, driverBinaryLocation, version string
+	options                                        *RunOptions
 }
 
 func newDriver(options *RunOptions) (*playwrightDriver, error) {
-	baseDriverDirectory := ""
-	if options != nil {
-		baseDriverDirectory = options.DriverDirectory
-	}
+	baseDriverDirectory := options.DriverDirectory
 	if baseDriverDirectory == "" {
 		var err error
 		baseDriverDirectory, err = getDefaultCacheDirectory()
@@ -37,6 +35,7 @@ func newDriver(options *RunOptions) (*playwrightDriver, error) {
 	driverDirectory := filepath.Join(baseDriverDirectory, "ms-playwright-go", playwrightCliVersion)
 	driverBinaryLocation := filepath.Join(driverDirectory, getDriverName())
 	return &playwrightDriver{
+		options:              options,
 		driverBinaryLocation: driverBinaryLocation,
 		driverDirectory:      driverDirectory,
 		version:              playwrightCliVersion,
@@ -84,7 +83,9 @@ func (d *playwrightDriver) install() error {
 	if err := d.installDriver(); err != nil {
 		return fmt.Errorf("could not install driver: %w", err)
 	}
-
+	if d.options.SkipInstallBrowsers {
+		return nil
+	}
 	log.Println("Downloading browsers...")
 	if err := d.installBrowsers(d.driverBinaryLocation); err != nil {
 		return fmt.Errorf("could not install browsers: %w", err)
@@ -177,7 +178,11 @@ func (d *playwrightDriver) run() (*connection, error) {
 }
 
 func (d *playwrightDriver) installBrowsers(driverPath string) error {
-	cmd := exec.Command(driverPath, "install")
+	additionalArgs := []string{"install"}
+	if d.options.Browsers != nil {
+		additionalArgs = append(additionalArgs, d.options.Browsers...)
+	}
+	cmd := exec.Command(driverPath, additionalArgs...)
 	cmd.Env = d.getDriverEnviron()
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -192,7 +197,9 @@ func (d *playwrightDriver) installBrowsers(driverPath string) error {
 
 // RunOptions are custom options to run the driver
 type RunOptions struct {
-	DriverDirectory string
+	DriverDirectory     string
+	SkipInstallBrowsers bool
+	Browsers            []string
 }
 
 // Install does download the driver and the browsers. If not called manually
@@ -238,7 +245,7 @@ func transformRunOptions(options []*RunOptions) *RunOptions {
 	if len(options) == 1 {
 		return options[0]
 	}
-	return nil
+	return &RunOptions{}
 }
 
 func getDriverName() string {
