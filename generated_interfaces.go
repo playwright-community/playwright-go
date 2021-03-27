@@ -195,13 +195,14 @@ type Dialog interface {
 // downloaded content. If `acceptDownloads` is not set, download events are emitted, but the actual download is not
 // performed and user has no access to the downloaded files.
 type Download interface {
-	// Deletes the downloaded file.
+	// Deletes the downloaded file. Will wait for the download to finish if necessary.
 	Delete() error
-	// Returns download error if any.
+	// Returns download error if any. Will wait for the download to finish if necessary.
 	Failure() error
-	// Returns path to the downloaded file in case of successful download.
+	// Returns path to the downloaded file in case of successful download. The method will wait for the download to finish if
+	// necessary.
 	Path() (string, error)
-	// Saves the download to a user-specified path.
+	// Saves the download to a user-specified path. It is safe to call this method while the download is still in progress.
 	SaveAs(path string) error
 	String() string
 	// Returns suggested filename for this download. It is typically computed by the browser from the
