@@ -179,6 +179,22 @@ func TestElementHandleTap(t *testing.T) {
 	require.Equal(t, true, value)
 }
 
+func TestElementHandleQuerySelectorNotExists(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent(`
+	<div id="a1">
+	</div>
+	`))
+	rootElement, err := page.QuerySelector("#a1")
+	require.NoError(t, err)
+	element, err := rootElement.QuerySelector(".foobar")
+	require.NoError(t, err)
+	require.Nil(t, element)
+}
+
 func TestElementHandleQuerySelectorAll(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
