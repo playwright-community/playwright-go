@@ -523,3 +523,17 @@ func TestElementHandleWaitForSelector(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "test result", text)
 }
+
+func TestElemetHandleFocus(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent(`<button onfocus="window.clicked=true"/>`))
+	buttonElement, err := page.QuerySelector("button")
+	require.NoError(t, err)
+	require.NoError(t, buttonElement.Focus())
+	result, err := page.Evaluate("window.clicked")
+	require.NoError(t, err)
+	require.True(t, result.(bool))
+}

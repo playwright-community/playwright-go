@@ -135,6 +135,36 @@ func TestKeyboardType(t *testing.T) {
 	require.True(t, result.(bool))
 }
 
+func TestElementHandleType(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent(`<input oninput="window.clicked=true"/>`))
+	require.NoError(t, page.Click("input"))
+	inputElement, err := page.QuerySelector("input")
+	require.NoError(t, err)
+	require.NoError(t, inputElement.Type("abc123"))
+	result, err := page.Evaluate("window.clicked")
+	require.NoError(t, err)
+	require.True(t, result.(bool))
+}
+
+func TestElementHandleFill(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent(`<input oninput="window.clicked=true"/>`))
+	require.NoError(t, page.Click("input"))
+	inputElement, err := page.QuerySelector("input")
+	require.NoError(t, err)
+	require.NoError(t, inputElement.Fill("abc123"))
+	result, err := page.Evaluate("window.clicked")
+	require.NoError(t, err)
+	require.True(t, result.(bool))
+}
+
 func TestKeyboardInsertPress(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
@@ -143,6 +173,21 @@ func TestKeyboardInsertPress(t *testing.T) {
 	require.NoError(t, page.SetContent(`<input onkeydown="window.clicked=true"/>`))
 	require.NoError(t, page.Click("input"))
 	require.NoError(t, page.Keyboard().Press("A"))
+	result, err := page.Evaluate("window.clicked")
+	require.NoError(t, err)
+	require.True(t, result.(bool))
+}
+
+func TestElementHandlePress(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent(`<input onkeydown="window.clicked=true"/>`))
+	require.NoError(t, page.Click("input"))
+	inputElement, err := page.QuerySelector("input")
+	require.NoError(t, err)
+	require.NoError(t, inputElement.Press("A"))
 	result, err := page.Evaluate("window.clicked")
 	require.NoError(t, err)
 	require.True(t, result.(bool))

@@ -312,7 +312,7 @@
 			"(Frame, error)"
 		],
 		"Press": [
-			"options ...ElementHandlePressOptions",
+			"key string, options ...ElementHandlePressOptions",
 			"error"
 		],
 		"QuerySelector": [

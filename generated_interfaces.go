@@ -351,7 +351,7 @@ type ElementHandle interface {
 	// texts.
 	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
-	Press(options ...ElementHandlePressOptions) error
+	Press(key string, options ...ElementHandlePressOptions) error
 	// The method finds an element matching the specified selector in the `ElementHandle`'s subtree. See
 	// [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns `null`.
 	QuerySelector(selector string) (ElementHandle, error)
