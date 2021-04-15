@@ -220,8 +220,10 @@ func (e *elementHandleImpl) Uncheck(options ...ElementHandleUncheckOptions) erro
 	return err
 }
 
-func (e *elementHandleImpl) Press(options ...ElementHandlePressOptions) error {
-	_, err := e.channel.Send("press", options)
+func (e *elementHandleImpl) Press(key string, options ...ElementHandlePressOptions) error {
+	_, err := e.channel.Send("press", map[string]interface{}{
+		"key": key,
+	}, options)
 	return err
 }
 
@@ -234,7 +236,7 @@ func (e *elementHandleImpl) Fill(value string, options ...ElementHandleFillOptio
 
 func (e *elementHandleImpl) Type(value string, options ...ElementHandleTypeOptions) error {
 	_, err := e.channel.Send("type", map[string]interface{}{
-		"value": value,
+		"text": value,
 	}, options)
 	return err
 }
