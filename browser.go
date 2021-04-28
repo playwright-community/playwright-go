@@ -18,9 +18,16 @@ func (b *browserImpl) IsConnected() bool {
 }
 
 func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserContext, error) {
+	opts := make([]interface{}, 0, len(options))
+	opts = append(opts, options)
+	if len(options) == 1 && options[0].ExtraHttpHeaders != nil {
+		overrides := make(map[string]interface{})
+		overrides["extraHTTPHeaders"] = serializeHeaders(options[0].ExtraHttpHeaders)
+		opts = append(opts, overrides)
+	}
 	channel, err := b.channel.Send("newContext", map[string]interface{}{
 		"sdkLanguage": "javascript",
-	}, options)
+	}, opts)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
