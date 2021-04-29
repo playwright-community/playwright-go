@@ -58,7 +58,7 @@ func TestBrowserNewPage(t *testing.T) {
 	require.Equal(t, 1, len(browser.Contexts()))
 }
 
-func TestBrwoserNewPageWithExtraHTTPHeaders(t *testing.T) {
+func TestBrowserNewPageWithExtraHTTPHeaders(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	require.Equal(t, 1, len(browser.Contexts()))
