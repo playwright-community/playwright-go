@@ -102,6 +102,7 @@ func main() {
 * [Scraping HackerNews](./examples/scraping/main.go)
 * [Take a screenshot](./examples/screenshot/main.go)
 * [Record a video](./examples/video/main.go)
+* [Monitor network activity](./examples/network-monitoring/main.go)
 
 ## How does it work?
 
