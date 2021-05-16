@@ -27,7 +27,8 @@ func TestCDPSessionOn(t *testing.T) {
 	cdpSession.On("Console.messageAdded", func(params map[string]interface{}) {
 		require.NotNil(t, params)
 	})
-	page.Evaluate(`console.log("hello")`)
+	_, err = page.Evaluate(`console.log("hello")`)
+	require.NoError(t, err)
 	require.NoError(t, cdpSession.Detach())
 }
 

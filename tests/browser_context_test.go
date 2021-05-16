@@ -81,7 +81,11 @@ func TestBrowserContextNewCDPSession(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	cdpSession, err := page.Context().NewCDPSession(page)
-	require.NoError(t, err)
+	if isChromium {
+		require.NoError(t, err)
+	} else {
+		require.Error(t, err)
+	}
 	require.NoError(t, cdpSession.Detach())
 }
 
