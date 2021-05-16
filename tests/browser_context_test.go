@@ -83,10 +83,10 @@ func TestBrowserContextNewCDPSession(t *testing.T) {
 	cdpSession, err := page.Context().NewCDPSession(page)
 	if isChromium {
 		require.NoError(t, err)
+		require.NoError(t, cdpSession.Detach())
 	} else {
 		require.Error(t, err)
 	}
-	require.NoError(t, cdpSession.Detach())
 }
 
 func TestBrowserContextSetGeolocation(t *testing.T) {

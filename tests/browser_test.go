@@ -106,11 +106,10 @@ func TestNewBrowserCDPSession(t *testing.T) {
 	cdpSession, err := browser.NewBrowserCDPSession()
 	if isChromium {
 		require.NoError(t, err)
+		require.NoError(t, cdpSession.Detach())
 	} else {
 		require.Error(t, err)
 	}
-
-	require.NoError(t, cdpSession.Detach())
 }
 
 func TestBrowserClose(t *testing.T) {
