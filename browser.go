@@ -53,10 +53,6 @@ func (b *browserImpl) NewPage(options ...BrowserNewContextOptions) (Page, error)
 }
 
 func (b *browserImpl) NewBrowserCDPSession() (CDPSession, error) {
-	if b.initializer["name"].(string) != "chromium" {
-		return nil, fmt.Errorf("could not create CDPSession for %s", b.initializer["name"])
-	}
-
 	channel, err := b.channel.Send("crNewBrowserCDPSession", map[string]interface{}{
 		"sdkLanguage": "javascript",
 	})
