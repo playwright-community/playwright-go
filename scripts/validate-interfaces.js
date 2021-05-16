@@ -5,7 +5,6 @@ const api = getAPIDocs()
 
 const IGNORE_CLASSES = [
   "Selectors",
-  "CDPSession",
   "Logger",
   "BrowserServer",
   "Accessibility",
