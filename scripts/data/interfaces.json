@@ -29,9 +29,26 @@
 			"options ...BrowserNewContextOptions",
 			"(Page, error)"
 		],
+		"NewBrowserCDPSession": [
+			null,
+			"(CDPSession, error)"
+		],
 		"Version": [
 			null,
 			"string"
+		]
+	},
+	"CDPSession": {
+		"extends": [
+			"EventEmitter"
+		],
+		"Detach": [
+			null,
+			"error"
+		],
+		"Send": [
+			"method string, params map[string]interface{}",
+			"(interface{}, error)"
 		]
 	},
 	"BrowserContext": {
@@ -82,6 +99,10 @@
 			"permissions []string, options ...BrowserContextGrantPermissionsOptions",
 			"error"
 		],
+		"NewCDPSession": [
+			"page Page",
+			"(CDPSession, error)"
+		],	
 		"NewPage": [
 			"options ...BrowserNewPageOptions",
 			"(Page, error)"

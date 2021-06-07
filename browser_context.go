@@ -46,6 +46,20 @@ func (b *browserContextImpl) Browser() Browser {
 	return b.browser
 }
 
+func (b *browserContextImpl) NewCDPSession(page Page) (CDPSession, error) {
+	channel, err := b.channel.Send("crNewCDPSession", map[string]interface{}{
+		"sdkLanguage": "javascript",
+		"page":        page.(*pageImpl).channel,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("could not send message: %w", err)
+	}
+
+	cdpSession := fromChannel(channel).(*cdpSessionImpl)
+
+	return cdpSession, nil
+}
+
 func (b *browserContextImpl) NewPage(options ...BrowserNewPageOptions) (Page, error) {
 	if b.ownedPage != nil {
 		return nil, errors.New("Please use browser.NewContext()")

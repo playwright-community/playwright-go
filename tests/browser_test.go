@@ -100,6 +100,18 @@ func TestBrowserShouldErrorUponSecondCreateNewPage(t *testing.T) {
 	require.NoError(t, page.Close())
 }
 
+func TestNewBrowserCDPSession(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	cdpSession, err := browser.NewBrowserCDPSession()
+	if isChromium {
+		require.NoError(t, err)
+		require.NoError(t, cdpSession.Detach())
+	} else {
+		require.Error(t, err)
+	}
+}
+
 func TestBrowserClose(t *testing.T) {
 	pw, err := playwright.Run()
 	require.NoError(t, err)

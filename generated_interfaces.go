@@ -24,8 +24,25 @@ type Browser interface {
 	// testing frameworks should explicitly create Browser.newContext() followed by the
 	// BrowserContext.newPage() to control their exact life times.
 	NewPage(options ...BrowserNewContextOptions) (Page, error)
+	NewBrowserCDPSession() (CDPSession, error)
 	// Returns the browser version.
 	Version() string
+}
+
+// The `CDPSession` instances are used to talk raw Chrome Devtools Protocol:
+// - protocol methods can be called with `session.send` method.
+// - protocol events can be subscribed to with `session.on` method.
+// Useful links:
+// - Documentation on DevTools Protocol can be found here:
+// [DevTools Protocol Viewer](https://chromedevtools.github.io/devtools-protocol/).
+// - Getting Started with DevTools Protocol:
+// https://github.com/aslushnikov/getting-started-with-cdp/blob/master/README.md
+type CDPSession interface {
+	EventEmitter
+	// Detaches the CDPSession from the target. Once detached, the CDPSession object won't emit any events and can't be used to
+	// send messages.
+	Detach() error
+	Send(method string, params map[string]interface{}) (interface{}, error)
 }
 
 // BrowserContexts provide a way to operate multiple independent browser sessions.
@@ -79,6 +96,7 @@ type BrowserContext interface {
 	// Grants specified permissions to the browser context. Only grants corresponding permissions to the given origin if
 	// specified.
 	GrantPermissions(permissions []string, options ...BrowserContextGrantPermissionsOptions) error
+	NewCDPSession(page Page) (CDPSession, error)
 	// Creates a new page in the browser context.
 	NewPage(options ...BrowserNewPageOptions) (Page, error)
 	// Returns all open pages in the context.
