@@ -52,6 +52,19 @@ func (b *browserImpl) NewPage(options ...BrowserNewContextOptions) (Page, error)
 	return page, nil
 }
 
+func (b *browserImpl) NewBrowserCDPSession() (CDPSession, error) {
+	channel, err := b.channel.Send("crNewBrowserCDPSession", map[string]interface{}{
+		"sdkLanguage": "javascript",
+	})
+	if err != nil {
+		return nil, fmt.Errorf("could not send message: %w", err)
+	}
+
+	cdpSession := fromChannel(channel).(*cdpSessionImpl)
+
+	return cdpSession, nil
+}
+
 func (b *browserImpl) Contexts() []BrowserContext {
 	b.Lock()
 	defer b.Unlock()

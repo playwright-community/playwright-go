@@ -77,6 +77,18 @@ func TestBrowserContextSetExtraHTTPHeaders(t *testing.T) {
 	<-intercepted
 }
 
+func TestBrowserContextNewCDPSession(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	cdpSession, err := page.Context().NewCDPSession(page)
+	if isChromium {
+		require.NoError(t, err)
+		require.NoError(t, cdpSession.Detach())
+	} else {
+		require.Error(t, err)
+	}
+}
+
 func TestBrowserContextSetGeolocation(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
