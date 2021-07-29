@@ -358,12 +358,7 @@ type BrowserTypeLaunchOptions struct {
 	/// </para>
 	/// </summary>
 	Args []string `json:"args"`
-	/// <summary>
-	/// <para>
-	/// Browser distribution channel. Read more about using <a href="./browsers#google-chrome--microsoft-edge">Google
-	/// Chrome and Microsoft Edge</a>.
-	/// </para>
-	/// </summary>
+	/// <summary><para>Browser distribution channel.</para></summary>
 	Channel *BrowserChannel `json:"channel"`
 	/// <summary><para>Enable Chromium sandboxing. Defaults to <c>false</c>.</para></summary>
 	ChromiumSandbox *bool `json:"chromiumSandbox"`
