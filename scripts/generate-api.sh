@@ -9,7 +9,7 @@ node scripts/generate-interfaces.js > generated_interfaces.go
 go fmt generated_interfaces.go > /dev/null
 echo "Generated Interfaces"
 
-PLAYWRIGHT_DIR="../playwright"
+PLAYWRIGHT_DIR="playwright"
 
 node $PLAYWRIGHT_DIR/utils/doclint/generateGoApi.js
 cp $PLAYWRIGHT_DIR/utils/doclint/generate_types/go/generated-{enums,structs}.go .

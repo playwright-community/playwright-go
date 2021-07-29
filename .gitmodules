@@ -1,0 +1,3 @@
+[submodule "playwright"]
+	path = playwright
+	url = https://github.com/mxschmitt/playwright
