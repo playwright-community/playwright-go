@@ -2,7 +2,9 @@
 
 set -e
 set +x
+PWD=$(pwd -P)
 
+$PWD/scripts/apply-patch.sh
 
 echo "Generating Interfaces"
 node scripts/generate-interfaces.js > generated_interfaces.go
