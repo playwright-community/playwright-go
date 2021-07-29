@@ -387,7 +387,7 @@ func unroute(channel *channel, inRoutes []*routeHandlerEntry, url interface{}, h
 
 	for _, route := range inRoutes {
 		routeHandlerPtr := reflect.ValueOf(route.handler).Pointer()
-		if route.matcher.urlOrPredicate != url.(interface{}) ||
+		if route.matcher.urlOrPredicate != url ||
 			(handler != nil && routeHandlerPtr != handlerPtr) {
 			routes = append(routes, route)
 		}

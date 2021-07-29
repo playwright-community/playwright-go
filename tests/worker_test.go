@@ -33,7 +33,7 @@ func TestWorkerShouldEmitCreatedAndDestroyedEvents(t *testing.T) {
 	var workerObj playwright.JSHandle
 	worker, err := page.ExpectWorker(func() error {
 		workerObjInterface, err := page.EvaluateHandle("() => new Worker(URL.createObjectURL(new Blob(['1'], {type: 'application/javascript'})))")
-		workerObj = workerObjInterface.(playwright.JSHandle)
+		workerObj = workerObjInterface
 		return err
 	})
 	require.NoError(t, err)
