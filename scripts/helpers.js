@@ -15,6 +15,8 @@ const getCacheDirectory = () => {
       return path.join(os.homedir(), '.cache');
     case "darwin":
       return path.join(os.homedir(), 'Library', 'Caches');
+    case 'win32':
+      return path.join(os.homedir(), 'AppData', 'Local');
     default:
       throw new Error(`Not implemented for: ${os.platform()}`)
   }
@@ -23,12 +25,15 @@ const getCacheDirectory = () => {
 const getCliLocation = () => {
   const cacheDirectory = getCacheDirectory()
   const cliVersion = getCliVersion()
-  return path.join(cacheDirectory, "ms-playwright-go", cliVersion, "playwright.sh")
+  if (os.platform() !== "win32")
+    return path.join(cacheDirectory, "ms-playwright-go", cliVersion, "playwright.sh")
+  return path.join(cacheDirectory, "ms-playwright-go", cliVersion, "playwright.cmd")
 }
 
 const getAPIDocs = () => {
-  return JSON.parse(child_process.execSync(`${getCliLocation()} print-api-json`, {
+  return JSON.parse(child_process.execSync(`"${getCliLocation()}" print-api-json`, {
     maxBuffer: 1024 * 1024 * 10,
+    shell: true
   }).toString())
 }
 
