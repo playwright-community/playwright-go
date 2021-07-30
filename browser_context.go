@@ -47,7 +47,7 @@ func (b *browserContextImpl) Browser() Browser {
 }
 
 func (b *browserContextImpl) NewCDPSession(page Page) (CDPSession, error) {
-	channel, err := b.channel.Send("crNewCDPSession", map[string]interface{}{
+	channel, err := b.channel.Send("newCDPSession", map[string]interface{}{
 		"sdkLanguage": "javascript",
 		"page":        page.(*pageImpl).channel,
 	})
@@ -333,6 +333,10 @@ func (b *browserContextImpl) onPage(page *pageImpl) {
 	b.pages = append(b.pages, page)
 	b.Unlock()
 	b.Emit("page", page)
+	opener, _ := page.Opener()
+	if opener != nil && !opener.IsClosed() {
+		opener.Emit("popup", page)
+	}
 }
 
 func (b *browserContextImpl) onRoute(route *routeImpl, request *requestImpl) {

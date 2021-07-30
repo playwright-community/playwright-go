@@ -4,10 +4,16 @@ echo "Applying patches..."
 
 cd "$(dirname "$0")"
 
-cd ../playwright
+cd ..
 
-git apply --index --whitespace=nowarn ../patches/*
+git apply --whitespace=nowarn patches/*
+
+pushd playwright
 
 git add -A
+
+git commit -m "Applied patches"
+
+popd
 
 cd -

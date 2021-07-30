@@ -4,6 +4,8 @@ func createObjectFactory(parent *channelOwner, objectType string, guid string, i
 	switch objectType {
 	case "Android":
 		return nil
+	case "Artifact":
+		return newArtifact(parent, objectType, guid, initializer)
 	case "BindingCall":
 		return newBindingCall(parent, objectType, guid, initializer)
 	case "Browser":
@@ -18,8 +20,6 @@ func createObjectFactory(parent *channelOwner, objectType string, guid string, i
 		return newConsoleMessage(parent, objectType, guid, initializer)
 	case "Dialog":
 		return newDialog(parent, objectType, guid, initializer)
-	case "Download":
-		return newDownload(parent, objectType, guid, initializer)
 	case "ElementHandle":
 		return newElementHandle(parent, objectType, guid, initializer)
 	case "Frame":

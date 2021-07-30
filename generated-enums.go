@@ -34,14 +34,15 @@ func getBrowserChannel(in string) *BrowserChannel {
 type BrowserChannel string
 
 var (
-	BrowserChannelChrome       *BrowserChannel = getBrowserChannel("chrome")
-	BrowserChannelChromeBeta                   = getBrowserChannel("chrome-beta")
-	BrowserChannelChromeDev                    = getBrowserChannel("chrome-dev")
-	BrowserChannelChromeCanary                 = getBrowserChannel("chrome-canary")
-	BrowserChannelMsedge                       = getBrowserChannel("msedge")
-	BrowserChannelMsedgeBeta                   = getBrowserChannel("msedge-beta")
-	BrowserChannelMsedgeDev                    = getBrowserChannel("msedge-dev")
-	BrowserChannelMsedgeCanary                 = getBrowserChannel("msedge-canary")
+	BrowserChannelChrome        *BrowserChannel = getBrowserChannel("chrome")
+	BrowserChannelChromeBeta                    = getBrowserChannel("chrome-beta")
+	BrowserChannelChromeDev                     = getBrowserChannel("chrome-dev")
+	BrowserChannelChromeCanary                  = getBrowserChannel("chrome-canary")
+	BrowserChannelMsedge                        = getBrowserChannel("msedge")
+	BrowserChannelMsedgeBeta                    = getBrowserChannel("msedge-beta")
+	BrowserChannelMsedgeDev                     = getBrowserChannel("msedge-dev")
+	BrowserChannelMsedgeCanary                  = getBrowserChannel("msedge-canary")
+	BrowserChannelFirefoxStable                 = getBrowserChannel("firefox-stable")
 )
 
 func getMouseButton(in string) *MouseButton {

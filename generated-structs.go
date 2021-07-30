@@ -8,37 +8,28 @@ type BrowserNewContextOptions struct {
 	/// </para>
 	/// </summary>
 	AcceptDownloads *bool `json:"acceptDownloads"`
+	/// <summary><para>Whether to ignore HTTPS errors during navigation. Defaults to <c>false</c>.</para></summary>
+	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
 	/// <summary><para>Toggles bypassing page's Content-Security-Policy.</para></summary>
 	BypassCSP *bool `json:"bypassCSP"`
 	/// <summary>
 	/// <para>
-	/// Emulates <c>'prefers-colors-scheme'</c> media feature, supported values are <c>'light'</c>,
-	/// <c>'dark'</c>, <c>'no-preference'</c>. See <see cref="Page.EmulateMedia"/> for more
-	/// details. Defaults to <c>'light'</c>.
+	/// Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. <c>no_viewport</c>
+	/// disables the fixed viewport.
 	/// </para>
 	/// </summary>
-	ColorScheme *ColorScheme `json:"colorScheme"`
+	Viewport *BrowserNewContextOptionsViewport `json:"viewport"`
+	/// <summary>
+	/// <para>
+	/// Emulates consistent window screen size available inside web page via <c>window.screen</c>.
+	/// Is only used when the <paramref name="viewport"/> is set.
+	/// </para>
+	/// </summary>
+	Screen *BrowserNewContextOptionsScreen `json:"screen"`
+	/// <summary><para>Specific user agent to use in this context.</para></summary>
+	UserAgent *string `json:"userAgent"`
 	/// <summary><para>Specify device scale factor (can be thought of as dpr). Defaults to <c>1</c>.</para></summary>
 	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
-	/// <summary>
-	/// <para>
-	/// An object containing additional HTTP headers to be sent with every request. All
-	/// header values must be strings.
-	/// </para>
-	/// </summary>
-	ExtraHttpHeaders map[string]string                    `json:"extraHTTPHeaders"`
-	Geolocation      *BrowserNewContextOptionsGeolocation `json:"geolocation"`
-	/// <summary><para>Specifies if viewport supports touch events. Defaults to false.</para></summary>
-	HasTouch *bool `json:"hasTouch"`
-	/// <summary>
-	/// <para>
-	/// Credentials for <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication">HTTP
-	/// authentication</a>.
-	/// </para>
-	/// </summary>
-	HttpCredentials *BrowserNewContextOptionsHttpCredentials `json:"httpCredentials"`
-	/// <summary><para>Whether to ignore HTTPS errors during navigation. Defaults to <c>false</c>.</para></summary>
-	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
 	/// <summary>
 	/// <para>
 	/// Whether the <c>meta viewport</c> tag is taken into account and touch events are
@@ -46,8 +37,18 @@ type BrowserNewContextOptions struct {
 	/// </para>
 	/// </summary>
 	IsMobile *bool `json:"isMobile"`
+	/// <summary><para>Specifies if viewport supports touch events. Defaults to false.</para></summary>
+	HasTouch *bool `json:"hasTouch"`
 	/// <summary><para>Whether or not to enable JavaScript in the context. Defaults to <c>true</c>.</para></summary>
 	JavaScriptEnabled *bool `json:"javaScriptEnabled"`
+	/// <summary>
+	/// <para>
+	/// Changes the timezone of the context. See <a href="https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1">ICU's
+	/// metaZones.txt</a> for a list of supported timezone IDs.
+	/// </para>
+	/// </summary>
+	TimezoneId  *string                              `json:"timezoneId"`
+	Geolocation *BrowserNewContextOptionsGeolocation `json:"geolocation"`
 	/// <summary>
 	/// <para>
 	/// Specify user locale, for example <c>en-GB</c>, <c>de-DE</c>, etc. Locale will affect
@@ -56,8 +57,6 @@ type BrowserNewContextOptions struct {
 	/// </para>
 	/// </summary>
 	Locale *string `json:"locale"`
-	/// <summary><para>Whether to emulate network being offline. Defaults to <c>false</c>.</para></summary>
-	Offline *bool `json:"offline"`
 	/// <summary>
 	/// <para>
 	/// A list of permissions to grant to all pages in this context. See <see cref="BrowserContext.GrantPermissions"/>
@@ -67,13 +66,28 @@ type BrowserNewContextOptions struct {
 	Permissions []string `json:"permissions"`
 	/// <summary>
 	/// <para>
-	/// Network proxy settings to use with this context. Note that browser needs to be launched
-	/// with the global proxy for this option to work. If all contexts override the proxy,
-	/// global proxy will be never used and can be any string, for example <c>launch({ proxy:
-	/// { server: 'per-context' } })</c>.
+	/// An object containing additional HTTP headers to be sent with every request. All
+	/// header values must be strings.
 	/// </para>
 	/// </summary>
-	Proxy *BrowserNewContextOptionsProxy `json:"proxy"`
+	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
+	/// <summary><para>Whether to emulate network being offline. Defaults to <c>false</c>.</para></summary>
+	Offline *bool `json:"offline"`
+	/// <summary>
+	/// <para>
+	/// Credentials for <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication">HTTP
+	/// authentication</a>.
+	/// </para>
+	/// </summary>
+	HttpCredentials *BrowserNewContextOptionsHttpCredentials `json:"httpCredentials"`
+	/// <summary>
+	/// <para>
+	/// Emulates <c>'prefers-colors-scheme'</c> media feature, supported values are <c>'light'</c>,
+	/// <c>'dark'</c>, <c>'no-preference'</c>. See <see cref="Page.EmulateMedia"/> for more
+	/// details. Defaults to <c>'light'</c>.
+	/// </para>
+	/// </summary>
+	ColorScheme *ColorScheme `json:"colorScheme"`
 	/// <summary>
 	/// <para>
 	/// Enables video recording for all pages into <c>recordVideo.dir</c> directory. If
@@ -82,22 +96,28 @@ type BrowserNewContextOptions struct {
 	/// </para>
 	/// </summary>
 	RecordVideo *BrowserNewContextOptionsRecordVideo `json:"recordVideo"`
-	/// <summary>
+	/// <summary><para>Network proxy settings to use with this context.</para></summary>
+	/// <remarks>
 	/// <para>
-	/// Changes the timezone of the context. See <a href="https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1">ICU's
-	/// metaZones.txt</a> for a list of supported timezone IDs.
+	/// For Chromium on Windows the browser needs to be launched with the global proxy for
+	/// this option to work. If all contexts override the proxy, global proxy will be never
+	/// used and can be any string, for example <c>launch({ proxy: { server: 'http://per-context'
+	/// } })</c>.
 	/// </para>
-	/// </summary>
-	TimezoneId *string `json:"timezoneId"`
-	/// <summary><para>Specific user agent to use in this context.</para></summary>
-	UserAgent *string `json:"userAgent"`
-	/// <summary>
-	/// <para>
-	/// Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. <c>no_viewport</c>
-	/// disables the fixed viewport.
-	/// </para>
-	/// </summary>
-	Viewport *BrowserNewContextOptionsViewport `json:"viewport"`
+	/// </remarks>
+	Proxy *BrowserNewContextOptionsProxy `json:"proxy"`
+}
+type BrowserViewport struct {
+	/// <summary><para>page width in pixels.</para></summary>
+	Width *int `json:"width"`
+	/// <summary><para>page height in pixels.</para></summary>
+	Height *int `json:"height"`
+}
+type BrowserScreen struct {
+	/// <summary><para>page width in pixels.</para></summary>
+	Width *int `json:"width"`
+	/// <summary><para>page height in pixels.</para></summary>
+	Height *int `json:"height"`
 }
 type BrowserGeolocation struct {
 	/// <summary><para>Latitude between -90 and 90.</para></summary>
@@ -112,6 +132,19 @@ type BrowserHttpCredentials struct {
 	Username *string `json:"username"`
 	/// <summary><para></para></summary>
 	Password *string `json:"password"`
+}
+type BrowserRecordVideo struct {
+	/// <summary><para>Path to the directory to put videos into.</para></summary>
+	Dir *string `json:"dir"`
+	/// <summary>
+	/// <para>
+	/// Optional dimensions of the recorded videos. If not specified the size will be equal
+	/// to <c>viewport</c> scaled down to fit into 800x800. If <c>viewport</c> is not configured
+	/// explicitly the video size defaults to 800x450. Actual picture of each page will
+	/// be scaled down if necessary to fit the specified size.
+	/// </para>
+	/// </summary>
+	Size *BrowserRecordVideoSize `json:"size"`
 }
 type BrowserProxy struct {
 	/// <summary>
@@ -134,25 +167,6 @@ type BrowserProxy struct {
 	/// <summary><para>Optional password to use if HTTP proxy requires authentication.</para></summary>
 	Password *string `json:"password"`
 }
-type BrowserRecordVideo struct {
-	/// <summary><para>Path to the directory to put videos into.</para></summary>
-	Dir *string `json:"dir"`
-	/// <summary>
-	/// <para>
-	/// Optional dimensions of the recorded videos. If not specified the size will be equal
-	/// to <c>viewport</c> scaled down to fit into 800x800. If <c>viewport</c> is not configured
-	/// explicitly the video size defaults to 800x450. Actual picture of each page will
-	/// be scaled down if necessary to fit the specified size.
-	/// </para>
-	/// </summary>
-	Size *BrowserRecordVideoSize `json:"size"`
-}
-type BrowserViewport struct {
-	/// <summary><para>page width in pixels.</para></summary>
-	Width *int `json:"width"`
-	/// <summary><para>page height in pixels.</para></summary>
-	Height *int `json:"height"`
-}
 type BrowserNewPageOptions struct {
 	/// <summary>
 	/// <para>
@@ -161,37 +175,28 @@ type BrowserNewPageOptions struct {
 	/// </para>
 	/// </summary>
 	AcceptDownloads *bool `json:"acceptDownloads"`
+	/// <summary><para>Whether to ignore HTTPS errors during navigation. Defaults to <c>false</c>.</para></summary>
+	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
 	/// <summary><para>Toggles bypassing page's Content-Security-Policy.</para></summary>
 	BypassCSP *bool `json:"bypassCSP"`
 	/// <summary>
 	/// <para>
-	/// Emulates <c>'prefers-colors-scheme'</c> media feature, supported values are <c>'light'</c>,
-	/// <c>'dark'</c>, <c>'no-preference'</c>. See <see cref="Page.EmulateMedia"/> for more
-	/// details. Defaults to <c>'light'</c>.
+	/// Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. <c>no_viewport</c>
+	/// disables the fixed viewport.
 	/// </para>
 	/// </summary>
-	ColorScheme *ColorScheme `json:"colorScheme"`
+	Viewport *BrowserNewPageOptionsViewport `json:"viewport"`
+	/// <summary>
+	/// <para>
+	/// Emulates consistent window screen size available inside web page via <c>window.screen</c>.
+	/// Is only used when the <paramref name="viewport"/> is set.
+	/// </para>
+	/// </summary>
+	Screen *BrowserNewPageOptionsScreen `json:"screen"`
+	/// <summary><para>Specific user agent to use in this context.</para></summary>
+	UserAgent *string `json:"userAgent"`
 	/// <summary><para>Specify device scale factor (can be thought of as dpr). Defaults to <c>1</c>.</para></summary>
 	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
-	/// <summary>
-	/// <para>
-	/// An object containing additional HTTP headers to be sent with every request. All
-	/// header values must be strings.
-	/// </para>
-	/// </summary>
-	ExtraHttpHeaders map[string]string                 `json:"extraHTTPHeaders"`
-	Geolocation      *BrowserNewPageOptionsGeolocation `json:"geolocation"`
-	/// <summary><para>Specifies if viewport supports touch events. Defaults to false.</para></summary>
-	HasTouch *bool `json:"hasTouch"`
-	/// <summary>
-	/// <para>
-	/// Credentials for <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication">HTTP
-	/// authentication</a>.
-	/// </para>
-	/// </summary>
-	HttpCredentials *BrowserNewPageOptionsHttpCredentials `json:"httpCredentials"`
-	/// <summary><para>Whether to ignore HTTPS errors during navigation. Defaults to <c>false</c>.</para></summary>
-	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
 	/// <summary>
 	/// <para>
 	/// Whether the <c>meta viewport</c> tag is taken into account and touch events are
@@ -199,8 +204,18 @@ type BrowserNewPageOptions struct {
 	/// </para>
 	/// </summary>
 	IsMobile *bool `json:"isMobile"`
+	/// <summary><para>Specifies if viewport supports touch events. Defaults to false.</para></summary>
+	HasTouch *bool `json:"hasTouch"`
 	/// <summary><para>Whether or not to enable JavaScript in the context. Defaults to <c>true</c>.</para></summary>
 	JavaScriptEnabled *bool `json:"javaScriptEnabled"`
+	/// <summary>
+	/// <para>
+	/// Changes the timezone of the context. See <a href="https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1">ICU's
+	/// metaZones.txt</a> for a list of supported timezone IDs.
+	/// </para>
+	/// </summary>
+	TimezoneId  *string                           `json:"timezoneId"`
+	Geolocation *BrowserNewPageOptionsGeolocation `json:"geolocation"`
 	/// <summary>
 	/// <para>
 	/// Specify user locale, for example <c>en-GB</c>, <c>de-DE</c>, etc. Locale will affect
@@ -209,8 +224,6 @@ type BrowserNewPageOptions struct {
 	/// </para>
 	/// </summary>
 	Locale *string `json:"locale"`
-	/// <summary><para>Whether to emulate network being offline. Defaults to <c>false</c>.</para></summary>
-	Offline *bool `json:"offline"`
 	/// <summary>
 	/// <para>
 	/// A list of permissions to grant to all pages in this context. See <see cref="BrowserContext.GrantPermissions"/>
@@ -220,13 +233,28 @@ type BrowserNewPageOptions struct {
 	Permissions []string `json:"permissions"`
 	/// <summary>
 	/// <para>
-	/// Network proxy settings to use with this context. Note that browser needs to be launched
-	/// with the global proxy for this option to work. If all contexts override the proxy,
-	/// global proxy will be never used and can be any string, for example <c>launch({ proxy:
-	/// { server: 'per-context' } })</c>.
+	/// An object containing additional HTTP headers to be sent with every request. All
+	/// header values must be strings.
 	/// </para>
 	/// </summary>
-	Proxy *BrowserNewPageOptionsProxy `json:"proxy"`
+	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
+	/// <summary><para>Whether to emulate network being offline. Defaults to <c>false</c>.</para></summary>
+	Offline *bool `json:"offline"`
+	/// <summary>
+	/// <para>
+	/// Credentials for <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication">HTTP
+	/// authentication</a>.
+	/// </para>
+	/// </summary>
+	HttpCredentials *BrowserNewPageOptionsHttpCredentials `json:"httpCredentials"`
+	/// <summary>
+	/// <para>
+	/// Emulates <c>'prefers-colors-scheme'</c> media feature, supported values are <c>'light'</c>,
+	/// <c>'dark'</c>, <c>'no-preference'</c>. See <see cref="Page.EmulateMedia"/> for more
+	/// details. Defaults to <c>'light'</c>.
+	/// </para>
+	/// </summary>
+	ColorScheme *ColorScheme `json:"colorScheme"`
 	/// <summary>
 	/// <para>
 	/// Enables video recording for all pages into <c>recordVideo.dir</c> directory. If
@@ -235,22 +263,16 @@ type BrowserNewPageOptions struct {
 	/// </para>
 	/// </summary>
 	RecordVideo *BrowserNewPageOptionsRecordVideo `json:"recordVideo"`
-	/// <summary>
+	/// <summary><para>Network proxy settings to use with this context.</para></summary>
+	/// <remarks>
 	/// <para>
-	/// Changes the timezone of the context. See <a href="https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1">ICU's
-	/// metaZones.txt</a> for a list of supported timezone IDs.
+	/// For Chromium on Windows the browser needs to be launched with the global proxy for
+	/// this option to work. If all contexts override the proxy, global proxy will be never
+	/// used and can be any string, for example <c>launch({ proxy: { server: 'http://per-context'
+	/// } })</c>.
 	/// </para>
-	/// </summary>
-	TimezoneId *string `json:"timezoneId"`
-	/// <summary><para>Specific user agent to use in this context.</para></summary>
-	UserAgent *string `json:"userAgent"`
-	/// <summary>
-	/// <para>
-	/// Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. <c>no_viewport</c>
-	/// disables the fixed viewport.
-	/// </para>
-	/// </summary>
-	Viewport *BrowserNewPageOptionsViewport `json:"viewport"`
+	/// </remarks>
+	Proxy *BrowserNewPageOptionsProxy `json:"proxy"`
 }
 type BrowserContextCookies struct {
 	/// <summary><para></para></summary>
@@ -353,29 +375,19 @@ type BrowserContextUnrouteOptions struct {
 type BrowserTypeLaunchOptions struct {
 	/// <summary>
 	/// <para>
-	/// Additional arguments to pass to the browser instance. The list of Chromium flags
-	/// can be found <a href="http://peter.sh/experiments/chromium-command-line-switches/">here</a>.
+	/// Whether to run browser in headless mode. More details for <a href="https://developers.google.com/web/updates/2017/04/headless-chrome">Chromium</a>
+	/// and <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode">Firefox</a>.
+	/// Defaults to <c>true</c> unless the <paramref name="devtools"/> option is <c>true</c>.
 	/// </para>
 	/// </summary>
-	Args []string `json:"args"`
-	/// <summary><para>Browser distribution channel.</para></summary>
+	Headless *bool `json:"headless"`
+	/// <summary>
+	/// <para>
+	/// Browser distribution channel. Read more about using <a href="./browsers.md#google-chrome--microsoft-edge">Google
+	/// Chrome and Microsoft Edge</a>.
+	/// </para>
+	/// </summary>
 	Channel *BrowserChannel `json:"channel"`
-	/// <summary><para>Enable Chromium sandboxing. Defaults to <c>false</c>.</para></summary>
-	ChromiumSandbox *bool `json:"chromiumSandbox"`
-	/// <summary>
-	/// <para>
-	/// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If
-	/// this option is <c>true</c>, the <paramref name="headless"/> option will be set <c>false</c>.
-	/// </para>
-	/// </summary>
-	Devtools *bool `json:"devtools"`
-	/// <summary>
-	/// <para>
-	/// If specified, accepted downloads are downloaded into this directory. Otherwise,
-	/// temporary directory is created and is deleted when browser is closed.
-	/// </para>
-	/// </summary>
-	DownloadsPath *string `json:"downloadsPath"`
 	/// <summary>
 	/// <para>
 	/// Path to a browser executable to run instead of the bundled one. If <paramref name="executablePath"/>
@@ -385,29 +397,30 @@ type BrowserTypeLaunchOptions struct {
 	/// </para>
 	/// </summary>
 	ExecutablePath *string `json:"executablePath"`
-	/// <summary><para>Close the browser process on SIGHUP. Defaults to <c>true</c>.</para></summary>
-	HandleSIGHUP *bool `json:"handleSIGHUP"`
-	/// <summary><para>Close the browser process on Ctrl-C. Defaults to <c>true</c>.</para></summary>
-	HandleSIGINT *bool `json:"handleSIGINT"`
-	/// <summary><para>Close the browser process on SIGTERM. Defaults to <c>true</c>.</para></summary>
-	HandleSIGTERM *bool `json:"handleSIGTERM"`
 	/// <summary>
 	/// <para>
-	/// Whether to run browser in headless mode. More details for <a href="https://developers.google.com/web/updates/2017/04/headless-chrome">Chromium</a>
-	/// and <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode">Firefox</a>.
-	/// Defaults to <c>true</c> unless the <paramref name="devtools"/> option is <c>true</c>.
+	/// Additional arguments to pass to the browser instance. The list of Chromium flags
+	/// can be found <a href="http://peter.sh/experiments/chromium-command-line-switches/">here</a>.
 	/// </para>
 	/// </summary>
-	Headless *bool `json:"headless"`
+	Args []string `json:"args"`
 	/// <summary><para>Network proxy settings.</para></summary>
 	Proxy *BrowserTypeLaunchOptionsProxy `json:"proxy"`
 	/// <summary>
 	/// <para>
-	/// Slows down Playwright operations by the specified amount of milliseconds. Useful
-	/// so that you can see what is going on.
+	/// If specified, accepted downloads are downloaded into this directory. Otherwise,
+	/// temporary directory is created and is deleted when browser is closed.
 	/// </para>
 	/// </summary>
-	SlowMo *float64 `json:"slowMo"`
+	DownloadsPath *string `json:"downloadsPath"`
+	/// <summary><para>Enable Chromium sandboxing. Defaults to <c>false</c>.</para></summary>
+	ChromiumSandbox *bool `json:"chromiumSandbox"`
+	/// <summary><para>Close the browser process on Ctrl-C. Defaults to <c>true</c>.</para></summary>
+	HandleSIGINT *bool `json:"handleSIGINT"`
+	/// <summary><para>Close the browser process on SIGTERM. Defaults to <c>true</c>.</para></summary>
+	HandleSIGTERM *bool `json:"handleSIGTERM"`
+	/// <summary><para>Close the browser process on SIGHUP. Defaults to <c>true</c>.</para></summary>
+	HandleSIGHUP *bool `json:"handleSIGHUP"`
 	/// <summary>
 	/// <para>
 	/// Maximum time in milliseconds to wait for the browser instance to start. Defaults
@@ -415,6 +428,20 @@ type BrowserTypeLaunchOptions struct {
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>
+	/// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If
+	/// this option is <c>true</c>, the <paramref name="headless"/> option will be set <c>false</c>.
+	/// </para>
+	/// </summary>
+	Devtools *bool `json:"devtools"`
+	/// <summary>
+	/// <para>
+	/// Slows down Playwright operations by the specified amount of milliseconds. Useful
+	/// so that you can see what is going on.
+	/// </para>
+	/// </summary>
+	SlowMo *float64 `json:"slowMo"`
 }
 type BrowserTypeProxy struct {
 	/// <summary>
@@ -440,48 +467,19 @@ type BrowserTypeProxy struct {
 type BrowserTypeLaunchPersistentContextOptions struct {
 	/// <summary>
 	/// <para>
-	/// Whether to automatically download all the attachments. Defaults to <c>false</c>
-	/// where all the downloads are canceled.
+	/// Whether to run browser in headless mode. More details for <a href="https://developers.google.com/web/updates/2017/04/headless-chrome">Chromium</a>
+	/// and <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode">Firefox</a>.
+	/// Defaults to <c>true</c> unless the <paramref name="devtools"/> option is <c>true</c>.
 	/// </para>
 	/// </summary>
-	AcceptDownloads *bool `json:"acceptDownloads"`
+	Headless *bool `json:"headless"`
 	/// <summary>
 	/// <para>
-	/// Additional arguments to pass to the browser instance. The list of Chromium flags
-	/// can be found <a href="http://peter.sh/experiments/chromium-command-line-switches/">here</a>.
+	/// Browser distribution channel. Read more about using <a href="./browsers.md#google-chrome--microsoft-edge">Google
+	/// Chrome and Microsoft Edge</a>.
 	/// </para>
 	/// </summary>
-	Args []string `json:"args"`
-	/// <summary><para>Toggles bypassing page's Content-Security-Policy.</para></summary>
-	BypassCSP *bool `json:"bypassCSP"`
-	/// <summary><para>Browser distribution channel.</para></summary>
 	Channel *BrowserChannel `json:"channel"`
-	/// <summary><para>Enable Chromium sandboxing. Defaults to <c>true</c>.</para></summary>
-	ChromiumSandbox *bool `json:"chromiumSandbox"`
-	/// <summary>
-	/// <para>
-	/// Emulates <c>'prefers-colors-scheme'</c> media feature, supported values are <c>'light'</c>,
-	/// <c>'dark'</c>, <c>'no-preference'</c>. See <see cref="Page.EmulateMedia"/> for more
-	/// details. Defaults to <c>'light'</c>.
-	/// </para>
-	/// </summary>
-	ColorScheme *ColorScheme `json:"colorScheme"`
-	/// <summary><para>Specify device scale factor (can be thought of as dpr). Defaults to <c>1</c>.</para></summary>
-	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
-	/// <summary>
-	/// <para>
-	/// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If
-	/// this option is <c>true</c>, the <paramref name="headless"/> option will be set <c>false</c>.
-	/// </para>
-	/// </summary>
-	Devtools *bool `json:"devtools"`
-	/// <summary>
-	/// <para>
-	/// If specified, accepted downloads are downloaded into this directory. Otherwise,
-	/// temporary directory is created and is deleted when browser is closed.
-	/// </para>
-	/// </summary>
-	DownloadsPath *string `json:"downloadsPath"`
 	/// <summary>
 	/// <para>
 	/// Path to a browser executable to run instead of the bundled one. If <paramref name="executablePath"/>
@@ -493,80 +491,28 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	ExecutablePath *string `json:"executablePath"`
 	/// <summary>
 	/// <para>
-	/// An object containing additional HTTP headers to be sent with every request. All
-	/// header values must be strings.
+	/// Additional arguments to pass to the browser instance. The list of Chromium flags
+	/// can be found <a href="http://peter.sh/experiments/chromium-command-line-switches/">here</a>.
 	/// </para>
 	/// </summary>
-	ExtraHttpHeaders map[string]string                                     `json:"extraHTTPHeaders"`
-	Geolocation      *BrowserTypeLaunchPersistentContextOptionsGeolocation `json:"geolocation"`
-	/// <summary><para>Close the browser process on SIGHUP. Defaults to <c>true</c>.</para></summary>
-	HandleSIGHUP *bool `json:"handleSIGHUP"`
-	/// <summary><para>Close the browser process on Ctrl-C. Defaults to <c>true</c>.</para></summary>
-	HandleSIGINT *bool `json:"handleSIGINT"`
-	/// <summary><para>Close the browser process on SIGTERM. Defaults to <c>true</c>.</para></summary>
-	HandleSIGTERM *bool `json:"handleSIGTERM"`
-	/// <summary><para>Specifies if viewport supports touch events. Defaults to false.</para></summary>
-	HasTouch *bool `json:"hasTouch"`
-	/// <summary>
-	/// <para>
-	/// Whether to run browser in headless mode. More details for <a href="https://developers.google.com/web/updates/2017/04/headless-chrome">Chromium</a>
-	/// and <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode">Firefox</a>.
-	/// Defaults to <c>true</c> unless the <paramref name="devtools"/> option is <c>true</c>.
-	/// </para>
-	/// </summary>
-	Headless *bool `json:"headless"`
-	/// <summary>
-	/// <para>
-	/// Credentials for <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication">HTTP
-	/// authentication</a>.
-	/// </para>
-	/// </summary>
-	HttpCredentials *BrowserTypeLaunchPersistentContextOptionsHttpCredentials `json:"httpCredentials"`
-	/// <summary><para>Whether to ignore HTTPS errors during navigation. Defaults to <c>false</c>.</para></summary>
-	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
-	/// <summary>
-	/// <para>
-	/// Whether the <c>meta viewport</c> tag is taken into account and touch events are
-	/// enabled. Defaults to <c>false</c>. Not supported in Firefox.
-	/// </para>
-	/// </summary>
-	IsMobile *bool `json:"isMobile"`
-	/// <summary><para>Whether or not to enable JavaScript in the context. Defaults to <c>true</c>.</para></summary>
-	JavaScriptEnabled *bool `json:"javaScriptEnabled"`
-	/// <summary>
-	/// <para>
-	/// Specify user locale, for example <c>en-GB</c>, <c>de-DE</c>, etc. Locale will affect
-	/// <c>navigator.language</c> value, <c>Accept-Language</c> request header value as
-	/// well as number and date formatting rules.
-	/// </para>
-	/// </summary>
-	Locale *string `json:"locale"`
-	/// <summary><para>Whether to emulate network being offline. Defaults to <c>false</c>.</para></summary>
-	Offline *bool `json:"offline"`
-	/// <summary>
-	/// <para>
-	/// A list of permissions to grant to all pages in this context. See <see cref="BrowserContext.GrantPermissions"/>
-	/// for more details.
-	/// </para>
-	/// </summary>
-	Permissions []string `json:"permissions"`
+	Args []string `json:"args"`
 	/// <summary><para>Network proxy settings.</para></summary>
 	Proxy *BrowserTypeLaunchPersistentContextOptionsProxy `json:"proxy"`
 	/// <summary>
 	/// <para>
-	/// Enables video recording for all pages into <c>recordVideo.dir</c> directory. If
-	/// not specified videos are not recorded. Make sure to await <see cref="BrowserContext.Close"/>
-	/// for videos to be saved.
+	/// If specified, accepted downloads are downloaded into this directory. Otherwise,
+	/// temporary directory is created and is deleted when browser is closed.
 	/// </para>
 	/// </summary>
-	RecordVideo *BrowserTypeLaunchPersistentContextOptionsRecordVideo `json:"recordVideo"`
-	/// <summary>
-	/// <para>
-	/// Slows down Playwright operations by the specified amount of milliseconds. Useful
-	/// so that you can see what is going on. Defaults to 0.
-	/// </para>
-	/// </summary>
-	SlowMo *float64 `json:"slowMo"`
+	DownloadsPath *string `json:"downloadsPath"`
+	/// <summary><para>Enable Chromium sandboxing. Defaults to <c>true</c>.</para></summary>
+	ChromiumSandbox *bool `json:"chromiumSandbox"`
+	/// <summary><para>Close the browser process on Ctrl-C. Defaults to <c>true</c>.</para></summary>
+	HandleSIGINT *bool `json:"handleSIGINT"`
+	/// <summary><para>Close the browser process on SIGTERM. Defaults to <c>true</c>.</para></summary>
+	HandleSIGTERM *bool `json:"handleSIGTERM"`
+	/// <summary><para>Close the browser process on SIGHUP. Defaults to <c>true</c>.</para></summary>
+	HandleSIGHUP *bool `json:"handleSIGHUP"`
 	/// <summary>
 	/// <para>
 	/// Maximum time in milliseconds to wait for the browser instance to start. Defaults
@@ -576,13 +522,29 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	Timeout *float64 `json:"timeout"`
 	/// <summary>
 	/// <para>
-	/// Changes the timezone of the context. See <a href="https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1">ICU's
-	/// metaZones.txt</a> for a list of supported timezone IDs.
+	/// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If
+	/// this option is <c>true</c>, the <paramref name="headless"/> option will be set <c>false</c>.
 	/// </para>
 	/// </summary>
-	TimezoneId *string `json:"timezoneId"`
-	/// <summary><para>Specific user agent to use in this context.</para></summary>
-	UserAgent *string `json:"userAgent"`
+	Devtools *bool `json:"devtools"`
+	/// <summary>
+	/// <para>
+	/// Slows down Playwright operations by the specified amount of milliseconds. Useful
+	/// so that you can see what is going on. Defaults to 0.
+	/// </para>
+	/// </summary>
+	SlowMo *float64 `json:"slowMo"`
+	/// <summary>
+	/// <para>
+	/// Whether to automatically download all the attachments. Defaults to <c>false</c>
+	/// where all the downloads are canceled.
+	/// </para>
+	/// </summary>
+	AcceptDownloads *bool `json:"acceptDownloads"`
+	/// <summary><para>Whether to ignore HTTPS errors during navigation. Defaults to <c>false</c>.</para></summary>
+	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
+	/// <summary><para>Toggles bypassing page's Content-Security-Policy.</para></summary>
+	BypassCSP *bool `json:"bypassCSP"`
 	/// <summary>
 	/// <para>
 	/// Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. <c>no_viewport</c>
@@ -590,6 +552,95 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	/// </para>
 	/// </summary>
 	Viewport *BrowserTypeLaunchPersistentContextOptionsViewport `json:"viewport"`
+	/// <summary>
+	/// <para>
+	/// Emulates consistent window screen size available inside web page via <c>window.screen</c>.
+	/// Is only used when the <paramref name="viewport"/> is set.
+	/// </para>
+	/// </summary>
+	Screen *BrowserTypeLaunchPersistentContextOptionsScreen `json:"screen"`
+	/// <summary><para>Specific user agent to use in this context.</para></summary>
+	UserAgent *string `json:"userAgent"`
+	/// <summary><para>Specify device scale factor (can be thought of as dpr). Defaults to <c>1</c>.</para></summary>
+	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
+	/// <summary>
+	/// <para>
+	/// Whether the <c>meta viewport</c> tag is taken into account and touch events are
+	/// enabled. Defaults to <c>false</c>. Not supported in Firefox.
+	/// </para>
+	/// </summary>
+	IsMobile *bool `json:"isMobile"`
+	/// <summary><para>Specifies if viewport supports touch events. Defaults to false.</para></summary>
+	HasTouch *bool `json:"hasTouch"`
+	/// <summary><para>Whether or not to enable JavaScript in the context. Defaults to <c>true</c>.</para></summary>
+	JavaScriptEnabled *bool `json:"javaScriptEnabled"`
+	/// <summary>
+	/// <para>
+	/// Changes the timezone of the context. See <a href="https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1">ICU's
+	/// metaZones.txt</a> for a list of supported timezone IDs.
+	/// </para>
+	/// </summary>
+	TimezoneId  *string                                               `json:"timezoneId"`
+	Geolocation *BrowserTypeLaunchPersistentContextOptionsGeolocation `json:"geolocation"`
+	/// <summary>
+	/// <para>
+	/// Specify user locale, for example <c>en-GB</c>, <c>de-DE</c>, etc. Locale will affect
+	/// <c>navigator.language</c> value, <c>Accept-Language</c> request header value as
+	/// well as number and date formatting rules.
+	/// </para>
+	/// </summary>
+	Locale *string `json:"locale"`
+	/// <summary>
+	/// <para>
+	/// A list of permissions to grant to all pages in this context. See <see cref="BrowserContext.GrantPermissions"/>
+	/// for more details.
+	/// </para>
+	/// </summary>
+	Permissions []string `json:"permissions"`
+	/// <summary>
+	/// <para>
+	/// An object containing additional HTTP headers to be sent with every request. All
+	/// header values must be strings.
+	/// </para>
+	/// </summary>
+	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
+	/// <summary><para>Whether to emulate network being offline. Defaults to <c>false</c>.</para></summary>
+	Offline *bool `json:"offline"`
+	/// <summary>
+	/// <para>
+	/// Credentials for <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication">HTTP
+	/// authentication</a>.
+	/// </para>
+	/// </summary>
+	HttpCredentials *BrowserTypeLaunchPersistentContextOptionsHttpCredentials `json:"httpCredentials"`
+	/// <summary>
+	/// <para>
+	/// Emulates <c>'prefers-colors-scheme'</c> media feature, supported values are <c>'light'</c>,
+	/// <c>'dark'</c>, <c>'no-preference'</c>. See <see cref="Page.EmulateMedia"/> for more
+	/// details. Defaults to <c>'light'</c>.
+	/// </para>
+	/// </summary>
+	ColorScheme *ColorScheme `json:"colorScheme"`
+	/// <summary>
+	/// <para>
+	/// Enables video recording for all pages into <c>recordVideo.dir</c> directory. If
+	/// not specified videos are not recorded. Make sure to await <see cref="BrowserContext.Close"/>
+	/// for videos to be saved.
+	/// </para>
+	/// </summary>
+	RecordVideo *BrowserTypeLaunchPersistentContextOptionsRecordVideo `json:"recordVideo"`
+}
+type BrowserTypeViewport struct {
+	/// <summary><para>page width in pixels.</para></summary>
+	Width *int `json:"width"`
+	/// <summary><para>page height in pixels.</para></summary>
+	Height *int `json:"height"`
+}
+type BrowserTypeScreen struct {
+	/// <summary><para>page width in pixels.</para></summary>
+	Width *int `json:"width"`
+	/// <summary><para>page height in pixels.</para></summary>
+	Height *int `json:"height"`
 }
 type BrowserTypeGeolocation struct {
 	/// <summary><para>Latitude between -90 and 90.</para></summary>
@@ -618,12 +669,6 @@ type BrowserTypeRecordVideo struct {
 	/// </summary>
 	Size *BrowserTypeRecordVideoSize `json:"size"`
 }
-type BrowserTypeViewport struct {
-	/// <summary><para>page width in pixels.</para></summary>
-	Width *int `json:"width"`
-	/// <summary><para>page height in pixels.</para></summary>
-	Height *int `json:"height"`
-}
 type DialogAcceptOptions struct {
 	/// <summary>
 	/// <para>
@@ -648,6 +693,13 @@ type ElementHandleBoundingBoxResult struct {
 type ElementHandleCheckOptions struct {
 	/// <summary>
 	/// <para>
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
+	/// </para>
+	/// </summary>
+	Position *ElementHandleCheckOptionsPosition `json:"position"`
+	/// <summary>
+	/// <para>
 	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
 	/// to <c>false</c>.
 	/// </para>
@@ -670,6 +722,20 @@ type ElementHandleCheckOptions struct {
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
+}
+type ElementHandlePosition struct {
+	/// <summary><para></para></summary>
+	X *float64 `json:"x"`
+	/// <summary><para></para></summary>
+	Y *float64 `json:"y"`
 }
 type ElementHandleClickOptions struct {
 	/// <summary><para>Defaults to <c>left</c>.</para></summary>
@@ -685,11 +751,11 @@ type ElementHandleClickOptions struct {
 	Delay *float64 `json:"delay"`
 	/// <summary>
 	/// <para>
-	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
-	/// to <c>false</c>.
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
 	/// </para>
 	/// </summary>
-	Force *bool `json:"force"`
+	Position *ElementHandleClickOptionsPosition `json:"position"`
 	/// <summary>
 	/// <para>
 	/// Modifier keys to press. Ensures that only these modifiers are pressed during the
@@ -698,6 +764,13 @@ type ElementHandleClickOptions struct {
 	/// </para>
 	/// </summary>
 	Modifiers []KeyboardModifier `json:"modifiers"`
+	/// <summary>
+	/// <para>
+	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
+	/// to <c>false</c>.
+	/// </para>
+	/// </summary>
+	Force *bool `json:"force"`
 	/// <summary>
 	/// <para>
 	/// Actions that initiate navigations are waiting for these navigations to happen and
@@ -709,25 +782,20 @@ type ElementHandleClickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	/// <summary>
 	/// <para>
-	/// A point to use relative to the top-left corner of element padding box. If not specified,
-	/// uses some visible point of the element.
-	/// </para>
-	/// </summary>
-	Position *ElementHandleClickOptionsPosition `json:"position"`
-	/// <summary>
-	/// <para>
 	/// Maximum time in milliseconds, defaults to 30 seconds, pass <c>0</c> to disable timeout.
 	/// The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/>
 	/// or <see cref="Page.SetDefaultTimeout"/> methods.
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
-}
-type ElementHandlePosition struct {
-	/// <summary><para></para></summary>
-	X *float64 `json:"x"`
-	/// <summary><para></para></summary>
-	Y *float64 `json:"y"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
 }
 type ElementHandleDblclickOptions struct {
 	/// <summary><para>Defaults to <c>left</c>.</para></summary>
@@ -741,11 +809,11 @@ type ElementHandleDblclickOptions struct {
 	Delay *float64 `json:"delay"`
 	/// <summary>
 	/// <para>
-	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
-	/// to <c>false</c>.
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
 	/// </para>
 	/// </summary>
-	Force *bool `json:"force"`
+	Position *ElementHandleDblclickOptionsPosition `json:"position"`
 	/// <summary>
 	/// <para>
 	/// Modifier keys to press. Ensures that only these modifiers are pressed during the
@@ -754,6 +822,13 @@ type ElementHandleDblclickOptions struct {
 	/// </para>
 	/// </summary>
 	Modifiers []KeyboardModifier `json:"modifiers"`
+	/// <summary>
+	/// <para>
+	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
+	/// to <c>false</c>.
+	/// </para>
+	/// </summary>
+	Force *bool `json:"force"`
 	/// <summary>
 	/// <para>
 	/// Actions that initiate navigations are waiting for these navigations to happen and
@@ -765,19 +840,20 @@ type ElementHandleDblclickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	/// <summary>
 	/// <para>
-	/// A point to use relative to the top-left corner of element padding box. If not specified,
-	/// uses some visible point of the element.
-	/// </para>
-	/// </summary>
-	Position *ElementHandleDblclickOptionsPosition `json:"position"`
-	/// <summary>
-	/// <para>
 	/// Maximum time in milliseconds, defaults to 30 seconds, pass <c>0</c> to disable timeout.
 	/// The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/>
 	/// or <see cref="Page.SetDefaultTimeout"/> methods.
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
 }
 type ElementHandleDispatchEventOptions struct {
 	/// <summary><para>Optional event-specific initialization properties.</para></summary>
@@ -813,11 +889,11 @@ type ElementHandleFillOptions struct {
 type ElementHandleHoverOptions struct {
 	/// <summary>
 	/// <para>
-	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
-	/// to <c>false</c>.
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
 	/// </para>
 	/// </summary>
-	Force *bool `json:"force"`
+	Position *ElementHandleHoverOptionsPosition `json:"position"`
 	/// <summary>
 	/// <para>
 	/// Modifier keys to press. Ensures that only these modifiers are pressed during the
@@ -828,11 +904,11 @@ type ElementHandleHoverOptions struct {
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	/// <summary>
 	/// <para>
-	/// A point to use relative to the top-left corner of element padding box. If not specified,
-	/// uses some visible point of the element.
+	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
+	/// to <c>false</c>.
 	/// </para>
 	/// </summary>
-	Position *ElementHandleHoverOptionsPosition `json:"position"`
+	Force *bool `json:"force"`
 	/// <summary>
 	/// <para>
 	/// Maximum time in milliseconds, defaults to 30 seconds, pass <c>0</c> to disable timeout.
@@ -841,6 +917,14 @@ type ElementHandleHoverOptions struct {
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
 }
 type ElementHandlePressOptions struct {
 	/// <summary>
@@ -871,13 +955,6 @@ type ElementHandlePressOptions struct {
 type ElementHandleScreenshotOptions struct {
 	/// <summary>
 	/// <para>
-	/// Hides default white background and allows capturing screenshots with transparency.
-	/// Not applicable to <c>jpeg</c> images. Defaults to <c>false</c>.
-	/// </para>
-	/// </summary>
-	OmitBackground *bool `json:"omitBackground"`
-	/// <summary>
-	/// <para>
 	/// The file path to save the image to. The screenshot type will be inferred from file
 	/// extension. If <paramref name="path"/> is a relative path, then it is resolved relative
 	/// to the current working directory. If no path is provided, the image won't be saved
@@ -885,8 +962,17 @@ type ElementHandleScreenshotOptions struct {
 	/// </para>
 	/// </summary>
 	Path *string `json:"path"`
+	/// <summary><para>Specify screenshot type, defaults to <c>png</c>.</para></summary>
+	Type *ScreenshotType `json:"type"`
 	/// <summary><para>The quality of the image, between 0-100. Not applicable to <c>png</c> images.</para></summary>
 	Quality *int `json:"quality"`
+	/// <summary>
+	/// <para>
+	/// Hides default white background and allows capturing screenshots with transparency.
+	/// Not applicable to <c>jpeg</c> images. Defaults to <c>false</c>.
+	/// </para>
+	/// </summary>
+	OmitBackground *bool `json:"omitBackground"`
 	/// <summary>
 	/// <para>
 	/// Maximum time in milliseconds, defaults to 30 seconds, pass <c>0</c> to disable timeout.
@@ -895,8 +981,6 @@ type ElementHandleScreenshotOptions struct {
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
-	/// <summary><para>Specify screenshot type, defaults to <c>png</c>.</para></summary>
-	Type *ScreenshotType `json:"type"`
 }
 type ElementHandleScrollIntoViewIfNeededOptions struct {
 	/// <summary>
@@ -959,11 +1043,11 @@ type ElementHandleSetInputFilesOptions struct {
 type ElementHandleTapOptions struct {
 	/// <summary>
 	/// <para>
-	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
-	/// to <c>false</c>.
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
 	/// </para>
 	/// </summary>
-	Force *bool `json:"force"`
+	Position *ElementHandleTapOptionsPosition `json:"position"`
 	/// <summary>
 	/// <para>
 	/// Modifier keys to press. Ensures that only these modifiers are pressed during the
@@ -972,6 +1056,13 @@ type ElementHandleTapOptions struct {
 	/// </para>
 	/// </summary>
 	Modifiers []KeyboardModifier `json:"modifiers"`
+	/// <summary>
+	/// <para>
+	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
+	/// to <c>false</c>.
+	/// </para>
+	/// </summary>
+	Force *bool `json:"force"`
 	/// <summary>
 	/// <para>
 	/// Actions that initiate navigations are waiting for these navigations to happen and
@@ -983,19 +1074,20 @@ type ElementHandleTapOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	/// <summary>
 	/// <para>
-	/// A point to use relative to the top-left corner of element padding box. If not specified,
-	/// uses some visible point of the element.
-	/// </para>
-	/// </summary>
-	Position *ElementHandleTapOptionsPosition `json:"position"`
-	/// <summary>
-	/// <para>
 	/// Maximum time in milliseconds, defaults to 30 seconds, pass <c>0</c> to disable timeout.
 	/// The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/>
 	/// or <see cref="Page.SetDefaultTimeout"/> methods.
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
 }
 type ElementHandleTypeOptions struct {
 	/// <summary><para>Time to wait between key presses in milliseconds. Defaults to 0.</para></summary>
@@ -1021,6 +1113,13 @@ type ElementHandleTypeOptions struct {
 type ElementHandleUncheckOptions struct {
 	/// <summary>
 	/// <para>
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
+	/// </para>
+	/// </summary>
+	Position *ElementHandleUncheckOptionsPosition `json:"position"`
+	/// <summary>
+	/// <para>
 	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
 	/// to <c>false</c>.
 	/// </para>
@@ -1043,6 +1142,14 @@ type ElementHandleUncheckOptions struct {
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
 }
 type ElementHandleWaitForElementStateOptions struct {
 	/// <summary>
@@ -1102,8 +1209,8 @@ type FileChooserSetFilesOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type FrameAddScriptTagOptions struct {
-	/// <summary><para>Raw JavaScript content to be injected into frame.</para></summary>
-	Content *string `json:"content"`
+	/// <summary><para>URL of a script to be added.</para></summary>
+	URL *string `json:"url"`
 	/// <summary>
 	/// <para>
 	/// Path to the JavaScript file to be injected into frame. If <c>path</c> is a relative
@@ -1111,6 +1218,8 @@ type FrameAddScriptTagOptions struct {
 	/// </para>
 	/// </summary>
 	Path *string `json:"path"`
+	/// <summary><para>Raw JavaScript content to be injected into frame.</para></summary>
+	Content *string `json:"content"`
 	/// <summary>
 	/// <para>
 	/// Script type. Use 'module' in order to load a Javascript ES6 module. See <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script">script</a>
@@ -1118,12 +1227,10 @@ type FrameAddScriptTagOptions struct {
 	/// </para>
 	/// </summary>
 	Type *string `json:"type"`
-	/// <summary><para>URL of a script to be added.</para></summary>
-	URL *string `json:"url"`
 }
 type FrameAddStyleTagOptions struct {
-	/// <summary><para>Raw CSS content to be injected into frame.</para></summary>
-	Content *string `json:"content"`
+	/// <summary><para>URL of the <c>&lt;link&gt;</c> tag.</para></summary>
+	URL *string `json:"url"`
 	/// <summary>
 	/// <para>
 	/// Path to the CSS file to be injected into frame. If <c>path</c> is a relative path,
@@ -1131,10 +1238,17 @@ type FrameAddStyleTagOptions struct {
 	/// </para>
 	/// </summary>
 	Path *string `json:"path"`
-	/// <summary><para>URL of the <c>&lt;link&gt;</c> tag.</para></summary>
-	URL *string `json:"url"`
+	/// <summary><para>Raw CSS content to be injected into frame.</para></summary>
+	Content *string `json:"content"`
 }
 type FrameCheckOptions struct {
+	/// <summary>
+	/// <para>
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
+	/// </para>
+	/// </summary>
+	Position *FrameCheckOptionsPosition `json:"position"`
 	/// <summary>
 	/// <para>
 	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
@@ -1159,6 +1273,20 @@ type FrameCheckOptions struct {
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
+}
+type FramePosition struct {
+	/// <summary><para></para></summary>
+	X *float64 `json:"x"`
+	/// <summary><para></para></summary>
+	Y *float64 `json:"y"`
 }
 type FrameClickOptions struct {
 	/// <summary><para>Defaults to <c>left</c>.</para></summary>
@@ -1174,11 +1302,11 @@ type FrameClickOptions struct {
 	Delay *float64 `json:"delay"`
 	/// <summary>
 	/// <para>
-	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
-	/// to <c>false</c>.
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
 	/// </para>
 	/// </summary>
-	Force *bool `json:"force"`
+	Position *FrameClickOptionsPosition `json:"position"`
 	/// <summary>
 	/// <para>
 	/// Modifier keys to press. Ensures that only these modifiers are pressed during the
@@ -1187,6 +1315,13 @@ type FrameClickOptions struct {
 	/// </para>
 	/// </summary>
 	Modifiers []KeyboardModifier `json:"modifiers"`
+	/// <summary>
+	/// <para>
+	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
+	/// to <c>false</c>.
+	/// </para>
+	/// </summary>
+	Force *bool `json:"force"`
 	/// <summary>
 	/// <para>
 	/// Actions that initiate navigations are waiting for these navigations to happen and
@@ -1198,25 +1333,20 @@ type FrameClickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	/// <summary>
 	/// <para>
-	/// A point to use relative to the top-left corner of element padding box. If not specified,
-	/// uses some visible point of the element.
-	/// </para>
-	/// </summary>
-	Position *FrameClickOptionsPosition `json:"position"`
-	/// <summary>
-	/// <para>
 	/// Maximum time in milliseconds, defaults to 30 seconds, pass <c>0</c> to disable timeout.
 	/// The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/>
 	/// or <see cref="Page.SetDefaultTimeout"/> methods.
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
-}
-type FramePosition struct {
-	/// <summary><para></para></summary>
-	X *float64 `json:"x"`
-	/// <summary><para></para></summary>
-	Y *float64 `json:"y"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
 }
 type FrameDblclickOptions struct {
 	/// <summary><para>Defaults to <c>left</c>.</para></summary>
@@ -1230,11 +1360,11 @@ type FrameDblclickOptions struct {
 	Delay *float64 `json:"delay"`
 	/// <summary>
 	/// <para>
-	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
-	/// to <c>false</c>.
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
 	/// </para>
 	/// </summary>
-	Force *bool `json:"force"`
+	Position *FrameDblclickOptionsPosition `json:"position"`
 	/// <summary>
 	/// <para>
 	/// Modifier keys to press. Ensures that only these modifiers are pressed during the
@@ -1243,6 +1373,13 @@ type FrameDblclickOptions struct {
 	/// </para>
 	/// </summary>
 	Modifiers []KeyboardModifier `json:"modifiers"`
+	/// <summary>
+	/// <para>
+	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
+	/// to <c>false</c>.
+	/// </para>
+	/// </summary>
+	Force *bool `json:"force"`
 	/// <summary>
 	/// <para>
 	/// Actions that initiate navigations are waiting for these navigations to happen and
@@ -1254,19 +1391,20 @@ type FrameDblclickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	/// <summary>
 	/// <para>
-	/// A point to use relative to the top-left corner of element padding box. If not specified,
-	/// uses some visible point of the element.
-	/// </para>
-	/// </summary>
-	Position *FrameDblclickOptionsPosition `json:"position"`
-	/// <summary>
-	/// <para>
 	/// Maximum time in milliseconds, defaults to 30 seconds, pass <c>0</c> to disable timeout.
 	/// The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/>
 	/// or <see cref="Page.SetDefaultTimeout"/> methods.
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
 }
 type FrameDispatchEventOptions struct {
 	/// <summary>
@@ -1335,22 +1473,6 @@ type FrameGetAttributeOptions struct {
 }
 type FrameGotoOptions struct {
 	/// <summary>
-	/// <para>
-	/// Referer header value. If provided it will take preference over the referer header
-	/// value set by <see cref="Page.SetExtraHttpHeaders"/>.
-	/// </para>
-	/// </summary>
-	Referer *string `json:"referer"`
-	/// <summary>
-	/// <para>
-	/// Maximum operation time in milliseconds, defaults to 30 seconds, pass <c>0</c> to
-	/// disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>,
-	/// <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/>
-	/// or <see cref="Page.SetDefaultTimeout"/> methods.
-	/// </para>
-	/// </summary>
-	Timeout *float64 `json:"timeout"`
-	/// <summary>
 	/// <para>When to consider operation succeeded, defaults to <c>load</c>. Events can be either:</para>
 	/// <list type="bullet">
 	/// <item><description>
@@ -1368,15 +1490,31 @@ type FrameGotoOptions struct {
 	/// </list>
 	/// </summary>
 	WaitUntil *WaitUntilState `json:"waitUntil"`
+	/// <summary>
+	/// <para>
+	/// Maximum operation time in milliseconds, defaults to 30 seconds, pass <c>0</c> to
+	/// disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>,
+	/// <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/>
+	/// or <see cref="Page.SetDefaultTimeout"/> methods.
+	/// </para>
+	/// </summary>
+	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>
+	/// Referer header value. If provided it will take preference over the referer header
+	/// value set by <see cref="Page.SetExtraHttpHeaders"/>.
+	/// </para>
+	/// </summary>
+	Referer *string `json:"referer"`
 }
 type FrameHoverOptions struct {
 	/// <summary>
 	/// <para>
-	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
-	/// to <c>false</c>.
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
 	/// </para>
 	/// </summary>
-	Force *bool `json:"force"`
+	Position *FrameHoverOptionsPosition `json:"position"`
 	/// <summary>
 	/// <para>
 	/// Modifier keys to press. Ensures that only these modifiers are pressed during the
@@ -1387,11 +1525,11 @@ type FrameHoverOptions struct {
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	/// <summary>
 	/// <para>
-	/// A point to use relative to the top-left corner of element padding box. If not specified,
-	/// uses some visible point of the element.
+	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
+	/// to <c>false</c>.
 	/// </para>
 	/// </summary>
-	Position *FrameHoverOptionsPosition `json:"position"`
+	Force *bool `json:"force"`
 	/// <summary>
 	/// <para>
 	/// Maximum time in milliseconds, defaults to 30 seconds, pass <c>0</c> to disable timeout.
@@ -1400,6 +1538,14 @@ type FrameHoverOptions struct {
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
 }
 type FrameInnerHTMLOptions struct {
 	/// <summary>
@@ -1577,11 +1723,11 @@ type FrameSetInputFilesOptions struct {
 type FrameTapOptions struct {
 	/// <summary>
 	/// <para>
-	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
-	/// to <c>false</c>.
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
 	/// </para>
 	/// </summary>
-	Force *bool `json:"force"`
+	Position *FrameTapOptionsPosition `json:"position"`
 	/// <summary>
 	/// <para>
 	/// Modifier keys to press. Ensures that only these modifiers are pressed during the
@@ -1601,11 +1747,11 @@ type FrameTapOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	/// <summary>
 	/// <para>
-	/// A point to use relative to the top-left corner of element padding box. If not specified,
-	/// uses some visible point of the element.
+	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
+	/// to <c>false</c>.
 	/// </para>
 	/// </summary>
-	Position *FrameTapOptionsPosition `json:"position"`
+	Force *bool `json:"force"`
 	/// <summary>
 	/// <para>
 	/// Maximum time in milliseconds, defaults to 30 seconds, pass <c>0</c> to disable timeout.
@@ -1614,6 +1760,14 @@ type FrameTapOptions struct {
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
 }
 type FrameTextContentOptions struct {
 	/// <summary>
@@ -1649,6 +1803,13 @@ type FrameTypeOptions struct {
 type FrameUncheckOptions struct {
 	/// <summary>
 	/// <para>
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
+	/// </para>
+	/// </summary>
+	Position *FrameUncheckOptionsPosition `json:"position"`
+	/// <summary>
+	/// <para>
 	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
 	/// to <c>false</c>.
 	/// </para>
@@ -1671,6 +1832,14 @@ type FrameUncheckOptions struct {
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
 }
 type FrameWaitForFunctionOptions struct {
 	/// <summary>
@@ -1705,15 +1874,6 @@ type FrameWaitForLoadStateOptions struct {
 type FrameWaitForNavigationOptions struct {
 	/// <summary>
 	/// <para>
-	/// Maximum operation time in milliseconds, defaults to 30 seconds, pass <c>0</c> to
-	/// disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>,
-	/// <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/>
-	/// or <see cref="Page.SetDefaultTimeout"/> methods.
-	/// </para>
-	/// </summary>
-	Timeout *float64 `json:"timeout"`
-	/// <summary>
-	/// <para>
 	/// A glob pattern, regex pattern or predicate receiving <see cref="URL"/> to match
 	/// while waiting for the navigation.
 	/// </para>
@@ -1737,6 +1897,15 @@ type FrameWaitForNavigationOptions struct {
 	/// </list>
 	/// </summary>
 	WaitUntil *WaitUntilState `json:"waitUntil"`
+	/// <summary>
+	/// <para>
+	/// Maximum operation time in milliseconds, defaults to 30 seconds, pass <c>0</c> to
+	/// disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>,
+	/// <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/>
+	/// or <see cref="Page.SetDefaultTimeout"/> methods.
+	/// </para>
+	/// </summary>
+	Timeout *float64 `json:"timeout"`
 }
 type FrameWaitForSelectorOptions struct {
 	/// <summary>
@@ -1765,6 +1934,35 @@ type FrameWaitForSelectorOptions struct {
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+}
+type FrameWaitForURLOptions struct {
+	/// <summary>
+	/// <para>
+	/// Maximum operation time in milliseconds, defaults to 30 seconds, pass <c>0</c> to
+	/// disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>,
+	/// <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/>
+	/// or <see cref="Page.SetDefaultTimeout"/> methods.
+	/// </para>
+	/// </summary>
+	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>When to consider operation succeeded, defaults to <c>load</c>. Events can be either:</para>
+	/// <list type="bullet">
+	/// <item><description>
+	/// <c>'domcontentloaded'</c> - consider operation to be finished when the <c>DOMContentLoaded</c>
+	/// event is fired.
+	/// </description></item>
+	/// <item><description>
+	/// <c>'load'</c> - consider operation to be finished when the <c>load</c> event is
+	/// fired.
+	/// </description></item>
+	/// <item><description>
+	/// <c>'networkidle'</c> - consider operation to be finished when there are no network
+	/// connections for at least <c>500</c> ms.
+	/// </description></item>
+	/// </list>
+	/// </summary>
+	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type JSHandleEvaluateOptions struct {
 	/// <summary><para>Optional argument to pass to <paramref name="expression"/>.</para></summary>
@@ -1834,8 +2032,8 @@ type PageAddInitScriptOptions struct {
 	Path *string `json:"path"`
 }
 type PageAddScriptTagOptions struct {
-	/// <summary><para>Raw JavaScript content to be injected into frame.</para></summary>
-	Content *string `json:"content"`
+	/// <summary><para>URL of a script to be added.</para></summary>
+	URL *string `json:"url"`
 	/// <summary>
 	/// <para>
 	/// Path to the JavaScript file to be injected into frame. If <c>path</c> is a relative
@@ -1843,6 +2041,8 @@ type PageAddScriptTagOptions struct {
 	/// </para>
 	/// </summary>
 	Path *string `json:"path"`
+	/// <summary><para>Raw JavaScript content to be injected into frame.</para></summary>
+	Content *string `json:"content"`
 	/// <summary>
 	/// <para>
 	/// Script type. Use 'module' in order to load a Javascript ES6 module. See <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script">script</a>
@@ -1850,12 +2050,10 @@ type PageAddScriptTagOptions struct {
 	/// </para>
 	/// </summary>
 	Type *string `json:"type"`
-	/// <summary><para>URL of a script to be added.</para></summary>
-	URL *string `json:"url"`
 }
 type PageAddStyleTagOptions struct {
-	/// <summary><para>Raw CSS content to be injected into frame.</para></summary>
-	Content *string `json:"content"`
+	/// <summary><para>URL of the <c>&lt;link&gt;</c> tag.</para></summary>
+	URL *string `json:"url"`
 	/// <summary>
 	/// <para>
 	/// Path to the CSS file to be injected into frame. If <c>path</c> is a relative path,
@@ -1863,10 +2061,17 @@ type PageAddStyleTagOptions struct {
 	/// </para>
 	/// </summary>
 	Path *string `json:"path"`
-	/// <summary><para>URL of the <c>&lt;link&gt;</c> tag.</para></summary>
-	URL *string `json:"url"`
+	/// <summary><para>Raw CSS content to be injected into frame.</para></summary>
+	Content *string `json:"content"`
 }
 type PageCheckOptions struct {
+	/// <summary>
+	/// <para>
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
+	/// </para>
+	/// </summary>
+	Position *PageCheckOptionsPosition `json:"position"`
 	/// <summary>
 	/// <para>
 	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
@@ -1891,6 +2096,20 @@ type PageCheckOptions struct {
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
+}
+type PagePosition struct {
+	/// <summary><para></para></summary>
+	X *float64 `json:"x"`
+	/// <summary><para></para></summary>
+	Y *float64 `json:"y"`
 }
 type PageClickOptions struct {
 	/// <summary><para>Defaults to <c>left</c>.</para></summary>
@@ -1906,11 +2125,11 @@ type PageClickOptions struct {
 	Delay *float64 `json:"delay"`
 	/// <summary>
 	/// <para>
-	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
-	/// to <c>false</c>.
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
 	/// </para>
 	/// </summary>
-	Force *bool `json:"force"`
+	Position *PageClickOptionsPosition `json:"position"`
 	/// <summary>
 	/// <para>
 	/// Modifier keys to press. Ensures that only these modifiers are pressed during the
@@ -1919,6 +2138,13 @@ type PageClickOptions struct {
 	/// </para>
 	/// </summary>
 	Modifiers []KeyboardModifier `json:"modifiers"`
+	/// <summary>
+	/// <para>
+	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
+	/// to <c>false</c>.
+	/// </para>
+	/// </summary>
+	Force *bool `json:"force"`
 	/// <summary>
 	/// <para>
 	/// Actions that initiate navigations are waiting for these navigations to happen and
@@ -1930,25 +2156,20 @@ type PageClickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	/// <summary>
 	/// <para>
-	/// A point to use relative to the top-left corner of element padding box. If not specified,
-	/// uses some visible point of the element.
-	/// </para>
-	/// </summary>
-	Position *PageClickOptionsPosition `json:"position"`
-	/// <summary>
-	/// <para>
 	/// Maximum time in milliseconds, defaults to 30 seconds, pass <c>0</c> to disable timeout.
 	/// The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/>
 	/// or <see cref="Page.SetDefaultTimeout"/> methods.
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
-}
-type PagePosition struct {
-	/// <summary><para></para></summary>
-	X *float64 `json:"x"`
-	/// <summary><para></para></summary>
-	Y *float64 `json:"y"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
 }
 type PageCloseOptions struct {
 	/// <summary>
@@ -1971,11 +2192,11 @@ type PageDblclickOptions struct {
 	Delay *float64 `json:"delay"`
 	/// <summary>
 	/// <para>
-	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
-	/// to <c>false</c>.
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
 	/// </para>
 	/// </summary>
-	Force *bool `json:"force"`
+	Position *PageDblclickOptionsPosition `json:"position"`
 	/// <summary>
 	/// <para>
 	/// Modifier keys to press. Ensures that only these modifiers are pressed during the
@@ -1984,6 +2205,13 @@ type PageDblclickOptions struct {
 	/// </para>
 	/// </summary>
 	Modifiers []KeyboardModifier `json:"modifiers"`
+	/// <summary>
+	/// <para>
+	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
+	/// to <c>false</c>.
+	/// </para>
+	/// </summary>
+	Force *bool `json:"force"`
 	/// <summary>
 	/// <para>
 	/// Actions that initiate navigations are waiting for these navigations to happen and
@@ -1995,19 +2223,20 @@ type PageDblclickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	/// <summary>
 	/// <para>
-	/// A point to use relative to the top-left corner of element padding box. If not specified,
-	/// uses some visible point of the element.
-	/// </para>
-	/// </summary>
-	Position *PageDblclickOptionsPosition `json:"position"`
-	/// <summary>
-	/// <para>
 	/// Maximum time in milliseconds, defaults to 30 seconds, pass <c>0</c> to disable timeout.
 	/// The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/>
 	/// or <see cref="Page.SetDefaultTimeout"/> methods.
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
 }
 type PageDispatchEventOptions struct {
 	/// <summary>
@@ -2022,19 +2251,19 @@ type PageDispatchEventOptions struct {
 type PageEmulateMediaOptions struct {
 	/// <summary>
 	/// <para>
+	/// Changes the CSS media type of the page. The only allowed values are <c>'screen'</c>,
+	/// <c>'print'</c> and <c>null</c>. Passing <c>null</c> disables CSS media emulation.
+	/// </para>
+	/// </summary>
+	Media *Media `json:"media"`
+	/// <summary>
+	/// <para>
 	/// Emulates <c>'prefers-colors-scheme'</c> media feature, supported values are <c>'light'</c>,
 	/// <c>'dark'</c>, <c>'no-preference'</c>. Passing <c>null</c> disables color scheme
 	/// emulation.
 	/// </para>
 	/// </summary>
 	ColorScheme *ColorScheme `json:"colorScheme"`
-	/// <summary>
-	/// <para>
-	/// Changes the CSS media type of the page. The only allowed values are <c>'screen'</c>,
-	/// <c>'print'</c> and <c>null</c>. Passing <c>null</c> disables CSS media emulation.
-	/// </para>
-	/// </summary>
-	Media *Media `json:"media"`
 }
 type PageEvalOnSelectorOptions struct {
 	/// <summary><para>Optional argument to pass to <paramref name="expression"/>.</para></summary>
@@ -2103,15 +2332,6 @@ type PageGetAttributeOptions struct {
 }
 type PageGoBackOptions struct {
 	/// <summary>
-	/// <para>
-	/// Maximum operation time in milliseconds, defaults to 30 seconds, pass <c>0</c> to
-	/// disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>,
-	/// <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/>
-	/// or <see cref="Page.SetDefaultTimeout"/> methods.
-	/// </para>
-	/// </summary>
-	Timeout *float64 `json:"timeout"`
-	/// <summary>
 	/// <para>When to consider operation succeeded, defaults to <c>load</c>. Events can be either:</para>
 	/// <list type="bullet">
 	/// <item><description>
@@ -2129,9 +2349,36 @@ type PageGoBackOptions struct {
 	/// </list>
 	/// </summary>
 	WaitUntil *WaitUntilState `json:"waitUntil"`
+	/// <summary>
+	/// <para>
+	/// Maximum operation time in milliseconds, defaults to 30 seconds, pass <c>0</c> to
+	/// disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>,
+	/// <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/>
+	/// or <see cref="Page.SetDefaultTimeout"/> methods.
+	/// </para>
+	/// </summary>
+	Timeout *float64 `json:"timeout"`
 }
 type PageGoForwardOptions struct {
 	/// <summary>
+	/// <para>When to consider operation succeeded, defaults to <c>load</c>. Events can be either:</para>
+	/// <list type="bullet">
+	/// <item><description>
+	/// <c>'domcontentloaded'</c> - consider operation to be finished when the <c>DOMContentLoaded</c>
+	/// event is fired.
+	/// </description></item>
+	/// <item><description>
+	/// <c>'load'</c> - consider operation to be finished when the <c>load</c> event is
+	/// fired.
+	/// </description></item>
+	/// <item><description>
+	/// <c>'networkidle'</c> - consider operation to be finished when there are no network
+	/// connections for at least <c>500</c> ms.
+	/// </description></item>
+	/// </list>
+	/// </summary>
+	WaitUntil *WaitUntilState `json:"waitUntil"`
+	/// <summary>
 	/// <para>
 	/// Maximum operation time in milliseconds, defaults to 30 seconds, pass <c>0</c> to
 	/// disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>,
@@ -2140,6 +2387,8 @@ type PageGoForwardOptions struct {
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+}
+type PageGotoOptions struct {
 	/// <summary>
 	/// <para>When to consider operation succeeded, defaults to <c>load</c>. Events can be either:</para>
 	/// <list type="bullet">
@@ -2158,8 +2407,15 @@ type PageGoForwardOptions struct {
 	/// </list>
 	/// </summary>
 	WaitUntil *WaitUntilState `json:"waitUntil"`
-}
-type PageGotoOptions struct {
+	/// <summary>
+	/// <para>
+	/// Maximum operation time in milliseconds, defaults to 30 seconds, pass <c>0</c> to
+	/// disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>,
+	/// <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/>
+	/// or <see cref="Page.SetDefaultTimeout"/> methods.
+	/// </para>
+	/// </summary>
+	Timeout *float64 `json:"timeout"`
 	/// <summary>
 	/// <para>
 	/// Referer header value. If provided it will take preference over the referer header
@@ -2167,42 +2423,15 @@ type PageGotoOptions struct {
 	/// </para>
 	/// </summary>
 	Referer *string `json:"referer"`
-	/// <summary>
-	/// <para>
-	/// Maximum operation time in milliseconds, defaults to 30 seconds, pass <c>0</c> to
-	/// disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>,
-	/// <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/>
-	/// or <see cref="Page.SetDefaultTimeout"/> methods.
-	/// </para>
-	/// </summary>
-	Timeout *float64 `json:"timeout"`
-	/// <summary>
-	/// <para>When to consider operation succeeded, defaults to <c>load</c>. Events can be either:</para>
-	/// <list type="bullet">
-	/// <item><description>
-	/// <c>'domcontentloaded'</c> - consider operation to be finished when the <c>DOMContentLoaded</c>
-	/// event is fired.
-	/// </description></item>
-	/// <item><description>
-	/// <c>'load'</c> - consider operation to be finished when the <c>load</c> event is
-	/// fired.
-	/// </description></item>
-	/// <item><description>
-	/// <c>'networkidle'</c> - consider operation to be finished when there are no network
-	/// connections for at least <c>500</c> ms.
-	/// </description></item>
-	/// </list>
-	/// </summary>
-	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageHoverOptions struct {
 	/// <summary>
 	/// <para>
-	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
-	/// to <c>false</c>.
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
 	/// </para>
 	/// </summary>
-	Force *bool `json:"force"`
+	Position *PageHoverOptionsPosition `json:"position"`
 	/// <summary>
 	/// <para>
 	/// Modifier keys to press. Ensures that only these modifiers are pressed during the
@@ -2213,11 +2442,11 @@ type PageHoverOptions struct {
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	/// <summary>
 	/// <para>
-	/// A point to use relative to the top-left corner of element padding box. If not specified,
-	/// uses some visible point of the element.
+	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
+	/// to <c>false</c>.
 	/// </para>
 	/// </summary>
-	Position *PageHoverOptionsPosition `json:"position"`
+	Force *bool `json:"force"`
 	/// <summary>
 	/// <para>
 	/// Maximum time in milliseconds, defaults to 30 seconds, pass <c>0</c> to disable timeout.
@@ -2226,6 +2455,14 @@ type PageHoverOptions struct {
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
 }
 type PageInnerHTMLOptions struct {
 	/// <summary>
@@ -2308,22 +2545,23 @@ type PageIsVisibleOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type PagePdfOptions struct {
+	/// <summary>
+	/// <para>
+	/// The file path to save the PDF to. If <paramref name="path"/> is a relative path,
+	/// then it is resolved relative to the current working directory. If no path is provided,
+	/// the PDF won't be saved to the disk.
+	/// </para>
+	/// </summary>
+	Path *string `json:"path"`
+	/// <summary>
+	/// <para>
+	/// Scale of the webpage rendering. Defaults to <c>1</c>. Scale amount must be between
+	/// 0.1 and 2.
+	/// </para>
+	/// </summary>
+	Scale *float64 `json:"scale"`
 	/// <summary><para>Display header and footer. Defaults to <c>false</c>.</para></summary>
 	DisplayHeaderFooter *bool `json:"displayHeaderFooter"`
-	/// <summary>
-	/// <para>
-	/// HTML template for the print footer. Should use the same format as the <paramref
-	/// name="headerTemplate"/>.
-	/// </para>
-	/// </summary>
-	FooterTemplate *string `json:"footerTemplate"`
-	/// <summary>
-	/// <para>
-	/// Paper format. If set, takes priority over <paramref name="width"/> or <paramref
-	/// name="height"/> options. Defaults to 'Letter'.
-	/// </para>
-	/// </summary>
-	Format *string `json:"format"`
 	/// <summary>
 	/// <para>
 	/// HTML template for the print header. Should be valid HTML markup with following classes
@@ -2338,6 +2576,15 @@ type PagePdfOptions struct {
 	/// </list>
 	/// </summary>
 	HeaderTemplate *string `json:"headerTemplate"`
+	/// <summary>
+	/// <para>
+	/// HTML template for the print footer. Should use the same format as the <paramref
+	/// name="headerTemplate"/>.
+	/// </para>
+	/// </summary>
+	FooterTemplate *string `json:"footerTemplate"`
+	/// <summary><para>Print background graphics. Defaults to <c>false</c>.</para></summary>
+	PrintBackground *bool `json:"printBackground"`
 	/// <summary><para>Paper orientation. Defaults to <c>false</c>.</para></summary>
 	Landscape *bool `json:"landscape"`
 	/// <summary>
@@ -2349,12 +2596,11 @@ type PagePdfOptions struct {
 	PageRanges *string `json:"pageRanges"`
 	/// <summary>
 	/// <para>
-	/// The file path to save the PDF to. If <paramref name="path"/> is a relative path,
-	/// then it is resolved relative to the current working directory. If no path is provided,
-	/// the PDF won't be saved to the disk.
+	/// Paper format. If set, takes priority over <paramref name="width"/> or <paramref
+	/// name="height"/> options. Defaults to 'Letter'.
 	/// </para>
 	/// </summary>
-	Path *string `json:"path"`
+	Format *string `json:"format"`
 	/// <summary>
 	/// <para>
 	/// Give any CSS <c>@page</c> size declared in the page priority over what is declared
@@ -2364,15 +2610,6 @@ type PagePdfOptions struct {
 	/// </para>
 	/// </summary>
 	PreferCSSPageSize *bool `json:"preferCSSPageSize"`
-	/// <summary><para>Print background graphics. Defaults to <c>false</c>.</para></summary>
-	PrintBackground *bool `json:"printBackground"`
-	/// <summary>
-	/// <para>
-	/// Scale of the webpage rendering. Defaults to <c>1</c>. Scale amount must be between
-	/// 0.1 and 2.
-	/// </para>
-	/// </summary>
-	Scale *float64 `json:"scale"`
 }
 type PagePressOptions struct {
 	/// <summary>
@@ -2402,15 +2639,6 @@ type PagePressOptions struct {
 }
 type PageReloadOptions struct {
 	/// <summary>
-	/// <para>
-	/// Maximum operation time in milliseconds, defaults to 30 seconds, pass <c>0</c> to
-	/// disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>,
-	/// <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/>
-	/// or <see cref="Page.SetDefaultTimeout"/> methods.
-	/// </para>
-	/// </summary>
-	Timeout *float64 `json:"timeout"`
-	/// <summary>
 	/// <para>When to consider operation succeeded, defaults to <c>load</c>. Events can be either:</para>
 	/// <list type="bullet">
 	/// <item><description>
@@ -2428,33 +2656,21 @@ type PageReloadOptions struct {
 	/// </list>
 	/// </summary>
 	WaitUntil *WaitUntilState `json:"waitUntil"`
+	/// <summary>
+	/// <para>
+	/// Maximum operation time in milliseconds, defaults to 30 seconds, pass <c>0</c> to
+	/// disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>,
+	/// <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/>
+	/// or <see cref="Page.SetDefaultTimeout"/> methods.
+	/// </para>
+	/// </summary>
+	Timeout *float64 `json:"timeout"`
 }
 type PageRouteOptions struct {
 	/// <summary><para>handler function to route the request.</para></summary>
 	Handler func(Route, Request) `json:"handler"`
 }
 type PageScreenshotOptions struct {
-	/// <summary>
-	/// <para>
-	/// An object which specifies clipping of the resulting image. Should have the following
-	/// fields:
-	/// </para>
-	/// </summary>
-	Clip *PageScreenshotOptionsClip `json:"clip"`
-	/// <summary>
-	/// <para>
-	/// When true, takes a screenshot of the full scrollable page, instead of the currently
-	/// visible viewport. Defaults to <c>false</c>.
-	/// </para>
-	/// </summary>
-	FullPage *bool `json:"fullPage"`
-	/// <summary>
-	/// <para>
-	/// Hides default white background and allows capturing screenshots with transparency.
-	/// Not applicable to <c>jpeg</c> images. Defaults to <c>false</c>.
-	/// </para>
-	/// </summary>
-	OmitBackground *bool `json:"omitBackground"`
 	/// <summary>
 	/// <para>
 	/// The file path to save the image to. The screenshot type will be inferred from file
@@ -2464,8 +2680,31 @@ type PageScreenshotOptions struct {
 	/// </para>
 	/// </summary>
 	Path *string `json:"path"`
+	/// <summary><para>Specify screenshot type, defaults to <c>png</c>.</para></summary>
+	Type *ScreenshotType `json:"type"`
 	/// <summary><para>The quality of the image, between 0-100. Not applicable to <c>png</c> images.</para></summary>
 	Quality *int `json:"quality"`
+	/// <summary>
+	/// <para>
+	/// When true, takes a screenshot of the full scrollable page, instead of the currently
+	/// visible viewport. Defaults to <c>false</c>.
+	/// </para>
+	/// </summary>
+	FullPage *bool `json:"fullPage"`
+	/// <summary>
+	/// <para>
+	/// An object which specifies clipping of the resulting image. Should have the following
+	/// fields:
+	/// </para>
+	/// </summary>
+	Clip *PageScreenshotOptionsClip `json:"clip"`
+	/// <summary>
+	/// <para>
+	/// Hides default white background and allows capturing screenshots with transparency.
+	/// Not applicable to <c>jpeg</c> images. Defaults to <c>false</c>.
+	/// </para>
+	/// </summary>
+	OmitBackground *bool `json:"omitBackground"`
 	/// <summary>
 	/// <para>
 	/// Maximum time in milliseconds, defaults to 30 seconds, pass <c>0</c> to disable timeout.
@@ -2474,8 +2713,6 @@ type PageScreenshotOptions struct {
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
-	/// <summary><para>Specify screenshot type, defaults to <c>png</c>.</para></summary>
-	Type *ScreenshotType `json:"type"`
 }
 type PageClip struct {
 	/// <summary><para>x-coordinate of top-left corner of clip area</para></summary>
@@ -2557,11 +2794,11 @@ type PageSetInputFilesOptions struct {
 type PageTapOptions struct {
 	/// <summary>
 	/// <para>
-	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
-	/// to <c>false</c>.
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
 	/// </para>
 	/// </summary>
-	Force *bool `json:"force"`
+	Position *PageTapOptionsPosition `json:"position"`
 	/// <summary>
 	/// <para>
 	/// Modifier keys to press. Ensures that only these modifiers are pressed during the
@@ -2581,11 +2818,11 @@ type PageTapOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	/// <summary>
 	/// <para>
-	/// A point to use relative to the top-left corner of element padding box. If not specified,
-	/// uses some visible point of the element.
+	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
+	/// to <c>false</c>.
 	/// </para>
 	/// </summary>
-	Position *PageTapOptionsPosition `json:"position"`
+	Force *bool `json:"force"`
 	/// <summary>
 	/// <para>
 	/// Maximum time in milliseconds, defaults to 30 seconds, pass <c>0</c> to disable timeout.
@@ -2594,6 +2831,14 @@ type PageTapOptions struct {
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
 }
 type PageTextContentOptions struct {
 	/// <summary>
@@ -2629,6 +2874,13 @@ type PageTypeOptions struct {
 type PageUncheckOptions struct {
 	/// <summary>
 	/// <para>
+	/// A point to use relative to the top-left corner of element padding box. If not specified,
+	/// uses some visible point of the element.
+	/// </para>
+	/// </summary>
+	Position *PageUncheckOptionsPosition `json:"position"`
+	/// <summary>
+	/// <para>
 	/// Whether to bypass the <a href="./actionability.md">actionability</a> checks. Defaults
 	/// to <c>false</c>.
 	/// </para>
@@ -2651,6 +2903,14 @@ type PageUncheckOptions struct {
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>
+	/// When set, this method only performs the <a href="./actionability.md">actionability</a>
+	/// checks and skips the action. Defaults to <c>false</c>. Useful to wait until the
+	/// element is ready for the action without performing it.
+	/// </para>
+	/// </summary>
+	Trial *bool `json:"trial"`
 }
 type PageUnrouteOptions struct {
 	/// <summary><para>Optional handler function to route the request.</para></summary>
@@ -2697,15 +2957,6 @@ type PageWaitForLoadStateOptions struct {
 type PageWaitForNavigationOptions struct {
 	/// <summary>
 	/// <para>
-	/// Maximum operation time in milliseconds, defaults to 30 seconds, pass <c>0</c> to
-	/// disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>,
-	/// <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/>
-	/// or <see cref="Page.SetDefaultTimeout"/> methods.
-	/// </para>
-	/// </summary>
-	Timeout *float64 `json:"timeout"`
-	/// <summary>
-	/// <para>
 	/// A glob pattern, regex pattern or predicate receiving <see cref="URL"/> to match
 	/// while waiting for the navigation.
 	/// </para>
@@ -2729,6 +2980,15 @@ type PageWaitForNavigationOptions struct {
 	/// </list>
 	/// </summary>
 	WaitUntil *WaitUntilState `json:"waitUntil"`
+	/// <summary>
+	/// <para>
+	/// Maximum operation time in milliseconds, defaults to 30 seconds, pass <c>0</c> to
+	/// disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>,
+	/// <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/>
+	/// or <see cref="Page.SetDefaultTimeout"/> methods.
+	/// </para>
+	/// </summary>
+	Timeout *float64 `json:"timeout"`
 }
 type PageWaitForRequestOptions struct {
 	/// <summary>
@@ -2777,6 +3037,35 @@ type PageWaitForSelectorOptions struct {
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
+}
+type PageWaitForURLOptions struct {
+	/// <summary>
+	/// <para>
+	/// Maximum operation time in milliseconds, defaults to 30 seconds, pass <c>0</c> to
+	/// disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>,
+	/// <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/>
+	/// or <see cref="Page.SetDefaultTimeout"/> methods.
+	/// </para>
+	/// </summary>
+	Timeout *float64 `json:"timeout"`
+	/// <summary>
+	/// <para>When to consider operation succeeded, defaults to <c>load</c>. Events can be either:</para>
+	/// <list type="bullet">
+	/// <item><description>
+	/// <c>'domcontentloaded'</c> - consider operation to be finished when the <c>DOMContentLoaded</c>
+	/// event is fired.
+	/// </description></item>
+	/// <item><description>
+	/// <c>'load'</c> - consider operation to be finished when the <c>load</c> event is
+	/// fired.
+	/// </description></item>
+	/// <item><description>
+	/// <c>'networkidle'</c> - consider operation to be finished when there are no network
+	/// connections for at least <c>500</c> ms.
+	/// </description></item>
+	/// </list>
+	/// </summary>
+	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 
 // Result of calling <see cref="Request.Timing" />.
@@ -2882,22 +3171,24 @@ type RouteAbortOptions struct {
 	ErrorCode *string `json:"errorCode"`
 }
 type RouteContinueOptions struct {
-	/// <summary><para>If set changes the request HTTP headers. Header values will be converted to a string.</para></summary>
-	Headers map[string]string `json:"headers"`
+	/// <summary><para>If set changes the request URL. New URL must have same protocol as original one.</para></summary>
+	URL *string `json:"url"`
 	/// <summary><para>If set changes the request method (e.g. GET or POST)</para></summary>
 	Method *string `json:"method"`
 	/// <summary><para>If set changes the post data of request</para></summary>
 	PostData interface{} `json:"postData"`
-	/// <summary><para>If set changes the request URL. New URL must have same protocol as original one.</para></summary>
-	URL *string `json:"url"`
+	/// <summary><para>If set changes the request HTTP headers. Header values will be converted to a string.</para></summary>
+	Headers map[string]string `json:"headers"`
 }
 type RouteFulfillOptions struct {
-	/// <summary><para>Response body.</para></summary>
-	Body interface{} `json:"body"`
-	/// <summary><para>If set, equals to setting <c>Content-Type</c> response header.</para></summary>
-	ContentType *string `json:"contentType"`
+	/// <summary><para>Response status code, defaults to <c>200</c>.</para></summary>
+	Status *int `json:"status"`
 	/// <summary><para>Response headers. Header values will be converted to a string.</para></summary>
 	Headers map[string]string `json:"headers"`
+	/// <summary><para>If set, equals to setting <c>Content-Type</c> response header.</para></summary>
+	ContentType *string `json:"contentType"`
+	/// <summary><para>Response body.</para></summary>
+	Body interface{} `json:"body"`
 	/// <summary>
 	/// <para>
 	/// File path to respond with. The content type will be inferred from file extension.
@@ -2906,8 +3197,6 @@ type RouteFulfillOptions struct {
 	/// </para>
 	/// </summary>
 	Path *string `json:"path"`
-	/// <summary><para>Response status code, defaults to <c>200</c>.</para></summary>
-	Status *int `json:"status"`
 }
 type SelectorsRegisterOptions struct {
 	/// <summary>
@@ -2936,6 +3225,18 @@ type WorkerEvaluateHandleOptions struct {
 	/// <summary><para>Optional argument to pass to <paramref name="expression"/>.</para></summary>
 	Arg interface{} `json:"arg"`
 }
+type BrowserNewContextOptionsViewport struct {
+	/// <summary><para>page width in pixels.</para></summary>
+	Width *int `json:"width"`
+	/// <summary><para>page height in pixels.</para></summary>
+	Height *int `json:"height"`
+}
+type BrowserNewContextOptionsScreen struct {
+	/// <summary><para>page width in pixels.</para></summary>
+	Width *int `json:"width"`
+	/// <summary><para>page height in pixels.</para></summary>
+	Height *int `json:"height"`
+}
 type BrowserNewContextOptionsGeolocation struct {
 	/// <summary><para>Latitude between -90 and 90.</para></summary>
 	Latitude *float64 `json:"latitude"`
@@ -2949,6 +3250,19 @@ type BrowserNewContextOptionsHttpCredentials struct {
 	Username *string `json:"username"`
 	/// <summary><para></para></summary>
 	Password *string `json:"password"`
+}
+type BrowserNewContextOptionsRecordVideo struct {
+	/// <summary><para>Path to the directory to put videos into.</para></summary>
+	Dir *string `json:"dir"`
+	/// <summary>
+	/// <para>
+	/// Optional dimensions of the recorded videos. If not specified the size will be equal
+	/// to <c>viewport</c> scaled down to fit into 800x800. If <c>viewport</c> is not configured
+	/// explicitly the video size defaults to 800x450. Actual picture of each page will
+	/// be scaled down if necessary to fit the specified size.
+	/// </para>
+	/// </summary>
+	Size *BrowserNewContextOptionsRecordVideoSize `json:"size"`
 }
 type BrowserNewContextOptionsProxy struct {
 	/// <summary>
@@ -2971,29 +3285,22 @@ type BrowserNewContextOptionsProxy struct {
 	/// <summary><para>Optional password to use if HTTP proxy requires authentication.</para></summary>
 	Password *string `json:"password"`
 }
-type BrowserNewContextOptionsRecordVideo struct {
-	/// <summary><para>Path to the directory to put videos into.</para></summary>
-	Dir *string `json:"dir"`
-	/// <summary>
-	/// <para>
-	/// Optional dimensions of the recorded videos. If not specified the size will be equal
-	/// to <c>viewport</c> scaled down to fit into 800x800. If <c>viewport</c> is not configured
-	/// explicitly the video size defaults to 800x450. Actual picture of each page will
-	/// be scaled down if necessary to fit the specified size.
-	/// </para>
-	/// </summary>
-	Size *BrowserNewContextOptionsRecordVideoSize `json:"size"`
+type BrowserRecordVideoSize struct {
+	/// <summary><para>Video frame width.</para></summary>
+	Width *int `json:"width"`
+	/// <summary><para>Video frame height.</para></summary>
+	Height *int `json:"height"`
 }
-type BrowserNewContextOptionsViewport struct {
+type BrowserNewPageOptionsViewport struct {
 	/// <summary><para>page width in pixels.</para></summary>
 	Width *int `json:"width"`
 	/// <summary><para>page height in pixels.</para></summary>
 	Height *int `json:"height"`
 }
-type BrowserRecordVideoSize struct {
-	/// <summary><para>Video frame width.</para></summary>
+type BrowserNewPageOptionsScreen struct {
+	/// <summary><para>page width in pixels.</para></summary>
 	Width *int `json:"width"`
-	/// <summary><para>Video frame height.</para></summary>
+	/// <summary><para>page height in pixels.</para></summary>
 	Height *int `json:"height"`
 }
 type BrowserNewPageOptionsGeolocation struct {
@@ -3009,6 +3316,19 @@ type BrowserNewPageOptionsHttpCredentials struct {
 	Username *string `json:"username"`
 	/// <summary><para></para></summary>
 	Password *string `json:"password"`
+}
+type BrowserNewPageOptionsRecordVideo struct {
+	/// <summary><para>Path to the directory to put videos into.</para></summary>
+	Dir *string `json:"dir"`
+	/// <summary>
+	/// <para>
+	/// Optional dimensions of the recorded videos. If not specified the size will be equal
+	/// to <c>viewport</c> scaled down to fit into 800x800. If <c>viewport</c> is not configured
+	/// explicitly the video size defaults to 800x450. Actual picture of each page will
+	/// be scaled down if necessary to fit the specified size.
+	/// </para>
+	/// </summary>
+	Size *BrowserNewPageOptionsRecordVideoSize `json:"size"`
 }
 type BrowserNewPageOptionsProxy struct {
 	/// <summary>
@@ -3030,25 +3350,6 @@ type BrowserNewPageOptionsProxy struct {
 	Username *string `json:"username"`
 	/// <summary><para>Optional password to use if HTTP proxy requires authentication.</para></summary>
 	Password *string `json:"password"`
-}
-type BrowserNewPageOptionsRecordVideo struct {
-	/// <summary><para>Path to the directory to put videos into.</para></summary>
-	Dir *string `json:"dir"`
-	/// <summary>
-	/// <para>
-	/// Optional dimensions of the recorded videos. If not specified the size will be equal
-	/// to <c>viewport</c> scaled down to fit into 800x800. If <c>viewport</c> is not configured
-	/// explicitly the video size defaults to 800x450. Actual picture of each page will
-	/// be scaled down if necessary to fit the specified size.
-	/// </para>
-	/// </summary>
-	Size *BrowserNewPageOptionsRecordVideoSize `json:"size"`
-}
-type BrowserNewPageOptionsViewport struct {
-	/// <summary><para>page width in pixels.</para></summary>
-	Width *int `json:"width"`
-	/// <summary><para>page height in pixels.</para></summary>
-	Height *int `json:"height"`
 }
 type BrowserContextStorageStateResultCookies struct {
 	/// <summary><para></para></summary>
@@ -3095,20 +3396,6 @@ type BrowserTypeLaunchOptionsProxy struct {
 	/// <summary><para>Optional password to use if HTTP proxy requires authentication.</para></summary>
 	Password *string `json:"password"`
 }
-type BrowserTypeLaunchPersistentContextOptionsGeolocation struct {
-	/// <summary><para>Latitude between -90 and 90.</para></summary>
-	Latitude *float64 `json:"latitude"`
-	/// <summary><para>Longitude between -180 and 180.</para></summary>
-	Longitude *float64 `json:"longitude"`
-	/// <summary><para>Non-negative accuracy value. Defaults to <c>0</c>.</para></summary>
-	Accuracy *float64 `json:"accuracy"`
-}
-type BrowserTypeLaunchPersistentContextOptionsHttpCredentials struct {
-	/// <summary><para></para></summary>
-	Username *string `json:"username"`
-	/// <summary><para></para></summary>
-	Password *string `json:"password"`
-}
 type BrowserTypeLaunchPersistentContextOptionsProxy struct {
 	/// <summary>
 	/// <para>
@@ -3130,6 +3417,32 @@ type BrowserTypeLaunchPersistentContextOptionsProxy struct {
 	/// <summary><para>Optional password to use if HTTP proxy requires authentication.</para></summary>
 	Password *string `json:"password"`
 }
+type BrowserTypeLaunchPersistentContextOptionsViewport struct {
+	/// <summary><para>page width in pixels.</para></summary>
+	Width *int `json:"width"`
+	/// <summary><para>page height in pixels.</para></summary>
+	Height *int `json:"height"`
+}
+type BrowserTypeLaunchPersistentContextOptionsScreen struct {
+	/// <summary><para>page width in pixels.</para></summary>
+	Width *int `json:"width"`
+	/// <summary><para>page height in pixels.</para></summary>
+	Height *int `json:"height"`
+}
+type BrowserTypeLaunchPersistentContextOptionsGeolocation struct {
+	/// <summary><para>Latitude between -90 and 90.</para></summary>
+	Latitude *float64 `json:"latitude"`
+	/// <summary><para>Longitude between -180 and 180.</para></summary>
+	Longitude *float64 `json:"longitude"`
+	/// <summary><para>Non-negative accuracy value. Defaults to <c>0</c>.</para></summary>
+	Accuracy *float64 `json:"accuracy"`
+}
+type BrowserTypeLaunchPersistentContextOptionsHttpCredentials struct {
+	/// <summary><para></para></summary>
+	Username *string `json:"username"`
+	/// <summary><para></para></summary>
+	Password *string `json:"password"`
+}
 type BrowserTypeLaunchPersistentContextOptionsRecordVideo struct {
 	/// <summary><para>Path to the directory to put videos into.</para></summary>
 	Dir *string `json:"dir"`
@@ -3143,17 +3456,17 @@ type BrowserTypeLaunchPersistentContextOptionsRecordVideo struct {
 	/// </summary>
 	Size *BrowserTypeLaunchPersistentContextOptionsRecordVideoSize `json:"size"`
 }
-type BrowserTypeLaunchPersistentContextOptionsViewport struct {
-	/// <summary><para>page width in pixels.</para></summary>
-	Width *int `json:"width"`
-	/// <summary><para>page height in pixels.</para></summary>
-	Height *int `json:"height"`
-}
 type BrowserTypeRecordVideoSize struct {
 	/// <summary><para>Video frame width.</para></summary>
 	Width *int `json:"width"`
 	/// <summary><para>Video frame height.</para></summary>
 	Height *int `json:"height"`
+}
+type ElementHandleCheckOptionsPosition struct {
+	/// <summary><para></para></summary>
+	X *float64 `json:"x"`
+	/// <summary><para></para></summary>
+	Y *float64 `json:"y"`
 }
 type ElementHandleClickOptionsPosition struct {
 	/// <summary><para></para></summary>
@@ -3179,6 +3492,18 @@ type ElementHandleTapOptionsPosition struct {
 	/// <summary><para></para></summary>
 	Y *float64 `json:"y"`
 }
+type ElementHandleUncheckOptionsPosition struct {
+	/// <summary><para></para></summary>
+	X *float64 `json:"x"`
+	/// <summary><para></para></summary>
+	Y *float64 `json:"y"`
+}
+type FrameCheckOptionsPosition struct {
+	/// <summary><para></para></summary>
+	X *float64 `json:"x"`
+	/// <summary><para></para></summary>
+	Y *float64 `json:"y"`
+}
 type FrameClickOptionsPosition struct {
 	/// <summary><para></para></summary>
 	X *float64 `json:"x"`
@@ -3198,6 +3523,18 @@ type FrameHoverOptionsPosition struct {
 	Y *float64 `json:"y"`
 }
 type FrameTapOptionsPosition struct {
+	/// <summary><para></para></summary>
+	X *float64 `json:"x"`
+	/// <summary><para></para></summary>
+	Y *float64 `json:"y"`
+}
+type FrameUncheckOptionsPosition struct {
+	/// <summary><para></para></summary>
+	X *float64 `json:"x"`
+	/// <summary><para></para></summary>
+	Y *float64 `json:"y"`
+}
+type PageCheckOptionsPosition struct {
 	/// <summary><para></para></summary>
 	X *float64 `json:"x"`
 	/// <summary><para></para></summary>
@@ -3232,6 +3569,12 @@ type PageScreenshotOptionsClip struct {
 	Height *float64 `json:"height"`
 }
 type PageTapOptionsPosition struct {
+	/// <summary><para></para></summary>
+	X *float64 `json:"x"`
+	/// <summary><para></para></summary>
+	Y *float64 `json:"y"`
+}
+type PageUncheckOptionsPosition struct {
 	/// <summary><para></para></summary>
 	X *float64 `json:"x"`
 	/// <summary><para></para></summary>

@@ -255,7 +255,6 @@ func TestPageExpectPopup(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, popup.URL(), server.EMPTY_PAGE)
 }
-
 func TestPageExpectNavigation(t *testing.T) {
 	t.Skip()
 	BeforeEach(t)

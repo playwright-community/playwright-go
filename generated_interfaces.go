@@ -24,6 +24,8 @@ type Browser interface {
 	// testing frameworks should explicitly create Browser.newContext() followed by the
 	// BrowserContext.newPage() to control their exact life times.
 	NewPage(options ...BrowserNewContextOptions) (Page, error)
+	// > NOTE: CDP Sessions are only supported on Chromium-based browsers.
+	// Returns the newly created browser session.
 	NewBrowserCDPSession() (CDPSession, error)
 	// Returns the browser version.
 	Version() string
@@ -96,6 +98,8 @@ type BrowserContext interface {
 	// Grants specified permissions to the browser context. Only grants corresponding permissions to the given origin if
 	// specified.
 	GrantPermissions(permissions []string, options ...BrowserContextGrantPermissionsOptions) error
+	// > NOTE: CDP sessions are only supported on Chromium-based browsers.
+	// Returns the newly created session.
 	NewCDPSession(page Page) (CDPSession, error)
 	// Creates a new page in the browser context.
 	NewPage(options ...BrowserNewPageOptions) (Page, error)
@@ -127,10 +131,13 @@ type BrowserContext interface {
 	ResetGeolocation() error
 	// Routing provides the capability to modify network requests that are made by any page in the browser context. Once route
 	// is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
-	// An example of a naïve handler that aborts all image requests:
+	// An example of a naive handler that aborts all image requests:
 	// or the same snippet using a regex pattern instead:
+	// It is possible to examine the request to decide the route action. For example, mocking all requests that contain some
+	// post data, and leaving all other requests as is:
 	// Page routes (set up with Page.route()) take precedence over browser context routes when request matches both
 	// handlers.
+	// To remove a route with its handler you can use BrowserContext.unroute().
 	// > NOTE: Enabling routing disables http cache.
 	Route(url interface{}, handler routeHandler) error
 	SetOffline(offline bool) error
@@ -176,9 +183,11 @@ type BrowserType interface {
 
 // `ConsoleMessage` objects are dispatched by page via the [`event: Page.console`] event.
 type ConsoleMessage interface {
+	// List of arguments passed to a `console` function call. See also [`event: Page.console`].
 	Args() []JSHandle
 	Location() ConsoleMessageLocation
 	String() string
+	// The text of the console message.
 	Text() string
 	// One of the following values: `'log'`, `'debug'`, `'info'`, `'error'`, `'warning'`, `'dir'`, `'dirxml'`, `'table'`,
 	// `'trace'`, `'clear'`, `'startGroup'`, `'startGroupCollapsed'`, `'endGroup'`, `'assert'`, `'profile'`, `'profileEnd'`,
@@ -218,7 +227,7 @@ type Download interface {
 	// Returns download error if any. Will wait for the download to finish if necessary.
 	Failure() error
 	// Returns path to the downloaded file in case of successful download. The method will wait for the download to finish if
-	// necessary.
+	// necessary. The method throws when connected remotely.
 	Path() (string, error)
 	// Saves the download to a user-specified path. It is safe to call this method while the download is still in progress.
 	SaveAs(path string) error
@@ -251,25 +260,25 @@ type ElementHandle interface {
 	// snippet should click the center of the element.
 	BoundingBox() (*Rect, error)
 	// This method checks the element by performing the following steps:
-	// 1. Ensure that element is a checkbox or a radio input. If not, this method rejects. If the element is already
-	// checked, this method returns immediately.
+	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already checked,
+	// this method returns immediately.
 	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// 1. Ensure that the element is now checked. If not, this method rejects.
-	// If the element is detached from the DOM at any moment during the action, this method rejects.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// 1. Ensure that the element is now checked. If not, this method throws.
+	// If the element is detached from the DOM at any moment during the action, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	Check(options ...ElementHandleCheckOptions) error
 	// This method clicks the element by performing the following steps:
 	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// If the element is detached from the DOM at any moment during the action, this method rejects.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// If the element is detached from the DOM at any moment during the action, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	Click(options ...ElementHandleClickOptions) error
 	// Returns the content frame for element handles referencing iframe nodes, or `null` otherwise
 	ContentFrame() (Frame, error)
@@ -278,14 +287,14 @@ type ElementHandle interface {
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to double click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the
-	// first click of the `dblclick()` triggers a navigation event, this method will reject.
-	// If the element is detached from the DOM at any moment during the action, this method rejects.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// first click of the `dblclick()` triggers a navigation event, this method will throw.
+	// If the element is detached from the DOM at any moment during the action, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	// > NOTE: `elementHandle.dblclick()` dispatches two `click` events and a single `dblclick` event.
 	Dblclick(options ...ElementHandleDblclickOptions) error
-	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click`
-	// is dispatched. This is equivalend to calling
+	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
+	// `click` is dispatched. This is equivalent to calling
 	// [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
 	// Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties
 	// and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
@@ -321,10 +330,12 @@ type ElementHandle interface {
 	// ```
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
 	// This method waits for [actionability](./actionability.md) checks, focuses the element, fills it and triggers an `input`
-	// event after filling. If the element is inside the `<label>` element that has associated
-	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), that control will be filled
-	// instead. If the element to be filled is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method
-	// throws an error. Note that you can pass an empty string to clear the input field.
+	// event after filling. Note that you can pass an empty string to clear the input field.
+	// If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
+	// However, if the element is inside the `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be filled
+	// instead.
+	// To send fine-grained keyboard events, use ElementHandle.type().
 	Fill(value string, options ...ElementHandleFillOptions) error
 	// Calls [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the element.
 	Focus() error
@@ -335,9 +346,9 @@ type ElementHandle interface {
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to hover over the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// If the element is detached from the DOM at any moment during the action, this method rejects.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// If the element is detached from the DOM at any moment during the action, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	Hover(options ...ElementHandleHoverOptions) error
 	// Returns the `element.innerHTML`.
 	InnerHTML() (string, error)
@@ -367,7 +378,7 @@ type ElementHandle interface {
 	// Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
 	// If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
 	// texts.
-	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the
+	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	Press(key string, options ...ElementHandlePressOptions) error
 	// The method finds an element matching the specified selector in the `ElementHandle`'s subtree. See
@@ -386,10 +397,13 @@ type ElementHandle interface {
 	// Throws when `elementHandle` does not point to an element
 	// [connected](https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected) to a Document or a ShadowRoot.
 	ScrollIntoViewIfNeeded(options ...ElementHandleScrollIntoViewIfNeededOptions) error
+	// This method waits for [actionability](./actionability.md) checks, waits until all specified options are present in the
+	// `<select>` element and selects these options.
+	// If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
+	// `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be used instead.
 	// Returns the array of option values that have been successfully selected.
-	// Triggers a `change` and `input` event once all the provided options have been selected. If element is not a `<select>`
-	// element, the method throws an error.
-	// Will wait until all specified options are present in the `<select>` element.
+	// Triggers a `change` and `input` event once all the provided options have been selected.
 	SelectOption(values SelectOptionValues, options ...ElementHandleSelectOptionOptions) ([]string, error)
 	// This method waits for [actionability](./actionability.md) checks, then focuses the element and selects all its text
 	// content.
@@ -404,9 +418,9 @@ type ElementHandle interface {
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.touchscreen`] to tap the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// If the element is detached from the DOM at any moment during the action, this method rejects.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// If the element is detached from the DOM at any moment during the action, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	// > NOTE: `elementHandle.tap()` requires that the `hasTouch` option of the browser context be set to true.
 	Tap(options ...ElementHandleTapOptions) error
 	// Returns the `node.textContent`.
@@ -416,16 +430,16 @@ type ElementHandle interface {
 	// An example of typing into a text field and then submitting the form:
 	Type(value string, options ...ElementHandleTypeOptions) error
 	// This method checks the element by performing the following steps:
-	// 1. Ensure that element is a checkbox or a radio input. If not, this method rejects. If the element is already
+	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already
 	// unchecked, this method returns immediately.
 	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// 1. Ensure that the element is now unchecked. If not, this method rejects.
-	// If the element is detached from the DOM at any moment during the action, this method rejects.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// 1. Ensure that the element is now unchecked. If not, this method throws.
+	// If the element is detached from the DOM at any moment during the action, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	Uncheck(options ...ElementHandleUncheckOptions) error
 	// Returns when the element satisfies the `state`.
 	// Depending on the `state` parameter, this method waits for one of the [actionability](./actionability.md) checks to pass.
@@ -489,45 +503,45 @@ type Frame interface {
 	// content.
 	AddStyleTag(options PageAddStyleTagOptions) (ElementHandle, error)
 	// This method checks an element matching `selector` by performing the following steps:
-	// 1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method rejects. If the element is already
+	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
 	// checked, this method returns immediately.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// 1. Ensure that the element is now checked. If not, this method rejects.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// 1. Ensure that the element is now checked. If not, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	Check(selector string, options ...FrameCheckOptions) error
 	ChildFrames() []Frame
 	// This method clicks an element matching `selector` by performing the following steps:
-	// 1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	Click(selector string, options ...PageClickOptions) error
 	// Gets the full HTML contents of the frame, including the doctype.
 	Content() (string, error)
 	// This method double clicks an element matching `selector` by performing the following steps:
-	// 1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to double click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the
-	// first click of the `dblclick()` triggers a navigation event, this method will reject.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// first click of the `dblclick()` triggers a navigation event, this method will throw.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	// > NOTE: `frame.dblclick()` dispatches two `click` events and a single `dblclick` event.
 	Dblclick(selector string, options ...FrameDblclickOptions) error
-	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click`
-	// is dispatched. This is equivalend to calling
+	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
+	// `click` is dispatched. This is equivalent to calling
 	// [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
 	// Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties
 	// and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
@@ -574,10 +588,12 @@ type Frame interface {
 	// Examples:
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
 	// This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, focuses the
-	// element, fills it and triggers an `input` event after filling. If the element is inside the `<label>` element that has
-	// associated [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), that control will be
-	// filled instead. If the element to be filled is not an `<input>`, `<textarea>` or `[contenteditable]` element, this
-	// method throws an error. Note that you can pass an empty string to clear the input field.
+	// element, fills it and triggers an `input` event after filling. Note that you can pass an empty string to clear the input
+	// field.
+	// If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
+	// However, if the element is inside the `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be filled
+	// instead.
 	// To send fine-grained keyboard events, use Frame.type().
 	Fill(selector string, value string, options ...FrameFillOptions) error
 	// This method fetches an element with `selector` and focuses it. If there's no element matching `selector`, the method
@@ -607,14 +623,14 @@ type Frame interface {
 	// [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
 	Goto(url string, options ...PageGotoOptions) (Response, error)
 	// This method hovers over an element matching `selector` by performing the following steps:
-	// 1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to hover over the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	Hover(selector string, options ...PageHoverOptions) error
 	// Returns `element.innerHTML`.
 	InnerHTML(selector string, options ...PageInnerHTMLOptions) (string, error)
@@ -653,7 +669,7 @@ type Frame interface {
 	// Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
 	// If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
 	// texts.
-	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the
+	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	Press(selector, key string, options ...PagePressOptions) error
 	// Returns the ElementHandle pointing to the frame element.
@@ -665,10 +681,13 @@ type Frame interface {
 	// [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns empty array.
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
 	SetContent(content string, options ...PageSetContentOptions) error
+	// This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, waits until
+	// all specified options are present in the `<select>` element and selects these options.
+	// If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
+	// `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be used instead.
 	// Returns the array of option values that have been successfully selected.
-	// Triggers a `change` and `input` event once all the provided options have been selected. If there's no `<select>` element
-	// matching `selector`, the method throws an error.
-	// Will wait until all specified options are present in the `<select>` element.
+	// Triggers a `change` and `input` event once all the provided options have been selected.
 	SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error)
 	// This method expects `selector` to point to an
 	// [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
@@ -676,14 +695,14 @@ type Frame interface {
 	// are resolved relative to the the current working directory. For empty array, clears the selected files.
 	SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error
 	// This method taps an element matching `selector` by performing the following steps:
-	// 1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.touchscreen`] to tap the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	// > NOTE: `frame.tap()` requires that the `hasTouch` option of the browser context be set to true.
 	Tap(selector string, options ...FrameTapOptions) error
 	// Returns `element.textContent`.
@@ -697,17 +716,17 @@ type Frame interface {
 	// Returns frame's url.
 	URL() string
 	// This method checks an element matching `selector` by performing the following steps:
-	// 1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method rejects. If the element is already
+	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
 	// unchecked, this method returns immediately.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// 1. Ensure that the element is now unchecked. If not, this method rejects.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// 1. Ensure that the element is now unchecked. If not, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	Uncheck(selector string, options ...FrameUncheckOptions) error
 	WaitForEvent(event string, predicate ...interface{}) interface{}
 	// Returns when the `expression` returns a truthy value, returns that value.
@@ -812,13 +831,14 @@ type Keyboard interface {
 	// Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
 	// If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
 	// texts.
-	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the
+	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	// Shortcut for Keyboard.down`] and [`method: Keyboard.up().
 	Press(key string, options ...KeyboardPressOptions) error
 	// Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
 	// To press a special key, like `Control` or `ArrowDown`, use Keyboard.press().
 	// > NOTE: Modifier keys DO NOT effect `keyboard.type`. Holding down `Shift` will not type the text in upper case.
+	// > NOTE: For characters that are not on a US keyboard, only an `input` event will be sent.
 	Type(text string, options ...KeyboardTypeOptions) error
 	// Dispatches a `keyup` event.
 	Up(key string) error
@@ -884,28 +904,28 @@ type Page interface {
 	// Brings page to front (activates tab).
 	BringToFront() error
 	// This method checks an element matching `selector` by performing the following steps:
-	// 1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method rejects. If the element is already
+	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
 	// checked, this method returns immediately.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// 1. Ensure that the element is now checked. If not, this method rejects.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// 1. Ensure that the element is now checked. If not, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	// Shortcut for main frame's Frame.check().
 	Check(selector string, options ...FrameCheckOptions) error
 	// This method clicks an element matching `selector` by performing the following steps:
-	// 1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	// Shortcut for main frame's Frame.click().
 	Click(selector string, options ...PageClickOptions) error
 	// If `runBeforeUnload` is `false`, does not run any unload handlers and waits for the page to be closed. If
@@ -919,20 +939,20 @@ type Page interface {
 	// Get the browser context that the page belongs to.
 	Context() BrowserContext
 	// This method double clicks an element matching `selector` by performing the following steps:
-	// 1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to double click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the
-	// first click of the `dblclick()` triggers a navigation event, this method will reject.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// first click of the `dblclick()` triggers a navigation event, this method will throw.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	// > NOTE: `page.dblclick()` dispatches two `click` events and a single `dblclick` event.
 	// Shortcut for main frame's Frame.dblclick().
 	Dblclick(expression string, options ...FrameDblclickOptions) error
-	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the elment, `click`
-	// is dispatched. This is equivalend to calling
+	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
+	// `click` is dispatched. This is equivalent to calling
 	// [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
 	// Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties
 	// and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
@@ -963,6 +983,8 @@ type Page interface {
 	// > NOTE: Functions installed via Page.exposeFunction() survive navigations.
 	// An example of adding an `sha1` function to the page:
 	ExposeFunction(name string, binding ExposedFunction) error
+	// This method changes the `CSS media type` through the `media` argument, and/or the `'prefers-colors-scheme'` media
+	// feature, using the `colorScheme` argument.
 	EmulateMedia(options ...PageEmulateMediaOptions) error
 	// Returns the value of the `expression` invocation.
 	// If the function passed to the Page.evaluate`] returns a [Promise], then [`method: Page.evaluate() would wait
@@ -1008,12 +1030,14 @@ type Page interface {
 	ExpectWorker(cb func() error) (Worker, error)
 	ExpectedDialog(cb func() error) (Dialog, error)
 	// This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, focuses the
-	// element, fills it and triggers an `input` event after filling. If the element is inside the `<label>` element that has
-	// associated [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), that control will be
-	// filled instead. If the element to be filled is not an `<input>`, `<textarea>` or `[contenteditable]` element, this
-	// method throws an error. Note that you can pass an empty string to clear the input field.
+	// element, fills it and triggers an `input` event after filling. Note that you can pass an empty string to clear the input
+	// field.
+	// If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
+	// However, if the element is inside the `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be filled
+	// instead.
 	// To send fine-grained keyboard events, use Page.type().
-	// Shortcut for main frame's Frame.fill()
+	// Shortcut for main frame's Frame.fill().
 	Fill(selector, text string, options ...FrameFillOptions) error
 	// This method fetches an element with `selector` and focuses it. If there's no element matching `selector`, the method
 	// waits until a matching element appears in the DOM.
@@ -1051,14 +1075,14 @@ type Page interface {
 	// Shortcut for main frame's Frame.goto()
 	Goto(url string, options ...PageGotoOptions) (Response, error)
 	// This method hovers over an element matching `selector` by performing the following steps:
-	// 1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to hover over the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	// Shortcut for main frame's Frame.hover().
 	Hover(selector string, options ...PageHoverOptions) error
 	// Returns `element.innerHTML`.
@@ -1127,7 +1151,7 @@ type Page interface {
 	// Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
 	// If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
 	// texts.
-	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When speficied with the
+	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	Press(selector, key string, options ...PagePressOptions) error
 	// The method finds an element matching the specified selector within the page. If no elements match the selector, the
@@ -1144,21 +1168,25 @@ type Page interface {
 	// Routing provides the capability to modify network requests that are made by a page.
 	// Once routing is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
 	// > NOTE: The handler will only be called for the first url if the response is a redirect.
-	// An example of a naïve handler that aborts all image requests:
+	// An example of a naive handler that aborts all image requests:
 	// or the same snippet using a regex pattern instead:
+	// It is possible to examine the request to decide the route action. For example, mocking all requests that contain some
+	// post data, and leaving all other requests as is:
 	// Page routes take precedence over browser context routes (set up with BrowserContext.route()) when request
 	// matches both handlers.
+	// To remove a route with its handler you can use Page.unroute().
 	// > NOTE: Enabling routing disables http cache.
 	Route(url interface{}, handler routeHandler) error
 	// Returns the buffer with the captured screenshot.
-	// > NOTE: Screenshots take at least 1/6 second on Chromium OS X and Chromium Windows. See https://crbug.com/741689 for
-	// discussion.
 	Screenshot(options ...PageScreenshotOptions) ([]byte, error)
+	// This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, waits until
+	// all specified options are present in the `<select>` element and selects these options.
+	// If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
+	// `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be used instead.
 	// Returns the array of option values that have been successfully selected.
-	// Triggers a `change` and `input` event once all the provided options have been selected. If there's no `<select>` element
-	// matching `selector`, the method throws an error.
-	// Will wait until all specified options are present in the `<select>` element.
-	// Shortcut for main frame's Frame.selectOption()
+	// Triggers a `change` and `input` event once all the provided options have been selected.
+	// Shortcut for main frame's Frame.selectOption().
 	SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error)
 	SetContent(content string, options ...PageSetContentOptions) error
 	// This setting will change the default maximum navigation time for the following methods and related shortcuts:
@@ -1168,6 +1196,7 @@ type Page interface {
 	// - Page.reload()
 	// - Page.setContent()
 	// - Page.waitForNavigation()
+	// - Page.waitForURL()
 	// > NOTE: Page.setDefaultNavigationTimeout`] takes priority over [`method: Page.setDefaultTimeout(),
 	// BrowserContext.setDefaultTimeout`] and [`method: BrowserContext.setDefaultNavigationTimeout().
 	SetDefaultNavigationTimeout(timeout float64)
@@ -1188,14 +1217,14 @@ type Page interface {
 	// viewport size before navigating to the page.
 	SetViewportSize(width, height int) error
 	// This method taps an element matching `selector` by performing the following steps:
-	// 1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.touchscreen`] to tap the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	// > NOTE: Page.tap() requires that the `hasTouch` option of the browser context be set to true.
 	// Shortcut for main frame's Frame.tap().
 	Tap(selector string, options ...FrameTapOptions) error
@@ -1211,17 +1240,17 @@ type Page interface {
 	// Shortcut for main frame's Frame.url().
 	URL() string
 	// This method unchecks an element matching `selector` by performing the following steps:
-	// 1. Find an element match matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method rejects. If the element is already
+	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
 	// unchecked, this method returns immediately.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// 1. Ensure that the element is now unchecked. If not, this method rejects.
-	// When all steps combined have not finished during the specified `timeout`, this method rejects with a `TimeoutError`.
-	// Passing zero timeout disables this.
+	// 1. Ensure that the element is now unchecked. If not, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
 	// Shortcut for main frame's Frame.uncheck().
 	Uncheck(selector string, options ...FrameUncheckOptions) error
 	// Removes a route created with Page.route(). When `handler` is not specified, removes all routes for the `url`.
@@ -1252,9 +1281,10 @@ type Page interface {
 	// considered a navigation.
 	// Shortcut for main frame's Frame.waitForNavigation().
 	WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error)
-	// Waits for the matching request and returns it.
+	// Waits for the matching request and returns it.  See [waiting for event](./events.md#waiting-for-event) for more details
+	// about events.
 	WaitForRequest(url interface{}, options ...interface{}) Request
-	// Returns the matched response.
+	// Returns the matched response. See [waiting for event](./events.md#waiting-for-event) for more details about events.
 	WaitForResponse(url interface{}, options ...interface{}) Response
 	// Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
 	// `detached`.
@@ -1371,7 +1401,7 @@ type Route interface {
 }
 
 // The Touchscreen class operates in main-frame CSS pixels relative to the top-left corner of the viewport. Methods on the
-// touchscreen can only be used in browser contexts that have been intialized with `hasTouch` set to true.
+// touchscreen can only be used in browser contexts that have been initialized with `hasTouch` set to true.
 type Touchscreen interface {
 	// Dispatches a `touchstart` and `touchend` event with a single touch at the position (`x`,`y`).
 	Tap(x int, y int) error
@@ -1389,10 +1419,10 @@ type WebSocket interface {
 	WaitForEvent(event string, predicate ...interface{}) interface{}
 }
 
-// When browser context is created with the `videosPath` option, each page has a video object associated with it.
+// When browser context is created with the `recordVideo` option, each page has a video object associated with it.
 type Video interface {
 	// Returns the file system path this video will be recorded to. The video is guaranteed to be written to the filesystem
-	// upon closing the browser context.
+	// upon closing the browser context. This method throws when connected remotely.
 	Path() string
 }
 
