@@ -1,53 +1,53 @@
 package playwright
 
-import "errors"
-
 type downloadImpl struct {
-	channelOwner
+	page              *pageImpl
+	url               string
+	suggestedFilename string
+	artifact          *artifactImpl
 }
 
 func (d *downloadImpl) String() string {
 	return d.SuggestedFilename()
 }
 
+func (d *downloadImpl) Page() *pageImpl {
+	return d.page
+}
+
 func (d *downloadImpl) URL() string {
-	return d.initializer["url"].(string)
+	return d.url
 }
 
 func (d *downloadImpl) SuggestedFilename() string {
-	return d.initializer["suggestedFilename"].(string)
+	return d.suggestedFilename
 }
 
 func (d *downloadImpl) Delete() error {
-	_, err := d.channel.Send("delete")
+	err := d.artifact.Delete()
 	return err
 }
 
 func (d *downloadImpl) Failure() error {
-	path, err := d.channel.Send("failure")
-	if err != nil {
-		return err
-	}
-	if path == nil {
-		return nil
-	}
-	return errors.New(path.(string))
-}
-
-func (d *downloadImpl) Path() (string, error) {
-	path, err := d.channel.Send("path")
-	return path.(string), err
-}
-
-func (d *downloadImpl) SaveAs(path string) error {
-	_, err := d.channel.Send("saveAs", map[string]interface{}{
-		"path": path,
-	})
+	err := d.artifact.Failure()
 	return err
 }
 
-func newDownload(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *downloadImpl {
-	bt := &downloadImpl{}
-	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
-	return bt
+func (d *downloadImpl) Path() (string, error) {
+	path, err := d.artifact.PathAfterFinished()
+	return path, err
+}
+
+func (d *downloadImpl) SaveAs(path string) error {
+	err := d.artifact.SaveAs(path)
+	return err
+}
+
+func newDownload(page *pageImpl, url string, suggestedFilename string, artifact *artifactImpl) *downloadImpl {
+	return &downloadImpl{
+		page:              page,
+		url:               url,
+		suggestedFilename: suggestedFilename,
+		artifact:          artifact,
+	}
 }

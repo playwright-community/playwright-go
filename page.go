@@ -535,9 +535,6 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 	bt.channel.On("domcontentloaded", func() {
 		bt.Emit("domcontentloaded")
 	})
-	bt.channel.On("download", func(ev map[string]interface{}) {
-		bt.Emit("download", fromChannel(ev["download"]))
-	})
 	bt.channel.On("fileChooser", func(ev map[string]interface{}) {
 		bt.Emit("filechooser", newFileChooser(bt, fromChannel(ev["element"]).(*elementHandleImpl), ev["isMultiple"].(bool)))
 	})
@@ -578,6 +575,12 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 	})
 	bt.channel.On("route", func(ev map[string]interface{}) {
 		bt.onRoute(fromChannel(ev["route"]).(*routeImpl), fromChannel(ev["request"]).(*requestImpl))
+	})
+	bt.channel.On("download", func(ev map[string]interface{}) {
+		url := ev["url"].(string)
+		suggestedFilename := ev["suggestedFilename"].(string)
+		artifact := fromChannel(ev["artifact"]).(*artifactImpl)
+		bt.Emit("download", newDownload(bt, url, suggestedFilename, artifact))
 	})
 	bt.channel.On("video", func(params map[string]interface{}) {
 		bt.Video().(*videoImpl).setRelativePath(params["relativePath"].(string))
