@@ -4,6 +4,10 @@ type artifactImpl struct {
 	channelOwner
 }
 
+func (a *artifactImpl) AbsolutePath() string {
+	return a.initializer["absolutePath"].(string)
+}
+
 func (a *artifactImpl) PathAfterFinished() (string, error) {
 	path, err := a.channel.Send("pathAfterFinished")
 	return path.(string), err

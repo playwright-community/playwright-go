@@ -53,7 +53,7 @@ func (b *browserImpl) NewPage(options ...BrowserNewContextOptions) (Page, error)
 }
 
 func (b *browserImpl) NewBrowserCDPSession() (CDPSession, error) {
-	channel, err := b.channel.Send("crNewBrowserCDPSession", map[string]interface{}{
+	channel, err := b.channel.Send("newBrowserCDPSession", map[string]interface{}{
 		"sdkLanguage": "javascript",
 	})
 	if err != nil {

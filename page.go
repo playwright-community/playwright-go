@@ -49,10 +49,7 @@ func (p *pageImpl) InnerHTML(selector string, options ...PageInnerHTMLOptions) (
 }
 
 func (p *pageImpl) Opener() (Page, error) {
-	channel, err := p.channel.Send("opener")
-	if err != nil {
-		return nil, err
-	}
+	channel := p.initializer["opener"]
 	channelOwner := fromNullableChannel(channel)
 	if channelOwner == nil {
 		return nil, nil
@@ -583,7 +580,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		bt.Emit("download", newDownload(bt, url, suggestedFilename, artifact))
 	})
 	bt.channel.On("video", func(params map[string]interface{}) {
-		bt.Video().(*videoImpl).setRelativePath(params["relativePath"].(string))
+		bt.Video().(*videoImpl).setArtifact(fromChannel(params["artifact"]).(*artifactImpl))
 	})
 	bt.channel.On("webSocket", func(ev map[string]interface{}) {
 		bt.Emit("websocket", fromChannel(ev["webSocket"]).(*webSocketImpl))
@@ -714,15 +711,8 @@ func (p *pageImpl) TextContent(selector string, options ...FrameTextContentOptio
 }
 
 func (p *pageImpl) Video() Video {
-	contextOptions := p.browserContext.options
-	if contextOptions.RecordVideo == nil {
-		return nil
-	}
 	if p.video == nil {
 		p.video = newVideo(p)
-		if videoRelativePath, ok := p.initializer["videoRelativePath"]; ok {
-			p.video.setRelativePath(videoRelativePath.(string))
-		}
 	}
 	return p.video
 }
