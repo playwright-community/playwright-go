@@ -19,6 +19,9 @@ jobs:
       - name: Install Browsers
         run: go run scripts/install-browsers/main.go
       - name: Regenerate APIs
-        run: scripts/generate-api.sh
+        run: |
+          git config --global user.email "no-reply@github.com"
+          git config --global user.name "Github Actions"
+          scripts/generate-api.sh
       - name: Verify API is up to date
         run: git diff --exit-code --ignore-submodules
