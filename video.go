@@ -1,25 +1,27 @@
 package playwright
 
 type videoImpl struct {
-	page         *pageImpl
-	path         string
-	artifactChan chan *artifactImpl
+	page     *pageImpl
+	artifact *artifactImpl
 }
 
 func (v *videoImpl) Path() string {
-	if v.path == "" {
-		v.path = (<-v.artifactChan).AbsolutePath()
-	}
-	return v.path
+	return v.artifact.AbsolutePath()
 }
 
+func (v *videoImpl) Delete() error {
+	return v.artifact.Delete()
+}
+
+func (v *videoImpl) SaveAs(path string) error {
+	return v.artifact.SaveAs(path)
+}
 func (v *videoImpl) setArtifact(artifact *artifactImpl) {
-	v.artifactChan <- artifact
+	v.artifact = artifact
 }
 
 func newVideo(page *pageImpl) *videoImpl {
 	return &videoImpl{
-		page:         page,
-		artifactChan: make(chan *artifactImpl, 1),
+		page: page,
 	}
 }
