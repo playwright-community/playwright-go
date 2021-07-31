@@ -5,6 +5,22 @@ type BindingCall interface {
 }
 
 // A Browser is created via BrowserType.launch(). An example of using a `Browser` to create a `Page`:
+// ```csharp
+// using Microsoft.Playwright;
+// using System.Threading.Tasks;
+// class Program
+// {
+// public static async Task Main()
+// {
+// using var playwright = await Playwright.CreateAsync();
+// var firefox = playwright.Firefox;
+// var browser = await firefox.LaunchAsync(new BrowserTypeLaunchOptions { Headless = false });
+// var page = await browser.NewPageAsync();
+// await page.GotoAsync("https://www.bing.com");
+// await browser.CloseAsync();
+// }
+// }
+// ```
 type Browser interface {
 	EventEmitter
 	// In case this browser is obtained using BrowserType.launch(), closes the browser and all of its pages (if any
@@ -14,10 +30,26 @@ type Browser interface {
 	// The `Browser` object itself is considered to be disposed and cannot be used anymore.
 	Close() error
 	// Returns an array of all open browser contexts. In a newly created browser, this will return zero browser contexts.
+	// ```csharp
+	// using var playwright = await Playwright.CreateAsync();
+	// var browser = await playwright.Webkit.LaunchAsync();
+	// System.Console.WriteLine(browser.Contexts.Count); // prints "0"
+	// var context = await browser.NewContextAsync();
+	// System.Console.WriteLine(browser.Contexts.Count); // prints "1"
+	// ```
 	Contexts() []BrowserContext
 	// Indicates that the browser is connected.
 	IsConnected() bool
 	// Creates a new browser context. It won't share cookies/cache with other browser contexts.
+	// ```csharp
+	// using var playwright = await Playwright.CreateAsync();
+	// var browser = await playwright.Firefox.LaunchAsync();
+	// // Create a new incognito browser context.
+	// var context = await browser.NewContextAsync();
+	// // Create a new page in a pristine context.
+	// var page = await context.NewPageAsync(); ;
+	// await page.GotoAsync("https://www.bing.com");
+	// ```
 	NewContext(options ...BrowserNewContextOptions) (BrowserContext, error)
 	// Creates a new page in a new browser context. Closing this page will close the context as well.
 	// This is a convenience API that should only be used for the single-page scenarios and short snippets. Production code and
@@ -52,10 +84,24 @@ type CDPSession interface {
 // context.
 // Playwright allows creation of "incognito" browser contexts with `browser.newContext()` method. "Incognito" browser
 // contexts don't write any browsing data to disk.
+// ```csharp
+// using var playwright = await Playwright.CreateAsync();
+// var browser = await playwright.Firefox.LaunchAsync(new BrowserTypeLaunchOptions { Headless = false });
+// // Create a new incognito browser context
+// var context = await browser.NewContextAsync();
+// // Create a new page inside context.
+// var page = await context.NewPageAsync();
+// await page.GotoAsync("https://bing.com");
+// // Dispose context once it is no longer needed.
+// await context.CloseAsync();
+// ```
 type BrowserContext interface {
 	EventEmitter
 	// Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies can be
 	// obtained via BrowserContext.cookies().
+	// ```csharp
+	// await context.AddCookiesAsync(new[] { cookie1, cookie2 });
+	// ```
 	AddCookies(cookies ...SetNetworkCookieParam) error
 	// Adds a script which would be evaluated in one of the following scenarios:
 	// - Whenever a page is created in the browser context or is navigated.
@@ -64,6 +110,9 @@ type BrowserContext interface {
 	// The script is evaluated after the document was created but before any of its scripts were run. This is useful to amend
 	// the JavaScript environment, e.g. to seed `Math.random`.
 	// An example of overriding `Math.random` before the page loads:
+	// ```csharp
+	// await context.AddInitScriptAsync(new BrowserContextAddInitScriptOptions { ScriptPath = "preload.js" });
+	// ```
 	// > NOTE: The order of evaluation of multiple scripts installed via BrowserContext.addInitScript() and
 	// Page.addInitScript() is not defined.
 	AddInitScript(script BrowserContextAddInitScriptOptions) error
@@ -72,6 +121,14 @@ type BrowserContext interface {
 	// Clears context cookies.
 	ClearCookies() error
 	// Clears all permission overrides for the browser context.
+	// ```csharp
+	// var context = await browser.NewContextAsync();
+	// await context.GrantPermissionsAsync(new[] { "clipboard-read" });
+	// // Alternatively, you can use the helper class ContextPermissions
+	// //  to specify the permissions...
+	// // do stuff ...
+	// await context.ClearPermissionsAsync();
+	// ```
 	ClearPermissions() error
 	// Closes the browser context. All the pages that belong to the browser context will be closed.
 	// > NOTE: The default browser context cannot be closed.
@@ -87,13 +144,83 @@ type BrowserContext interface {
 	// page: Page, frame: Frame }`.
 	// See Page.exposeBinding() for page-only version.
 	// An example of exposing page URL to all frames in all pages in the context:
+	// ```csharp
+	// using Microsoft.Playwright;
+	// using System.Threading.Tasks;
+	// class Program
+	// {
+	// public static async Task Main()
+	// {
+	// using var playwright = await Playwright.CreateAsync();
+	// var browser = await playwright.Webkit.LaunchAsync(new BrowserTypeLaunchOptions { Headless = false });
+	// var context = await browser.NewContextAsync();
+	// await context.ExposeBindingAsync("pageURL", source => source.Page.Url);
+	// var page = await context.NewPageAsync();
+	// await page.SetContentAsync("<script>\n" +
+	// "  async function onClick() {\n" +
+	// "    document.querySelector('div').textContent = await window.pageURL();\n" +
+	// "  }\n" +
+	// "</script>\n" +
+	// "<button onclick=\"onClick()\">Click me</button>\n" +
+	// "<div></div>");
+	// await page.ClickAsync("button");
+	// }
+	// }
+	// ```
 	// An example of passing an element handle:
+	// ```csharp
+	// var result = new TaskCompletionSource<string>();
+	// var page = await Context.NewPageAsync();
+	// await Context.ExposeBindingAsync("clicked", async (BindingSource _, IJSHandle t) =>
+	// {
+	// return result.TrySetResult(await t.AsElement().TextContentAsync());
+	// });
+	// await page.SetContentAsync("<script>\n" +
+	// "  document.addEventListener('click', event => window.clicked(event.target));\n" +
+	// "</script>\n" +
+	// "<div>Click me</div>\n" +
+	// "<div>Or click me</div>\n");
+	// await page.ClickAsync("div");
+	// // Note: it makes sense to await the result here, because otherwise, the context
+	// //  gets closed and the binding function will throw an exception.
+	// Assert.Equal("Click me", await result.Task);
+	// ```
 	ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error
 	// The method adds a function called `name` on the `window` object of every frame in every page in the context. When
 	// called, the function executes `callback` and returns a [Promise] which resolves to the return value of `callback`.
 	// If the `callback` returns a [Promise], it will be awaited.
 	// See Page.exposeFunction() for page-only version.
-	// An example of adding an `md5` function to all pages in the context:
+	// An example of adding a `sha256` function to all pages in the context:
+	// ```csharp
+	// using Microsoft.Playwright;
+	// using System;
+	// using System.Security.Cryptography;
+	// using System.Threading.Tasks;
+	// class BrowserContextExamples
+	// {
+	// public static async Task Main()
+	// {
+	// using var playwright = await Playwright.CreateAsync();
+	// var browser = await playwright.Webkit.LaunchAsync(new BrowserTypeLaunchOptions { Headless = false });
+	// var context = await browser.NewContextAsync();
+	// await context.ExposeFunctionAsync("sha256", (string input) =>
+	// {
+	// return Convert.ToBase64String(
+	// SHA256.Create().ComputeHash(System.Text.Encoding.UTF8.GetBytes(input)));
+	// });
+	// var page = await context.NewPageAsync();
+	// await page.SetContentAsync("<script>\n" +
+	// "  async function onClick() {\n" +
+	// "    document.querySelector('div').textContent = await window.sha256('PLAYWRIGHT');\n" +
+	// "  }\n" +
+	// "</script>\n" +
+	// "<button onclick=\"onClick()\">Click me</button>\n" +
+	// "<div></div>");
+	// await page.ClickAsync("button");
+	// Console.WriteLine(await page.TextContentAsync("div"));
+	// }
+	// }
+	// ```
 	ExposeFunction(name string, binding ExposedFunction) error
 	// Grants specified permissions to the browser context. Only grants corresponding permissions to the given origin if
 	// specified.
@@ -125,6 +252,13 @@ type BrowserContext interface {
 	// > NOTE: BrowserContext.setExtraHTTPHeaders() does not guarantee the order of headers in the outgoing requests.
 	SetExtraHTTPHeaders(headers map[string]string) error
 	// Sets the context's geolocation. Passing `null` or `undefined` emulates position unavailable.
+	// ```csharp
+	// await context.SetGeolocationAsync(new Geolocation()
+	// {
+	// Latitude = 59.95f,
+	// Longitude = 30.31667f
+	// });
+	// ```
 	// > NOTE: Consider using BrowserContext.grantPermissions() to grant permissions for the browser context pages to
 	// read its geolocation.
 	SetGeolocation(gelocation *SetGeolocationOptions) error
@@ -132,9 +266,32 @@ type BrowserContext interface {
 	// Routing provides the capability to modify network requests that are made by any page in the browser context. Once route
 	// is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
 	// An example of a naive handler that aborts all image requests:
+	// ```csharp
+	// var context = await browser.NewContextAsync();
+	// var page = await context.NewPageAsync();
+	// await context.RouteAsync("**/*.{png,jpg,jpeg}", r => r.AbortAsync());
+	// await page.GotoAsync("https://theverge.com");
+	// await browser.CloseAsync();
+	// ```
 	// or the same snippet using a regex pattern instead:
+	// ```csharp
+	// var context = await browser.NewContextAsync();
+	// var page = await context.NewPageAsync();
+	// await context.RouteAsync(new Regex("(\\.png$)|(\\.jpg$)"), r => r.AbortAsync());
+	// await page.GotoAsync("https://theverge.com");
+	// await browser.CloseAsync();
+	// ```
 	// It is possible to examine the request to decide the route action. For example, mocking all requests that contain some
 	// post data, and leaving all other requests as is:
+	// ```csharp
+	// await page.RouteAsync("/api/**", async r =>
+	// {
+	// if (r.Request.PostData.Contains("my-string"))
+	// await r.FulfillAsync(body: "mocked-data");
+	// else
+	// await r.ContinueAsync();
+	// });
+	// ```
 	// Page routes (set up with Page.route()) take precedence over browser context routes when request matches both
 	// handlers.
 	// To remove a route with its handler you can use BrowserContext.unroute().
@@ -148,16 +305,44 @@ type BrowserContext interface {
 	Unroute(url interface{}, handler ...routeHandler) error
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the context closes before the event is fired. Returns the event data value.
+	// ```csharp
+	// var page = await context.RunAndWaitForPageAsync(async () =>
+	// {
+	// await page.ClickAsync("button");
+	// });
+	// ```
 	WaitForEvent(event string, predicate ...interface{}) interface{}
 }
 
 // BrowserType provides methods to launch a specific browser instance or connect to an existing one. The following is a
 // typical example of using Playwright to drive automation:
+// ```csharp
+// using Microsoft.Playwright;
+// using System.Threading.Tasks;
+// class BrowserTypeExamples
+// {
+// public static async Task Run()
+// {
+// using var playwright = await Playwright.CreateAsync();
+// var chromium = playwright.Chromium;
+// var browser = await chromium.LaunchAsync();
+// var page = await browser.NewPageAsync();
+// await page.GoToAsync("https://www.bing.com");
+// // other actions
+// await browser.CloseAsync();
+// }
+// }
+// ```
 type BrowserType interface {
 	// A path where Playwright expects to find a bundled browser executable.
 	ExecutablePath() string
 	// Returns the browser instance.
 	// You can use `ignoreDefaultArgs` to filter out `--mute-audio` from default arguments:
+	// ```csharp
+	// var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions {
+	// IgnoreDefaultArgs = new[] { "--mute-audio" }
+	// })
+	// ```
 	// > **Chromium-only** Playwright can also be used to control the Google Chrome or Microsoft Edge browsers, but it works
 	// best with the version of Chromium it is bundled with. There is no guarantee it will work with any other version. Use
 	// `executablePath` option with extreme caution.
@@ -197,6 +382,25 @@ type ConsoleMessage interface {
 
 // `Dialog` objects are dispatched by page via the [`event: Page.dialog`] event.
 // An example of using `Dialog` class:
+// ```csharp
+// using Microsoft.Playwright;
+// using System.Threading.Tasks;
+// class DialogExample
+// {
+// public static async Task Run()
+// {
+// using var playwright = await Playwright.CreateAsync();
+// await using var browser = await playwright.Chromium.LaunchAsync();
+// var page = await browser.NewPageAsync();
+// page.Dialog += async (_, dialog) =>
+// {
+// System.Console.WriteLine(dialog.Message);
+// await dialog.DismissAsync();
+// };
+// await page.EvaluateAsync("alert('1');");
+// }
+// }
+// ```
 // > NOTE: Dialogs are dismissed automatically, unless there is a [`event: Page.dialog`] listener. When listener is
 // present, it **must** either Dialog.accept`] or [`method: Dialog.dismiss() the dialog - otherwise the page will
 // [freeze](https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop#never_blocking) waiting for the dialog, and
@@ -215,9 +419,16 @@ type Dialog interface {
 }
 
 // `Download` objects are dispatched by page via the [`event: Page.download`] event.
-// All the downloaded files belonging to the browser context are deleted when the browser context is closed. All downloaded
-// files are deleted when the browser closes.
+// If `downloadsPath` isn't specified, all the downloaded files belonging to the browser context are deleted when the
+// browser context is closed. And all downloaded files are deleted when the browser closes.
 // Download event is emitted once the download starts. Download path becomes available once download completes:
+// ```csharp
+// var download = await page.RunAndWaitForDownloadAsync(async () =>
+// {
+// await page.ClickAsync("#downloadButton");
+// });
+// Console.WriteLine(await download.PathAsync());
+// ```
 // > NOTE: Browser context **must** be created with the `acceptDownloads` set to `true` when user needs access to the
 // downloaded content. If `acceptDownloads` is not set, download events are emitted, but the actual download is not
 // performed and user has no access to the downloaded files.
@@ -229,7 +440,8 @@ type Download interface {
 	// Returns path to the downloaded file in case of successful download. The method will wait for the download to finish if
 	// necessary. The method throws when connected remotely.
 	Path() (string, error)
-	// Saves the download to a user-specified path. It is safe to call this method while the download is still in progress.
+	// Copy the download to a user-specified path. It is safe to call this method while the download is still in progress. Will
+	// wait for the download to finish if necessary.
 	SaveAs(path string) error
 	String() string
 	// Returns suggested filename for this download. It is typically computed by the browser from the
@@ -243,6 +455,22 @@ type Download interface {
 
 // ElementHandle represents an in-page DOM element. ElementHandles can be created with the Page.querySelector()
 // method.
+// ```csharp
+// using Microsoft.Playwright;
+// using System.Threading.Tasks;
+// class HandleExamples
+// {
+// public static async Task Run()
+// {
+// using var playwright = await Playwright.CreateAsync();
+// var browser = await playwright.Chromium.LaunchAsync();
+// var page = await browser.NewPageAsync();
+// await page.GotoAsync("https://www.bing.com");
+// var handle = await page.QuerySelectorAsync("a");
+// await handle.ClickAsync();
+// }
+// }
+// ```
 // ElementHandle prevents DOM element from garbage collection unless the handle is disposed with
 // JSHandle.dispose(). ElementHandles are auto-disposed when their origin frame gets navigated.
 // ElementHandle instances can be used as an argument in Page.evalOnSelector`] and [`method: Page.evaluate()
@@ -258,6 +486,10 @@ type ElementHandle interface {
 	// [Element.getBoundingClientRect](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect).
 	// Assuming the page is static, it is safe to use bounding box coordinates to perform input. For example, the following
 	// snippet should click the center of the element.
+	// ```csharp
+	// var box = await elementHandle.BoundingBoxAsync();
+	// await page.Mouse.ClickAsync(box.X + box.Width / 2, box.Y + box.Height / 2);
+	// ```
 	BoundingBox() (*Rect, error)
 	// This method checks the element by performing the following steps:
 	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already checked,
@@ -296,6 +528,9 @@ type ElementHandle interface {
 	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
 	// `click` is dispatched. This is equivalent to calling
 	// [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
+	// ```csharp
+	// await elementHandle.DispatchEventAsync("click");
+	// ```
 	// Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties
 	// and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 	// Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
@@ -307,6 +542,13 @@ type ElementHandle interface {
 	// - [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)
 	// - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
 	// You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
+	// ```csharp
+	// var handle = await page.EvaluateHandleAsync("() => new DataTransfer()");
+	// await handle.AsElement().DispatchEventAsync("dragstart", new Dictionary<string, object>
+	// {
+	// { "dataTransfer", dataTransfer }
+	// });
+	// ```
 	DispatchEvent(typ string, initObjects ...interface{}) error
 	// Returns the return value of `expression`.
 	// The method finds an element matching the specified selector in the `ElementHandle`s subtree and passes it as a first
@@ -315,6 +557,11 @@ type ElementHandle interface {
 	// If `expression` returns a [Promise], then ElementHandle.evalOnSelector() would wait for the promise to resolve
 	// and return its value.
 	// Examples:
+	// ```csharp
+	// var tweetHandle = await page.QuerySelectorAsync(".tweet");
+	// Assert.Equals("100", await tweetHandle.EvalOnSelectorAsync(".like", "node => node.innerText"));
+	// Assert.Equals("10", await tweetHandle.EvalOnSelectorAsync(".retweets", "node => node.innerText"));
+	// ```
 	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
 	// Returns the return value of `expression`.
 	// The method finds all elements matching the specified selector in the `ElementHandle`'s subtree and passes an array of
@@ -327,6 +574,10 @@ type ElementHandle interface {
 	// <div class="tweet">Hello!</div>
 	// <div class="tweet">Hi!</div>
 	// </div>
+	// ```
+	// ```csharp
+	// var feedHandle = await page.QuerySelectorAsync(".feed");
+	// Assert.Equals(new [] { "Hello!", "Hi!" }, await feedHandle.EvalOnSelectorAllAsync<string[]>(".tweet", "nodes => nodes.map(n => n.innerText)"));
 	// ```
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
 	// This method waits for [actionability](./actionability.md) checks, focuses the element, fills it and triggers an `input`
@@ -404,6 +655,19 @@ type ElementHandle interface {
 	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be used instead.
 	// Returns the array of option values that have been successfully selected.
 	// Triggers a `change` and `input` event once all the provided options have been selected.
+	// ```csharp
+	// // single selection matching the value
+	// await handle.SelectOptionAsync(new[] { "blue" });
+	// // single selection matching the label
+	// await handle.SelectOptionAsync(new[] { new SelectOptionValue() { Label = "blue" } });
+	// // multiple selection
+	// await handle.SelectOptionAsync(new[] { "red", "green", "blue" });
+	// // multiple selection for blue, red and second option
+	// await handle.SelectOptionAsync(new[] {
+	// new SelectOptionValue() { Label = "blue" },
+	// new SelectOptionValue() { Index = 2 },
+	// new SelectOptionValue() { Value = "red" }});
+	// ```
 	SelectOption(values SelectOptionValues, options ...ElementHandleSelectOptionOptions) ([]string, error)
 	// This method waits for [actionability](./actionability.md) checks, then focuses the element and selects all its text
 	// content.
@@ -427,7 +691,16 @@ type ElementHandle interface {
 	TextContent() (string, error)
 	// Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
 	// To press a special key, like `Control` or `ArrowDown`, use ElementHandle.press().
+	// ```csharp
+	// await elementHandle.TypeAsync("Hello"); // Types instantly
+	// await elementHandle.TypeAsync("World", delay: 100); // Types slower, like a user
+	// ```
 	// An example of typing into a text field and then submitting the form:
+	// ```csharp
+	// var elementHandle = await page.QuerySelectorAsync("input");
+	// await elementHandle.TypeAsync("some text");
+	// await elementHandle.PressAsync("Enter");
+	// ```
 	Type(value string, options ...ElementHandleTypeOptions) error
 	// This method checks the element by performing the following steps:
 	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already
@@ -460,6 +733,12 @@ type ElementHandle interface {
 	// become visible/hidden). If at the moment of calling the method `selector` already satisfies the condition, the method
 	// will return immediately. If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will
 	// throw.
+	// ```csharp
+	// await page.SetContentAsync("<div><span></span></div>");
+	// var div = await page.QuerySelectorAsync("div");
+	// // Waiting for the "span" selector relative to the div.
+	// var span = await page.WaitForSelectorAsync("span", WaitForSelectorState.Attached);
+	// ```
 	// > NOTE: This method does not work across navigations, use Page.waitForSelector() instead.
 	WaitForSelector(selector string, options ...ElementHandleWaitForSelectorOptions) (ElementHandle, error)
 }
@@ -473,6 +752,13 @@ type EventEmitter interface {
 }
 
 // `FileChooser` objects are dispatched by the page in the [`event: Page.fileChooser`] event.
+// ```csharp
+// var fileChooser = await page.RunAndWaitForFileChooserAsync(async () =>
+// {
+// await page.ClickAsync("upload");
+// });
+// await fileChooser.SetFilesAsync("temp.txt");
+// ```
 type FileChooser interface {
 	// Returns input element associated with this file chooser.
 	Element() ElementHandle
@@ -494,6 +780,28 @@ type FileChooser interface {
 // - [`event: Page.frameDetached`] - fired when the frame gets detached from the page.  A Frame can be detached from the
 // page only once.
 // An example of dumping frame tree:
+// ```csharp
+// using Microsoft.Playwright;
+// using System;
+// using System.Threading.Tasks;
+// class FrameExamples
+// {
+// public static async Task Main()
+// {
+// using var playwright = await Playwright.CreateAsync();
+// await using var browser = await playwright.Firefox.LaunchAsync();
+// var page = await browser.NewPageAsync();
+// await page.GotoAsync("https://www.bing.com");
+// DumpFrameTree(page.MainFrame, string.Empty);
+// }
+// private static void DumpFrameTree(IFrame frame, string indent)
+// {
+// Console.WriteLine($"{indent}{frame.Url}");
+// foreach (var child in frame.ChildFrames)
+// DumpFrameTree(child, indent + " ");
+// }
+// }
+// ```
 type Frame interface {
 	// Returns the added tag when the script's onload fires or when the script content was injected into frame.
 	// Adds a `<script>` tag into the page with the desired url or content.
@@ -543,6 +851,9 @@ type Frame interface {
 	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
 	// `click` is dispatched. This is equivalent to calling
 	// [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
+	// ```csharp
+	// await frame.DispatchEventAsync("button#submit", "click");
+	// ```
 	// Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties
 	// and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 	// Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
@@ -554,6 +865,11 @@ type Frame interface {
 	// - [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)
 	// - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
 	// You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
+	// ```csharp
+	// // Note you can only create DataTransfer in Chromium and Firefox
+	// var dataTransfer = await frame.EvaluateHandleAsync("() => new DataTransfer()");
+	// await frame.DispatchEventAsync("#source", "dragstart", new { dataTransfer });
+	// ```
 	DispatchEvent(selector, typ string, eventInit interface{}, options ...PageDispatchEventOptions) error
 	// Returns the return value of `expression`.
 	// If the function passed to the Frame.evaluate`] returns a [Promise], then [`method: Frame.evaluate() would wait
@@ -561,16 +877,41 @@ type Frame interface {
 	// If the function passed to the Frame.evaluate() returns a non-[Serializable] value, then
 	// Frame.evaluate() returns `undefined`. Playwright also supports transferring some additional values that are
 	// not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`.
+	// ```csharp
+	// var result = await frame.EvaluateAsync<int>("([x, y]) => Promise.resolve(x * y)", new[] { 7, 8 });
+	// Console.WriteLine(result);
+	// ```
 	// A string can also be passed in instead of a function.
+	// ```csharp
+	// Console.WriteLine(await frame.EvaluateAsync<int>("1 + 2")); // prints "3"
+	// ```
 	// `ElementHandle` instances can be passed as an argument to the Frame.evaluate():
+	// ```csharp
+	// var bodyHandle = await frame.QuerySelectorAsync("body");
+	// var html = await frame.EvaluateAsync<string>("([body, suffix]) => body.innerHTML + suffix", new object [] { bodyHandle, "hello" });
+	// await bodyHandle.DisposeAsync();
+	// ```
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
 	// Returns the return value of `expression` as a `JSHandle`.
 	// The only difference between Frame.evaluate`] and [`method: Frame.evaluateHandle() is that
 	// Frame.evaluateHandle() returns `JSHandle`.
 	// If the function, passed to the Frame.evaluateHandle(), returns a [Promise], then
 	// Frame.evaluateHandle() would wait for the promise to resolve and return its value.
+	// ```csharp
+	// // Handle for the window object.
+	// var aWindowHandle = await frame.EvaluateHandleAsync("() => Promise.resolve(window)");
+	// ```
 	// A string can also be passed in instead of a function.
+	// ```csharp
+	// var docHandle = await frame.EvalueHandleAsync("document"); // Handle for the `document`
+	// ```
 	// `JSHandle` instances can be passed as an argument to the Frame.evaluateHandle():
+	// ```csharp
+	// var handle = await frame.EvaluateHandleAsync("() => document.body");
+	// var resultHandle = await frame.EvaluateHandleAsync("([body, suffix]) => body.innerHTML + suffix", new object[] { handle, "hello" });
+	// Console.WriteLine(await resultHandle.JsonValueAsync<string>());
+	// await resultHandle.DisposeAsync();
+	// ```
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	// Returns the return value of `expression`.
 	// The method finds an element matching the specified selector within the frame and passes it as a first argument to
@@ -579,6 +920,11 @@ type Frame interface {
 	// If `expression` returns a [Promise], then Frame.evalOnSelector() would wait for the promise to resolve and
 	// return its value.
 	// Examples:
+	// ```csharp
+	// var searchValue = await frame.EvalOnSelectorAsync<string>("#search", "el => el.value");
+	// var preloadHref = await frame.EvalOnSelectorAsync<string>("link[rel=preload]", "el => el.href");
+	// var html = await frame.EvalOnSelectorAsync(".main-container", "(e, suffix) => e.outerHTML + suffix", "hello");
+	// ```
 	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
 	// Returns the return value of `expression`.
 	// The method finds all elements matching the specified selector within the frame and passes an array of matched elements
@@ -586,6 +932,9 @@ type Frame interface {
 	// If `expression` returns a [Promise], then Frame.evalOnSelectorAll() would wait for the promise to resolve and
 	// return its value.
 	// Examples:
+	// ```csharp
+	// var divsCount = await frame.EvalOnSelectorAllAsync<bool>("div", "(divs, min) => divs.length >= min", 10);
+	// ```
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
 	// This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, focuses the
 	// element, fills it and triggers an `input` event after filling. Note that you can pass an empty string to clear the input
@@ -603,6 +952,11 @@ type Frame interface {
 	// This is an inverse of ElementHandle.contentFrame(). Note that returned handle actually belongs to the parent
 	// frame.
 	// This method throws an error if the frame has been detached before `frameElement()` returns.
+	// ```csharp
+	// var frameElement = await frame.FrameElementAsync();
+	// var contentFrame = await frameElement.ContentFrameAsync();
+	// Console.WriteLine(frame == contentFrame); // -> True
+	// ```
 	FrameElement() (ElementHandle, error)
 	// Returns element attribute value.
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
@@ -688,6 +1042,14 @@ type Frame interface {
 	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be used instead.
 	// Returns the array of option values that have been successfully selected.
 	// Triggers a `change` and `input` event once all the provided options have been selected.
+	// ```csharp
+	// // single selection matching the value
+	// await frame.SelectOptionAsync("select#colors", new[] { "blue" });
+	// // single selection matching both the value and the label
+	// await frame.SelectOptionAsync("select#colors", new[] { new SelectOptionValue() { Label = "blue" } });
+	// // multiple selection
+	// await frame.SelectOptionAsync("select#colors", new[] { "red", "green", "blue" });
+	// ```
 	SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error)
 	// This method expects `selector` to point to an
 	// [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
@@ -712,6 +1074,10 @@ type Frame interface {
 	// Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text. `frame.type` can be used to
 	// send fine-grained keyboard events. To fill values in form fields, use Frame.fill().
 	// To press a special key, like `Control` or `ArrowDown`, use Keyboard.press().
+	// ```csharp
+	// await frame.TypeAsync("#mytextarea", "hello"); // types instantly
+	// await frame.TypeAsync("#mytextarea", "world", delay: 100); // types slower, like a user
+	// ```
 	Type(selector, text string, options ...PageTypeOptions) error
 	// Returns frame's url.
 	URL() string
@@ -731,17 +1097,48 @@ type Frame interface {
 	WaitForEvent(event string, predicate ...interface{}) interface{}
 	// Returns when the `expression` returns a truthy value, returns that value.
 	// The Frame.waitForFunction() can be used to observe viewport size change:
+	// ```csharp
+	// using Microsoft.Playwright;
+	// using System.Threading.Tasks;
+	// class FrameExamples
+	// {
+	// public static async Task Main()
+	// {
+	// using var playwright = await Playwright.CreateAsync();
+	// await using var browser = await playwright.Firefox.LaunchAsync();
+	// var page = await browser.NewPageAsync();
+	// await page.SetViewportSizeAsync(50, 50);
+	// await page.MainFrame.WaitForFunctionAsync("window.innerWidth < 100");
+	// }
+	// }
+	// ```
 	// To pass an argument to the predicate of `frame.waitForFunction` function:
+	// ```csharp
+	// var selector = ".foo";
+	// await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(selector)", selector);
+	// ```
 	WaitForFunction(expression string, arg interface{}, options ...FrameWaitForFunctionOptions) (JSHandle, error)
 	// Waits for the required load state to be reached.
 	// This returns when the frame reaches a required load state, `load` by default. The navigation must have been committed
 	// when this method is called. If current document has already reached the required state, resolves immediately.
+	// ```csharp
+	// await frame.ClickAsync("button");
+	// await frame.WaitForLoadStateAsync(); // Defaults to LoadState.Load
+	// ```
 	WaitForLoadState(given ...string)
 	// Waits for the frame navigation and returns the main resource response. In case of multiple redirects, the navigation
 	// will resolve with the response of the last redirect. In case of navigation to a different anchor or navigation due to
 	// History API usage, the navigation will resolve with `null`.
 	// This method waits for the frame to navigate to a new URL. It is useful for when you run code which will indirectly cause
 	// the frame to navigate. Consider this example:
+	// ```csharp
+	// await frame.RunAndWaitForNavigationAsync(async () =>
+	// {
+	// // Clicking the link will indirectly cause a navigation.
+	// await frame.ClickAsync("a.delayed-navigation");
+	// });
+	// // Resolves after navigation has finished
+	// ```
 	// > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
 	// considered a navigation.
 	WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error)
@@ -751,6 +1148,26 @@ type Frame interface {
 	// the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the
 	// selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
 	// This method works across navigations:
+	// ```csharp
+	// using Microsoft.Playwright;
+	// using System;
+	// using System.Threading.Tasks;
+	// class FrameExamples
+	// {
+	// public static async Task Main()
+	// {
+	// using var playwright = await Playwright.CreateAsync();
+	// await using var browser = await playwright.Chromium.LaunchAsync();
+	// var page = await browser.NewPageAsync();
+	// foreach (var currentUrl in new[] { "https://www.google.com", "https://bbc.com" })
+	// {
+	// await page.GotoAsync(currentUrl);
+	// element = await page.MainFrame.WaitForSelectorAsync("img");
+	// Console.WriteLine($"Loaded image: {await element.GetAttributeAsync("src")}");
+	// }
+	// }
+	// }
+	// ```
 	WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandle, error)
 	// Waits for the given `timeout` in milliseconds.
 	// Note that `frame.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to
@@ -760,6 +1177,9 @@ type Frame interface {
 
 // JSHandle represents an in-page JavaScript object. JSHandles can be created with the Page.evaluateHandle()
 // method.
+// ```csharp
+// var windowHandle = await page.EvaluateHandleAsync("() => window");
+// ```
 // JSHandle prevents the referenced JavaScript object being garbage collected unless the handle is exposed with
 // JSHandle.dispose(). JSHandles are auto-disposed when their origin frame gets navigated or the parent context
 // gets destroyed.
@@ -774,6 +1194,10 @@ type JSHandle interface {
 	// This method passes this handle as the first argument to `expression`.
 	// If `expression` returns a [Promise], then `handle.evaluate` would wait for the promise to resolve and return its value.
 	// Examples:
+	// ```csharp
+	// var tweetHandle = await page.QuerySelectorAsync(".tweet .retweets");
+	// Assert.Equals("10 retweets", await tweetHandle.EvaluateAsync("node => node.innerText"));
+	// ```
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
 	// Returns the return value of `expression` as a `JSHandle`.
 	// This method passes this handle as the first argument to `expression`.
@@ -784,6 +1208,13 @@ type JSHandle interface {
 	// See Page.evaluateHandle() for more details.
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	// The method returns a map with **own property names** as keys and JSHandle instances for the property values.
+	// ```csharp
+	// var handle = await page.EvaluateHandleAsync("() => ({window, document}");
+	// var properties = await handle.GetPropertiesAsync();
+	// var windowHandle = properties["window"];
+	// var documentHandle = properties["document"];
+	// await handle.DisposeAsync();
+	// ```
 	GetProperties() (map[string]JSHandle, error)
 	// Fetches a single property from the referenced object.
 	GetProperty(name string) (JSHandle, error)
@@ -799,8 +1230,29 @@ type JSHandle interface {
 // For finer control, you can use Keyboard.down`], [`method: Keyboard.up`], and [`method: Keyboard.insertText()
 // to manually fire events as if they were generated from a real keyboard.
 // An example of holding down `Shift` in order to select and delete some text:
+// ```csharp
+// await page.Keyboard.TypeAsync("Hello World!");
+// await page.Keyboard.PressAsync("ArrowLeft");
+// await page.Keyboard.DownAsync("Shift");
+// for (int i = 0; i < " World".Length; i++)
+// await page.Keyboard.PressAsync("ArrowLeft");
+// await page.Keyboard.UpAsync("Shift");
+// await page.Keyboard.PressAsync("Backspace");
+// // Result text will end up saying "Hello!"
+// ```
 // An example of pressing uppercase `A`
+// ```csharp
+// await page.Keyboard.PressAsync("Shift+KeyA");
+// // or
+// await page.Keyboard.PressAsync("Shift+A");
+// ```
 // An example to trigger select-all with the keyboard
+// ```csharp
+// // on Windows and Linux
+// await page.Keyboard.PressAsync("Control+A");
+// // on macOS
+// await page.Keyboard.PressAsync("Meta+A");
+// ```
 type Keyboard interface {
 	// Dispatches a `keydown` event.
 	// `key` can specify the intended [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key)
@@ -820,6 +1272,9 @@ type Keyboard interface {
 	// > NOTE: Modifier keys DO influence `keyboard.down`. Holding down `Shift` will type the text in upper case.
 	Down(key string) error
 	// Dispatches only `input` event, does not emit the `keydown`, `keyup` or `keypress` events.
+	// ```csharp
+	// await page.Keyboard.PressAsync("嗨");
+	// ```
 	// > NOTE: Modifier keys DO NOT effect `keyboard.insertText`. Holding down `Shift` will not type the text in upper case.
 	InsertText(text string) error
 	// `key` can specify the intended [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key)
@@ -833,10 +1288,24 @@ type Keyboard interface {
 	// texts.
 	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
+	// ```csharp
+	// await page.GotoAsync("https://keycode.info");
+	// await page.Keyboard.PressAsync("A");
+	// await page.ScreenshotAsync("A.png");
+	// await page.Keyboard.PressAsync("ArrowLeft");
+	// await page.ScreenshotAsync("ArrowLeft.png");
+	// await page.Keyboard.PressAsync("Shift+O");
+	// await page.ScreenshotAsync("O.png");
+	// await browser.CloseAsync();
+	// ```
 	// Shortcut for Keyboard.down`] and [`method: Keyboard.up().
 	Press(key string, options ...KeyboardPressOptions) error
 	// Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
 	// To press a special key, like `Control` or `ArrowDown`, use Keyboard.press().
+	// ```csharp
+	// await page.Keyboard.TypeAsync("Hello"); // types instantly
+	// await page.Keyboard.TypeAsync("World"); // types slower, like a user
+	// ```
 	// > NOTE: Modifier keys DO NOT effect `keyboard.type`. Holding down `Shift` will not type the text in upper case.
 	// > NOTE: For characters that are not on a US keyboard, only an `input` event will be sent.
 	Type(text string, options ...KeyboardTypeOptions) error
@@ -873,11 +1342,37 @@ type Mouse interface {
 // [extension background page](https://developer.chrome.com/extensions/background_pages) in Chromium. One `Browser`
 // instance might have multiple `Page` instances.
 // This example creates a page, navigates it to a URL, and then saves a screenshot:
+// ```csharp
+// using Microsoft.Playwright;
+// using System.Threading.Tasks;
+// class PageExamples
+// {
+// public static async Task Run()
+// {
+// using var playwright = await Playwright.CreateAsync();
+// await using var browser = await playwright.Webkit.LaunchAsync();
+// var page = await browser.NewPageAsync();
+// await page.GotoAsync("https://www.theverge.com");
+// await page.ScreenshotAsync("theverge.png");
+// }
+// }
+// ```
 // The Page class emits various events (described below) which can be handled using any of Node's native
 // [`EventEmitter`](https://nodejs.org/api/events.html#events_class_eventemitter) methods, such as `on`, `once` or
 // `removeListener`.
 // This example logs a message for a single page `load` event:
+// ```csharp
+// page.Load += (_, _) => Console.WriteLine("Page loaded!");
+// ```
 // To unsubscribe from events use the `removeListener` method:
+// ```csharp
+// void PageLoadHandler(object _, IPage p) {
+// Console.WriteLine("Page loaded!");
+// };
+// page.Load += PageLoadHandler;
+// // Do some work...
+// page.Load -= PageLoadHandler;
+// ```
 type Page interface {
 	EventEmitter
 	Mouse() Mouse
@@ -890,6 +1385,9 @@ type Page interface {
 	// The script is evaluated after the document was created but before any of its scripts were run. This is useful to amend
 	// the JavaScript environment, e.g. to seed `Math.random`.
 	// An example of overriding `Math.random` before the page loads:
+	// ```csharp
+	// await page.AddInitScriptAsync(new PageAddInitScriptOption { ScriptPath = "./preload.js" });
+	// ```
 	// > NOTE: The order of evaluation of multiple scripts installed via BrowserContext.addInitScript() and
 	// Page.addInitScript() is not defined.
 	AddInitScript(script PageAddInitScriptOptions) error
@@ -954,6 +1452,9 @@ type Page interface {
 	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
 	// `click` is dispatched. This is equivalent to calling
 	// [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
+	// ```csharp
+	// await page.DispatchEventAsync("button#submit", "click");
+	// ```
 	// Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit` properties
 	// and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 	// Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
@@ -965,6 +1466,10 @@ type Page interface {
 	// - [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)
 	// - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
 	// You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
+	// ```csharp
+	// var dataTransfer = await page.EvaluateHandleAsync("() => new DataTransfer()");
+	// await page.DispatchEventAsync("#source", "dragstart", new { dataTransfer });
+	// ```
 	DispatchEvent(selector string, typ string, options ...PageDispatchEventOptions) error
 	// The method adds a function called `name` on the `window` object of every frame in this page. When called, the function
 	// executes `callback` and returns a [Promise] which resolves to the return value of `callback`. If the `callback` returns
@@ -974,18 +1479,86 @@ type Page interface {
 	// See BrowserContext.exposeBinding() for the context-wide version.
 	// > NOTE: Functions installed via Page.exposeBinding() survive navigations.
 	// An example of exposing page URL to all frames in a page:
+	// ```csharp
+	// using Microsoft.Playwright;
+	// using System.Threading.Tasks;
+	// class PageExamples
+	// {
+	// public static async Task Main()
+	// {
+	// using var playwright = await Playwright.CreateAsync();
+	// await using var browser = await playwright.Webkit.LaunchAsync(new BrowserTypeLaunchOptions
+	// {
+	// Headless: false
+	// });
+	// var page = await browser.NewPageAsync();
+	// await page.ExposeBindingAsync("pageUrl", (source) => source.Page.Url);
+	// await page.SetContentAsync("<script>\n" +
+	// "  async function onClick() {\n" +
+	// "    document.querySelector('div').textContent = await window.pageURL();\n" +
+	// "  }\n" +
+	// "</script>\n" +
+	// "<button onclick=\"onClick()\">Click me</button>\n" +
+	// "<div></div>");
+	// await page.ClickAsync("button");
+	// }
+	// }
+	// ```
 	// An example of passing an element handle:
+	// ```csharp
+	// var result = new TaskCompletionSource<string>();
+	// await page.ExposeBindingAsync("clicked", async (BindingSource _, IJSHandle t) =>
+	// {
+	// return result.TrySetResult(await t.AsElement().TextContentAsync());
+	// });
+	// await page.SetContentAsync("<script>\n" +
+	// "  document.addEventListener('click', event => window.clicked(event.target));\n" +
+	// "</script>\n" +
+	// "<div>Click me</div>\n" +
+	// "<div>Or click me</div>\n");
+	// await page.ClickAsync("div");
+	// Console.WriteLine(await result.Task);
+	// ```
 	ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error
 	// The method adds a function called `name` on the `window` object of every frame in the page. When called, the function
 	// executes `callback` and returns a [Promise] which resolves to the return value of `callback`.
 	// If the `callback` returns a [Promise], it will be awaited.
 	// See BrowserContext.exposeFunction() for context-wide exposed function.
 	// > NOTE: Functions installed via Page.exposeFunction() survive navigations.
-	// An example of adding an `sha1` function to the page:
+	// An example of adding a `sha256` function to the page:
+	// ```csharp
+	// using Microsoft.Playwright;
+	// using System;
+	// using System.Security.Cryptography;
+	// using System.Threading.Tasks;
+	// class PageExamples
+	// {
+	// public static async Task Main()
+	// {
+	// using var playwright = await Playwright.CreateAsync();
+	// await using var browser = await playwright.Webkit.LaunchAsync(new BrowserTypeLaunchOptions
+	// {
+	// Headless: false
+	// });
+	// var page = await browser.NewPageAsync();
+	// await page.ExposeFunctionAsync("sha256", (string input) =>
+	// {
+	// return Convert.ToBase64String(
+	// SHA256.Create().ComputeHash(System.Text.Encoding.UTF8.GetBytes(input)));
+	// });
+	// await page.SetContentAsync("<script>\n" +
+	// "  async function onClick() {\n" +
+	// "    document.querySelector('div').textContent = await window.sha256('PLAYWRIGHT');\n" +
+	// "  }\n" +
+	// "</script>\n" +
+	// "<button onclick=\"onClick()\">Click me</button>\n" +
+	// "<div></div>");
+	// await page.ClickAsync("button");
+	// Console.WriteLine(await page.TextContentAsync("div"));
+	// }
+	// }
+	// ```
 	ExposeFunction(name string, binding ExposedFunction) error
-	// This method changes the `CSS media type` through the `media` argument, and/or the `'prefers-colors-scheme'` media
-	// feature, using the `colorScheme` argument.
-	EmulateMedia(options ...PageEmulateMediaOptions) error
 	// Returns the value of the `expression` invocation.
 	// If the function passed to the Page.evaluate`] returns a [Promise], then [`method: Page.evaluate() would wait
 	// for the promise to resolve and return its value.
@@ -993,8 +1566,20 @@ type Page interface {
 	// Page.evaluate() resolves to `undefined`. Playwright also supports transferring some additional values that are
 	// not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`.
 	// Passing argument to `expression`:
+	// ```csharp
+	// var result = await page.EvaluateAsync<int>("([x, y]) => Promise.resolve(x * y)", new[] { 7, 8 });
+	// Console.WriteLine(result);
+	// ```
 	// A string can also be passed in instead of a function:
+	// ```csharp
+	// Console.WriteLine(await page.EvaluateAsync<int>("1 + 2")); // prints "3"
+	// ```
 	// `ElementHandle` instances can be passed as an argument to the Page.evaluate():
+	// ```csharp
+	// var bodyHandle = await page.QuerySelectorAsync("body");
+	// var html = await page.EvaluateAsync<string>("([body, suffix]) => body.innerHTML + suffix", new object [] { bodyHandle, "hello" });
+	// await bodyHandle.DisposeAsync();
+	// ```
 	// Shortcut for main frame's Frame.evaluate().
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
 	// Returns the value of the `expression` invocation as a `JSHandle`.
@@ -1002,14 +1587,32 @@ type Page interface {
 	// Page.evaluateHandle() returns `JSHandle`.
 	// If the function passed to the Page.evaluateHandle`] returns a [Promise], then [`method: Page.evaluateHandle()
 	// would wait for the promise to resolve and return its value.
+	// ```csharp
+	// // Handle for the window object.
+	// var aWindowHandle = await page.EvaluateHandleAsync("() => Promise.resolve(window)");
+	// ```
 	// A string can also be passed in instead of a function:
+	// ```csharp
+	// var docHandle = await page.EvalueHandleAsync("document"); // Handle for the `document`
+	// ```
 	// `JSHandle` instances can be passed as an argument to the Page.evaluateHandle():
+	// ```csharp
+	// var handle = await page.EvaluateHandleAsync("() => document.body");
+	// var resultHandle = await page.EvaluateHandleAsync("([body, suffix]) => body.innerHTML + suffix", new object[] { handle, "hello" });
+	// Console.WriteLine(await resultHandle.JsonValueAsync<string>());
+	// await resultHandle.DisposeAsync();
+	// ```
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	// The method finds an element matching the specified selector within the page and passes it as a first argument to
 	// `expression`. If no elements match the selector, the method throws an error. Returns the value of `expression`.
 	// If `expression` returns a [Promise], then Page.evalOnSelector() would wait for the promise to resolve and
 	// return its value.
 	// Examples:
+	// ```csharp
+	// var searchValue = await page.EvalOnSelectorAsync<string>("#search", "el => el.value");
+	// var preloadHref = await page.EvalOnSelectorAsync<string>("link[rel=preload]", "el => el.href");
+	// var html = await page.EvalOnSelectorAsync(".main-container", "(e, suffix) => e.outerHTML + suffix", "hello");
+	// ```
 	// Shortcut for main frame's Frame.evalOnSelector().
 	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
 	// The method finds all elements matching the specified selector within the page and passes an array of matched elements as
@@ -1017,6 +1620,9 @@ type Page interface {
 	// If `expression` returns a [Promise], then Page.evalOnSelectorAll() would wait for the promise to resolve and
 	// return its value.
 	// Examples:
+	// ```csharp
+	// var divsCount = await page.EvalOnSelectorAllAsync<bool>("div", "(divs, min) => divs.length >= min", 10);
+	// ```
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
 	ExpectConsoleMessage(cb func() error) (ConsoleMessage, error)
 	ExpectDownload(cb func() error) (Download, error)
@@ -1044,6 +1650,12 @@ type Page interface {
 	// Shortcut for main frame's Frame.focus().
 	Focus(expression string, options ...FrameFocusOptions) error
 	// Returns frame matching the specified criteria. Either `name` or `url` must be specified.
+	// ```csharp
+	// var frame = page.Frame("frame-name");
+	// ```
+	// ```csharp
+	// var frame = page.FrameByUrl(".*domain.*");
+	// ```
 	Frame(options PageFrameOptions) Frame
 	// An array of all frames attached to the page.
 	Frames() []Frame
@@ -1116,6 +1728,11 @@ type Page interface {
 	// > NOTE: By default, `page.pdf()` generates a pdf with modified colors for printing. Use the
 	// [`-webkit-print-color-adjust`](https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-print-color-adjust) property to
 	// force rendering of exact colors.
+	// ```csharp
+	// // Generates a PDF with 'screen' media type
+	// await page.EmulateMediaAsync(new PageEmulateMediaOptions { Media = Media.Screen });
+	// await page.PdfAsync(new PagePdfOptions { Path = "page.pdf" });
+	// ```
 	// The `width`, `height`, and `margin` options accept values labeled with units. Unlabeled values are treated as pixels.
 	// A few examples:
 	// - `page.pdf({width: 100})` - prints with width set to 100 pixels
@@ -1153,9 +1770,19 @@ type Page interface {
 	// texts.
 	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
+	// ```csharp
+	// var page = await browser.NewPageAsync();
+	// await page.GotoAsync("https://keycode.info");
+	// await page.PressAsync("body", "A");
+	// await page.ScreenshotAsync("A.png");
+	// await page.PressAsync("body", "ArrowLeft");
+	// await page.ScreenshotAsync("ArrowLeft.png");
+	// await page.PressAsync("body", "Shift+O");
+	// await page.ScreenshotAsync("O.png");
+	// ```
 	Press(selector, key string, options ...PagePressOptions) error
 	// The method finds an element matching the specified selector within the page. If no elements match the selector, the
-	// return value resolves to `null`.
+	// return value resolves to `null`. To wait for an element on the page, use Page.waitForSelector().
 	// Shortcut for main frame's Frame.querySelector().
 	QuerySelector(selector string) (ElementHandle, error)
 	// The method finds all elements matching the specified selector within the page. If no elements match the selector, the
@@ -1169,9 +1796,28 @@ type Page interface {
 	// Once routing is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
 	// > NOTE: The handler will only be called for the first url if the response is a redirect.
 	// An example of a naive handler that aborts all image requests:
+	// ```csharp
+	// var page = await browser.NewPageAsync();
+	// await page.RouteAsync("**/*.{png,jpg,jpeg}", async r => await r.AbortAsync());
+	// await page.GotoAsync("https://www.microsoft.com");
+	// ```
 	// or the same snippet using a regex pattern instead:
+	// ```csharp
+	// var page = await browser.NewPageAsync();
+	// await page.RouteAsync(new Regex("(\\.png$)|(\\.jpg$)"), async r => await r.AbortAsync());
+	// await page.GotoAsync("https://www.microsoft.com");
+	// ```
 	// It is possible to examine the request to decide the route action. For example, mocking all requests that contain some
 	// post data, and leaving all other requests as is:
+	// ```csharp
+	// await page.RouteAsync("/api/**", async r =>
+	// {
+	// if (r.Request.PostData.Contains("my-string"))
+	// await r.FulfillAsync(new RouteFulfillOptions { Body = "mocked-data" });
+	// else
+	// await r.ContinueAsync();
+	// });
+	// ```
 	// Page routes take precedence over browser context routes (set up with BrowserContext.route()) when request
 	// matches both handlers.
 	// To remove a route with its handler you can use Page.unroute().
@@ -1186,6 +1832,14 @@ type Page interface {
 	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be used instead.
 	// Returns the array of option values that have been successfully selected.
 	// Triggers a `change` and `input` event once all the provided options have been selected.
+	// ```csharp
+	// // single selection matching the value
+	// await page.SelectOptionAsync("select#colors", new[] { "blue" });
+	// // single selection matching both the value and the label
+	// await page.SelectOptionAsync("select#colors", new[] { new SelectOptionValue() { Label = "blue" } });
+	// // multiple
+	// await page.SelectOptionAsync("select#colors", new[] { "red", "green", "blue" });
+	// ```
 	// Shortcut for main frame's Frame.selectOption().
 	SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error)
 	SetContent(content string, options ...PageSetContentOptions) error
@@ -1215,6 +1869,11 @@ type Page interface {
 	// Browser.newContext() allows to set viewport size (and more) for all pages in the context at once.
 	// `page.setViewportSize` will resize the page. A lot of websites don't expect phones to change size, so you should set the
 	// viewport size before navigating to the page.
+	// ```csharp
+	// var page = await browser.NewPageAsync();
+	// await page.SetViewportSizeAsync(640, 480);
+	// await page.GotoAsync("https://www.microsoft.com");
+	// ```
 	SetViewportSize(width, height int) error
 	// This method taps an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
@@ -1235,6 +1894,10 @@ type Page interface {
 	// Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text. `page.type` can be used to send
 	// fine-grained keyboard events. To fill values in form fields, use Page.fill().
 	// To press a special key, like `Control` or `ArrowDown`, use Keyboard.press().
+	// ```csharp
+	// await page.TypeAsync("#mytextarea", "hello"); // types instantly
+	// await page.TypeAsync("#mytextarea", "world"); // types slower, like a user
+	// ```
 	// Shortcut for main frame's Frame.type().
 	Type(selector, text string, options ...PageTypeOptions) error
 	// Shortcut for main frame's Frame.url().
@@ -1263,12 +1926,43 @@ type Page interface {
 	WaitForEvent(event string, predicate ...interface{}) interface{}
 	// Returns when the `expression` returns a truthy value. It resolves to a JSHandle of the truthy value.
 	// The Page.waitForFunction() can be used to observe viewport size change:
+	// ```csharp
+	// using Microsoft.Playwright;
+	// using System.Threading.Tasks;
+	// class FrameExamples
+	// {
+	// public static async Task WaitForFunction()
+	// {
+	// using var playwright = await Playwright.CreateAsync();
+	// await using var browser = await playwright.Webkit.LaunchAsync();
+	// var page = await browser.NewPageAsync();
+	// await page.SetViewportSizeAsync(50, 50);
+	// await page.MainFrame.WaitForFunctionAsync("window.innerWidth < 100");
+	// }
+	// }
+	// ```
 	// To pass an argument to the predicate of Page.waitForFunction() function:
+	// ```csharp
+	// var selector = ".foo";
+	// await page.WaitForFunctionAsync("selector => !!document.querySelector(selector)", selector);
+	// ```
 	// Shortcut for main frame's Frame.waitForFunction().
 	WaitForFunction(expression string, arg interface{}, options ...FrameWaitForFunctionOptions) (JSHandle, error)
 	// Returns when the required load state has been reached.
 	// This resolves when the page reaches a required load state, `load` by default. The navigation must have been committed
 	// when this method is called. If current document has already reached the required state, resolves immediately.
+	// ```csharp
+	// await page.ClickAsync("button"); // Click triggers navigation.
+	// await page.WaitForLoadStateAsync(); // The promise resolves after 'load' event.
+	// ```
+	// ```csharp
+	// var popup = await page.RunAndWaitForPopupAsync(async () =>
+	// {
+	// await page.ClickAsync("button"); // click triggers the popup/
+	// });
+	// await popup.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+	// Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
+	// ```
 	// Shortcut for main frame's Frame.waitForLoadState().
 	WaitForLoadState(state ...string)
 	// Waits for the main frame navigation and returns the main resource response. In case of multiple redirects, the
@@ -1277,14 +1971,46 @@ type Page interface {
 	// This resolves when the page navigates to a new URL or reloads. It is useful for when you run code which will indirectly
 	// cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from a `setTimeout`.
 	// Consider this example:
+	// ```csharp
+	// await page.RunAndWaitForNavigationAsync(async () =>
+	// {
+	// // Clicking the link will indirectly cause a navigation.
+	// await page.ClickAsync("a.delayed-navigation");
+	// });
+	// // The method continues after navigation has finished
+	// ```
 	// > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
 	// considered a navigation.
 	// Shortcut for main frame's Frame.waitForNavigation().
 	WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error)
 	// Waits for the matching request and returns it.  See [waiting for event](./events.md#waiting-for-event) for more details
 	// about events.
+	// ```csharp
+	// // Waits for the next request with the specified url.
+	// await page.RunAndWaitForRequestAsync(async () =>
+	// {
+	// await page.ClickAsync("button");
+	// }, "http://example.com/resource");
+	// // Alternative way with a predicate.
+	// await page.RunAndWaitForRequestAsync(async () =>
+	// {
+	// await page.ClickAsync("button");
+	// }, request => request.Url == "https://example.com" && request.Method == "GET");
+	// ```
 	WaitForRequest(url interface{}, options ...interface{}) Request
 	// Returns the matched response. See [waiting for event](./events.md#waiting-for-event) for more details about events.
+	// ```csharp
+	// // Waits for the next response with the specified url.
+	// await page.RunAndWaitForResponseAsync(async () =>
+	// {
+	// await page.ClickAsync("button.triggers-response");
+	// }, "http://example.com/resource");
+	// // Alternative way with a predicate.
+	// await page.RunAndWaitForResponseAsync(async () =>
+	// {
+	// await page.ClickAsync("button");
+	// }, response => response.Url == "https://example.com" && response.Status == 200);
+	// ```
 	WaitForResponse(url interface{}, options ...interface{}) Response
 	// Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
 	// `detached`.
@@ -1292,10 +2018,35 @@ type Page interface {
 	// the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the
 	// selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
 	// This method works across navigations:
+	// ```csharp
+	// using Microsoft.Playwright;
+	// using System;
+	// using System.Threading.Tasks;
+	// class FrameExamples
+	// {
+	// public static async Task Images()
+	// {
+	// using var playwright = await Playwright.CreateAsync();
+	// await using var browser = await playwright.Chromium.LaunchAsync();
+	// var page = await browser.NewPageAsync();
+	// foreach (var currentUrl in new[] { "https://www.google.com", "https://bbc.com" })
+	// {
+	// await page.GotoAsync(currentUrl);
+	// var element = await page.WaitForSelectorAsync("img");
+	// Console.WriteLine($"Loaded image: {await element.GetAttributeAsync("src")}");
+	// }
+	// await browser.CloseAsync();
+	// }
+	// }
+	// ```
 	WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandle, error)
 	// Waits for the given `timeout` in milliseconds.
 	// Note that `page.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to be
 	// flaky. Use signals such as network events, selectors becoming visible and others instead.
+	// ```csharp
+	// // Wait for 1 second
+	// await page.WaitForTimeoutAsync(1000);
+	// ```
 	// Shortcut for main frame's Frame.waitForTimeout().
 	WaitForTimeout(timeout float64)
 	// This method returns all of the dedicated [WebWorkers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)
@@ -1317,6 +2068,12 @@ type Page interface {
 type Request interface {
 	// The method returns `null` unless this request has failed, as reported by `requestfailed` event.
 	// Example of logging of all the failed requests:
+	// ```csharp
+	// page.RequestFailed += (_, request) =>
+	// {
+	// Console.WriteLine(request.Failure);
+	// };
+	// ```
 	Failure() *RequestFailure
 	// Returns the `Frame` that initiated this request.
 	Frame() Frame
@@ -1339,10 +2096,21 @@ type Request interface {
 	// `redirectedFrom()` and `redirectedTo()` methods. When multiple server redirects has happened, it is possible to
 	// construct the whole redirect chain by repeatedly calling `redirectedFrom()`.
 	// For example, if the website `http://example.com` redirects to `https://example.com`:
+	// ```csharp
+	// var response = await page.GotoAsync("http://www.microsoft.com");
+	// Console.WriteLine(response.Request.RedirectedFrom?.Url); // http://www.microsoft.com
+	// ```
 	// If the website `https://google.com` has no redirects:
+	// ```csharp
+	// var response = await page.GotoAsync("https://www.google.com");
+	// Console.WriteLine(response.Request.RedirectedFrom?.Url); // null
+	// ```
 	RedirectedFrom() Request
 	// New request issued by the browser if the server responded with redirect.
 	// This method is the opposite of Request.redirectedFrom():
+	// ```csharp
+	// Console.WriteLine(request.RedirectedFrom?.RedirectedTo == request); // True
+	// ```
 	RedirectedTo() Request
 	// Contains the request's resource type as it was perceived by the rendering engine. ResourceType will be one of the
 	// following: `document`, `stylesheet`, `image`, `media`, `font`, `script`, `texttrack`, `xhr`, `fetch`, `eventsource`,
@@ -1353,6 +2121,13 @@ type Request interface {
 	// Returns resource timing information for given request. Most of the timing values become available upon the response,
 	// `responseEnd` becomes available when request finishes. Find more information at
 	// [Resource Timing API](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceResourceTiming).
+	// ```csharp
+	// var request = await page.RunAndWaitForRequestFinishedAsync(async () =>
+	// {
+	// await page.GotoAsync("https://www.microsoft.com");
+	// });
+	// Console.WriteLine(request.Timing.ResponseEnd);
+	// ```
 	Timing() *ResourceTiming
 	// URL of the request.
 	URL() string
@@ -1391,10 +2166,27 @@ type Route interface {
 	// Aborts the route's request.
 	Abort(errorCode ...string) error
 	// Continues route's request with optional overrides.
+	// ```csharp
+	// await page.RouteAsync("**/*", route =>
+	// {
+	// var headers = new Dictionary<string, string>(route.Request.Headers) { { "foo", "bar" } };
+	// headers.Remove("origin");
+	// route.ContinueAsync(headers);
+	// });
+	// ```
 	Continue(options ...RouteContinueOptions) error
 	// Fulfills route's request with given response.
 	// An example of fulfilling all requests with 404 responses:
+	// ```csharp
+	// await page.RouteAsync("**/*", route => route.FulfillAsync(
+	// status: 404,
+	// contentType: "text/plain",
+	// body: "Not Found!"));
+	// ```
 	// An example of serving static file:
+	// ```csharp
+	// await page.RouteAsync("**/xhr_endpoint", route => route.FulfillAsync(new RouteFulfillOptions { Path = "mock_data.json" }));
+	// ```
 	Fulfill(options RouteFulfillOptions) error
 	// A request to be routed.
 	Request() Request
@@ -1420,6 +2212,9 @@ type WebSocket interface {
 }
 
 // When browser context is created with the `recordVideo` option, each page has a video object associated with it.
+// ```csharp
+// Console.WriteLine(await page.Video.GetPathAsync());
+// ```
 type Video interface {
 	// Returns the file system path this video will be recorded to. The video is guaranteed to be written to the filesystem
 	// upon closing the browser context. This method throws when connected remotely.
@@ -1435,13 +2230,13 @@ type Video interface {
 // event is emitted on the page object to signal a worker creation. `close` event is emitted on the worker object when the
 // worker is gone.
 // ```csharp
-// Page.Worker += (_, worker) =>
+// page.Worker += (_, worker) =>
 // {
 // Console.WriteLine($"Worker created: {worker.Url}");
 // worker.Close += (_, _) => Console.WriteLine($"Worker closed {worker.Url}");
 // };
 // Console.WriteLine("Current Workers:");
-// foreach(var pageWorker in Page.Workers)
+// foreach(var pageWorker in page.Workers)
 // {
 // Console.WriteLine($"\tWorker: {pageWorker.Url}");
 // }

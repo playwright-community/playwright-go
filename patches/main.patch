@@ -1,8 +1,8 @@
 diff --git a/playwright/docs/src/api/class-browsercontext.md b/playwright/docs/src/api/class-browsercontext.md
-index f6c21312102fa8133e18a4ab425f94d00da88dc5..ebd854e7fda6e11635f513228ead9b7f1909a773 100644
+index 34c897af02670a61b61678ae41fedffce7523d34..4f0cd94c7300776490bc391aa8678d79d05e5ec5 100644
 --- a/playwright/docs/src/api/class-browsercontext.md
 +++ b/playwright/docs/src/api/class-browsercontext.md
-@@ -224,7 +224,17 @@ Script to be evaluated in all pages in the browser context.
+@@ -287,7 +287,17 @@ Script to be evaluated in all pages in the browser context.
  * langs: csharp, java
  - `script` <[string]|[path]>
  
@@ -21,7 +21,7 @@ index f6c21312102fa8133e18a4ab425f94d00da88dc5..ebd854e7fda6e11635f513228ead9b7f
  
  ### param: BrowserContext.addInitScript.arg
  * langs: js
-@@ -833,7 +843,7 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
+@@ -1009,7 +1019,7 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
  handler function to route the request.
  
  ### param: BrowserContext.route.handler
@@ -30,7 +30,7 @@ index f6c21312102fa8133e18a4ab425f94d00da88dc5..ebd854e7fda6e11635f513228ead9b7f
  - `handler` <[function]\([Route]\)>
  
  handler function to route the request.
-@@ -987,7 +997,7 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
+@@ -1174,7 +1184,7 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
  [`method: BrowserContext.route`].
  
  ### param: BrowserContext.unroute.handler
@@ -40,10 +40,10 @@ index f6c21312102fa8133e18a4ab425f94d00da88dc5..ebd854e7fda6e11635f513228ead9b7f
  
  Optional handler function used to register a routing with [`method: BrowserContext.route`].
 diff --git a/playwright/docs/src/api/class-frame.md b/playwright/docs/src/api/class-frame.md
-index e721df30bbb5cf6cbe9936264d8c4c72fe5fe6d6..412faf452d90d42521adc25eac4205b01b4cc16e 100644
+index 95faad471d881a1444bec86b0a4fd12e11daf426..7944fff0daa90af1cf3169544bad610549cc0250 100644
 --- a/playwright/docs/src/api/class-frame.md
 +++ b/playwright/docs/src/api/class-frame.md
-@@ -1224,7 +1224,7 @@ frame.wait_for_function("selector => !!document.querySelector(selector)", select
+@@ -1342,7 +1342,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
  
  Optional argument to pass to [`param: expression`].
  
@@ -53,10 +53,10 @@ index e721df30bbb5cf6cbe9936264d8c4c72fe5fe6d6..412faf452d90d42521adc25eac4205b0
  ### option: Frame.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
  
 diff --git a/playwright/docs/src/api/class-page.md b/playwright/docs/src/api/class-page.md
-index a4279dffde71d42fc74177a276c291e5fe1e68c5..740fa2a8715295946dc0952e29d3706be9ff6aa9 100644
+index ce9371347684800434f380762950acfe2d44c799..cec8184ed76b49805fb225110846b33833a4a41f 100644
 --- a/playwright/docs/src/api/class-page.md
 +++ b/playwright/docs/src/api/class-page.md
-@@ -448,6 +448,18 @@ Script to be evaluated in all pages in the browser context.
+@@ -520,6 +520,18 @@ Script to be evaluated in all pages in the browser context.
  
  Optional argument to pass to [`param: script`] (only supported when passing a function).
  
@@ -75,7 +75,7 @@ index a4279dffde71d42fc74177a276c291e5fe1e68c5..740fa2a8715295946dc0952e29d3706b
  ## async method: Page.addScriptTag
  - returns: <[ElementHandle]>
  
-@@ -2198,7 +2210,7 @@ Enabling routing disables http cache.
+@@ -2508,7 +2520,7 @@ Enabling routing disables http cache.
  A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
  
  ### param: Page.route.handler
@@ -84,7 +84,7 @@ index a4279dffde71d42fc74177a276c291e5fe1e68c5..740fa2a8715295946dc0952e29d3706b
  - `handler` <[function]\([Route], [Request]\)>
  
  handler function to route the request.
-@@ -2574,7 +2586,7 @@ the [`param: url`].
+@@ -2904,7 +2916,7 @@ the [`param: url`].
  A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
  
  ### param: Page.unroute.handler
@@ -93,7 +93,7 @@ index a4279dffde71d42fc74177a276c291e5fe1e68c5..740fa2a8715295946dc0952e29d3706b
  - `handler` <[function]\([Route], [Request]\)>
  
  Optional handler function to route the request.
-@@ -2795,7 +2807,7 @@ Shortcut for main frame's [`method: Frame.waitForFunction`].
+@@ -3150,7 +3162,7 @@ Shortcut for main frame's [`method: Frame.waitForFunction`].
  
  Optional argument to pass to [`param: expression`].
  
@@ -103,10 +103,10 @@ index a4279dffde71d42fc74177a276c291e5fe1e68c5..740fa2a8715295946dc0952e29d3706b
  ### option: Page.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
  
 diff --git a/playwright/docs/src/api/class-route.md b/playwright/docs/src/api/class-route.md
-index 0b33a5f930946abbda3e636ef478cded2d7d8442..5241de49422463e073d0815011f731058538b7f8 100644
+index 639324bb2faa3eb9d2c254cbff16f2e380379ab9..96cfbfe8c6ea48c3ae0301cd529713f301ee2b74 100644
 --- a/playwright/docs/src/api/class-route.md
 +++ b/playwright/docs/src/api/class-route.md
-@@ -95,10 +95,17 @@ If set changes the request URL. New URL must have same protocol as original one.
+@@ -103,10 +103,17 @@ If set changes the request URL. New URL must have same protocol as original one.
  If set changes the request method (e.g. GET or POST)
  
  ### option: Route.continue.postData
@@ -124,7 +124,7 @@ index 0b33a5f930946abbda3e636ef478cded2d7d8442..5241de49422463e073d0815011f73105
  ### option: Route.continue.headers
  - `headers` <[Object]<[string], [string]>>
  
-@@ -183,6 +190,12 @@ If set, equals to setting `Content-Type` response header.
+@@ -202,6 +209,12 @@ If set, equals to setting `Content-Type` response header.
  
  Response body.
  
@@ -138,7 +138,7 @@ index 0b33a5f930946abbda3e636ef478cded2d7d8442..5241de49422463e073d0815011f73105
  * langs: csharp, java
  - `body` <[string]>
 diff --git a/playwright/docs/src/api/params.md b/playwright/docs/src/api/params.md
-index f518d7bbd0e2916c32b574edb6a2133c1893cab4..daa0fa4d1dba51ae63319ec22f89927f2ece313c 100644
+index 3b88a716d122328878706609a01da5b8f01b47f4..24df4165dc45fa365286d1203cc7620f4a9f8c63 100644
 --- a/playwright/docs/src/api/params.md
 +++ b/playwright/docs/src/api/params.md
 @@ -103,8 +103,8 @@ Defaults to `'visible'`. Can be either:
@@ -161,7 +161,7 @@ index f518d7bbd0e2916c32b574edb6a2133c1893cab4..daa0fa4d1dba51ae63319ec22f89927f
  - `viewport` <[null]|[Object]>
    - `width` <[int]> page width in pixels.
    - `height` <[int]> page height in pixels.
-@@ -414,7 +414,7 @@ call [`method: BrowserContext.close`] for the HAR to be saved.
+@@ -420,7 +420,7 @@ call [`method: BrowserContext.close`] for the HAR to be saved.
  Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
  
  ## context-option-recordvideo

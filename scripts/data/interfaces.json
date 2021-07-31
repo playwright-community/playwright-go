@@ -769,10 +769,7 @@
 			"name string, binding ExposedFunction",
 			"error"
 		],
-		"EmulateMedia": [
-			"options ...PageEmulateMediaOptions",
-			"error"
-		],
+		
 		"Evaluate": [
 			"expression string, options ...interface{}",
 			"interface{}, error"

@@ -90,6 +90,14 @@ type BrowserNewContextOptions struct {
 	ColorScheme *ColorScheme `json:"colorScheme"`
 	/// <summary>
 	/// <para>
+	/// Emulates <c>'prefers-reduced-motion'</c> media feature, supported values are <c>'reduce'</c>,
+	/// <c>'no-preference'</c>. See <see cref="Page.EmulateMedia"/> for more details. Defaults
+	/// to <c>'no-preference'</c>.
+	/// </para>
+	/// </summary>
+	ReducedMotion *ReducedMotion `json:"reducedMotion"`
+	/// <summary>
+	/// <para>
 	/// Enables video recording for all pages into <c>recordVideo.dir</c> directory. If
 	/// not specified videos are not recorded. Make sure to await <see cref="BrowserContext.Close"/>
 	/// for videos to be saved.
@@ -257,6 +265,14 @@ type BrowserNewPageOptions struct {
 	ColorScheme *ColorScheme `json:"colorScheme"`
 	/// <summary>
 	/// <para>
+	/// Emulates <c>'prefers-reduced-motion'</c> media feature, supported values are <c>'reduce'</c>,
+	/// <c>'no-preference'</c>. See <see cref="Page.EmulateMedia"/> for more details. Defaults
+	/// to <c>'no-preference'</c>.
+	/// </para>
+	/// </summary>
+	ReducedMotion *ReducedMotion `json:"reducedMotion"`
+	/// <summary>
+	/// <para>
 	/// Enables video recording for all pages into <c>recordVideo.dir</c> directory. If
 	/// not specified videos are not recorded. Make sure to await <see cref="BrowserContext.Close"/>
 	/// for videos to be saved.
@@ -375,19 +391,36 @@ type BrowserContextUnrouteOptions struct {
 type BrowserTypeLaunchOptions struct {
 	/// <summary>
 	/// <para>
-	/// Whether to run browser in headless mode. More details for <a href="https://developers.google.com/web/updates/2017/04/headless-chrome">Chromium</a>
-	/// and <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode">Firefox</a>.
-	/// Defaults to <c>true</c> unless the <paramref name="devtools"/> option is <c>true</c>.
+	/// Additional arguments to pass to the browser instance. The list of Chromium flags
+	/// can be found <a href="http://peter.sh/experiments/chromium-command-line-switches/">here</a>.
 	/// </para>
 	/// </summary>
-	Headless *bool `json:"headless"`
+	Args []string `json:"args"`
 	/// <summary>
 	/// <para>
-	/// Browser distribution channel. Read more about using <a href="./browsers.md#google-chrome--microsoft-edge">Google
-	/// Chrome and Microsoft Edge</a>.
+	/// Browser distribution channel.  Supported values are "chrome", "chrome-beta", "chrome-dev",
+	/// "chrome-canary", "msedge", "msedge-beta", "msedge-dev", "msedge-canary". Read more
+	/// about using <a href="./browsers.md#google-chrome--microsoft-edge">Google Chrome
+	/// and Microsoft Edge</a>.
 	/// </para>
 	/// </summary>
-	Channel *BrowserChannel `json:"channel"`
+	Channel *string `json:"channel"`
+	/// <summary><para>Enable Chromium sandboxing. Defaults to <c>false</c>.</para></summary>
+	ChromiumSandbox *bool `json:"chromiumSandbox"`
+	/// <summary>
+	/// <para>
+	/// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If
+	/// this option is <c>true</c>, the <paramref name="headless"/> option will be set <c>false</c>.
+	/// </para>
+	/// </summary>
+	Devtools *bool `json:"devtools"`
+	/// <summary>
+	/// <para>
+	/// If specified, accepted downloads are downloaded into this directory. Otherwise,
+	/// temporary directory is created and is deleted when browser is closed.
+	/// </para>
+	/// </summary>
+	DownloadsPath *string `json:"downloadsPath"`
 	/// <summary>
 	/// <para>
 	/// Path to a browser executable to run instead of the bundled one. If <paramref name="executablePath"/>
@@ -397,24 +430,6 @@ type BrowserTypeLaunchOptions struct {
 	/// </para>
 	/// </summary>
 	ExecutablePath *string `json:"executablePath"`
-	/// <summary>
-	/// <para>
-	/// Additional arguments to pass to the browser instance. The list of Chromium flags
-	/// can be found <a href="http://peter.sh/experiments/chromium-command-line-switches/">here</a>.
-	/// </para>
-	/// </summary>
-	Args []string `json:"args"`
-	/// <summary><para>Network proxy settings.</para></summary>
-	Proxy *BrowserTypeLaunchOptionsProxy `json:"proxy"`
-	/// <summary>
-	/// <para>
-	/// If specified, accepted downloads are downloaded into this directory. Otherwise,
-	/// temporary directory is created and is deleted when browser is closed.
-	/// </para>
-	/// </summary>
-	DownloadsPath *string `json:"downloadsPath"`
-	/// <summary><para>Enable Chromium sandboxing. Defaults to <c>false</c>.</para></summary>
-	ChromiumSandbox *bool `json:"chromiumSandbox"`
 	/// <summary><para>Close the browser process on Ctrl-C. Defaults to <c>true</c>.</para></summary>
 	HandleSIGINT *bool `json:"handleSIGINT"`
 	/// <summary><para>Close the browser process on SIGTERM. Defaults to <c>true</c>.</para></summary>
@@ -423,18 +438,23 @@ type BrowserTypeLaunchOptions struct {
 	HandleSIGHUP *bool `json:"handleSIGHUP"`
 	/// <summary>
 	/// <para>
+	/// Whether to run browser in headless mode. More details for <a href="https://developers.google.com/web/updates/2017/04/headless-chrome">Chromium</a>
+	/// and <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode">Firefox</a>.
+	/// Defaults to <c>true</c> unless the <paramref name="devtools"/> option is <c>true</c>.
+	/// </para>
+	/// </summary>
+	Headless *bool `json:"headless"`
+	/// <summary><para>Network proxy settings.</para></summary>
+	Proxy *BrowserTypeLaunchOptionsProxy `json:"proxy"`
+	/// <summary>
+	/// <para>
 	/// Maximum time in milliseconds to wait for the browser instance to start. Defaults
 	/// to <c>30000</c> (30 seconds). Pass <c>0</c> to disable timeout.
 	/// </para>
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
-	/// <summary>
-	/// <para>
-	/// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If
-	/// this option is <c>true</c>, the <paramref name="headless"/> option will be set <c>false</c>.
-	/// </para>
-	/// </summary>
-	Devtools *bool `json:"devtools"`
+	/// <summary><para>If specified, traces are saved into this directory.</para></summary>
+	TracesDir *string `json:"tracesDir"`
 	/// <summary>
 	/// <para>
 	/// Slows down Playwright operations by the specified amount of milliseconds. Useful
@@ -467,59 +487,22 @@ type BrowserTypeProxy struct {
 type BrowserTypeLaunchPersistentContextOptions struct {
 	/// <summary>
 	/// <para>
-	/// Whether to run browser in headless mode. More details for <a href="https://developers.google.com/web/updates/2017/04/headless-chrome">Chromium</a>
-	/// and <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode">Firefox</a>.
-	/// Defaults to <c>true</c> unless the <paramref name="devtools"/> option is <c>true</c>.
-	/// </para>
-	/// </summary>
-	Headless *bool `json:"headless"`
-	/// <summary>
-	/// <para>
-	/// Browser distribution channel. Read more about using <a href="./browsers.md#google-chrome--microsoft-edge">Google
-	/// Chrome and Microsoft Edge</a>.
-	/// </para>
-	/// </summary>
-	Channel *BrowserChannel `json:"channel"`
-	/// <summary>
-	/// <para>
-	/// Path to a browser executable to run instead of the bundled one. If <paramref name="executablePath"/>
-	/// is a relative path, then it is resolved relative to the current working directory.
-	/// **BEWARE**: Playwright is only guaranteed to work with the bundled Chromium, Firefox
-	/// or WebKit, use at your own risk.
-	/// </para>
-	/// </summary>
-	ExecutablePath *string `json:"executablePath"`
-	/// <summary>
-	/// <para>
 	/// Additional arguments to pass to the browser instance. The list of Chromium flags
 	/// can be found <a href="http://peter.sh/experiments/chromium-command-line-switches/">here</a>.
 	/// </para>
 	/// </summary>
 	Args []string `json:"args"`
-	/// <summary><para>Network proxy settings.</para></summary>
-	Proxy *BrowserTypeLaunchPersistentContextOptionsProxy `json:"proxy"`
 	/// <summary>
 	/// <para>
-	/// If specified, accepted downloads are downloaded into this directory. Otherwise,
-	/// temporary directory is created and is deleted when browser is closed.
+	/// Browser distribution channel.  Supported values are "chrome", "chrome-beta", "chrome-dev",
+	/// "chrome-canary", "msedge", "msedge-beta", "msedge-dev", "msedge-canary". Read more
+	/// about using <a href="./browsers.md#google-chrome--microsoft-edge">Google Chrome
+	/// and Microsoft Edge</a>.
 	/// </para>
 	/// </summary>
-	DownloadsPath *string `json:"downloadsPath"`
-	/// <summary><para>Enable Chromium sandboxing. Defaults to <c>true</c>.</para></summary>
+	Channel *string `json:"channel"`
+	/// <summary><para>Enable Chromium sandboxing. Defaults to <c>false</c>.</para></summary>
 	ChromiumSandbox *bool `json:"chromiumSandbox"`
-	/// <summary><para>Close the browser process on Ctrl-C. Defaults to <c>true</c>.</para></summary>
-	HandleSIGINT *bool `json:"handleSIGINT"`
-	/// <summary><para>Close the browser process on SIGTERM. Defaults to <c>true</c>.</para></summary>
-	HandleSIGTERM *bool `json:"handleSIGTERM"`
-	/// <summary><para>Close the browser process on SIGHUP. Defaults to <c>true</c>.</para></summary>
-	HandleSIGHUP *bool `json:"handleSIGHUP"`
-	/// <summary>
-	/// <para>
-	/// Maximum time in milliseconds to wait for the browser instance to start. Defaults
-	/// to <c>30000</c> (30 seconds). Pass <c>0</c> to disable timeout.
-	/// </para>
-	/// </summary>
-	Timeout *float64 `json:"timeout"`
 	/// <summary>
 	/// <para>
 	/// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If
@@ -529,8 +512,49 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	Devtools *bool `json:"devtools"`
 	/// <summary>
 	/// <para>
+	/// If specified, accepted downloads are downloaded into this directory. Otherwise,
+	/// temporary directory is created and is deleted when browser is closed.
+	/// </para>
+	/// </summary>
+	DownloadsPath *string `json:"downloadsPath"`
+	/// <summary>
+	/// <para>
+	/// Path to a browser executable to run instead of the bundled one. If <paramref name="executablePath"/>
+	/// is a relative path, then it is resolved relative to the current working directory.
+	/// Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use
+	/// at your own risk.
+	/// </para>
+	/// </summary>
+	ExecutablePath *string `json:"executablePath"`
+	/// <summary><para>Close the browser process on Ctrl-C. Defaults to <c>true</c>.</para></summary>
+	HandleSIGINT *bool `json:"handleSIGINT"`
+	/// <summary><para>Close the browser process on SIGTERM. Defaults to <c>true</c>.</para></summary>
+	HandleSIGTERM *bool `json:"handleSIGTERM"`
+	/// <summary><para>Close the browser process on SIGHUP. Defaults to <c>true</c>.</para></summary>
+	HandleSIGHUP *bool `json:"handleSIGHUP"`
+	/// <summary>
+	/// <para>
+	/// Whether to run browser in headless mode. More details for <a href="https://developers.google.com/web/updates/2017/04/headless-chrome">Chromium</a>
+	/// and <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode">Firefox</a>.
+	/// Defaults to <c>true</c> unless the <paramref name="devtools"/> option is <c>true</c>.
+	/// </para>
+	/// </summary>
+	Headless *bool `json:"headless"`
+	/// <summary><para>Network proxy settings.</para></summary>
+	Proxy *BrowserTypeLaunchPersistentContextOptionsProxy `json:"proxy"`
+	/// <summary>
+	/// <para>
+	/// Maximum time in milliseconds to wait for the browser instance to start. Defaults
+	/// to <c>30000</c> (30 seconds). Pass <c>0</c> to disable timeout.
+	/// </para>
+	/// </summary>
+	Timeout *float64 `json:"timeout"`
+	/// <summary><para>If specified, traces are saved into this directory.</para></summary>
+	TracesDir *string `json:"tracesDir"`
+	/// <summary>
+	/// <para>
 	/// Slows down Playwright operations by the specified amount of milliseconds. Useful
-	/// so that you can see what is going on. Defaults to 0.
+	/// so that you can see what is going on.
 	/// </para>
 	/// </summary>
 	SlowMo *float64 `json:"slowMo"`
@@ -621,6 +645,14 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	/// </para>
 	/// </summary>
 	ColorScheme *ColorScheme `json:"colorScheme"`
+	/// <summary>
+	/// <para>
+	/// Emulates <c>'prefers-reduced-motion'</c> media feature, supported values are <c>'reduce'</c>,
+	/// <c>'no-preference'</c>. See <see cref="Page.EmulateMedia"/> for more details. Defaults
+	/// to <c>'no-preference'</c>.
+	/// </para>
+	/// </summary>
+	ReducedMotion *ReducedMotion `json:"reducedMotion"`
 	/// <summary>
 	/// <para>
 	/// Enables video recording for all pages into <c>recordVideo.dir</c> directory. If
@@ -2248,23 +2280,6 @@ type PageDispatchEventOptions struct {
 	/// </summary>
 	Timeout *float64 `json:"timeout"`
 }
-type PageEmulateMediaOptions struct {
-	/// <summary>
-	/// <para>
-	/// Changes the CSS media type of the page. The only allowed values are <c>'screen'</c>,
-	/// <c>'print'</c> and <c>null</c>. Passing <c>null</c> disables CSS media emulation.
-	/// </para>
-	/// </summary>
-	Media *Media `json:"media"`
-	/// <summary>
-	/// <para>
-	/// Emulates <c>'prefers-colors-scheme'</c> media feature, supported values are <c>'light'</c>,
-	/// <c>'dark'</c>, <c>'no-preference'</c>. Passing <c>null</c> disables color scheme
-	/// emulation.
-	/// </para>
-	/// </summary>
-	ColorScheme *ColorScheme `json:"colorScheme"`
-}
 type PageEvalOnSelectorOptions struct {
 	/// <summary><para>Optional argument to pass to <paramref name="expression"/>.</para></summary>
 	Arg interface{} `json:"arg"`
@@ -3208,6 +3223,28 @@ type SelectorsRegisterOptions struct {
 	/// </para>
 	/// </summary>
 	ContentScript *bool `json:"contentScript"`
+}
+type TracingStartOptions struct {
+	/// <summary>
+	/// <para>
+	/// If specified, the trace is going to be saved into the file with the given name inside
+	/// the <paramref name="tracesDir"/> folder specified in <see cref="BrowserType.Launch"/>.
+	/// </para>
+	/// </summary>
+	Name *string `json:"name"`
+	/// <summary>
+	/// <para>
+	/// Whether to capture screenshots during tracing. Screenshots are used to build a timeline
+	/// preview.
+	/// </para>
+	/// </summary>
+	Screenshots *bool `json:"screenshots"`
+	/// <summary><para>Whether to capture DOM snapshot on every action.</para></summary>
+	Snapshots *bool `json:"snapshots"`
+}
+type TracingStopOptions struct {
+	/// <summary><para>Export trace into the file with the given name.</para></summary>
+	Path *string `json:"path"`
 }
 type FrameReceivedPayload struct {
 	/// <summary><para>frame payload</para></summary>

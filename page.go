@@ -216,16 +216,6 @@ func (p *pageImpl) GoForward(options ...PageGoForwardOptions) (Response, error) 
 	return obj.(*responseImpl), nil
 }
 
-var MediaNull = getMedia(Null().(string))
-
-func (p *pageImpl) EmulateMedia(options ...PageEmulateMediaOptions) error {
-	_, err := p.channel.Send("emulateMedia", options)
-	if err != nil {
-		return err
-	}
-	return err
-}
-
 // ViewportSize represents the viewport size
 type ViewportSize struct {
 	Width  int `json:"width"`
