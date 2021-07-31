@@ -9,17 +9,63 @@ import (
 	"os"
 	"sync"
 
+	"github.com/gorilla/websocket"
 	"gopkg.in/square/go-jose.v2/json"
 )
 
-type transport struct {
+type Transport interface {
+	Start() error
+	Stop() error
+	Send(message map[string]interface{}) error
+	SetDispatch(dispatch func(msg *message))
+}
+
+type pipeTransport struct {
 	stdin    io.WriteCloser
 	stdout   io.ReadCloser
 	dispatch func(msg *message)
 	rLock    sync.Mutex
 }
 
-func (t *transport) Start() error {
+type websocketTransport struct {
+	url      string
+	conn     *websocket.Conn
+	dispatch func(msg *message)
+}
+
+func (t *websocketTransport) Start() error {
+	conn, _, err := websocket.DefaultDialer.Dial(t.url, nil)
+	if err != nil {
+		return fmt.Errorf("could not connect to websocket: %w", err)
+	}
+	t.conn = conn
+	for {
+		msg := &message{}
+		err := t.conn.ReadJSON(msg)
+		if err != nil {
+			return fmt.Errorf("could not read json: %w", err)
+		}
+		t.dispatch(msg)
+	}
+}
+
+func (t *websocketTransport) Send(message map[string]interface{}) error {
+	if err := t.conn.WriteJSON(message); err != nil {
+		return fmt.Errorf("could not write json: %w", err)
+	}
+	return nil
+}
+
+func (t *websocketTransport) SetDispatch(dispatch func(msg *message)) {
+	t.dispatch = dispatch
+}
+
+func (t *websocketTransport) Stop() error {
+	t.conn.Close()
+	return nil
+}
+
+func (t *pipeTransport) Start() error {
 	reader := bufio.NewReader(t.stdout)
 	for {
 		lengthContent := make([]byte, 4)
@@ -45,7 +91,10 @@ func (t *transport) Start() error {
 	}
 }
 
-func (t *transport) Stop() error {
+func (t *pipeTransport) SetDispatch(dispatch func(msg *message)) {
+	t.dispatch = dispatch
+}
+func (t *pipeTransport) Stop() error {
 	return nil
 }
 
@@ -66,7 +115,7 @@ type message struct {
 	} `json:"error"`
 }
 
-func (t *transport) Send(message map[string]interface{}) error {
+func (t *pipeTransport) Send(message map[string]interface{}) error {
 	msg, err := json.Marshal(message)
 	if err != nil {
 		return fmt.Errorf("could not marshal json: %w", err)
@@ -91,10 +140,14 @@ func (t *transport) Send(message map[string]interface{}) error {
 	return nil
 }
 
-func newTransport(stdin io.WriteCloser, stdout io.ReadCloser, dispatch func(msg *message)) *transport {
-	return &transport{
-		stdout:   stdout,
-		stdin:    stdin,
-		dispatch: dispatch,
+func newPipeTransport(stdin io.WriteCloser, stdout io.ReadCloser) Transport {
+	return &pipeTransport{
+		stdout: stdout,
+		stdin:  stdin,
+	}
+}
+func newWebsocketTransport(url string) Transport {
+	return &websocketTransport{
+		url: url,
 	}
 }

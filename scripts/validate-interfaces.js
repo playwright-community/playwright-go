@@ -25,7 +25,6 @@ const shouldIgnoreClass = ({ name }) =>
   !name.startsWith("WebKit")
 
 const allowedMissing = [
-  "BrowserType.Connect",
   "BrowserType.LaunchServer",
   "Download.CreateReadStream",
   "BrowserContext.SetHTTPCredentials",
