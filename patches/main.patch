@@ -1,5 +1,5 @@
 diff --git a/playwright/docs/src/api/class-browsercontext.md b/playwright/docs/src/api/class-browsercontext.md
-index 34c897af02670a61b61678ae41fedffce7523d34..4f0cd94c7300776490bc391aa8678d79d05e5ec5 100644
+index 960d527374d591c83aae8415b53c8f2604f4b89e..b9b74abebe5f793c0f6c0c348828e747923cbef8 100644
 --- a/playwright/docs/src/api/class-browsercontext.md
 +++ b/playwright/docs/src/api/class-browsercontext.md
 @@ -287,7 +287,17 @@ Script to be evaluated in all pages in the browser context.
@@ -21,7 +21,7 @@ index 34c897af02670a61b61678ae41fedffce7523d34..4f0cd94c7300776490bc391aa8678d79
  
  ### param: BrowserContext.addInitScript.arg
  * langs: js
-@@ -1009,7 +1019,7 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
+@@ -1011,7 +1021,7 @@ it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/We
  handler function to route the request.
  
  ### param: BrowserContext.route.handler
@@ -30,7 +30,7 @@ index 34c897af02670a61b61678ae41fedffce7523d34..4f0cd94c7300776490bc391aa8678d79
  - `handler` <[function]\([Route]\)>
  
  handler function to route the request.
-@@ -1174,7 +1184,7 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
+@@ -1176,7 +1186,7 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
  [`method: BrowserContext.route`].
  
  ### param: BrowserContext.unroute.handler
@@ -40,10 +40,10 @@ index 34c897af02670a61b61678ae41fedffce7523d34..4f0cd94c7300776490bc391aa8678d79
  
  Optional handler function used to register a routing with [`method: BrowserContext.route`].
 diff --git a/playwright/docs/src/api/class-frame.md b/playwright/docs/src/api/class-frame.md
-index 95faad471d881a1444bec86b0a4fd12e11daf426..7944fff0daa90af1cf3169544bad610549cc0250 100644
+index 44f46bcb2a3ac7aebea3b5d275c32d0527d132ba..6e6c944107641b96f27827336cc241d233a1be69 100644
 --- a/playwright/docs/src/api/class-frame.md
 +++ b/playwright/docs/src/api/class-frame.md
-@@ -1342,7 +1342,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
+@@ -1362,7 +1362,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
  
  Optional argument to pass to [`param: expression`].
  
@@ -53,7 +53,7 @@ index 95faad471d881a1444bec86b0a4fd12e11daf426..7944fff0daa90af1cf3169544bad6105
  ### option: Frame.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
  
 diff --git a/playwright/docs/src/api/class-page.md b/playwright/docs/src/api/class-page.md
-index ce9371347684800434f380762950acfe2d44c799..cec8184ed76b49805fb225110846b33833a4a41f 100644
+index a993da69ca93082036451bed0b7b4999cd8cf61d..27866d92c5e40c0f5416c3823a51ffe3cd1d2bff 100644
 --- a/playwright/docs/src/api/class-page.md
 +++ b/playwright/docs/src/api/class-page.md
 @@ -520,6 +520,18 @@ Script to be evaluated in all pages in the browser context.
@@ -75,16 +75,16 @@ index ce9371347684800434f380762950acfe2d44c799..cec8184ed76b49805fb225110846b338
  ## async method: Page.addScriptTag
  - returns: <[ElementHandle]>
  
-@@ -2508,7 +2520,7 @@ Enabling routing disables http cache.
- A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
- 
+@@ -2533,7 +2545,7 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
+ When a [`option: baseURL`] via the context options was provided and the passed URL is a path,
+ it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
  ### param: Page.route.handler
 -* langs: js, python
 +* langs: js, python, go
  - `handler` <[function]\([Route], [Request]\)>
  
  handler function to route the request.
-@@ -2904,7 +2916,7 @@ the [`param: url`].
+@@ -2927,7 +2939,7 @@ the [`param: url`].
  A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
  
  ### param: Page.unroute.handler
@@ -93,7 +93,7 @@ index ce9371347684800434f380762950acfe2d44c799..cec8184ed76b49805fb225110846b338
  - `handler` <[function]\([Route], [Request]\)>
  
  Optional handler function to route the request.
-@@ -3150,7 +3162,7 @@ Shortcut for main frame's [`method: Frame.waitForFunction`].
+@@ -3173,7 +3185,7 @@ Shortcut for main frame's [`method: Frame.waitForFunction`].
  
  Optional argument to pass to [`param: expression`].
  
@@ -138,10 +138,10 @@ index 639324bb2faa3eb9d2c254cbff16f2e380379ab9..96cfbfe8c6ea48c3ae0301cd529713f3
  * langs: csharp, java
  - `body` <[string]>
 diff --git a/playwright/docs/src/api/params.md b/playwright/docs/src/api/params.md
-index 3b88a716d122328878706609a01da5b8f01b47f4..24df4165dc45fa365286d1203cc7620f4a9f8c63 100644
+index f7fd21e5b138fefe026beaeae867212c014257d1..b5aee337efeb7d863f7606296c25d569458d9e74 100644
 --- a/playwright/docs/src/api/params.md
 +++ b/playwright/docs/src/api/params.md
-@@ -103,8 +103,8 @@ Defaults to `'visible'`. Can be either:
+@@ -113,8 +113,8 @@ Defaults to `'visible'`. Can be either:
  * `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`.
    This is opposite to the `'visible'` option.
  
@@ -152,7 +152,7 @@ index 3b88a716d122328878706609a01da5b8f01b47f4..24df4165dc45fa365286d1203cc7620f
  - `polling` <[float]|"raf">
  
  If [`option: polling`] is `'raf'`, then [`param: expression`] is constantly executed in `requestAnimationFrame`
-@@ -280,7 +280,7 @@ Function to be evaluated in the worker context.
+@@ -297,7 +297,7 @@ Function to be evaluated in the worker context.
  Function to be evaluated in the worker context.
  
  ## python-context-option-viewport
@@ -161,7 +161,7 @@ index 3b88a716d122328878706609a01da5b8f01b47f4..24df4165dc45fa365286d1203cc7620f
  - `viewport` <[null]|[Object]>
    - `width` <[int]> page width in pixels.
    - `height` <[int]> page height in pixels.
-@@ -420,7 +420,7 @@ call [`method: BrowserContext.close`] for the HAR to be saved.
+@@ -437,7 +437,7 @@ call [`method: BrowserContext.close`] for the HAR to be saved.
  Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
  
  ## context-option-recordvideo

@@ -548,18 +548,6 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 	bt.channel.On("popup", func(ev map[string]interface{}) {
 		bt.Emit("popup", fromChannel(ev["page"]))
 	})
-	bt.channel.On("request", func(ev map[string]interface{}) {
-		bt.Emit("request", fromChannel(ev["request"]))
-	})
-	bt.channel.On("requestFailed", func(ev map[string]interface{}) {
-		bt.onRequestFailed(fromChannel(ev["request"]).(*requestImpl), ev["responseEndTiming"].(float64), ev["failureText"].(string))
-	})
-	bt.channel.On("requestFinished", func(ev map[string]interface{}) {
-		bt.onRequestFinished(fromChannel(ev["request"]).(*requestImpl), ev["responseEndTiming"].(float64))
-	})
-	bt.channel.On("response", func(ev map[string]interface{}) {
-		bt.Emit("response", fromChannel(ev["response"]))
-	})
 	bt.channel.On("route", func(ev map[string]interface{}) {
 		bt.onRoute(fromChannel(ev["route"]).(*routeImpl), fromChannel(ev["request"]).(*requestImpl))
 	})
@@ -603,17 +591,6 @@ func (p *pageImpl) onBinding(binding *bindingCallImpl) {
 		return
 	}
 	go binding.Call(function)
-}
-
-func (p *pageImpl) onRequestFailed(req *requestImpl, responseEndTiming float64, failureText string) {
-	req.failureText = failureText
-	req.timing.ResponseEnd = responseEndTiming
-	p.Emit("requestfailed", req)
-}
-
-func (p *pageImpl) onRequestFinished(req *requestImpl, responseEndTiming float64) {
-	req.timing.ResponseEnd = responseEndTiming
-	p.Emit("requestfinished", req)
 }
 
 func (p *pageImpl) onFrameAttached(frame *frameImpl) {

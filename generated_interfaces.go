@@ -419,8 +419,7 @@ type Dialog interface {
 }
 
 // `Download` objects are dispatched by page via the [`event: Page.download`] event.
-// If `downloadsPath` isn't specified, all the downloaded files belonging to the browser context are deleted when the
-// browser context is closed. And all downloaded files are deleted when the browser closes.
+// All the downloaded files belonging to the browser context are deleted when the browser context is closed.
 // Download event is emitted once the download starts. Download path becomes available once download completes:
 // ```csharp
 // var download = await page.RunAndWaitForDownloadAsync(async () =>
@@ -439,6 +438,8 @@ type Download interface {
 	Failure() error
 	// Returns path to the downloaded file in case of successful download. The method will wait for the download to finish if
 	// necessary. The method throws when connected remotely.
+	// Note that the download's file name is a random GUID, use Download.suggestedFilename() to get suggested file
+	// name.
 	Path() (string, error)
 	// Copy the download to a user-specified path. It is safe to call this method while the download is still in progress. Will
 	// wait for the download to finish if necessary.
@@ -1291,11 +1292,11 @@ type Keyboard interface {
 	// ```csharp
 	// await page.GotoAsync("https://keycode.info");
 	// await page.Keyboard.PressAsync("A");
-	// await page.ScreenshotAsync("A.png");
+	// await page.ScreenshotAsync(new PageScreenshotOptions { Path = "A.png" });
 	// await page.Keyboard.PressAsync("ArrowLeft");
-	// await page.ScreenshotAsync("ArrowLeft.png");
+	// await page.ScreenshotAsync(new PageScreenshotOptions { Path = "ArrowLeft.png" });
 	// await page.Keyboard.PressAsync("Shift+O");
-	// await page.ScreenshotAsync("O.png");
+	// await page.ScreenshotAsync(new PageScreenshotOptions { Path = "O.png" });
 	// await browser.CloseAsync();
 	// ```
 	// Shortcut for Keyboard.down`] and [`method: Keyboard.up().
@@ -1353,7 +1354,7 @@ type Mouse interface {
 // await using var browser = await playwright.Webkit.LaunchAsync();
 // var page = await browser.NewPageAsync();
 // await page.GotoAsync("https://www.theverge.com");
-// await page.ScreenshotAsync("theverge.png");
+// await page.ScreenshotAsync(new PageScreenshotOptions { Path = "theverge.png" });
 // }
 // }
 // ```
@@ -1774,11 +1775,11 @@ type Page interface {
 	// var page = await browser.NewPageAsync();
 	// await page.GotoAsync("https://keycode.info");
 	// await page.PressAsync("body", "A");
-	// await page.ScreenshotAsync("A.png");
+	// await page.ScreenshotAsync(new PageScreenshotOptions { Path = "A.png" });
 	// await page.PressAsync("body", "ArrowLeft");
-	// await page.ScreenshotAsync("ArrowLeft.png");
+	// await page.ScreenshotAsync(new PageScreenshotOptions { Path = "ArrowLeft.png" });
 	// await page.PressAsync("body", "Shift+O");
-	// await page.ScreenshotAsync("O.png");
+	// await page.ScreenshotAsync(new PageScreenshotOptions { Path = "O.png" });
 	// ```
 	Press(selector, key string, options ...PagePressOptions) error
 	// The method finds an element matching the specified selector within the page. If no elements match the selector, the
@@ -1983,7 +1984,7 @@ type Page interface {
 	// considered a navigation.
 	// Shortcut for main frame's Frame.waitForNavigation().
 	WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error)
-	// Waits for the matching request and returns it.  See [waiting for event](./events.md#waiting-for-event) for more details
+	// Waits for the matching request and returns it. See [waiting for event](./events.md#waiting-for-event) for more details
 	// about events.
 	// ```csharp
 	// // Waits for the next request with the specified url.
