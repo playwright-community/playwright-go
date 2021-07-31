@@ -31,7 +31,13 @@ func TestVideoShouldWork(t *testing.T) {
 	require.Equal(t, len(files), 1)
 	videoFileLocation := filepath.Join(recordVideoDir, files[0].Name())
 	require.Equal(t, videoFileLocation, page.Video().Path())
+	require.FileExists(t, videoFileLocation)
 	content, err := ioutil.ReadFile(videoFileLocation)
 	require.NoError(t, err)
 	require.True(t, filetype.IsVideo(content))
+	tmpFile := filepath.Join(t.TempDir(), "test.webm")
+	require.NoError(t, page.Video().SaveAs(tmpFile))
+	require.FileExists(t, tmpFile)
+	require.NoError(t, page.Video().Delete())
+	require.NoFileExists(t, videoFileLocation)
 }

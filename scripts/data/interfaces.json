@@ -102,7 +102,7 @@
 		"NewCDPSession": [
 			"page Page",
 			"(CDPSession, error)"
-		],	
+		],
 		"NewPage": [
 			"options ...BrowserNewPageOptions",
 			"(Page, error)"
@@ -1191,6 +1191,14 @@
 		"Path": [
 			null,
 			"string"
+		],
+		"Delete": [
+			null,
+			"error"
+		],
+		"SaveAs": [
+			"path string",
+			"error"
 		]
 	},
 	"Worker": {

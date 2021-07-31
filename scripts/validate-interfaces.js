@@ -4,6 +4,14 @@ const interfaceData = require("./data/interfaces.json")
 const api = getAPIDocs()
 
 const IGNORE_CLASSES = [
+  "Android",
+  "AndroidDevice",
+  "AndroidInput",
+  "AndroidWebView",
+  "AndroidSocket",
+  "Electron",
+  "ElectronApplication",
+  "Coverage",
   "Selectors",
   "Logger",
   "BrowserServer",
