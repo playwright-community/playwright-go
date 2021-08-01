@@ -18,12 +18,12 @@ import (
 
 const playwrightCliVersion = "1.13.1"
 
-type playwrightDriver struct {
-	driverDirectory, driverBinaryLocation, version string
+type PlaywrightDriver struct {
+	DriverDirectory, DriverBinaryLocation, Version string
 	options                                        *RunOptions
 }
 
-func newDriver(options *RunOptions) (*playwrightDriver, error) {
+func NewDriver(options *RunOptions) (*PlaywrightDriver, error) {
 	baseDriverDirectory := options.DriverDirectory
 	if baseDriverDirectory == "" {
 		var err error
@@ -34,11 +34,11 @@ func newDriver(options *RunOptions) (*playwrightDriver, error) {
 	}
 	driverDirectory := filepath.Join(baseDriverDirectory, "ms-playwright-go", playwrightCliVersion)
 	driverBinaryLocation := filepath.Join(driverDirectory, getDriverName())
-	return &playwrightDriver{
+	return &PlaywrightDriver{
 		options:              options,
-		driverBinaryLocation: driverBinaryLocation,
-		driverDirectory:      driverDirectory,
-		version:              playwrightCliVersion,
+		DriverBinaryLocation: driverBinaryLocation,
+		DriverDirectory:      driverDirectory,
+		Version:              playwrightCliVersion,
 	}, nil
 }
 
@@ -58,42 +58,42 @@ func getDefaultCacheDirectory() (string, error) {
 	return "", errors.New("could not determine cache directory")
 }
 
-func (d *playwrightDriver) isUpToDateDriver() (bool, error) {
-	if _, err := os.Stat(d.driverDirectory); os.IsNotExist(err) {
-		if err := os.MkdirAll(d.driverDirectory, 0777); err != nil {
+func (d *PlaywrightDriver) isUpToDateDriver() (bool, error) {
+	if _, err := os.Stat(d.DriverDirectory); os.IsNotExist(err) {
+		if err := os.MkdirAll(d.DriverDirectory, 0777); err != nil {
 			return false, fmt.Errorf("could not create driver directory: %w", err)
 		}
 	}
-	if _, err := os.Stat(d.driverBinaryLocation); os.IsNotExist(err) {
+	if _, err := os.Stat(d.DriverBinaryLocation); os.IsNotExist(err) {
 		return false, nil
 	}
-	cmd := exec.Command(d.driverBinaryLocation, "--version")
+	cmd := exec.Command(d.DriverBinaryLocation, "--version")
 	cmd.Env = d.getDriverEnviron()
 	output, err := cmd.Output()
 	if err != nil {
 		return false, fmt.Errorf("could not run driver: %w", err)
 	}
-	if bytes.Contains(output, []byte(d.version)) {
+	if bytes.Contains(output, []byte(d.Version)) {
 		return true, nil
 	}
 	return false, nil
 }
 
-func (d *playwrightDriver) install() error {
-	if err := d.installDriver(); err != nil {
+func (d *PlaywrightDriver) install() error {
+	if err := d.DownloadDriver(); err != nil {
 		return fmt.Errorf("could not install driver: %w", err)
 	}
 	if d.options.SkipInstallBrowsers {
 		return nil
 	}
 	log.Println("Downloading browsers...")
-	if err := d.installBrowsers(d.driverBinaryLocation); err != nil {
+	if err := d.installBrowsers(d.DriverBinaryLocation); err != nil {
 		return fmt.Errorf("could not install browsers: %w", err)
 	}
 	log.Println("Downloaded browsers successfully")
 	return nil
 }
-func (d *playwrightDriver) installDriver() error {
+func (d *PlaywrightDriver) DownloadDriver() error {
 	up2Date, err := d.isUpToDateDriver()
 	if err != nil {
 		return fmt.Errorf("could not check if driver is up2date: %w", err)
@@ -102,7 +102,7 @@ func (d *playwrightDriver) installDriver() error {
 		return nil
 	}
 
-	log.Printf("Downloading driver to %s", d.driverDirectory)
+	log.Printf("Downloading driver to %s", d.DriverDirectory)
 	driverURL := d.getDriverURL()
 	resp, err := http.Get(driverURL)
 	if err != nil {
@@ -123,7 +123,7 @@ func (d *playwrightDriver) installDriver() error {
 	}
 
 	for _, zipFile := range zipReader.File {
-		zipFileDiskPath := filepath.Join(d.driverDirectory, zipFile.Name)
+		zipFileDiskPath := filepath.Join(d.DriverDirectory, zipFile.Name)
 		if zipFile.FileInfo().IsDir() {
 			if err := os.MkdirAll(zipFileDiskPath, os.ModePerm); err != nil {
 				return fmt.Errorf("could not create directory: %w", err)
@@ -159,8 +159,8 @@ func (d *playwrightDriver) installDriver() error {
 	return nil
 }
 
-func (d *playwrightDriver) run() (*connection, error) {
-	cmd := exec.Command(d.driverBinaryLocation, "run-driver")
+func (d *PlaywrightDriver) run() (*connection, error) {
+	cmd := exec.Command(d.DriverBinaryLocation, "run-driver")
 	cmd.Env = d.getDriverEnviron()
 	cmd.Stderr = os.Stderr
 	stdin, err := cmd.StdinPipe()
@@ -177,7 +177,7 @@ func (d *playwrightDriver) run() (*connection, error) {
 	return newConnection(stdin, stdout, cmd.Process.Kill), nil
 }
 
-func (d *playwrightDriver) installBrowsers(driverPath string) error {
+func (d *PlaywrightDriver) installBrowsers(driverPath string) error {
 	additionalArgs := []string{"install"}
 	if d.options.Browsers != nil {
 		additionalArgs = append(additionalArgs, d.options.Browsers...)
@@ -206,7 +206,7 @@ type RunOptions struct {
 // before playwright.Run() it will get executed there and might take a few seconds
 // to download the Playwright suite.
 func Install(options ...*RunOptions) error {
-	driver, err := newDriver(transformRunOptions(options))
+	driver, err := NewDriver(transformRunOptions(options))
 	if err != nil {
 		return fmt.Errorf("could not get driver instance: %w", err)
 	}
@@ -218,7 +218,7 @@ func Install(options ...*RunOptions) error {
 
 // Run starts a Playwright instance
 func Run(options ...*RunOptions) (*Playwright, error) {
-	driver, err := newDriver(transformRunOptions(options))
+	driver, err := NewDriver(transformRunOptions(options))
 	if err != nil {
 		return nil, fmt.Errorf("could not get driver instance: %w", err)
 	}
@@ -260,7 +260,7 @@ func getDriverName() string {
 	panic("Not supported OS!")
 }
 
-func (d *playwrightDriver) getDriverURL() string {
+func (d *PlaywrightDriver) getDriverURL() string {
 	platform := ""
 	switch runtime.GOOS {
 	case "windows":
@@ -271,13 +271,13 @@ func (d *playwrightDriver) getDriverURL() string {
 		platform = "linux"
 	}
 	optionalSubDirectory := ""
-	if strings.Contains(d.version, "next") {
+	if strings.Contains(d.Version, "next") {
 		optionalSubDirectory = "/next"
 	}
-	return fmt.Sprintf("https://playwright.azureedge.net/builds/driver%s/playwright-%s-%s.zip", optionalSubDirectory, d.version, platform)
+	return fmt.Sprintf("https://playwright.azureedge.net/builds/driver%s/playwright-%s-%s.zip", optionalSubDirectory, d.Version, platform)
 }
 
-func (d *playwrightDriver) getDriverEnviron() []string {
+func (d *PlaywrightDriver) getDriverEnviron() []string {
 	environ := os.Environ()
 	unset := func(key string) {
 		for i := range environ {
