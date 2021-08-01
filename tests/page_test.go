@@ -765,7 +765,7 @@ func TestPagePageError(t *testing.T) {
     at c (myscript.js:14:11)
     at b (myscript.js:10:5)
     at a (myscript.js:6:5)
-    at myscript.js:3:1"`, pageError.Stack)
+    at myscript.js:3:1`, pageError.Stack)
 	}
 	if browserName == "firefox" {
 		require.Equal(t, `Error: Fancy error!
