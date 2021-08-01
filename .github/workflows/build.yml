@@ -23,15 +23,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     name:  ${{ matrix.browser }} on ${{ matrix.os }}
     steps:
-    - uses: microsoft/playwright-github-action@v1
     - uses: actions/checkout@v2
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
         go-version: ^1.16.1
       id: go
-    - name: Get dependencies
-      run: go get -v -t -d ./...
+    - run: |
+        go install ./...
+        playwright install-deps
     - name: Test
       env:
         BROWSER: ${{ matrix.browser }}
@@ -65,14 +65,14 @@ jobs:
   test-examples:
     runs-on: ubuntu-latest
     steps:
-    - uses: microsoft/playwright-github-action@v1
     - uses: actions/checkout@v2
     - name: Set up Go 1.x
       uses: actions/setup-go@v2
       with:
         go-version: ^1.16.1
       id: go
-    - name: Get dependencies
-      run: go get -v -t -d ./...
+    - run: |
+        go install ./...
+        playwright install-deps
     - name: Run examples
       run: xvfb-run bash -c "for dir in examples/*; do go run \$dir/main.go; done"
