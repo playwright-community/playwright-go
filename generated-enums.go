@@ -26,23 +26,16 @@ var (
 	ColorSchemeNoPreference              = getColorScheme("no-preference")
 )
 
-func getBrowserChannel(in string) *BrowserChannel {
-	v := BrowserChannel(in)
+func getReducedMotion(in string) *ReducedMotion {
+	v := ReducedMotion(in)
 	return &v
 }
 
-type BrowserChannel string
+type ReducedMotion string
 
 var (
-	BrowserChannelChrome        *BrowserChannel = getBrowserChannel("chrome")
-	BrowserChannelChromeBeta                    = getBrowserChannel("chrome-beta")
-	BrowserChannelChromeDev                     = getBrowserChannel("chrome-dev")
-	BrowserChannelChromeCanary                  = getBrowserChannel("chrome-canary")
-	BrowserChannelMsedge                        = getBrowserChannel("msedge")
-	BrowserChannelMsedgeBeta                    = getBrowserChannel("msedge-beta")
-	BrowserChannelMsedgeDev                     = getBrowserChannel("msedge-dev")
-	BrowserChannelMsedgeCanary                  = getBrowserChannel("msedge-canary")
-	BrowserChannelFirefoxStable                 = getBrowserChannel("firefox-stable")
+	ReducedMotionReduce       *ReducedMotion = getReducedMotion("reduce")
+	ReducedMotionNoPreference                = getReducedMotion("no-preference")
 )
 
 func getMouseButton(in string) *MouseButton {
@@ -138,18 +131,6 @@ var (
 	LoadStateLoad             *LoadState = getLoadState("load")
 	LoadStateDomcontentloaded            = getLoadState("domcontentloaded")
 	LoadStateNetworkidle                 = getLoadState("networkidle")
-)
-
-func getMedia(in string) *Media {
-	v := Media(in)
-	return &v
-}
-
-type Media string
-
-var (
-	MediaScreen *Media = getMedia("screen")
-	MediaPrint         = getMedia("print")
 )
 
 func getSameSiteAttribute(in string) *SameSiteAttribute {
