@@ -25,6 +25,7 @@ var page playwright.Page
 var isChromium bool
 var isFirefox bool
 var isWebKit bool
+var browserName = os.Getenv("BROWSER")
 var server *testServer
 var browserType playwright.BrowserType
 var utils *testUtils
@@ -48,7 +49,6 @@ func BeforeAll() {
 	if err != nil {
 		log.Fatalf("could not start Playwright: %v", err)
 	}
-	browserName := os.Getenv("BROWSER")
 	if browserName == "chromium" || browserName == "" {
 		browserType = pw.Chromium
 	} else if browserName == "firefox" {

@@ -750,21 +750,37 @@ func TestPageTap(t *testing.T) {
 func TestPagePageError(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
+	url := server.PREFIX + "/error.html"
 	errInterface, err := page.ExpectEvent("pageerror", func() error {
-		_, err := page.Goto(server.PREFIX + "/error.html")
+		_, err := page.Goto(url)
 		return err
 	})
 	require.NoError(t, err)
 	pageError := errInterface.(*playwright.Error)
 	require.Equal(t, "Fancy error!", pageError.Message)
+	require.Equal(t, "Error", pageError.Name)
 
-	stack, err := page.Evaluate("() => window['e'].stack")
-	require.NoError(t, err)
-	// Note that WebKit reports the stack of the 'throw' statement instead of the Error constructor call.
-	if isWebKit {
-		stack = strings.Replace(stack.(string), "14:25", "15:19", -1)
+	if browserName == "chromium" {
+		require.Equal(t, `Error: Fancy error!
+    at c (myscript.js:14:11)
+    at b (myscript.js:10:5)
+    at a (myscript.js:6:5)
+    at myscript.js:3:1`, pageError.Stack)
 	}
-	require.Equal(t, pageError.Stack, stack)
+	if browserName == "firefox" {
+		require.Equal(t, `Error: Fancy error!
+    at c (myscript.js:14:11)
+    at b (myscript.js:10:5)
+    at a (myscript.js:6:5)
+    at  (myscript.js:3:1)`, pageError.Stack)
+	}
+	if browserName == "webkit" {
+		require.Equal(t, fmt.Sprintf(`Error: Fancy error!
+    at c (%[1]s:14:36)
+    at b (%[1]s:10:6)
+    at a (%[1]s:6:6)
+    at global code (%[1]s:3:2)`, url), pageError.Stack)
+	}
 }
 
 func TestPageSelectOption(t *testing.T) {
