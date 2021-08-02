@@ -12,7 +12,7 @@ type callback struct {
 }
 
 type connection struct {
-	transport                   Transport
+	transport                   transport
 	waitingForRemoteObjectsLock sync.Mutex
 	waitingForRemoteObjects     map[string]chan interface{}
 	objects                     map[string]*channelOwner
@@ -161,13 +161,13 @@ func (c *connection) SendMessageToServer(guid string, method string, params inte
 	return result.Data, nil
 }
 
-func newConnection(transport Transport, stopDriver func() error) *connection {
+func newConnection(t transport, stopDriver func() error) *connection {
 	connection := &connection{
 		waitingForRemoteObjects: make(map[string]chan interface{}),
 		objects:                 make(map[string]*channelOwner),
 		stopDriver:              stopDriver,
 	}
-	connection.transport = transport
+	connection.transport = t
 	connection.transport.SetDispatch(connection.Dispatch)
 	connection.rootObject = newRootChannelOwner(connection)
 	return connection

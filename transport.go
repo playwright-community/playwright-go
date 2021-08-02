@@ -13,7 +13,7 @@ import (
 	"gopkg.in/square/go-jose.v2/json"
 )
 
-type Transport interface {
+type transport interface {
 	Start() error
 	Stop() error
 	Send(message map[string]interface{}) error
@@ -27,42 +27,67 @@ type pipeTransport struct {
 	rLock    sync.Mutex
 }
 
-type websocketTransport struct {
+type webSocketTransport struct {
+	eventEmitter
 	url      string
 	conn     *websocket.Conn
 	dispatch func(msg *message)
+	stopped  bool
+	rLock    sync.Mutex
+	err      error
 }
 
-func (t *websocketTransport) Start() error {
+func (t *webSocketTransport) Start() error {
 	conn, _, err := websocket.DefaultDialer.Dial(t.url, nil)
 	if err != nil {
 		return fmt.Errorf("could not connect to websocket: %w", err)
 	}
 	t.conn = conn
+
 	for {
 		msg := &message{}
 		err := t.conn.ReadJSON(msg)
 		if err != nil {
-			return fmt.Errorf("could not read json: %w", err)
+			t.rLock.Lock()
+			if t.stopped {
+				t.rLock.Unlock()
+				return nil
+			}
+			t.err = err
+			t.rLock.Unlock()
+			break
 		}
 		t.dispatch(msg)
 	}
+	return nil
 }
 
-func (t *websocketTransport) Send(message map[string]interface{}) error {
+func (t *webSocketTransport) Send(message map[string]interface{}) error {
+	t.rLock.Lock()
+	if t.err != nil {
+		t.stopped = true
+		t.rLock.Unlock()
+		t.Emit("close")
+		return t.err
+	}
+	t.rLock.Unlock()
 	if err := t.conn.WriteJSON(message); err != nil {
 		return fmt.Errorf("could not write json: %w", err)
 	}
 	return nil
 }
 
-func (t *websocketTransport) SetDispatch(dispatch func(msg *message)) {
+func (t *webSocketTransport) SetDispatch(dispatch func(msg *message)) {
 	t.dispatch = dispatch
 }
 
-func (t *websocketTransport) Stop() error {
+func (t *webSocketTransport) Stop() error {
+	t.rLock.Lock()
+	defer t.rLock.Unlock()
+	t.stopped = true
 	t.conn.Close()
-	return nil
+	t.Emit("close")
+	return t.err
 }
 
 func (t *pipeTransport) Start() error {
@@ -140,14 +165,16 @@ func (t *pipeTransport) Send(message map[string]interface{}) error {
 	return nil
 }
 
-func newPipeTransport(stdin io.WriteCloser, stdout io.ReadCloser) Transport {
+func newPipeTransport(stdin io.WriteCloser, stdout io.ReadCloser) transport {
 	return &pipeTransport{
 		stdout: stdout,
 		stdin:  stdin,
 	}
 }
-func newWebsocketTransport(url string) Transport {
-	return &websocketTransport{
+func newWebSocketTransport(url string) transport {
+	t := &webSocketTransport{
 		url: url,
 	}
+	t.initEventEmitter()
+	return t
 }
