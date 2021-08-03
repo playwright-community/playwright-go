@@ -20,9 +20,12 @@ func (a *artifactImpl) SaveAs(path string) error {
 	return err
 }
 
-func (d *artifactImpl) Failure() error {
-	_, err := d.channel.Send("failure")
-	return err
+func (d *artifactImpl) Failure() (string, error) {
+	failure, err := d.channel.Send("failure")
+	if failure == nil {
+		return "", err
+	}
+	return failure.(string), err
 }
 
 func (d *artifactImpl) Delete() error {
