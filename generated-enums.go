@@ -133,6 +133,19 @@ var (
 	LoadStateNetworkidle                 = getLoadState("networkidle")
 )
 
+func getMedia(in string) *Media {
+	v := Media(in)
+	return &v
+}
+
+type Media string
+
+var (
+	MediaScreen *Media = getMedia("screen")
+	MediaPrint         = getMedia("print")
+	MediaNull          = getMedia("null")
+)
+
 func getSameSiteAttribute(in string) *SameSiteAttribute {
 	v := SameSiteAttribute(in)
 	return &v
