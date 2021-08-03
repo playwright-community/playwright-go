@@ -158,6 +158,7 @@ func (t *testServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
 		route(w, r)
 		return
 	}
+	w.Header().Add("Cache-Control", "no-cache, no-store")
 	http.FileServer(http.Dir("assets")).ServeHTTP(w, r)
 }
 
