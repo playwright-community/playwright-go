@@ -28,3 +28,5 @@ covprofile
 .DS_Store
 
 api.json
+_site/
+.jekyll-cache/
