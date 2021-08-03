@@ -53,7 +53,7 @@ index 44f46bcb2a3ac7aebea3b5d275c32d0527d132ba..6e6c944107641b96f27827336cc241d2
  ### option: Frame.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
  
 diff --git a/playwright/docs/src/api/class-page.md b/playwright/docs/src/api/class-page.md
-index a993da69ca93082036451bed0b7b4999cd8cf61d..6d7bc7a7cba651cfdc0795cf1772814a32a06aa0 100644
+index a993da69ca93082036451bed0b7b4999cd8cf61d..55769bd2b5c4ef67ee5c578087be7a78d14bd46c 100644
 --- a/playwright/docs/src/api/class-page.md
 +++ b/playwright/docs/src/api/class-page.md
 @@ -520,6 +520,18 @@ Script to be evaluated in all pages in the browser context.
@@ -102,6 +102,33 @@ index a993da69ca93082036451bed0b7b4999cd8cf61d..6d7bc7a7cba651cfdc0795cf1772814a
  - `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"null">>
  
  Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.
+@@ -2211,7 +2223,7 @@ Paper format. If set, takes priority over [`option: width`] or [`option: height`
+ Paper width, accepts values labeled with units.
+ 
+ ### option: Page.pdf.width
+-* langs: csharp, java
++* langs: csharp, java, go
+ - `width` <[string]>
+ 
+ Paper width, accepts values labeled with units.
+@@ -2223,7 +2235,7 @@ Paper width, accepts values labeled with units.
+ Paper height, accepts values labeled with units.
+ 
+ ### option: Page.pdf.height
+-* langs: csharp, java
++* langs: csharp, java, go
+ - `height` <[string]>
+ 
+ Paper height, accepts values labeled with units.
+@@ -2239,7 +2251,7 @@ Paper height, accepts values labeled with units.
+ Paper margins, defaults to none.
+ 
+ ### option: Page.pdf.margin
+-* langs: csharp, java
++* langs: csharp, java, go
+ - `margin` <[Object]>
+   - `top` <[string]> Top margin, accepts values labeled with units. Defaults to `0`.
+   - `right` <[string]> Right margin, accepts values labeled with units. Defaults to `0`.
 @@ -2533,7 +2545,7 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
  When a [`option: baseURL`] via the context options was provided and the passed URL is a path,
  it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
@@ -199,10 +226,10 @@ index f7fd21e5b138fefe026beaeae867212c014257d1..b5aee337efeb7d863f7606296c25d569
    - `size` <[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
 diff --git a/playwright/utils/doclint/generateGoApi.js b/playwright/utils/doclint/generateGoApi.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..e476a6b9683bc194630633990cf175fb1bb56e2c
+index 0000000000000000000000000000000000000000..540ef12628d75af28cb2751fa93794531cef76f2
 --- /dev/null
 +++ b/playwright/utils/doclint/generateGoApi.js
-@@ -0,0 +1,761 @@
+@@ -0,0 +1,755 @@
 +/**
 + * Copyright (c) Microsoft Corporation.
 + *
@@ -360,8 +387,6 @@ index 0000000000000000000000000000000000000000..e476a6b9683bc194630633990cf175fb
 +      throw new Error('Array at this stage is unexpected.');
 +    } else if (type.properties) {
 +      for (const member of type.properties) {
-+        // if (name === "BrowserContextAddInitScriptOptions")
-+        //   debugger
 +        let fakeType = new Type(name, null);
 +        renderMember(member, fakeType, out);
 +      }
@@ -377,8 +402,6 @@ index 0000000000000000000000000000000000000000..e476a6b9683bc194630633990cf175fb
 +
 +  enumTypes.forEach((values, name) => {
 +    const out = []
-+    if (name.includes('"'))
-+      debugger
 +    const fcall = `get${name}`
 +    out.push(`func ${fcall}(in string) *${name} {
 +      v := ${name}(in)
@@ -634,8 +657,6 @@ index 0000000000000000000000000000000000000000..e476a6b9683bc194630633990cf175fb
 +  type = type || typeResolve(member.type);
 +
 +  const optionsStructName = `${parent.name}${makeFirstCharUpperCase(member.name)}Options`
-+  if (true && optionsStructName === "FrameWaitForFunctionOptions")
-+    debugger
 +  let optionsStructMembers = member.argsArray.find(a => a.name === "options")?.type.properties || []
 +  if (!optionsStructMembers.length)
 +    optionsStructMembers = member.argsArray.filter(a => (!a.required || a.langs.only?.includes("go")))

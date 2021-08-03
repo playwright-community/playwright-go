@@ -2811,8 +2811,12 @@ type PagePdfOptions struct {
 	/// </list>
 	/// </summary>
 	HeaderTemplate *string `json:"headerTemplate"`
+	/// <summary><para>Paper height, accepts values labeled with units.</para></summary>
+	Height *string `json:"height"`
 	/// <summary><para>Paper orientation. Defaults to <c>false</c>.</para></summary>
 	Landscape *bool `json:"landscape"`
+	/// <summary><para>Paper margins, defaults to none.</para></summary>
+	Margin *PagePdfOptionsMargin `json:"margin"`
 	/// <summary>
 	/// <para>
 	/// Paper ranges to print, e.g., '1-5, 8, 11-13'. Defaults to the empty string, which
@@ -2846,6 +2850,18 @@ type PagePdfOptions struct {
 	/// </para>
 	/// </summary>
 	Scale *float64 `json:"scale"`
+	/// <summary><para>Paper width, accepts values labeled with units.</para></summary>
+	Width *string `json:"width"`
+}
+type PageMargin struct {
+	/// <summary><para>Top margin, accepts values labeled with units. Defaults to <c>0</c>.</para></summary>
+	Top *string `json:"top"`
+	/// <summary><para>Right margin, accepts values labeled with units. Defaults to <c>0</c>.</para></summary>
+	Right *string `json:"right"`
+	/// <summary><para>Bottom margin, accepts values labeled with units. Defaults to <c>0</c>.</para></summary>
+	Bottom *string `json:"bottom"`
+	/// <summary><para>Left margin, accepts values labeled with units. Defaults to <c>0</c>.</para></summary>
+	Left *string `json:"left"`
 }
 type PagePressOptions struct {
 	/// <summary>
@@ -3854,6 +3870,16 @@ type PageHoverOptionsPosition struct {
 	X *float64 `json:"x"`
 	/// <summary><para></para></summary>
 	Y *float64 `json:"y"`
+}
+type PagePdfOptionsMargin struct {
+	/// <summary><para>Top margin, accepts values labeled with units. Defaults to <c>0</c>.</para></summary>
+	Top *string `json:"top"`
+	/// <summary><para>Right margin, accepts values labeled with units. Defaults to <c>0</c>.</para></summary>
+	Right *string `json:"right"`
+	/// <summary><para>Bottom margin, accepts values labeled with units. Defaults to <c>0</c>.</para></summary>
+	Bottom *string `json:"bottom"`
+	/// <summary><para>Left margin, accepts values labeled with units. Defaults to <c>0</c>.</para></summary>
+	Left *string `json:"left"`
 }
 type PageScreenshotOptionsClip struct {
 	/// <summary><para>x-coordinate of top-left corner of clip area</para></summary>
