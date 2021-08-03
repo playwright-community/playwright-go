@@ -53,7 +53,7 @@ index 44f46bcb2a3ac7aebea3b5d275c32d0527d132ba..6e6c944107641b96f27827336cc241d2
  ### option: Frame.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
  
 diff --git a/playwright/docs/src/api/class-page.md b/playwright/docs/src/api/class-page.md
-index a993da69ca93082036451bed0b7b4999cd8cf61d..27866d92c5e40c0f5416c3823a51ffe3cd1d2bff 100644
+index a993da69ca93082036451bed0b7b4999cd8cf61d..6d7bc7a7cba651cfdc0795cf1772814a32a06aa0 100644
 --- a/playwright/docs/src/api/class-page.md
 +++ b/playwright/docs/src/api/class-page.md
 @@ -520,6 +520,18 @@ Script to be evaluated in all pages in the browser context.
@@ -75,6 +75,33 @@ index a993da69ca93082036451bed0b7b4999cd8cf61d..27866d92c5e40c0f5416c3823a51ffe3
  ## async method: Page.addScriptTag
  - returns: <[ElementHandle]>
  
+@@ -981,7 +993,7 @@ Changes the CSS media type of the page. The only allowed values are `'screen'`,
+ Passing `null` disables CSS media emulation.
+ 
+ ### option: Page.emulateMedia.media
+-* langs: csharp
++* langs: csharp, go
+ - `media` <[Media]<"screen"|"print"|"null">>
+ 
+ Changes the CSS media type of the page. The only allowed values are `'Screen'`, `'Print'` and `'Null'`.
+@@ -995,7 +1007,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+ `null` disables color scheme emulation.
+ 
+ ### option: Page.emulateMedia.colorScheme
+-* langs: csharp
++* langs: csharp, go
+ - `colorScheme` <[ColorScheme]<"light"|"dark"|"no-preference"|"null">>
+ 
+ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing
+@@ -1008,7 +1020,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.
+ 
+ ### option: Page.emulateMedia.reducedMotion
+-* langs: csharp
++* langs: csharp, go
+ - `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"null">>
+ 
+ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.
 @@ -2533,7 +2545,7 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
  When a [`option: baseURL`] via the context options was provided and the passed URL is a path,
  it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
@@ -172,7 +199,7 @@ index f7fd21e5b138fefe026beaeae867212c014257d1..b5aee337efeb7d863f7606296c25d569
    - `size` <[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
 diff --git a/playwright/utils/doclint/generateGoApi.js b/playwright/utils/doclint/generateGoApi.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..25fb18290cc951e55e10ea59b4a6cbd7e3da3288
+index 0000000000000000000000000000000000000000..e476a6b9683bc194630633990cf175fb1bb56e2c
 --- /dev/null
 +++ b/playwright/utils/doclint/generateGoApi.js
 @@ -0,0 +1,761 @@

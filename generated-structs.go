@@ -2460,6 +2460,30 @@ type PageDragAndDropOptions struct {
 	/// </summary>
 	Trial *bool `json:"trial"`
 }
+type PageEmulateMediaOptions struct {
+	/// <summary>
+	/// <para>
+	/// Emulates <c>'prefers-colors-scheme'</c> media feature, supported values are <c>'light'</c>,
+	/// <c>'dark'</c>, <c>'no-preference'</c>. Passing <c>'Null'</c> disables color scheme
+	/// emulation.
+	/// </para>
+	/// </summary>
+	ColorScheme *ColorScheme `json:"colorScheme"`
+	/// <summary>
+	/// <para>
+	/// Changes the CSS media type of the page. The only allowed values are <c>'Screen'</c>,
+	/// <c>'Print'</c> and <c>'Null'</c>. Passing <c>'Null'</c> disables CSS media emulation.
+	/// </para>
+	/// </summary>
+	Media *Media `json:"media"`
+	/// <summary>
+	/// <para>
+	/// Emulates <c>'prefers-reduced-motion'</c> media feature, supported values are <c>'reduce'</c>,
+	/// <c>'no-preference'</c>. Passing <c>null</c> disables reduced motion emulation.
+	/// </para>
+	/// </summary>
+	ReducedMotion *ReducedMotion `json:"reducedMotion"`
+}
 type PageEvalOnSelectorOptions struct {
 	/// <summary><para>Optional argument to pass to <paramref name="expression"/>.</para></summary>
 	Arg interface{} `json:"arg"`

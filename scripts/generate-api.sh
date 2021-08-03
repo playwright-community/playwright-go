@@ -14,7 +14,8 @@ echo "Generated Interfaces"
 PLAYWRIGHT_DIR="playwright"
 
 node $PLAYWRIGHT_DIR/utils/doclint/generateGoApi.js
-cp $PLAYWRIGHT_DIR/utils/doclint/generate_types/go/generated-{enums,structs}.go .
+mv $PLAYWRIGHT_DIR/utils/doclint/generate_types/go/generated-{enums,structs}.go .
+rm $PLAYWRIGHT_DIR/utils/doclint/generate_types/go/generated-interfaces.go
 go fmt generated-{enums,structs}.go > /dev/null
 
 # echo "Validating API"

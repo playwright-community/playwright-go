@@ -1560,6 +1560,34 @@ type Page interface {
 	// }
 	// ```
 	ExposeFunction(name string, binding ExposedFunction) error
+	// This method changes the `CSS media type` through the `media` argument, and/or the `'prefers-colors-scheme'` media
+	// feature, using the `colorScheme` argument.
+	// ```csharp
+	// await page.EvaluateAsync("() => matchMedia('screen').matches");
+	// // → true
+	// await page.EvaluateAsync("() => matchMedia('print').matches");
+	// // → false
+	// await page.EmulateMediaAsync(new PageEmulateMediaOptions { Media = Media.Print });
+	// await page.EvaluateAsync("() => matchMedia('screen').matches");
+	// // → false
+	// await page.EvaluateAsync("() => matchMedia('print').matches");
+	// // → true
+	// await page.EmulateMediaAsync(new PageEmulateMediaOptions { Media = Media.Screen });
+	// await page.EvaluateAsync("() => matchMedia('screen').matches");
+	// // → true
+	// await page.EvaluateAsync("() => matchMedia('print').matches");
+	// // → false
+	// ```
+	// ```csharp
+	// await page.EmulateMediaAsync(new PageEmulateMediaOptions { ColorScheme = ColorScheme.Dark });
+	// await page.EvaluateAsync("matchMedia('(prefers-color-scheme: dark)').matches");
+	// // → true
+	// await page.EvaluateAsync("matchMedia('(prefers-color-scheme: light)').matches");
+	// // → false
+	// await page.EvaluateAsync("matchMedia('(prefers-color-scheme: no-preference)').matches");
+	// // → false
+	// ```
+	EmulateMedia(options ...PageEmulateMediaOptions) error
 	// Returns the value of the `expression` invocation.
 	// If the function passed to the Page.evaluate`] returns a [Promise], then [`method: Page.evaluate() would wait
 	// for the promise to resolve and return its value.
