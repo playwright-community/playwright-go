@@ -226,10 +226,10 @@ index f7fd21e5b138fefe026beaeae867212c014257d1..b5aee337efeb7d863f7606296c25d569
    - `size` <[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
 diff --git a/playwright/utils/doclint/generateGoApi.js b/playwright/utils/doclint/generateGoApi.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..540ef12628d75af28cb2751fa93794531cef76f2
+index 0000000000000000000000000000000000000000..5060630f9b65a9ce5544d26bd5ed1057f92fc456
 --- /dev/null
 +++ b/playwright/utils/doclint/generateGoApi.js
-@@ -0,0 +1,755 @@
+@@ -0,0 +1,763 @@
 +/**
 + * Copyright (c) Microsoft Corporation.
 + *
@@ -516,8 +516,16 @@ index 0000000000000000000000000000000000000000..540ef12628d75af28cb2751fa9379453
 +      else
 +        output(`event EventHandler<${type}> ${name};`);
 +    } else if (member.kind === 'property') {
-+      if (member.spec)
-+        output(XmlDoc.renderXmlDoc(member.spec, maxDocumentationColumnWidth));
++      if (member.spec) {
++        const text = member.spec
++        if (text.length > 0) {
++          text.forEach(line => {
++            if (line.text)
++              output(`// ${line.text}`)
++          }
++          )
++        }
++      }
 +      let propertyOrigin = member.name;
 +      if (member.type.expression === '[string]|[float]')
 +        propertyOrigin = `${member.name}String`;
@@ -985,4 +993,3 @@ index 0000000000000000000000000000000000000000..540ef12628d75af28cb2751fa9379453
 +
 +  additionalTypes.set(typeName, type);
 +}
-\ No newline at end of file
