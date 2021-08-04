@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -59,7 +58,11 @@ func TestDownloadCancel(t *testing.T) {
 		if _, err := w.Write([]byte(strings.Repeat("foobar", 8192))); err != nil {
 			log.Printf("could not write: %v", err)
 		}
-		<-time.After(time.Second)
+		if h, ok := w.(http.Hijacker); ok {
+			if _, _, err := h.Hijack(); err != nil {
+				log.Printf("could not hijack connection: %v", err)
+			}
+		}
 	})
 	require.NoError(t, page.SetContent(
 		fmt.Sprintf(`<a href="%s/downloadWithDelay">download</a>`, server.PREFIX),
