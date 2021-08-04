@@ -221,7 +221,7 @@
 		],
 		"Failure": [
 			null,
-			"error"
+			"(string, error)"
 		],
 		"Path": [
 			null,
@@ -242,6 +242,14 @@
 		"URL": [
 			null,
 			"string"
+		],
+		"Page": [
+			null,
+			"Page"
+		],
+		"Cancel": [
+			null,
+			"error"
 		]
 	},
 	"ElementHandle": {
