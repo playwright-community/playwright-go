@@ -20,6 +20,7 @@ type browserContextImpl struct {
 	browser           *browserImpl
 	serviceWorkers    []*workerImpl
 	bindings          map[string]BindingCallFunction
+	tracing           *tracingImpl
 }
 
 func (b *browserContextImpl) SetDefaultNavigationTimeout(timeout float64) {
@@ -44,6 +45,9 @@ func (b *browserContextImpl) Pages() []Page {
 
 func (b *browserContextImpl) Browser() Browser {
 	return b.browser
+}
+func (b *browserContextImpl) Tracing() Tracing {
+	return b.tracing
 }
 
 func (b *browserContextImpl) NewCDPSession(page Page) (CDPSession, error) {
@@ -361,6 +365,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 		bindings:        make(map[string]BindingCallFunction),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
+	bt.tracing = newTracing(bt)
 	bt.channel.On("bindingCall", func(params map[string]interface{}) {
 		bt.onBinding(fromChannel(params["binding"]).(*bindingCallImpl))
 	})

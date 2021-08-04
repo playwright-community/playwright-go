@@ -150,6 +150,20 @@
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
 			"interface{}"
+		],
+		"Tracing": [
+			null,
+			"Tracing"
+		]
+	},
+	"Tracing": {
+		"Start": [
+			"options ...TracingStartOptions",
+			"error"
+		],
+		"Stop": [
+			"options ...TracingStopOptions",
+			"error"
 		]
 	},
 	"BrowserType": {

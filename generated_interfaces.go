@@ -149,6 +149,17 @@ type BrowserContext interface {
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the context closes before the event is fired. Returns the event data value.
 	WaitForEvent(event string, predicate ...interface{}) interface{}
+	Tracing() Tracing
+}
+
+// API for collecting and saving Playwright traces. Playwright traces can be opened using the Playwright CLI after
+// Playwright script runs.
+// Start with specifying the folder traces will be stored in:
+type Tracing interface {
+	// Start tracing.
+	Start(options ...TracingStartOptions) error
+	// Stop tracing.
+	Stop(options ...TracingStopOptions) error
 }
 
 // BrowserType provides methods to launch a specific browser instance or connect to an existing one. The following is a
