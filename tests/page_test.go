@@ -366,10 +366,6 @@ func TestPageReload(t *testing.T) {
 func TestPageGoBackGoForward(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	if isFirefox {
-		t.Skip("https://github.com/microsoft/playwright/issues/3693")
-	}
-
 	resp, err := page.GoBack()
 	require.NoError(t, err)
 	require.Nil(t, resp)
