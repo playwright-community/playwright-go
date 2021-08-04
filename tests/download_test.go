@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -18,13 +19,6 @@ func TestDownloadBasic(t *testing.T) {
 		w.Header().Add("Content-Type", "application/octet-stream")
 		w.Header().Add("Content-Disposition", "attachment; filename=file.txt")
 		if _, err := w.Write([]byte("foobar")); err != nil {
-			log.Printf("could not write: %v", err)
-		}
-	})
-	server.SetRoute("/downloadWithDelay", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Content-Type", "application/octet-stream")
-		w.Header().Add("Content-Disposition", "attachment")
-		if _, err := w.Write([]byte(strings.Repeat("foobar", 8192))); err != nil {
 			log.Printf("could not write: %v", err)
 		}
 	})
@@ -54,18 +48,28 @@ func TestDownloadBasic(t *testing.T) {
 
 	require.NoError(t, download.Delete())
 	require.NoFileExists(t, file)
+}
 
+func TestDownloadCancel(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	server.SetRoute("/downloadWithDelay", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/octet-stream")
+		w.Header().Add("Content-Disposition", "attachment")
+		if _, err := w.Write([]byte(strings.Repeat("foobar", 8192))); err != nil {
+			log.Printf("could not write: %v", err)
+		}
+		<-time.After(time.Second)
+	})
 	require.NoError(t, page.SetContent(
 		fmt.Sprintf(`<a href="%s/downloadWithDelay">download</a>`, server.PREFIX),
 	))
-	download, err = page.ExpectDownload(func() error {
+	download, err := page.ExpectDownload(func() error {
 		return page.Click("a")
 	})
 	require.NoError(t, err)
-	require.Equal(t, download.URL(), fmt.Sprintf("%s/downloadWithDelay", server.PREFIX))
-	err = download.Cancel()
+	require.NoError(t, download.Cancel())
+	failure, err := download.Failure()
 	require.NoError(t, err)
-	failure, err = download.Failure()
-	require.NoError(t, err)
-	require.Equal(t, failure, "canceled")
+	require.Equal(t, "canceled", failure)
 }
