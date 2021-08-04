@@ -11,7 +11,7 @@ func (d *downloadImpl) String() string {
 	return d.SuggestedFilename()
 }
 
-func (d *downloadImpl) Page() *pageImpl {
+func (d *downloadImpl) Page() Page {
 	return d.page
 }
 
@@ -28,9 +28,9 @@ func (d *downloadImpl) Delete() error {
 	return err
 }
 
-func (d *downloadImpl) Failure() error {
-	err := d.artifact.Failure()
-	return err
+func (d *downloadImpl) Failure() (string, error) {
+
+	return d.artifact.Failure()
 }
 
 func (d *downloadImpl) Path() (string, error) {
@@ -41,6 +41,10 @@ func (d *downloadImpl) Path() (string, error) {
 func (d *downloadImpl) SaveAs(path string) error {
 	err := d.artifact.SaveAs(path)
 	return err
+}
+
+func (d *downloadImpl) Cancel() error {
+	return d.artifact.Cancel()
 }
 
 func newDownload(page *pageImpl, url string, suggestedFilename string, artifact *artifactImpl) *downloadImpl {

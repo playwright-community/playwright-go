@@ -224,7 +224,7 @@ type Download interface {
 	// Deletes the downloaded file. Will wait for the download to finish if necessary.
 	Delete() error
 	// Returns download error if any. Will wait for the download to finish if necessary.
-	Failure() error
+	Failure() (string, error)
 	// Returns path to the downloaded file in case of successful download. The method will wait for the download to finish if
 	// necessary. The method throws when connected remotely.
 	// Note that the download's file name is a random GUID, use Download.suggestedFilename() to get suggested file
@@ -241,6 +241,11 @@ type Download interface {
 	SuggestedFilename() string
 	// Returns downloaded url.
 	URL() string
+	// Get the page that the download belongs to.
+	Page() Page
+	// Cancels a download. Will not fail if the download is already finished or canceled. Upon successful cancellations,
+	// `download.failure()` would resolve to `'canceled'`.
+	Cancel() error
 }
 
 // ElementHandle represents an in-page DOM element. ElementHandles can be created with the Page.querySelector()
