@@ -3,13 +3,13 @@ package playwright
 type BrowserNewContextOptions struct {
 	// Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
 	AcceptDownloads *bool `json:"acceptDownloads"`
-	// When using <see cref="Page.Goto"/>, <see cref="Page.Route"/>, <see cref="Page.WaitForURL"/>, <see cref="Page.WaitForRequest"/>, or <see cref="Page.WaitForResponse"/> it takes the base URL in consideration by using the [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the corresponding URL. Examples:
+	// When using Page.Goto(), Page.Route(), Page.WaitForURL(), Page.WaitForRequest(), or Page.WaitForResponse() it takes the base URL in consideration by using the [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the corresponding URL. Examples:
 	// baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
 	// baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in `http://localhost:3000/foo/bar.html`
 	BaseURL *string `json:"baseURL"`
 	// Toggles bypassing page's Content-Security-Policy.
 	BypassCSP *bool `json:"bypassCSP"`
-	// Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See <see cref="Page.EmulateMedia"/> for more details. Defaults to `'light'`.
+	// Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See Page.EmulateMedia() for more details. Defaults to `'light'`.
 	ColorScheme *ColorScheme `json:"colorScheme"`
 	// Specify device scale factor (can be thought of as dpr). Defaults to `1`.
 	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
@@ -30,16 +30,16 @@ type BrowserNewContextOptions struct {
 	Locale *string `json:"locale"`
 	// Whether to emulate network being offline. Defaults to `false`.
 	Offline *bool `json:"offline"`
-	// A list of permissions to grant to all pages in this context. See <see cref="BrowserContext.GrantPermissions"/> for more details.
+	// A list of permissions to grant to all pages in this context. See BrowserContext.GrantPermissions() for more details.
 	Permissions []string `json:"permissions"`
 	// Network proxy settings to use with this context.
 	// For Chromium on Windows the browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: 'http://per-context' } })`.
 	Proxy *BrowserNewContextOptionsProxy `json:"proxy"`
-	// Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await <see cref="BrowserContext.Close"/> for videos to be saved.
+	// Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await BrowserContext.Close() for videos to be saved.
 	RecordVideo *BrowserNewContextOptionsRecordVideo `json:"recordVideo"`
-	// Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See <see cref="Page.EmulateMedia"/> for more details. Defaults to `'no-preference'`.
+	// Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See Page.EmulateMedia() for more details. Defaults to `'no-preference'`.
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
-	// Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the <paramref name="viewport"/> is set.
+	// Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the [`option: viewport`] is set.
 	Screen *BrowserNewContextOptionsScreen `json:"screen"`
 	// Changes the timezone of the context. See [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1) for a list of supported timezone IDs.
 	TimezoneId *string `json:"timezoneId"`
@@ -91,13 +91,13 @@ type BrowserViewport struct {
 type BrowserNewPageOptions struct {
 	// Whether to automatically download all the attachments. Defaults to `false` where all the downloads are canceled.
 	AcceptDownloads *bool `json:"acceptDownloads"`
-	// When using <see cref="Page.Goto"/>, <see cref="Page.Route"/>, <see cref="Page.WaitForURL"/>, <see cref="Page.WaitForRequest"/>, or <see cref="Page.WaitForResponse"/> it takes the base URL in consideration by using the [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the corresponding URL. Examples:
+	// When using Page.Goto(), Page.Route(), Page.WaitForURL(), Page.WaitForRequest(), or Page.WaitForResponse() it takes the base URL in consideration by using the [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the corresponding URL. Examples:
 	// baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
 	// baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in `http://localhost:3000/foo/bar.html`
 	BaseURL *string `json:"baseURL"`
 	// Toggles bypassing page's Content-Security-Policy.
 	BypassCSP *bool `json:"bypassCSP"`
-	// Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See <see cref="Page.EmulateMedia"/> for more details. Defaults to `'light'`.
+	// Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See Page.EmulateMedia() for more details. Defaults to `'light'`.
 	ColorScheme *ColorScheme `json:"colorScheme"`
 	// Specify device scale factor (can be thought of as dpr). Defaults to `1`.
 	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
@@ -118,16 +118,16 @@ type BrowserNewPageOptions struct {
 	Locale *string `json:"locale"`
 	// Whether to emulate network being offline. Defaults to `false`.
 	Offline *bool `json:"offline"`
-	// A list of permissions to grant to all pages in this context. See <see cref="BrowserContext.GrantPermissions"/> for more details.
+	// A list of permissions to grant to all pages in this context. See BrowserContext.GrantPermissions() for more details.
 	Permissions []string `json:"permissions"`
 	// Network proxy settings to use with this context.
 	// For Chromium on Windows the browser needs to be launched with the global proxy for this option to work. If all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({ proxy: { server: 'http://per-context' } })`.
 	Proxy *BrowserNewPageOptionsProxy `json:"proxy"`
-	// Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await <see cref="BrowserContext.Close"/> for videos to be saved.
+	// Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await BrowserContext.Close() for videos to be saved.
 	RecordVideo *BrowserNewPageOptionsRecordVideo `json:"recordVideo"`
-	// Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See <see cref="Page.EmulateMedia"/> for more details. Defaults to `'no-preference'`.
+	// Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See Page.EmulateMedia() for more details. Defaults to `'no-preference'`.
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
-	// Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the <paramref name="viewport"/> is set.
+	// Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the [`option: viewport`] is set.
 	Screen *BrowserNewPageOptionsScreen `json:"screen"`
 	// Changes the timezone of the context. See [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1) for a list of supported timezone IDs.
 	TimezoneId *string `json:"timezoneId"`
@@ -204,11 +204,11 @@ type BrowserContextStorageStateResult struct {
 	Origins []BrowserContextStorageStateResultOrigins `json:"origins"`
 }
 type BrowserContextStorageStateOptions struct {
-	// The file path to save the storage state to. If <paramref name="path"/> is a relative path, then it is resolved relative to current working directory. If no path is provided, storage state is still returned, but won't be saved to the disk.
+	// The file path to save the storage state to. If [`option: path`] is a relative path, then it is resolved relative to current working directory. If no path is provided, storage state is still returned, but won't be saved to the disk.
 	Path *string `json:"path"`
 }
 type BrowserContextUnrouteOptions struct {
-	// Optional handler function used to register a routing with <see cref="BrowserContext.Route"/>.
+	// Optional handler function used to register a routing with BrowserContext.Route().
 	Handler func(Route, Request) `json:"handler"`
 }
 type BrowserTypeLaunchOptions struct {
@@ -218,11 +218,11 @@ type BrowserTypeLaunchOptions struct {
 	Channel *string `json:"channel"`
 	// Enable Chromium sandboxing. Defaults to `false`.
 	ChromiumSandbox *bool `json:"chromiumSandbox"`
-	// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the <paramref name="headless"/> option will be set `false`.
+	// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the [`option: headless`] option will be set `false`.
 	Devtools *bool `json:"devtools"`
 	// If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is deleted when browser is closed.
 	DownloadsPath *string `json:"downloadsPath"`
-	// Path to a browser executable to run instead of the bundled one. If <paramref name="executablePath"/> is a relative path, then it is resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
+	// Path to a browser executable to run instead of the bundled one. If [`option: executablePath`] is a relative path, then it is resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
 	ExecutablePath *string `json:"executablePath"`
 	// Close the browser process on SIGHUP. Defaults to `true`.
 	HandleSIGHUP *bool `json:"handleSIGHUP"`
@@ -230,7 +230,7 @@ type BrowserTypeLaunchOptions struct {
 	HandleSIGINT *bool `json:"handleSIGINT"`
 	// Close the browser process on SIGTERM. Defaults to `true`.
 	HandleSIGTERM *bool `json:"handleSIGTERM"`
-	// Whether to run browser in headless mode. More details for [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the <paramref name="devtools"/> option is `true`.
+	// Whether to run browser in headless mode. More details for [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the [`option: devtools`] option is `true`.
 	Headless *bool `json:"headless"`
 	// Network proxy settings.
 	Proxy *BrowserTypeLaunchOptionsProxy `json:"proxy"`
@@ -256,7 +256,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	AcceptDownloads *bool `json:"acceptDownloads"`
 	// Additional arguments to pass to the browser instance. The list of Chromium flags can be found [here](http://peter.sh/experiments/chromium-command-line-switches/).
 	Args []string `json:"args"`
-	// When using <see cref="Page.Goto"/>, <see cref="Page.Route"/>, <see cref="Page.WaitForURL"/>, <see cref="Page.WaitForRequest"/>, or <see cref="Page.WaitForResponse"/> it takes the base URL in consideration by using the [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the corresponding URL. Examples:
+	// When using Page.Goto(), Page.Route(), Page.WaitForURL(), Page.WaitForRequest(), or Page.WaitForResponse() it takes the base URL in consideration by using the [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the corresponding URL. Examples:
 	// baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
 	// baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in `http://localhost:3000/foo/bar.html`
 	BaseURL *string `json:"baseURL"`
@@ -266,15 +266,15 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	Channel *string `json:"channel"`
 	// Enable Chromium sandboxing. Defaults to `false`.
 	ChromiumSandbox *bool `json:"chromiumSandbox"`
-	// Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See <see cref="Page.EmulateMedia"/> for more details. Defaults to `'light'`.
+	// Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See Page.EmulateMedia() for more details. Defaults to `'light'`.
 	ColorScheme *ColorScheme `json:"colorScheme"`
 	// Specify device scale factor (can be thought of as dpr). Defaults to `1`.
 	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
-	// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the <paramref name="headless"/> option will be set `false`.
+	// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the [`option: headless`] option will be set `false`.
 	Devtools *bool `json:"devtools"`
 	// If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is deleted when browser is closed.
 	DownloadsPath *string `json:"downloadsPath"`
-	// Path to a browser executable to run instead of the bundled one. If <paramref name="executablePath"/> is a relative path, then it is resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
+	// Path to a browser executable to run instead of the bundled one. If [`option: executablePath`] is a relative path, then it is resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
 	ExecutablePath *string `json:"executablePath"`
 	// An object containing additional HTTP headers to be sent with every request. All header values must be strings.
 	ExtraHttpHeaders map[string]string                                     `json:"extraHTTPHeaders"`
@@ -287,7 +287,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	HandleSIGTERM *bool `json:"handleSIGTERM"`
 	// Specifies if viewport supports touch events. Defaults to false.
 	HasTouch *bool `json:"hasTouch"`
-	// Whether to run browser in headless mode. More details for [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the <paramref name="devtools"/> option is `true`.
+	// Whether to run browser in headless mode. More details for [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the [`option: devtools`] option is `true`.
 	Headless *bool `json:"headless"`
 	// Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
 	HttpCredentials *BrowserTypeLaunchPersistentContextOptionsHttpCredentials `json:"httpCredentials"`
@@ -301,15 +301,15 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	Locale *string `json:"locale"`
 	// Whether to emulate network being offline. Defaults to `false`.
 	Offline *bool `json:"offline"`
-	// A list of permissions to grant to all pages in this context. See <see cref="BrowserContext.GrantPermissions"/> for more details.
+	// A list of permissions to grant to all pages in this context. See BrowserContext.GrantPermissions() for more details.
 	Permissions []string `json:"permissions"`
 	// Network proxy settings.
 	Proxy *BrowserTypeLaunchPersistentContextOptionsProxy `json:"proxy"`
-	// Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await <see cref="BrowserContext.Close"/> for videos to be saved.
+	// Enables video recording for all pages into `recordVideo.dir` directory. If not specified videos are not recorded. Make sure to await BrowserContext.Close() for videos to be saved.
 	RecordVideo *BrowserTypeLaunchPersistentContextOptionsRecordVideo `json:"recordVideo"`
-	// Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See <see cref="Page.EmulateMedia"/> for more details. Defaults to `'no-preference'`.
+	// Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See Page.EmulateMedia() for more details. Defaults to `'no-preference'`.
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
-	// Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the <paramref name="viewport"/> is set.
+	// Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the [`option: viewport`] is set.
 	Screen *BrowserTypeLaunchPersistentContextOptionsScreen `json:"screen"`
 	// Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
 	SlowMo *float64 `json:"slowMo"`
@@ -377,7 +377,7 @@ type ElementHandleCheckOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *ElementHandleCheckOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -401,7 +401,7 @@ type ElementHandleClickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *ElementHandleClickOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -419,7 +419,7 @@ type ElementHandleDblclickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *ElementHandleDblclickOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -429,11 +429,11 @@ type ElementHandleDispatchEventOptions struct {
 	EventInit interface{} `json:"eventInit"`
 }
 type ElementHandleEvalOnSelectorOptions struct {
-	// Optional argument to pass to <paramref name="expression"/>.
+	// Optional argument to pass to [`param: expression`].
 	Arg interface{} `json:"arg"`
 }
 type ElementHandleEvalOnSelectorAllOptions struct {
-	// Optional argument to pass to <paramref name="expression"/>.
+	// Optional argument to pass to [`param: expression`].
 	Arg interface{} `json:"arg"`
 }
 type ElementHandleFillOptions struct {
@@ -441,7 +441,7 @@ type ElementHandleFillOptions struct {
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandleHoverOptions struct {
@@ -451,13 +451,13 @@ type ElementHandleHoverOptions struct {
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *ElementHandleHoverOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
 }
 type ElementHandleInputValueOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandlePressOptions struct {
@@ -465,23 +465,23 @@ type ElementHandlePressOptions struct {
 	Delay *float64 `json:"delay"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandleScreenshotOptions struct {
 	// Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
 	OmitBackground *bool `json:"omitBackground"`
-	// The file path to save the image to. The screenshot type will be inferred from file extension. If <paramref name="path"/> is a relative path, then it is resolved relative to the current working directory. If no path is provided, the image won't be saved to the disk.
+	// The file path to save the image to. The screenshot type will be inferred from file extension. If [`option: path`] is a relative path, then it is resolved relative to the current working directory. If no path is provided, the image won't be saved to the disk.
 	Path *string `json:"path"`
 	// The quality of the image, between 0-100. Not applicable to `png` images.
 	Quality *int `json:"quality"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// Specify screenshot type, defaults to `png`.
 	Type *ScreenshotType `json:"type"`
 }
 type ElementHandleScrollIntoViewIfNeededOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandleSelectOptionOptions struct {
@@ -489,19 +489,19 @@ type ElementHandleSelectOptionOptions struct {
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandleSelectTextOptions struct {
 	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandleSetInputFilesOptions struct {
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandleTapOptions struct {
@@ -513,7 +513,7 @@ type ElementHandleTapOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *ElementHandleTapOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -523,7 +523,7 @@ type ElementHandleTypeOptions struct {
 	Delay *float64 `json:"delay"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandleUncheckOptions struct {
@@ -533,13 +533,13 @@ type ElementHandleUncheckOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *ElementHandleUncheckOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
 }
 type ElementHandleWaitForElementStateOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandleWaitForSelectorOptions struct {
@@ -549,13 +549,13 @@ type ElementHandleWaitForSelectorOptions struct {
 	// `'visible'` - wait for element to have non-empty bounding box and no `visibility:hidden`. Note that element without any content or with `display:none` has an empty bounding box and is not considered visible.
 	// `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`. This is opposite to the `'visible'` option.
 	State *WaitForSelectorState `json:"state"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FileChooserSetFilesOptions struct {
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameAddScriptTagOptions struct {
@@ -583,7 +583,7 @@ type FrameCheckOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *FrameCheckOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -607,7 +607,7 @@ type FrameClickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *FrameClickOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -625,13 +625,13 @@ type FrameDblclickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *FrameDblclickOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
 }
 type FrameDispatchEventOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameDragAndDropOptions struct {
@@ -639,25 +639,25 @@ type FrameDragAndDropOptions struct {
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
 }
 type FrameEvalOnSelectorOptions struct {
-	// Optional argument to pass to <paramref name="expression"/>.
+	// Optional argument to pass to [`param: expression`].
 	Arg interface{} `json:"arg"`
 }
 type FrameEvalOnSelectorAllOptions struct {
-	// Optional argument to pass to <paramref name="expression"/>.
+	// Optional argument to pass to [`param: expression`].
 	Arg interface{} `json:"arg"`
 }
 type FrameEvaluateOptions struct {
-	// Optional argument to pass to <paramref name="expression"/>.
+	// Optional argument to pass to [`param: expression`].
 	Arg interface{} `json:"arg"`
 }
 type FrameEvaluateHandleOptions struct {
-	// Optional argument to pass to <paramref name="expression"/>.
+	// Optional argument to pass to [`param: expression`].
 	Arg interface{} `json:"arg"`
 }
 type FrameFillOptions struct {
@@ -665,21 +665,21 @@ type FrameFillOptions struct {
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameFocusOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameGetAttributeOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameGotoOptions struct {
-	// Referer header value. If provided it will take preference over the referer header value set by <see cref="Page.SetExtraHttpHeaders"/>.
+	// Referer header value. If provided it will take preference over the referer header value set by Page.SetExtraHttpHeaders().
 	Referer *string `json:"referer"`
-	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>, <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(), BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When to consider operation succeeded, defaults to `load`. Events can be either:
 	// `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
@@ -694,45 +694,45 @@ type FrameHoverOptions struct {
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *FrameHoverOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
 }
 type FrameInnerHTMLOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameInnerTextOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameInputValueOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameIsCheckedOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameIsDisabledOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameIsEditableOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameIsEnabledOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameIsHiddenOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameIsVisibleOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FramePressOptions struct {
@@ -740,7 +740,7 @@ type FramePressOptions struct {
 	Delay *float64 `json:"delay"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameSelectOptionOptions struct {
@@ -748,11 +748,11 @@ type FrameSelectOptionOptions struct {
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameSetContentOptions struct {
-	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>, <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(), BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When to consider operation succeeded, defaults to `load`. Events can be either:
 	// `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
@@ -763,7 +763,7 @@ type FrameSetContentOptions struct {
 type FrameSetInputFilesOptions struct {
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameTapOptions struct {
@@ -775,13 +775,13 @@ type FrameTapOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *FrameTapOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
 }
 type FrameTextContentOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameTypeOptions struct {
@@ -789,7 +789,7 @@ type FrameTypeOptions struct {
 	Delay *float64 `json:"delay"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameUncheckOptions struct {
@@ -799,23 +799,23 @@ type FrameUncheckOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *FrameUncheckOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
 }
 type FrameWaitForFunctionOptions struct {
-	// If <paramref name="polling"/> is `'raf'`, then <paramref name="expression"/> is constantly executed in `requestAnimationFrame` callback. If <paramref name="polling"/> is a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
+	// If [`option: polling`] is `'raf'`, then [`param: expression`] is constantly executed in `requestAnimationFrame` callback. If [`option: polling`] is a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
 	Polling interface{} `json:"polling"`
-	// maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/>.
+	// maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
 	Timeout *float64 `json:"timeout"`
 }
 type FrameWaitForLoadStateOptions struct {
-	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>, <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(), BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameWaitForNavigationOptions struct {
-	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>, <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(), BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
 	URL interface{} `json:"url"`
@@ -832,11 +832,11 @@ type FrameWaitForSelectorOptions struct {
 	// `'visible'` - wait for element to have non-empty bounding box and no `visibility:hidden`. Note that element without any content or with `display:none` has an empty bounding box and is not considered visible.
 	// `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`. This is opposite to the `'visible'` option.
 	State *WaitForSelectorState `json:"state"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameWaitForURLOptions struct {
-	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>, <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(), BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When to consider operation succeeded, defaults to `load`. Events can be either:
 	// `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
@@ -845,11 +845,11 @@ type FrameWaitForURLOptions struct {
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type JSHandleEvaluateOptions struct {
-	// Optional argument to pass to <paramref name="expression"/>.
+	// Optional argument to pass to [`param: expression`].
 	Arg interface{} `json:"arg"`
 }
 type JSHandleEvaluateHandleOptions struct {
-	// Optional argument to pass to <paramref name="expression"/>.
+	// Optional argument to pass to [`param: expression`].
 	Arg interface{} `json:"arg"`
 }
 type KeyboardPressOptions struct {
@@ -921,7 +921,7 @@ type PageCheckOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *PageCheckOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -945,7 +945,7 @@ type PageClickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *PageClickOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -967,13 +967,13 @@ type PageDblclickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *PageDblclickOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
 }
 type PageDispatchEventOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageDragAndDropOptions struct {
@@ -981,7 +981,7 @@ type PageDragAndDropOptions struct {
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -995,19 +995,19 @@ type PageEmulateMediaOptions struct {
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
 }
 type PageEvalOnSelectorOptions struct {
-	// Optional argument to pass to <paramref name="expression"/>.
+	// Optional argument to pass to [`param: expression`].
 	Arg interface{} `json:"arg"`
 }
 type PageEvalOnSelectorAllOptions struct {
-	// Optional argument to pass to <paramref name="expression"/>.
+	// Optional argument to pass to [`param: expression`].
 	Arg interface{} `json:"arg"`
 }
 type PageEvaluateOptions struct {
-	// Optional argument to pass to <paramref name="expression"/>.
+	// Optional argument to pass to [`param: expression`].
 	Arg interface{} `json:"arg"`
 }
 type PageEvaluateHandleOptions struct {
-	// Optional argument to pass to <paramref name="expression"/>.
+	// Optional argument to pass to [`param: expression`].
 	Arg interface{} `json:"arg"`
 }
 type PageExposeBindingOptions struct {
@@ -1019,19 +1019,19 @@ type PageFillOptions struct {
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageFocusOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageGetAttributeOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageGoBackOptions struct {
-	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>, <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(), BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When to consider operation succeeded, defaults to `load`. Events can be either:
 	// `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
@@ -1040,7 +1040,7 @@ type PageGoBackOptions struct {
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageGoForwardOptions struct {
-	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>, <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(), BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When to consider operation succeeded, defaults to `load`. Events can be either:
 	// `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
@@ -1049,9 +1049,9 @@ type PageGoForwardOptions struct {
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageGotoOptions struct {
-	// Referer header value. If provided it will take preference over the referer header value set by <see cref="Page.SetExtraHttpHeaders"/>.
+	// Referer header value. If provided it will take preference over the referer header value set by Page.SetExtraHttpHeaders().
 	Referer *string `json:"referer"`
-	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>, <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(), BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When to consider operation succeeded, defaults to `load`. Events can be either:
 	// `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
@@ -1066,53 +1066,53 @@ type PageHoverOptions struct {
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *PageHoverOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
 }
 type PageInnerHTMLOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageInnerTextOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageInputValueOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageIsCheckedOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageIsDisabledOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageIsEditableOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageIsEnabledOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageIsHiddenOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageIsVisibleOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PagePdfOptions struct {
 	// Display header and footer. Defaults to `false`.
 	DisplayHeaderFooter *bool `json:"displayHeaderFooter"`
-	// HTML template for the print footer. Should use the same format as the <paramref name="headerTemplate"/>.
+	// HTML template for the print footer. Should use the same format as the [`option: headerTemplate`].
 	FooterTemplate *string `json:"footerTemplate"`
-	// Paper format. If set, takes priority over <paramref name="width"/> or <paramref name="height"/> options. Defaults to 'Letter'.
+	// Paper format. If set, takes priority over [`option: width`] or [`option: height`] options. Defaults to 'Letter'.
 	Format *string `json:"format"`
 	// HTML template for the print header. Should be valid HTML markup with following classes used to inject printing values into them:
 	// `'date'` formatted print date
@@ -1129,9 +1129,9 @@ type PagePdfOptions struct {
 	Margin *PagePdfOptionsMargin `json:"margin"`
 	// Paper ranges to print, e.g., '1-5, 8, 11-13'. Defaults to the empty string, which means print all pages.
 	PageRanges *string `json:"pageRanges"`
-	// The file path to save the PDF to. If <paramref name="path"/> is a relative path, then it is resolved relative to the current working directory. If no path is provided, the PDF won't be saved to the disk.
+	// The file path to save the PDF to. If [`option: path`] is a relative path, then it is resolved relative to the current working directory. If no path is provided, the PDF won't be saved to the disk.
 	Path *string `json:"path"`
-	// Give any CSS `@page` size declared in the page priority over what is declared in <paramref name="width"/> and <paramref name="height"/> or <paramref name="format"/> options. Defaults to `false`, which will scale the content to fit the paper size.
+	// Give any CSS `@page` size declared in the page priority over what is declared in [`option: width`] and [`option: height`] or [`option: format`] options. Defaults to `false`, which will scale the content to fit the paper size.
 	PreferCSSPageSize *bool `json:"preferCSSPageSize"`
 	// Print background graphics. Defaults to `false`.
 	PrintBackground *bool `json:"printBackground"`
@@ -1155,11 +1155,11 @@ type PagePressOptions struct {
 	Delay *float64 `json:"delay"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageReloadOptions struct {
-	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>, <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(), BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When to consider operation succeeded, defaults to `load`. Events can be either:
 	// `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
@@ -1178,11 +1178,11 @@ type PageScreenshotOptions struct {
 	FullPage *bool `json:"fullPage"`
 	// Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
 	OmitBackground *bool `json:"omitBackground"`
-	// The file path to save the image to. The screenshot type will be inferred from file extension. If <paramref name="path"/> is a relative path, then it is resolved relative to the current working directory. If no path is provided, the image won't be saved to the disk.
+	// The file path to save the image to. The screenshot type will be inferred from file extension. If [`option: path`] is a relative path, then it is resolved relative to the current working directory. If no path is provided, the image won't be saved to the disk.
 	Path *string `json:"path"`
 	// The quality of the image, between 0-100. Not applicable to `png` images.
 	Quality *int `json:"quality"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// Specify screenshot type, defaults to `png`.
 	Type *ScreenshotType `json:"type"`
@@ -1202,11 +1202,11 @@ type PageSelectOptionOptions struct {
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageSetContentOptions struct {
-	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>, <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(), BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When to consider operation succeeded, defaults to `load`. Events can be either:
 	// `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
@@ -1217,7 +1217,7 @@ type PageSetContentOptions struct {
 type PageSetInputFilesOptions struct {
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageTapOptions struct {
@@ -1229,13 +1229,13 @@ type PageTapOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *PageTapOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
 }
 type PageTextContentOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageTypeOptions struct {
@@ -1243,7 +1243,7 @@ type PageTypeOptions struct {
 	Delay *float64 `json:"delay"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageUncheckOptions struct {
@@ -1253,7 +1253,7 @@ type PageUncheckOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
 	Position *PageUncheckOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -1271,17 +1271,17 @@ type PageViewportSizeResult struct {
 	Height *int `json:"height"`
 }
 type PageWaitForFunctionOptions struct {
-	// If <paramref name="polling"/> is `'raf'`, then <paramref name="expression"/> is constantly executed in `requestAnimationFrame` callback. If <paramref name="polling"/> is a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
+	// If [`option: polling`] is `'raf'`, then [`param: expression`] is constantly executed in `requestAnimationFrame` callback. If [`option: polling`] is a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
 	Polling interface{} `json:"polling"`
-	// maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/>.
+	// maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
 	Timeout *float64 `json:"timeout"`
 }
 type PageWaitForLoadStateOptions struct {
-	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>, <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(), BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageWaitForNavigationOptions struct {
-	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>, <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(), BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
 	URL interface{} `json:"url"`
@@ -1292,11 +1292,11 @@ type PageWaitForNavigationOptions struct {
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageWaitForRequestOptions struct {
-	// Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the <see cref="Page.SetDefaultTimeout"/> method.
+	// Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the Page.SetDefaultTimeout() method.
 	Timeout *float64 `json:"timeout"`
 }
 type PageWaitForResponseOptions struct {
-	// Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageWaitForSelectorOptions struct {
@@ -1306,11 +1306,11 @@ type PageWaitForSelectorOptions struct {
 	// `'visible'` - wait for element to have non-empty bounding box and no `visibility:hidden`. Note that element without any content or with `display:none` has an empty bounding box and is not considered visible.
 	// `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`. This is opposite to the `'visible'` option.
 	State *WaitForSelectorState `json:"state"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageWaitForURLOptions struct {
-	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the <see cref="BrowserContext.SetDefaultNavigationTimeout"/>, <see cref="BrowserContext.SetDefaultTimeout"/>, <see cref="Page.SetDefaultNavigationTimeout"/> or <see cref="Page.SetDefaultTimeout"/> methods.
+	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(), BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When to consider operation succeeded, defaults to `load`. Events can be either:
 	// `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
@@ -1406,7 +1406,7 @@ type SelectorsRegisterOptions struct {
 	ContentScript *bool `json:"contentScript"`
 }
 type TracingStartOptions struct {
-	// If specified, the trace is going to be saved into the file with the given name inside the <paramref name="tracesDir"/> folder specified in <see cref="BrowserType.Launch"/>.
+	// If specified, the trace is going to be saved into the file with the given name inside the [`option: tracesDir`] folder specified in BrowserType.Launch().
 	Name *string `json:"name"`
 	// Whether to capture screenshots during tracing. Screenshots are used to build a timeline preview.
 	Screenshots *bool `json:"screenshots"`
@@ -1426,11 +1426,11 @@ type FrameSentPayload struct {
 	Payload []byte `json:"payload"`
 }
 type WorkerEvaluateOptions struct {
-	// Optional argument to pass to <paramref name="expression"/>.
+	// Optional argument to pass to [`param: expression`].
 	Arg interface{} `json:"arg"`
 }
 type WorkerEvaluateHandleOptions struct {
-	// Optional argument to pass to <paramref name="expression"/>.
+	// Optional argument to pass to [`param: expression`].
 	Arg interface{} `json:"arg"`
 }
 type BrowserNewContextOptionsGeolocation struct {

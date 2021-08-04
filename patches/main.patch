@@ -226,10 +226,10 @@ index f7fd21e5b138fefe026beaeae867212c014257d1..b5aee337efeb7d863f7606296c25d569
    - `size` <[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
 diff --git a/playwright/utils/doclint/generateGoApi.js b/playwright/utils/doclint/generateGoApi.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..5060630f9b65a9ce5544d26bd5ed1057f92fc456
+index 0000000000000000000000000000000000000000..f2b21e84a0eb585d9b9596108e515cea5ec5eed9
 --- /dev/null
 +++ b/playwright/utils/doclint/generateGoApi.js
-@@ -0,0 +1,763 @@
+@@ -0,0 +1,755 @@
 +/**
 + * Copyright (c) Microsoft Corporation.
 + *
@@ -285,20 +285,12 @@ index 0000000000000000000000000000000000000000..5060630f9b65a9ce5544d26bd5ed1057
 +
 +  documentation = parseApi(path.join(PROJECT_DIR, 'docs', 'src', 'api'));
 +  documentation.filterForLanguage('go');
-+
 +  documentation.setLinkRenderer(item => {
 +    if (item.clazz)
-+      return `<see cref="${translateMemberName("interface", item.clazz.name, null)}"/>`;
++      return translateMemberName("interface", item.clazz.name, null);
 +    else if (item.member)
-+      return `<see cref="${translateMemberName("interface", item.member.clazz.name, null)}.${translateMemberName(item.member.kind, item.member.name, item.member)}"/>`;
-+    else if (item.option)
-+      return `<paramref name="${item.option}"/>`;
-+    else if (item.param)
-+      return `<paramref name="${item.param}"/>`;
-+    else
-+      throw new Error('Unknown link format.');
++      return `${translateMemberName("interface", item.member.clazz.name, null)}.${translateMemberName(item.member.kind, item.member.name, item.member)}()`;
 +  });
-+
 +  // we have some "predefined" types, like the mixed state enum, that we can map in advance
 +  enumTypes.set("MixedState", ["On", "Off", "Mixed"]);
 +
