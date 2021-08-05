@@ -6,9 +6,10 @@ import (
 
 type browserImpl struct {
 	channelOwner
-	isConnected       bool
-	isClosedOrClosing bool
-	contexts          []BrowserContext
+	isConnected              bool
+	isClosedOrClosing        bool
+	isConnectedOverWebSocket bool
+	contexts                 []BrowserContext
 }
 
 func (b *browserImpl) IsConnected() bool {
@@ -73,11 +74,25 @@ func (b *browserImpl) Contexts() []BrowserContext {
 
 func (b *browserImpl) Close() error {
 	_, err := b.channel.Send("close")
-	return err
+	if err != nil {
+		return fmt.Errorf("could not send message: %w", err)
+	}
+	if b.isConnectedOverWebSocket {
+		return b.connection.Stop()
+	}
+	return nil
 }
 
 func (b *browserImpl) Version() string {
 	return b.initializer["version"].(string)
+}
+
+func (b *browserImpl) onClose() {
+	b.Lock()
+	b.isConnected = false
+	b.isClosedOrClosing = true
+	b.Unlock()
+	b.Emit("disconnected")
 }
 
 func newBrowser(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserImpl {
@@ -86,12 +101,6 @@ func newBrowser(parent *channelOwner, objectType string, guid string, initialize
 		contexts:    make([]BrowserContext, 0),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
-	bt.channel.On("close", func(ev map[string]interface{}) {
-		bt.Lock()
-		bt.isConnected = false
-		bt.isClosedOrClosing = true
-		bt.Unlock()
-		bt.Emit("disconnected")
-	})
+	bt.channel.On("close", bt.onClose)
 	return bt
 }

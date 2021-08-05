@@ -174,7 +174,9 @@ func (d *PlaywrightDriver) run() (*connection, error) {
 	if err := cmd.Start(); err != nil {
 		return nil, fmt.Errorf("could not start driver: %w", err)
 	}
-	return newConnection(stdin, stdout, cmd.Process.Kill), nil
+	transport := newPipeTransport(stdin, stdout)
+	connection := newConnection(transport, cmd.Process.Kill)
+	return connection, nil
 }
 
 func (d *PlaywrightDriver) installBrowsers(driverPath string) error {

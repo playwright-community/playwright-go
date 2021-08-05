@@ -2,6 +2,7 @@ package playwright
 
 import (
 	"fmt"
+	"log"
 )
 
 type browserTypeImpl struct {
@@ -37,6 +38,35 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
 	return fromChannel(channel).(*browserContextImpl), nil
+}
+func (b *browserTypeImpl) Connect(url string) (Browser, error) {
+	transport := newWebSocketTransport(url)
+	connection := newConnection(transport, transport.Stop)
+	go func() {
+		err := connection.Start()
+		if err != nil {
+			log.Fatalf("could not start connection: %v", err)
+		}
+	}()
+	obj, err := connection.CallOnObjectWithKnownName("Playwright")
+	if err != nil {
+		return nil, fmt.Errorf("could not call object: %w", err)
+	}
+	playwright := obj.(*Playwright)
+	browser := fromChannel(playwright.initializer["preLaunchedBrowser"]).(*browserImpl)
+	browser.isConnectedOverWebSocket = true
+	close_handler := func() {
+		for _, context := range browser.contexts {
+			pages := context.(*browserContextImpl).pages
+			for _, page := range pages {
+				page.(*pageImpl).onClose()
+			}
+			context.(*browserContextImpl).onClose()
+		}
+		browser.onClose()
+	}
+	transport.(*webSocketTransport).Once("close", close_handler)
+	return browser, nil
 }
 
 func newBrowserType(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserTypeImpl {

@@ -2,7 +2,6 @@ package playwright
 
 import (
 	"fmt"
-	"io"
 	"reflect"
 	"sync"
 )
@@ -13,7 +12,7 @@ type callback struct {
 }
 
 type connection struct {
-	transport                   *transport
+	transport                   transport
 	waitingForRemoteObjectsLock sync.Mutex
 	waitingForRemoteObjects     map[string]chan interface{}
 	objects                     map[string]*channelOwner
@@ -162,13 +161,14 @@ func (c *connection) SendMessageToServer(guid string, method string, params inte
 	return result.Data, nil
 }
 
-func newConnection(stdin io.WriteCloser, stdout io.ReadCloser, stopDriver func() error) *connection {
+func newConnection(t transport, stopDriver func() error) *connection {
 	connection := &connection{
 		waitingForRemoteObjects: make(map[string]chan interface{}),
 		objects:                 make(map[string]*channelOwner),
 		stopDriver:              stopDriver,
 	}
-	connection.transport = newTransport(stdin, stdout, connection.Dispatch)
+	connection.transport = t
+	connection.transport.SetDispatch(connection.Dispatch)
 	connection.rootObject = newRootChannelOwner(connection)
 	return connection
 }

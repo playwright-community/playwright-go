@@ -190,6 +190,8 @@ type BrowserType interface {
 	LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (BrowserContext, error)
 	// Returns browser name. For example: `'chromium'`, `'webkit'` or `'firefox'`.
 	Name() string
+	// This methods attaches Playwright to an existing browser instance.
+	Connect(url string) (Browser, error)
 }
 
 // `ConsoleMessage` objects are dispatched by page via the [`event: Page.console`] event.
