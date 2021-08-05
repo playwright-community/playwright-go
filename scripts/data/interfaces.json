@@ -640,6 +640,10 @@
 			"options ...PageWaitForNavigationOptions",
 			"(Response, error)"
 		],
+		"WaitForURL": [
+			"url string, options ...FrameWaitForURLOptions",
+			"error"
+		],
 		"WaitForSelector": [
 			"selector string, options ...PageWaitForSelectorOptions",
 			"(ElementHandle, error)"
@@ -647,6 +651,14 @@
 		"WaitForTimeout": [
 			"timeout float64",
 			null
+		],
+		"InputValue": [
+			"selector string, options ...FrameInputValueOptions",
+			"(string, error)"
+		],
+		"DragAndDrop": [
+			"source string, target string, options ...FrameDragAndDropOptions",
+			"error"
 		]
 	},
 	"JSHandle": {
