@@ -27,8 +27,6 @@ go run scripts/update-readme-versions/main.go
 
 pushd $PLAYWRIGHT_DIR
 
-git add -A
-
 git reset --hard $(git rev-parse HEAD^1)
 
 popd
