@@ -160,7 +160,7 @@ func (b *browserContextImpl) ResetGeolocation() error {
 
 func (b *browserContextImpl) SetExtraHTTPHeaders(headers map[string]string) error {
 	_, err := b.channel.Send("setExtraHTTPHeaders", map[string]interface{}{
-		"headers": serializeHeaders(headers),
+		"headers": serializeMapToNameAndValue(headers),
 	})
 	return err
 }

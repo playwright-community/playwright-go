@@ -75,7 +75,7 @@ func (r *routeImpl) Fulfill(options RouteFulfillOptions) error {
 	options.Path = nil
 	_, err := r.channel.Send("fulfill", options, map[string]interface{}{
 		"isBase64": isBase64,
-		"headers":  serializeHeaders(headers),
+		"headers":  serializeMapToNameAndValue(headers),
 	})
 	return err
 }
@@ -91,7 +91,7 @@ func (r *routeImpl) Continue(options ...RouteContinueOptions) error {
 			overrides["method"] = option.Method
 		}
 		if option.Headers != nil {
-			overrides["headers"] = serializeHeaders(option.Headers)
+			overrides["headers"] = serializeMapToNameAndValue(option.Headers)
 		}
 		if option.PostData != nil {
 			switch v := option.PostData.(type) {

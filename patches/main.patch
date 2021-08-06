@@ -192,7 +192,7 @@ index 639324bb2faa3eb9d2c254cbff16f2e380379ab9..96cfbfe8c6ea48c3ae0301cd529713f3
  * langs: csharp, java
  - `body` <[string]>
 diff --git a/playwright/docs/src/api/params.md b/playwright/docs/src/api/params.md
-index f7fd21e5b138fefe026beaeae867212c014257d1..24f4e9e2485e2e656036ad0e2a9d50ac32204c56 100644
+index f7fd21e5b138fefe026beaeae867212c014257d1..7a0990039cfc81935a713ecce176ffe766d010c3 100644
 --- a/playwright/docs/src/api/params.md
 +++ b/playwright/docs/src/api/params.md
 @@ -113,8 +113,8 @@ Defaults to `'visible'`. Can be either:
@@ -206,6 +206,15 @@ index f7fd21e5b138fefe026beaeae867212c014257d1..24f4e9e2485e2e656036ad0e2a9d50ac
  - `polling` <[float]|"raf">
  
  If [`option: polling`] is `'raf'`, then [`param: expression`] is constantly executed in `requestAnimationFrame`
+@@ -161,7 +161,7 @@ Dangerous option; use with care. Defaults to `false`.
+ Network proxy settings.
+ 
+ ## csharp-java-browser-option-env
+-* langs: csharp, java
++* langs: csharp, java, go
+ - `env` <[Object]<[string], [string]>>
+ 
+ Specify environment variables that will be visible to the browser. Defaults to `process.env`.
 @@ -173,7 +173,7 @@ Specify environment variables that will be visible to the browser. Defaults to `
  Specify environment variables that will be visible to the browser. Defaults to `process.env`.
  

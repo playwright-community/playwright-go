@@ -24,7 +24,7 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 	overrides := map[string]interface{}{"sdkLanguage": "javascript"}
 	if len(options) == 1 {
 		if options[0].ExtraHttpHeaders != nil {
-			overrides["extraHTTPHeaders"] = serializeHeaders(options[0].ExtraHttpHeaders)
+			overrides["extraHTTPHeaders"] = serializeMapToNameAndValue(options[0].ExtraHttpHeaders)
 			options[0].ExtraHttpHeaders = nil
 		}
 		if options[0].StorageStatePath != nil {
