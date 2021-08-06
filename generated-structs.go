@@ -236,6 +236,8 @@ type BrowserTypeLaunchOptions struct {
 	Devtools *bool `json:"devtools"`
 	// If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is deleted when browser is closed.
 	DownloadsPath *string `json:"downloadsPath"`
+	// Specify environment variables that will be visible to the browser. Defaults to `process.env`.
+	Env map[string]string `json:"env"`
 	// Path to a browser executable to run instead of the bundled one. If [`option: executablePath`] is a relative path, then it is resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
 	ExecutablePath *string `json:"executablePath"`
 	// Close the browser process on SIGHUP. Defaults to `true`.
@@ -288,6 +290,8 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	Devtools *bool `json:"devtools"`
 	// If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is deleted when browser is closed.
 	DownloadsPath *string `json:"downloadsPath"`
+	// Specify environment variables that will be visible to the browser. Defaults to `process.env`.
+	Env map[string]string `json:"env"`
 	// Path to a browser executable to run instead of the bundled one. If [`option: executablePath`] is a relative path, then it is resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
 	ExecutablePath *string `json:"executablePath"`
 	// An object containing additional HTTP headers to be sent with every request. All header values must be strings.
