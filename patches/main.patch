@@ -192,7 +192,7 @@ index 639324bb2faa3eb9d2c254cbff16f2e380379ab9..96cfbfe8c6ea48c3ae0301cd529713f3
  * langs: csharp, java
  - `body` <[string]>
 diff --git a/playwright/docs/src/api/params.md b/playwright/docs/src/api/params.md
-index f7fd21e5b138fefe026beaeae867212c014257d1..b5aee337efeb7d863f7606296c25d569458d9e74 100644
+index f7fd21e5b138fefe026beaeae867212c014257d1..24f4e9e2485e2e656036ad0e2a9d50ac32204c56 100644
 --- a/playwright/docs/src/api/params.md
 +++ b/playwright/docs/src/api/params.md
 @@ -113,8 +113,8 @@ Defaults to `'visible'`. Can be either:
@@ -206,6 +206,24 @@ index f7fd21e5b138fefe026beaeae867212c014257d1..b5aee337efeb7d863f7606296c25d569
  - `polling` <[float]|"raf">
  
  If [`option: polling`] is `'raf'`, then [`param: expression`] is constantly executed in `requestAnimationFrame`
+@@ -173,7 +173,7 @@ Specify environment variables that will be visible to the browser. Defaults to `
+ Specify environment variables that will be visible to the browser. Defaults to `process.env`.
+ 
+ ## js-python-context-option-storage-state
+-* langs: js, python
++* langs: js, python, go
+ - `storageState` <[path]|[Object]>
+   - `cookies` <[Array]<[Object]>> Optional cookies to set for context
+     - `name` <[string]>
+@@ -202,7 +202,7 @@ Populates context with given storage state. This option can be used to initializ
+ obtained via [`method: BrowserContext.storageState`].
+ 
+ ## csharp-java-context-option-storage-state-path
+-* langs: csharp, java
++* langs: csharp, java, go
+ - `storageStatePath` <[path]>
+ 
+ Populates context with given storage state. This option can be used to initialize context with logged-in information
 @@ -297,7 +297,7 @@ Function to be evaluated in the worker context.
  Function to be evaluated in the worker context.
  

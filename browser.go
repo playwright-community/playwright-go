@@ -1,7 +1,9 @@
 package playwright
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 )
 
 type browserImpl struct {
@@ -20,9 +22,24 @@ func (b *browserImpl) IsConnected() bool {
 
 func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserContext, error) {
 	overrides := map[string]interface{}{"sdkLanguage": "javascript"}
-	if len(options) == 1 && options[0].ExtraHttpHeaders != nil {
-		overrides["extraHTTPHeaders"] = serializeHeaders(options[0].ExtraHttpHeaders)
-		options[0].ExtraHttpHeaders = nil
+	if len(options) == 1 {
+		if options[0].ExtraHttpHeaders != nil {
+			overrides["extraHTTPHeaders"] = serializeHeaders(options[0].ExtraHttpHeaders)
+			options[0].ExtraHttpHeaders = nil
+		}
+		if options[0].StorageStatePath != nil {
+			var storageState *BrowserNewContextOptionsStorageState
+			storageString, err := ioutil.ReadFile(*options[0].StorageStatePath)
+			if err != nil {
+				return nil, fmt.Errorf("could not read storage state file: %w", err)
+			}
+			err = json.Unmarshal(storageString, &storageState)
+			if err != nil {
+				return nil, fmt.Errorf("could not parse storage state file: %w", err)
+			}
+			options[0].StorageState = storageState
+			options[0].StorageStatePath = nil
+		}
 	}
 	channel, err := b.channel.Send("newContext", overrides, options)
 	if err != nil {

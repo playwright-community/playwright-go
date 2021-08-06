@@ -294,11 +294,14 @@ func (b *browserContextImpl) StorageState(paths ...string) (*StorageState, error
 		return nil, err
 	}
 	if len(paths) == 1 {
-		file, err := os.Open(paths[0])
+		file, err := os.Create(paths[0])
 		if err != nil {
 			return nil, err
 		}
-		if err := json.NewDecoder(file).Decode(result); err != nil {
+		if err := json.NewEncoder(file).Encode(result); err != nil {
+			return nil, err
+		}
+		if err := file.Close(); err != nil {
 			return nil, err
 		}
 	}

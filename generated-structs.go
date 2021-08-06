@@ -41,6 +41,10 @@ type BrowserNewContextOptions struct {
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
 	// Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the [`option: viewport`] is set.
 	Screen *BrowserNewContextOptionsScreen `json:"screen"`
+	// Populates context with given storage state. This option can be used to initialize context with logged-in information obtained via BrowserContext.StorageState(). Either a path to the file with saved storage, or an object with the following fields:
+	StorageState *BrowserNewContextOptionsStorageState `json:"storageState"`
+	// Populates context with given storage state. This option can be used to initialize context with logged-in information obtained via BrowserContext.StorageState(). Path to the file with saved storage state.
+	StorageStatePath *string `json:"storageStatePath"`
 	// Changes the timezone of the context. See [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1) for a list of supported timezone IDs.
 	TimezoneId *string `json:"timezoneId"`
 	// Specific user agent to use in this context.
@@ -81,6 +85,12 @@ type BrowserScreen struct {
 	Width *int `json:"width"`
 	// page height in pixels.
 	Height *int `json:"height"`
+}
+type BrowserStorageState struct {
+	// Optional cookies to set for context
+	Cookies []BrowserStorageStateCookies `json:"cookies"`
+	// Optional localStorage to set for context
+	Origins []BrowserStorageStateOrigins `json:"origins"`
 }
 type BrowserViewport struct {
 	// page width in pixels.
@@ -129,6 +139,10 @@ type BrowserNewPageOptions struct {
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
 	// Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the [`option: viewport`] is set.
 	Screen *BrowserNewPageOptionsScreen `json:"screen"`
+	// Populates context with given storage state. This option can be used to initialize context with logged-in information obtained via BrowserContext.StorageState(). Either a path to the file with saved storage, or an object with the following fields:
+	StorageState *BrowserNewPageOptionsStorageState `json:"storageState"`
+	// Populates context with given storage state. This option can be used to initialize context with logged-in information obtained via BrowserContext.StorageState(). Path to the file with saved storage state.
+	StorageStatePath *string `json:"storageStatePath"`
 	// Changes the timezone of the context. See [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1) for a list of supported timezone IDs.
 	TimezoneId *string `json:"timezoneId"`
 	// Specific user agent to use in this context.
@@ -1467,6 +1481,12 @@ type BrowserNewContextOptionsScreen struct {
 	// page height in pixels.
 	Height *int `json:"height"`
 }
+type BrowserNewContextOptionsStorageState struct {
+	// Optional cookies to set for context
+	Cookies []BrowserNewContextOptionsStorageStateCookies `json:"cookies"`
+	// Optional localStorage to set for context
+	Origins []BrowserNewContextOptionsStorageStateOrigins `json:"origins"`
+}
 type BrowserNewContextOptionsViewport struct {
 	// page width in pixels.
 	Width *int `json:"width"`
@@ -1478,6 +1498,28 @@ type BrowserRecordVideoSize struct {
 	Width *int `json:"width"`
 	// Video frame height.
 	Height *int `json:"height"`
+}
+type BrowserStorageStateCookies struct {
+	Name  *string `json:"name"`
+	Value *string `json:"value"`
+	// Optional either url or domain / path are required
+	URL *string `json:"url"`
+	// Optional either url or domain / path are required
+	Domain *string `json:"domain"`
+	// Optional either url or domain / path are required
+	Path *string `json:"path"`
+	// Optional Unix time in seconds.
+	Expires *float64 `json:"expires"`
+	// Optional httpOnly flag
+	HttpOnly *bool `json:"httpOnly"`
+	// Optional secure flag
+	Secure *bool `json:"secure"`
+	// Optional sameSite flag
+	SameSite *SameSiteAttribute `json:"sameSite"`
+}
+type BrowserStorageStateOrigins struct {
+	Origin       *string                                  `json:"origin"`
+	LocalStorage []BrowserStorageStateOriginsLocalStorage `json:"localStorage"`
 }
 type BrowserNewPageOptionsGeolocation struct {
 	// Latitude between -90 and 90.
@@ -1512,6 +1554,12 @@ type BrowserNewPageOptionsScreen struct {
 	Width *int `json:"width"`
 	// page height in pixels.
 	Height *int `json:"height"`
+}
+type BrowserNewPageOptionsStorageState struct {
+	// Optional cookies to set for context
+	Cookies []BrowserNewPageOptionsStorageStateCookies `json:"cookies"`
+	// Optional localStorage to set for context
+	Origins []BrowserNewPageOptionsStorageStateOrigins `json:"origins"`
 }
 type BrowserNewPageOptionsViewport struct {
 	// page width in pixels.
@@ -1688,11 +1736,59 @@ type BrowserNewContextOptionsRecordVideoSize struct {
 	// Video frame height.
 	Height *int `json:"height"`
 }
+type BrowserNewContextOptionsStorageStateCookies struct {
+	Name  *string `json:"name"`
+	Value *string `json:"value"`
+	// Optional either url or domain / path are required
+	URL *string `json:"url"`
+	// Optional either url or domain / path are required
+	Domain *string `json:"domain"`
+	// Optional either url or domain / path are required
+	Path *string `json:"path"`
+	// Optional Unix time in seconds.
+	Expires *float64 `json:"expires"`
+	// Optional httpOnly flag
+	HttpOnly *bool `json:"httpOnly"`
+	// Optional secure flag
+	Secure *bool `json:"secure"`
+	// Optional sameSite flag
+	SameSite *SameSiteAttribute `json:"sameSite"`
+}
+type BrowserNewContextOptionsStorageStateOrigins struct {
+	Origin       *string                                                   `json:"origin"`
+	LocalStorage []BrowserNewContextOptionsStorageStateOriginsLocalStorage `json:"localStorage"`
+}
+type BrowserStorageStateOriginsLocalStorage struct {
+	Name  *string `json:"name"`
+	Value *string `json:"value"`
+}
 type BrowserNewPageOptionsRecordVideoSize struct {
 	// Video frame width.
 	Width *int `json:"width"`
 	// Video frame height.
 	Height *int `json:"height"`
+}
+type BrowserNewPageOptionsStorageStateCookies struct {
+	Name  *string `json:"name"`
+	Value *string `json:"value"`
+	// Optional either url or domain / path are required
+	URL *string `json:"url"`
+	// Optional either url or domain / path are required
+	Domain *string `json:"domain"`
+	// Optional either url or domain / path are required
+	Path *string `json:"path"`
+	// Optional Unix time in seconds.
+	Expires *float64 `json:"expires"`
+	// Optional httpOnly flag
+	HttpOnly *bool `json:"httpOnly"`
+	// Optional secure flag
+	Secure *bool `json:"secure"`
+	// Optional sameSite flag
+	SameSite *SameSiteAttribute `json:"sameSite"`
+}
+type BrowserNewPageOptionsStorageStateOrigins struct {
+	Origin       *string                                                `json:"origin"`
+	LocalStorage []BrowserNewPageOptionsStorageStateOriginsLocalStorage `json:"localStorage"`
 }
 type BrowserContextStorageStateResultOriginsLocalStorage struct {
 	Name  *string `json:"name"`
@@ -1703,4 +1799,12 @@ type BrowserTypeLaunchPersistentContextOptionsRecordVideoSize struct {
 	Width *int `json:"width"`
 	// Video frame height.
 	Height *int `json:"height"`
+}
+type BrowserNewContextOptionsStorageStateOriginsLocalStorage struct {
+	Name  *string `json:"name"`
+	Value *string `json:"value"`
+}
+type BrowserNewPageOptionsStorageStateOriginsLocalStorage struct {
+	Name  *string `json:"name"`
+	Value *string `json:"value"`
 }
