@@ -403,3 +403,14 @@ func unroute(channel *channel, inRoutes []*routeHandlerEntry, url interface{}, h
 	}
 	return routes, nil
 }
+
+func serializeMapToNameAndValue(headers map[string]string) []map[string]string {
+	serialized := make([]map[string]string, 0)
+	for name, value := range headers {
+		serialized = append(serialized, map[string]string{
+			"name":  name,
+			"value": value,
+		})
+	}
+	return serialized
+}

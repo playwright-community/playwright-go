@@ -146,7 +146,7 @@ func (p *pageImpl) AddStyleTag(options PageAddStyleTagOptions) (ElementHandle, e
 
 func (p *pageImpl) SetExtraHTTPHeaders(headers map[string]string) error {
 	_, err := p.channel.Send("setExtraHTTPHeaders", map[string]interface{}{
-		"headers": serializeHeaders(headers),
+		"headers": serializeMapToNameAndValue(headers),
 	})
 	return err
 }

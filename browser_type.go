@@ -18,7 +18,12 @@ func (b *browserTypeImpl) ExecutablePath() string {
 }
 
 func (b *browserTypeImpl) Launch(options ...BrowserTypeLaunchOptions) (Browser, error) {
-	channel, err := b.channel.Send("launch", options)
+	overrides := map[string]interface{}{}
+	if len(options) == 1 && options[0].Env != nil {
+		overrides["env"] = serializeMapToNameAndValue(options[0].Env)
+		options[0].Env = nil
+	}
+	channel, err := b.channel.Send("launch", overrides, options)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
@@ -30,8 +35,14 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 		"userDataDir": userDataDir,
 		"sdkLanguage": "javascript",
 	}
-	if len(options) == 1 && options[0].ExtraHttpHeaders != nil {
-		overrides["extraHTTPHeaders"] = serializeHeaders(options[0].ExtraHttpHeaders)
+	if len(options) == 1 {
+		if options[0].ExtraHttpHeaders != nil {
+			overrides["extraHTTPHeaders"] = serializeMapToNameAndValue(options[0].ExtraHttpHeaders)
+		}
+		if options[0].Env != nil {
+			overrides["env"] = serializeMapToNameAndValue(options[0].Env)
+			options[0].Env = nil
+		}
 	}
 	channel, err := b.channel.Send("launchPersistentContext", overrides, options)
 	if err != nil {
