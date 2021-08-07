@@ -39,7 +39,7 @@ type BrowserNewContextOptions struct {
 	RecordVideo *BrowserNewContextOptionsRecordVideo `json:"recordVideo"`
 	// Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See Page.EmulateMedia() for more details. Defaults to `'no-preference'`.
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
-	// Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the [`option: viewport`] is set.
+	// Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the `viewport` is set.
 	Screen *BrowserNewContextOptionsScreen `json:"screen"`
 	// Populates context with given storage state. This option can be used to initialize context with logged-in information obtained via BrowserContext.StorageState(). Either a path to the file with saved storage, or an object with the following fields:
 	StorageState *BrowserNewContextOptionsStorageState `json:"storageState"`
@@ -137,7 +137,7 @@ type BrowserNewPageOptions struct {
 	RecordVideo *BrowserNewPageOptionsRecordVideo `json:"recordVideo"`
 	// Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See Page.EmulateMedia() for more details. Defaults to `'no-preference'`.
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
-	// Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the [`option: viewport`] is set.
+	// Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the `viewport` is set.
 	Screen *BrowserNewPageOptionsScreen `json:"screen"`
 	// Populates context with given storage state. This option can be used to initialize context with logged-in information obtained via BrowserContext.StorageState(). Either a path to the file with saved storage, or an object with the following fields:
 	StorageState *BrowserNewPageOptionsStorageState `json:"storageState"`
@@ -218,7 +218,7 @@ type BrowserContextStorageStateResult struct {
 	Origins []BrowserContextStorageStateResultOrigins `json:"origins"`
 }
 type BrowserContextStorageStateOptions struct {
-	// The file path to save the storage state to. If [`option: path`] is a relative path, then it is resolved relative to current working directory. If no path is provided, storage state is still returned, but won't be saved to the disk.
+	// The file path to save the storage state to. If `path` is a relative path, then it is resolved relative to current working directory. If no path is provided, storage state is still returned, but won't be saved to the disk.
 	Path *string `json:"path"`
 }
 type BrowserContextUnrouteOptions struct {
@@ -232,13 +232,13 @@ type BrowserTypeLaunchOptions struct {
 	Channel *string `json:"channel"`
 	// Enable Chromium sandboxing. Defaults to `false`.
 	ChromiumSandbox *bool `json:"chromiumSandbox"`
-	// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the [`option: headless`] option will be set `false`.
+	// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
 	Devtools *bool `json:"devtools"`
 	// If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is deleted when browser is closed.
 	DownloadsPath *string `json:"downloadsPath"`
 	// Specify environment variables that will be visible to the browser. Defaults to `process.env`.
 	Env map[string]string `json:"env"`
-	// Path to a browser executable to run instead of the bundled one. If [`option: executablePath`] is a relative path, then it is resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
+	// Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
 	ExecutablePath *string `json:"executablePath"`
 	// Close the browser process on SIGHUP. Defaults to `true`.
 	HandleSIGHUP *bool `json:"handleSIGHUP"`
@@ -246,7 +246,7 @@ type BrowserTypeLaunchOptions struct {
 	HandleSIGINT *bool `json:"handleSIGINT"`
 	// Close the browser process on SIGTERM. Defaults to `true`.
 	HandleSIGTERM *bool `json:"handleSIGTERM"`
-	// Whether to run browser in headless mode. More details for [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the [`option: devtools`] option is `true`.
+	// Whether to run browser in headless mode. More details for [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the `devtools` option is `true`.
 	Headless *bool `json:"headless"`
 	// Network proxy settings.
 	Proxy *BrowserTypeLaunchOptionsProxy `json:"proxy"`
@@ -286,13 +286,13 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	ColorScheme *ColorScheme `json:"colorScheme"`
 	// Specify device scale factor (can be thought of as dpr). Defaults to `1`.
 	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
-	// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the [`option: headless`] option will be set `false`.
+	// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
 	Devtools *bool `json:"devtools"`
 	// If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is deleted when browser is closed.
 	DownloadsPath *string `json:"downloadsPath"`
 	// Specify environment variables that will be visible to the browser. Defaults to `process.env`.
 	Env map[string]string `json:"env"`
-	// Path to a browser executable to run instead of the bundled one. If [`option: executablePath`] is a relative path, then it is resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
+	// Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
 	ExecutablePath *string `json:"executablePath"`
 	// An object containing additional HTTP headers to be sent with every request. All header values must be strings.
 	ExtraHttpHeaders map[string]string                                     `json:"extraHTTPHeaders"`
@@ -305,7 +305,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	HandleSIGTERM *bool `json:"handleSIGTERM"`
 	// Specifies if viewport supports touch events. Defaults to false.
 	HasTouch *bool `json:"hasTouch"`
-	// Whether to run browser in headless mode. More details for [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the [`option: devtools`] option is `true`.
+	// Whether to run browser in headless mode. More details for [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the `devtools` option is `true`.
 	Headless *bool `json:"headless"`
 	// Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
 	HttpCredentials *BrowserTypeLaunchPersistentContextOptionsHttpCredentials `json:"httpCredentials"`
@@ -327,7 +327,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	RecordVideo *BrowserTypeLaunchPersistentContextOptionsRecordVideo `json:"recordVideo"`
 	// Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See Page.EmulateMedia() for more details. Defaults to `'no-preference'`.
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
-	// Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the [`option: viewport`] is set.
+	// Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the `viewport` is set.
 	Screen *BrowserTypeLaunchPersistentContextOptionsScreen `json:"screen"`
 	// Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
 	SlowMo *float64 `json:"slowMo"`
@@ -447,11 +447,11 @@ type ElementHandleDispatchEventOptions struct {
 	EventInit interface{} `json:"eventInit"`
 }
 type ElementHandleEvalOnSelectorOptions struct {
-	// Optional argument to pass to [`param: expression`].
+	// Optional argument to pass to `expression`.
 	Arg interface{} `json:"arg"`
 }
 type ElementHandleEvalOnSelectorAllOptions struct {
-	// Optional argument to pass to [`param: expression`].
+	// Optional argument to pass to `expression`.
 	Arg interface{} `json:"arg"`
 }
 type ElementHandleFillOptions struct {
@@ -489,7 +489,7 @@ type ElementHandlePressOptions struct {
 type ElementHandleScreenshotOptions struct {
 	// Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
 	OmitBackground *bool `json:"omitBackground"`
-	// The file path to save the image to. The screenshot type will be inferred from file extension. If [`option: path`] is a relative path, then it is resolved relative to the current working directory. If no path is provided, the image won't be saved to the disk.
+	// The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to the current working directory. If no path is provided, the image won't be saved to the disk.
 	Path *string `json:"path"`
 	// The quality of the image, between 0-100. Not applicable to `png` images.
 	Quality *int `json:"quality"`
@@ -663,19 +663,19 @@ type FrameDragAndDropOptions struct {
 	Trial *bool `json:"trial"`
 }
 type FrameEvalOnSelectorOptions struct {
-	// Optional argument to pass to [`param: expression`].
+	// Optional argument to pass to `expression`.
 	Arg interface{} `json:"arg"`
 }
 type FrameEvalOnSelectorAllOptions struct {
-	// Optional argument to pass to [`param: expression`].
+	// Optional argument to pass to `expression`.
 	Arg interface{} `json:"arg"`
 }
 type FrameEvaluateOptions struct {
-	// Optional argument to pass to [`param: expression`].
+	// Optional argument to pass to `expression`.
 	Arg interface{} `json:"arg"`
 }
 type FrameEvaluateHandleOptions struct {
-	// Optional argument to pass to [`param: expression`].
+	// Optional argument to pass to `expression`.
 	Arg interface{} `json:"arg"`
 }
 type FrameFillOptions struct {
@@ -823,7 +823,7 @@ type FrameUncheckOptions struct {
 	Trial *bool `json:"trial"`
 }
 type FrameWaitForFunctionOptions struct {
-	// If [`option: polling`] is `'raf'`, then [`param: expression`] is constantly executed in `requestAnimationFrame` callback. If [`option: polling`] is a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
+	// If `polling` is `'raf'`, then `expression` is constantly executed in `requestAnimationFrame` callback. If `polling` is a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
 	Polling interface{} `json:"polling"`
 	// maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
 	Timeout *float64 `json:"timeout"`
@@ -863,11 +863,11 @@ type FrameWaitForURLOptions struct {
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type JSHandleEvaluateOptions struct {
-	// Optional argument to pass to [`param: expression`].
+	// Optional argument to pass to `expression`.
 	Arg interface{} `json:"arg"`
 }
 type JSHandleEvaluateHandleOptions struct {
-	// Optional argument to pass to [`param: expression`].
+	// Optional argument to pass to `expression`.
 	Arg interface{} `json:"arg"`
 }
 type KeyboardPressOptions struct {
@@ -1013,19 +1013,19 @@ type PageEmulateMediaOptions struct {
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
 }
 type PageEvalOnSelectorOptions struct {
-	// Optional argument to pass to [`param: expression`].
+	// Optional argument to pass to `expression`.
 	Arg interface{} `json:"arg"`
 }
 type PageEvalOnSelectorAllOptions struct {
-	// Optional argument to pass to [`param: expression`].
+	// Optional argument to pass to `expression`.
 	Arg interface{} `json:"arg"`
 }
 type PageEvaluateOptions struct {
-	// Optional argument to pass to [`param: expression`].
+	// Optional argument to pass to `expression`.
 	Arg interface{} `json:"arg"`
 }
 type PageEvaluateHandleOptions struct {
-	// Optional argument to pass to [`param: expression`].
+	// Optional argument to pass to `expression`.
 	Arg interface{} `json:"arg"`
 }
 type PageExposeBindingOptions struct {
@@ -1128,9 +1128,9 @@ type PageIsVisibleOptions struct {
 type PagePdfOptions struct {
 	// Display header and footer. Defaults to `false`.
 	DisplayHeaderFooter *bool `json:"displayHeaderFooter"`
-	// HTML template for the print footer. Should use the same format as the [`option: headerTemplate`].
+	// HTML template for the print footer. Should use the same format as the `headerTemplate`.
 	FooterTemplate *string `json:"footerTemplate"`
-	// Paper format. If set, takes priority over [`option: width`] or [`option: height`] options. Defaults to 'Letter'.
+	// Paper format. If set, takes priority over `width` or `height` options. Defaults to 'Letter'.
 	Format *string `json:"format"`
 	// HTML template for the print header. Should be valid HTML markup with following classes used to inject printing values into them:
 	// `'date'` formatted print date
@@ -1147,9 +1147,9 @@ type PagePdfOptions struct {
 	Margin *PagePdfOptionsMargin `json:"margin"`
 	// Paper ranges to print, e.g., '1-5, 8, 11-13'. Defaults to the empty string, which means print all pages.
 	PageRanges *string `json:"pageRanges"`
-	// The file path to save the PDF to. If [`option: path`] is a relative path, then it is resolved relative to the current working directory. If no path is provided, the PDF won't be saved to the disk.
+	// The file path to save the PDF to. If `path` is a relative path, then it is resolved relative to the current working directory. If no path is provided, the PDF won't be saved to the disk.
 	Path *string `json:"path"`
-	// Give any CSS `@page` size declared in the page priority over what is declared in [`option: width`] and [`option: height`] or [`option: format`] options. Defaults to `false`, which will scale the content to fit the paper size.
+	// Give any CSS `@page` size declared in the page priority over what is declared in `width` and `height` or `format` options. Defaults to `false`, which will scale the content to fit the paper size.
 	PreferCSSPageSize *bool `json:"preferCSSPageSize"`
 	// Print background graphics. Defaults to `false`.
 	PrintBackground *bool `json:"printBackground"`
@@ -1196,7 +1196,7 @@ type PageScreenshotOptions struct {
 	FullPage *bool `json:"fullPage"`
 	// Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images. Defaults to `false`.
 	OmitBackground *bool `json:"omitBackground"`
-	// The file path to save the image to. The screenshot type will be inferred from file extension. If [`option: path`] is a relative path, then it is resolved relative to the current working directory. If no path is provided, the image won't be saved to the disk.
+	// The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a relative path, then it is resolved relative to the current working directory. If no path is provided, the image won't be saved to the disk.
 	Path *string `json:"path"`
 	// The quality of the image, between 0-100. Not applicable to `png` images.
 	Quality *int `json:"quality"`
@@ -1289,7 +1289,7 @@ type PageViewportSizeResult struct {
 	Height *int `json:"height"`
 }
 type PageWaitForFunctionOptions struct {
-	// If [`option: polling`] is `'raf'`, then [`param: expression`] is constantly executed in `requestAnimationFrame` callback. If [`option: polling`] is a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
+	// If `polling` is `'raf'`, then `expression` is constantly executed in `requestAnimationFrame` callback. If `polling` is a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
 	Polling interface{} `json:"polling"`
 	// maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
 	Timeout *float64 `json:"timeout"`
@@ -1424,7 +1424,7 @@ type SelectorsRegisterOptions struct {
 	ContentScript *bool `json:"contentScript"`
 }
 type TracingStartOptions struct {
-	// If specified, the trace is going to be saved into the file with the given name inside the [`option: tracesDir`] folder specified in BrowserType.Launch().
+	// If specified, the trace is going to be saved into the file with the given name inside the `tracesDir` folder specified in BrowserType.Launch().
 	Name *string `json:"name"`
 	// Whether to capture screenshots during tracing. Screenshots are used to build a timeline preview.
 	Screenshots *bool `json:"screenshots"`
@@ -1444,11 +1444,11 @@ type FrameSentPayload struct {
 	Payload []byte `json:"payload"`
 }
 type WorkerEvaluateOptions struct {
-	// Optional argument to pass to [`param: expression`].
+	// Optional argument to pass to `expression`.
 	Arg interface{} `json:"arg"`
 }
 type WorkerEvaluateHandleOptions struct {
-	// Optional argument to pass to [`param: expression`].
+	// Optional argument to pass to `expression`.
 	Arg interface{} `json:"arg"`
 }
 type BrowserNewContextOptionsGeolocation struct {
