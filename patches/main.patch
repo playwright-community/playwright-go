@@ -253,10 +253,10 @@ index f7fd21e5b138fefe026beaeae867212c014257d1..7a0990039cfc81935a713ecce176ffe7
    - `size` <[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
 diff --git a/playwright/utils/doclint/generateGoApi.js b/playwright/utils/doclint/generateGoApi.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..f2b21e84a0eb585d9b9596108e515cea5ec5eed9
+index 0000000000000000000000000000000000000000..bc4702d8f141269c21ecb0fda2fa05dfa4614244
 --- /dev/null
 +++ b/playwright/utils/doclint/generateGoApi.js
-@@ -0,0 +1,755 @@
+@@ -0,0 +1,757 @@
 +/**
 + * Copyright (c) Microsoft Corporation.
 + *
@@ -315,6 +315,8 @@ index 0000000000000000000000000000000000000000..f2b21e84a0eb585d9b9596108e515cea
 +  documentation.setLinkRenderer(item => {
 +    if (item.clazz)
 +      return translateMemberName("interface", item.clazz.name, null);
++    else if (item.option || item.param)
++      return `\`${item.option || item.param}\``
 +    else if (item.member)
 +      return `${translateMemberName("interface", item.member.clazz.name, null)}.${translateMemberName(item.member.kind, item.member.name, item.member)}()`;
 +  });
