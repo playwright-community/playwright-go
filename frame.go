@@ -137,6 +137,19 @@ func (f *frameImpl) WaitForLoadState(given ...string) {
 	<-succeed
 }
 
+func (f *frameImpl) WaitForURL(url string, options ...FrameWaitForURLOptions) error {
+	if len(options) > 0 {
+		if _, err := f.WaitForNavigation(PageWaitForNavigationOptions{
+			URL:       url,
+			Timeout:   options[0].Timeout,
+			WaitUntil: options[0].WaitUntil,
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (f *frameImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
 	return <-waitForEvent(f, event, predicate...)
 }
@@ -598,4 +611,20 @@ func (f *frameImpl) IsVisible(selector string, options ...FrameIsVisibleOptions)
 		return false, err
 	}
 	return visible.(bool), nil
+}
+
+func (f *frameImpl) InputValue(selector string, options ...FrameInputValueOptions) (string, error) {
+
+	value, err := f.channel.Send("inputValue", map[string]interface{}{
+		"selector": selector,
+	}, options)
+	return value.(string), err
+}
+
+func (f *frameImpl) DragAndDrop(source string, target string, options ...FrameDragAndDropOptions) error {
+	_, err := f.channel.Send("dragAndDrop", map[string]interface{}{
+		"source": source,
+		"target": target,
+	}, options)
+	return err
 }
