@@ -765,6 +765,8 @@ type Frame interface {
 	// > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
 	// considered a navigation.
 	WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error)
+	// Waits for the frame to navigate to the given URL.
+	WaitForURL(url string, options ...FrameWaitForURLOptions) error
 	// Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
 	// `detached`.
 	// Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at
@@ -776,6 +778,9 @@ type Frame interface {
 	// Note that `frame.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to
 	// be flaky. Use signals such as network events, selectors becoming visible and others instead.
 	WaitForTimeout(timeout float64)
+	// Returns `input.value` for the selected `<input>` or `<textarea>` element. Throws for non-input elements.
+	InputValue(selector string, options ...FrameInputValueOptions) (string, error)
+	DragAndDrop(source string, target string, options ...FrameDragAndDropOptions) error
 }
 
 // JSHandle represents an in-page JavaScript object. JSHandles can be created with the Page.evaluateHandle()
