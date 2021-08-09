@@ -175,7 +175,12 @@ func (d *PlaywrightDriver) run() (*connection, error) {
 		return nil, fmt.Errorf("could not start driver: %w", err)
 	}
 	transport := newPipeTransport(stdin, stdout)
-	connection := newConnection(transport, cmd.Process.Kill)
+	connection := newConnection(transport,
+		func() error {
+			_ = cmd.Process.Kill()
+			_ = cmd.Wait()
+			return nil
+		})
 	return connection, nil
 }
 

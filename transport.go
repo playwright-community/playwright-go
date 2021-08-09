@@ -95,16 +95,14 @@ func (t *pipeTransport) Start() error {
 	for {
 		lengthContent := make([]byte, 4)
 		_, err := io.ReadFull(reader, lengthContent)
-		if err == io.EOF {
-			return nil
-		} else if err != nil {
-			return fmt.Errorf("could not read padding: %w", err)
+		if err != nil {
+			break
 		}
 		length := binary.LittleEndian.Uint32(lengthContent)
 
 		msg := &message{}
 		if err := json.NewDecoder(io.LimitReader(reader, int64(length))).Decode(&msg); err != nil {
-			return fmt.Errorf("could not decode json: %w", err)
+			break
 		}
 		if os.Getenv("DEBUGP") != "" {
 			fmt.Print("RECV>")
@@ -114,6 +112,7 @@ func (t *pipeTransport) Start() error {
 		}
 		t.dispatch(msg)
 	}
+	return nil
 }
 
 func (t *pipeTransport) SetDispatch(dispatch func(msg *message)) {
