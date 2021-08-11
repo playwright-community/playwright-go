@@ -1,7 +1,7 @@
-diff --git a/playwright/docs/src/api/class-browsercontext.md b/playwright/docs/src/api/class-browsercontext.md
+diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
 index 960d527374d591c83aae8415b53c8f2604f4b89e..b9b74abebe5f793c0f6c0c348828e747923cbef8 100644
---- a/playwright/docs/src/api/class-browsercontext.md
-+++ b/playwright/docs/src/api/class-browsercontext.md
+--- a/docs/src/api/class-browsercontext.md
++++ b/docs/src/api/class-browsercontext.md
 @@ -287,7 +287,17 @@ Script to be evaluated in all pages in the browser context.
  * langs: csharp, java
  - `script` <[string]|[path]>
@@ -39,11 +39,11 @@ index 960d527374d591c83aae8415b53c8f2604f4b89e..b9b74abebe5f793c0f6c0c348828e747
  - `handler` <[function]\([Route], [Request]\)>
  
  Optional handler function used to register a routing with [`method: BrowserContext.route`].
-diff --git a/playwright/docs/src/api/class-frame.md b/playwright/docs/src/api/class-frame.md
-index a1ba9b8fcca27987d3b3ea45060273ba17f978c2..93132473817e1def8d4fdd8e076570424ead66fb 100644
---- a/playwright/docs/src/api/class-frame.md
-+++ b/playwright/docs/src/api/class-frame.md
-@@ -1363,7 +1363,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
+diff --git a/docs/src/api/class-frame.md b/docs/src/api/class-frame.md
+index 44f46bcb2a3ac7aebea3b5d275c32d0527d132ba..6e6c944107641b96f27827336cc241d233a1be69 100644
+--- a/docs/src/api/class-frame.md
++++ b/docs/src/api/class-frame.md
+@@ -1362,7 +1362,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
  
  Optional argument to pass to [`param: expression`].
  
@@ -52,10 +52,10 @@ index a1ba9b8fcca27987d3b3ea45060273ba17f978c2..93132473817e1def8d4fdd8e07657042
  
  ### option: Frame.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
  
-diff --git a/playwright/docs/src/api/class-page.md b/playwright/docs/src/api/class-page.md
-index e6ae6a2472da16f16cfcb164b1265f343a601f4a..ec27c3e5c5fa5913a711ae0b32664acdc4130cd0 100644
---- a/playwright/docs/src/api/class-page.md
-+++ b/playwright/docs/src/api/class-page.md
+diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
+index a993da69ca93082036451bed0b7b4999cd8cf61d..55769bd2b5c4ef67ee5c578087be7a78d14bd46c 100644
+--- a/docs/src/api/class-page.md
++++ b/docs/src/api/class-page.md
 @@ -520,6 +520,18 @@ Script to be evaluated in all pages in the browser context.
  
  Optional argument to pass to [`param: script`] (only supported when passing a function).
@@ -156,10 +156,10 @@ index e6ae6a2472da16f16cfcb164b1265f343a601f4a..ec27c3e5c5fa5913a711ae0b32664acd
  
  ### option: Page.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
  
-diff --git a/playwright/docs/src/api/class-route.md b/playwright/docs/src/api/class-route.md
+diff --git a/docs/src/api/class-route.md b/docs/src/api/class-route.md
 index 639324bb2faa3eb9d2c254cbff16f2e380379ab9..96cfbfe8c6ea48c3ae0301cd529713f301ee2b74 100644
---- a/playwright/docs/src/api/class-route.md
-+++ b/playwright/docs/src/api/class-route.md
+--- a/docs/src/api/class-route.md
++++ b/docs/src/api/class-route.md
 @@ -103,10 +103,17 @@ If set changes the request URL. New URL must have same protocol as original one.
  If set changes the request method (e.g. GET or POST)
  
@@ -191,11 +191,11 @@ index 639324bb2faa3eb9d2c254cbff16f2e380379ab9..96cfbfe8c6ea48c3ae0301cd529713f3
  ### option: Route.fulfill.body
  * langs: csharp, java
  - `body` <[string]>
-diff --git a/playwright/docs/src/api/params.md b/playwright/docs/src/api/params.md
-index 8468447d5dd292e6b92398474def864f15e01cc5..5c206d6c08ba0efbc4e4724b7f5dc1f11e94dabc 100644
---- a/playwright/docs/src/api/params.md
-+++ b/playwright/docs/src/api/params.md
-@@ -138,8 +138,8 @@ Defaults to `'visible'`. Can be either:
+diff --git a/docs/src/api/params.md b/docs/src/api/params.md
+index f7fd21e5b138fefe026beaeae867212c014257d1..7a0990039cfc81935a713ecce176ffe766d010c3 100644
+--- a/docs/src/api/params.md
++++ b/docs/src/api/params.md
+@@ -113,8 +113,8 @@ Defaults to `'visible'`. Can be either:
  * `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`.
    This is opposite to the `'visible'` option.
  
@@ -251,11 +251,11 @@ index 8468447d5dd292e6b92398474def864f15e01cc5..5c206d6c08ba0efbc4e4724b7f5dc1f1
  - `recordVideo` <[Object]>
    - `dir` <[path]> Path to the directory to put videos into.
    - `size` <[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
-diff --git a/playwright/utils/doclint/generateGoApi.js b/playwright/utils/doclint/generateGoApi.js
+diff --git a/utils/doclint/generateGoApi.js b/utils/doclint/generateGoApi.js
 new file mode 100644
 index 0000000000000000000000000000000000000000..bc4702d8f141269c21ecb0fda2fa05dfa4614244
 --- /dev/null
-+++ b/playwright/utils/doclint/generateGoApi.js
++++ b/utils/doclint/generateGoApi.js
 @@ -0,0 +1,757 @@
 +/**
 + * Copyright (c) Microsoft Corporation.

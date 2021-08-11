@@ -1,13 +1,16 @@
 #!/bin/bash
 
+set -e
+set +x
+
+SCRIPTS_DIR="$(dirname "$0")"
+
+pushd "$SCRIPTS_DIR/../playwright"
+SCRIPTS_DIR="$(dirname "$0")"
 echo "Creating patch..."
 
-cd "$(dirname "$0")"
+git diff --full-index HEAD^1..HEAD > ../patches/main.patch
+git reset --hard HEAD^1
+git branch -D playwright-build
 
-cd ../playwright 
-
-git diff --full-index --src-prefix="a/playwright/" --dst-prefix="b/playwright/" > ../patches/main.patch $(git rev-parse HEAD^1)..$(git rev-parse HEAD)
-
-git reset --hard $(git rev-parse HEAD^1)
-
-cd -
+popd
