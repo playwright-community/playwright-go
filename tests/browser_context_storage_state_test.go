@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
-	"runtime"
 	"testing"
 
 	"github.com/mxschmitt/playwright-go"
@@ -14,9 +13,6 @@ import (
 func TestBrowserContextStorageStateShouldCaptureLocalStorage(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	if isWebKit && runtime.GOOS == "windows" {
-		t.Skip()
-	}
 	page1, err := context.NewPage()
 	require.NoError(t, err)
 	require.NoError(t, page1.Route("**/*", func(route playwright.Route, request playwright.Request) {
@@ -60,9 +56,6 @@ func TestBrowserContextStorageStateShouldCaptureLocalStorage(t *testing.T) {
 func TestBrowserContextStorageStateSetLocalStorage(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	if isWebKit && runtime.GOOS == "windows" {
-		t.Skip()
-	}
 	context, err := browser.NewContext(
 		playwright.BrowserNewContextOptions{
 			StorageState: &playwright.BrowserNewContextOptionsStorageState{
