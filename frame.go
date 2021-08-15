@@ -621,7 +621,7 @@ func (f *frameImpl) InputValue(selector string, options ...FrameInputValueOption
 	return value.(string), err
 }
 
-func (f *frameImpl) DragAndDrop(source string, target string, options ...FrameDragAndDropOptions) error {
+func (f *frameImpl) DragAndDrop(source, target string, options ...FrameDragAndDropOptions) error {
 	_, err := f.channel.Send("dragAndDrop", map[string]interface{}{
 		"source": source,
 		"target": target,

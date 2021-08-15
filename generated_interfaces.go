@@ -482,6 +482,8 @@ type ElementHandle interface {
 	// throw.
 	// > NOTE: This method does not work across navigations, use Page.waitForSelector() instead.
 	WaitForSelector(selector string, options ...ElementHandleWaitForSelectorOptions) (ElementHandle, error)
+	// Returns `input.value` for `<input>` or `<textarea>` element. Throws for non-input elements.
+	InputValue(options ...ElementHandleInputValueOptions) (string, error)
 }
 
 type EventEmitter interface {
@@ -780,7 +782,7 @@ type Frame interface {
 	WaitForTimeout(timeout float64)
 	// Returns `input.value` for the selected `<input>` or `<textarea>` element. Throws for non-input elements.
 	InputValue(selector string, options ...FrameInputValueOptions) (string, error)
-	DragAndDrop(source string, target string, options ...FrameDragAndDropOptions) error
+	DragAndDrop(source, target string, options ...FrameDragAndDropOptions) error
 }
 
 // JSHandle represents an in-page JavaScript object. JSHandles can be created with the Page.evaluateHandle()
@@ -1318,6 +1320,19 @@ type Page interface {
 	// associated with the page.
 	// > NOTE: This does not contain ServiceWorkers
 	Workers() []Worker
+	DragAndDrop(source, target string, options ...FrameDragAndDropOptions) error
+	// Pauses script execution. Playwright will stop executing the script and wait for the user to either press 'Resume' button
+	// in the page overlay or to call `playwright.resume()` in the DevTools console.
+	// User can inspect selectors or perform manual steps while paused. Resume will continue running the original script from
+	// the place it was paused.
+	// > NOTE: This method requires Playwright to be started in a headed mode, with a falsy `headless` value in the
+	// BrowserType.launch().
+	Pause() error
+	// Returns `input.value` for the selected `<input>` or `<textarea>` element. Throws for non-input elements.
+	InputValue(selector string, options ...FrameInputValueOptions) (string, error)
+	// Waits for the main frame to navigate to the given URL.
+	// Shortcut for main frame's Frame.waitForURL().
+	WaitForURL(url string, options ...FrameWaitForURLOptions) error
 }
 
 // Whenever the page sends a request for a network resource the following sequence of events are emitted by `Page`:

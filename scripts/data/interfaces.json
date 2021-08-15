@@ -413,6 +413,10 @@
 		"WaitForSelector": [
 			"selector string, options ...ElementHandleWaitForSelectorOptions",
 			"(ElementHandle, error)"
+		],
+		"InputValue": [
+			"options ...ElementHandleInputValueOptions",
+			"(string, error)"
 		]
 	},
 	"EventEmitter": {
@@ -657,7 +661,7 @@
 			"(string, error)"
 		],
 		"DragAndDrop": [
-			"source string, target string, options ...FrameDragAndDropOptions",
+			"source , target string, options ...FrameDragAndDropOptions",
 			"error"
 		]
 	},
@@ -1078,6 +1082,22 @@
 		"Workers": [
 			null,
 			"[]Worker"
+		],
+		"DragAndDrop": [
+			"source , target string, options ...FrameDragAndDropOptions",
+			"error"
+		],
+		"Pause": [
+			null,
+			"error"
+		],
+		"InputValue": [
+			"selector string, options ...FrameInputValueOptions",
+			"(string, error)"
+		],
+		"WaitForURL": [
+			"url string, options ...FrameWaitForURLOptions",
+			"error"
 		]
 	},
 	"Request": {

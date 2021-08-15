@@ -359,6 +359,10 @@ func (b *browserContextImpl) onRoute(route *routeImpl, request *requestImpl) {
 		}
 	}()
 }
+func (p *browserContextImpl) Pause() error {
+	_, err := p.channel.Send("pause")
+	return err
+}
 
 func newBrowserContext(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserContextImpl {
 	bt := &browserContextImpl{
