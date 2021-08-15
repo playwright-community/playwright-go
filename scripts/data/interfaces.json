@@ -661,7 +661,7 @@
 			"(string, error)"
 		],
 		"DragAndDrop": [
-			"source , target string, options ...FrameDragAndDropOptions",
+			"source, target string, options ...FrameDragAndDropOptions",
 			"error"
 		]
 	},
@@ -1084,7 +1084,7 @@
 			"[]Worker"
 		],
 		"DragAndDrop": [
-			"source , target string, options ...FrameDragAndDropOptions",
+			"source, target string, options ...FrameDragAndDropOptions",
 			"error"
 		],
 		"Pause": [
