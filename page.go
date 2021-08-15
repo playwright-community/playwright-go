@@ -747,3 +747,19 @@ func (p *pageImpl) IsHidden(selector string, options ...FrameIsHiddenOptions) (b
 func (p *pageImpl) IsVisible(selector string, options ...FrameIsVisibleOptions) (bool, error) {
 	return p.mainFrame.IsVisible(selector, options...)
 }
+
+func (p *pageImpl) DragAndDrop(source, target string, options ...FrameDragAndDropOptions) error {
+	return p.mainFrame.DragAndDrop(source, target, options...)
+}
+
+func (p *pageImpl) Pause() error {
+	return p.browserContext.Pause()
+}
+
+func (p *pageImpl) InputValue(selector string, options ...FrameInputValueOptions) (string, error) {
+	return p.mainFrame.InputValue(selector, options...)
+}
+
+func (p *pageImpl) WaitForURL(url string, options ...FrameWaitForURLOptions) error {
+	return p.mainFrame.WaitForURL(url, options...)
+}

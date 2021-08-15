@@ -830,3 +830,29 @@ func TestPageUnrouteShouldWork(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, []int{4}, intercepted)
 }
+
+func TestPageDragAndDrop(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.PREFIX + "/drag-n-drop.html")
+	require.NoError(t, err)
+	require.NoError(t, page.DragAndDrop("#source", "#target"))
+	value, err := page.EvalOnSelector("#target", "target => target.contains(document.querySelector('#source'))")
+	require.NoError(t, err)
+	require.Equal(t, true, value)
+}
+func TestPageInputValue(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.SetContent(`
+		<input></input>
+	`))
+	require.NoError(t, page.Fill("input", "hello"))
+	value, err := page.InputValue("input")
+	require.NoError(t, err)
+	require.Equal(t, "hello", value)
+	require.NoError(t, page.Fill("input", ""))
+	value, err = page.InputValue("input")
+	require.NoError(t, err)
+	require.Equal(t, "", value)
+}

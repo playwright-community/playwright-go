@@ -360,6 +360,11 @@ func (e *elementHandleImpl) WaitForSelector(selector string, options ...ElementH
 	return channelOwner.(*elementHandleImpl), nil
 }
 
+func (e *elementHandleImpl) InputValue(options ...ElementHandleInputValueOptions) (string, error) {
+	result, err := e.channel.Send("inputValue", options)
+	return result.(string), err
+}
+
 func newElementHandle(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *elementHandleImpl {
 	bt := &elementHandleImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)

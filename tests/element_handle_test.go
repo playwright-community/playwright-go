@@ -537,3 +537,21 @@ func TestElemetHandleFocus(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, result.(bool))
 }
+
+func TestElementHandleInputValue(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.SetContent(`
+	<input></input>
+	`))
+	inputElement, err := page.QuerySelector("input")
+	require.NoError(t, err)
+	require.NoError(t, inputElement.Fill("test"))
+	value, err := inputElement.InputValue()
+	require.NoError(t, err)
+	require.Equal(t, "test", value)
+	require.NoError(t, inputElement.Fill(""))
+	value, err = inputElement.InputValue()
+	require.NoError(t, err)
+	require.Equal(t, "", value)
+}
