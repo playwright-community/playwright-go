@@ -1,32 +1,30 @@
 package playwright_test
 
 import (
-	"log"
+	"path/filepath"
+	"testing"
 
 	"github.com/mxschmitt/playwright-go"
+	"github.com/stretchr/testify/require"
 )
 
-func assertErrorToNil(message string, err error) {
-	if err != nil {
-		log.Fatalf(message, err)
-	}
-}
-
-func ExampleRun() {
+func TestExampleRun(t *testing.T) {
 	pw, err := playwright.Run()
-	assertErrorToNil("could not launch playwright: %w", err)
+	require.NoError(t, err)
 	browser, err := pw.Chromium.Launch()
-	assertErrorToNil("could not launch Chromium: %w", err)
+	require.NoError(t, err)
 	context, err := browser.NewContext()
-	assertErrorToNil("could not create context: %w", err)
+	require.NoError(t, err)
 	page, err := context.NewPage()
-	assertErrorToNil("could not create page: %w", err)
+	require.NoError(t, err)
 	_, err = page.Goto("http://whatsmyuseragent.org/")
-	assertErrorToNil("could not goto: %w", err)
+	require.NoError(t, err)
+	path := filepath.Join(t.TempDir(), "foo.png")
 	_, err = page.Screenshot(playwright.PageScreenshotOptions{
-		Path: playwright.String("foo.png"),
+		Path: &path,
 	})
-	assertErrorToNil("could not create screenshot: %w", err)
-	assertErrorToNil("could not close browser: %v", browser.Close())
-	assertErrorToNil("could not stop Playwright: %v", pw.Stop())
+	require.NoError(t, err)
+	require.FileExists(t, path)
+	require.NoError(t, browser.Close())
+	require.NoError(t, pw.Stop())
 }
