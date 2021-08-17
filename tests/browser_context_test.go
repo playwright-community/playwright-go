@@ -126,6 +126,10 @@ func TestBrowserContextAddCookies(t *testing.T) {
 
 	cookies, err := context.Cookies()
 	require.NoError(t, err)
+	sameSite := "None"
+	if isChromium {
+		sameSite = "Lax"
+	}
 	require.Equal(t, []*playwright.NetworkCookie{
 		{
 			Name:     "password",
@@ -135,7 +139,7 @@ func TestBrowserContextAddCookies(t *testing.T) {
 			Expires:  -1,
 			HttpOnly: false,
 			Secure:   false,
-			SameSite: "None",
+			SameSite: sameSite,
 		},
 	}, cookies)
 

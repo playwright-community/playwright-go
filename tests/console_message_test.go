@@ -17,8 +17,13 @@ func TestConsoleShouldWork(t *testing.T) {
 	_, err := page.Evaluate(`() => console.log("hello", 5, {foo: "bar"})`)
 	require.NoError(t, err)
 	message := <-messages
-	require.Equal(t, message.Text(), "hello 5 JSHandle@object")
-	require.Equal(t, message.String(), "hello 5 JSHandle@object")
+	if !isFirefox {
+		require.Equal(t, message.Text(), "hello 5 {foo: bar}")
+		require.Equal(t, message.String(), "hello 5 {foo: bar}")
+	} else {
+		require.Equal(t, message.Text(), "hello 5 JSHandle@object")
+		require.Equal(t, message.String(), "hello 5 JSHandle@object")
+	}
 	require.Equal(t, message.Type(), "log")
 	jsonValue1, err := message.Args()[0].JSONValue()
 	require.NoError(t, err)
@@ -98,7 +103,7 @@ func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 		"calling console.dir",
 		"calling console.warn",
 		"calling console.error",
-		"JSHandle@promise",
+		"Promise",
 	}, Map(messages[1:], func(msg interface{}) interface{} {
 		return msg.(playwright.ConsoleMessage).Text()
 	}))
@@ -114,7 +119,11 @@ func TestConsoleShouldNotFailForWindowObjects(t *testing.T) {
 	_, err := page.Evaluate("() => console.error(window)")
 	require.NoError(t, err)
 	message := <-messages
-	require.Equal(t, "JSHandle@object", message.Text())
+	if !isFirefox {
+		require.Equal(t, "Window", message.Text())
+	} else {
+		require.Equal(t, "JSHandle@object", message.Text())
+	}
 }
 
 func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
