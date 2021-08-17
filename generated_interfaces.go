@@ -267,6 +267,15 @@ type Download interface {
 // JSHandle.dispose(). ElementHandles are auto-disposed when their origin frame gets navigated.
 // ElementHandle instances can be used as an argument in Page.evalOnSelector`] and [`method: Page.evaluate()
 // methods.
+// > NOTE: In most cases, you would want to use the `Locator` object instead. You should only use `ElementHandle` if you
+// want to retain a handle to a particular DOM Node that you intend to pass into Page.evaluate() as an argument.
+// The difference between the `Locator` and ElementHandle is that the ElementHandle points to a particular element, while
+// `Locator` captures the logic of how to retrieve an element.
+// In the example below, handle points to a particular DOM element on page. If that element changes text or is used by
+// React to render an entirely different component, handle is still pointing to that very DOM element. This can lead to
+// unexpected behaviors.
+// With the locator, every time the `element` is used, up-to-date DOM element is located in the page using the selector. So
+// in the snippet below, underlying DOM element is going to be located twice.
 type ElementHandle interface {
 	JSHandle
 	// This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
@@ -482,7 +491,7 @@ type ElementHandle interface {
 	// throw.
 	// > NOTE: This method does not work across navigations, use Page.waitForSelector() instead.
 	WaitForSelector(selector string, options ...ElementHandleWaitForSelectorOptions) (ElementHandle, error)
-	// Returns `input.value` for `<input>` or `<textarea>` element. Throws for non-input elements.
+	// Returns `input.value` for `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
 	InputValue(options ...ElementHandleInputValueOptions) (string, error)
 }
 
@@ -780,7 +789,7 @@ type Frame interface {
 	// Note that `frame.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to
 	// be flaky. Use signals such as network events, selectors becoming visible and others instead.
 	WaitForTimeout(timeout float64)
-	// Returns `input.value` for the selected `<input>` or `<textarea>` element. Throws for non-input elements.
+	// Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
 	InputValue(selector string, options ...FrameInputValueOptions) (string, error)
 	DragAndDrop(source, target string, options ...FrameDragAndDropOptions) error
 }
@@ -1328,7 +1337,7 @@ type Page interface {
 	// > NOTE: This method requires Playwright to be started in a headed mode, with a falsy `headless` value in the
 	// BrowserType.launch().
 	Pause() error
-	// Returns `input.value` for the selected `<input>` or `<textarea>` element. Throws for non-input elements.
+	// Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
 	InputValue(selector string, options ...FrameInputValueOptions) (string, error)
 	// Waits for the main frame to navigate to the given URL.
 	// Shortcut for main frame's Frame.waitForURL().
