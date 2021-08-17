@@ -64,7 +64,11 @@ func TestWorkerShouldHaveJSHandlesForConsoleLogs(t *testing.T) {
 	})
 	require.NoError(t, err)
 	log := message.(playwright.ConsoleMessage)
-	require.Equal(t, "1 2 3 JSHandle@object", log.Text())
+	if !isFirefox {
+		require.Equal(t, "1 2 3 DedicatedWorkerGlobalScope", log.Text())
+	} else {
+		require.Equal(t, "1 2 3 JSHandle@object", log.Text())
+	}
 	require.Equal(t, 4, len(log.Args()))
 	origin, err := log.Args()[3].GetProperty("origin")
 	require.NoError(t, err)

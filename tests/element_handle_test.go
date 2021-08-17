@@ -262,11 +262,10 @@ func TestElementHandleString(t *testing.T) {
 	defer AfterEach(t)
 	numberHandle, err := page.EvaluateHandle("() => 2")
 	require.NoError(t, err)
-	require.Equal(t, "JSHandle@2", numberHandle.String())
-
+	require.Equal(t, "2", numberHandle.String())
 	stringHandle, err := page.EvaluateHandle("() => 'a'")
 	require.NoError(t, err)
-	require.Equal(t, "JSHandle@a", stringHandle.String())
+	require.Equal(t, "a", stringHandle.String())
 }
 
 func TestElementHandleCheck(t *testing.T) {

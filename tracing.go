@@ -11,9 +11,6 @@ func (t *tracingImpl) Start(options ...TracingStartOptions) error {
 }
 
 func (t *tracingImpl) Stop(options ...TracingStopOptions) error {
-	if _, err := t.channel.Send("tracingStop", nil); err != nil {
-		return err
-	}
 	if len(options) == 1 && options[0].Path != nil {
 		artifactChannel, err := t.channel.Send("tracingExport", nil)
 		if err != nil {
@@ -26,6 +23,9 @@ func (t *tracingImpl) Stop(options ...TracingStopOptions) error {
 		if err = artifact.Delete(); err != nil {
 			return err
 		}
+	}
+	if _, err := t.channel.Send("tracingStop", nil); err != nil {
+		return err
 	}
 	return nil
 }
