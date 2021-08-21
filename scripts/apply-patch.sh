@@ -13,7 +13,6 @@ git submodule update --init
 pushd playwright
 
 git reset --hard HEAD
-git checkout master
 
 if git show-ref -q --heads "$BRANCH_NAME_HEAD"; then
   git branch -D "$BRANCH_NAME_HEAD"
