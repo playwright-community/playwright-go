@@ -4,7 +4,7 @@ package playwright_test
 
 import (
 	"bufio"
-	"log"
+	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
@@ -18,30 +18,32 @@ type remoteServer struct {
 	cmd *exec.Cmd
 }
 
-func newRemoteServer() *remoteServer {
+func newRemoteServer() (*remoteServer, error) {
 	driver, err := playwright.NewDriver(&playwright.RunOptions{})
 	if err != nil {
-		log.Fatalf("could not start Playwright: %v", err)
+		return nil, fmt.Errorf("could not start Playwright: %v", err)
 	}
 	cmd := exec.Command(driver.DriverBinaryLocation, "launch-server", browserName)
+	cmd.Stderr = os.Stderr
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		log.Fatalf("could not get stdout pipe: %v", err)
+		return nil, fmt.Errorf("could not get stdout pipe: %v", err)
 	}
 	err = cmd.Start()
 	if err != nil {
-		log.Fatalf("could not start server: %v", err)
+		return nil, fmt.Errorf("could not start server: %v", err)
 	}
 	scanner := bufio.NewReader(stdout)
 	url, err := scanner.ReadString('\n')
+	fmt.Println(url)
 	url = strings.TrimRight(url, "\n")
 	if err != nil {
-		log.Fatalf("could not read url: %v", err)
+		return nil, fmt.Errorf("could not read url: %v", err)
 	}
 	return &remoteServer{
 		url: url,
 		cmd: cmd,
-	}
+	}, nil
 }
 
 func (s *remoteServer) Close() {

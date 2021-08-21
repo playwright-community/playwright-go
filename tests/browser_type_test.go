@@ -61,9 +61,10 @@ func TestBrowserTypeLaunchPersistentContext(t *testing.T) {
 func TestBrowserTypeConnect(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	remote_server := newRemoteServer()
-	defer remote_server.Close()
-	browser, err := browserType.Connect(remote_server.url)
+	remoteServer, err := newRemoteServer()
+	require.NoError(t, err)
+	defer remoteServer.Close()
+	browser, err := browserType.Connect(remoteServer.url)
 	require.NoError(t, err)
 	require.NotNil(t, browser)
 	browser_context, err := browser.NewContext()
@@ -79,9 +80,10 @@ func TestBrowserTypeConnect(t *testing.T) {
 func TestBrowserTypeConnectShouldBeAbleToReconnectToBrowser(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	remote_server := newRemoteServer()
-	defer remote_server.Close()
-	browser, err := browserType.Connect(remote_server.url)
+	remoteServer, err := newRemoteServer()
+	require.NoError(t, err)
+	defer remoteServer.Close()
+	browser, err := browserType.Connect(remoteServer.url)
 	require.NoError(t, err)
 	require.NotNil(t, browser)
 	require.Len(t, browser.Contexts(), 0)
@@ -97,7 +99,7 @@ func TestBrowserTypeConnectShouldBeAbleToReconnectToBrowser(t *testing.T) {
 	require.Equal(t, result, 121)
 	require.NoError(t, browser.Close())
 
-	browser, err = browserType.Connect(remote_server.url)
+	browser, err = browserType.Connect(remoteServer.url)
 	require.NoError(t, err)
 	require.NotNil(t, browser)
 	require.Len(t, browser.Contexts(), 0)
@@ -115,16 +117,16 @@ func TestBrowserTypeConnectShouldBeAbleToReconnectToBrowser(t *testing.T) {
 }
 
 func TestBrowserTypeConnectShouldEmitDisconnectedEvent(t *testing.T) {
-
 	BeforeEach(t)
 	defer AfterEach(t)
-	remote_server := newRemoteServer()
+	remoteServer, err := newRemoteServer()
+	require.NoError(t, err)
 	disconnected1 := newSyncSlice()
 	disconnected2 := newSyncSlice()
-	browser1, err := browserType.Connect(remote_server.url)
+	browser1, err := browserType.Connect(remoteServer.url)
 	require.NoError(t, err)
 	require.NotNil(t, browser1)
-	browser2, err := browserType.Connect(remote_server.url)
+	browser2, err := browserType.Connect(remoteServer.url)
 	require.NoError(t, err)
 	require.NotNil(t, browser2)
 	browser1.On("disconnected", func() {
@@ -139,7 +141,7 @@ func TestBrowserTypeConnectShouldEmitDisconnectedEvent(t *testing.T) {
 	require.False(t, browser1.IsConnected())
 	require.Len(t, disconnected1.Get(), 1)
 	require.Len(t, disconnected2.Get(), 0)
-	remote_server.Close()
+	remoteServer.Close()
 
 	require.Panics(t, func() {
 		_, err = page.Title()

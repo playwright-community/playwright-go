@@ -25,7 +25,7 @@ var page playwright.Page
 var isChromium bool
 var isFirefox bool
 var isWebKit bool
-var browserName = os.Getenv("BROWSER")
+var browserName = getBrowserName()
 var server *testServer
 var browserType playwright.BrowserType
 var utils *testUtils
@@ -266,4 +266,12 @@ func (tu *testUtils) AssertEval(t *testing.T, page playwright.Page, script strin
 	result, err := page.Evaluate(script)
 	require.NoError(t, err)
 	require.Equal(t, expected, result)
+}
+
+func getBrowserName() string {
+	browserName, hasEnv := os.LookupEnv("BROWSER")
+	if hasEnv {
+		return browserName
+	}
+	return "chromium"
 }

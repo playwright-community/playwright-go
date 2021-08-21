@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"os"
 	"sync"
 
@@ -29,34 +30,26 @@ type pipeTransport struct {
 }
 
 type webSocketTransport struct {
-	eventEmitter
+	OnClose  func()
 	url      string
 	conn     *websocket.Conn
 	dispatch func(msg *message)
 	stopped  bool
-	rLock    sync.Mutex
-	err      error
 }
 
 func (t *webSocketTransport) Start() error {
 	conn, _, err := websocket.DefaultDialer.Dial(t.url, nil)
 	if err != nil {
-		return fmt.Errorf("could not connect to websocket: %w", err)
+		return fmt.Errorf("could not connect to websocket: %v", err)
 	}
 	t.conn = conn
-
-	for {
+	for !t.stopped {
 		msg := &message{}
 		err := t.conn.ReadJSON(msg)
-		if err != nil {
-			t.rLock.Lock()
-			if t.stopped {
-				t.rLock.Unlock()
-				return nil
-			}
-			t.err = err
-			t.rLock.Unlock()
+		if errors.Is(err, net.ErrClosed) {
 			break
+		} else if err != nil {
+			return fmt.Errorf("could not read json: %v", err)
 		}
 		t.dispatch(msg)
 	}
@@ -64,15 +57,8 @@ func (t *webSocketTransport) Start() error {
 }
 
 func (t *webSocketTransport) Send(message map[string]interface{}) error {
-	t.rLock.Lock()
-	if t.err != nil {
-		t.stopped = true
-		t.rLock.Unlock()
-		t.Emit("close")
-		return t.err
-	}
-	t.rLock.Unlock()
 	if err := t.conn.WriteJSON(message); err != nil {
+		t.stopped = true
 		return fmt.Errorf("could not write json: %w", err)
 	}
 	return nil
@@ -83,12 +69,12 @@ func (t *webSocketTransport) SetDispatch(dispatch func(msg *message)) {
 }
 
 func (t *webSocketTransport) Stop() error {
-	t.rLock.Lock()
-	defer t.rLock.Unlock()
-	t.stopped = true
 	t.conn.Close()
-	t.Emit("close")
-	return t.err
+	t.stopped = true
+	if t.OnClose != nil {
+		t.OnClose()
+	}
+	return nil
 }
 
 func (t *pipeTransport) Start() error {
@@ -173,9 +159,7 @@ func newPipeTransport(stdin io.WriteCloser, stdout io.ReadCloser) transport {
 	}
 }
 func newWebSocketTransport(url string) transport {
-	t := &webSocketTransport{
+	return &webSocketTransport{
 		url: url,
 	}
-	t.initEventEmitter()
-	return t
 }
