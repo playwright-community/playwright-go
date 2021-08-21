@@ -40,10 +40,10 @@ index 960d527374d591c83aae8415b53c8f2604f4b89e..b9b74abebe5f793c0f6c0c348828e747
  
  Optional handler function used to register a routing with [`method: BrowserContext.route`].
 diff --git a/docs/src/api/class-frame.md b/docs/src/api/class-frame.md
-index 44f46bcb2a3ac7aebea3b5d275c32d0527d132ba..6e6c944107641b96f27827336cc241d233a1be69 100644
+index 056a4c0484539fd4524fe38330ec9c42391e0f8f..34646b6c1e3f9a13c951412be10500e1a0326900 100644
 --- a/docs/src/api/class-frame.md
 +++ b/docs/src/api/class-frame.md
-@@ -1362,7 +1362,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
+@@ -1359,7 +1359,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
  
  Optional argument to pass to [`param: expression`].
  
@@ -53,7 +53,7 @@ index 44f46bcb2a3ac7aebea3b5d275c32d0527d132ba..6e6c944107641b96f27827336cc241d2
  ### option: Frame.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
  
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index a993da69ca93082036451bed0b7b4999cd8cf61d..55769bd2b5c4ef67ee5c578087be7a78d14bd46c 100644
+index 67f7f778a9b196ab9111b8ddea7fe6d780974b6b..11d2606f3726d5dbf42da9cc45c9a80206fa58f6 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
 @@ -520,6 +520,18 @@ Script to be evaluated in all pages in the browser context.
@@ -75,7 +75,7 @@ index a993da69ca93082036451bed0b7b4999cd8cf61d..55769bd2b5c4ef67ee5c578087be7a78
  ## async method: Page.addScriptTag
  - returns: <[ElementHandle]>
  
-@@ -967,7 +979,7 @@ Changes the CSS media type of the page. The only allowed values are `'screen'`,
+@@ -963,7 +975,7 @@ Changes the CSS media type of the page. The only allowed values are `'screen'`,
  Passing `null` disables CSS media emulation.
  
  ### option: Page.emulateMedia.media
@@ -84,7 +84,7 @@ index a993da69ca93082036451bed0b7b4999cd8cf61d..55769bd2b5c4ef67ee5c578087be7a78
  - `media` <[Media]<"screen"|"print"|"null">>
  
  Changes the CSS media type of the page. The only allowed values are `'Screen'`, `'Print'` and `'Null'`.
-@@ -981,7 +993,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+@@ -977,7 +989,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
  `null` disables color scheme emulation.
  
  ### option: Page.emulateMedia.colorScheme
@@ -93,7 +93,7 @@ index a993da69ca93082036451bed0b7b4999cd8cf61d..55769bd2b5c4ef67ee5c578087be7a78
  - `colorScheme` <[ColorScheme]<"light"|"dark"|"no-preference"|"null">>
  
  Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing
-@@ -994,7 +1006,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+@@ -990,7 +1002,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
  Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.
  
  ### option: Page.emulateMedia.reducedMotion
@@ -102,7 +102,7 @@ index a993da69ca93082036451bed0b7b4999cd8cf61d..55769bd2b5c4ef67ee5c578087be7a78
  - `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"null">>
  
  Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.
-@@ -2218,7 +2230,7 @@ Paper format. If set, takes priority over [`option: width`] or [`option: height`
+@@ -2214,7 +2226,7 @@ Paper format. If set, takes priority over [`option: width`] or [`option: height`
  Paper width, accepts values labeled with units.
  
  ### option: Page.pdf.width
@@ -111,7 +111,7 @@ index a993da69ca93082036451bed0b7b4999cd8cf61d..55769bd2b5c4ef67ee5c578087be7a78
  - `width` <[string]>
  
  Paper width, accepts values labeled with units.
-@@ -2230,7 +2242,7 @@ Paper width, accepts values labeled with units.
+@@ -2226,7 +2238,7 @@ Paper width, accepts values labeled with units.
  Paper height, accepts values labeled with units.
  
  ### option: Page.pdf.height
@@ -120,7 +120,7 @@ index a993da69ca93082036451bed0b7b4999cd8cf61d..55769bd2b5c4ef67ee5c578087be7a78
  - `height` <[string]>
  
  Paper height, accepts values labeled with units.
-@@ -2246,7 +2258,7 @@ Paper height, accepts values labeled with units.
+@@ -2242,7 +2254,7 @@ Paper height, accepts values labeled with units.
  Paper margins, defaults to none.
  
  ### option: Page.pdf.margin
@@ -129,7 +129,7 @@ index a993da69ca93082036451bed0b7b4999cd8cf61d..55769bd2b5c4ef67ee5c578087be7a78
  - `margin` <[Object]>
    - `top` <[string]> Top margin, accepts values labeled with units. Defaults to `0`.
    - `right` <[string]> Right margin, accepts values labeled with units. Defaults to `0`.
-@@ -2542,7 +2554,7 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
+@@ -2538,7 +2550,7 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
  When a [`option: baseURL`] via the context options was provided and the passed URL is a path,
  it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
  ### param: Page.route.handler
@@ -138,7 +138,7 @@ index a993da69ca93082036451bed0b7b4999cd8cf61d..55769bd2b5c4ef67ee5c578087be7a78
  - `handler` <[function]\([Route], [Request]\)>
  
  handler function to route the request.
-@@ -2931,7 +2943,7 @@ the [`param: url`].
+@@ -2927,7 +2939,7 @@ the [`param: url`].
  A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
  
  ### param: Page.unroute.handler
@@ -147,7 +147,7 @@ index a993da69ca93082036451bed0b7b4999cd8cf61d..55769bd2b5c4ef67ee5c578087be7a78
  - `handler` <[function]\([Route], [Request]\)>
  
  Optional handler function to route the request.
-@@ -3177,7 +3189,7 @@ Shortcut for main frame's [`method: Frame.waitForFunction`].
+@@ -3173,7 +3185,7 @@ Shortcut for main frame's [`method: Frame.waitForFunction`].
  
  Optional argument to pass to [`param: expression`].
  
@@ -192,10 +192,10 @@ index 639324bb2faa3eb9d2c254cbff16f2e380379ab9..96cfbfe8c6ea48c3ae0301cd529713f3
  * langs: csharp, java
  - `body` <[string]>
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index f7fd21e5b138fefe026beaeae867212c014257d1..7a0990039cfc81935a713ecce176ffe766d010c3 100644
+index 67c93813609412d60e5c8058912d31885124ad15..9f39946c88b6391112f91217344386f11cd0b5a3 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
-@@ -113,8 +113,8 @@ Defaults to `'visible'`. Can be either:
+@@ -124,8 +124,8 @@ Defaults to `'visible'`. Can be either:
  * `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`.
    This is opposite to the `'visible'` option.
  
@@ -206,7 +206,7 @@ index f7fd21e5b138fefe026beaeae867212c014257d1..7a0990039cfc81935a713ecce176ffe7
  - `polling` <[float]|"raf">
  
  If [`option: polling`] is `'raf'`, then [`param: expression`] is constantly executed in `requestAnimationFrame`
-@@ -186,7 +186,7 @@ Dangerous option; use with care. Defaults to `false`.
+@@ -172,7 +172,7 @@ Dangerous option; use with care. Defaults to `false`.
  Network proxy settings.
  
  ## csharp-java-browser-option-env
@@ -215,7 +215,7 @@ index f7fd21e5b138fefe026beaeae867212c014257d1..7a0990039cfc81935a713ecce176ffe7
  - `env` <[Object]<[string], [string]>>
  
  Specify environment variables that will be visible to the browser. Defaults to `process.env`.
-@@ -198,7 +198,7 @@ Specify environment variables that will be visible to the browser. Defaults to `
+@@ -184,7 +184,7 @@ Specify environment variables that will be visible to the browser. Defaults to `
  Specify environment variables that will be visible to the browser. Defaults to `process.env`.
  
  ## js-python-context-option-storage-state
@@ -224,7 +224,7 @@ index f7fd21e5b138fefe026beaeae867212c014257d1..7a0990039cfc81935a713ecce176ffe7
  - `storageState` <[path]|[Object]>
    - `cookies` <[Array]<[Object]>> Optional cookies to set for context
      - `name` <[string]>
-@@ -227,7 +227,7 @@ Populates context with given storage state. This option can be used to initializ
+@@ -213,7 +213,7 @@ Populates context with given storage state. This option can be used to initializ
  obtained via [`method: BrowserContext.storageState`].
  
  ## csharp-java-context-option-storage-state-path
@@ -233,7 +233,7 @@ index f7fd21e5b138fefe026beaeae867212c014257d1..7a0990039cfc81935a713ecce176ffe7
  - `storageStatePath` <[path]>
  
  Populates context with given storage state. This option can be used to initialize context with logged-in information
-@@ -322,7 +322,7 @@ Function to be evaluated in the worker context.
+@@ -308,7 +308,7 @@ Function to be evaluated in the worker context.
  Function to be evaluated in the worker context.
  
  ## python-context-option-viewport
@@ -242,7 +242,7 @@ index f7fd21e5b138fefe026beaeae867212c014257d1..7a0990039cfc81935a713ecce176ffe7
  - `viewport` <[null]|[Object]>
    - `width` <[int]> page width in pixels.
    - `height` <[int]> page height in pixels.
-@@ -462,7 +462,7 @@ call [`method: BrowserContext.close`] for the HAR to be saved.
+@@ -448,7 +448,7 @@ call [`method: BrowserContext.close`] for the HAR to be saved.
  Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
  
  ## context-option-recordvideo
