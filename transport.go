@@ -3,6 +3,7 @@ package playwright
 import (
 	"bufio"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -95,7 +96,7 @@ func (t *pipeTransport) Start() error {
 	for {
 		lengthContent := make([]byte, 4)
 		_, err := io.ReadFull(reader, lengthContent)
-		if err == io.EOF {
+		if err == io.EOF || errors.Is(err, os.ErrClosed) {
 			return nil
 		} else if err != nil {
 			return fmt.Errorf("could not read padding: %w", err)
