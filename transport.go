@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net"
 	"os"
 	"sync"
+	"sync/atomic"
 
 	"github.com/gorilla/websocket"
 	"gopkg.in/square/go-jose.v2/json"
@@ -34,7 +34,7 @@ type webSocketTransport struct {
 	url      string
 	conn     *websocket.Conn
 	dispatch func(msg *message)
-	stopped  bool
+	stopped  atomic.Value
 }
 
 func (t *webSocketTransport) Start() error {
@@ -43,13 +43,12 @@ func (t *webSocketTransport) Start() error {
 		return fmt.Errorf("could not connect to websocket: %v", err)
 	}
 	t.conn = conn
-	for !t.stopped {
+	for !t.stopped.Load().(bool) {
 		msg := &message{}
 		err := t.conn.ReadJSON(msg)
-		if errors.Is(err, net.ErrClosed) {
-			break
-		} else if err != nil {
-			return fmt.Errorf("could not read json: %v", err)
+		if err != nil {
+			_ = t.Stop()
+			return nil
 		}
 		t.dispatch(msg)
 	}
@@ -58,7 +57,7 @@ func (t *webSocketTransport) Start() error {
 
 func (t *webSocketTransport) Send(message map[string]interface{}) error {
 	if err := t.conn.WriteJSON(message); err != nil {
-		t.stopped = true
+		t.stopped.Store(true)
 		return fmt.Errorf("could not write json: %w", err)
 	}
 	return nil
@@ -69,8 +68,10 @@ func (t *webSocketTransport) SetDispatch(dispatch func(msg *message)) {
 }
 
 func (t *webSocketTransport) Stop() error {
-	t.conn.Close()
-	t.stopped = true
+	t.stopped.Store(true)
+	if err := t.conn.Close(); err != nil {
+		return fmt.Errorf("could not close websocket: %w", err)
+	}
 	if t.OnClose != nil {
 		t.OnClose()
 	}
@@ -159,7 +160,9 @@ func newPipeTransport(stdin io.WriteCloser, stdout io.ReadCloser) transport {
 	}
 }
 func newWebSocketTransport(url string) transport {
-	return &webSocketTransport{
+	t := &webSocketTransport{
 		url: url,
 	}
+	t.stopped.Store(false)
+	return t
 }

@@ -1,6 +1,7 @@
 package playwright_test
 
 import (
+	"net"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -143,9 +144,8 @@ func TestBrowserTypeConnectShouldEmitDisconnectedEvent(t *testing.T) {
 	require.Len(t, disconnected2.Get(), 0)
 	remoteServer.Close()
 
-	require.Panics(t, func() {
-		_, err = page.Title()
-	})
+	_, err = page.Title()
+	require.ErrorIs(t, err, net.ErrClosed)
 	require.False(t, browser2.IsConnected())
 	require.Len(t, disconnected2.Get(), 1)
 }

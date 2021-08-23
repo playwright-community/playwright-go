@@ -475,6 +475,9 @@ func (f *frameImpl) WaitForFunction(expression string, arg interface{}, options 
 
 func (f *frameImpl) Title() (string, error) {
 	title, err := f.channel.Send("title")
+	if err != nil {
+		return "", err
+	}
 	return title.(string), err
 }
 

@@ -52,11 +52,11 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 }
 func (b *browserTypeImpl) Connect(url string) (Browser, error) {
 	transport := newWebSocketTransport(url)
-	connection := newConnection(transport, transport.Stop)
+	connection := newConnection(transport, func() error { return nil })
 	go func() {
 		err := connection.Start()
 		if err != nil {
-			log.Fatalf("could not start connection: %v", err)
+			log.Fatalf("could not start websocket connection: %v", err)
 		}
 	}()
 	obj, err := connection.CallOnObjectWithKnownName("Playwright")
