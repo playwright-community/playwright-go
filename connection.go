@@ -20,7 +20,7 @@ type connection struct {
 	lastIDLock                  sync.Mutex
 	rootObject                  *channelOwner
 	callbacks                   sync.Map
-	stopDriver                  func() error
+	onClose                     func() error
 }
 
 func (c *connection) Start() error {
@@ -31,7 +31,7 @@ func (c *connection) Stop() error {
 	if err := c.transport.Stop(); err != nil {
 		return fmt.Errorf("could not stop transport: %w", err)
 	}
-	return c.stopDriver()
+	return c.onClose()
 }
 
 func (c *connection) CallOnObjectWithKnownName(name string) (interface{}, error) {
@@ -161,11 +161,11 @@ func (c *connection) SendMessageToServer(guid string, method string, params inte
 	return result.Data, nil
 }
 
-func newConnection(t transport, stopDriver func() error) *connection {
+func newConnection(t transport, onClose func() error) *connection {
 	connection := &connection{
 		waitingForRemoteObjects: make(map[string]chan interface{}),
 		objects:                 make(map[string]*channelOwner),
-		stopDriver:              stopDriver,
+		onClose:                 onClose,
 	}
 	connection.transport = t
 	connection.transport.SetDispatch(connection.Dispatch)

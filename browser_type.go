@@ -52,11 +52,11 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 }
 func (b *browserTypeImpl) Connect(url string) (Browser, error) {
 	transport := newWebSocketTransport(url)
-	connection := newConnection(transport, transport.Stop)
+	connection := newConnection(transport, func() error { return nil })
 	go func() {
 		err := connection.Start()
 		if err != nil {
-			log.Fatalf("could not start connection: %v", err)
+			log.Fatalf("could not start websocket connection: %v", err)
 		}
 	}()
 	obj, err := connection.CallOnObjectWithKnownName("Playwright")
@@ -66,7 +66,7 @@ func (b *browserTypeImpl) Connect(url string) (Browser, error) {
 	playwright := obj.(*Playwright)
 	browser := fromChannel(playwright.initializer["preLaunchedBrowser"]).(*browserImpl)
 	browser.isConnectedOverWebSocket = true
-	close_handler := func() {
+	transport.(*webSocketTransport).OnClose = func() {
 		for _, context := range browser.contexts {
 			pages := context.(*browserContextImpl).pages
 			for _, page := range pages {
@@ -76,7 +76,6 @@ func (b *browserTypeImpl) Connect(url string) (Browser, error) {
 		}
 		browser.onClose()
 	}
-	transport.(*webSocketTransport).Once("close", close_handler)
 	return browser, nil
 }
 
