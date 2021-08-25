@@ -225,6 +225,14 @@ type BrowserContextUnrouteOptions struct {
 	// Optional handler function used to register a routing with BrowserContext.Route().
 	Handler func(Route, Request) `json:"handler"`
 }
+type BrowserTypeConnectOptions struct {
+	// Additional HTTP headers to be sent with web socket connect request. Optional.
+	Headers map[string]string `json:"headers"`
+	// Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on. Defaults to 0.
+	SlowMo *float64 `json:"slowMo"`
+	// Maximum time in milliseconds to wait for the connection to be established. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+	Timeout *float64 `json:"timeout"`
+}
 type BrowserTypeLaunchOptions struct {
 	// Additional arguments to pass to the browser instance. The list of Chromium flags can be found [here](http://peter.sh/experiments/chromium-command-line-switches/).
 	Args []string `json:"args"`

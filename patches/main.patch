@@ -39,6 +39,49 @@ index 960d527374d591c83aae8415b53c8f2604f4b89e..b9b74abebe5f793c0f6c0c348828e747
  - `handler` <[function]\([Route], [Request]\)>
  
  Optional handler function used to register a routing with [`method: BrowserContext.route`].
+diff --git a/docs/src/api/class-browsertype.md b/docs/src/api/class-browsertype.md
+index d2829128827ac81456b5fd28a7d224f2f5dda4e4..5b748e4675a9890a72f1d45d43899b832d8b9a49 100644
+--- a/docs/src/api/class-browsertype.md
++++ b/docs/src/api/class-browsertype.md
+@@ -85,25 +85,25 @@ class BrowserTypeExamples
+ ```
+ 
+ ## async method: BrowserType.connect
+-* langs: js, python, java
++* langs: js, python, java, go
+ - returns: <[Browser]>
+ 
+ This methods attaches Playwright to an existing browser instance.
+ 
+ ### param: BrowserType.connect.wsEndpoint
+-* langs: java, python, js
++* langs: java, python, js, go
+ - `wsEndpoint` <[string]>
+ 
+ A browser websocket endpoint to connect to.
+ 
+ ### option: BrowserType.connect.headers
+-* langs: java, python, js
++* langs: java, python, js, go
+ - `headers` <[Object]<[string], [string]>>
+ 
+ Additional HTTP headers to be sent with web socket connect request. Optional.
+ 
+ ### option: BrowserType.connect.slowMo
+-* langs: java, python, js
++* langs: java, python, js, go
+ - `slowMo` <[float]>
+ 
+ Slows down Playwright operations by the specified amount of milliseconds. Useful so that you
+@@ -116,7 +116,7 @@ can see what is going on. Defaults to 0.
+ Logger sink for Playwright logging. Optional.
+ 
+ ### option: BrowserType.connect.timeout
+-* langs: java, python, js
++* langs: java, python, js, go
+ - `timeout` <[float]>
+ 
+ Maximum time in milliseconds to wait for the connection to be established. Defaults to
 diff --git a/docs/src/api/class-frame.md b/docs/src/api/class-frame.md
 index a1ba9b8fcca27987d3b3ea45060273ba17f978c2..93132473817e1def8d4fdd8e076570424ead66fb 100644
 --- a/docs/src/api/class-frame.md

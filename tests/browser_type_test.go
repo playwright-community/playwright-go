@@ -3,7 +3,9 @@ package playwright_test
 import (
 	"net"
 	"testing"
+	"time"
 
+	"github.com/mxschmitt/playwright-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -148,4 +150,27 @@ func TestBrowserTypeConnectShouldEmitDisconnectedEvent(t *testing.T) {
 	require.ErrorIs(t, err, net.ErrClosed)
 	require.False(t, browser2.IsConnected())
 	require.Len(t, disconnected2.Get(), 1)
+}
+
+func TestBrowserTypeConnectSlowMo(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	remoteServer, err := newRemoteServer()
+	require.NoError(t, err)
+	defer remoteServer.Close()
+	browser, err := browserType.Connect(remoteServer.url, playwright.BrowserTypeConnectOptions{
+		SlowMo: playwright.Float(100),
+	})
+	require.NoError(t, err)
+	require.NotNil(t, browser)
+	browser_context, err := browser.NewContext()
+	require.NoError(t, err)
+	t1 := time.Now()
+	page, err := browser_context.NewPage()
+	require.NoError(t, err)
+	result, err := page.Evaluate("11 * 11")
+	require.NoError(t, err)
+	require.Equal(t, result, 121)
+	require.GreaterOrEqual(t, time.Since(t1), time.Duration(time.Millisecond*200))
+	require.NoError(t, browser.Close())
 }
