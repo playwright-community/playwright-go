@@ -66,7 +66,7 @@ func (c *connection) Dispatch(msg *message) {
 		return
 	}
 	if method == "__dispose__" {
-		object.Dispose()
+		object.dispose()
 		return
 	}
 	object.channel.Emit(method, c.replaceGuidsWithChannels(msg.Params))
