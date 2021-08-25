@@ -50,8 +50,8 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 	}
 	return fromChannel(channel).(*browserContextImpl), nil
 }
-func (b *browserTypeImpl) Connect(url string) (Browser, error) {
-	transport := newWebSocketTransport(url)
+func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptions) (Browser, error) {
+	transport := newWebSocketTransport(url, options...)
 	connection := newConnection(transport, func() error { return nil })
 	go func() {
 		err := connection.Start()
