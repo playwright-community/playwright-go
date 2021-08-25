@@ -367,10 +367,10 @@ func (p *browserContextImpl) Pause() error {
 
 func (b *browserContextImpl) OnBackgroundPage(ev map[string]interface{}) {
 	b.Lock()
-	p := ev["page"].(*pageImpl)
+	p := fromChannel(ev["page"]).(*pageImpl)
 	b.backgroundPages = append(b.backgroundPages, p)
 	b.Unlock()
-	p.Emit("backgroundpage", p)
+	b.Emit("backgroundpage", p)
 }
 
 func (b *browserContextImpl) BackgroundPages() []Page {
