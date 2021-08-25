@@ -19,6 +19,7 @@ type browserContextImpl struct {
 	ownedPage         Page
 	browser           *browserImpl
 	serviceWorkers    []*workerImpl
+	backgroundPages   []Page
 	bindings          map[string]BindingCallFunction
 	tracing           *tracingImpl
 }
@@ -364,6 +365,20 @@ func (p *browserContextImpl) Pause() error {
 	return err
 }
 
+func (b *browserContextImpl) OnBackgroundPage(ev map[string]interface{}) {
+	b.Lock()
+	p := ev["page"].(*pageImpl)
+	b.backgroundPages = append(b.backgroundPages, p)
+	b.Unlock()
+	p.Emit("backgroundpage", p)
+}
+
+func (b *browserContextImpl) BackgroundPages() []Page {
+	b.Lock()
+	defer b.Unlock()
+	return b.backgroundPages
+}
+
 func newBrowserContext(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserContextImpl {
 	bt := &browserContextImpl{
 		timeoutSettings: newTimeoutSettings(nil),
@@ -423,5 +438,6 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 	bt.channel.On("route", func(params map[string]interface{}) {
 		bt.onRoute(fromChannel(params["route"]).(*routeImpl), fromChannel(params["request"]).(*requestImpl))
 	})
+	bt.channel.On("backgroundPage", bt.OnBackgroundPage)
 	return bt
 }

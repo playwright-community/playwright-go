@@ -150,6 +150,9 @@ type BrowserContext interface {
 	// value. Will throw an error if the context closes before the event is fired. Returns the event data value.
 	WaitForEvent(event string, predicate ...interface{}) interface{}
 	Tracing() Tracing
+	// > NOTE: Background pages are only supported on Chromium-based browsers.
+	// All existing background pages in the context.
+	BackgroundPages() []Page
 }
 
 // API for collecting and saving Playwright traces. Playwright traces can be opened using the Playwright CLI after
