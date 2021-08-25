@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"gopkg.in/square/go-jose.v2/json"
@@ -33,17 +35,32 @@ type webSocketTransport struct {
 	OnClose  func()
 	url      string
 	conn     *websocket.Conn
+	options  BrowserTypeConnectOptions
 	dispatch func(msg *message)
 	stopped  atomic.Value
 }
 
 func (t *webSocketTransport) Start() error {
-	conn, _, err := websocket.DefaultDialer.Dial(t.url, nil)
+	var headers http.Header
+	if t.options.Headers != nil {
+		for k, v := range t.options.Headers {
+			headers.Add(k, v)
+		}
+	}
+	conn, _, err := websocket.DefaultDialer.Dial(t.url, headers)
 	if err != nil {
 		return fmt.Errorf("could not connect to websocket: %v", err)
 	}
 	t.conn = conn
 	for !t.stopped.Load().(bool) {
+		if t.options.Timeout != nil {
+			if err := t.conn.SetReadDeadline(time.Now().Add(time.Duration(*t.options.Timeout))); err != nil {
+				return err
+			}
+		}
+		if t.options.SlowMo != nil {
+			time.Sleep(time.Duration(*t.options.SlowMo) * time.Millisecond)
+		}
 		msg := &message{}
 		err := t.conn.ReadJSON(msg)
 		if err != nil {
@@ -159,9 +176,16 @@ func newPipeTransport(stdin io.WriteCloser, stdout io.ReadCloser) transport {
 		stdin:  stdin,
 	}
 }
-func newWebSocketTransport(url string) transport {
+func newWebSocketTransport(url string, options ...BrowserTypeConnectOptions) transport {
+	var option BrowserTypeConnectOptions
+	if len(options) == 1 {
+		option = options[0]
+	} else {
+		option = BrowserTypeConnectOptions{}
+	}
 	t := &webSocketTransport{
-		url: url,
+		url:     url,
+		options: option,
 	}
 	t.stopped.Store(false)
 	return t

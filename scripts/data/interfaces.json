@@ -184,7 +184,7 @@
 			"string"
 		],
 		"Connect": [
-			"url string",
+			"url string, options ...BrowserTypeConnectOptions",
 			"(Browser, error)"
 		]
 	},
