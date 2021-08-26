@@ -251,7 +251,6 @@ func TestBrowserContextShouldReturnBackgroundPage(t *testing.T) {
 		},
 	)
 	require.NoError(t, err)
-	defer context.Close()
 	var page playwright.Page
 	if len(context.BackgroundPages()) == 1 {
 		page = context.BackgroundPages()[0]
@@ -261,4 +260,7 @@ func TestBrowserContextShouldReturnBackgroundPage(t *testing.T) {
 	require.NotNil(t, page)
 	require.NotContains(t, context.Pages(), page)
 	require.Contains(t, context.BackgroundPages(), page)
+	context.Close()
+	require.Len(t, context.BackgroundPages(), 0)
+	require.Len(t, context.Pages(), 0)
 }

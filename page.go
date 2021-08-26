@@ -642,14 +642,21 @@ func (p *pageImpl) onWorker(worker *workerImpl) {
 func (p *pageImpl) onClose() {
 	p.isClosed = true
 	newPages := []Page{}
+	newBackgoundPages := []Page{}
 	if p.browserContext != nil {
 		p.browserContext.Lock()
 		for _, page := range p.browserContext.pages {
 			if page != p {
 				newPages = append(newPages, page)
 			}
-			p.browserContext.pages = newPages
 		}
+		for _, page := range p.browserContext.backgroundPages {
+			if page != p {
+				newBackgoundPages = append(newBackgoundPages, page)
+			}
+		}
+		p.browserContext.pages = newPages
+		p.browserContext.backgroundPages = newBackgoundPages
 		p.browserContext.Unlock()
 	}
 	p.Emit("close")
