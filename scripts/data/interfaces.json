@@ -154,6 +154,10 @@
 		"Tracing": [
 			null,
 			"Tracing"
+		],
+		"BackgroundPages":[
+			null,
+			"[]Page"
 		]
 	},
 	"Tracing": {
