@@ -1,6 +1,7 @@
 package playwright_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/mxschmitt/playwright-go"
@@ -132,11 +133,12 @@ func TestBrowserContextAddCookies(t *testing.T) {
 	}
 	require.Equal(t, []*playwright.NetworkCookie{
 		{
-			Name:     "password",
-			Value:    "123456",
-			Domain:   "127.0.0.1",
-			Path:     "/",
-			Expires:  -1,
+			Name:    "password",
+			Value:   "123456",
+			Domain:  "127.0.0.1",
+			Path:    "/",
+			Expires: -1,
+
 			HttpOnly: false,
 			Secure:   false,
 			SameSite: sameSite,
@@ -229,4 +231,36 @@ func TestBrowserContextUnrouteShouldWork(t *testing.T) {
 	_, err = page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.Equal(t, []int{4}, intercepted)
+}
+
+func TestBrowserContextShouldReturnBackgroundPage(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	if !isChromium {
+		t.Skip()
+	}
+	extensionPath := Asset("simple-extension")
+	context, err := browserType.LaunchPersistentContext(
+		t.TempDir(),
+		playwright.BrowserTypeLaunchPersistentContextOptions{
+			Headless: playwright.Bool(false),
+			Args: []string{
+				fmt.Sprintf("--disable-extensions-except=%s", extensionPath),
+				fmt.Sprintf("--load-extension=%s", extensionPath),
+			},
+		},
+	)
+	require.NoError(t, err)
+	var page playwright.Page
+	if len(context.BackgroundPages()) == 1 {
+		page = context.BackgroundPages()[0]
+	} else {
+		page = context.WaitForEvent("backgroundpage").(playwright.Page)
+	}
+	require.NotNil(t, page)
+	require.NotContains(t, context.Pages(), page)
+	require.Contains(t, context.BackgroundPages(), page)
+	context.Close()
+	require.Len(t, context.BackgroundPages(), 0)
+	require.Len(t, context.Pages(), 0)
 }
