@@ -25,6 +25,15 @@ Headless execution is supported for all the browsers on all platforms.
 go get github.com/mxschmitt/playwright-go
 ```
 
+Install the browsers and OS dependencies:
+
+```txt
+go run github.com/mxschmitt/playwright-go/cmd/playwright install --with-deps
+# Or
+go install github.com/mxschmitt/playwright-go/cmd/playwright
+playwright install --with-deps
+```
+
 ## Capabilities
 
 Playwright is built to automate the broad and growing set of web browser capabilities used by Single Page Apps and Progressive Web Apps.
