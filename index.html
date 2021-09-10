@@ -106,6 +106,14 @@
 <pre><code class="language-txt">go get github.com/mxschmitt/playwright-go
 </code></pre>
 
+<p>Install the browsers and OS dependencies:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>go run github.com/mxschmitt/playwright-go/cmd/playwright <span class="nb">install</span> <span class="nt">--with-deps</span>
+<span class="c"># Or</span>
+go <span class="nb">install </span>github.com/mxschmitt/playwright-go/cmd/playwright
+playwright <span class="nb">install</span> <span class="nt">--with-deps</span>
+</code></pre></div></div>
+
 <h2 id="capabilities">Capabilities</h2>
 
 <p>Playwright is built to automate the broad and growing set of web browser capabilities used by Single Page Apps and Progressive Web Apps.</p>
