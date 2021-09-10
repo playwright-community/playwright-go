@@ -27,7 +27,7 @@ go get github.com/mxschmitt/playwright-go
 
 Install the browsers and OS dependencies:
 
-```txt
+```bash
 go run github.com/mxschmitt/playwright-go/cmd/playwright install --with-deps
 # Or
 go install github.com/mxschmitt/playwright-go/cmd/playwright
