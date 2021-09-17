@@ -45,6 +45,8 @@ type BrowserNewContextOptions struct {
 	StorageState *BrowserNewContextOptionsStorageState `json:"storageState"`
 	// Populates context with given storage state. This option can be used to initialize context with logged-in information obtained via BrowserContext.StorageState(). Path to the file with saved storage state.
 	StorageStatePath *string `json:"storageStatePath"`
+	// It specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors that imply single target DOM element will throw when more than one element matches the selector. See Locator to learn more about the strict mode.
+	StrictSelectors *bool `json:"strictSelectors"`
 	// Changes the timezone of the context. See [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1) for a list of supported timezone IDs.
 	TimezoneId *string `json:"timezoneId"`
 	// Specific user agent to use in this context.
@@ -143,6 +145,8 @@ type BrowserNewPageOptions struct {
 	StorageState *BrowserNewPageOptionsStorageState `json:"storageState"`
 	// Populates context with given storage state. This option can be used to initialize context with logged-in information obtained via BrowserContext.StorageState(). Path to the file with saved storage state.
 	StorageStatePath *string `json:"storageStatePath"`
+	// It specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors that imply single target DOM element will throw when more than one element matches the selector. See Locator to learn more about the strict mode.
+	StrictSelectors *bool `json:"strictSelectors"`
 	// Changes the timezone of the context. See [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1) for a list of supported timezone IDs.
 	TimezoneId *string `json:"timezoneId"`
 	// Specific user agent to use in this context.
@@ -339,6 +343,8 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	Screen *BrowserTypeLaunchPersistentContextOptionsScreen `json:"screen"`
 	// Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on.
 	SlowMo *float64 `json:"slowMo"`
+	// It specified, enables strict selectors mode for this context. In the strict selectors mode all operations on selectors that imply single target DOM element will throw when more than one element matches the selector. See Locator to learn more about the strict mode.
+	StrictSelectors *bool `json:"strictSelectors"`
 	// Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 	Timeout *float64 `json:"timeout"`
 	// Changes the timezone of the context. See [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1) for a list of supported timezone IDs.
@@ -800,13 +806,13 @@ type FrameIsEnabledOptions struct {
 type FrameIsHiddenOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more then one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
+	// **DEPRECATED** This option is ignored. Frame.IsHidden() does not wait for the element to become hidden and returns immediately.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameIsVisibleOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more then one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
+	// **DEPRECATED** This option is ignored. Frame.IsVisible() does not wait for the element to become visible and returns immediately.
 	Timeout *float64 `json:"timeout"`
 }
 type FramePressOptions struct {
@@ -1101,11 +1107,11 @@ type LocatorIsEnabledOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorIsHiddenOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
+	// **DEPRECATED** This option is ignored. Locator.IsHidden() does not wait for the element to become hidden and returns immediately.
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorIsVisibleOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
+	// **DEPRECATED** This option is ignored. Locator.IsVisible() does not wait for the element to become visible and returns immediately.
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorPressOptions struct {
@@ -1476,13 +1482,13 @@ type PageIsEnabledOptions struct {
 type PageIsHiddenOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more then one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
+	// **DEPRECATED** This option is ignored. Page.IsHidden() does not wait for the element to become hidden and returns immediately.
 	Timeout *float64 `json:"timeout"`
 }
 type PageIsVisibleOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more then one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
+	// **DEPRECATED** This option is ignored. Page.IsVisible() does not wait for the element to become visible and returns immediately.
 	Timeout *float64 `json:"timeout"`
 }
 type PagePdfOptions struct {

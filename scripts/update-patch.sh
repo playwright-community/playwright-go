@@ -9,9 +9,8 @@ pushd "$SCRIPTS_DIR/../playwright"
 SCRIPTS_DIR="$(dirname "$0")"
 echo "Creating patch..."
 git add .
-git diff --staged --full-index playwright-head > ../patches/main.patch
-
+git diff --full-index playwright-build^1..playwright-build > ../patches/main.patch
+git reset --hard playwright-build^1
 cd ..
-git submodule update --init
 
 popd

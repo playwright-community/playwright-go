@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-const playwrightCliVersion = "1.14.0"
+const playwrightCliVersion = "1.14.1"
 
 type PlaywrightDriver struct {
 	DriverDirectory, DriverBinaryLocation, Version string
