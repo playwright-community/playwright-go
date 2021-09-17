@@ -27,6 +27,6 @@ go run scripts/update-readme-versions/main.go
 
 pushd $PLAYWRIGHT_DIR
 
-git reset --hard $(git rev-parse HEAD^1)
+git reset --hard $(git rev-parse playwright-build^1)
 
 popd
