@@ -33,25 +33,34 @@ func (c *channelOwner) createChannelOwner(self interface{}, parent *channelOwner
 	c.guid = guid
 	c.parent = parent
 	c.objects = make(map[string]*channelOwner)
-	c.connection = parent.connection
 	c.channel = newChannel(c.connection, guid)
 	c.channel.object = self
 	c.initializer = initializer
+	if parent != nil {
+		c.connection = parent.connection
+		c.parent.objects[guid] = c
+	}
 	c.connection.objects[guid] = c
-	c.parent.objects[guid] = c
 	c.initEventEmitter()
 }
 
-func newRootChannelOwner(connection *connection) *channelOwner {
-	c := &channelOwner{
-		objectType: "",
-		guid:       "",
-		connection: connection,
-		objects:    make(map[string]*channelOwner),
-		channel:    newChannel(connection, ""),
+type rootChannelOwner struct {
+	channelOwner
+}
+
+func (r *rootChannelOwner) initialize() (*Playwright, error) {
+	result, err := r.channel.Send("initialize", map[string]interface{}{
+		"sdkLanguage": "javascript",
+	})
+	if err != nil {
+		return nil, err
 	}
-	c.channel.object = c
-	c.connection.objects[""] = c
-	c.initEventEmitter()
+	return fromChannel(result).(*Playwright), nil
+}
+
+func newRootChannelOwner(connection *connection) *rootChannelOwner {
+	c := &rootChannelOwner{}
+	c.connection = connection
+	c.createChannelOwner(c, nil, "Root", "", nil)
 	return c
 }

@@ -2,6 +2,7 @@ package playwright
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"sync"
 )
@@ -18,13 +19,25 @@ type connection struct {
 	objects                     map[string]*channelOwner
 	lastID                      int
 	lastIDLock                  sync.Mutex
-	rootObject                  *channelOwner
+	rootObject                  *rootChannelOwner
 	callbacks                   sync.Map
 	onClose                     func() error
+	playwright                  chan *Playwright
 }
 
 func (c *connection) Start() error {
-	return c.transport.Start()
+	go func() {
+		playwright, err := c.rootObject.initialize()
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		c.playwright <- playwright
+	}()
+	if err := c.transport.Start(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *connection) Stop() error {
@@ -32,15 +45,6 @@ func (c *connection) Stop() error {
 		return fmt.Errorf("could not stop transport: %w", err)
 	}
 	return c.onClose()
-}
-
-func (c *connection) CallOnObjectWithKnownName(name string) (interface{}, error) {
-	if _, ok := c.waitingForRemoteObjects[name]; !ok {
-		c.waitingForRemoteObjectsLock.Lock()
-		c.waitingForRemoteObjects[name] = make(chan interface{})
-		c.waitingForRemoteObjectsLock.Unlock()
-	}
-	return <-c.waitingForRemoteObjects[name], nil
 }
 
 func (c *connection) Dispatch(msg *message) {
@@ -170,6 +174,7 @@ func newConnection(t transport, onClose func() error) *connection {
 	connection.transport = t
 	connection.transport.SetDispatch(connection.Dispatch)
 	connection.rootObject = newRootChannelOwner(connection)
+	connection.playwright = make(chan *Playwright, 1)
 	return connection
 }
 

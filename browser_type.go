@@ -59,11 +59,7 @@ func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptio
 			log.Fatalf("could not start websocket connection: %v", err)
 		}
 	}()
-	obj, err := connection.CallOnObjectWithKnownName("Playwright")
-	if err != nil {
-		return nil, fmt.Errorf("could not call object: %w", err)
-	}
-	playwright := obj.(*Playwright)
+	playwright := <-connection.playwright
 	browser := fromChannel(playwright.initializer["preLaunchedBrowser"]).(*browserImpl)
 	browser.isConnectedOverWebSocket = true
 	transport.(*webSocketTransport).OnClose = func() {

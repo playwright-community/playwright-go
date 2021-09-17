@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-const playwrightCliVersion = "1.14.1"
+const playwrightCliVersion = "1.16.0-next-1631944242000"
 
 type PlaywrightDriver struct {
 	DriverDirectory, DriverBinaryLocation, Version string
@@ -244,11 +244,8 @@ func Run(options ...*RunOptions) (*Playwright, error) {
 			log.Fatalf("could not start connection: %v", err)
 		}
 	}()
-	obj, err := connection.CallOnObjectWithKnownName("Playwright")
-	if err != nil {
-		return nil, fmt.Errorf("could not call object: %w", err)
-	}
-	return obj.(*Playwright), nil
+	playwright := <-connection.playwright
+	return playwright, nil
 }
 
 func transformRunOptions(options []*RunOptions) *RunOptions {
