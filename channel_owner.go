@@ -1,6 +1,8 @@
 package playwright
 
-import "sync"
+import (
+	"sync"
+)
 
 type channelOwner struct {
 	sync.RWMutex
@@ -33,14 +35,16 @@ func (c *channelOwner) createChannelOwner(self interface{}, parent *channelOwner
 	c.guid = guid
 	c.parent = parent
 	c.objects = make(map[string]*channelOwner)
-	c.channel = newChannel(c.connection, guid)
-	c.channel.object = self
 	c.initializer = initializer
-	if parent != nil {
+	if c.parent != nil {
 		c.connection = parent.connection
 		c.parent.objects[guid] = c
 	}
-	c.connection.objects[guid] = c
+	if c.connection != nil {
+		c.connection.objects[guid] = c
+	}
+	c.channel = newChannel(c.connection, guid)
+	c.channel.object = self
 	c.initEventEmitter()
 }
 
@@ -61,6 +65,6 @@ func (r *rootChannelOwner) initialize() (*Playwright, error) {
 func newRootChannelOwner(connection *connection) *rootChannelOwner {
 	c := &rootChannelOwner{}
 	c.connection = connection
-	c.createChannelOwner(c, nil, "Root", "", nil)
+	c.createChannelOwner(c, nil, "Root", "", make(map[string]interface{}))
 	return c
 }

@@ -131,6 +131,9 @@ type BrowserContext interface {
 	ResetGeolocation() error
 	// Routing provides the capability to modify network requests that are made by any page in the browser context. Once route
 	// is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
+	// > NOTE: Page.route() will not intercept requests intercepted by Service Worker. See
+	// [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when using
+	// request interception. Via `await context.addInitScript(() => delete window.navigator.serviceWorker);`
 	// An example of a naive handler that aborts all image requests:
 	// or the same snippet using a regex pattern instead:
 	// It is possible to examine the request to decide the route action. For example, mocking all requests that contain some
@@ -155,9 +158,9 @@ type BrowserContext interface {
 	BackgroundPages() []Page
 }
 
-// API for collecting and saving Playwright traces. Playwright traces can be opened using the Playwright CLI after
-// Playwright script runs.
-// Start with specifying the folder traces will be stored in:
+// API for collecting and saving Playwright traces. Playwright traces can be opened in [Trace Viewer](./trace-viewer.md)
+// after Playwright script runs.
+// Start recording a trace before performing actions. At the end, stop tracing and save it to a file.
 type Tracing interface {
 	// Start tracing.
 	Start(options ...TracingStartOptions) error
@@ -642,16 +645,16 @@ type Frame interface {
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
 	// last redirect.
-	// `frame.goto` will throw an error if:
+	// The method will throw an error if:
 	// - there's an SSL error (e.g. in case of self-signed certificates).
 	// - target URL is invalid.
 	// - the `timeout` is exceeded during navigation.
 	// - the remote server does not respond or is unreachable.
 	// - the main resource failed to load.
-	// `frame.goto` will not throw an error when any valid HTTP status code is returned by the remote server, including 404
-	// "Not Found" and 500 "Internal Server Error".  The status code for such responses can be retrieved by calling
+	// The method will not throw an error when any valid HTTP status code is returned by the remote server, including 404 "Not
+	// Found" and 500 "Internal Server Error".  The status code for such responses can be retrieved by calling
 	// Response.status().
-	// > NOTE: `frame.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
+	// > NOTE: The method either throws an error or returns a main resource response. The only exceptions are navigation to
 	// `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
 	// > NOTE: Headless mode doesn't support navigation to a PDF document. See the
 	// [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
@@ -1089,16 +1092,16 @@ type Page interface {
 	GoForward(options ...PageGoForwardOptions) (Response, error)
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
 	// last redirect.
-	// `page.goto` will throw an error if:
+	// The method will throw an error if:
 	// - there's an SSL error (e.g. in case of self-signed certificates).
 	// - target URL is invalid.
 	// - the `timeout` is exceeded during navigation.
 	// - the remote server does not respond or is unreachable.
 	// - the main resource failed to load.
-	// `page.goto` will not throw an error when any valid HTTP status code is returned by the remote server, including 404 "Not
+	// The method will not throw an error when any valid HTTP status code is returned by the remote server, including 404 "Not
 	// Found" and 500 "Internal Server Error".  The status code for such responses can be retrieved by calling
 	// Response.status().
-	// > NOTE: `page.goto` either throws an error or returns a main resource response. The only exceptions are navigation to
+	// > NOTE: The method either throws an error or returns a main resource response. The only exceptions are navigation to
 	// `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
 	// > NOTE: Headless mode doesn't support navigation to a PDF document. See the
 	// [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
@@ -1198,6 +1201,9 @@ type Page interface {
 	// Routing provides the capability to modify network requests that are made by a page.
 	// Once routing is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
 	// > NOTE: The handler will only be called for the first url if the response is a redirect.
+	// > NOTE: Page.route() will not intercept requests intercepted by Service Worker. See
+	// [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when using
+	// request interception. Via `await context.addInitScript(() => delete window.navigator.serviceWorker);`
 	// An example of a naive handler that aborts all image requests:
 	// or the same snippet using a regex pattern instead:
 	// It is possible to examine the request to decide the route action. For example, mocking all requests that contain some
@@ -1363,7 +1369,7 @@ type Request interface {
 	Failure() *RequestFailure
 	// Returns the `Frame` that initiated this request.
 	Frame() Frame
-	// An object with HTTP headers associated with the request. All header names are lower-case.
+	// **DEPRECATED** Incomplete list of headers as seen by the rendering engine. Use Request.allHeaders() instead.
 	Headers() map[string]string
 	// Whether this request is driving frame's navigation.
 	IsNavigationRequest() bool
@@ -1405,11 +1411,11 @@ type Request interface {
 type Response interface {
 	// Returns the buffer with response body.
 	Body() ([]byte, error)
-	// Waits for this response to finish, returns failure error if request failed.
+	// Waits for this response to finish, returns always `null`.
 	Finished() error
 	// Returns the `Frame` that initiated this response.
 	Frame() Frame
-	// Returns the object with HTTP headers associated with the response. All header names are lower-case.
+	// **DEPRECATED** Incomplete list of headers as seen by the rendering engine. Use Response.allHeaders() instead.
 	Headers() map[string]string
 	// Returns the JSON representation of response body.
 	// This method will throw if the response body is not parsable via `JSON.parse`.

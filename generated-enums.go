@@ -26,6 +26,18 @@ var (
 	ColorSchemeNoPreference              = getColorScheme("no-preference")
 )
 
+func getForcedColors(in string) *ForcedColors {
+	v := ForcedColors(in)
+	return &v
+}
+
+type ForcedColors string
+
+var (
+	ForcedColorsActive *ForcedColors = getForcedColors("active")
+	ForcedColorsNone                 = getForcedColors("none")
+)
+
 func getReducedMotion(in string) *ReducedMotion {
 	v := ReducedMotion(in)
 	return &v

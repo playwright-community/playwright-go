@@ -5,6 +5,8 @@ import (
 	"log"
 	"reflect"
 	"sync"
+
+	"github.com/go-stack/stack"
 )
 
 type callback struct {
@@ -147,11 +149,16 @@ func (c *connection) SendMessageToServer(guid string, method string, params inte
 	c.lastID++
 	id := c.lastID
 	c.lastIDLock.Unlock()
+	stack := serializeCallStack(stack.Trace())
+	metadata := make(map[string]interface{})
+	metadata["stack"] = stack
+	metadata["apiName"] = ""
 	message := map[string]interface{}{
-		"id":     id,
-		"guid":   guid,
-		"method": method,
-		"params": c.replaceChannelsWithGuids(params),
+		"id":       id,
+		"guid":     guid,
+		"method":   method,
+		"params":   c.replaceChannelsWithGuids(params),
+		"metadata": metadata,
 	}
 	cb, _ := c.callbacks.LoadOrStore(id, make(chan callback))
 	if err := c.transport.Send(message); err != nil {
@@ -165,6 +172,17 @@ func (c *connection) SendMessageToServer(guid string, method string, params inte
 	return result.Data, nil
 }
 
+func serializeCallStack(stack stack.CallStack) []map[string]interface{} {
+	callStack := make([]map[string]interface{}, 0)
+	for _, s := range stack {
+		callStack = append(callStack, map[string]interface{}{
+			"file":     s.Frame().File,
+			"line":     s.Frame().Line,
+			"function": s.Frame().Function,
+		})
+	}
+	return callStack
+}
 func newConnection(t transport, onClose func() error) *connection {
 	connection := &connection{
 		waitingForRemoteObjects: make(map[string]chan interface{}),
