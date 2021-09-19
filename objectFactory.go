@@ -45,7 +45,9 @@ func createObjectFactory(parent *channelOwner, objectType string, guid string, i
 	case "Electron":
 		return nil
 	case "FetchRequest":
-		return nil
+		c := &channelOwner{}
+		c.createChannelOwner(c, parent, objectType, guid, initializer)
+		return c
 	default:
 		panic(objectType)
 	}

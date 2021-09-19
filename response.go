@@ -7,7 +7,10 @@ import (
 
 type responseImpl struct {
 	channelOwner
-	request *requestImpl
+	request            *requestImpl
+	provisionalHeaders *rawHeaders
+	rawHeaders         *rawHeaders
+	finished           bool
 }
 
 func (r *responseImpl) URL() string {
@@ -66,6 +69,35 @@ func (r *responseImpl) Request() Request {
 func (r *responseImpl) Frame() Frame {
 	return r.request.Frame()
 }
+func (r *responseImpl) AllHeaders() map[string]string {
+	return r.provisionalHeaders.Headers()
+}
+func (r *responseImpl) ActualHeaders() (*rawHeaders, error) {
+	if r.rawHeaders == nil {
+		headers, err := r.channel.Send("rawResponseHeaders")
+		if err == nil {
+			return nil, err
+		}
+		r.rawHeaders = newRawHeaders(headers.([]interface{}))
+	}
+	return r.rawHeaders, nil
+}
+
+func (r *responseImpl) SecurityDetails() (*ResponseSecurityDetailsResult, error) {
+	result, err := r.channel.Send("securityDetails")
+	if err != nil {
+		return nil, err
+	}
+	return result.(*ResponseSecurityDetailsResult), nil
+}
+
+func (r *responseImpl) ServerAddr() (*ResponseServerAddrResult, error) {
+	result, err := r.channel.Send("serverAddr")
+	if err != nil {
+		return nil, err
+	}
+	return result.(*ResponseServerAddrResult), nil
+}
 
 func newResponse(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *responseImpl {
 	resp := &responseImpl{}
@@ -82,6 +114,6 @@ func newResponse(parent *channelOwner, objectType string, guid string, initializ
 		RequestStart:          timing["requestStart"].(float64),
 		ResponseStart:         timing["responseStart"].(float64),
 	}
-	resp.request.headers = parseHeaders(resp.initializer["requestHeaders"].([]interface{}))
+	resp.provisionalHeaders = newRawHeaders(resp.initializer["headers"].([]interface{}))
 	return resp
 }
