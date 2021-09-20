@@ -1,5 +1,3 @@
-// +build windows
-
 package playwright_test
 
 import (
@@ -7,7 +5,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strconv"
+	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/mxschmitt/playwright-go"
@@ -23,7 +22,12 @@ func newRemoteServer() (*remoteServer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not start Playwright: %v", err)
 	}
-	cmd := exec.Command(driver.DriverBinaryLocation, "launch-server", browserName)
+	node := "node"
+	if runtime.GOOS == "windows" {
+		node = "node.exe"
+	}
+	cliJs := filepath.Join(driver.DriverDirectory, "package", "lib", "cli", "cli.js")
+	cmd := exec.Command(filepath.Join(driver.DriverDirectory, node), cliJs, "launch-server", browserName)
 	cmd.Stderr = os.Stderr
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -35,7 +39,6 @@ func newRemoteServer() (*remoteServer, error) {
 	}
 	scanner := bufio.NewReader(stdout)
 	url, err := scanner.ReadString('\n')
-	fmt.Println(url)
 	url = strings.TrimRight(url, "\n")
 	if err != nil {
 		return nil, fmt.Errorf("could not read url: %v", err)
@@ -47,8 +50,6 @@ func newRemoteServer() (*remoteServer, error) {
 }
 
 func (s *remoteServer) Close() {
-	cmd := exec.Command("cmd", "/C", "taskkill", "/T", "/F", "/PID", strconv.Itoa(s.cmd.Process.Pid))
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	_ = cmd.Run()
+	_ = s.cmd.Process.Kill()
+	_ = s.cmd.Wait()
 }
