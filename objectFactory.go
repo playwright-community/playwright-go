@@ -44,6 +44,12 @@ func createObjectFactory(parent *channelOwner, objectType string, guid string, i
 		return nil
 	case "Electron":
 		return nil
+	case "FetchRequest":
+		c := &channelOwner{}
+		c.createChannelOwner(c, parent, objectType, guid, initializer)
+		return c
+	case "JsonPipe":
+		return newJsonPipe(parent, objectType, guid, initializer)
 	default:
 		panic(objectType)
 	}

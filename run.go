@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-const playwrightCliVersion = "1.14.1"
+const playwrightCliVersion = "1.16.0-next-1631944242000"
 
 type PlaywrightDriver struct {
 	DriverDirectory, DriverBinaryLocation, Version string
@@ -175,7 +175,12 @@ func (d *PlaywrightDriver) run() (*connection, error) {
 		return nil, fmt.Errorf("could not start driver: %w", err)
 	}
 	transport := newPipeTransport(stdin, stdout)
-	connection := newConnection(transport, func() error {
+	go func() {
+		if err := transport.Start(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+	connection := newConnection(func() error {
 		if err := stdin.Close(); err != nil {
 			return fmt.Errorf("could not close stdin: %v", err)
 		}
@@ -184,6 +189,8 @@ func (d *PlaywrightDriver) run() (*connection, error) {
 		}
 		return cmd.Process.Kill()
 	})
+	connection.onmessage = transport.Send
+	transport.onmessage = connection.Dispatch
 	return connection, nil
 }
 
@@ -239,16 +246,8 @@ func Run(options ...*RunOptions) (*Playwright, error) {
 	if err != nil {
 		return nil, err
 	}
-	go func() {
-		if err := connection.Start(); err != nil {
-			log.Fatalf("could not start connection: %v", err)
-		}
-	}()
-	obj, err := connection.CallOnObjectWithKnownName("Playwright")
-	if err != nil {
-		return nil, fmt.Errorf("could not call object: %w", err)
-	}
-	return obj.(*Playwright), nil
+	connection.Start()
+	return <-connection.playwright, nil
 }
 
 func transformRunOptions(options []*RunOptions) *RunOptions {

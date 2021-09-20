@@ -2,8 +2,11 @@ package playwright
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"sync"
+
+	"github.com/go-stack/stack"
 )
 
 type callback struct {
@@ -12,35 +15,31 @@ type callback struct {
 }
 
 type connection struct {
-	transport                   transport
 	waitingForRemoteObjectsLock sync.Mutex
 	waitingForRemoteObjects     map[string]chan interface{}
 	objects                     map[string]*channelOwner
 	lastID                      int
 	lastIDLock                  sync.Mutex
-	rootObject                  *channelOwner
+	rootObject                  *rootChannelOwner
 	callbacks                   sync.Map
 	onClose                     func() error
+	playwright                  chan *Playwright
+	onmessage                   func(message map[string]interface{}) error
 }
 
-func (c *connection) Start() error {
-	return c.transport.Start()
+func (c *connection) Start() {
+	go func() {
+		playwright, err := c.rootObject.initialize()
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		c.playwright <- playwright
+	}()
 }
 
 func (c *connection) Stop() error {
-	if err := c.transport.Stop(); err != nil {
-		return fmt.Errorf("could not stop transport: %w", err)
-	}
 	return c.onClose()
-}
-
-func (c *connection) CallOnObjectWithKnownName(name string) (interface{}, error) {
-	if _, ok := c.waitingForRemoteObjects[name]; !ok {
-		c.waitingForRemoteObjectsLock.Lock()
-		c.waitingForRemoteObjects[name] = make(chan interface{})
-		c.waitingForRemoteObjectsLock.Unlock()
-	}
-	return <-c.waitingForRemoteObjects[name], nil
 }
 
 func (c *connection) Dispatch(msg *message) {
@@ -69,7 +68,11 @@ func (c *connection) Dispatch(msg *message) {
 		object.dispose()
 		return
 	}
-	object.channel.Emit(method, c.replaceGuidsWithChannels(msg.Params))
+	if object.objectType == "JsonPipe" {
+		object.channel.Emit(method, msg.Params)
+	} else {
+		object.channel.Emit(method, c.replaceGuidsWithChannels(msg.Params))
+	}
 }
 
 func (c *connection) createRemoteObject(parent *channelOwner, objectType string, guid string, initializer interface{}) interface{} {
@@ -143,14 +146,19 @@ func (c *connection) SendMessageToServer(guid string, method string, params inte
 	c.lastID++
 	id := c.lastID
 	c.lastIDLock.Unlock()
+	stack := serializeCallStack(stack.Trace())
+	metadata := make(map[string]interface{})
+	metadata["stack"] = stack
+	metadata["apiName"] = ""
 	message := map[string]interface{}{
-		"id":     id,
-		"guid":   guid,
-		"method": method,
-		"params": c.replaceChannelsWithGuids(params),
+		"id":       id,
+		"guid":     guid,
+		"method":   method,
+		"params":   c.replaceChannelsWithGuids(params),
+		"metadata": metadata,
 	}
 	cb, _ := c.callbacks.LoadOrStore(id, make(chan callback))
-	if err := c.transport.Send(message); err != nil {
+	if err := c.onmessage(message); err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
 	result := <-cb.(chan callback)
@@ -161,15 +169,26 @@ func (c *connection) SendMessageToServer(guid string, method string, params inte
 	return result.Data, nil
 }
 
-func newConnection(t transport, onClose func() error) *connection {
+func serializeCallStack(stack stack.CallStack) []map[string]interface{} {
+	callStack := make([]map[string]interface{}, 0)
+	for _, s := range stack {
+		callStack = append(callStack, map[string]interface{}{
+			"file":     s.Frame().File,
+			"line":     s.Frame().Line,
+			"function": s.Frame().Function,
+		})
+	}
+	return callStack
+}
+
+func newConnection(onClose func() error) *connection {
 	connection := &connection{
 		waitingForRemoteObjects: make(map[string]chan interface{}),
 		objects:                 make(map[string]*channelOwner),
 		onClose:                 onClose,
 	}
-	connection.transport = t
-	connection.transport.SetDispatch(connection.Dispatch)
 	connection.rootObject = newRootChannelOwner(connection)
+	connection.playwright = make(chan *Playwright, 1)
 	return connection
 }
 

@@ -566,7 +566,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		bt.Emit("download", newDownload(bt, url, suggestedFilename, artifact))
 	})
 	bt.channel.On("video", func(params map[string]interface{}) {
-		bt.Video().(*videoImpl).setArtifact(fromChannel(params["artifact"]).(*artifactImpl))
+		bt.Video().(*videoImpl).artifact = fromChannel(params["artifact"]).(*artifactImpl)
 	})
 	bt.channel.On("webSocket", func(ev map[string]interface{}) {
 		bt.Emit("websocket", fromChannel(ev["webSocket"]).(*webSocketImpl))
