@@ -49,6 +49,7 @@ jobs:
     - name: Send coverage
       env:
         COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      continue-on-error: true
       run: goveralls -coverprofile=covprofile -service=github -parallel -flagname="${{ matrix.os }}-${{ matrix.browser }}"
   finish:
     needs: test
