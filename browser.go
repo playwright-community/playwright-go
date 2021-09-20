@@ -106,10 +106,12 @@ func (b *browserImpl) Version() string {
 
 func (b *browserImpl) onClose() {
 	b.Lock()
-	b.isConnected = false
-	b.isClosedOrClosing = true
+	if !b.isClosedOrClosing {
+		b.isConnected = false
+		b.isClosedOrClosing = true
+		b.Emit("disconnected")
+	}
 	b.Unlock()
-	b.Emit("disconnected")
 }
 
 func newBrowser(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserImpl {

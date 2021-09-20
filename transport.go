@@ -7,13 +7,9 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"sync"
-	"sync/atomic"
-	"time"
 
-	"github.com/gorilla/websocket"
 	"gopkg.in/square/go-jose.v2/json"
 )
 
@@ -25,74 +21,10 @@ type transport interface {
 }
 
 type pipeTransport struct {
-	stdin    io.WriteCloser
-	stdout   io.ReadCloser
-	dispatch func(msg *message)
-	rLock    sync.Mutex
-}
-
-type webSocketTransport struct {
-	OnClose  func()
-	url      string
-	conn     *websocket.Conn
-	options  BrowserTypeConnectOptions
-	dispatch func(msg *message)
-	stopped  atomic.Value
-}
-
-func (t *webSocketTransport) Start() error {
-	var headers http.Header
-	if t.options.Headers != nil {
-		for k, v := range t.options.Headers {
-			headers.Add(k, v)
-		}
-	}
-	conn, _, err := websocket.DefaultDialer.Dial(t.url, headers)
-	if err != nil {
-		return fmt.Errorf("could not connect to websocket: %v", err)
-	}
-	t.conn = conn
-	for !t.stopped.Load().(bool) {
-		if t.options.Timeout != nil {
-			if err := t.conn.SetReadDeadline(time.Now().Add(time.Duration(*t.options.Timeout))); err != nil {
-				return err
-			}
-		}
-		if t.options.SlowMo != nil {
-			time.Sleep(time.Duration(*t.options.SlowMo) * time.Millisecond)
-		}
-		msg := &message{}
-		err := t.conn.ReadJSON(msg)
-		if err != nil {
-			_ = t.Stop()
-			return nil
-		}
-		t.dispatch(msg)
-	}
-	return nil
-}
-
-func (t *webSocketTransport) Send(message map[string]interface{}) error {
-	if err := t.conn.WriteJSON(message); err != nil {
-		t.stopped.Store(true)
-		return fmt.Errorf("could not write json: %w", err)
-	}
-	return nil
-}
-
-func (t *webSocketTransport) SetDispatch(dispatch func(msg *message)) {
-	t.dispatch = dispatch
-}
-
-func (t *webSocketTransport) Stop() error {
-	t.stopped.Store(true)
-	if err := t.conn.Close(); err != nil {
-		return fmt.Errorf("could not close websocket: %w", err)
-	}
-	if t.OnClose != nil {
-		t.OnClose()
-	}
-	return nil
+	stdin     io.WriteCloser
+	stdout    io.ReadCloser
+	onmessage func(msg *message)
+	rLock     sync.Mutex
 }
 
 func (t *pipeTransport) Start() error {
@@ -117,13 +49,10 @@ func (t *pipeTransport) Start() error {
 				log.Printf("could not encode json: %v", err)
 			}
 		}
-		t.dispatch(msg)
+		t.onmessage(msg)
 	}
 }
 
-func (t *pipeTransport) SetDispatch(dispatch func(msg *message)) {
-	t.dispatch = dispatch
-}
 func (t *pipeTransport) Stop() error {
 	return nil
 }
@@ -166,27 +95,12 @@ func (t *pipeTransport) Send(message map[string]interface{}) error {
 	if _, err = t.stdin.Write(msg); err != nil {
 		return err
 	}
-
 	return nil
 }
 
-func newPipeTransport(stdin io.WriteCloser, stdout io.ReadCloser) transport {
+func newPipeTransport(stdin io.WriteCloser, stdout io.ReadCloser) *pipeTransport {
 	return &pipeTransport{
 		stdout: stdout,
 		stdin:  stdin,
 	}
-}
-func newWebSocketTransport(url string, options ...BrowserTypeConnectOptions) transport {
-	var option BrowserTypeConnectOptions
-	if len(options) == 1 {
-		option = options[0]
-	} else {
-		option = BrowserTypeConnectOptions{}
-	}
-	t := &webSocketTransport{
-		url:     url,
-		options: option,
-	}
-	t.stopped.Store(false)
-	return t
 }

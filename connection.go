@@ -15,7 +15,6 @@ type callback struct {
 }
 
 type connection struct {
-	transport                   transport
 	waitingForRemoteObjectsLock sync.Mutex
 	waitingForRemoteObjects     map[string]chan interface{}
 	objects                     map[string]*channelOwner
@@ -25,9 +24,10 @@ type connection struct {
 	callbacks                   sync.Map
 	onClose                     func() error
 	playwright                  chan *Playwright
+	onmessage                   func(message map[string]interface{}) error
 }
 
-func (c *connection) Start() error {
+func (c *connection) Start() {
 	go func() {
 		playwright, err := c.rootObject.initialize()
 		if err != nil {
@@ -36,16 +36,9 @@ func (c *connection) Start() error {
 		}
 		c.playwright <- playwright
 	}()
-	if err := c.transport.Start(); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (c *connection) Stop() error {
-	if err := c.transport.Stop(); err != nil {
-		return fmt.Errorf("could not stop transport: %w", err)
-	}
 	return c.onClose()
 }
 
@@ -75,7 +68,11 @@ func (c *connection) Dispatch(msg *message) {
 		object.dispose()
 		return
 	}
-	object.channel.Emit(method, c.replaceGuidsWithChannels(msg.Params))
+	if object.objectType == "JsonPipe" {
+		object.channel.Emit(method, msg.Params)
+	} else {
+		object.channel.Emit(method, c.replaceGuidsWithChannels(msg.Params))
+	}
 }
 
 func (c *connection) createRemoteObject(parent *channelOwner, objectType string, guid string, initializer interface{}) interface{} {
@@ -161,7 +158,7 @@ func (c *connection) SendMessageToServer(guid string, method string, params inte
 		"metadata": metadata,
 	}
 	cb, _ := c.callbacks.LoadOrStore(id, make(chan callback))
-	if err := c.transport.Send(message); err != nil {
+	if err := c.onmessage(message); err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
 	result := <-cb.(chan callback)
@@ -183,14 +180,13 @@ func serializeCallStack(stack stack.CallStack) []map[string]interface{} {
 	}
 	return callStack
 }
-func newConnection(t transport, onClose func() error) *connection {
+
+func newConnection(onClose func() error) *connection {
 	connection := &connection{
 		waitingForRemoteObjects: make(map[string]chan interface{}),
 		objects:                 make(map[string]*channelOwner),
 		onClose:                 onClose,
 	}
-	connection.transport = t
-	connection.transport.SetDispatch(connection.Dispatch)
 	connection.rootObject = newRootChannelOwner(connection)
 	connection.playwright = make(chan *Playwright, 1)
 	return connection

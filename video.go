@@ -16,9 +16,6 @@ func (v *videoImpl) Delete() error {
 func (v *videoImpl) SaveAs(path string) error {
 	return v.artifact.SaveAs(path)
 }
-func (v *videoImpl) setArtifact(artifact *artifactImpl) {
-	v.artifact = artifact
-}
 
 func newVideo(page *pageImpl) *videoImpl {
 	return &videoImpl{
