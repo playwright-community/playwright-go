@@ -14,8 +14,11 @@ type BrowserNewContextOptions struct {
 	// Specify device scale factor (can be thought of as dpr). Defaults to `1`.
 	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
 	// An object containing additional HTTP headers to be sent with every request. All header values must be strings.
-	ExtraHttpHeaders map[string]string                    `json:"extraHTTPHeaders"`
-	Geolocation      *BrowserNewContextOptionsGeolocation `json:"geolocation"`
+	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
+	// Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See Page.EmulateMedia() for more details. Defaults to `'none'`.
+	// It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
+	ForcedColors *ForcedColors                        `json:"forcedColors"`
+	Geolocation  *BrowserNewContextOptionsGeolocation `json:"geolocation"`
 	// Specifies if viewport supports touch events. Defaults to false.
 	HasTouch *bool `json:"hasTouch"`
 	// Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
@@ -114,8 +117,11 @@ type BrowserNewPageOptions struct {
 	// Specify device scale factor (can be thought of as dpr). Defaults to `1`.
 	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
 	// An object containing additional HTTP headers to be sent with every request. All header values must be strings.
-	ExtraHttpHeaders map[string]string                 `json:"extraHTTPHeaders"`
-	Geolocation      *BrowserNewPageOptionsGeolocation `json:"geolocation"`
+	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
+	// Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See Page.EmulateMedia() for more details. Defaults to `'none'`.
+	// It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
+	ForcedColors *ForcedColors                     `json:"forcedColors"`
+	Geolocation  *BrowserNewPageOptionsGeolocation `json:"geolocation"`
 	// Specifies if viewport supports touch events. Defaults to false.
 	HasTouch *bool `json:"hasTouch"`
 	// Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
@@ -204,8 +210,8 @@ type BrowserContextGrantPermissionsOptions struct {
 	Origin *string `json:"origin"`
 }
 type BrowserContextRouteOptions struct {
-	// handler function to route the request.
-	Handler func(Route) `json:"handler"`
+	// How often a route should be used. By default it will be used every time.
+	Times *int `json:"times"`
 }
 type BrowserContextGeolocation struct {
 	// Latitude between -90 and 90.
@@ -246,7 +252,7 @@ type BrowserTypeLaunchOptions struct {
 	ChromiumSandbox *bool `json:"chromiumSandbox"`
 	// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
 	Devtools *bool `json:"devtools"`
-	// If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is deleted when browser is closed.
+	// If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is deleted when browser is closed. In either case, the downloads are deleted when the browser context they were created in is closed.
 	DownloadsPath *string `json:"downloadsPath"`
 	// Specify environment variables that will be visible to the browser. Defaults to `process.env`.
 	Env map[string]string `json:"env"`
@@ -300,15 +306,18 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
 	// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the `headless` option will be set `false`.
 	Devtools *bool `json:"devtools"`
-	// If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is deleted when browser is closed.
+	// If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and is deleted when browser is closed. In either case, the downloads are deleted when the browser context they were created in is closed.
 	DownloadsPath *string `json:"downloadsPath"`
 	// Specify environment variables that will be visible to the browser. Defaults to `process.env`.
 	Env map[string]string `json:"env"`
 	// Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
 	ExecutablePath *string `json:"executablePath"`
 	// An object containing additional HTTP headers to be sent with every request. All header values must be strings.
-	ExtraHttpHeaders map[string]string                                     `json:"extraHTTPHeaders"`
-	Geolocation      *BrowserTypeLaunchPersistentContextOptionsGeolocation `json:"geolocation"`
+	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
+	// Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See Page.EmulateMedia() for more details. Defaults to `'none'`.
+	// It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
+	ForcedColors *ForcedColors                                         `json:"forcedColors"`
+	Geolocation  *BrowserTypeLaunchPersistentContextOptionsGeolocation `json:"geolocation"`
 	// Close the browser process on SIGHUP. Defaults to `true`.
 	HandleSIGHUP *bool `json:"handleSIGHUP"`
 	// Close the browser process on Ctrl-C. Defaults to `true`.
@@ -530,6 +539,18 @@ type ElementHandleSelectTextOptions struct {
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
+type ElementHandleSetCheckedOptions struct {
+	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	Force *bool `json:"force"`
+	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+	NoWaitAfter *bool `json:"noWaitAfter"`
+	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
+	Position *ElementHandleSetCheckedOptionsPosition `json:"position"`
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
+	Timeout *float64 `json:"timeout"`
+	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
+	Trial *bool `json:"trial"`
+}
 type ElementHandleSetInputFilesOptions struct {
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
@@ -581,6 +602,8 @@ type ElementHandleWaitForSelectorOptions struct {
 	// `'visible'` - wait for element to have non-empty bounding box and no `visibility:hidden`. Note that element without any content or with `display:none` has an empty bounding box and is not considered visible.
 	// `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`. This is opposite to the `'visible'` option.
 	State *WaitForSelectorState `json:"state"`
+	// When true, the call requires selector to resolve to a single element. If given selector resolves to more then one element, the call throws an exception.
+	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -839,6 +862,20 @@ type FrameSelectOptionOptions struct {
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
+type FrameSetCheckedOptions struct {
+	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	Force *bool `json:"force"`
+	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+	NoWaitAfter *bool `json:"noWaitAfter"`
+	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
+	Position *FrameSetCheckedOptionsPosition `json:"position"`
+	// When true, the call requires selector to resolve to a single element. If given selector resolves to more then one element, the call throws an exception.
+	Strict *bool `json:"strict"`
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
+	Timeout *float64 `json:"timeout"`
+	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
+	Trial *bool `json:"trial"`
+}
 type FrameSetContentOptions struct {
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(), BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
@@ -915,7 +952,7 @@ type FrameWaitForLoadStateOptions struct {
 type FrameWaitForNavigationOptions struct {
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(), BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
+	// A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation. Note that if the parameter is a string without wilcard characters, the method will wait for navigation to URL that is exactly equal to the string.
 	URL interface{} `json:"url"`
 	// When to consider operation succeeded, defaults to `load`. Events can be either:
 	// `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
@@ -1152,6 +1189,18 @@ type LocatorSelectTextOptions struct {
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
+type LocatorSetCheckedOptions struct {
+	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	Force *bool `json:"force"`
+	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+	NoWaitAfter *bool `json:"noWaitAfter"`
+	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
+	Position *LocatorSetCheckedOptionsPosition `json:"position"`
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
+	Timeout *float64 `json:"timeout"`
+	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
+	Trial *bool `json:"trial"`
+}
 type LocatorSetInputFilesOptions struct {
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
@@ -1347,6 +1396,9 @@ type PageTargetPosition struct {
 type PageEmulateMediaOptions struct {
 	// Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing `'Null'` disables color scheme emulation.
 	ColorScheme *ColorScheme `json:"colorScheme"`
+	// Emulates `'forced-colors'` media feature, supported values are `'active'` and `'none'`. Passing `null` disables forced colors emulation.
+	// It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
+	ForcedColors *ForcedColors `json:"forcedColors"`
 	// Changes the CSS media type of the page. The only allowed values are `'Screen'`, `'Print'` and `'Null'`. Passing `'Null'` disables CSS media emulation.
 	Media *Media `json:"media"`
 	// Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.
@@ -1558,8 +1610,8 @@ type PageReloadOptions struct {
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageRouteOptions struct {
-	// handler function to route the request.
-	Handler func(Route, Request) `json:"handler"`
+	// How often a route should be used. By default it will be used every time.
+	Times *int `json:"times"`
 }
 type PageScreenshotOptions struct {
 	// An object which specifies clipping of the resulting image. Should have the following fields:
@@ -1596,6 +1648,20 @@ type PageSelectOptionOptions struct {
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
+}
+type PageSetCheckedOptions struct {
+	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	Force *bool `json:"force"`
+	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as navigating to inaccessible pages. Defaults to `false`.
+	NoWaitAfter *bool `json:"noWaitAfter"`
+	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of the element.
+	Position *PageSetCheckedOptionsPosition `json:"position"`
+	// When true, the call requires selector to resolve to a single element. If given selector resolves to more then one element, the call throws an exception.
+	Strict *bool `json:"strict"`
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
+	Timeout *float64 `json:"timeout"`
+	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
+	Trial *bool `json:"trial"`
 }
 type PageSetContentOptions struct {
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(), BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout() methods.
@@ -1685,7 +1751,7 @@ type PageWaitForLoadStateOptions struct {
 type PageWaitForNavigationOptions struct {
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(), BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation.
+	// A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation. Note that if the parameter is a string without wilcard characters, the method will wait for navigation to URL that is exactly equal to the string.
 	URL interface{} `json:"url"`
 	// When to consider operation succeeded, defaults to `load`. Events can be either:
 	// `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
@@ -1723,6 +1789,26 @@ type PageWaitForURLOptions struct {
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 
+// Result of calling <see cref="Request.HeadersArray" />.
+type RequestHeadersArrayResult struct {
+	// Name of the header.
+	Name *string `json:"name"`
+	// Value of the header.
+	Value *string `json:"value"`
+}
+
+// Result of calling <see cref="Request.Sizes" />.
+type RequestSizesResult struct {
+	// Size of the request body (POST data payload) in bytes. Set to 0 if there was no body.
+	RequestBodySize *int `json:"requestBodySize"`
+	// Total number of bytes from the start of the HTTP request message until (and including) the double CRLF before the body.
+	RequestHeadersSize *int `json:"requestHeadersSize"`
+	// Size of the received response body (encoded) in bytes.
+	ResponseBodySize *int `json:"responseBodySize"`
+	// Total number of bytes from the start of the HTTP response message until (and including) the double CRLF before the body.
+	ResponseHeadersSize *int `json:"responseHeadersSize"`
+}
+
 // Result of calling <see cref="Request.Timing" />.
 type RequestTimingResult struct {
 	// Request start time in milliseconds elapsed since January 1, 1970 00:00:00 UTC
@@ -1743,6 +1829,14 @@ type RequestTimingResult struct {
 	ResponseStart *float64 `json:"responseStart"`
 	// Time immediately after the browser receives the last byte of the resource or immediately before the transport connection is closed, whichever comes first. The value is given in milliseconds relative to `startTime`, -1 if not available.
 	ResponseEnd *float64 `json:"responseEnd"`
+}
+
+// Result of calling <see cref="Response.HeadersArray" />.
+type ResponseHeadersArrayResult struct {
+	// Name of the header.
+	Name *string `json:"name"`
+	// Value of the header.
+	Value *string `json:"value"`
 }
 
 // Result of calling <see cref="Response.SecurityDetails" />.
@@ -1818,7 +1912,11 @@ type TracingStartOptions struct {
 	Snapshots *bool `json:"snapshots"`
 }
 type TracingStopOptions struct {
-	// Export trace into the file with the given name.
+	// Export trace into the file with the given path.
+	Path *string `json:"path"`
+}
+type TracingStopChunkOptions struct {
+	// Export trace collected since the last Tracing.StartChunk() call into the file with the given path.
 	Path *string `json:"path"`
 }
 type FrameReceivedPayload struct {
@@ -2044,6 +2142,10 @@ type ElementHandleHoverOptionsPosition struct {
 	X *float64 `json:"x"`
 	Y *float64 `json:"y"`
 }
+type ElementHandleSetCheckedOptionsPosition struct {
+	X *float64 `json:"x"`
+	Y *float64 `json:"y"`
+}
 type ElementHandleTapOptionsPosition struct {
 	X *float64 `json:"x"`
 	Y *float64 `json:"y"`
@@ -2076,6 +2178,10 @@ type FrameHoverOptionsPosition struct {
 	X *float64 `json:"x"`
 	Y *float64 `json:"y"`
 }
+type FrameSetCheckedOptionsPosition struct {
+	X *float64 `json:"x"`
+	Y *float64 `json:"y"`
+}
 type FrameTapOptionsPosition struct {
 	X *float64 `json:"x"`
 	Y *float64 `json:"y"`
@@ -2097,6 +2203,10 @@ type LocatorDblclickOptionsPosition struct {
 	Y *float64 `json:"y"`
 }
 type LocatorHoverOptionsPosition struct {
+	X *float64 `json:"x"`
+	Y *float64 `json:"y"`
+}
+type LocatorSetCheckedOptionsPosition struct {
 	X *float64 `json:"x"`
 	Y *float64 `json:"y"`
 }
@@ -2151,6 +2261,10 @@ type PageScreenshotOptionsClip struct {
 	Width *float64 `json:"width"`
 	// height of clipping area
 	Height *float64 `json:"height"`
+}
+type PageSetCheckedOptionsPosition struct {
+	X *float64 `json:"x"`
+	Y *float64 `json:"y"`
 }
 type PageTapOptionsPosition struct {
 	X *float64 `json:"x"`

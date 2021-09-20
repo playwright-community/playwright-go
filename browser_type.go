@@ -2,7 +2,6 @@ package playwright
 
 import (
 	"fmt"
-	"log"
 )
 
 type browserTypeImpl struct {
@@ -51,22 +50,17 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 	return fromChannel(channel).(*browserContextImpl), nil
 }
 func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptions) (Browser, error) {
-	transport := newWebSocketTransport(url, options...)
-	connection := newConnection(transport, func() error { return nil })
-	go func() {
-		err := connection.Start()
-		if err != nil {
-			log.Fatalf("could not start websocket connection: %v", err)
-		}
-	}()
-	obj, err := connection.CallOnObjectWithKnownName("Playwright")
-	if err != nil {
-		return nil, fmt.Errorf("could not call object: %w", err)
+	overrides := map[string]interface{}{
+		"wsEndpoint": url,
 	}
-	playwright := obj.(*Playwright)
-	browser := fromChannel(playwright.initializer["preLaunchedBrowser"]).(*browserImpl)
-	browser.isConnectedOverWebSocket = true
-	transport.(*webSocketTransport).OnClose = func() {
+	pipe, err := b.channel.Send("connect", overrides, options)
+	if err != nil {
+		return nil, err
+	}
+	jsonPipe := fromChannel(pipe).(*jsonPipe)
+	connection := newConnection(jsonPipe.Close)
+	var browser *browserImpl
+	pipeClosed := func() {
 		for _, context := range browser.contexts {
 			pages := context.(*browserContextImpl).pages
 			for _, page := range pages {
@@ -76,6 +70,19 @@ func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptio
 		}
 		browser.onClose()
 	}
+	jsonPipe.On("closed", pipeClosed)
+	connection.onmessage = func(message map[string]interface{}) error {
+		if err := jsonPipe.Send(message); err != nil {
+			pipeClosed()
+			return err
+		}
+		return nil
+	}
+	jsonPipe.On("message", connection.Dispatch)
+	connection.Start()
+	playwright := <-connection.playwright
+	browser = fromChannel(playwright.initializer["preLaunchedBrowser"]).(*browserImpl)
+	browser.isConnectedOverWebSocket = true
 	return browser, nil
 }
 

@@ -19,7 +19,7 @@ type BindingSource struct {
 type ExposedFunction = func(args ...interface{}) interface{}
 
 // BindingCallFunction represents the func signature of an exposed binding call func
-type BindingCallFunction = func(source *BindingSource, args ...interface{}) interface{}
+type BindingCallFunction func(source *BindingSource, args ...interface{}) interface{}
 
 func (b *bindingCallImpl) Call(f BindingCallFunction) {
 	defer func() {

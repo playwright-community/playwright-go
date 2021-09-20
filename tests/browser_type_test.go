@@ -1,7 +1,6 @@
 package playwright_test
 
 import (
-	"net"
 	"testing"
 	"time"
 
@@ -147,7 +146,7 @@ func TestBrowserTypeConnectShouldEmitDisconnectedEvent(t *testing.T) {
 	remoteServer.Close()
 
 	_, err = page.Title()
-	require.ErrorIs(t, err, net.ErrClosed)
+	require.Error(t, err)
 	require.False(t, browser2.IsConnected())
 	require.Len(t, disconnected2.Get(), 1)
 }

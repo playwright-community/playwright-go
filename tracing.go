@@ -6,26 +6,62 @@ type tracingImpl struct {
 }
 
 func (t *tracingImpl) Start(options ...TracingStartOptions) error {
-	_, err := t.channel.Send("tracingStart", options)
-	return err
+	if _, err := t.channel.Send("tracingStart", options); err != nil {
+		return err
+	}
+	if _, err := t.channel.Send("tracingStartChunk", options); err != nil {
+		return err
+	}
+	return nil
 }
 
+func (t *tracingImpl) StartChunk() error {
+	_, err := t.channel.Send("tracingStartChunk")
+	return err
+}
 func (t *tracingImpl) Stop(options ...TracingStopOptions) error {
+	path := ""
 	if len(options) == 1 && options[0].Path != nil {
-		artifactChannel, err := t.channel.Send("tracingExport", nil)
-		if err != nil {
-			return err
-		}
-		artifact := fromChannel(artifactChannel).(*artifactImpl)
-		if err = artifact.SaveAs(*options[0].Path); err != nil {
-			return err
-		}
-		if err = artifact.Delete(); err != nil {
-			return err
-		}
+		path = *options[0].Path
 	}
-	if _, err := t.channel.Send("tracingStop", nil); err != nil {
+	if err := t.stopChunk(path); err != nil {
 		return err
+	}
+	if _, err := t.channel.Send("tracingStop"); err != nil {
+		return err
+	}
+	return nil
+}
+func (t *tracingImpl) StopChunk(options ...TracingStopChunkOptions) error {
+	path := ""
+	if len(options) == 1 && options[0].Path != nil {
+		path = *options[0].Path
+	}
+	if err := t.stopChunk(path); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (t *tracingImpl) stopChunk(path string) error {
+	save := true
+	if path == "" {
+		save = false
+	}
+	artifactChannel, err := t.channel.Send("tracingStopChunk", map[string]interface{}{
+		"save": save,
+	})
+	if err != nil {
+		return err
+	}
+	if artifactChannel != nil {
+		artifact := fromChannel(artifactChannel).(*artifactImpl)
+		if path != "" {
+			if err := artifact.SaveAs(path); err != nil {
+				return err
+			}
+		}
+		return artifact.Delete()
 	}
 	return nil
 }
