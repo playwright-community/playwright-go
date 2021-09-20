@@ -10,7 +10,6 @@ type responseImpl struct {
 	request            *requestImpl
 	provisionalHeaders *rawHeaders
 	rawHeaders         *rawHeaders
-	finished           bool
 }
 
 func (r *responseImpl) URL() string {

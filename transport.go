@@ -13,13 +13,6 @@ import (
 	"gopkg.in/square/go-jose.v2/json"
 )
 
-type transport interface {
-	Start() error
-	Stop() error
-	Send(message map[string]interface{}) error
-	SetDispatch(dispatch func(msg *message))
-}
-
 type pipeTransport struct {
 	stdin     io.WriteCloser
 	stdout    io.ReadCloser
