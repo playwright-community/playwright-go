@@ -20,7 +20,7 @@ func (r *rawHeaders) Get(name string) string {
 	values := r.GetAll(name)
 	sep := ", "
 	if strings.ToLower(name) == "set-cookie" {
-		sep = "; "
+		sep = "\n"
 	}
 	return strings.Join(values, sep)
 }
@@ -47,8 +47,8 @@ func newRawHeaders(headers []interface{}) *rawHeaders {
 		name := strings.ToLower(entry["name"].(string))
 		if _, ok := r.headersMap[name]; !ok {
 			r.headersMap[name] = make([]string, 0)
-			r.headersMap[name] = append(r.headersMap[name], entry["value"].(string))
 		}
+		r.headersMap[name] = append(r.headersMap[name], entry["value"].(string))
 	}
 	return r
 }
