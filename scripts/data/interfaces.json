@@ -155,7 +155,7 @@
 			null,
 			"Tracing"
 		],
-		"BackgroundPages":[
+		"BackgroundPages": [
 			null,
 			"[]Page"
 		]
@@ -1110,6 +1110,22 @@
 		]
 	},
 	"Request": {
+		"AllHeaders": [
+			null,
+			"map[string]string, error"
+		],
+		"HeadersArray": [
+			null,
+			"[]map[string]string, error"
+		],
+		"HeaderValue": [
+			"name string",
+			"string, error"
+		],
+		"HeaderValues": [
+			"name string",
+			"[]string, error"
+		],
 		"Failure": [
 			null,
 			"*RequestFailure"
@@ -1168,13 +1184,29 @@
 		]
 	},
 	"Response": {
+		"AllHeaders": [
+			null,
+			"map[string]string, error"
+		],
+		"HeadersArray": [
+			null,
+			"[]map[string]string, error"
+		],
+		"HeaderValue": [
+			"name string",
+			"string, error"
+		],
+		"HeaderValues": [
+			"name string",
+			"[]string, error"
+		],
 		"Body": [
 			null,
 			"[]byte, error"
 		],
 		"Finished": [
 			null,
-			"error"
+			null
 		],
 		"Frame": [
 			null,

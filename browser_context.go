@@ -415,6 +415,10 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 
 	bt.channel.On("requestFinished", func(ev map[string]interface{}) {
 		request := fromChannel(ev["request"]).(*requestImpl)
+		response := fromNullableChannel(ev["response"])
+		if response != nil {
+			response.(*responseImpl).finished <- true
+		}
 		page := fromNullableChannel(ev["page"])
 		if request.timing != nil {
 			request.timing.ResponseEnd = ev["responseEndTiming"].(float64)

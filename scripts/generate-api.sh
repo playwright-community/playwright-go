@@ -19,4 +19,6 @@ go fmt generated-{enums,structs}.go > /dev/null
 
 echo "Updating README"
 go run scripts/update-readme-versions/main.go
+
 git submodule update
+
