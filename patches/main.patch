@@ -334,10 +334,10 @@ index 47d79018f024b6f20cb204829d50fdc39259a311..e6b683b38919c7949ad622516d2e40de
    - `size` <[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
 diff --git a/utils/doclint/generateGoApi.js b/utils/doclint/generateGoApi.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..bc4702d8f141269c21ecb0fda2fa05dfa4614244
+index 0000000000000000000000000000000000000000..8d165a64374c268648dffe3b1c5b82642448d791
 --- /dev/null
 +++ b/utils/doclint/generateGoApi.js
-@@ -0,0 +1,757 @@
+@@ -0,0 +1,754 @@
 +/**
 + * Copyright (c) Microsoft Corporation.
 + *
@@ -386,9 +386,8 @@ index 0000000000000000000000000000000000000000..bc4702d8f141269c21ecb0fda2fa05df
 +
 +  const structsFile = path.join(typesDir, "generated-structs.go");
 +  const enumsFile = path.join(typesDir, "generated-enums.go");
-+  const interfacesFile = path.join(typesDir, "generated-interfaces.go");
 +
-+  for (const file of [structsFile, enumsFile, interfacesFile])
++  for (const file of [structsFile, enumsFile])
 +    fs.writeFileSync(file, "package playwright\n")
 +
 +  documentation = parseApi(path.join(PROJECT_DIR, 'docs', 'src', 'api'));
@@ -466,8 +465,6 @@ index 0000000000000000000000000000000000000000..bc4702d8f141269c21ecb0fda2fa05df
 +      out.push(lastLine);
 +
 +    out.push('}');
-+
-+    appendFile(interfacesFile, out);
 +  }
 +
 +  additionalTypes.forEach((type, name) => {
