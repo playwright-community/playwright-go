@@ -85,6 +85,23 @@ func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptio
 	browser.isConnectedOverWebSocket = true
 	return browser, nil
 }
+func (b *browserTypeImpl) ConnectOverCDP(endpointURL string, options ...BrowserTypeConnectOverCDPOptions) (Browser, error) {
+	overrides := map[string]interface{}{
+		"endpointURL": endpointURL,
+		"sdkLanguage": "javascript",
+	}
+	response, err := b.channel.SendReturnAsDict("connectOverCDP", overrides, options)
+	if err != nil {
+		return nil, err
+	}
+	browser := fromChannel(response.(map[string]interface{})["browser"]).(*browserImpl)
+	if defaultContext, ok := response.(map[string]interface{})["defaultContext"]; ok {
+		context := fromChannel(defaultContext).(*browserContextImpl)
+		browser.contexts = append(browser.contexts, context)
+		context.browser = browser
+	}
+	return browser, nil
+}
 
 func newBrowserType(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserTypeImpl {
 	bt := &browserTypeImpl{}

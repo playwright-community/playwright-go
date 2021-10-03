@@ -15,7 +15,7 @@ func TestCDPSessionSend(t *testing.T) {
 		result, err := cdpSession.Send("Target.getTargets", nil)
 		require.NoError(t, err)
 		targetInfos := result.(map[string]interface{})["targetInfos"].([]interface{})
-		require.Equal(t, 1, len(targetInfos))
+		require.GreaterOrEqual(t, len(targetInfos), 1)
 	} else {
 		require.Error(t, err)
 	}

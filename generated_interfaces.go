@@ -198,6 +198,10 @@ type BrowserType interface {
 	Name() string
 	// This methods attaches Playwright to an existing browser instance.
 	Connect(url string, options ...BrowserTypeConnectOptions) (Browser, error)
+	// This methods attaches Playwright to an existing browser instance using the Chrome DevTools Protocol.
+	// The default browser context is accessible via Browser.contexts().
+	// > NOTE: Connecting over the Chrome DevTools Protocol is only supported for Chromium-based browsers.
+	ConnectOverCDP(endpointURL string, options ...BrowserTypeConnectOverCDPOptions) (Browser, error)
 }
 
 // `ConsoleMessage` objects are dispatched by page via the [`event: Page.console`] event.

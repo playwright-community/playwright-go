@@ -190,7 +190,12 @@
 		"Connect": [
 			"url string, options ...BrowserTypeConnectOptions",
 			"(Browser, error)"
+		],
+		"ConnectOverCDP":[
+			"endpointURL string, options ...BrowserTypeConnectOverCDPOptions",
+			"(Browser, error)"
 		]
+
 	},
 	"ConsoleMessage": {
 		"Args": [

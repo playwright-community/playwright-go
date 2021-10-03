@@ -495,15 +495,17 @@ func (p *pageImpl) setBrowserContext(browserContext *browserContextImpl) {
 }
 
 func newPage(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *pageImpl {
+	viewportSize := &ViewportSize{}
+	if _, ok := initializer["viewportSize"].(map[string]interface{}); ok {
+		viewportSize.Height = int(initializer["viewportSize"].(map[string]interface{})["height"].(float64))
+		viewportSize.Width = int(initializer["viewportSize"].(map[string]interface{})["width"].(float64))
+	}
 	bt := &pageImpl{
-		mainFrame: fromChannel(initializer["mainFrame"]).(*frameImpl),
-		workers:   make([]Worker, 0),
-		routes:    make([]*routeHandlerEntry, 0),
-		bindings:  make(map[string]BindingCallFunction),
-		viewportSize: ViewportSize{
-			Height: int(initializer["viewportSize"].(map[string]interface{})["height"].(float64)),
-			Width:  int(initializer["viewportSize"].(map[string]interface{})["width"].(float64)),
-		},
+		mainFrame:       fromChannel(initializer["mainFrame"]).(*frameImpl),
+		workers:         make([]Worker, 0),
+		routes:          make([]*routeHandlerEntry, 0),
+		bindings:        make(map[string]BindingCallFunction),
+		viewportSize:    *viewportSize,
 		timeoutSettings: newTimeoutSettings(nil),
 	}
 	bt.frames = []Frame{bt.mainFrame}
@@ -540,16 +542,14 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		bt.onFrameDetached(fromChannel(ev["frame"]).(*frameImpl))
 	})
 	bt.channel.On(
-		"load",
-		func(params map[string]interface{}) {
+		"load", func(ev map[string]interface{}) {
 			bt.Emit("load")
 		},
 	)
 	bt.channel.On(
-		"pageError",
-		func(params map[string]interface{}) {
+		"pageError", func(ev map[string]interface{}) {
 			err := errorPayload{}
-			remapMapToStruct(params["error"].(map[string]interface{})["error"], &err)
+			remapMapToStruct(ev["error"].(map[string]interface{})["error"], &err)
 			bt.Emit("pageerror", parseError(err))
 		},
 	)

@@ -1,5 +1,5 @@
 diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
-index 83c73dc614f94ba68ae499bd65e40e1c1a378964..a6b4892ef80554b163db874a63e49c79ae7b817c 100644
+index fc7aea4f4e5b9a30c6288a2bba8be7b1ae5c9c0b..b751ec95b0e638d71e858e9c87fda2264a7c50c1 100644
 --- a/docs/src/api/class-browsercontext.md
 +++ b/docs/src/api/class-browsercontext.md
 @@ -293,7 +293,17 @@ Script to be evaluated in all pages in the browser context.
@@ -30,7 +30,7 @@ index 83c73dc614f94ba68ae499bd65e40e1c1a378964..a6b4892ef80554b163db874a63e49c79
  - `handler` <[function]\([Route]\)>
  
  handler function to route the request.
-@@ -1192,7 +1202,7 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
+@@ -1187,7 +1197,7 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
  [`method: BrowserContext.route`].
  
  ### param: BrowserContext.unroute.handler
@@ -40,13 +40,14 @@ index 83c73dc614f94ba68ae499bd65e40e1c1a378964..a6b4892ef80554b163db874a63e49c79
  
  Optional handler function used to register a routing with [`method: BrowserContext.route`].
 diff --git a/docs/src/api/class-browsertype.md b/docs/src/api/class-browsertype.md
-index 414ce0323cb8111a08b1548a745e1db46abb1d59..734980844e308b4ddd93d91beeb5d970f843efba 100644
+index 16c4062a210a52e411da22f8904f37b4ce69d98b..b1f55bce93da017c1d8127ed9a4fd0f76e93804a 100644
 --- a/docs/src/api/class-browsertype.md
 +++ b/docs/src/api/class-browsertype.md
-@@ -85,21 +85,25 @@ class BrowserTypeExamples
+@@ -85,22 +85,25 @@ class BrowserTypeExamples
  ```
  
  ## async method: BrowserType.connect
+-* langs: js, python, java
 +* langs: js, python, java, go
  - returns: <[Browser]>
  
@@ -69,10 +70,52 @@ index 414ce0323cb8111a08b1548a745e1db46abb1d59..734980844e308b4ddd93d91beeb5d970
  - `slowMo` <[float]>
  
  Slows down Playwright operations by the specified amount of milliseconds. Useful so that you
-@@ -112,6 +116,7 @@ can see what is going on. Defaults to 0.
+@@ -113,13 +116,14 @@ can see what is going on. Defaults to 0.
  Logger sink for Playwright logging. Optional.
  
  ### option: BrowserType.connect.timeout
++* langs: java, python, js, go
+ - `timeout` <[float]>
+ 
+ Maximum time in milliseconds to wait for the connection to be established. Defaults to
+ `30000` (30 seconds). Pass `0` to disable timeout.
+ 
+ ## async method: BrowserType.connectOverCDP
+-* langs: java, js, python
++* langs: java, js, python, go
+ - returns: <[Browser]>
+ 
+ This methods attaches Playwright to an existing browser instance using the Chrome DevTools Protocol.
+@@ -131,7 +135,7 @@ Connecting over the Chrome DevTools Protocol is only supported for Chromium-base
+ :::
+ 
+ ### param: BrowserType.connectOverCDP.endpointURL
+-* langs: java, python, js
++* langs: java, python, js, go
+ - `endpointURL` <[string]>
+ 
+ A CDP websocket endpoint or http url to connect to. For example `http://localhost:9222/` or `ws://127.0.0.1:9222/devtools/browser/387adf4c-243f-4051-a181-46798f4a46f4`.
+@@ -143,13 +147,13 @@ A CDP websocket endpoint or http url to connect to. For example `http://localhos
+ Deprecated, use the first argument instead. Optional.
+ 
+ ### option: BrowserType.connectOverCDP.headers
+-* langs: java, python, js
++* langs: java, python, js, go
+ - `headers` <[Object]<[string], [string]>>
+ 
+ Additional HTTP headers to be sent with connect request. Optional.
+ 
+ ### option: BrowserType.connectOverCDP.slowMo
+-* langs: java, python, js
++* langs: java, python, js, go
+ - `slowMo` <[float]>
+ 
+ Slows down Playwright operations by the specified amount of milliseconds. Useful so that you
+@@ -162,7 +166,7 @@ can see what is going on. Defaults to 0.
+ Logger sink for Playwright logging. Optional.
+ 
+ ### option: BrowserType.connectOverCDP.timeout
+-* langs: java, python, js
 +* langs: java, python, js, go
  - `timeout` <[float]>
  
@@ -91,7 +134,7 @@ index 929d1453cc30235701fc4a9dd80d40ae2f45374c..f3d14908335e44047b7653cf798d12a5
  ### option: Frame.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
  
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index ad4d6516a73a8da73c1c6a1b075f695c566baa31..03878a3c3686ec0bb02aae03d1c18cee726f49da 100644
+index 577cd6d3604aa9b4f7b7dec289c17110434829f1..4267b3f3f5a9f43a079e1bd6f91b0acdcedf58ff 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
 @@ -526,6 +526,18 @@ Script to be evaluated in all pages in the browser context.
@@ -140,7 +183,7 @@ index ad4d6516a73a8da73c1c6a1b075f695c566baa31..03878a3c3686ec0bb02aae03d1c18cee
  - `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"null">>
  
  Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.
-@@ -2237,7 +2249,7 @@ Paper format. If set, takes priority over [`option: width`] or [`option: height`
+@@ -2242,7 +2254,7 @@ Paper format. If set, takes priority over [`option: width`] or [`option: height`
  Paper width, accepts values labeled with units.
  
  ### option: Page.pdf.width
@@ -149,7 +192,7 @@ index ad4d6516a73a8da73c1c6a1b075f695c566baa31..03878a3c3686ec0bb02aae03d1c18cee
  - `width` <[string]>
  
  Paper width, accepts values labeled with units.
-@@ -2249,7 +2261,7 @@ Paper width, accepts values labeled with units.
+@@ -2254,7 +2266,7 @@ Paper width, accepts values labeled with units.
  Paper height, accepts values labeled with units.
  
  ### option: Page.pdf.height
@@ -158,7 +201,7 @@ index ad4d6516a73a8da73c1c6a1b075f695c566baa31..03878a3c3686ec0bb02aae03d1c18cee
  - `height` <[string]>
  
  Paper height, accepts values labeled with units.
-@@ -2265,7 +2277,7 @@ Paper height, accepts values labeled with units.
+@@ -2270,7 +2282,7 @@ Paper height, accepts values labeled with units.
  Paper margins, defaults to none.
  
  ### option: Page.pdf.margin
@@ -167,7 +210,7 @@ index ad4d6516a73a8da73c1c6a1b075f695c566baa31..03878a3c3686ec0bb02aae03d1c18cee
  - `margin` <[Object]>
    - `top` <[string]> Top margin, accepts values labeled with units. Defaults to `0`.
    - `right` <[string]> Right margin, accepts values labeled with units. Defaults to `0`.
-@@ -2565,7 +2577,7 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
+@@ -2570,7 +2582,7 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
  When a [`option: baseURL`] via the context options was provided and the passed URL is a path,
  it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
  ### param: Page.route.handler
@@ -176,7 +219,7 @@ index ad4d6516a73a8da73c1c6a1b075f695c566baa31..03878a3c3686ec0bb02aae03d1c18cee
  - `handler` <[function]\([Route], [Request]\)>
  
  handler function to route the request.
-@@ -2987,7 +2999,7 @@ the [`param: url`].
+@@ -2992,7 +3004,7 @@ the [`param: url`].
  A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
  
  ### param: Page.unroute.handler
@@ -185,7 +228,7 @@ index ad4d6516a73a8da73c1c6a1b075f695c566baa31..03878a3c3686ec0bb02aae03d1c18cee
  - `handler` <[function]\([Route], [Request]\)>
  
  Optional handler function to route the request.
-@@ -3233,7 +3245,7 @@ Shortcut for main frame's [`method: Frame.waitForFunction`].
+@@ -3238,7 +3250,7 @@ Shortcut for main frame's [`method: Frame.waitForFunction`].
  
  Optional argument to pass to [`param: expression`].
  
@@ -230,7 +273,7 @@ index eb2a5f806a827a122b45c42517bd31dc0b27170f..506a16261e90a7a8e4d299c9f7201a39
  * langs: csharp, java
  - `body` <[string]>
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index 0a7dfbf708650a61a573e4d76df7b6a3d869d650..fd22c29a2f12b9cde7c0807d6b81faf310a95e2f 100644
+index 47d79018f024b6f20cb204829d50fdc39259a311..e6b683b38919c7949ad622516d2e40de75736eb8 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
 @@ -145,8 +145,8 @@ Defaults to `'visible'`. Can be either:
@@ -271,7 +314,7 @@ index 0a7dfbf708650a61a573e4d76df7b6a3d869d650..fd22c29a2f12b9cde7c0807d6b81faf3
  - `storageStatePath` <[path]>
  
  Populates context with given storage state. This option can be used to initialize context with logged-in information
-@@ -329,7 +329,7 @@ Function to be evaluated in the worker context.
+@@ -362,7 +362,7 @@ Function to be evaluated in the worker context.
  Function to be evaluated in the worker context.
  
  ## python-context-option-viewport
@@ -280,7 +323,7 @@ index 0a7dfbf708650a61a573e4d76df7b6a3d869d650..fd22c29a2f12b9cde7c0807d6b81faf3
  - `viewport` <[null]|[Object]>
    - `width` <[int]> page width in pixels.
    - `height` <[int]> page height in pixels.
-@@ -479,7 +479,7 @@ call [`method: BrowserContext.close`] for the HAR to be saved.
+@@ -512,7 +512,7 @@ call [`method: BrowserContext.close`] for the HAR to be saved.
  Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
  
  ## context-option-recordvideo

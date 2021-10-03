@@ -11,7 +11,7 @@ pushd "$SCRIPTS_DIR/.."
 git submodule update --init
 pushd playwright
 
-git reset --hard HEAD
+git checkout HEAD --detach
 
 if git show-ref -q --heads "$BRANCH_NAME_BUILD"; then
   git branch -D "$BRANCH_NAME_BUILD"
