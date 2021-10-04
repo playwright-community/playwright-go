@@ -25,7 +25,7 @@ func TestBrowserTypeExecutablePath(t *testing.T) {
 
 func TestBrowserTypeLaunchPersistentContext(t *testing.T) {
 	BeforeEach(t)
-	t.Parallel()
+
 	defer AfterEach(t)
 	user_data_dir1 := t.TempDir()
 	browser_context, err := browserType.LaunchPersistentContext(user_data_dir1)
@@ -64,7 +64,7 @@ func TestBrowserTypeLaunchPersistentContext(t *testing.T) {
 
 func TestBrowserTypeConnect(t *testing.T) {
 	BeforeEach(t)
-	t.Parallel()
+
 	defer AfterEach(t)
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
@@ -84,7 +84,7 @@ func TestBrowserTypeConnect(t *testing.T) {
 
 func TestBrowserTypeConnectShouldBeAbleToReconnectToBrowser(t *testing.T) {
 	BeforeEach(t)
-	t.Parallel()
+
 	defer AfterEach(t)
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
@@ -124,7 +124,7 @@ func TestBrowserTypeConnectShouldBeAbleToReconnectToBrowser(t *testing.T) {
 
 func TestBrowserTypeConnectShouldEmitDisconnectedEvent(t *testing.T) {
 	BeforeEach(t)
-	t.Parallel()
+
 	defer AfterEach(t)
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
@@ -158,7 +158,7 @@ func TestBrowserTypeConnectShouldEmitDisconnectedEvent(t *testing.T) {
 
 func TestBrowserTypeConnectSlowMo(t *testing.T) {
 	BeforeEach(t)
-	t.Parallel()
+
 	defer AfterEach(t)
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
@@ -185,7 +185,7 @@ func TestBrowserTypeConnectOverCDP(t *testing.T) {
 		t.Skip("CDP is only supported on Chromium")
 	}
 	BeforeEach(t)
-	t.Parallel()
+
 	defer AfterEach(t)
 	port, err := getFreePort()
 	require.NoError(t, err)
@@ -206,7 +206,7 @@ func TestBrowserTypeConnectOverCDPTwice(t *testing.T) {
 		t.Skip("CDP is only supported on Chromium")
 	}
 	BeforeEach(t)
-	t.Parallel()
+
 	defer AfterEach(t)
 	port, err := getFreePort()
 	require.NoError(t, err)
