@@ -619,7 +619,6 @@ func TestPageAddInitScriptWithPath(t *testing.T) {
 
 func TestPageSupportNetworkEvents(t *testing.T) {
 	BeforeEach(t)
-	t.Skip("TODO: fix this test")
 	defer AfterEach(t)
 	eventsChan := make(chan string, 6)
 	page.On("request", func(request playwright.Request) {
@@ -638,7 +637,6 @@ func TestPageSupportNetworkEvents(t *testing.T) {
 	FOO_URL := server.PREFIX + "/foo.html"
 	response, err := page.Goto(FOO_URL)
 	require.NoError(t, err)
-	require.NoError(t, response.Finished())
 	eventsSlice := ChanToSlice(eventsChan, 6)
 	require.Equal(t, []string{
 		fmt.Sprintf("GET %s", FOO_URL),

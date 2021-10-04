@@ -10,6 +10,7 @@ type responseImpl struct {
 	request            *requestImpl
 	provisionalHeaders *rawHeaders
 	rawHeaders         *rawHeaders
+	finished           chan bool
 }
 
 func (r *responseImpl) URL() string {
@@ -29,12 +30,11 @@ func (r *responseImpl) StatusText() string {
 }
 
 func (r *responseImpl) Headers() map[string]string {
-	return parseHeaders(r.initializer["headers"].([]interface{}))
+	return r.provisionalHeaders.Headers()
 }
 
-func (r *responseImpl) Finished() error {
-	_, err := r.channel.Send("finished")
-	return err
+func (r *responseImpl) Finished() {
+	<-r.finished
 }
 
 func (r *responseImpl) Body() ([]byte, error) {
@@ -68,8 +68,34 @@ func (r *responseImpl) Request() Request {
 func (r *responseImpl) Frame() Frame {
 	return r.request.Frame()
 }
-func (r *responseImpl) AllHeaders() map[string]string {
-	return r.provisionalHeaders.Headers()
+
+func (r *responseImpl) AllHeaders() (map[string]string, error) {
+	headers, err := r.ActualHeaders()
+	if err != nil {
+		return nil, err
+	}
+	return headers.Headers(), nil
+}
+func (r *responseImpl) HeadersArray() ([]map[string]string, error) {
+	headers, err := r.ActualHeaders()
+	if err != nil {
+		return nil, err
+	}
+	return headers.HeadersArray(), nil
+}
+func (r *responseImpl) HeaderValue(name string) (string, error) {
+	headers, err := r.ActualHeaders()
+	if err != nil {
+		return "", err
+	}
+	return headers.Get(name), err
+}
+func (r *responseImpl) HeaderValues(name string) ([]string, error) {
+	headers, err := r.ActualHeaders()
+	if err != nil {
+		return []string{}, err
+	}
+	return headers.GetAll(name), err
 }
 func (r *responseImpl) ActualHeaders() (*rawHeaders, error) {
 	if r.rawHeaders == nil {
@@ -77,7 +103,7 @@ func (r *responseImpl) ActualHeaders() (*rawHeaders, error) {
 		if err == nil {
 			return nil, err
 		}
-		r.rawHeaders = newRawHeaders(headers.([]interface{}))
+		r.rawHeaders = newRawHeaders(headers)
 	}
 	return r.rawHeaders, nil
 }
@@ -113,6 +139,7 @@ func newResponse(parent *channelOwner, objectType string, guid string, initializ
 		RequestStart:          timing["requestStart"].(float64),
 		ResponseStart:         timing["responseStart"].(float64),
 	}
-	resp.provisionalHeaders = newRawHeaders(resp.initializer["headers"].([]interface{}))
+	resp.provisionalHeaders = newRawHeaders(resp.initializer["headers"])
+	resp.finished = make(chan bool, 1)
 	return resp
 }

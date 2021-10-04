@@ -1,23 +1,19 @@
 package playwright
 
-import "strings"
-
-func parseHeaders(headers []interface{}) map[string]string {
-	out := make(map[string]string)
-	for _, header := range headers {
-		entry := header.(map[string]interface{})
-		out[strings.ToLower(entry["name"].(string))] = entry["value"].(string)
-	}
-	return out
-}
+import (
+	"strings"
+)
 
 type rawHeaders struct {
-	headersArray map[string]string
-	headersMap   map[string][]string
+	headersArray []map[string]string
+	headersMap   map[string]map[string]bool
 }
 
 func (r *rawHeaders) Get(name string) string {
 	values := r.GetAll(name)
+	if len(values) == 0 {
+		return ""
+	}
 	sep := ", "
 	if strings.ToLower(name) == "set-cookie" {
 		sep = "\n"
@@ -25,30 +21,41 @@ func (r *rawHeaders) Get(name string) string {
 	return strings.Join(values, sep)
 }
 func (r *rawHeaders) GetAll(name string) []string {
-	return r.headersMap[strings.ToLower(name)]
+	name = strings.ToLower(name)
+	out := make([]string, 0)
+	for value := range r.headersMap[name] {
+		out = append(out, value)
+	}
+	return out
 }
 func (r *rawHeaders) Headers() map[string]string {
 	out := make(map[string]string)
-	for key, value := range r.headersArray {
-		out[strings.ToLower(key)] = strings.ToLower(value)
+	for key := range r.headersMap {
+		out[key] = r.Get(key)
 	}
 	return out
 }
 
-func (r *rawHeaders) HeadersArray() map[string]string {
+func (r *rawHeaders) HeadersArray() []map[string]string {
 	return r.headersArray
 }
-func newRawHeaders(headers []interface{}) *rawHeaders {
+func newRawHeaders(headers interface{}) *rawHeaders {
 	r := &rawHeaders{}
-	r.headersArray = parseHeaders(headers)
-	r.headersMap = make(map[string][]string)
-	for _, header := range headers {
+	r.headersArray = make([]map[string]string, 0)
+	for _, header := range headers.([]interface{}) {
+		entry := header.(map[string]interface{})
+		r.headersArray = append(r.headersArray, map[string]string{
+			strings.ToLower(entry["name"].(string)): entry["value"].(string),
+		})
+	}
+	r.headersMap = make(map[string]map[string]bool)
+	for _, header := range headers.([]interface{}) {
 		entry := header.(map[string]interface{})
 		name := strings.ToLower(entry["name"].(string))
 		if _, ok := r.headersMap[name]; !ok {
-			r.headersMap[name] = make([]string, 0)
+			r.headersMap[name] = make(map[string]bool)
 		}
-		r.headersMap[name] = append(r.headersMap[name], entry["value"].(string))
+		r.headersMap[name][entry["value"].(string)] = true
 	}
 	return r
 }
