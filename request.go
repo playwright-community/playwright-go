@@ -25,11 +25,12 @@ type ResourceTiming struct {
 
 type requestImpl struct {
 	channelOwner
-	timing         *ResourceTiming
-	headers        map[string]string
-	redirectedFrom Request
-	redirectedTo   Request
-	failureText    string
+	timing             *ResourceTiming
+	provisionalHeaders *rawHeaders
+	allHeaders         *rawHeaders
+	redirectedFrom     Request
+	redirectedTo       Request
+	failureText        string
 }
 
 func (r *requestImpl) URL() string {
@@ -68,7 +69,7 @@ func (r *requestImpl) PostDataBuffer() ([]byte, error) {
 }
 
 func (r *requestImpl) Headers() map[string]string {
-	return r.headers
+	return r.provisionalHeaders.Headers()
 }
 
 func (r *requestImpl) Response() (Response, error) {
@@ -111,6 +112,51 @@ func (r *requestImpl) Failure() *RequestFailure {
 func (r *requestImpl) Timing() *ResourceTiming {
 	return r.timing
 }
+func (r *requestImpl) AllHeaders() (map[string]string, error) {
+	headers, err := r.ActualHeaders()
+	if err != nil {
+		return nil, err
+	}
+	return headers.Headers(), nil
+}
+func (r *requestImpl) HeadersArray() ([]map[string]string, error) {
+	headers, err := r.ActualHeaders()
+	if err != nil {
+		return nil, err
+	}
+	return headers.HeadersArray(), nil
+}
+func (r *requestImpl) HeaderValue(name string) (string, error) {
+	headers, err := r.ActualHeaders()
+	if err != nil {
+		return "", err
+	}
+	return headers.Get(name), err
+}
+func (r *requestImpl) HeaderValues(name string) ([]string, error) {
+	headers, err := r.ActualHeaders()
+	if err != nil {
+		return []string{}, err
+	}
+	return headers.GetAll(name), err
+}
+func (r *requestImpl) ActualHeaders() (*rawHeaders, error) {
+	if r.allHeaders == nil {
+		response, err := r.Response()
+		if err != nil {
+			return nil, err
+		}
+		if response == nil {
+			return r.provisionalHeaders, nil
+		}
+		headers, err := r.channel.Send("rawRequestHeaders")
+		if err != nil {
+			return nil, err
+		}
+		r.allHeaders = newRawHeaders(headers)
+	}
+	return r.allHeaders, nil
+}
 
 func newRequest(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *requestImpl {
 	req := &requestImpl{}
@@ -133,6 +179,6 @@ func newRequest(parent *channelOwner, objectType string, guid string, initialize
 		ResponseStart:         -1,
 		ResponseEnd:           -1,
 	}
-	req.headers = parseHeaders(req.initializer["headers"].([]interface{}))
+	req.provisionalHeaders = newRawHeaders(req.initializer["headers"])
 	return req
 }

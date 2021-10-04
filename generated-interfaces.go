@@ -1368,6 +1368,14 @@ type Page interface {
 // If request gets a 'redirect' response, the request is successfully finished with the 'requestfinished' event, and a new
 // request is  issued to a redirected url.
 type Request interface {
+	// An object with all the request HTTP headers associated with this request. The header names are lower-cased.
+	AllHeaders() (map[string]string, error)
+	// An array with all the request HTTP headers associated with this request. Unlike Request.allHeaders(), header
+	// names are NOT lower-cased. Headers with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
+	HeadersArray() ([]map[string]string, error)
+	// Returns the value of the header matching the name. The name is case insensitive.
+	HeaderValue(name string) (string, error)
+	HeaderValues(name string) ([]string, error)
 	// The method returns `null` unless this request has failed, as reported by `requestfailed` event.
 	// Example of logging of all the failed requests:
 	Failure() *RequestFailure
@@ -1413,10 +1421,21 @@ type Request interface {
 
 // `Response` class represents responses which are received by page.
 type Response interface {
+	// An object with all the response HTTP headers associated with this response.
+	AllHeaders() (map[string]string, error)
+	// An array with all the request HTTP headers associated with this response. Unlike Response.allHeaders(), header
+	// names are NOT lower-cased. Headers with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
+	HeadersArray() ([]map[string]string, error)
+	// Returns the value of the header matching the name. The name is case insensitive. If multiple headers have the same name
+	// (except `set-cookie`), they are returned as a list separated by `, `. For `set-cookie`, the `\n` separator is used. If
+	// no headers are found, `null` is returned.
+	HeaderValue(name string) (string, error)
+	// Returns all values of the headers matching the name, for example `set-cookie`. The name is case insensitive.
+	HeaderValues(name string) ([]string, error)
 	// Returns the buffer with response body.
 	Body() ([]byte, error)
 	// Waits for this response to finish, returns always `null`.
-	Finished() error
+	Finished()
 	// Returns the `Frame` that initiated this response.
 	Frame() Frame
 	// **DEPRECATED** Incomplete list of headers as seen by the rendering engine. Use Response.allHeaders() instead.
