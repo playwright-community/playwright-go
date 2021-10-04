@@ -24,6 +24,8 @@ jobs:
     name:  ${{ matrix.browser }} on ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: true
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
@@ -32,6 +34,8 @@ jobs:
     - run: |
         go install ./...
         playwright install-deps
+        mkdir -p tests/assets
+        cp -r playwright/tests/assets/* tests/assets/
     - name: Test
       env:
         BROWSER: ${{ matrix.browser }}

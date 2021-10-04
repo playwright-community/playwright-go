@@ -9,6 +9,8 @@ echo "Applying patches..."
 
 pushd "$SCRIPTS_DIR/.."
 git submodule update --init
+mkdir -p tests/assets
+cp -r playwright/tests/assets/* tests/assets/
 pushd playwright
 
 git checkout HEAD --detach
