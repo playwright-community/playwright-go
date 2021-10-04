@@ -13,7 +13,7 @@ type BrowserNewContextOptions struct {
 	ColorScheme *ColorScheme `json:"colorScheme"`
 	// Specify device scale factor (can be thought of as dpr). Defaults to `1`.
 	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
-	// An object containing additional HTTP headers to be sent with every request. All header values must be strings.
+	// An object containing additional HTTP headers to be sent with every request.
 	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
 	// Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See Page.EmulateMedia() for more details. Defaults to `'none'`.
 	// It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
@@ -23,7 +23,7 @@ type BrowserNewContextOptions struct {
 	HasTouch *bool `json:"hasTouch"`
 	// Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
 	HttpCredentials *BrowserNewContextOptionsHttpCredentials `json:"httpCredentials"`
-	// Whether to ignore HTTPS errors during navigation. Defaults to `false`.
+	// Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
 	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
 	// Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
 	IsMobile *bool `json:"isMobile"`
@@ -116,7 +116,7 @@ type BrowserNewPageOptions struct {
 	ColorScheme *ColorScheme `json:"colorScheme"`
 	// Specify device scale factor (can be thought of as dpr). Defaults to `1`.
 	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
-	// An object containing additional HTTP headers to be sent with every request. All header values must be strings.
+	// An object containing additional HTTP headers to be sent with every request.
 	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
 	// Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See Page.EmulateMedia() for more details. Defaults to `'none'`.
 	// It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
@@ -126,7 +126,7 @@ type BrowserNewPageOptions struct {
 	HasTouch *bool `json:"hasTouch"`
 	// Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
 	HttpCredentials *BrowserNewPageOptionsHttpCredentials `json:"httpCredentials"`
-	// Whether to ignore HTTPS errors during navigation. Defaults to `false`.
+	// Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
 	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
 	// Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
 	IsMobile *bool `json:"isMobile"`
@@ -243,6 +243,14 @@ type BrowserTypeConnectOptions struct {
 	// Maximum time in milliseconds to wait for the connection to be established. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 	Timeout *float64 `json:"timeout"`
 }
+type BrowserTypeConnectOverCDPOptions struct {
+	// Additional HTTP headers to be sent with connect request. Optional.
+	Headers map[string]string `json:"headers"`
+	// Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going on. Defaults to 0.
+	SlowMo *float64 `json:"slowMo"`
+	// Maximum time in milliseconds to wait for the connection to be established. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+	Timeout *float64 `json:"timeout"`
+}
 type BrowserTypeLaunchOptions struct {
 	// Additional arguments to pass to the browser instance. The list of Chromium flags can be found [here](http://peter.sh/experiments/chromium-command-line-switches/).
 	Args []string `json:"args"`
@@ -312,7 +320,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	Env map[string]string `json:"env"`
 	// Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use at your own risk.
 	ExecutablePath *string `json:"executablePath"`
-	// An object containing additional HTTP headers to be sent with every request. All header values must be strings.
+	// An object containing additional HTTP headers to be sent with every request.
 	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
 	// Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See Page.EmulateMedia() for more details. Defaults to `'none'`.
 	// It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
@@ -330,7 +338,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	Headless *bool `json:"headless"`
 	// Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
 	HttpCredentials *BrowserTypeLaunchPersistentContextOptionsHttpCredentials `json:"httpCredentials"`
-	// Whether to ignore HTTPS errors during navigation. Defaults to `false`.
+	// Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
 	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
 	// Whether the `meta viewport` tag is taken into account and touch events are enabled. Defaults to `false`. Not supported in Firefox.
 	IsMobile *bool `json:"isMobile"`
@@ -1245,6 +1253,16 @@ type LocatorUncheckOptions struct {
 	// When set, this method only performs the [actionability](./actionability.md) checks and skips the action. Defaults to `false`. Useful to wait until the element is ready for the action without performing it.
 	Trial *bool `json:"trial"`
 }
+type LocatorWaitForOptions struct {
+	// Defaults to `'visible'`. Can be either:
+	// `'attached'` - wait for element to be present in DOM.
+	// `'detached'` - wait for element to not be present in DOM.
+	// `'visible'` - wait for element to have non-empty bounding box and no `visibility:hidden`. Note that element without any content or with `display:none` has an empty bounding box and is not considered visible.
+	// `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`. This is opposite to the `'visible'` option.
+	State *WaitForSelectorState `json:"state"`
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
+	Timeout *float64 `json:"timeout"`
+}
 type MouseClickOptions struct {
 	// Defaults to `left`.
 	Button *MouseButton `json:"button"`
@@ -1396,9 +1414,6 @@ type PageTargetPosition struct {
 type PageEmulateMediaOptions struct {
 	// Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing `'Null'` disables color scheme emulation.
 	ColorScheme *ColorScheme `json:"colorScheme"`
-	// Emulates `'forced-colors'` media feature, supported values are `'active'` and `'none'`. Passing `null` disables forced colors emulation.
-	// It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281) in their issue tracker.
-	ForcedColors *ForcedColors `json:"forcedColors"`
 	// Changes the CSS media type of the page. The only allowed values are `'Screen'`, `'Print'` and `'Null'`. Passing `'Null'` disables CSS media emulation.
 	Media *Media `json:"media"`
 	// Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.

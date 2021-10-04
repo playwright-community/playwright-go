@@ -1,6 +1,7 @@
 package playwright_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -24,6 +25,7 @@ func TestBrowserTypeExecutablePath(t *testing.T) {
 
 func TestBrowserTypeLaunchPersistentContext(t *testing.T) {
 	BeforeEach(t)
+	t.Parallel()
 	defer AfterEach(t)
 	user_data_dir1 := t.TempDir()
 	browser_context, err := browserType.LaunchPersistentContext(user_data_dir1)
@@ -62,6 +64,7 @@ func TestBrowserTypeLaunchPersistentContext(t *testing.T) {
 
 func TestBrowserTypeConnect(t *testing.T) {
 	BeforeEach(t)
+	t.Parallel()
 	defer AfterEach(t)
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
@@ -81,6 +84,7 @@ func TestBrowserTypeConnect(t *testing.T) {
 
 func TestBrowserTypeConnectShouldBeAbleToReconnectToBrowser(t *testing.T) {
 	BeforeEach(t)
+	t.Parallel()
 	defer AfterEach(t)
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
@@ -120,6 +124,7 @@ func TestBrowserTypeConnectShouldBeAbleToReconnectToBrowser(t *testing.T) {
 
 func TestBrowserTypeConnectShouldEmitDisconnectedEvent(t *testing.T) {
 	BeforeEach(t)
+	t.Parallel()
 	defer AfterEach(t)
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
@@ -153,6 +158,7 @@ func TestBrowserTypeConnectShouldEmitDisconnectedEvent(t *testing.T) {
 
 func TestBrowserTypeConnectSlowMo(t *testing.T) {
 	BeforeEach(t)
+	t.Parallel()
 	defer AfterEach(t)
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
@@ -172,4 +178,63 @@ func TestBrowserTypeConnectSlowMo(t *testing.T) {
 	require.Equal(t, result, 121)
 	require.GreaterOrEqual(t, time.Since(t1), time.Duration(time.Millisecond*200))
 	require.NoError(t, browser.Close())
+}
+
+func TestBrowserTypeConnectOverCDP(t *testing.T) {
+	if !isChromium {
+		t.Skip("CDP is only supported on Chromium")
+	}
+	BeforeEach(t)
+	t.Parallel()
+	defer AfterEach(t)
+	port, err := getFreePort()
+	require.NoError(t, err)
+	browserServer, err := browserType.Launch(playwright.BrowserTypeLaunchOptions{
+		Args: []string{fmt.Sprintf("--remote-debugging-port=%d", port)},
+	})
+	require.NoError(t, err)
+	defer browserServer.Close()
+	browser, err := browserType.ConnectOverCDP(fmt.Sprintf("http://localhost:%d", port))
+	require.NoError(t, err)
+	require.NotNil(t, browser)
+	defer browser.Close()
+	require.Len(t, browser.Contexts(), 1)
+}
+
+func TestBrowserTypeConnectOverCDPTwice(t *testing.T) {
+	if !isChromium {
+		t.Skip("CDP is only supported on Chromium")
+	}
+	BeforeEach(t)
+	t.Parallel()
+	defer AfterEach(t)
+	port, err := getFreePort()
+	require.NoError(t, err)
+	browserServer, err := browserType.Launch(playwright.BrowserTypeLaunchOptions{
+		Args: []string{fmt.Sprintf("--remote-debugging-port=%d", port)},
+	})
+	require.NoError(t, err)
+	defer browserServer.Close()
+	browser1, err := browserType.ConnectOverCDP(fmt.Sprintf("http://localhost:%d", port))
+	require.NoError(t, err)
+	require.NotNil(t, browser1)
+	browser2, err := browserType.ConnectOverCDP(fmt.Sprintf("http://localhost:%d", port))
+	require.NoError(t, err)
+	require.NotNil(t, browser2)
+	defer browser1.Close()
+	defer browser2.Close()
+	require.Len(t, browser1.Contexts(), 1)
+	page1, err := browser1.Contexts()[0].NewPage()
+	require.NoError(t, err)
+	_, err = page1.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.Len(t, browser2.Contexts(), 1)
+	page2, err := browser2.Contexts()[0].NewPage()
+	require.NoError(t, err)
+	_, err = page2.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+
+	require.Len(t, browser1.Contexts()[0].Pages(), 2)
+	require.Len(t, browser2.Contexts()[0].Pages(), 2)
+
 }

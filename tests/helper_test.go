@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"mime"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -134,9 +135,9 @@ type testServer struct {
 
 func (t *testServer) AfterEach() {
 	t.Lock()
+	defer t.Unlock()
 	t.routes = make(map[string]http.HandlerFunc)
 	t.requestSubscriberes = make(map[string][]chan *http.Request)
-	t.Unlock()
 }
 
 func (t *testServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
@@ -163,6 +164,8 @@ func (t *testServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *testServer) SetRoute(path string, f http.HandlerFunc) {
+	s.Lock()
+	defer s.Unlock()
 	s.routes[path] = f
 }
 
@@ -173,6 +176,8 @@ func (s *testServer) SetRedirect(from, to string) {
 }
 
 func (s *testServer) WaitForRequestChan(path string) <-chan *http.Request {
+	s.Lock()
+	defer s.Unlock()
 	if _, ok := s.requestSubscriberes[path]; !ok {
 		s.requestSubscriberes[path] = make([]chan *http.Request, 0)
 	}
@@ -274,4 +279,18 @@ func getBrowserName() string {
 		return browserName
 	}
 	return "chromium"
+}
+
+func getFreePort() (int, error) {
+	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
+	if err != nil {
+		return 0, err
+	}
+
+	l, err := net.ListenTCP("tcp", addr)
+	if err != nil {
+		return 0, err
+	}
+	defer l.Close()
+	return l.Addr().(*net.TCPAddr).Port, nil
 }
