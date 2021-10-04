@@ -44,3 +44,5 @@ func newPlaywright(parent *channelOwner, objectType string, guid string, initial
 	pw.createChannelOwner(pw, parent, objectType, guid, initializer)
 	return pw
 }
+
+//go:generate bash scripts/generate-api.sh
