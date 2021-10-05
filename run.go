@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-const playwrightCliVersion = "1.16.0-next-1631944242000"
+const playwrightCliVersion = "1.16.0-next-1633411110000"
 
 type PlaywrightDriver struct {
 	DriverDirectory, DriverBinaryLocation, Version string
@@ -68,7 +68,6 @@ func (d *PlaywrightDriver) isUpToDateDriver() (bool, error) {
 		return false, nil
 	}
 	cmd := exec.Command(d.DriverBinaryLocation, "--version")
-	cmd.Env = d.getDriverEnviron()
 	output, err := cmd.Output()
 	if err != nil {
 		return false, fmt.Errorf("could not run driver: %w", err)
@@ -161,7 +160,6 @@ func (d *PlaywrightDriver) DownloadDriver() error {
 
 func (d *PlaywrightDriver) run() (*connection, error) {
 	cmd := exec.Command(d.DriverBinaryLocation, "run-driver")
-	cmd.Env = d.getDriverEnviron()
 	cmd.Stderr = os.Stderr
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -187,7 +185,13 @@ func (d *PlaywrightDriver) run() (*connection, error) {
 		if err := stdout.Close(); err != nil {
 			return fmt.Errorf("could not close stdout: %v", err)
 		}
-		return cmd.Process.Kill()
+		if err := cmd.Process.Kill(); err != nil {
+			return fmt.Errorf("could not kill process: %v", err)
+		}
+		if _, err := cmd.Process.Wait(); err != nil {
+			return fmt.Errorf("could not wait for process: %v", err)
+		}
+		return nil
 	})
 	connection.onmessage = transport.Send
 	transport.onmessage = connection.Dispatch
@@ -200,14 +204,10 @@ func (d *PlaywrightDriver) installBrowsers(driverPath string) error {
 		additionalArgs = append(additionalArgs, d.options.Browsers...)
 	}
 	cmd := exec.Command(driverPath, additionalArgs...)
-	cmd.Env = d.getDriverEnviron()
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("could not start driver: %w", err)
-	}
-	if err := cmd.Wait(); err != nil {
-		return err
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("could not install browsers: %w", err)
 	}
 	return nil
 }
@@ -262,7 +262,7 @@ func getDriverName() string {
 	case "windows":
 		return "playwright.cmd"
 	case "darwin":
-		return "playwright.sh"
+		fallthrough
 	case "linux":
 		return "playwright.sh"
 	}
@@ -284,21 +284,6 @@ func (d *PlaywrightDriver) getDriverURL() string {
 		optionalSubDirectory = "/next"
 	}
 	return fmt.Sprintf("https://playwright.azureedge.net/builds/driver%s/playwright-%s-%s.zip", optionalSubDirectory, d.Version, platform)
-}
-
-func (d *PlaywrightDriver) getDriverEnviron() []string {
-	environ := os.Environ()
-	unset := func(key string) {
-		for i := range environ {
-			if strings.HasPrefix((environ)[i], key+"=") {
-				(environ)[i] = (environ)[len(environ)-1]
-				environ = (environ)[:len(environ)-1]
-				break
-			}
-		}
-	}
-	unset("NODE_OPTIONS")
-	return environ
 }
 
 func makeFileExecutable(path string) error {
