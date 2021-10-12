@@ -116,10 +116,10 @@ func TestBrowserContextAddCookies(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, context.AddCookies(playwright.SetNetworkCookieParam{
+	require.NoError(t, context.AddCookies(playwright.BrowserContextAddCookiesOptionsCookies{
 		URL:   playwright.String(server.EMPTY_PAGE),
-		Name:  "password",
-		Value: "123456",
+		Name:  playwright.String("password"),
+		Value: playwright.String("123456"),
 	}))
 	cookie, err := page.Evaluate("() => document.cookie")
 	require.NoError(t, err)
@@ -127,11 +127,11 @@ func TestBrowserContextAddCookies(t *testing.T) {
 
 	cookies, err := context.Cookies()
 	require.NoError(t, err)
-	sameSite := "None"
+	sameSite := playwright.SameSiteAttributeNone
 	if isChromium {
-		sameSite = "Lax"
+		sameSite = playwright.SameSiteAttributeLax
 	}
-	require.Equal(t, []*playwright.NetworkCookie{
+	require.Equal(t, []*playwright.BrowserContextCookiesResult{
 		{
 			Name:    "password",
 			Value:   "123456",
@@ -141,7 +141,7 @@ func TestBrowserContextAddCookies(t *testing.T) {
 
 			HttpOnly: false,
 			Secure:   false,
-			SameSite: sameSite,
+			SameSite: *sameSite,
 		},
 	}, cookies)
 
