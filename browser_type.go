@@ -4,19 +4,19 @@ import (
 	"fmt"
 )
 
-type browserTypeImpl struct {
+type browsertypeImpl struct {
 	channelOwner
 }
 
-func (b *browserTypeImpl) Name() string {
+func (b *browsertypeImpl) Name() string {
 	return b.initializer["name"].(string)
 }
 
-func (b *browserTypeImpl) ExecutablePath() string {
+func (b *browsertypeImpl) ExecutablePath() string {
 	return b.initializer["executablePath"].(string)
 }
 
-func (b *browserTypeImpl) Launch(options ...BrowserTypeLaunchOptions) (Browser, error) {
+func (b *browsertypeImpl) Launch(options ...BrowserTypeLaunchOptions) (Browser, error) {
 	overrides := map[string]interface{}{}
 	if len(options) == 1 && options[0].Env != nil {
 		overrides["env"] = serializeMapToNameAndValue(options[0].Env)
@@ -29,7 +29,7 @@ func (b *browserTypeImpl) Launch(options ...BrowserTypeLaunchOptions) (Browser, 
 	return fromChannel(channel).(*browserImpl), nil
 }
 
-func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (BrowserContext, error) {
+func (b *browsertypeImpl) LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (BrowserContext, error) {
 	overrides := map[string]interface{}{
 		"userDataDir": userDataDir,
 		"sdkLanguage": "javascript",
@@ -47,9 +47,9 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
-	return fromChannel(channel).(*browserContextImpl), nil
+	return fromChannel(channel).(*browsercontextImpl), nil
 }
-func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptions) (Browser, error) {
+func (b *browsertypeImpl) Connect(url string, options ...BrowserTypeConnectOptions) (Browser, error) {
 	overrides := map[string]interface{}{
 		"wsEndpoint": url,
 	}
@@ -62,11 +62,11 @@ func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptio
 	var browser *browserImpl
 	pipeClosed := func() {
 		for _, context := range browser.contexts {
-			pages := context.(*browserContextImpl).pages
+			pages := context.(*browsercontextImpl).pages
 			for _, page := range pages {
 				page.(*pageImpl).onClose()
 			}
-			context.(*browserContextImpl).onClose()
+			context.(*browsercontextImpl).onClose()
 		}
 		browser.onClose()
 	}
@@ -85,7 +85,7 @@ func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptio
 	browser.isConnectedOverWebSocket = true
 	return browser, nil
 }
-func (b *browserTypeImpl) ConnectOverCDP(endpointURL string, options ...BrowserTypeConnectOverCDPOptions) (Browser, error) {
+func (b *browsertypeImpl) ConnectOverCDP(endpointURL string, options ...BrowserTypeConnectOverCDPOptions) (Browser, error) {
 	overrides := map[string]interface{}{
 		"endpointURL": endpointURL,
 		"sdkLanguage": "javascript",
@@ -96,15 +96,15 @@ func (b *browserTypeImpl) ConnectOverCDP(endpointURL string, options ...BrowserT
 	}
 	browser := fromChannel(response.(map[string]interface{})["browser"]).(*browserImpl)
 	if defaultContext, ok := response.(map[string]interface{})["defaultContext"]; ok {
-		context := fromChannel(defaultContext).(*browserContextImpl)
+		context := fromChannel(defaultContext).(*browsercontextImpl)
 		browser.contexts = append(browser.contexts, context)
 		context.browser = browser
 	}
 	return browser, nil
 }
 
-func newBrowserType(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserTypeImpl {
-	bt := &browserTypeImpl{}
+func newBrowserType(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browsertypeImpl {
+	bt := &browsertypeImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	return bt
 }

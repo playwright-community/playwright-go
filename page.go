@@ -15,7 +15,7 @@ type pageImpl struct {
 	keyboard        *keyboardImpl
 	touchscreen     *touchscreenImpl
 	timeoutSettings *timeoutSettings
-	browserContext  *browserContextImpl
+	browserContext  *browsercontextImpl
 	frames          []Frame
 	workers         []Worker
 	mainFrame       Frame
@@ -399,7 +399,7 @@ func (p *pageImpl) ExpectDownload(cb func() error) (Download, error) {
 
 func (p *pageImpl) ExpectFileChooser(cb func() error) (FileChooser, error) {
 	response, err := newExpectWrapper(p.WaitForEvent, []interface{}{"filechooser"}, cb)
-	return response.(*fileChooserImpl), err
+	return response.(*filechooserImpl), err
 }
 
 func (p *pageImpl) ExpectLoadState(state string, cb func() error) error {
@@ -489,7 +489,7 @@ func (p *pageImpl) Touchscreen() Touchscreen {
 	return p.touchscreen
 }
 
-func (p *pageImpl) setBrowserContext(browserContext *browserContextImpl) {
+func (p *pageImpl) setBrowserContext(browserContext *browsercontextImpl) {
 	p.browserContext = browserContext
 	p.timeoutSettings = newTimeoutSettings(browserContext.timeoutSettings)
 }
@@ -533,7 +533,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		bt.Emit("domcontentloaded")
 	})
 	bt.channel.On("fileChooser", func(ev map[string]interface{}) {
-		bt.Emit("filechooser", newFileChooser(bt, fromChannel(ev["element"]).(*elementHandleImpl), ev["isMultiple"].(bool)))
+		bt.Emit("filechooser", newFileChooser(bt, fromChannel(ev["element"]).(*elementhandleImpl), ev["isMultiple"].(bool)))
 	})
 	bt.channel.On("frameAttached", func(ev map[string]interface{}) {
 		bt.onFrameAttached(fromChannel(ev["frame"]).(*frameImpl))

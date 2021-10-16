@@ -45,7 +45,7 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
-	context := fromChannel(channel).(*browserContextImpl)
+	context := fromChannel(channel).(*browsercontextImpl)
 	if len(options) == 1 {
 		context.options = &options[0]
 	}
@@ -66,7 +66,7 @@ func (b *browserImpl) NewPage(options ...BrowserNewContextOptions) (Page, error)
 		return nil, err
 	}
 	page.(*pageImpl).ownedContext = context
-	context.(*browserContextImpl).ownedPage = page
+	context.(*browsercontextImpl).ownedPage = page
 	return page, nil
 }
 
@@ -78,7 +78,7 @@ func (b *browserImpl) NewBrowserCDPSession() (CDPSession, error) {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
 
-	cdpSession := fromChannel(channel).(*cdpSessionImpl)
+	cdpSession := fromChannel(channel).(*cdpsessionImpl)
 
 	return cdpSession, nil
 }

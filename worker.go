@@ -3,7 +3,7 @@ package playwright
 type workerImpl struct {
 	channelOwner
 	page    *pageImpl
-	context *browserContextImpl
+	context *browsercontextImpl
 }
 
 func (w *workerImpl) URL() string {
@@ -53,7 +53,7 @@ func (w *workerImpl) EvaluateHandle(expression string, options ...interface{}) (
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(result).(*jsHandleImpl), nil
+	return fromChannel(result).(*jshandleImpl), nil
 }
 
 func (w *workerImpl) onClose() {

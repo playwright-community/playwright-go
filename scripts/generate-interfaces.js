@@ -64,7 +64,16 @@ for (const [className, methods] of Object.entries(interfaceData)) {
 
       const [inputTypes, returnTypes] = funcData
       console.log(`${funcName}(${transformInputParameters(inputTypes)}) ${transformReturnParameters(returnTypes)}`)
+      if (returnTypes?.includes("error")) {
+        const returnType = returnTypes.replace(", error", "").replace("error", "") || " "
+        console.log(`Must${funcName}(${transformInputParameters(inputTypes)}) ${returnType}`)
+      }
     }
   }
   console.log("}\n")
+}
+
+module.exports = {
+  interfaceData,
+  api,
 }

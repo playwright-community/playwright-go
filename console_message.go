@@ -27,7 +27,7 @@ func (c *consoleMessageImpl) Args() []JSHandle {
 	args := c.initializer["args"].([]interface{})
 	out := []JSHandle{}
 	for idx := range args {
-		out = append(out, fromChannel(args[idx]).(*jsHandleImpl))
+		out = append(out, fromChannel(args[idx]).(*jshandleImpl))
 	}
 	return out
 }

@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-type browserContextImpl struct {
+type browsercontextImpl struct {
 	channelOwner
 	timeoutSettings   *timeoutSettings
 	isClosedOrClosing bool
@@ -24,34 +24,34 @@ type browserContextImpl struct {
 	tracing           *tracingImpl
 }
 
-func (b *browserContextImpl) SetDefaultNavigationTimeout(timeout float64) {
+func (b *browsercontextImpl) SetDefaultNavigationTimeout(timeout float64) {
 	b.timeoutSettings.SetNavigationTimeout(timeout)
 	b.channel.SendNoReply("setDefaultNavigationTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
 	})
 }
 
-func (b *browserContextImpl) SetDefaultTimeout(timeout float64) {
+func (b *browsercontextImpl) SetDefaultTimeout(timeout float64) {
 	b.timeoutSettings.SetTimeout(timeout)
 	b.channel.SendNoReply("setDefaultTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
 	})
 }
 
-func (b *browserContextImpl) Pages() []Page {
+func (b *browsercontextImpl) Pages() []Page {
 	b.Lock()
 	defer b.Unlock()
 	return b.pages
 }
 
-func (b *browserContextImpl) Browser() Browser {
+func (b *browsercontextImpl) Browser() Browser {
 	return b.browser
 }
-func (b *browserContextImpl) Tracing() Tracing {
+func (b *browsercontextImpl) Tracing() Tracing {
 	return b.tracing
 }
 
-func (b *browserContextImpl) NewCDPSession(page Page) (CDPSession, error) {
+func (b *browsercontextImpl) NewCDPSession(page Page) (CDPSession, error) {
 	channel, err := b.channel.Send("newCDPSession", map[string]interface{}{
 		"sdkLanguage": "javascript",
 		"page":        page.(*pageImpl).channel,
@@ -60,12 +60,12 @@ func (b *browserContextImpl) NewCDPSession(page Page) (CDPSession, error) {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
 
-	cdpSession := fromChannel(channel).(*cdpSessionImpl)
+	cdpSession := fromChannel(channel).(*cdpsessionImpl)
 
 	return cdpSession, nil
 }
 
-func (b *browserContextImpl) NewPage(options ...BrowserNewPageOptions) (Page, error) {
+func (b *browsercontextImpl) NewPage(options ...BrowserNewPageOptions) (Page, error) {
 	if b.ownedPage != nil {
 		return nil, errors.New("Please use browser.NewContext()")
 	}
@@ -76,7 +76,7 @@ func (b *browserContextImpl) NewPage(options ...BrowserNewPageOptions) (Page, er
 	return fromChannel(channel).(*pageImpl), nil
 }
 
-func (b *browserContextImpl) Cookies(urls ...string) ([]*BrowserContextCookiesResult, error) {
+func (b *browsercontextImpl) Cookies(urls ...string) ([]*BrowserContextCookiesResult, error) {
 	result, err := b.channel.Send("cookies", map[string]interface{}{
 		"urls": urls,
 	})
@@ -91,26 +91,26 @@ func (b *browserContextImpl) Cookies(urls ...string) ([]*BrowserContextCookiesRe
 	return cookies, nil
 }
 
-func (b *browserContextImpl) AddCookies(cookies ...BrowserContextAddCookiesOptionsCookies) error {
+func (b *browsercontextImpl) AddCookies(cookies ...BrowserContextAddCookiesOptionsCookies) error {
 	_, err := b.channel.Send("addCookies", map[string]interface{}{
 		"cookies": cookies,
 	})
 	return err
 }
 
-func (b *browserContextImpl) ClearCookies() error {
+func (b *browsercontextImpl) ClearCookies() error {
 	_, err := b.channel.Send("clearCookies")
 	return err
 }
 
-func (b *browserContextImpl) GrantPermissions(permissions []string, options ...BrowserContextGrantPermissionsOptions) error {
+func (b *browsercontextImpl) GrantPermissions(permissions []string, options ...BrowserContextGrantPermissionsOptions) error {
 	_, err := b.channel.Send("grantPermissions", map[string]interface{}{
 		"permissions": permissions,
 	}, options)
 	return err
 }
 
-func (b *browserContextImpl) ClearPermissions() error {
+func (b *browsercontextImpl) ClearPermissions() error {
 	_, err := b.channel.Send("clearPermissions")
 	return err
 }
@@ -122,33 +122,33 @@ type SetGeolocationOptions struct {
 	Accuracy  *int `json:"accuracy"`
 }
 
-func (b *browserContextImpl) SetGeolocation(gelocation *SetGeolocationOptions) error {
+func (b *browsercontextImpl) SetGeolocation(gelocation *SetGeolocationOptions) error {
 	_, err := b.channel.Send("setGeolocation", map[string]interface{}{
 		"geolocation": gelocation,
 	})
 	return err
 }
 
-func (b *browserContextImpl) ResetGeolocation() error {
+func (b *browsercontextImpl) ResetGeolocation() error {
 	_, err := b.channel.Send("setGeolocation", map[string]interface{}{})
 	return err
 }
 
-func (b *browserContextImpl) SetExtraHTTPHeaders(headers map[string]string) error {
+func (b *browsercontextImpl) SetExtraHTTPHeaders(headers map[string]string) error {
 	_, err := b.channel.Send("setExtraHTTPHeaders", map[string]interface{}{
 		"headers": serializeMapToNameAndValue(headers),
 	})
 	return err
 }
 
-func (b *browserContextImpl) SetOffline(offline bool) error {
+func (b *browsercontextImpl) SetOffline(offline bool) error {
 	_, err := b.channel.Send("setOffline", map[string]interface{}{
 		"offline": offline,
 	})
 	return err
 }
 
-func (b *browserContextImpl) AddInitScript(options BrowserContextAddInitScriptOptions) error {
+func (b *browsercontextImpl) AddInitScript(options BrowserContextAddInitScriptOptions) error {
 	var source string
 	if options.Script != nil {
 		source = *options.Script
@@ -166,7 +166,7 @@ func (b *browserContextImpl) AddInitScript(options BrowserContextAddInitScriptOp
 	return err
 }
 
-func (b *browserContextImpl) ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error {
+func (b *browsercontextImpl) ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error {
 	needsHandle := false
 	if len(handle) == 1 {
 		needsHandle = handle[0]
@@ -187,13 +187,13 @@ func (b *browserContextImpl) ExposeBinding(name string, binding BindingCallFunct
 	return err
 }
 
-func (b *browserContextImpl) ExposeFunction(name string, binding ExposedFunction) error {
+func (b *browsercontextImpl) ExposeFunction(name string, binding ExposedFunction) error {
 	return b.ExposeBinding(name, func(source *BindingSource, args ...interface{}) interface{} {
 		return binding(args...)
 	})
 }
 
-func (b *browserContextImpl) Route(url interface{}, handler routeHandler) error {
+func (b *browsercontextImpl) Route(url interface{}, handler routeHandler) error {
 	b.routes = append(b.routes, newRouteHandlerEntry(newURLMatcher(url), handler))
 	if len(b.routes) == 1 {
 		_, err := b.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
@@ -206,7 +206,7 @@ func (b *browserContextImpl) Route(url interface{}, handler routeHandler) error 
 	return nil
 }
 
-func (b *browserContextImpl) Unroute(url interface{}, handlers ...routeHandler) error {
+func (b *browsercontextImpl) Unroute(url interface{}, handlers ...routeHandler) error {
 	b.Lock()
 	defer b.Unlock()
 
@@ -219,15 +219,15 @@ func (b *browserContextImpl) Unroute(url interface{}, handlers ...routeHandler) 
 	return nil
 }
 
-func (b *browserContextImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
+func (b *browsercontextImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
 	return <-waitForEvent(b, event, predicate...)
 }
 
-func (b *browserContextImpl) ExpectEvent(event string, cb func() error) (interface{}, error) {
+func (b *browsercontextImpl) ExpectEvent(event string, cb func() error) (interface{}, error) {
 	return newExpectWrapper(b.WaitForEvent, []interface{}{event}, cb)
 }
 
-func (b *browserContextImpl) Close() error {
+func (b *browsercontextImpl) Close() error {
 	if b.isClosedOrClosing {
 		return nil
 	}
@@ -264,7 +264,7 @@ type LocalStorageEntry struct {
 	Value string `json:"value"`
 }
 
-func (b *browserContextImpl) StorageState(paths ...string) (*StorageState, error) {
+func (b *browsercontextImpl) StorageState(paths ...string) (*StorageState, error) {
 	result, err := b.channel.SendReturnAsDict("storageState")
 	if err != nil {
 		return nil, err
@@ -286,7 +286,7 @@ func (b *browserContextImpl) StorageState(paths ...string) (*StorageState, error
 	return &storageState, nil
 }
 
-func (b *browserContextImpl) onBinding(binding *bindingCallImpl) {
+func (b *browsercontextImpl) onBinding(binding *bindingCallImpl) {
 	function := b.bindings[binding.initializer["name"].(string)]
 	if function == nil {
 		return
@@ -294,7 +294,7 @@ func (b *browserContextImpl) onBinding(binding *bindingCallImpl) {
 	go binding.Call(function)
 }
 
-func (b *browserContextImpl) onClose() {
+func (b *browsercontextImpl) onClose() {
 	b.isClosedOrClosing = true
 	if b.browser != nil {
 		contexts := make([]BrowserContext, 0)
@@ -310,7 +310,7 @@ func (b *browserContextImpl) onClose() {
 	b.Emit("close")
 }
 
-func (b *browserContextImpl) onPage(page *pageImpl) {
+func (b *browsercontextImpl) onPage(page *pageImpl) {
 	page.setBrowserContext(b)
 	b.Lock()
 	b.pages = append(b.pages, page)
@@ -322,7 +322,7 @@ func (b *browserContextImpl) onPage(page *pageImpl) {
 	}
 }
 
-func (b *browserContextImpl) onRoute(route *routeImpl, request *requestImpl) {
+func (b *browsercontextImpl) onRoute(route *routeImpl, request *requestImpl) {
 	go func() {
 		for _, handlerEntry := range b.routes {
 			if handlerEntry.matcher.Matches(request.URL()) {
@@ -335,12 +335,12 @@ func (b *browserContextImpl) onRoute(route *routeImpl, request *requestImpl) {
 		}
 	}()
 }
-func (p *browserContextImpl) Pause() error {
+func (p *browsercontextImpl) Pause() error {
 	_, err := p.channel.Send("pause")
 	return err
 }
 
-func (b *browserContextImpl) OnBackgroundPage(ev map[string]interface{}) {
+func (b *browsercontextImpl) OnBackgroundPage(ev map[string]interface{}) {
 	b.Lock()
 	p := fromChannel(ev["page"]).(*pageImpl)
 	p.browserContext = b
@@ -349,14 +349,14 @@ func (b *browserContextImpl) OnBackgroundPage(ev map[string]interface{}) {
 	b.Emit("backgroundpage", p)
 }
 
-func (b *browserContextImpl) BackgroundPages() []Page {
+func (b *browsercontextImpl) BackgroundPages() []Page {
 	b.Lock()
 	defer b.Unlock()
 	return b.backgroundPages
 }
 
-func newBrowserContext(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserContextImpl {
-	bt := &browserContextImpl{
+func newBrowserContext(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browsercontextImpl {
+	bt := &browsercontextImpl{
 		timeoutSettings: newTimeoutSettings(nil),
 		pages:           make([]Page, 0),
 		routes:          make([]*routeHandlerEntry, 0),

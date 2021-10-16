@@ -366,7 +366,7 @@ func convertSelectOptionSet(values SelectOptionValues) map[string]interface{} {
 	var e []*channel
 	if values.Elements != nil {
 		for _, eh := range *values.Elements {
-			e = append(e, eh.(*elementHandleImpl).channel)
+			e = append(e, eh.(*elementhandleImpl).channel)
 		}
 	}
 	if e != nil {

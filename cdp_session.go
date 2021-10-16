@@ -1,15 +1,15 @@
 package playwright
 
-type cdpSessionImpl struct {
+type cdpsessionImpl struct {
 	channelOwner
 }
 
-func (c *cdpSessionImpl) Detach() error {
+func (c *cdpsessionImpl) Detach() error {
 	_, err := c.channel.Send("detach")
 	return err
 }
 
-func (c *cdpSessionImpl) Send(method string, params map[string]interface{}) (interface{}, error) {
+func (c *cdpsessionImpl) Send(method string, params map[string]interface{}) (interface{}, error) {
 	result, err := c.channel.Send("send", map[string]interface{}{
 		"method": method,
 		"params": params,
@@ -21,12 +21,12 @@ func (c *cdpSessionImpl) Send(method string, params map[string]interface{}) (int
 	return result, err
 }
 
-func (c *cdpSessionImpl) onEvent(params map[string]interface{}) {
+func (c *cdpsessionImpl) onEvent(params map[string]interface{}) {
 	c.Emit(params["method"].(string), params["params"])
 }
 
-func newCDPSession(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *cdpSessionImpl {
-	bt := &cdpSessionImpl{}
+func newCDPSession(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *cdpsessionImpl {
+	bt := &cdpsessionImpl{}
 
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 

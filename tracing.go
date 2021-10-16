@@ -1,7 +1,7 @@
 package playwright
 
 type tracingImpl struct {
-	context *browserContextImpl
+	context *browsercontextImpl
 	channel *channel
 }
 
@@ -66,6 +66,6 @@ func (t *tracingImpl) stopChunk(path string) error {
 	return nil
 }
 
-func newTracing(context *browserContextImpl) *tracingImpl {
+func newTracing(context *browsercontextImpl) *tracingImpl {
 	return &tracingImpl{context, context.channel}
 }

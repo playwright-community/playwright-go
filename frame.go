@@ -96,7 +96,7 @@ func (f *frameImpl) AddScriptTag(options PageAddScriptTagOptions) (ElementHandle
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(channel).(*elementHandleImpl), nil
+	return fromChannel(channel).(*elementhandleImpl), nil
 }
 
 func (f *frameImpl) AddStyleTag(options PageAddStyleTagOptions) (ElementHandle, error) {
@@ -112,7 +112,7 @@ func (f *frameImpl) AddStyleTag(options PageAddStyleTagOptions) (ElementHandle, 
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(channel).(*elementHandleImpl), nil
+	return fromChannel(channel).(*elementhandleImpl), nil
 }
 
 func (f *frameImpl) Page() Page {
@@ -222,7 +222,7 @@ func (f *frameImpl) QuerySelector(selector string) (ElementHandle, error) {
 	if channel == nil {
 		return nil, nil
 	}
-	return fromChannel(channel).(*elementHandleImpl), nil
+	return fromChannel(channel).(*elementhandleImpl), nil
 }
 
 func (f *frameImpl) QuerySelectorAll(selector string) ([]ElementHandle, error) {
@@ -234,7 +234,7 @@ func (f *frameImpl) QuerySelectorAll(selector string) ([]ElementHandle, error) {
 	}
 	elements := make([]ElementHandle, 0)
 	for _, channel := range channels.([]interface{}) {
-		elements = append(elements, fromChannel(channel).(*elementHandleImpl))
+		elements = append(elements, fromChannel(channel).(*elementhandleImpl))
 	}
 	return elements, nil
 }
@@ -355,7 +355,7 @@ func (f *frameImpl) WaitForSelector(selector string, options ...PageWaitForSelec
 	if channelOwner == nil {
 		return nil, nil
 	}
-	return channelOwner.(*elementHandleImpl), nil
+	return channelOwner.(*elementhandleImpl), nil
 }
 
 func (f *frameImpl) DispatchEvent(selector, typ string, eventInit interface{}, options ...PageDispatchEventOptions) error {
@@ -470,7 +470,7 @@ func (f *frameImpl) WaitForFunction(expression string, arg interface{}, options 
 	if handle == nil {
 		return nil, nil
 	}
-	return handle.(*jsHandleImpl), nil
+	return handle.(*jshandleImpl), nil
 }
 
 func (f *frameImpl) Title() (string, error) {
@@ -512,7 +512,7 @@ func (f *frameImpl) FrameElement() (ElementHandle, error) {
 	if err != nil {
 		return nil, err
 	}
-	return elementHandle.(*elementHandleImpl), nil
+	return elementHandle.(*elementhandleImpl), nil
 }
 
 func (f *frameImpl) IsDetached() bool {

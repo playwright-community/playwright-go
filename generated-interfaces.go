@@ -13,20 +13,24 @@ type Browser interface {
 	// browser server.
 	// The `Browser` object itself is considered to be disposed and cannot be used anymore.
 	Close() error
+	MustClose()
 	// Returns an array of all open browser contexts. In a newly created browser, this will return zero browser contexts.
 	Contexts() []BrowserContext
 	// Indicates that the browser is connected.
 	IsConnected() bool
 	// Creates a new browser context. It won't share cookies/cache with other browser contexts.
 	NewContext(options ...BrowserNewContextOptions) (BrowserContext, error)
+	MustNewContext(options ...BrowserNewContextOptions) BrowserContext
 	// Creates a new page in a new browser context. Closing this page will close the context as well.
 	// This is a convenience API that should only be used for the single-page scenarios and short snippets. Production code and
 	// testing frameworks should explicitly create Browser.newContext() followed by the
 	// BrowserContext.newPage() to control their exact life times.
 	NewPage(options ...BrowserNewContextOptions) (Page, error)
+	MustNewPage(options ...BrowserNewContextOptions) Page
 	// > NOTE: CDP Sessions are only supported on Chromium-based browsers.
 	// Returns the newly created browser session.
 	NewBrowserCDPSession() (CDPSession, error)
+	MustNewBrowserCDPSession() CDPSession
 	// Returns the browser version.
 	Version() string
 }
@@ -44,7 +48,9 @@ type CDPSession interface {
 	// Detaches the CDPSession from the target. Once detached, the CDPSession object won't emit any events and can't be used to
 	// send messages.
 	Detach() error
+	MustDetach()
 	Send(method string, params map[string]interface{}) (interface{}, error)
+	MustSend(method string, params map[string]interface{}) interface{}
 }
 
 // BrowserContexts provide a way to operate multiple independent browser sessions.
@@ -57,6 +63,7 @@ type BrowserContext interface {
 	// Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies can be
 	// obtained via BrowserContext.cookies().
 	AddCookies(cookies ...BrowserContextAddCookiesOptionsCookies) error
+	MustAddCookies(cookies ...BrowserContextAddCookiesOptionsCookies)
 	// Adds a script which would be evaluated in one of the following scenarios:
 	// - Whenever a page is created in the browser context or is navigated.
 	// - Whenever a child frame is attached or navigated in any page in the browser context. In this case, the script is
@@ -67,19 +74,25 @@ type BrowserContext interface {
 	// > NOTE: The order of evaluation of multiple scripts installed via BrowserContext.addInitScript() and
 	// Page.addInitScript() is not defined.
 	AddInitScript(script BrowserContextAddInitScriptOptions) error
+	MustAddInitScript(script BrowserContextAddInitScriptOptions)
 	// Returns the browser instance of the context. If it was launched as a persistent context null gets returned.
 	Browser() Browser
 	// Clears context cookies.
 	ClearCookies() error
+	MustClearCookies()
 	// Clears all permission overrides for the browser context.
 	ClearPermissions() error
+	MustClearPermissions()
 	// Closes the browser context. All the pages that belong to the browser context will be closed.
 	// > NOTE: The default browser context cannot be closed.
 	Close() error
+	MustClose()
 	// If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those URLs
 	// are returned.
 	Cookies(urls ...string) ([]*BrowserContextCookiesResult, error)
+	MustCookies(urls ...string) []*BrowserContextCookiesResult
 	ExpectEvent(event string, cb func() error) (interface{}, error)
+	MustExpectEvent(event string, cb func() error) interface{}
 	// The method adds a function called `name` on the `window` object of every frame in every page in the context. When
 	// called, the function executes `callback` and returns a [Promise] which resolves to the return value of `callback`. If
 	// the `callback` returns a [Promise], it will be awaited.
@@ -89,20 +102,25 @@ type BrowserContext interface {
 	// An example of exposing page URL to all frames in all pages in the context:
 	// An example of passing an element handle:
 	ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error
+	MustExposeBinding(name string, binding BindingCallFunction, handle ...bool)
 	// The method adds a function called `name` on the `window` object of every frame in every page in the context. When
 	// called, the function executes `callback` and returns a [Promise] which resolves to the return value of `callback`.
 	// If the `callback` returns a [Promise], it will be awaited.
 	// See Page.exposeFunction() for page-only version.
 	// An example of adding a `sha256` function to all pages in the context:
 	ExposeFunction(name string, binding ExposedFunction) error
+	MustExposeFunction(name string, binding ExposedFunction)
 	// Grants specified permissions to the browser context. Only grants corresponding permissions to the given origin if
 	// specified.
 	GrantPermissions(permissions []string, options ...BrowserContextGrantPermissionsOptions) error
+	MustGrantPermissions(permissions []string, options ...BrowserContextGrantPermissionsOptions)
 	// > NOTE: CDP sessions are only supported on Chromium-based browsers.
 	// Returns the newly created session.
 	NewCDPSession(page Page) (CDPSession, error)
+	MustNewCDPSession(page Page) CDPSession
 	// Creates a new page in the browser context.
 	NewPage(options ...BrowserNewPageOptions) (Page, error)
+	MustNewPage(options ...BrowserNewPageOptions) Page
 	// Returns all open pages in the context.
 	Pages() []Page
 	// This setting will change the default maximum navigation time for the following methods and related shortcuts:
@@ -124,11 +142,14 @@ type BrowserContext interface {
 	// header, page-specific header value will be used instead of the browser context header value.
 	// > NOTE: BrowserContext.setExtraHTTPHeaders() does not guarantee the order of headers in the outgoing requests.
 	SetExtraHTTPHeaders(headers map[string]string) error
+	MustSetExtraHTTPHeaders(headers map[string]string)
 	// Sets the context's geolocation. Passing `null` or `undefined` emulates position unavailable.
 	// > NOTE: Consider using BrowserContext.grantPermissions() to grant permissions for the browser context pages to
 	// read its geolocation.
 	SetGeolocation(gelocation *SetGeolocationOptions) error
+	MustSetGeolocation(gelocation *SetGeolocationOptions)
 	ResetGeolocation() error
+	MustResetGeolocation()
 	// Routing provides the capability to modify network requests that are made by any page in the browser context. Once route
 	// is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
 	// > NOTE: Page.route() will not intercept requests intercepted by Service Worker. See
@@ -143,12 +164,16 @@ type BrowserContext interface {
 	// To remove a route with its handler you can use BrowserContext.unroute().
 	// > NOTE: Enabling routing disables http cache.
 	Route(url interface{}, handler routeHandler) error
+	MustRoute(url interface{}, handler routeHandler)
 	SetOffline(offline bool) error
+	MustSetOffline(offline bool)
 	// Returns storage state for this browser context, contains current cookies and local storage snapshot.
 	StorageState(path ...string) (*StorageState, error)
+	MustStorageState(path ...string) *StorageState
 	// Removes a route created with BrowserContext.route(). When `handler` is not specified, removes all routes for
 	// the `url`.
 	Unroute(url interface{}, handler ...routeHandler) error
+	MustUnroute(url interface{}, handler ...routeHandler)
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the context closes before the event is fired. Returns the event data value.
 	WaitForEvent(event string, predicate ...interface{}) interface{}
@@ -164,14 +189,18 @@ type BrowserContext interface {
 type Tracing interface {
 	// Start tracing.
 	Start(options ...TracingStartOptions) error
+	MustStart(options ...TracingStartOptions)
 	// Stop tracing.
 	Stop(options ...TracingStopOptions) error
+	MustStop(options ...TracingStopOptions)
 	// Start a new trace chunk. If you'd like to record multiple traces on the same `BrowserContext`, use
 	// Tracing.start`] once, and then create multiple trace chunks with [`method: Tracing.startChunk() and
 	// Tracing.stopChunk().
 	StartChunk() error
+	MustStartChunk()
 	// Stop the trace chunk. See Tracing.startChunk() for more details about multiple trace chunks.
 	StopChunk(options ...TracingStopChunkOptions) error
+	MustStopChunk(options ...TracingStopChunkOptions)
 }
 
 // BrowserType provides methods to launch a specific browser instance or connect to an existing one. The following is a
@@ -196,18 +225,22 @@ type BrowserType interface {
 	// [This article](https://chromium.googlesource.com/chromium/src/+/lkgr/docs/chromium_browser_vs_google_chrome.md)
 	// describes some differences for Linux users.
 	Launch(options ...BrowserTypeLaunchOptions) (Browser, error)
+	MustLaunch(options ...BrowserTypeLaunchOptions) Browser
 	// Returns the persistent browser context instance.
 	// Launches browser that uses persistent storage located at `userDataDir` and returns the only context. Closing this
 	// context will automatically close the browser.
 	LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (BrowserContext, error)
+	MustLaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) BrowserContext
 	// Returns browser name. For example: `'chromium'`, `'webkit'` or `'firefox'`.
 	Name() string
 	// This methods attaches Playwright to an existing browser instance.
 	Connect(url string, options ...BrowserTypeConnectOptions) (Browser, error)
+	MustConnect(url string, options ...BrowserTypeConnectOptions) Browser
 	// This methods attaches Playwright to an existing browser instance using the Chrome DevTools Protocol.
 	// The default browser context is accessible via Browser.contexts().
 	// > NOTE: Connecting over the Chrome DevTools Protocol is only supported for Chromium-based browsers.
 	ConnectOverCDP(endpointURL string, options ...BrowserTypeConnectOverCDPOptions) (Browser, error)
+	MustConnectOverCDP(endpointURL string, options ...BrowserTypeConnectOverCDPOptions) Browser
 }
 
 // `ConsoleMessage` objects are dispatched by page via the [`event: Page.console`] event.
@@ -233,10 +266,12 @@ type ConsoleMessage interface {
 type Dialog interface {
 	// Returns when the dialog has been accepted.
 	Accept(texts ...string) error
+	MustAccept(texts ...string)
 	// If dialog is prompt, returns default prompt value. Otherwise, returns empty string.
 	DefaultValue() string
 	// Returns when the dialog has been dismissed.
 	Dismiss() error
+	MustDismiss()
 	// A message displayed in the dialog.
 	Message() string
 	// Returns dialog's type, can be one of `alert`, `beforeunload`, `confirm` or `prompt`.
@@ -252,16 +287,20 @@ type Dialog interface {
 type Download interface {
 	// Deletes the downloaded file. Will wait for the download to finish if necessary.
 	Delete() error
+	MustDelete()
 	// Returns download error if any. Will wait for the download to finish if necessary.
 	Failure() (string, error)
+	MustFailure() string
 	// Returns path to the downloaded file in case of successful download. The method will wait for the download to finish if
 	// necessary. The method throws when connected remotely.
 	// Note that the download's file name is a random GUID, use Download.suggestedFilename() to get suggested file
 	// name.
 	Path() (string, error)
+	MustPath() string
 	// Copy the download to a user-specified path. It is safe to call this method while the download is still in progress. Will
 	// wait for the download to finish if necessary.
 	SaveAs(path string) error
+	MustSaveAs(path string)
 	String() string
 	// Returns suggested filename for this download. It is typically computed by the browser from the
 	// [`Content-Disposition`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition) response header
@@ -275,6 +314,7 @@ type Download interface {
 	// Cancels a download. Will not fail if the download is already finished or canceled. Upon successful cancellations,
 	// `download.failure()` would resolve to `'canceled'`.
 	Cancel() error
+	MustCancel()
 }
 
 // ElementHandle represents an in-page DOM element. ElementHandles can be created with the Page.querySelector()
@@ -304,6 +344,7 @@ type ElementHandle interface {
 	// Assuming the page is static, it is safe to use bounding box coordinates to perform input. For example, the following
 	// snippet should click the center of the element.
 	BoundingBox() (*Rect, error)
+	MustBoundingBox() *Rect
 	// This method checks the element by performing the following steps:
 	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already checked,
 	// this method returns immediately.
@@ -316,6 +357,7 @@ type ElementHandle interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
 	// zero timeout disables this.
 	Check(options ...ElementHandleCheckOptions) error
+	MustCheck(options ...ElementHandleCheckOptions)
 	// This method clicks the element by performing the following steps:
 	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
@@ -325,8 +367,10 @@ type ElementHandle interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
 	// zero timeout disables this.
 	Click(options ...ElementHandleClickOptions) error
+	MustClick(options ...ElementHandleClickOptions)
 	// Returns the content frame for element handles referencing iframe nodes, or `null` otherwise
 	ContentFrame() (Frame, error)
+	MustContentFrame() Frame
 	// This method double clicks the element by performing the following steps:
 	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
@@ -338,6 +382,7 @@ type ElementHandle interface {
 	// zero timeout disables this.
 	// > NOTE: `elementHandle.dblclick()` dispatches two `click` events and a single `dblclick` event.
 	Dblclick(options ...ElementHandleDblclickOptions) error
+	MustDblclick(options ...ElementHandleDblclickOptions)
 	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
 	// `click` is dispatched. This is equivalent to calling
 	// [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
@@ -353,6 +398,7 @@ type ElementHandle interface {
 	// - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
 	// You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 	DispatchEvent(typ string, initObjects ...interface{}) error
+	MustDispatchEvent(typ string, initObjects ...interface{})
 	// Returns the return value of `expression`.
 	// The method finds an element matching the specified selector in the `ElementHandle`s subtree and passes it as a first
 	// argument to `expression`. See [Working with selectors](./selectors.md) for more details. If no elements match the
@@ -361,6 +407,7 @@ type ElementHandle interface {
 	// and return its value.
 	// Examples:
 	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
+	MustEvalOnSelector(selector string, expression string, options ...interface{}) interface{}
 	// Returns the return value of `expression`.
 	// The method finds all elements matching the specified selector in the `ElementHandle`'s subtree and passes an array of
 	// matched elements as a first argument to `expression`. See [Working with selectors](./selectors.md) for more details.
@@ -374,6 +421,7 @@ type ElementHandle interface {
 	// </div>
 	// ```
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
+	MustEvalOnSelectorAll(selector string, expression string, options ...interface{}) interface{}
 	// This method waits for [actionability](./actionability.md) checks, focuses the element, fills it and triggers an `input`
 	// event after filling. Note that you can pass an empty string to clear the input field.
 	// If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
@@ -382,10 +430,13 @@ type ElementHandle interface {
 	// instead.
 	// To send fine-grained keyboard events, use ElementHandle.type().
 	Fill(value string, options ...ElementHandleFillOptions) error
+	MustFill(value string, options ...ElementHandleFillOptions)
 	// Calls [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the element.
 	Focus() error
+	MustFocus()
 	// Returns element attribute value.
 	GetAttribute(name string) (string, error)
+	MustGetAttribute(name string) string
 	// This method hovers over the element by performing the following steps:
 	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
@@ -395,24 +446,34 @@ type ElementHandle interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
 	// zero timeout disables this.
 	Hover(options ...ElementHandleHoverOptions) error
+	MustHover(options ...ElementHandleHoverOptions)
 	// Returns the `element.innerHTML`.
 	InnerHTML() (string, error)
+	MustInnerHTML() string
 	// Returns the `element.innerText`.
 	InnerText() (string, error)
+	MustInnerText() string
 	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
 	IsChecked() (bool, error)
+	MustIsChecked() bool
 	// Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
 	IsDisabled() (bool, error)
+	MustIsDisabled() bool
 	// Returns whether the element is [editable](./actionability.md#editable).
 	IsEditable() (bool, error)
+	MustIsEditable() bool
 	// Returns whether the element is [enabled](./actionability.md#enabled).
 	IsEnabled() (bool, error)
+	MustIsEnabled() bool
 	// Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
 	IsHidden() (bool, error)
+	MustIsHidden() bool
 	// Returns whether the element is [visible](./actionability.md#visible).
 	IsVisible() (bool, error)
+	MustIsVisible() bool
 	// Returns the frame containing the given element.
 	OwnerFrame() (Frame, error)
+	MustOwnerFrame() Frame
 	// Focuses the element, and then uses Keyboard.down`] and [`method: Keyboard.up().
 	// `key` can specify the intended [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key)
 	// value or a single character to generate the text for. A superset of the `key` values can be found
@@ -426,22 +487,27 @@ type ElementHandle interface {
 	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	Press(key string, options ...ElementHandlePressOptions) error
+	MustPress(key string, options ...ElementHandlePressOptions)
 	// The method finds an element matching the specified selector in the `ElementHandle`'s subtree. See
 	// [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns `null`.
 	QuerySelector(selector string) (ElementHandle, error)
+	MustQuerySelector(selector string) ElementHandle
 	// The method finds all elements matching the specified selector in the `ElementHandle`s subtree. See
 	// [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns empty array.
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
+	MustQuerySelectorAll(selector string) []ElementHandle
 	// Returns the buffer with the captured screenshot.
 	// This method waits for the [actionability](./actionability.md) checks, then scrolls element into view before taking a
 	// screenshot. If the element is detached from DOM, the method throws an error.
 	Screenshot(options ...ElementHandleScreenshotOptions) ([]byte, error)
+	MustScreenshot(options ...ElementHandleScreenshotOptions) []byte
 	// This method waits for [actionability](./actionability.md) checks, then tries to scroll element into view, unless it is
 	// completely visible as defined by
 	// [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)'s `ratio`.
 	// Throws when `elementHandle` does not point to an element
 	// [connected](https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected) to a Document or a ShadowRoot.
 	ScrollIntoViewIfNeeded(options ...ElementHandleScrollIntoViewIfNeededOptions) error
+	MustScrollIntoViewIfNeeded(options ...ElementHandleScrollIntoViewIfNeededOptions)
 	// This method waits for [actionability](./actionability.md) checks, waits until all specified options are present in the
 	// `<select>` element and selects these options.
 	// If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
@@ -450,14 +516,17 @@ type ElementHandle interface {
 	// Returns the array of option values that have been successfully selected.
 	// Triggers a `change` and `input` event once all the provided options have been selected.
 	SelectOption(values SelectOptionValues, options ...ElementHandleSelectOptionOptions) ([]string, error)
+	MustSelectOption(values SelectOptionValues, options ...ElementHandleSelectOptionOptions) []string
 	// This method waits for [actionability](./actionability.md) checks, then focuses the element and selects all its text
 	// content.
 	SelectText(options ...ElementHandleSelectTextOptions) error
+	MustSelectText(options ...ElementHandleSelectTextOptions)
 	// This method expects `elementHandle` to point to an
 	// [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
 	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
 	// are resolved relative to the the current working directory. For empty array, clears the selected files.
 	SetInputFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error
+	MustSetInputFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions)
 	// This method taps the element by performing the following steps:
 	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
@@ -468,12 +537,15 @@ type ElementHandle interface {
 	// zero timeout disables this.
 	// > NOTE: `elementHandle.tap()` requires that the `hasTouch` option of the browser context be set to true.
 	Tap(options ...ElementHandleTapOptions) error
+	MustTap(options ...ElementHandleTapOptions)
 	// Returns the `node.textContent`.
 	TextContent() (string, error)
+	MustTextContent() string
 	// Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
 	// To press a special key, like `Control` or `ArrowDown`, use ElementHandle.press().
 	// An example of typing into a text field and then submitting the form:
 	Type(value string, options ...ElementHandleTypeOptions) error
+	MustType(value string, options ...ElementHandleTypeOptions)
 	// This method checks the element by performing the following steps:
 	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already
 	// unchecked, this method returns immediately.
@@ -486,6 +558,7 @@ type ElementHandle interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
 	// zero timeout disables this.
 	Uncheck(options ...ElementHandleUncheckOptions) error
+	MustUncheck(options ...ElementHandleUncheckOptions)
 	// Returns when the element satisfies the `state`.
 	// Depending on the `state` parameter, this method waits for one of the [actionability](./actionability.md) checks to pass.
 	// This method throws when the element is detached while waiting, unless waiting for the `"hidden"` state.
@@ -499,6 +572,7 @@ type ElementHandle interface {
 	// - `"editable"` Wait until the element is [editable](./actionability.md#editable).
 	// If the element does not satisfy the condition for the `timeout` milliseconds, this method will throw.
 	WaitForElementState(state string, options ...ElementHandleWaitForElementStateOptions) error
+	MustWaitForElementState(state string, options ...ElementHandleWaitForElementStateOptions)
 	// Returns element specified by selector when it satisfies `state` option. Returns `null` if waiting for `hidden` or
 	// `detached`.
 	// Wait for the `selector` relative to the element handle to satisfy `state` option (either appear/disappear from dom, or
@@ -507,8 +581,10 @@ type ElementHandle interface {
 	// throw.
 	// > NOTE: This method does not work across navigations, use Page.waitForSelector() instead.
 	WaitForSelector(selector string, options ...ElementHandleWaitForSelectorOptions) (ElementHandle, error)
+	MustWaitForSelector(selector string, options ...ElementHandleWaitForSelectorOptions) ElementHandle
 	// Returns `input.value` for `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
 	InputValue(options ...ElementHandleInputValueOptions) (string, error)
+	MustInputValue(options ...ElementHandleInputValueOptions) string
 }
 
 type EventEmitter interface {
@@ -530,6 +606,7 @@ type FileChooser interface {
 	// Sets the value of the file input this chooser is associated with. If some of the `filePaths` are relative paths, then
 	// they are resolved relative to the the current working directory. For empty array, clears the selected files.
 	SetFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error
+	MustSetFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions)
 }
 
 // At every point of time, page exposes its current frame tree via the Page.mainFrame() and
@@ -545,10 +622,12 @@ type Frame interface {
 	// Returns the added tag when the script's onload fires or when the script content was injected into frame.
 	// Adds a `<script>` tag into the page with the desired url or content.
 	AddScriptTag(options PageAddScriptTagOptions) (ElementHandle, error)
+	MustAddScriptTag(options PageAddScriptTagOptions) ElementHandle
 	// Returns the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.
 	// Adds a `<link rel="stylesheet">` tag into the page with the desired url or a `<style type="text/css">` tag with the
 	// content.
 	AddStyleTag(options PageAddStyleTagOptions) (ElementHandle, error)
+	MustAddStyleTag(options PageAddStyleTagOptions) ElementHandle
 	// This method checks an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
@@ -562,6 +641,7 @@ type Frame interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
 	// zero timeout disables this.
 	Check(selector string, options ...FrameCheckOptions) error
+	MustCheck(selector string, options ...FrameCheckOptions)
 	ChildFrames() []Frame
 	// This method clicks an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
@@ -573,8 +653,10 @@ type Frame interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
 	// zero timeout disables this.
 	Click(selector string, options ...PageClickOptions) error
+	MustClick(selector string, options ...PageClickOptions)
 	// Gets the full HTML contents of the frame, including the doctype.
 	Content() (string, error)
+	MustContent() string
 	// This method double clicks an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
@@ -587,6 +669,7 @@ type Frame interface {
 	// zero timeout disables this.
 	// > NOTE: `frame.dblclick()` dispatches two `click` events and a single `dblclick` event.
 	Dblclick(selector string, options ...FrameDblclickOptions) error
+	MustDblclick(selector string, options ...FrameDblclickOptions)
 	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
 	// `click` is dispatched. This is equivalent to calling
 	// [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
@@ -602,6 +685,7 @@ type Frame interface {
 	// - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
 	// You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 	DispatchEvent(selector, typ string, eventInit interface{}, options ...PageDispatchEventOptions) error
+	MustDispatchEvent(selector, typ string, eventInit interface{}, options ...PageDispatchEventOptions)
 	// Returns the return value of `expression`.
 	// If the function passed to the Frame.evaluate`] returns a [Promise], then [`method: Frame.evaluate() would wait
 	// for the promise to resolve and return its value.
@@ -611,6 +695,7 @@ type Frame interface {
 	// A string can also be passed in instead of a function.
 	// `ElementHandle` instances can be passed as an argument to the Frame.evaluate():
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
+	MustEvaluate(expression string, options ...interface{}) interface{}
 	// Returns the return value of `expression` as a `JSHandle`.
 	// The only difference between Frame.evaluate`] and [`method: Frame.evaluateHandle() is that
 	// Frame.evaluateHandle() returns `JSHandle`.
@@ -619,6 +704,7 @@ type Frame interface {
 	// A string can also be passed in instead of a function.
 	// `JSHandle` instances can be passed as an argument to the Frame.evaluateHandle():
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
+	MustEvaluateHandle(expression string, options ...interface{}) JSHandle
 	// Returns the return value of `expression`.
 	// The method finds an element matching the specified selector within the frame and passes it as a first argument to
 	// `expression`. See [Working with selectors](./selectors.md) for more details. If no elements match the selector, the
@@ -627,6 +713,7 @@ type Frame interface {
 	// return its value.
 	// Examples:
 	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
+	MustEvalOnSelector(selector string, expression string, options ...interface{}) interface{}
 	// Returns the return value of `expression`.
 	// The method finds all elements matching the specified selector within the frame and passes an array of matched elements
 	// as a first argument to `expression`. See [Working with selectors](./selectors.md) for more details.
@@ -634,6 +721,7 @@ type Frame interface {
 	// return its value.
 	// Examples:
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
+	MustEvalOnSelectorAll(selector string, expression string, options ...interface{}) interface{}
 	// This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, focuses the
 	// element, fills it and triggers an `input` event after filling. Note that you can pass an empty string to clear the input
 	// field.
@@ -643,16 +731,20 @@ type Frame interface {
 	// instead.
 	// To send fine-grained keyboard events, use Frame.type().
 	Fill(selector string, value string, options ...FrameFillOptions) error
+	MustFill(selector string, value string, options ...FrameFillOptions)
 	// This method fetches an element with `selector` and focuses it. If there's no element matching `selector`, the method
 	// waits until a matching element appears in the DOM.
 	Focus(selector string, options ...FrameFocusOptions) error
+	MustFocus(selector string, options ...FrameFocusOptions)
 	// Returns the `frame` or `iframe` element handle which corresponds to this frame.
 	// This is an inverse of ElementHandle.contentFrame(). Note that returned handle actually belongs to the parent
 	// frame.
 	// This method throws an error if the frame has been detached before `frameElement()` returns.
 	FrameElement() (ElementHandle, error)
+	MustFrameElement() ElementHandle
 	// Returns element attribute value.
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
+	MustGetAttribute(selector string, name string, options ...PageGetAttributeOptions) string
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
 	// last redirect.
 	// The method will throw an error if:
@@ -669,6 +761,7 @@ type Frame interface {
 	// > NOTE: Headless mode doesn't support navigation to a PDF document. See the
 	// [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
 	Goto(url string, options ...PageGotoOptions) (Response, error)
+	MustGoto(url string, options ...PageGotoOptions) Response
 	// This method hovers over an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
@@ -679,26 +772,35 @@ type Frame interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
 	// zero timeout disables this.
 	Hover(selector string, options ...PageHoverOptions) error
+	MustHover(selector string, options ...PageHoverOptions)
 	// Returns `element.innerHTML`.
 	InnerHTML(selector string, options ...PageInnerHTMLOptions) (string, error)
+	MustInnerHTML(selector string, options ...PageInnerHTMLOptions) string
 	// Returns `element.innerText`.
 	InnerText(selector string, options ...PageInnerTextOptions) (string, error)
+	MustInnerText(selector string, options ...PageInnerTextOptions) string
 	// Returns `true` if the frame has been detached, or `false` otherwise.
 	IsDetached() bool
 	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
 	IsChecked(selector string, options ...FrameIsCheckedOptions) (bool, error)
+	MustIsChecked(selector string, options ...FrameIsCheckedOptions) bool
 	// Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
 	IsDisabled(selector string, options ...FrameIsDisabledOptions) (bool, error)
+	MustIsDisabled(selector string, options ...FrameIsDisabledOptions) bool
 	// Returns whether the element is [editable](./actionability.md#editable).
 	IsEditable(selector string, options ...FrameIsEditableOptions) (bool, error)
+	MustIsEditable(selector string, options ...FrameIsEditableOptions) bool
 	// Returns whether the element is [enabled](./actionability.md#enabled).
 	IsEnabled(selector string, options ...FrameIsEnabledOptions) (bool, error)
+	MustIsEnabled(selector string, options ...FrameIsEnabledOptions) bool
 	// Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).  `selector` that does not
 	// match any elements is considered hidden.
 	IsHidden(selector string, options ...FrameIsHiddenOptions) (bool, error)
+	MustIsHidden(selector string, options ...FrameIsHiddenOptions) bool
 	// Returns whether the element is [visible](./actionability.md#visible). `selector` that does not match any elements is
 	// considered not visible.
 	IsVisible(selector string, options ...FrameIsVisibleOptions) (bool, error)
+	MustIsVisible(selector string, options ...FrameIsVisibleOptions) bool
 	// Returns frame's name attribute as specified in the tag.
 	// If the name is empty, returns the id attribute instead.
 	// > NOTE: This value is calculated once when the frame is created, and will not update if the attribute is changed later.
@@ -719,15 +821,19 @@ type Frame interface {
 	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	Press(selector, key string, options ...PagePressOptions) error
+	MustPress(selector, key string, options ...PagePressOptions)
 	// Returns the ElementHandle pointing to the frame element.
 	// The method finds an element matching the specified selector within the frame. See
 	// [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns `null`.
 	QuerySelector(selector string) (ElementHandle, error)
+	MustQuerySelector(selector string) ElementHandle
 	// Returns the ElementHandles pointing to the frame elements.
 	// The method finds all elements matching the specified selector within the frame. See
 	// [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns empty array.
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
+	MustQuerySelectorAll(selector string) []ElementHandle
 	SetContent(content string, options ...PageSetContentOptions) error
+	MustSetContent(content string, options ...PageSetContentOptions)
 	// This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, waits until
 	// all specified options are present in the `<select>` element and selects these options.
 	// If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
@@ -736,11 +842,13 @@ type Frame interface {
 	// Returns the array of option values that have been successfully selected.
 	// Triggers a `change` and `input` event once all the provided options have been selected.
 	SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error)
+	MustSelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) []string
 	// This method expects `selector` to point to an
 	// [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
 	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
 	// are resolved relative to the the current working directory. For empty array, clears the selected files.
 	SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error
+	MustSetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions)
 	// This method taps an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
@@ -752,14 +860,18 @@ type Frame interface {
 	// zero timeout disables this.
 	// > NOTE: `frame.tap()` requires that the `hasTouch` option of the browser context be set to true.
 	Tap(selector string, options ...FrameTapOptions) error
+	MustTap(selector string, options ...FrameTapOptions)
 	// Returns `element.textContent`.
 	TextContent(selector string, options ...FrameTextContentOptions) (string, error)
+	MustTextContent(selector string, options ...FrameTextContentOptions) string
 	// Returns the page title.
 	Title() (string, error)
+	MustTitle() string
 	// Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text. `frame.type` can be used to
 	// send fine-grained keyboard events. To fill values in form fields, use Frame.fill().
 	// To press a special key, like `Control` or `ArrowDown`, use Keyboard.press().
 	Type(selector, text string, options ...PageTypeOptions) error
+	MustType(selector, text string, options ...PageTypeOptions)
 	// Returns frame's url.
 	URL() string
 	// This method checks an element matching `selector` by performing the following steps:
@@ -775,11 +887,13 @@ type Frame interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
 	// zero timeout disables this.
 	Uncheck(selector string, options ...FrameUncheckOptions) error
+	MustUncheck(selector string, options ...FrameUncheckOptions)
 	WaitForEvent(event string, predicate ...interface{}) interface{}
 	// Returns when the `expression` returns a truthy value, returns that value.
 	// The Frame.waitForFunction() can be used to observe viewport size change:
 	// To pass an argument to the predicate of `frame.waitForFunction` function:
 	WaitForFunction(expression string, arg interface{}, options ...FrameWaitForFunctionOptions) (JSHandle, error)
+	MustWaitForFunction(expression string, arg interface{}, options ...FrameWaitForFunctionOptions) JSHandle
 	// Waits for the required load state to be reached.
 	// This returns when the frame reaches a required load state, `load` by default. The navigation must have been committed
 	// when this method is called. If current document has already reached the required state, resolves immediately.
@@ -792,8 +906,10 @@ type Frame interface {
 	// > NOTE: Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL is
 	// considered a navigation.
 	WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error)
+	MustWaitForNavigation(options ...PageWaitForNavigationOptions) Response
 	// Waits for the frame to navigate to the given URL.
 	WaitForURL(url string, options ...FrameWaitForURLOptions) error
+	MustWaitForURL(url string, options ...FrameWaitForURLOptions)
 	// Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
 	// `detached`.
 	// Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at
@@ -801,13 +917,16 @@ type Frame interface {
 	// selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
 	// This method works across navigations:
 	WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandle, error)
+	MustWaitForSelector(selector string, options ...PageWaitForSelectorOptions) ElementHandle
 	// Waits for the given `timeout` in milliseconds.
 	// Note that `frame.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to
 	// be flaky. Use signals such as network events, selectors becoming visible and others instead.
 	WaitForTimeout(timeout float64)
 	// Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
 	InputValue(selector string, options ...FrameInputValueOptions) (string, error)
+	MustInputValue(selector string, options ...FrameInputValueOptions) string
 	DragAndDrop(source, target string, options ...FrameDragAndDropOptions) error
+	MustDragAndDrop(source, target string, options ...FrameDragAndDropOptions)
 }
 
 // JSHandle represents an in-page JavaScript object. JSHandles can be created with the Page.evaluateHandle()
@@ -822,11 +941,13 @@ type JSHandle interface {
 	AsElement() ElementHandle
 	// The `jsHandle.dispose` method stops referencing the element handle.
 	Dispose() error
+	MustDispose()
 	// Returns the return value of `expression`.
 	// This method passes this handle as the first argument to `expression`.
 	// If `expression` returns a [Promise], then `handle.evaluate` would wait for the promise to resolve and return its value.
 	// Examples:
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
+	MustEvaluate(expression string, options ...interface{}) interface{}
 	// Returns the return value of `expression` as a `JSHandle`.
 	// This method passes this handle as the first argument to `expression`.
 	// The only difference between `jsHandle.evaluate` and `jsHandle.evaluateHandle` is that `jsHandle.evaluateHandle` returns
@@ -835,14 +956,18 @@ type JSHandle interface {
 	// for the promise to resolve and return its value.
 	// See Page.evaluateHandle() for more details.
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
+	MustEvaluateHandle(expression string, options ...interface{}) JSHandle
 	// The method returns a map with **own property names** as keys and JSHandle instances for the property values.
 	GetProperties() (map[string]JSHandle, error)
+	MustGetProperties() map[string]JSHandle
 	// Fetches a single property from the referenced object.
 	GetProperty(name string) (JSHandle, error)
+	MustGetProperty(name string) JSHandle
 	// Returns a JSON representation of the object. If the object has a `toJSON` function, it **will not be called**.
 	// > NOTE: The method will return an empty JSON object if the referenced object is not stringifiable. It will throw an
 	// error if the object has circular references.
 	JSONValue() (interface{}, error)
+	MustJSONValue() interface{}
 	String() string
 }
 
@@ -871,9 +996,11 @@ type Keyboard interface {
 	// Keyboard.up().
 	// > NOTE: Modifier keys DO influence `keyboard.down`. Holding down `Shift` will type the text in upper case.
 	Down(key string) error
+	MustDown(key string)
 	// Dispatches only `input` event, does not emit the `keydown`, `keyup` or `keypress` events.
 	// > NOTE: Modifier keys DO NOT effect `keyboard.insertText`. Holding down `Shift` will not type the text in upper case.
 	InsertText(text string) error
+	MustInsertText(text string)
 	// `key` can specify the intended [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key)
 	// value or a single character to generate the text for. A superset of the `key` values can be found
 	// [here](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values). Examples of the keys are:
@@ -887,13 +1014,16 @@ type Keyboard interface {
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	// Shortcut for Keyboard.down`] and [`method: Keyboard.up().
 	Press(key string, options ...KeyboardPressOptions) error
+	MustPress(key string, options ...KeyboardPressOptions)
 	// Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
 	// To press a special key, like `Control` or `ArrowDown`, use Keyboard.press().
 	// > NOTE: Modifier keys DO NOT effect `keyboard.type`. Holding down `Shift` will not type the text in upper case.
 	// > NOTE: For characters that are not on a US keyboard, only an `input` event will be sent.
 	Type(text string, options ...KeyboardTypeOptions) error
+	MustType(text string, options ...KeyboardTypeOptions)
 	// Dispatches a `keyup` event.
 	Up(key string) error
+	MustUp(key string)
 }
 
 // The Mouse class operates in main-frame CSS pixels relative to the top-left corner of the viewport.
@@ -901,15 +1031,20 @@ type Keyboard interface {
 type Mouse interface {
 	// Shortcut for Mouse.move`], [`method: Mouse.down`], [`method: Mouse.up().
 	Click(x, y float64, options ...MouseClickOptions) error
+	MustClick(x, y float64, options ...MouseClickOptions)
 	// Shortcut for Mouse.move`], [`method: Mouse.down`], [`method: Mouse.up`], [`method: Mouse.down() and
 	// Mouse.up().
 	Dblclick(x, y float64, options ...MouseDblclickOptions) error
+	MustDblclick(x, y float64, options ...MouseDblclickOptions)
 	// Dispatches a `mousedown` event.
 	Down(options ...MouseDownOptions) error
+	MustDown(options ...MouseDownOptions)
 	// Dispatches a `mousemove` event.
 	Move(x float64, y float64, options ...MouseMoveOptions) error
+	MustMove(x float64, y float64, options ...MouseMoveOptions)
 	// Dispatches a `mouseup` event.
 	Up(options ...MouseUpOptions) error
+	MustUp(options ...MouseUpOptions)
 }
 
 // Page provides methods to interact with a single tab in a `Browser`, or an
@@ -936,16 +1071,20 @@ type Page interface {
 	// > NOTE: The order of evaluation of multiple scripts installed via BrowserContext.addInitScript() and
 	// Page.addInitScript() is not defined.
 	AddInitScript(script PageAddInitScriptOptions) error
+	MustAddInitScript(script PageAddInitScriptOptions)
 	// Adds a `<script>` tag into the page with the desired url or content. Returns the added tag when the script's onload
 	// fires or when the script content was injected into frame.
 	// Shortcut for main frame's Frame.addScriptTag().
 	AddScriptTag(options PageAddScriptTagOptions) (ElementHandle, error)
+	MustAddScriptTag(options PageAddScriptTagOptions) ElementHandle
 	// Adds a `<link rel="stylesheet">` tag into the page with the desired url or a `<style type="text/css">` tag with the
 	// content. Returns the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.
 	// Shortcut for main frame's Frame.addStyleTag().
 	AddStyleTag(options PageAddStyleTagOptions) (ElementHandle, error)
+	MustAddStyleTag(options PageAddStyleTagOptions) ElementHandle
 	// Brings page to front (activates tab).
 	BringToFront() error
+	MustBringToFront()
 	// This method checks an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
@@ -960,6 +1099,7 @@ type Page interface {
 	// zero timeout disables this.
 	// Shortcut for main frame's Frame.check().
 	Check(selector string, options ...FrameCheckOptions) error
+	MustCheck(selector string, options ...FrameCheckOptions)
 	// This method clicks an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
@@ -971,14 +1111,17 @@ type Page interface {
 	// zero timeout disables this.
 	// Shortcut for main frame's Frame.click().
 	Click(selector string, options ...PageClickOptions) error
+	MustClick(selector string, options ...PageClickOptions)
 	// If `runBeforeUnload` is `false`, does not run any unload handlers and waits for the page to be closed. If
 	// `runBeforeUnload` is `true` the method will run unload handlers, but will **not** wait for the page to close.
 	// By default, `page.close()` **does not** run `beforeunload` handlers.
 	// > NOTE: if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned and should be handled manually
 	// via [`event: Page.dialog`] event.
 	Close(options ...PageCloseOptions) error
+	MustClose(options ...PageCloseOptions)
 	// Gets the full HTML contents of the page, including the doctype.
 	Content() (string, error)
+	MustContent() string
 	// Get the browser context that the page belongs to.
 	Context() BrowserContext
 	// This method double clicks an element matching `selector` by performing the following steps:
@@ -994,6 +1137,7 @@ type Page interface {
 	// > NOTE: `page.dblclick()` dispatches two `click` events and a single `dblclick` event.
 	// Shortcut for main frame's Frame.dblclick().
 	Dblclick(expression string, options ...FrameDblclickOptions) error
+	MustDblclick(expression string, options ...FrameDblclickOptions)
 	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
 	// `click` is dispatched. This is equivalent to calling
 	// [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
@@ -1009,6 +1153,7 @@ type Page interface {
 	// - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
 	// You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 	DispatchEvent(selector string, typ string, options ...PageDispatchEventOptions) error
+	MustDispatchEvent(selector string, typ string, options ...PageDispatchEventOptions)
 	// The method adds a function called `name` on the `window` object of every frame in this page. When called, the function
 	// executes `callback` and returns a [Promise] which resolves to the return value of `callback`. If the `callback` returns
 	// a [Promise], it will be awaited.
@@ -1019,6 +1164,7 @@ type Page interface {
 	// An example of exposing page URL to all frames in a page:
 	// An example of passing an element handle:
 	ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error
+	MustExposeBinding(name string, binding BindingCallFunction, handle ...bool)
 	// The method adds a function called `name` on the `window` object of every frame in the page. When called, the function
 	// executes `callback` and returns a [Promise] which resolves to the return value of `callback`.
 	// If the `callback` returns a [Promise], it will be awaited.
@@ -1026,9 +1172,11 @@ type Page interface {
 	// > NOTE: Functions installed via Page.exposeFunction() survive navigations.
 	// An example of adding a `sha256` function to the page:
 	ExposeFunction(name string, binding ExposedFunction) error
+	MustExposeFunction(name string, binding ExposedFunction)
 	// This method changes the `CSS media type` through the `media` argument, and/or the `'prefers-colors-scheme'` media
 	// feature, using the `colorScheme` argument.
 	EmulateMedia(options ...PageEmulateMediaOptions) error
+	MustEmulateMedia(options ...PageEmulateMediaOptions)
 	// Returns the value of the `expression` invocation.
 	// If the function passed to the Page.evaluate`] returns a [Promise], then [`method: Page.evaluate() would wait
 	// for the promise to resolve and return its value.
@@ -1040,6 +1188,7 @@ type Page interface {
 	// `ElementHandle` instances can be passed as an argument to the Page.evaluate():
 	// Shortcut for main frame's Frame.evaluate().
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
+	MustEvaluate(expression string, options ...interface{}) interface{}
 	// Returns the value of the `expression` invocation as a `JSHandle`.
 	// The only difference between Page.evaluate`] and [`method: Page.evaluateHandle() is that
 	// Page.evaluateHandle() returns `JSHandle`.
@@ -1048,6 +1197,7 @@ type Page interface {
 	// A string can also be passed in instead of a function:
 	// `JSHandle` instances can be passed as an argument to the Page.evaluateHandle():
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
+	MustEvaluateHandle(expression string, options ...interface{}) JSHandle
 	// The method finds an element matching the specified selector within the page and passes it as a first argument to
 	// `expression`. If no elements match the selector, the method throws an error. Returns the value of `expression`.
 	// If `expression` returns a [Promise], then Page.evalOnSelector() would wait for the promise to resolve and
@@ -1055,23 +1205,36 @@ type Page interface {
 	// Examples:
 	// Shortcut for main frame's Frame.evalOnSelector().
 	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
+	MustEvalOnSelector(selector string, expression string, options ...interface{}) interface{}
 	// The method finds all elements matching the specified selector within the page and passes an array of matched elements as
 	// a first argument to `expression`. Returns the result of `expression` invocation.
 	// If `expression` returns a [Promise], then Page.evalOnSelectorAll() would wait for the promise to resolve and
 	// return its value.
 	// Examples:
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
+	MustEvalOnSelectorAll(selector string, expression string, options ...interface{}) interface{}
 	ExpectConsoleMessage(cb func() error) (ConsoleMessage, error)
+	MustExpectConsoleMessage(cb func() error) ConsoleMessage
 	ExpectDownload(cb func() error) (Download, error)
+	MustExpectDownload(cb func() error) Download
 	ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error)
+	MustExpectEvent(event string, cb func() error, predicates ...interface{}) interface{}
 	ExpectFileChooser(cb func() error) (FileChooser, error)
+	MustExpectFileChooser(cb func() error) FileChooser
 	ExpectLoadState(state string, cb func() error) error
+	MustExpectLoadState(state string, cb func() error)
 	ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (Response, error)
+	MustExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) Response
 	ExpectPopup(cb func() error) (Page, error)
+	MustExpectPopup(cb func() error) Page
 	ExpectRequest(url interface{}, cb func() error, options ...interface{}) (Request, error)
+	MustExpectRequest(url interface{}, cb func() error, options ...interface{}) Request
 	ExpectResponse(url interface{}, cb func() error, options ...interface{}) (Response, error)
+	MustExpectResponse(url interface{}, cb func() error, options ...interface{}) Response
 	ExpectWorker(cb func() error) (Worker, error)
+	MustExpectWorker(cb func() error) Worker
 	ExpectedDialog(cb func() error) (Dialog, error)
+	MustExpectedDialog(cb func() error) Dialog
 	// This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, focuses the
 	// element, fills it and triggers an `input` event after filling. Note that you can pass an empty string to clear the input
 	// field.
@@ -1082,24 +1245,29 @@ type Page interface {
 	// To send fine-grained keyboard events, use Page.type().
 	// Shortcut for main frame's Frame.fill().
 	Fill(selector, text string, options ...FrameFillOptions) error
+	MustFill(selector, text string, options ...FrameFillOptions)
 	// This method fetches an element with `selector` and focuses it. If there's no element matching `selector`, the method
 	// waits until a matching element appears in the DOM.
 	// Shortcut for main frame's Frame.focus().
 	Focus(expression string, options ...FrameFocusOptions) error
+	MustFocus(expression string, options ...FrameFocusOptions)
 	// Returns frame matching the specified criteria. Either `name` or `url` must be specified.
 	Frame(options PageFrameOptions) Frame
 	// An array of all frames attached to the page.
 	Frames() []Frame
 	// Returns element attribute value.
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
+	MustGetAttribute(selector string, name string, options ...PageGetAttributeOptions) string
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
 	// last redirect. If can not go back, returns `null`.
 	// Navigate to the previous page in history.
 	GoBack(options ...PageGoBackOptions) (Response, error)
+	MustGoBack(options ...PageGoBackOptions) Response
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
 	// last redirect. If can not go forward, returns `null`.
 	// Navigate to the next page in history.
 	GoForward(options ...PageGoForwardOptions) (Response, error)
+	MustGoForward(options ...PageGoForwardOptions) Response
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
 	// last redirect.
 	// The method will throw an error if:
@@ -1117,6 +1285,7 @@ type Page interface {
 	// [upstream issue](https://bugs.chromium.org/p/chromium/issues/detail?id=761295).
 	// Shortcut for main frame's Frame.goto()
 	Goto(url string, options ...PageGotoOptions) (Response, error)
+	MustGoto(url string, options ...PageGotoOptions) Response
 	// This method hovers over an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
@@ -1128,30 +1297,40 @@ type Page interface {
 	// zero timeout disables this.
 	// Shortcut for main frame's Frame.hover().
 	Hover(selector string, options ...PageHoverOptions) error
+	MustHover(selector string, options ...PageHoverOptions)
 	// Returns `element.innerHTML`.
 	InnerHTML(selector string, options ...PageInnerHTMLOptions) (string, error)
+	MustInnerHTML(selector string, options ...PageInnerHTMLOptions) string
 	// Returns `element.innerText`.
 	InnerText(selector string, options ...PageInnerTextOptions) (string, error)
+	MustInnerText(selector string, options ...PageInnerTextOptions) string
 	// Indicates that the page has been closed.
 	IsClosed() bool
 	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
 	IsChecked(selector string, options ...FrameIsCheckedOptions) (bool, error)
+	MustIsChecked(selector string, options ...FrameIsCheckedOptions) bool
 	// Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
 	IsDisabled(selector string, options ...FrameIsDisabledOptions) (bool, error)
+	MustIsDisabled(selector string, options ...FrameIsDisabledOptions) bool
 	// Returns whether the element is [editable](./actionability.md#editable).
 	IsEditable(selector string, options ...FrameIsEditableOptions) (bool, error)
+	MustIsEditable(selector string, options ...FrameIsEditableOptions) bool
 	// Returns whether the element is [enabled](./actionability.md#enabled).
 	IsEnabled(selector string, options ...FrameIsEnabledOptions) (bool, error)
+	MustIsEnabled(selector string, options ...FrameIsEnabledOptions) bool
 	// Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).  `selector` that does not
 	// match any elements is considered hidden.
 	IsHidden(selector string, options ...FrameIsHiddenOptions) (bool, error)
+	MustIsHidden(selector string, options ...FrameIsHiddenOptions) bool
 	// Returns whether the element is [visible](./actionability.md#visible). `selector` that does not match any elements is
 	// considered not visible.
 	IsVisible(selector string, options ...FrameIsVisibleOptions) (bool, error)
+	MustIsVisible(selector string, options ...FrameIsVisibleOptions) bool
 	// The page's main frame. Page is guaranteed to have a main frame which persists during navigations.
 	MainFrame() Frame
 	// Returns the opener for popup pages and `null` for others. If the opener has been closed already the returns `null`.
 	Opener() (Page, error)
+	MustOpener() Page
 	// Returns the PDF buffer.
 	// > NOTE: Generating a pdf is currently only supported in Chromium headless.
 	// `page.pdf()` generates a pdf of the page with `print` css media. To generate a pdf with `screen` media, call
@@ -1184,6 +1363,7 @@ type Page interface {
 	// > NOTE: `headerTemplate` and `footerTemplate` markup have the following limitations: > 1. Script tags inside templates
 	// are not evaluated. > 2. Page styles are not visible inside templates.
 	PDF(options ...PagePdfOptions) ([]byte, error)
+	MustPDF(options ...PagePdfOptions) []byte
 	// Focuses the element, and then uses Keyboard.down`] and [`method: Keyboard.up().
 	// `key` can specify the intended [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key)
 	// value or a single character to generate the text for. A superset of the `key` values can be found
@@ -1197,17 +1377,21 @@ type Page interface {
 	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	Press(selector, key string, options ...PagePressOptions) error
+	MustPress(selector, key string, options ...PagePressOptions)
 	// The method finds an element matching the specified selector within the page. If no elements match the selector, the
 	// return value resolves to `null`. To wait for an element on the page, use Page.waitForSelector().
 	// Shortcut for main frame's Frame.querySelector().
 	QuerySelector(selector string) (ElementHandle, error)
+	MustQuerySelector(selector string) ElementHandle
 	// The method finds all elements matching the specified selector within the page. If no elements match the selector, the
 	// return value resolves to `[]`.
 	// Shortcut for main frame's Frame.querySelectorAll().
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
+	MustQuerySelectorAll(selector string) []ElementHandle
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
 	// last redirect.
 	Reload(options ...PageReloadOptions) (Response, error)
+	MustReload(options ...PageReloadOptions) Response
 	// Routing provides the capability to modify network requests that are made by a page.
 	// Once routing is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
 	// > NOTE: The handler will only be called for the first url if the response is a redirect.
@@ -1223,8 +1407,10 @@ type Page interface {
 	// To remove a route with its handler you can use Page.unroute().
 	// > NOTE: Enabling routing disables http cache.
 	Route(url interface{}, handler routeHandler) error
+	MustRoute(url interface{}, handler routeHandler)
 	// Returns the buffer with the captured screenshot.
 	Screenshot(options ...PageScreenshotOptions) ([]byte, error)
+	MustScreenshot(options ...PageScreenshotOptions) []byte
 	// This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, waits until
 	// all specified options are present in the `<select>` element and selects these options.
 	// If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
@@ -1234,7 +1420,9 @@ type Page interface {
 	// Triggers a `change` and `input` event once all the provided options have been selected.
 	// Shortcut for main frame's Frame.selectOption().
 	SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error)
+	MustSelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) []string
 	SetContent(content string, options ...PageSetContentOptions) error
+	MustSetContent(content string, options ...PageSetContentOptions)
 	// This setting will change the default maximum navigation time for the following methods and related shortcuts:
 	// - Page.goBack()
 	// - Page.goForward()
@@ -1252,17 +1440,20 @@ type Page interface {
 	// The extra HTTP headers will be sent with every request the page initiates.
 	// > NOTE: Page.setExtraHTTPHeaders() does not guarantee the order of headers in the outgoing requests.
 	SetExtraHTTPHeaders(headers map[string]string) error
+	MustSetExtraHTTPHeaders(headers map[string]string)
 	// This method expects `selector` to point to an
 	// [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
 	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
 	// are resolved relative to the the current working directory. For empty array, clears the selected files.
 	SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error
+	MustSetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions)
 	// In the case of multiple pages in a single browser, each page can have its own viewport size. However,
 	// Browser.newContext() allows to set viewport size (and more) for all pages in the context at once.
 	// `page.setViewportSize` will resize the page. A lot of websites don't expect phones to change size, so you should set the
 	// viewport size before navigating to the page. Page.setViewportSize() will also reset `screen` size, use
 	// Browser.newContext() with `screen` and `viewport` parameters if you need better control of these properties.
 	SetViewportSize(width, height int) error
+	MustSetViewportSize(width, height int)
 	// This method taps an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
@@ -1275,15 +1466,19 @@ type Page interface {
 	// > NOTE: Page.tap() requires that the `hasTouch` option of the browser context be set to true.
 	// Shortcut for main frame's Frame.tap().
 	Tap(selector string, options ...FrameTapOptions) error
+	MustTap(selector string, options ...FrameTapOptions)
 	// Returns `element.textContent`.
 	TextContent(selector string, options ...FrameTextContentOptions) (string, error)
+	MustTextContent(selector string, options ...FrameTextContentOptions) string
 	// Returns the page's title. Shortcut for main frame's Frame.title().
 	Title() (string, error)
+	MustTitle() string
 	// Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text. `page.type` can be used to send
 	// fine-grained keyboard events. To fill values in form fields, use Page.fill().
 	// To press a special key, like `Control` or `ArrowDown`, use Keyboard.press().
 	// Shortcut for main frame's Frame.type().
 	Type(selector, text string, options ...PageTypeOptions) error
+	MustType(selector, text string, options ...PageTypeOptions)
 	// Shortcut for main frame's Frame.url().
 	URL() string
 	// This method unchecks an element matching `selector` by performing the following steps:
@@ -1300,8 +1495,10 @@ type Page interface {
 	// zero timeout disables this.
 	// Shortcut for main frame's Frame.uncheck().
 	Uncheck(selector string, options ...FrameUncheckOptions) error
+	MustUncheck(selector string, options ...FrameUncheckOptions)
 	// Removes a route created with Page.route(). When `handler` is not specified, removes all routes for the `url`.
 	Unroute(url interface{}, handler ...routeHandler) error
+	MustUnroute(url interface{}, handler ...routeHandler)
 	// Video object associated with this page.
 	Video() Video
 	ViewportSize() ViewportSize
@@ -1313,6 +1510,7 @@ type Page interface {
 	// To pass an argument to the predicate of Page.waitForFunction() function:
 	// Shortcut for main frame's Frame.waitForFunction().
 	WaitForFunction(expression string, arg interface{}, options ...FrameWaitForFunctionOptions) (JSHandle, error)
+	MustWaitForFunction(expression string, arg interface{}, options ...FrameWaitForFunctionOptions) JSHandle
 	// Returns when the required load state has been reached.
 	// This resolves when the page reaches a required load state, `load` by default. The navigation must have been committed
 	// when this method is called. If current document has already reached the required state, resolves immediately.
@@ -1328,6 +1526,7 @@ type Page interface {
 	// considered a navigation.
 	// Shortcut for main frame's Frame.waitForNavigation().
 	WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error)
+	MustWaitForNavigation(options ...PageWaitForNavigationOptions) Response
 	// Waits for the matching request and returns it. See [waiting for event](./events.md#waiting-for-event) for more details
 	// about events.
 	WaitForRequest(url interface{}, options ...interface{}) Request
@@ -1340,6 +1539,7 @@ type Page interface {
 	// selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
 	// This method works across navigations:
 	WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandle, error)
+	MustWaitForSelector(selector string, options ...PageWaitForSelectorOptions) ElementHandle
 	// Waits for the given `timeout` in milliseconds.
 	// Note that `page.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to be
 	// flaky. Use signals such as network events, selectors becoming visible and others instead.
@@ -1350,6 +1550,7 @@ type Page interface {
 	// > NOTE: This does not contain ServiceWorkers
 	Workers() []Worker
 	DragAndDrop(source, target string, options ...FrameDragAndDropOptions) error
+	MustDragAndDrop(source, target string, options ...FrameDragAndDropOptions)
 	// Pauses script execution. Playwright will stop executing the script and wait for the user to either press 'Resume' button
 	// in the page overlay or to call `playwright.resume()` in the DevTools console.
 	// User can inspect selectors or perform manual steps while paused. Resume will continue running the original script from
@@ -1357,11 +1558,14 @@ type Page interface {
 	// > NOTE: This method requires Playwright to be started in a headed mode, with a falsy `headless` value in the
 	// BrowserType.launch().
 	Pause() error
+	MustPause()
 	// Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
 	InputValue(selector string, options ...FrameInputValueOptions) (string, error)
+	MustInputValue(selector string, options ...FrameInputValueOptions) string
 	// Waits for the main frame to navigate to the given URL.
 	// Shortcut for main frame's Frame.waitForURL().
 	WaitForURL(url string, options ...FrameWaitForURLOptions) error
+	MustWaitForURL(url string, options ...FrameWaitForURLOptions)
 }
 
 // Whenever the page sends a request for a network resource the following sequence of events are emitted by `Page`:
@@ -1377,12 +1581,16 @@ type Page interface {
 type Request interface {
 	// An object with all the request HTTP headers associated with this request. The header names are lower-cased.
 	AllHeaders() (map[string]string, error)
+	MustAllHeaders() map[string]string
 	// An array with all the request HTTP headers associated with this request. Unlike Request.allHeaders(), header
 	// names are NOT lower-cased. Headers with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
 	HeadersArray() (HeadersArray, error)
+	MustHeadersArray() HeadersArray
 	// Returns the value of the header matching the name. The name is case insensitive.
 	HeaderValue(name string) (string, error)
+	MustHeaderValue(name string) string
 	HeaderValues(name string) ([]string, error)
+	MustHeaderValues(name string) []string
 	// The method returns `null` unless this request has failed, as reported by `requestfailed` event.
 	// Example of logging of all the failed requests:
 	Failure() *RequestFailure
@@ -1396,12 +1604,15 @@ type Request interface {
 	Method() string
 	// Request's post body, if any.
 	PostData() (string, error)
+	MustPostData() string
 	// Request's post body in a binary form, if any.
 	PostDataBuffer() ([]byte, error)
+	MustPostDataBuffer() []byte
 	// Returns parsed request's body for `form-urlencoded` and JSON as a fallback if any.
 	// When the response is `application/x-www-form-urlencoded` then a key/value object of the values will be returned.
 	// Otherwise it will be parsed as JSON.
 	PostDataJSON(v interface{}) error
+	MustPostDataJSON(v interface{})
 	// Request that was redirected by the server to this one, if any.
 	// When the server responds with a redirect, Playwright creates a new `Request` object. The two requests are connected by
 	// `redirectedFrom()` and `redirectedTo()` methods. When multiple server redirects has happened, it is possible to
@@ -1418,6 +1629,7 @@ type Request interface {
 	ResourceType() string
 	// Returns the matching `Response` object, or `null` if the response was not received due to error.
 	Response() (Response, error)
+	MustResponse() Response
 	// Returns resource timing information for given request. Most of the timing values become available upon the response,
 	// `responseEnd` becomes available when request finishes. Find more information at
 	// [Resource Timing API](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceResourceTiming).
@@ -1426,23 +1638,29 @@ type Request interface {
 	URL() string
 	// Returns resource size information for given request.
 	Sizes() (*RequestSizesResult, error)
+	MustSizes() *RequestSizesResult
 }
 
 // `Response` class represents responses which are received by page.
 type Response interface {
 	// An object with all the response HTTP headers associated with this response.
 	AllHeaders() (map[string]string, error)
+	MustAllHeaders() map[string]string
 	// An array with all the request HTTP headers associated with this response. Unlike Response.allHeaders(), header
 	// names are NOT lower-cased. Headers with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
 	HeadersArray() (HeadersArray, error)
+	MustHeadersArray() HeadersArray
 	// Returns the value of the header matching the name. The name is case insensitive. If multiple headers have the same name
 	// (except `set-cookie`), they are returned as a list separated by `, `. For `set-cookie`, the `\n` separator is used. If
 	// no headers are found, `null` is returned.
 	HeaderValue(name string) (string, error)
+	MustHeaderValue(name string) string
 	// Returns all values of the headers matching the name, for example `set-cookie`. The name is case insensitive.
 	HeaderValues(name string) ([]string, error)
+	MustHeaderValues(name string) []string
 	// Returns the buffer with response body.
 	Body() ([]byte, error)
+	MustBody() []byte
 	// Waits for this response to finish, returns always `null`.
 	Finished()
 	// Returns the `Frame` that initiated this response.
@@ -1452,6 +1670,7 @@ type Response interface {
 	// Returns the JSON representation of response body.
 	// This method will throw if the response body is not parsable via `JSON.parse`.
 	JSON(v interface{}) error
+	MustJSON(v interface{})
 	// Contains a boolean stating whether the response was successful (status in the range 200-299) or not.
 	Ok() bool
 	// Returns the matching `Request` object.
@@ -1462,12 +1681,15 @@ type Response interface {
 	StatusText() string
 	// Returns the text representation of response body.
 	Text() (string, error)
+	MustText() string
 	// Contains the URL of the response.
 	URL() string
 	// Returns SSL and other security information.
 	SecurityDetails() (*ResponseSecurityDetailsResult, error)
+	MustSecurityDetails() *ResponseSecurityDetailsResult
 	// Returns the IP address and port of the server.
 	ServerAddr() (*ResponseServerAddrResult, error)
+	MustServerAddr() *ResponseServerAddrResult
 }
 
 // Whenever a network route is set up with Page.route`] or [`method: BrowserContext.route(), the `Route` object
@@ -1475,12 +1697,15 @@ type Response interface {
 type Route interface {
 	// Aborts the route's request.
 	Abort(errorCode ...string) error
+	MustAbort(errorCode ...string)
 	// Continues route's request with optional overrides.
 	Continue(options ...RouteContinueOptions) error
+	MustContinue(options ...RouteContinueOptions)
 	// Fulfills route's request with given response.
 	// An example of fulfilling all requests with 404 responses:
 	// An example of serving static file:
 	Fulfill(options RouteFulfillOptions) error
+	MustFulfill(options RouteFulfillOptions)
 	// A request to be routed.
 	Request() Request
 }
@@ -1490,6 +1715,7 @@ type Route interface {
 type Touchscreen interface {
 	// Dispatches a `touchstart` and `touchend` event with a single touch at the position (`x`,`y`).
 	Tap(x int, y int) error
+	MustTap(x int, y int)
 }
 
 // The `WebSocket` class represents websocket connections in the page.
@@ -1511,9 +1737,11 @@ type Video interface {
 	Path() string
 	// Deletes the video file. Will wait for the video to finish if necessary.
 	Delete() error
+	MustDelete()
 	// Saves the video to a user-specified path. It is safe to call this method while the video is still in progress, or after
 	// the page has closed. This method waits until the page is closed and the video is fully saved.
 	SaveAs(path string) error
+	MustSaveAs(path string)
 }
 
 // The Worker class represents a [WebWorker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API). `worker`
@@ -1528,13 +1756,16 @@ type Worker interface {
 	// Worker.evaluate() returns `undefined`. Playwright also supports transferring some additional values that are
 	// not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`.
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
+	MustEvaluate(expression string, options ...interface{}) interface{}
 	// Returns the return value of `expression` as a `JSHandle`.
 	// The only difference between Worker.evaluate`] and [`method: Worker.evaluateHandle() is that
 	// Worker.evaluateHandle() returns `JSHandle`.
 	// If the function passed to the Worker.evaluateHandle() returns a [Promise], then
 	// Worker.evaluateHandle() would wait for the promise to resolve and return its value.
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
+	MustEvaluateHandle(expression string, options ...interface{}) JSHandle
 	URL() string
 	WaitForEvent(event string, predicate ...interface{}) interface{}
 	ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error)
+	MustExpectEvent(event string, cb func() error, predicates ...interface{}) interface{}
 }

@@ -8,7 +8,9 @@ $PWD/scripts/apply-patch.sh
 
 echo "Generating Interfaces"
 node scripts/generate-interfaces.js > generated-interfaces.go
+node scripts/generate-must-interfaces.js > generated-must-methods.go
 go fmt generated-interfaces.go > /dev/null
+go fmt generated-must-methods.go > /dev/null
 echo "Generated Interfaces"
 
 PLAYWRIGHT_DIR="playwright"

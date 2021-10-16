@@ -1,20 +1,20 @@
 package playwright
 
-type fileChooserImpl struct {
+type filechooserImpl struct {
 	page          Page
 	elementHandle ElementHandle
 	isMultiple    bool
 }
 
-func (f *fileChooserImpl) Page() Page {
+func (f *filechooserImpl) Page() Page {
 	return f.page
 }
 
-func (f *fileChooserImpl) Element() ElementHandle {
+func (f *filechooserImpl) Element() ElementHandle {
 	return f.elementHandle
 }
 
-func (f *fileChooserImpl) IsMultiple() bool {
+func (f *filechooserImpl) IsMultiple() bool {
 	return f.isMultiple
 }
 
@@ -28,12 +28,12 @@ type InputFile struct {
 	Buffer   []byte
 }
 
-func (f *fileChooserImpl) SetFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error {
+func (f *filechooserImpl) SetFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error {
 	return f.elementHandle.SetInputFiles(files, options...)
 }
 
-func newFileChooser(page Page, elementHandle ElementHandle, isMultiple bool) *fileChooserImpl {
-	return &fileChooserImpl{
+func newFileChooser(page Page, elementHandle ElementHandle, isMultiple bool) *filechooserImpl {
+	return &filechooserImpl{
 		page:          page,
 		elementHandle: elementHandle,
 		isMultiple:    isMultiple,
