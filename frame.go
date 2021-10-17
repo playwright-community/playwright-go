@@ -456,7 +456,7 @@ func (f *frameImpl) WaitForFunction(expression string, arg interface{}, options 
 	if !isFunctionBody(expression) {
 		forceExpression = true
 	}
-	result, err := f.channel.Send("waitForFunction", map[string]interface{}{
+	result, err := f.channel.Send("evaluateExpression", map[string]interface{}{
 		"expression": expression,
 		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
@@ -466,7 +466,7 @@ func (f *frameImpl) WaitForFunction(expression string, arg interface{}, options 
 	if err != nil {
 		return nil, err
 	}
-	handle := fromChannel(result)
+	handle := result.(map[string]interface{})["handle"]
 	if handle == nil {
 		return nil, nil
 	}
