@@ -1,8 +1,8 @@
 diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
-index fc7aea4f4e5b9a30c6288a2bba8be7b1ae5c9c0b..72e9a3beb1d53320b9336fde7205faf32524998b 100644
+index e28cff153d28f73a9a42a36c9ec2f60be549013d..2143f1d78f31a6b266c1e9fff5c90c7df5cdd12f 100644
 --- a/docs/src/api/class-browsercontext.md
 +++ b/docs/src/api/class-browsercontext.md
-@@ -221,6 +221,7 @@ await context.AddCookiesAsync(new[] { cookie1, cookie2 });
+@@ -215,6 +215,7 @@ await context.AddCookiesAsync(new[] { cookie1, cookie2 });
  ```
  
  ### param: BrowserContext.addCookies.cookies
@@ -10,7 +10,7 @@ index fc7aea4f4e5b9a30c6288a2bba8be7b1ae5c9c0b..72e9a3beb1d53320b9336fde7205faf3
  - `cookies` <[Array]<[Object]>>
    - `name` <[string]>
    - `value` <[string]>
-@@ -293,7 +294,17 @@ Script to be evaluated in all pages in the browser context.
+@@ -287,7 +288,17 @@ Script to be evaluated in all pages in the browser context.
  * langs: csharp, java
  - `script` <[string]|[path]>
  
