@@ -50,7 +50,7 @@ type CDPSession interface {
 // BrowserContexts provide a way to operate multiple independent browser sessions.
 // If a page opens another page, e.g. with a `window.open` call, the popup will belong to the parent page's browser
 // context.
-// Playwright allows creation of "incognito" browser contexts with `browser.newContext()` method. "Incognito" browser
+// Playwright allows creating "incognito" browser contexts with Browser.newContext() method. "Incognito" browser
 // contexts don't write any browsing data to disk.
 type BrowserContext interface {
 	EventEmitter
@@ -166,6 +166,12 @@ type Tracing interface {
 	Start(options ...TracingStartOptions) error
 	// Stop tracing.
 	Stop(options ...TracingStopOptions) error
+	// Start a new trace chunk. If you'd like to record multiple traces on the same `BrowserContext`, use
+	// Tracing.start`] once, and then create multiple trace chunks with [`method: Tracing.startChunk() and
+	// Tracing.stopChunk().
+	StartChunk() error
+	// Stop the trace chunk. See Tracing.startChunk() for more details about multiple trace chunks.
+	StopChunk(options ...TracingStopChunkOptions) error
 }
 
 // BrowserType provides methods to launch a specific browser instance or connect to an existing one. The following is a
@@ -1254,7 +1260,8 @@ type Page interface {
 	// In the case of multiple pages in a single browser, each page can have its own viewport size. However,
 	// Browser.newContext() allows to set viewport size (and more) for all pages in the context at once.
 	// `page.setViewportSize` will resize the page. A lot of websites don't expect phones to change size, so you should set the
-	// viewport size before navigating to the page.
+	// viewport size before navigating to the page. Page.setViewportSize() will also reset `screen` size, use
+	// Browser.newContext() with `screen` and `viewport` parameters if you need better control of these properties.
 	SetViewportSize(width, height int) error
 	// This method taps an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
@@ -1372,7 +1379,7 @@ type Request interface {
 	AllHeaders() (map[string]string, error)
 	// An array with all the request HTTP headers associated with this request. Unlike Request.allHeaders(), header
 	// names are NOT lower-cased. Headers with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
-	HeadersArray() ([]map[string]string, error)
+	HeadersArray() (HeadersArray, error)
 	// Returns the value of the header matching the name. The name is case insensitive.
 	HeaderValue(name string) (string, error)
 	HeaderValues(name string) ([]string, error)
@@ -1417,6 +1424,8 @@ type Request interface {
 	Timing() *ResourceTiming
 	// URL of the request.
 	URL() string
+	// Returns resource size information for given request.
+	Sizes() (*RequestSizesResult, error)
 }
 
 // `Response` class represents responses which are received by page.
@@ -1425,7 +1434,7 @@ type Response interface {
 	AllHeaders() (map[string]string, error)
 	// An array with all the request HTTP headers associated with this response. Unlike Response.allHeaders(), header
 	// names are NOT lower-cased. Headers with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
-	HeadersArray() ([]map[string]string, error)
+	HeadersArray() (HeadersArray, error)
 	// Returns the value of the header matching the name. The name is case insensitive. If multiple headers have the same name
 	// (except `set-cookie`), they are returned as a list separated by `, `. For `set-cookie`, the `\n` separator is used. If
 	// no headers are found, `null` is returned.
@@ -1455,6 +1464,10 @@ type Response interface {
 	Text() (string, error)
 	// Contains the URL of the response.
 	URL() string
+	// Returns SSL and other security information.
+	SecurityDetails() (*ResponseSecurityDetailsResult, error)
+	// Returns the IP address and port of the server.
+	ServerAddr() (*ResponseServerAddrResult, error)
 }
 
 // Whenever a network route is set up with Page.route`] or [`method: BrowserContext.route(), the `Route` object

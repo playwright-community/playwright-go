@@ -76,7 +76,7 @@ func (r *responseImpl) AllHeaders() (map[string]string, error) {
 	}
 	return headers.Headers(), nil
 }
-func (r *responseImpl) HeadersArray() ([]map[string]string, error) {
+func (r *responseImpl) HeadersArray() (HeadersArray, error) {
 	headers, err := r.ActualHeaders()
 	if err != nil {
 		return nil, err

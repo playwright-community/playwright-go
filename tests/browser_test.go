@@ -113,9 +113,7 @@ func TestNewBrowserCDPSession(t *testing.T) {
 }
 
 func TestBrowserClose(t *testing.T) {
-	pw, err := playwright.Run()
-	require.NoError(t, err)
-	browser, err := pw.Chromium.Launch()
+	browser, err := browserType.Launch()
 	require.NoError(t, err)
 	onCloseWasCalled := make(chan bool, 1)
 	onClose := func() {
@@ -125,6 +123,5 @@ func TestBrowserClose(t *testing.T) {
 	require.True(t, browser.IsConnected())
 	require.NoError(t, browser.Close())
 	<-onCloseWasCalled
-	require.NoError(t, pw.Stop())
 	require.False(t, browser.IsConnected())
 }

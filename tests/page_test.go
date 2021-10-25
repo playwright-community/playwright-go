@@ -855,3 +855,22 @@ func TestPageInputValue(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "", value)
 }
+
+func TestPageWaitForFunction2(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	_, err = page.AddScriptTag(
+		playwright.PageAddScriptTagOptions{
+			Path: playwright.String(Asset(filepath.Join("es6", "es6pathimport.js"))),
+			Type: playwright.String("module"),
+		},
+	)
+	require.NoError(t, err)
+	_, err = page.WaitForFunction("window.__es6injected", nil)
+	require.NoError(t, err)
+	value, err := page.Evaluate("window.__es6injected")
+	require.NoError(t, err)
+	require.Equal(t, 42, value)
+}
