@@ -874,3 +874,39 @@ func TestPageWaitForFunction2(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 42, value)
 }
+
+func TestPageShouldSetBodysizeAndHeadersize(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	request, err := page.ExpectRequest("**/*", func() error {
+		_, err = page.Evaluate("() => fetch('./get', { method: 'POST', body: '12345'}).then(r => r.text())")
+		require.NoError(t, err)
+		return nil
+	},
+	)
+	require.NoError(t, err)
+	sizes, err := request.Sizes()
+	require.NoError(t, err)
+	require.Equal(t, 5, sizes.RequestBodySize)
+	require.GreaterOrEqual(t, sizes.RequestHeadersSize, 300)
+}
+
+func TestPageTestShouldSetBodysizeTo0(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	request, err := page.ExpectRequest("**/*", func() error {
+		_, err = page.Evaluate("() => fetch('./get').then(r => r.text())")
+		require.NoError(t, err)
+		return nil
+	},
+	)
+	require.NoError(t, err)
+	sizes, err := request.Sizes()
+	require.NoError(t, err)
+	require.Equal(t, 0, sizes.RequestBodySize)
+	require.GreaterOrEqual(t, sizes.RequestHeadersSize, 200)
+}

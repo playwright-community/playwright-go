@@ -167,7 +167,9 @@ func (r *requestImpl) Sizes() (*RequestSizesResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	return sizes.(*RequestSizesResult), nil
+	result := &RequestSizesResult{}
+	remapMapToStruct(sizes, result)
+	return result, nil
 }
 
 func newRequest(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *requestImpl {
