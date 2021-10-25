@@ -168,6 +168,14 @@
 		"Stop": [
 			"options ...TracingStopOptions",
 			"error"
+		],
+		"StartChunk": [
+			null,
+			"error"
+		],
+		"StopChunk": [
+			"options ...TracingStopChunkOptions",
+			"error"
 		]
 	},
 	"BrowserType": {
@@ -191,11 +199,10 @@
 			"url string, options ...BrowserTypeConnectOptions",
 			"(Browser, error)"
 		],
-		"ConnectOverCDP":[
+		"ConnectOverCDP": [
 			"endpointURL string, options ...BrowserTypeConnectOverCDPOptions",
 			"(Browser, error)"
 		]
-
 	},
 	"ConsoleMessage": {
 		"Args": [
@@ -1116,7 +1123,7 @@
 		],
 		"HeadersArray": [
 			null,
-			"[]map[string]string, error"
+			"HeadersArray, error"
 		],
 		"HeaderValue": [
 			"name string",
@@ -1181,6 +1188,10 @@
 		"URL": [
 			null,
 			"string"
+		],
+		"Sizes": [
+			null,
+			"(*RequestSizesResult, error)"
 		]
 	},
 	"Response": {
@@ -1190,7 +1201,7 @@
 		],
 		"HeadersArray": [
 			null,
-			"[]map[string]string, error"
+			"HeadersArray, error"
 		],
 		"HeaderValue": [
 			"name string",
@@ -1243,6 +1254,14 @@
 		"URL": [
 			null,
 			"string"
+		],
+		"SecurityDetails": [
+			null,
+			"(*ResponseSecurityDetailsResult, error)"
+		],
+		"ServerAddr": [
+			null,
+			"(*ResponseServerAddrResult, error)"
 		]
 	},
 	"Route": {

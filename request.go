@@ -119,7 +119,7 @@ func (r *requestImpl) AllHeaders() (map[string]string, error) {
 	}
 	return headers.Headers(), nil
 }
-func (r *requestImpl) HeadersArray() ([]map[string]string, error) {
+func (r *requestImpl) HeadersArray() (HeadersArray, error) {
 	headers, err := r.ActualHeaders()
 	if err != nil {
 		return nil, err
@@ -156,6 +156,18 @@ func (r *requestImpl) ActualHeaders() (*rawHeaders, error) {
 		r.allHeaders = newRawHeaders(headers)
 	}
 	return r.allHeaders, nil
+}
+
+func (r *requestImpl) Sizes() (*RequestSizesResult, error) {
+	response, err := r.Response()
+	if err != nil {
+		return nil, err
+	}
+	sizes, err := response.(*responseImpl).channel.Send("sizes")
+	if err != nil {
+		return nil, err
+	}
+	return sizes.(*RequestSizesResult), nil
 }
 
 func newRequest(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *requestImpl {

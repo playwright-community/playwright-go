@@ -4,8 +4,13 @@ import (
 	"strings"
 )
 
+type NameValue struct {
+	Name  string
+	Value string
+}
+type HeadersArray []NameValue
 type rawHeaders struct {
-	headersArray []map[string]string
+	headersArray HeadersArray
 	headersMap   map[string]map[string]bool
 }
 
@@ -36,26 +41,25 @@ func (r *rawHeaders) Headers() map[string]string {
 	return out
 }
 
-func (r *rawHeaders) HeadersArray() []map[string]string {
+func (r *rawHeaders) HeadersArray() HeadersArray {
 	return r.headersArray
 }
 func newRawHeaders(headers interface{}) *rawHeaders {
 	r := &rawHeaders{}
-	r.headersArray = make([]map[string]string, 0)
-	for _, header := range headers.([]interface{}) {
-		entry := header.(map[string]interface{})
-		r.headersArray = append(r.headersArray, map[string]string{
-			strings.ToLower(entry["name"].(string)): entry["value"].(string),
-		})
-	}
+	r.headersArray = make([]NameValue, 0)
 	r.headersMap = make(map[string]map[string]bool)
 	for _, header := range headers.([]interface{}) {
 		entry := header.(map[string]interface{})
-		name := strings.ToLower(entry["name"].(string))
-		if _, ok := r.headersMap[name]; !ok {
-			r.headersMap[name] = make(map[string]bool)
+		name := entry["name"].(string)
+		value := entry["value"].(string)
+		r.headersArray = append(r.headersArray, NameValue{
+			Name:  name,
+			Value: value,
+		})
+		if _, ok := r.headersMap[strings.ToLower(name)]; !ok {
+			r.headersMap[strings.ToLower(name)] = make(map[string]bool)
 		}
-		r.headersMap[name][entry["value"].(string)] = true
+		r.headersMap[strings.ToLower(name)][value] = true
 	}
 	return r
 }

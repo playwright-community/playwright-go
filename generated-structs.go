@@ -72,7 +72,7 @@ type BrowserHttpCredentials struct {
 type BrowserProxy struct {
 	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128` is considered an HTTP proxy.
 	Server *string `json:"server"`
-	// Optional coma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
+	// Optional comma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
 	Bypass *string `json:"bypass"`
 	// Optional username to use if HTTP proxy requires authentication.
 	Username *string `json:"username"`
@@ -92,9 +92,9 @@ type BrowserScreen struct {
 	Height *int `json:"height"`
 }
 type BrowserStorageState struct {
-	// Optional cookies to set for context
+	// cookies to set for context
 	Cookies []BrowserStorageStateCookies `json:"cookies"`
-	// Optional localStorage to set for context
+	// localStorage to set for context
 	Origins []BrowserStorageStateOrigins `json:"origins"`
 }
 type BrowserViewport struct {
@@ -289,7 +289,7 @@ type BrowserTypeLaunchOptions struct {
 type BrowserTypeProxy struct {
 	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128` is considered an HTTP proxy.
 	Server *string `json:"server"`
-	// Optional coma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
+	// Optional comma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
 	Bypass *string `json:"bypass"`
 	// Optional username to use if HTTP proxy requires authentication.
 	Username *string `json:"username"`
@@ -1968,7 +1968,7 @@ type BrowserNewContextOptionsHttpCredentials struct {
 type BrowserNewContextOptionsProxy struct {
 	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128` is considered an HTTP proxy.
 	Server *string `json:"server"`
-	// Optional coma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
+	// Optional comma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
 	Bypass *string `json:"bypass"`
 	// Optional username to use if HTTP proxy requires authentication.
 	Username *string `json:"username"`
@@ -1988,9 +1988,9 @@ type BrowserNewContextOptionsScreen struct {
 	Height *int `json:"height"`
 }
 type BrowserNewContextOptionsStorageState struct {
-	// Optional cookies to set for context
+	// cookies to set for context
 	Cookies []BrowserNewContextOptionsStorageStateCookies `json:"cookies"`
-	// Optional localStorage to set for context
+	// localStorage to set for context
 	Origins []BrowserNewContextOptionsStorageStateOrigins `json:"origins"`
 }
 type BrowserNewContextOptionsViewport struct {
@@ -2008,19 +2008,15 @@ type BrowserRecordVideoSize struct {
 type BrowserStorageStateCookies struct {
 	Name  *string `json:"name"`
 	Value *string `json:"value"`
-	// Optional either url or domain / path are required
-	URL *string `json:"url"`
-	// Optional either url or domain / path are required
+	// domain and path are required
 	Domain *string `json:"domain"`
-	// Optional either url or domain / path are required
+	// domain and path are required
 	Path *string `json:"path"`
-	// Optional Unix time in seconds.
-	Expires *float64 `json:"expires"`
-	// Optional httpOnly flag
-	HttpOnly *bool `json:"httpOnly"`
-	// Optional secure flag
-	Secure *bool `json:"secure"`
-	// Optional sameSite flag
+	// Unix time in seconds.
+	Expires  *float64 `json:"expires"`
+	HttpOnly *bool    `json:"httpOnly"`
+	Secure   *bool    `json:"secure"`
+	// sameSite flag
 	SameSite *SameSiteAttribute `json:"sameSite"`
 }
 type BrowserStorageStateOrigins struct {
@@ -2042,7 +2038,7 @@ type BrowserNewPageOptionsHttpCredentials struct {
 type BrowserNewPageOptionsProxy struct {
 	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128` is considered an HTTP proxy.
 	Server *string `json:"server"`
-	// Optional coma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
+	// Optional comma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
 	Bypass *string `json:"bypass"`
 	// Optional username to use if HTTP proxy requires authentication.
 	Username *string `json:"username"`
@@ -2062,9 +2058,9 @@ type BrowserNewPageOptionsScreen struct {
 	Height *int `json:"height"`
 }
 type BrowserNewPageOptionsStorageState struct {
-	// Optional cookies to set for context
+	// cookies to set for context
 	Cookies []BrowserNewPageOptionsStorageStateCookies `json:"cookies"`
-	// Optional localStorage to set for context
+	// localStorage to set for context
 	Origins []BrowserNewPageOptionsStorageStateOrigins `json:"origins"`
 }
 type BrowserNewPageOptionsViewport struct {
@@ -2109,7 +2105,7 @@ type BrowserContextStorageStateResultOrigins struct {
 type BrowserTypeLaunchOptionsProxy struct {
 	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128` is considered an HTTP proxy.
 	Server *string `json:"server"`
-	// Optional coma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
+	// Optional comma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
 	Bypass *string `json:"bypass"`
 	// Optional username to use if HTTP proxy requires authentication.
 	Username *string `json:"username"`
@@ -2131,7 +2127,7 @@ type BrowserTypeLaunchPersistentContextOptionsHttpCredentials struct {
 type BrowserTypeLaunchPersistentContextOptionsProxy struct {
 	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128` is considered an HTTP proxy.
 	Server *string `json:"server"`
-	// Optional coma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
+	// Optional comma-separated domains to bypass proxy, for example `".com, chromium.org, .domain.com"`.
 	Bypass *string `json:"bypass"`
 	// Optional username to use if HTTP proxy requires authentication.
 	Username *string `json:"username"`
@@ -2319,19 +2315,15 @@ type BrowserNewContextOptionsRecordVideoSize struct {
 type BrowserNewContextOptionsStorageStateCookies struct {
 	Name  *string `json:"name"`
 	Value *string `json:"value"`
-	// Optional either url or domain / path are required
-	URL *string `json:"url"`
-	// Optional either url or domain / path are required
+	// domain and path are required
 	Domain *string `json:"domain"`
-	// Optional either url or domain / path are required
+	// domain and path are required
 	Path *string `json:"path"`
-	// Optional Unix time in seconds.
-	Expires *float64 `json:"expires"`
-	// Optional httpOnly flag
-	HttpOnly *bool `json:"httpOnly"`
-	// Optional secure flag
-	Secure *bool `json:"secure"`
-	// Optional sameSite flag
+	// Unix time in seconds.
+	Expires  *float64 `json:"expires"`
+	HttpOnly *bool    `json:"httpOnly"`
+	Secure   *bool    `json:"secure"`
+	// sameSite flag
 	SameSite *SameSiteAttribute `json:"sameSite"`
 }
 type BrowserNewContextOptionsStorageStateOrigins struct {
@@ -2351,19 +2343,15 @@ type BrowserNewPageOptionsRecordVideoSize struct {
 type BrowserNewPageOptionsStorageStateCookies struct {
 	Name  *string `json:"name"`
 	Value *string `json:"value"`
-	// Optional either url or domain / path are required
-	URL *string `json:"url"`
-	// Optional either url or domain / path are required
+	// domain and path are required
 	Domain *string `json:"domain"`
-	// Optional either url or domain / path are required
+	// domain and path are required
 	Path *string `json:"path"`
-	// Optional Unix time in seconds.
-	Expires *float64 `json:"expires"`
-	// Optional httpOnly flag
-	HttpOnly *bool `json:"httpOnly"`
-	// Optional secure flag
-	Secure *bool `json:"secure"`
-	// Optional sameSite flag
+	// Unix time in seconds.
+	Expires  *float64 `json:"expires"`
+	HttpOnly *bool    `json:"httpOnly"`
+	Secure   *bool    `json:"secure"`
+	// sameSite flag
 	SameSite *SameSiteAttribute `json:"sameSite"`
 }
 type BrowserNewPageOptionsStorageStateOrigins struct {
