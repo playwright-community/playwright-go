@@ -56,7 +56,7 @@
 			"EventEmitter"
 		],
 		"AddCookies": [
-			"cookies ...SetNetworkCookieParam",
+			"cookies ...BrowserContextAddCookiesOptionsCookies",
 			"error"
 		],
 		"AddInitScript": [
@@ -81,7 +81,7 @@
 		],
 		"Cookies": [
 			"urls ...string",
-			"([]*NetworkCookie, error)"
+			"([]*BrowserContextCookiesResult, error)"
 		],
 		"ExpectEvent": [
 			"event string, cb func() error",

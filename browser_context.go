@@ -76,47 +76,22 @@ func (b *browserContextImpl) NewPage(options ...BrowserNewPageOptions) (Page, er
 	return fromChannel(channel).(*pageImpl), nil
 }
 
-// NetworkCookie is the return structure of BrowserContext.Cookies()
-type NetworkCookie struct {
-	Name     string `json:"name"`
-	Value    string `json:"value"`
-	Domain   string `json:"domain"`
-	Path     string `json:"path"`
-	Expires  int    `json:"expires"`
-	HttpOnly bool   `json:"httpOnly"`
-	Secure   bool   `json:"secure"`
-	SameSite string `json:"sameSite"`
-}
-
-func (b *browserContextImpl) Cookies(urls ...string) ([]*NetworkCookie, error) {
+func (b *browserContextImpl) Cookies(urls ...string) ([]*BrowserContextCookiesResult, error) {
 	result, err := b.channel.Send("cookies", map[string]interface{}{
 		"urls": urls,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
-	cookies := make([]*NetworkCookie, len(result.([]interface{})))
+	cookies := make([]*BrowserContextCookiesResult, len(result.([]interface{})))
 	for i, cookie := range result.([]interface{}) {
-		cookies[i] = &NetworkCookie{}
+		cookies[i] = &BrowserContextCookiesResult{}
 		remapMapToStruct(cookie, cookies[i])
 	}
 	return cookies, nil
 }
 
-// SetNetworkCookieParam is used to filter cookies in BrowserContext.AddCookies()
-type SetNetworkCookieParam struct {
-	Name     string  `json:"name"`
-	Value    string  `json:"value"`
-	URL      *string `json:"url"`
-	Domain   *string `json:"domain"`
-	Path     *string `json:"path"`
-	Expires  *int    `json:"expires"`
-	HttpOnly *bool   `json:"httpOnly"`
-	Secure   *bool   `json:"secure"`
-	SameSite *string `json:"sameSite"`
-}
-
-func (b *browserContextImpl) AddCookies(cookies ...SetNetworkCookieParam) error {
+func (b *browserContextImpl) AddCookies(cookies ...BrowserContextAddCookiesOptionsCookies) error {
 	_, err := b.channel.Send("addCookies", map[string]interface{}{
 		"cookies": cookies,
 	})
