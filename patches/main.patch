@@ -1,8 +1,16 @@
 diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
-index fc7aea4f4e5b9a30c6288a2bba8be7b1ae5c9c0b..b751ec95b0e638d71e858e9c87fda2264a7c50c1 100644
+index fc7aea4f4e5b9a30c6288a2bba8be7b1ae5c9c0b..72e9a3beb1d53320b9336fde7205faf32524998b 100644
 --- a/docs/src/api/class-browsercontext.md
 +++ b/docs/src/api/class-browsercontext.md
-@@ -293,7 +293,17 @@ Script to be evaluated in all pages in the browser context.
+@@ -221,6 +221,7 @@ await context.AddCookiesAsync(new[] { cookie1, cookie2 });
+ ```
+ 
+ ### param: BrowserContext.addCookies.cookies
++* langs: go
+ - `cookies` <[Array]<[Object]>>
+   - `name` <[string]>
+   - `value` <[string]>
+@@ -293,7 +294,17 @@ Script to be evaluated in all pages in the browser context.
  * langs: csharp, java
  - `script` <[string]|[path]>
  
@@ -21,7 +29,7 @@ index fc7aea4f4e5b9a30c6288a2bba8be7b1ae5c9c0b..b751ec95b0e638d71e858e9c87fda226
  
  ### param: BrowserContext.addInitScript.arg
  * langs: js
-@@ -1022,7 +1032,7 @@ it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/We
+@@ -1022,7 +1033,7 @@ it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/We
  handler function to route the request.
  
  ### param: BrowserContext.route.handler
@@ -30,7 +38,7 @@ index fc7aea4f4e5b9a30c6288a2bba8be7b1ae5c9c0b..b751ec95b0e638d71e858e9c87fda226
  - `handler` <[function]\([Route]\)>
  
  handler function to route the request.
-@@ -1187,7 +1197,7 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
+@@ -1187,7 +1198,7 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
  [`method: BrowserContext.route`].
  
  ### param: BrowserContext.unroute.handler
@@ -334,10 +342,10 @@ index 47d79018f024b6f20cb204829d50fdc39259a311..e6b683b38919c7949ad622516d2e40de
    - `size` <[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
 diff --git a/utils/doclint/generateGoApi.js b/utils/doclint/generateGoApi.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..8d165a64374c268648dffe3b1c5b82642448d791
+index 0000000000000000000000000000000000000000..8c57a8968a1da34d03a573f6a445eac5cef01483
 --- /dev/null
 +++ b/utils/doclint/generateGoApi.js
-@@ -0,0 +1,754 @@
+@@ -0,0 +1,753 @@
 +/**
 + * Copyright (c) Microsoft Corporation.
 + *
@@ -610,10 +618,6 @@ index 0000000000000000000000000000000000000000..8d165a64374c268648dffe3b1c5b8264
 +        throw new Error(`No Event Type for ${name} in ${parent.name}`);
 +      if (member.spec)
 +        output(XmlDoc.renderXmlDoc(member.spec, maxDocumentationColumnWidth));
-+      if (parent && (classNameMap.get(parent.name) === type))
-+        output(`event EventHandler ${name};`); // event sender will be the type, so we're fine to ignore
-+      else
-+        output(`event EventHandler<${type}> ${name};`);
 +    } else if (member.kind === 'property') {
 +      if (member.spec) {
 +        const text = member.spec
@@ -631,6 +635,9 @@ index 0000000000000000000000000000000000000000..8d165a64374c268648dffe3b1c5b8264
 +      if (parent && member && member.name === 'children') {  // this is a special hack for Accessibility
 +        console.warn(`children property found in ${parent.name}, assuming array.`);
 +        type = `[]${parent.name}`;
++      }
++      if ( parent.name.endsWith("Result")){
++        type = type.replace("*", "")
 +      }
 +      output(`${name} ${type} \`json:"${propertyOrigin}"\``);
 +    } else {

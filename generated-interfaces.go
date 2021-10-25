@@ -56,7 +56,7 @@ type BrowserContext interface {
 	EventEmitter
 	// Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies can be
 	// obtained via BrowserContext.cookies().
-	AddCookies(cookies ...SetNetworkCookieParam) error
+	AddCookies(cookies ...BrowserContextAddCookiesOptionsCookies) error
 	// Adds a script which would be evaluated in one of the following scenarios:
 	// - Whenever a page is created in the browser context or is navigated.
 	// - Whenever a child frame is attached or navigated in any page in the browser context. In this case, the script is
@@ -78,7 +78,7 @@ type BrowserContext interface {
 	Close() error
 	// If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those URLs
 	// are returned.
-	Cookies(urls ...string) ([]*NetworkCookie, error)
+	Cookies(urls ...string) ([]*BrowserContextCookiesResult, error)
 	ExpectEvent(event string, cb func() error) (interface{}, error)
 	// The method adds a function called `name` on the `window` object of every frame in every page in the context. When
 	// called, the function executes `callback` and returns a [Promise] which resolves to the return value of `callback`. If

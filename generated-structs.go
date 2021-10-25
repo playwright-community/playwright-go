@@ -160,6 +160,9 @@ type BrowserNewPageOptions struct {
 	// Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
 	Viewport *BrowserNewPageOptionsViewport `json:"viewport"`
 }
+type BrowserContextAddCookiesOptions struct {
+	Cookies []BrowserContextAddCookiesOptionsCookies `json:"cookies"`
+}
 type BrowserContextCookies struct {
 	Name  *string `json:"name"`
 	Value *string `json:"value"`
@@ -187,15 +190,15 @@ type BrowserContextAddInitScriptOptions struct {
 
 // Result of calling <see cref="BrowserContext.Cookies" />.
 type BrowserContextCookiesResult struct {
-	Name   *string `json:"name"`
-	Value  *string `json:"value"`
-	Domain *string `json:"domain"`
-	Path   *string `json:"path"`
+	Name   string `json:"name"`
+	Value  string `json:"value"`
+	Domain string `json:"domain"`
+	Path   string `json:"path"`
 	// Unix time in seconds.
-	Expires  *float64           `json:"expires"`
-	HttpOnly *bool              `json:"httpOnly"`
-	Secure   *bool              `json:"secure"`
-	SameSite *SameSiteAttribute `json:"sameSite"`
+	Expires  float64           `json:"expires"`
+	HttpOnly bool              `json:"httpOnly"`
+	Secure   bool              `json:"secure"`
+	SameSite SameSiteAttribute `json:"sameSite"`
 }
 type BrowserContextCookiesOptions struct {
 	// Optional list of URLs.
@@ -411,13 +414,13 @@ type DialogAcceptOptions struct {
 // Result of calling <see cref="ElementHandle.BoundingBox" />.
 type ElementHandleBoundingBoxResult struct {
 	// the x coordinate of the element in pixels.
-	X *float64 `json:"x"`
+	X float64 `json:"x"`
 	// the y coordinate of the element in pixels.
-	Y *float64 `json:"y"`
+	Y float64 `json:"y"`
 	// the width of the element in pixels.
-	Width *float64 `json:"width"`
+	Width float64 `json:"width"`
 	// the height of the element in pixels.
-	Height *float64 `json:"height"`
+	Height float64 `json:"height"`
 }
 type ElementHandleCheckOptions struct {
 	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
@@ -1009,13 +1012,13 @@ type KeyboardTypeOptions struct {
 // Result of calling <see cref="Locator.BoundingBox" />.
 type LocatorBoundingBoxResult struct {
 	// the x coordinate of the element in pixels.
-	X *float64 `json:"x"`
+	X float64 `json:"x"`
 	// the y coordinate of the element in pixels.
-	Y *float64 `json:"y"`
+	Y float64 `json:"y"`
 	// the width of the element in pixels.
-	Width *float64 `json:"width"`
+	Width float64 `json:"width"`
 	// the height of the element in pixels.
-	Height *float64 `json:"height"`
+	Height float64 `json:"height"`
 }
 type LocatorBoundingBoxOptions struct {
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout() or Page.SetDefaultTimeout() methods.
@@ -1749,9 +1752,9 @@ type PageUnrouteOptions struct {
 // Result of calling <see cref="Page.ViewportSize" />.
 type PageViewportSizeResult struct {
 	// page width in pixels.
-	Width *int `json:"width"`
+	Width int `json:"width"`
 	// page height in pixels.
-	Height *int `json:"height"`
+	Height int `json:"height"`
 }
 type PageWaitForFunctionOptions struct {
 	// If `polling` is `'raf'`, then `expression` is constantly executed in `requestAnimationFrame` callback. If `polling` is a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to `raf`.
@@ -1807,72 +1810,72 @@ type PageWaitForURLOptions struct {
 // Result of calling <see cref="Request.HeadersArray" />.
 type RequestHeadersArrayResult struct {
 	// Name of the header.
-	Name *string `json:"name"`
+	Name string `json:"name"`
 	// Value of the header.
-	Value *string `json:"value"`
+	Value string `json:"value"`
 }
 
 // Result of calling <see cref="Request.Sizes" />.
 type RequestSizesResult struct {
 	// Size of the request body (POST data payload) in bytes. Set to 0 if there was no body.
-	RequestBodySize *int `json:"requestBodySize"`
+	RequestBodySize int `json:"requestBodySize"`
 	// Total number of bytes from the start of the HTTP request message until (and including) the double CRLF before the body.
-	RequestHeadersSize *int `json:"requestHeadersSize"`
+	RequestHeadersSize int `json:"requestHeadersSize"`
 	// Size of the received response body (encoded) in bytes.
-	ResponseBodySize *int `json:"responseBodySize"`
+	ResponseBodySize int `json:"responseBodySize"`
 	// Total number of bytes from the start of the HTTP response message until (and including) the double CRLF before the body.
-	ResponseHeadersSize *int `json:"responseHeadersSize"`
+	ResponseHeadersSize int `json:"responseHeadersSize"`
 }
 
 // Result of calling <see cref="Request.Timing" />.
 type RequestTimingResult struct {
 	// Request start time in milliseconds elapsed since January 1, 1970 00:00:00 UTC
-	StartTime *float64 `json:"startTime"`
+	StartTime float64 `json:"startTime"`
 	// Time immediately before the browser starts the domain name lookup for the resource. The value is given in milliseconds relative to `startTime`, -1 if not available.
-	DomainLookupStart *float64 `json:"domainLookupStart"`
+	DomainLookupStart float64 `json:"domainLookupStart"`
 	// Time immediately after the browser starts the domain name lookup for the resource. The value is given in milliseconds relative to `startTime`, -1 if not available.
-	DomainLookupEnd *float64 `json:"domainLookupEnd"`
+	DomainLookupEnd float64 `json:"domainLookupEnd"`
 	// Time immediately before the user agent starts establishing the connection to the server to retrieve the resource. The value is given in milliseconds relative to `startTime`, -1 if not available.
-	ConnectStart *float64 `json:"connectStart"`
+	ConnectStart float64 `json:"connectStart"`
 	// Time immediately before the browser starts the handshake process to secure the current connection. The value is given in milliseconds relative to `startTime`, -1 if not available.
-	SecureConnectionStart *float64 `json:"secureConnectionStart"`
+	SecureConnectionStart float64 `json:"secureConnectionStart"`
 	// Time immediately before the user agent starts establishing the connection to the server to retrieve the resource. The value is given in milliseconds relative to `startTime`, -1 if not available.
-	ConnectEnd *float64 `json:"connectEnd"`
+	ConnectEnd float64 `json:"connectEnd"`
 	// Time immediately before the browser starts requesting the resource from the server, cache, or local resource. The value is given in milliseconds relative to `startTime`, -1 if not available.
-	RequestStart *float64 `json:"requestStart"`
+	RequestStart float64 `json:"requestStart"`
 	// Time immediately after the browser starts requesting the resource from the server, cache, or local resource. The value is given in milliseconds relative to `startTime`, -1 if not available.
-	ResponseStart *float64 `json:"responseStart"`
+	ResponseStart float64 `json:"responseStart"`
 	// Time immediately after the browser receives the last byte of the resource or immediately before the transport connection is closed, whichever comes first. The value is given in milliseconds relative to `startTime`, -1 if not available.
-	ResponseEnd *float64 `json:"responseEnd"`
+	ResponseEnd float64 `json:"responseEnd"`
 }
 
 // Result of calling <see cref="Response.HeadersArray" />.
 type ResponseHeadersArrayResult struct {
 	// Name of the header.
-	Name *string `json:"name"`
+	Name string `json:"name"`
 	// Value of the header.
-	Value *string `json:"value"`
+	Value string `json:"value"`
 }
 
 // Result of calling <see cref="Response.SecurityDetails" />.
 type ResponseSecurityDetailsResult struct {
 	// Common Name component of the Issuer field. from the certificate. This should only be used for informational purposes. Optional.
-	Issuer *string `json:"issuer"`
+	Issuer string `json:"issuer"`
 	// The specific TLS protocol used. (e.g. `TLS 1.3`). Optional.
-	Protocol *string `json:"protocol"`
+	Protocol string `json:"protocol"`
 	// Common Name component of the Subject field from the certificate. This should only be used for informational purposes. Optional.
-	SubjectName *string `json:"subjectName"`
+	SubjectName string `json:"subjectName"`
 	// Unix timestamp (in seconds) specifying when this cert becomes valid. Optional.
-	ValidFrom *float64 `json:"validFrom"`
+	ValidFrom float64 `json:"validFrom"`
 	// Unix timestamp (in seconds) specifying when this cert becomes invalid. Optional.
-	ValidTo *float64 `json:"validTo"`
+	ValidTo float64 `json:"validTo"`
 }
 
 // Result of calling <see cref="Response.ServerAddr" />.
 type ResponseServerAddrResult struct {
 	// IPv4 or IPV6 address of the server.
-	IpAddress *string `json:"ipAddress"`
-	Port      *int    `json:"port"`
+	IpAddress string `json:"ipAddress"`
+	Port      int    `json:"port"`
 }
 type RouteAbortOptions struct {
 	// Optional error code. Defaults to `failed`, could be one of the following:
@@ -2069,6 +2072,24 @@ type BrowserNewPageOptionsViewport struct {
 	Width *int `json:"width"`
 	// page height in pixels.
 	Height *int `json:"height"`
+}
+type BrowserContextAddCookiesOptionsCookies struct {
+	Name  *string `json:"name"`
+	Value *string `json:"value"`
+	// either url or domain / path are required. Optional.
+	URL *string `json:"url"`
+	// either url or domain / path are required Optional.
+	Domain *string `json:"domain"`
+	// either url or domain / path are required Optional.
+	Path *string `json:"path"`
+	// Unix time in seconds. Optional.
+	Expires *float64 `json:"expires"`
+	// Optional.
+	HttpOnly *bool `json:"httpOnly"`
+	// Optional.
+	Secure *bool `json:"secure"`
+	// Optional.
+	SameSite *SameSiteAttribute `json:"sameSite"`
 }
 type BrowserContextStorageStateResultCookies struct {
 	Name   *string `json:"name"`
