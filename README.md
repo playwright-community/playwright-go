@@ -132,7 +132,7 @@ The bridge between Node.js and the other languages is basically a Node.js runtim
 
 ## Is Playwright for Go ready?
 
-We are ready for your feedback, but we are still covering Playwright Go with the tests.
+We are ready for your feedback, but we are still covering Playwright Go with tests.
 
 ## Resources
 
