@@ -342,10 +342,10 @@ index 07f1abcc0217be269b5cb71739cc88f8c37f81f9..d8605d79df0f68b66e12aa62fb77beff
    - `size` <[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
 diff --git a/utils/doclint/generateGoApi.js b/utils/doclint/generateGoApi.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..8c57a8968a1da34d03a573f6a445eac5cef01483
+index 0000000000000000000000000000000000000000..df722cfb131676d6b73ade666eb3b0322333879a
 --- /dev/null
 +++ b/utils/doclint/generateGoApi.js
-@@ -0,0 +1,753 @@
+@@ -0,0 +1,763 @@
 +/**
 + * Copyright (c) Microsoft Corporation.
 + *
@@ -623,8 +623,18 @@ index 0000000000000000000000000000000000000000..8c57a8968a1da34d03a573f6a445eac5
 +        const text = member.spec
 +        if (text.length > 0) {
 +          text.forEach(line => {
-+            if (line.text)
-+              output(`// ${line.text}`)
++            let words = line.text.split(' ');
++            let lines = [];
++            let lineText = "";
++            for (let i = 0; i < words.length; i++) {
++              lineText += ' ' + words[i];
++              if (lineText.length >= 80) {
++                lines.push(lineText);
++                lineText = '';
++              }
++            }
++            lines.push(lineText);
++            lines.filter(line => !["", " "].includes(line)).forEach(line => output(`//${line}`));
 +          }
 +          )
 +        }
@@ -636,7 +646,7 @@ index 0000000000000000000000000000000000000000..8c57a8968a1da34d03a573f6a445eac5
 +        console.warn(`children property found in ${parent.name}, assuming array.`);
 +        type = `[]${parent.name}`;
 +      }
-+      if ( parent.name.endsWith("Result")){
++      if (parent.name.endsWith("Result")) {
 +        type = type.replace("*", "")
 +      }
 +      output(`${name} ${type} \`json:"${propertyOrigin}"\``);
