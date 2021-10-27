@@ -34,8 +34,6 @@ jobs:
     - run: |
         go install ./...
         playwright install-deps
-        mkdir -p tests/assets
-        cp -r playwright/tests/assets/* tests/assets/
     - name: Test
       env:
         BROWSER: ${{ matrix.browser }}
