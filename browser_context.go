@@ -377,7 +377,10 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 	})
 	bt.channel.On("requestFailed", func(ev map[string]interface{}) {
 		request := fromChannel(ev["request"]).(*requestImpl)
-		request.failureText = ev["failureText"].(string)
+		failureText := ev["failureText"]
+		if failureText != nil {
+			request.failureText = failureText.(string)
+		}
 		page := fromNullableChannel(ev["page"])
 		if request.timing != nil {
 			request.timing.ResponseEnd = ev["responseEndTiming"].(float64)
