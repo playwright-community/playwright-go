@@ -246,8 +246,8 @@ func Run(options ...*RunOptions) (*Playwright, error) {
 	if err != nil {
 		return nil, err
 	}
-	connection.Start()
-	return <-connection.playwright, nil
+	playwright := connection.Start()
+	return playwright, nil
 }
 
 func transformRunOptions(options []*RunOptions) *RunOptions {
