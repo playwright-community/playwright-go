@@ -910,3 +910,17 @@ func TestPageTestShouldSetBodysizeTo0(t *testing.T) {
 	require.Equal(t, 0, sizes.RequestBodySize)
 	require.GreaterOrEqual(t, sizes.RequestHeadersSize, 200)
 }
+
+func TestPageSetChecked(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.SetContent(`<input id='checkbox' type='checkbox'></input>`))
+	require.NoError(t, page.SetChecked("input", true))
+	isChecked, err := page.Evaluate("checkbox.checked")
+	require.NoError(t, err)
+	require.True(t, isChecked.(bool))
+	require.NoError(t, page.SetChecked("input", false))
+	isChecked, err = page.Evaluate("checkbox.checked")
+	require.NoError(t, err)
+	require.False(t, isChecked.(bool))
+}

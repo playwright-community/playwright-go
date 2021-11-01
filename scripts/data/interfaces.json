@@ -298,6 +298,10 @@
 			"options ...ElementHandleCheckOptions",
 			"error"
 		],
+		"SetChecked": [
+			"checked bool, options ...ElementHandleSetCheckedOptions",
+			"error"
+		],
 		"Click": [
 			"options ...ElementHandleClickOptions",
 			"error"
@@ -476,6 +480,10 @@
 		]
 	},
 	"Frame": {
+		"SetChecked": [
+			"selector string, checked bool, options ...FrameSetCheckedOptions",
+			"error"
+		],
 		"AddScriptTag": [
 			"options PageAddScriptTagOptions",
 			"(ElementHandle, error)"
@@ -762,6 +770,10 @@
 	"Page": {
 		"extends": [
 			"EventEmitter"
+		],
+		"SetChecked": [
+			"selector string, checked bool, options ...FrameSetCheckedOptions",
+			"error"
 		],
 		"Mouse": [
 			null,

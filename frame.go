@@ -631,3 +631,17 @@ func (f *frameImpl) DragAndDrop(source, target string, options ...FrameDragAndDr
 	}, options)
 	return err
 }
+
+func (f *frameImpl) SetChecked(selector string, checked bool, options ...FrameSetCheckedOptions) error {
+	if checked {
+		_, err := f.channel.Send("check", map[string]interface{}{
+			"selector": selector,
+		}, options)
+		return err
+	} else {
+		_, err := f.channel.Send("uncheck", map[string]interface{}{
+			"selector": selector,
+		}, options)
+		return err
+	}
+}

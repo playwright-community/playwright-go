@@ -772,3 +772,7 @@ func (p *pageImpl) InputValue(selector string, options ...FrameInputValueOptions
 func (p *pageImpl) WaitForURL(url string, options ...FrameWaitForURLOptions) error {
 	return p.mainFrame.WaitForURL(url, options...)
 }
+
+func (p *pageImpl) SetChecked(selector string, checked bool, options ...FrameSetCheckedOptions) error {
+	return p.mainFrame.SetChecked(selector, checked, options...)
+}

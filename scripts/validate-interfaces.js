@@ -4,6 +4,7 @@ const interfaceData = require("./data/interfaces.json")
 const api = getAPIDocs()
 
 const IGNORE_CLASSES = [
+  "APIRequestContext",
   "Android",
   "AndroidDevice",
   "AndroidInput",
@@ -16,7 +17,10 @@ const IGNORE_CLASSES = [
   "Logger",
   "BrowserServer",
   "Accessibility",
-  "TimeoutError"
+  "TimeoutError", 
+  "Locator", 
+  "APIRequest",
+  "APIResponse"
 ]
 const shouldIgnoreClass = ({ name }) =>
   !IGNORE_CLASSES.includes(name) &&
