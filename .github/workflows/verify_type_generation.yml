@@ -24,4 +24,4 @@ jobs:
           git config --global user.name "Github Actions"
           go generate
       - name: Verify API is up to date
-        run: git diff --exit-code --ignore-submodules
+        run: git diff --exit-code --ignore-submodules --ignore-cr-at-eol --ignore-space-at-eol 
