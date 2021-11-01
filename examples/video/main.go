@@ -1,3 +1,4 @@
+//go:build ignore
 // +build ignore
 
 package main
@@ -39,7 +40,11 @@ func main() {
 	if err := page.Close(); err != nil {
 		log.Fatalf("failed to close page: %v", err)
 	}
-	fmt.Printf("Saved to %s\n", page.Video().Path())
+	path, err := page.Video().Path()
+	if err != nil {
+		log.Fatalf("failed to get video path: %v", err)
+	}
+	fmt.Printf("Saved to %s\n", path)
 	if err = browser.Close(); err != nil {
 		log.Fatalf("could not close browser: %v", err)
 	}
