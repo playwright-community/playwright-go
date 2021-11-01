@@ -59,6 +59,7 @@ func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptio
 	}
 	jsonPipe := fromChannel(pipe).(*jsonPipe)
 	connection := newConnection(jsonPipe.Close)
+	connection.isRemote = true
 	var browser *browserImpl
 	pipeClosed := func() {
 		for _, context := range browser.contexts {
@@ -79,8 +80,7 @@ func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptio
 		return nil
 	}
 	jsonPipe.On("message", connection.Dispatch)
-	connection.Start()
-	playwright := <-connection.playwright
+	playwright := connection.Start()
 	browser = fromChannel(playwright.initializer["preLaunchedBrowser"]).(*browserImpl)
 	browser.isConnectedOverWebSocket = true
 	return browser, nil

@@ -50,6 +50,8 @@ func createObjectFactory(parent *channelOwner, objectType string, guid string, i
 		return c
 	case "JsonPipe":
 		return newJsonPipe(parent, objectType, guid, initializer)
+	case "Stream":
+		return newStream(parent, objectType, guid, initializer)
 	default:
 		panic(objectType)
 	}

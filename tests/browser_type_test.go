@@ -1,6 +1,7 @@
 package playwright_test
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -175,6 +176,34 @@ func TestBrowserTypeConnectSlowMo(t *testing.T) {
 	require.NoError(t, browser.Close())
 }
 
+func TestBrowserTypeConnectArtifactPath(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	remoteServer, err := newRemoteServer()
+	require.NoError(t, err)
+	defer remoteServer.Close()
+	browser, err := browserType.Connect(remoteServer.url)
+	require.NoError(t, err)
+	require.NotNil(t, browser)
+	defer browser.Close()
+	recordVideoDir := t.TempDir()
+	browserContext, err := browser.NewContext(playwright.BrowserNewContextOptions{
+		RecordVideo: &playwright.BrowserNewContextOptionsRecordVideo{
+			Dir: &recordVideoDir,
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, browserContext)
+	defer browserContext.Close()
+	page, err := browserContext.NewPage()
+	require.NoError(t, err)
+	defer page.Close()
+	_, err = page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	_, err = page.Video().Path()
+	require.Error(t, err)
+	require.Equal(t, err, errors.New("Path is not available when connecting remotely. Use SaveAs() to save a local copy."))
+}
 func TestBrowserTypeConnectOverCDP(t *testing.T) {
 	if !isChromium {
 		t.Skip("CDP is only supported on Chromium")
