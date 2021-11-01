@@ -23,19 +23,21 @@ type connection struct {
 	rootObject                  *rootChannelOwner
 	callbacks                   sync.Map
 	onClose                     func() error
-	playwright                  chan *Playwright
-	onmessage                   func(message map[string]interface{}) error
+	onmessage                   func(map[string]interface{}) error
+	isRemote                    bool
 }
 
-func (c *connection) Start() {
+func (c *connection) Start() *Playwright {
+	playwright := make(chan *Playwright, 1)
 	go func() {
-		playwright, err := c.rootObject.initialize()
+		pw, err := c.rootObject.initialize()
 		if err != nil {
 			log.Fatal(err)
 			return
 		}
-		c.playwright <- playwright
+		playwright <- pw
 	}()
+	return <-playwright
 }
 
 func (c *connection) Stop() error {
@@ -186,9 +188,9 @@ func newConnection(onClose func() error) *connection {
 		waitingForRemoteObjects: make(map[string]chan interface{}),
 		objects:                 make(map[string]*channelOwner),
 		onClose:                 onClose,
+		isRemote:                false,
 	}
 	connection.rootObject = newRootChannelOwner(connection)
-	connection.playwright = make(chan *Playwright, 1)
 	return connection
 }
 

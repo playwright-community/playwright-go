@@ -1,5 +1,7 @@
 package playwright
 
+import "errors"
+
 type artifactImpl struct {
 	channelOwner
 }
@@ -9,15 +11,26 @@ func (a *artifactImpl) AbsolutePath() string {
 }
 
 func (a *artifactImpl) PathAfterFinished() (string, error) {
+	if a.connection.isRemote {
+		return "", errors.New("Path is not available when connecting remotely. Use SaveAs() to save a local copy")
+	}
 	path, err := a.channel.Send("pathAfterFinished")
 	return path.(string), err
 }
 
 func (a *artifactImpl) SaveAs(path string) error {
-	_, err := a.channel.Send("saveAs", map[string]interface{}{
-		"path": path,
-	})
-	return err
+	if !a.connection.isRemote {
+		_, err := a.channel.Send("saveAs", map[string]interface{}{
+			"path": path,
+		})
+		return err
+	}
+	streamChannel, err := a.channel.Send("saveAsStream")
+	if err != nil {
+		return err
+	}
+	stream := streamChannel.(*streamImpl)
+	return stream.SaveAs(path)
 }
 
 func (d *artifactImpl) Failure() (string, error) {

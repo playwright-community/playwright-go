@@ -1320,7 +1320,7 @@
 	"Video": {
 		"Path": [
 			null,
-			"string"
+			"(string, error)"
 		],
 		"Delete": [
 			null,
