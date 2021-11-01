@@ -365,6 +365,16 @@ func (e *elementHandleImpl) InputValue(options ...ElementHandleInputValueOptions
 	return result.(string), err
 }
 
+func (e *elementHandleImpl) SetChecked(checked bool, options ...ElementHandleSetCheckedOptions) error {
+	if checked {
+		_, err := e.channel.Send("check", options)
+		return err
+	} else {
+		_, err := e.channel.Send("uncheck", options)
+		return err
+	}
+}
+
 func newElementHandle(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *elementHandleImpl {
 	bt := &elementHandleImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)

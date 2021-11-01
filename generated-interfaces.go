@@ -316,6 +316,18 @@ type ElementHandle interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
 	// zero timeout disables this.
 	Check(options ...ElementHandleCheckOptions) error
+	// This method checks or unchecks an element by performing the following steps:
+	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws.
+	// 1. If the element already has the right checked state, this method returns immediately.
+	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// element is detached during the checks, the whole action is retried.
+	// 1. Scroll the element into view if needed.
+	// 1. Use [`property: Page.mouse`] to click in the center of the element.
+	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+	// 1. Ensure that the element is now checked or unchecked. If not, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
+	SetChecked(checked bool, options ...ElementHandleSetCheckedOptions) error
 	// This method clicks the element by performing the following steps:
 	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
@@ -542,6 +554,19 @@ type FileChooser interface {
 // page only once.
 // An example of dumping frame tree:
 type Frame interface {
+	// This method checks or unchecks an element matching `selector` by performing the following steps:
+	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws.
+	// 1. If the element already has the right checked state, this method returns immediately.
+	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// element is detached during the checks, the whole action is retried.
+	// 1. Scroll the element into view if needed.
+	// 1. Use [`property: Page.mouse`] to click in the center of the element.
+	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+	// 1. Ensure that the element is now checked or unchecked. If not, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
+	SetChecked(selector string, checked bool, options ...FrameSetCheckedOptions) error
 	// Returns the added tag when the script's onload fires or when the script content was injected into frame.
 	// Adds a `<script>` tag into the page with the desired url or content.
 	AddScriptTag(options PageAddScriptTagOptions) (ElementHandle, error)
@@ -923,6 +948,20 @@ type Mouse interface {
 // To unsubscribe from events use the `removeListener` method:
 type Page interface {
 	EventEmitter
+	// This method checks or unchecks an element matching `selector` by performing the following steps:
+	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
+	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws.
+	// 1. If the element already has the right checked state, this method returns immediately.
+	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// element is detached during the checks, the whole action is retried.
+	// 1. Scroll the element into view if needed.
+	// 1. Use [`property: Page.mouse`] to click in the center of the element.
+	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+	// 1. Ensure that the element is now checked or unchecked. If not, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
+	// Shortcut for main frame's Frame.setChecked().
+	SetChecked(selector string, checked bool, options ...FrameSetCheckedOptions) error
 	Mouse() Mouse
 	Keyboard() Keyboard
 	Touchscreen() Touchscreen
