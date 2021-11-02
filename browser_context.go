@@ -353,8 +353,10 @@ func (b *browserContextImpl) OnBackgroundPage(ev map[string]interface{}) {
 
 func (b *browserContextImpl) BackgroundPages() []Page {
 	b.Lock()
-	defer b.Unlock()
-	return b.backgroundPages
+	pages := make([]Page, len(b.backgroundPages))
+	copy(pages, b.backgroundPages)
+	b.Unlock()
+	return pages
 }
 
 func newBrowserContext(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserContextImpl {
