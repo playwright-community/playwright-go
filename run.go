@@ -84,11 +84,15 @@ func (d *PlaywrightDriver) install() error {
 	if d.options.SkipInstallBrowsers {
 		return nil
 	}
-	log.Println("Downloading browsers...")
+	if d.options.Verbose {
+		log.Println("Downloading browsers...")
+	}
 	if err := d.installBrowsers(d.DriverBinaryLocation); err != nil {
 		return fmt.Errorf("could not install browsers: %w", err)
 	}
-	log.Println("Downloaded browsers successfully")
+	if d.options.Verbose {
+		log.Println("Downloaded browsers successfully")
+	}
 	return nil
 }
 func (d *PlaywrightDriver) DownloadDriver() error {
@@ -216,6 +220,7 @@ type RunOptions struct {
 	DriverDirectory     string
 	SkipInstallBrowsers bool
 	Browsers            []string
+	Verbose             bool
 }
 
 // Install does download the driver and the browsers. If not called manually
@@ -253,7 +258,9 @@ func transformRunOptions(options []*RunOptions) *RunOptions {
 	if len(options) == 1 {
 		return options[0]
 	}
-	return &RunOptions{}
+	return &RunOptions{
+		Verbose: true,
+	}
 }
 
 func getDriverName() string {
