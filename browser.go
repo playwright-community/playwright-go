@@ -85,8 +85,11 @@ func (b *browserImpl) NewBrowserCDPSession() (CDPSession, error) {
 
 func (b *browserImpl) Contexts() []BrowserContext {
 	b.Lock()
-	defer b.Unlock()
-	return b.contexts
+	contexts := make([]BrowserContext, len(b.contexts))
+	copy(contexts, b.contexts)
+	b.Unlock()
+
+	return contexts
 }
 
 func (b *browserImpl) Close() error {
