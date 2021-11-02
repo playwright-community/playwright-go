@@ -40,8 +40,10 @@ func (b *browserContextImpl) SetDefaultTimeout(timeout float64) {
 
 func (b *browserContextImpl) Pages() []Page {
 	b.Lock()
-	defer b.Unlock()
-	return b.pages
+	pages := make([]Page, len(b.pages))
+	copy(pages, b.pages)
+	b.Unlock()
+	return pages
 }
 
 func (b *browserContextImpl) Browser() Browser {
