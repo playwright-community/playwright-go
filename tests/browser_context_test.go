@@ -2,7 +2,6 @@ package playwright_test
 
 import (
 	"fmt"
-	"runtime"
 	"testing"
 
 	"github.com/mxschmitt/playwright-go"
@@ -239,9 +238,6 @@ func TestBrowserContextShouldReturnBackgroundPage(t *testing.T) {
 	defer AfterEach(t)
 	if !isChromium {
 		t.Skip()
-	}
-	if runtime.GOOS == "windows" {
-		t.Skip("flaky on windows")
 	}
 	extensionPath := Asset("simple-extension")
 	context, err := browserType.LaunchPersistentContext(
