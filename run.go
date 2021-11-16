@@ -75,6 +75,13 @@ func (d *PlaywrightDriver) isUpToDateDriver() (bool, error) {
 	if bytes.Contains(output, []byte(d.Version)) {
 		return true, nil
 	}
+	if strings.HasPrefix(string(output), "Version ") {
+		// Get rid of trailing new line
+		outputStr := strings.TrimSpace(string(output))
+		if len(outputStr) > 8 && strings.Contains(d.Version, outputStr[8:]) {
+			return true, nil
+		}
+	}
 	return false, nil
 }
 
