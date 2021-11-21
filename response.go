@@ -100,7 +100,7 @@ func (r *responseImpl) HeaderValues(name string) ([]string, error) {
 func (r *responseImpl) ActualHeaders() (*rawHeaders, error) {
 	if r.rawHeaders == nil {
 		headers, err := r.channel.Send("rawResponseHeaders")
-		if err == nil {
+		if err != nil {
 			return nil, err
 		}
 		r.rawHeaders = newRawHeaders(headers)
@@ -109,19 +109,23 @@ func (r *responseImpl) ActualHeaders() (*rawHeaders, error) {
 }
 
 func (r *responseImpl) SecurityDetails() (*ResponseSecurityDetailsResult, error) {
-	result, err := r.channel.Send("securityDetails")
+	details, err := r.channel.Send("securityDetails")
 	if err != nil {
 		return nil, err
 	}
-	return result.(*ResponseSecurityDetailsResult), nil
+	result := &ResponseSecurityDetailsResult{}
+	remapMapToStruct(details.(map[string]interface{}), result)
+	return result, nil
 }
 
 func (r *responseImpl) ServerAddr() (*ResponseServerAddrResult, error) {
-	result, err := r.channel.Send("serverAddr")
+	addr, err := r.channel.Send("serverAddr")
 	if err != nil {
 		return nil, err
 	}
-	return result.(*ResponseServerAddrResult), nil
+	result := &ResponseServerAddrResult{}
+	remapMapToStruct(addr, result)
+	return result, nil
 }
 
 func newResponse(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *responseImpl {

@@ -46,10 +46,6 @@ func (t *pipeTransport) Start() error {
 	}
 }
 
-func (t *pipeTransport) Stop() error {
-	return nil
-}
-
 type errorPayload struct {
 	Name    string `json:"name"`
 	Message string `json:"message"`
