@@ -153,10 +153,7 @@ func TestShouldReportResponseHeadersArray(t *testing.T) {
 		"set-cookie":     {"a=b", "c=d"},
 		"content-length": {"0"},
 	})
-	header, err := response.HeaderValue("header-a")
-	require.NoError(t, err)
-	require.Equal(t, "value-a, value-a-1, value-a-2", header)
-	header, err = response.HeaderValue("header-b")
+	header, err := response.HeaderValue("header-b")
 	require.NoError(t, err)
 	require.Equal(t, "value-b", header)
 	header, err = response.HeaderValue("set-cookie")
