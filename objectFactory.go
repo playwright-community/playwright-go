@@ -52,6 +52,10 @@ func createObjectFactory(parent *channelOwner, objectType string, guid string, i
 		return newJsonPipe(parent, objectType, guid, initializer)
 	case "Stream":
 		return newStream(parent, objectType, guid, initializer)
+	case "APIRequestContext":
+		c := &channelOwner{}
+		c.createChannelOwner(c, parent, objectType, guid, initializer)
+		return c
 	default:
 		panic(objectType)
 	}

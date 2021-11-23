@@ -1081,6 +1081,8 @@ type FrameGotoOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type FrameHoverOptions struct {
@@ -1256,6 +1258,8 @@ type FrameSetContentOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type FrameSetInputFilesOptions struct {
@@ -1379,6 +1383,8 @@ type FrameWaitForNavigationOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type FrameWaitForSelectorOptions struct {
@@ -1411,6 +1417,8 @@ type FrameWaitForURLOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type JSHandleEvaluateOptions struct {
@@ -2095,6 +2103,8 @@ type PageGoBackOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageGoForwardOptions struct {
@@ -2109,6 +2119,8 @@ type PageGoForwardOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageGotoOptions struct {
@@ -2126,6 +2138,8 @@ type PageGotoOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageHoverOptions struct {
@@ -2313,6 +2327,8 @@ type PageReloadOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageRouteOptions struct {
@@ -2403,6 +2419,8 @@ type PageSetContentOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageSetInputFilesOptions struct {
@@ -2538,6 +2556,8 @@ type PageWaitForNavigationOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageWaitForRequestOptions struct {
@@ -2582,6 +2602,8 @@ type PageWaitForURLOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 
@@ -2737,6 +2759,12 @@ type TracingStartOptions struct {
 	Screenshots *bool `json:"screenshots"`
 	// Whether to capture DOM snapshot on every action.
 	Snapshots *bool `json:"snapshots"`
+	// Trace name to be shown in the Trace Viewer.
+	Title *string `json:"title"`
+}
+type TracingStartChunkOptions struct {
+	// Trace name to be shown in the Trace Viewer.
+	Title *string `json:"title"`
 }
 type TracingStopOptions struct {
 	// Export trace into the file with the given path.

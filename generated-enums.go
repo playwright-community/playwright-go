@@ -130,6 +130,7 @@ var (
 	WaitUntilStateLoad             *WaitUntilState = getWaitUntilState("load")
 	WaitUntilStateDomcontentloaded                 = getWaitUntilState("domcontentloaded")
 	WaitUntilStateNetworkidle                      = getWaitUntilState("networkidle")
+	WaitUntilStateCommit                           = getWaitUntilState("commit")
 )
 
 func getLoadState(in string) *LoadState {

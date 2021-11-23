@@ -13,9 +13,10 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
-const playwrightCliVersion = "1.16.3-1635814179000"
+const playwrightCliVersion = "1.17.0-rc1"
 
 type PlaywrightDriver struct {
 	DriverDirectory, DriverBinaryLocation, Version string
@@ -277,6 +278,7 @@ func getDriverName() string {
 
 func (d *PlaywrightDriver) getDriverURL() string {
 	platform := ""
+	url := "https://playwright.azureedge.net/builds/driver/"
 	switch runtime.GOOS {
 	case "windows":
 		platform = "win32_x64"
@@ -285,7 +287,10 @@ func (d *PlaywrightDriver) getDriverURL() string {
 	case "linux":
 		platform = "linux"
 	}
-	return fmt.Sprintf("https://playwright.azureedge.net/builds/driver/next/playwright-%s-%s.zip", d.Version, platform)
+	if strings.Contains(d.Version, "-alpha") || strings.Contains(d.Version, "-beta") || strings.Contains(d.Version, "-next") {
+		url += "next/"
+	}
+	return url + fmt.Sprintf("playwright-%s-%s.zip", d.Version, platform)
 }
 
 func makeFileExecutable(path string) error {

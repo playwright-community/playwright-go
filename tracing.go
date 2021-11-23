@@ -49,7 +49,8 @@ func (t *tracingImpl) stopChunk(path string) error {
 		save = false
 	}
 	artifactChannel, err := t.channel.Send("tracingStopChunk", map[string]interface{}{
-		"save": save,
+		"save":         save,
+		"skipCompress": false,
 	})
 	if err != nil {
 		return err

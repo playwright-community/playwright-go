@@ -1,5 +1,5 @@
 diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
-index e28cff153d28f73a9a42a36c9ec2f60be549013d..2143f1d78f31a6b266c1e9fff5c90c7df5cdd12f 100644
+index 1dc0f002966da2e66e1a72d00c5faea736c93458..8355af4e13bff3d440ec86f00e7e08cf66f2fe62 100644
 --- a/docs/src/api/class-browsercontext.md
 +++ b/docs/src/api/class-browsercontext.md
 @@ -215,6 +215,7 @@ await context.AddCookiesAsync(new[] { cookie1, cookie2 });
@@ -129,10 +129,10 @@ index 16c4062a210a52e411da22f8904f37b4ce69d98b..b1f55bce93da017c1d8127ed9a4fd0f7
  
  Maximum time in milliseconds to wait for the connection to be established. Defaults to
 diff --git a/docs/src/api/class-frame.md b/docs/src/api/class-frame.md
-index 929d1453cc30235701fc4a9dd80d40ae2f45374c..f3d14908335e44047b7653cf798d12a505d240a4 100644
+index 8c38e899f5a0f5d90f47f66bde4c534fb872bd88..a2802f0f9efd7d126f848e331c1b26e95a673413 100644
 --- a/docs/src/api/class-frame.md
 +++ b/docs/src/api/class-frame.md
-@@ -1395,7 +1395,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
+@@ -1448,7 +1448,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
  
  Optional argument to pass to [`param: expression`].
  
@@ -142,10 +142,10 @@ index 929d1453cc30235701fc4a9dd80d40ae2f45374c..f3d14908335e44047b7653cf798d12a5
  ### option: Frame.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
  
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index ba018552b6743a274f916be5716e1ac2881ec334..16afa1aa70ff2bd4aa755ee990bbf11ae2ad0b67 100644
+index b5a9438c72ea5e0dade7d08a464d89f1b5581290..58e98b99d06ed522a154ec7e6f47a118dd81d46a 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
-@@ -520,6 +520,18 @@ Script to be evaluated in all pages in the browser context.
+@@ -524,6 +524,18 @@ Script to be evaluated in all pages in the browser context.
  
  Optional argument to pass to [`param: script`] (only supported when passing a function).
  
@@ -164,7 +164,7 @@ index ba018552b6743a274f916be5716e1ac2881ec334..16afa1aa70ff2bd4aa755ee990bbf11a
  ## async method: Page.addScriptTag
  - returns: <[ElementHandle]>
  
-@@ -967,7 +979,7 @@ Changes the CSS media type of the page. The only allowed values are `'screen'`,
+@@ -971,7 +983,7 @@ Changes the CSS media type of the page. The only allowed values are `'screen'`,
  Passing `null` disables CSS media emulation.
  
  ### option: Page.emulateMedia.media
@@ -173,7 +173,7 @@ index ba018552b6743a274f916be5716e1ac2881ec334..16afa1aa70ff2bd4aa755ee990bbf11a
  - `media` <[Media]<"screen"|"print"|"null">>
  
  Changes the CSS media type of the page. The only allowed values are `'Screen'`, `'Print'` and `'Null'`.
-@@ -981,7 +993,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+@@ -985,7 +997,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
  `null` disables color scheme emulation.
  
  ### option: Page.emulateMedia.colorScheme
@@ -182,7 +182,7 @@ index ba018552b6743a274f916be5716e1ac2881ec334..16afa1aa70ff2bd4aa755ee990bbf11a
  - `colorScheme` <[ColorScheme]<"light"|"dark"|"no-preference"|"null">>
  
  Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing
-@@ -994,7 +1006,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+@@ -998,7 +1010,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
  Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.
  
  ### option: Page.emulateMedia.reducedMotion
@@ -191,7 +191,7 @@ index ba018552b6743a274f916be5716e1ac2881ec334..16afa1aa70ff2bd4aa755ee990bbf11a
  - `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"null">>
  
  Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.
-@@ -2236,7 +2248,7 @@ Paper format. If set, takes priority over [`option: width`] or [`option: height`
+@@ -2285,7 +2297,7 @@ Paper format. If set, takes priority over [`option: width`] or [`option: height`
  Paper width, accepts values labeled with units.
  
  ### option: Page.pdf.width
@@ -200,7 +200,7 @@ index ba018552b6743a274f916be5716e1ac2881ec334..16afa1aa70ff2bd4aa755ee990bbf11a
  - `width` <[string]>
  
  Paper width, accepts values labeled with units.
-@@ -2248,7 +2260,7 @@ Paper width, accepts values labeled with units.
+@@ -2297,7 +2309,7 @@ Paper width, accepts values labeled with units.
  Paper height, accepts values labeled with units.
  
  ### option: Page.pdf.height
@@ -209,7 +209,7 @@ index ba018552b6743a274f916be5716e1ac2881ec334..16afa1aa70ff2bd4aa755ee990bbf11a
  - `height` <[string]>
  
  Paper height, accepts values labeled with units.
-@@ -2264,7 +2276,7 @@ Paper height, accepts values labeled with units.
+@@ -2313,7 +2325,7 @@ Paper height, accepts values labeled with units.
  Paper margins, defaults to none.
  
  ### option: Page.pdf.margin
@@ -218,7 +218,7 @@ index ba018552b6743a274f916be5716e1ac2881ec334..16afa1aa70ff2bd4aa755ee990bbf11a
  - `margin` <[Object]>
    - `top` <[string]> Top margin, accepts values labeled with units. Defaults to `0`.
    - `right` <[string]> Right margin, accepts values labeled with units. Defaults to `0`.
-@@ -2570,7 +2582,7 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
+@@ -2628,7 +2640,7 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
  When a [`option: baseURL`] via the context options was provided and the passed URL is a path,
  it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
  ### param: Page.route.handler
@@ -227,7 +227,7 @@ index ba018552b6743a274f916be5716e1ac2881ec334..16afa1aa70ff2bd4aa755ee990bbf11a
  - `handler` <[function]\([Route], [Request]\)>
  
  handler function to route the request.
-@@ -2992,7 +3004,7 @@ the [`param: url`].
+@@ -3050,7 +3062,7 @@ the [`param: url`].
  A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
  
  ### param: Page.unroute.handler
@@ -236,7 +236,7 @@ index ba018552b6743a274f916be5716e1ac2881ec334..16afa1aa70ff2bd4aa755ee990bbf11a
  - `handler` <[function]\([Route], [Request]\)>
  
  Optional handler function to route the request.
-@@ -3238,7 +3250,7 @@ Shortcut for main frame's [`method: Frame.waitForFunction`].
+@@ -3296,7 +3308,7 @@ Shortcut for main frame's [`method: Frame.waitForFunction`].
  
  Optional argument to pass to [`param: expression`].
  
@@ -281,10 +281,10 @@ index b36a78f02c3d66e438f1f3f6d9c78a6ec01b3f35..e304fe69e3dae822b18b0ae7dc86ce31
  * langs: csharp, java
  - `body` <[string]>
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index 07f1abcc0217be269b5cb71739cc88f8c37f81f9..d8605d79df0f68b66e12aa62fb77beffb3d48587 100644
+index f0f16d286da3fae39e7a012816f9d7867a443628..7e0a538125576c1250757c3e5ca4049e1a1874a0 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
-@@ -145,8 +145,8 @@ Defaults to `'visible'`. Can be either:
+@@ -146,8 +146,8 @@ Defaults to `'visible'`. Can be either:
  * `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`.
    This is opposite to the `'visible'` option.
  
@@ -295,7 +295,7 @@ index 07f1abcc0217be269b5cb71739cc88f8c37f81f9..d8605d79df0f68b66e12aa62fb77beff
  - `polling` <[float]|"raf">
  
  If [`option: polling`] is `'raf'`, then [`param: expression`] is constantly executed in `requestAnimationFrame`
-@@ -193,7 +193,7 @@ Dangerous option; use with care. Defaults to `false`.
+@@ -194,7 +194,7 @@ Dangerous option; use with care. Defaults to `false`.
  Network proxy settings.
  
  ## csharp-java-browser-option-env
@@ -304,7 +304,7 @@ index 07f1abcc0217be269b5cb71739cc88f8c37f81f9..d8605d79df0f68b66e12aa62fb77beff
  - `env` <[Object]<[string], [string]>>
  
  Specify environment variables that will be visible to the browser. Defaults to `process.env`.
-@@ -205,7 +205,7 @@ Specify environment variables that will be visible to the browser. Defaults to `
+@@ -206,7 +206,7 @@ Specify environment variables that will be visible to the browser. Defaults to `
  Specify environment variables that will be visible to the browser. Defaults to `process.env`.
  
  ## js-python-context-option-storage-state
@@ -313,7 +313,7 @@ index 07f1abcc0217be269b5cb71739cc88f8c37f81f9..d8605d79df0f68b66e12aa62fb77beff
  - `storageState` <[path]|[Object]>
    - `cookies` <[Array]<[Object]>> cookies to set for context
      - `name` <[string]>
-@@ -233,7 +233,7 @@ Populates context with given storage state. This option can be used to initializ
+@@ -234,7 +234,7 @@ Populates context with given storage state. This option can be used to initializ
  obtained via [`method: BrowserContext.storageState`].
  
  ## csharp-java-context-option-storage-state-path
@@ -322,7 +322,7 @@ index 07f1abcc0217be269b5cb71739cc88f8c37f81f9..d8605d79df0f68b66e12aa62fb77beff
  - `storageStatePath` <[path]>
  
  Populates context with given storage state. This option can be used to initialize context with logged-in information
-@@ -387,7 +387,7 @@ Function to be evaluated in the worker context.
+@@ -388,7 +388,7 @@ Function to be evaluated in the worker context.
  Function to be evaluated in the worker context.
  
  ## python-context-option-viewport
@@ -331,7 +331,7 @@ index 07f1abcc0217be269b5cb71739cc88f8c37f81f9..d8605d79df0f68b66e12aa62fb77beff
  - `viewport` <[null]|[Object]>
    - `width` <[int]> page width in pixels.
    - `height` <[int]> page height in pixels.
-@@ -537,7 +537,7 @@ call [`method: BrowserContext.close`] for the HAR to be saved.
+@@ -538,7 +538,7 @@ call [`method: BrowserContext.close`] for the HAR to be saved.
  Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
  
  ## context-option-recordvideo
