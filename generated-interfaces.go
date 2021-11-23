@@ -1577,3 +1577,50 @@ type Worker interface {
 	WaitForEvent(event string, predicate ...interface{}) interface{}
 	ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error)
 }
+
+// Locator represents a view to the element(s) on the page. It captures the logic sufficient to retrieve the element at any
+// given moment. Locator can be created with the Page.locator() method.
+// The difference between the Locator and `ElementHandle` is that the latter points to a particular element, while Locator
+// captures the logic of how to retrieve that element.
+// In the example below, handle points to a particular DOM element on page. If that element changes text or is used by
+// React to render an entirely different component, handle is still pointing to that very DOM element. This can lead to
+// unexpected behaviors.
+// With the locator, every time the `element` is used, up-to-date DOM element is located in the page using the selector. So
+// in the snippet below, underlying DOM element is going to be located twice.
+// **Strictness**
+// Locators are strict. This means that all operations on locators that imply some target DOM element will throw if more
+// than one element matches given selector.
+type Locator interface {
+	// This method clicks the element by performing the following steps:
+	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+	// 1. Scroll the element into view if needed.
+	// 1. Use [`property: Page.mouse`] to click in the center of the element, or the specified `position`.
+	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+	// If the element is detached from the DOM at any moment during the action, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
+	Click(options ...PageClickOptions) error
+	// This method checks the element by performing the following steps:
+	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already checked,
+	// this method returns immediately.
+	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+	// 1. Scroll the element into view if needed.
+	// 1. Use [`property: Page.mouse`] to click in the center of the element.
+	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+	// 1. Ensure that the element is now checked. If not, this method throws.
+	// If the element is detached from the DOM at any moment during the action, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
+	Check(options ...FrameCheckOptions) error
+	// This method double clicks the element by performing the following steps:
+	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+	// 1. Scroll the element into view if needed.
+	// 1. Use [`property: Page.mouse`] to double click in the center of the element, or the specified `position`.
+	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the
+	// first click of the `dblclick()` triggers a navigation event, this method will throw.
+	// If the element is detached from the DOM at any moment during the action, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
+	// zero timeout disables this.
+	// > NOTE: `element.dblclick()` dispatches two `click` events and a single `dblclick` event.
+	Dblclick(options ...FrameDblclickOptions) error
+}

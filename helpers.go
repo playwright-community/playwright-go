@@ -9,9 +9,7 @@ import (
 	"github.com/danwakefield/fnmatch"
 )
 
-type (
-	routeHandler = func(Route, Request)
-)
+type routeHandler func(Route, Request)
 
 func skipFieldSerialization(val reflect.Value) bool {
 	typ := val.Type()

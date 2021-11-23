@@ -1355,5 +1355,19 @@
 			"event string, cb func() error, predicates ...interface{}",
 			"(interface{}, error)"
 		]
+	},
+	"Locator": {
+		"Click": [
+			"options ...PageClickOptions",
+			"error"
+		],
+		"Check": [
+			"options ...FrameCheckOptions",
+			"error"
+		],
+		"Dblclick": [
+			"options ...FrameDblclickOptions",
+			"error"
+		]
 	}
 }
