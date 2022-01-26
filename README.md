@@ -1,6 +1,6 @@
 # 🎭 [Playwright](https://github.com/microsoft/playwright#readme) for <img src="https://user-images.githubusercontent.com/17984549/91302719-343a1d80-e7a7-11ea-8d6a-9448ef598420.png" height="35" />
 
-## Feedback for future development of this project is needed, see [here](https://github.com/playwright-community/playwright-go/issues/122). Thanks!
+## Looking for maintainers and see [here](https://github.com/playwright-community/playwright-go/issues/122). Thanks!
 
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/playwright-community/playwright-go)](https://pkg.go.dev/github.com/playwright-community/playwright-go)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](http://opensource.org/licenses/MIT)
