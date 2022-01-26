@@ -54,6 +54,7 @@ jobs:
       continue-on-error: true
       run: goveralls -coverprofile=covprofile -service=github -parallel -flagname="${{ matrix.os }}-${{ matrix.browser }}"
   finish:
+    if: ${{ always() }}
     needs: test
     runs-on: ubuntu-latest
     steps:
