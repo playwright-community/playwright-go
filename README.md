@@ -1,13 +1,13 @@
 # 🎭 [Playwright](https://github.com/microsoft/playwright#readme) for <img src="https://user-images.githubusercontent.com/17984549/91302719-343a1d80-e7a7-11ea-8d6a-9448ef598420.png" height="35" />
 
-## Feedback for future development of this project is needed, see [here](https://github.com/mxschmitt/playwright-go/issues/122). Thanks!
+## Feedback for future development of this project is needed, see [here](https://github.com/playwright-community/playwright-go/issues/122). Thanks!
 
-[![PkgGoDev](https://pkg.go.dev/badge/github.com/mxschmitt/playwright-go)](https://pkg.go.dev/github.com/mxschmitt/playwright-go)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/playwright-community/playwright-go)](https://pkg.go.dev/github.com/playwright-community/playwright-go)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](http://opensource.org/licenses/MIT)
-[![Go Report Card](https://goreportcard.com/badge/github.com/mxschmitt/playwright-go)](https://goreportcard.com/report/github.com/mxschmitt/playwright-go) ![Build Status](https://github.com/mxschmitt/playwright-go/workflows/Go/badge.svg)
-[![Join Slack](https://img.shields.io/badge/join-slack-infomational)](https://aka.ms/playwright-slack) [![Coverage Status](https://coveralls.io/repos/github/mxschmitt/playwright-go/badge.svg?branch=master)](https://coveralls.io/github/mxschmitt/playwright-go?branch=master) <!-- GEN:chromium-version-badge -->[![Chromium version](https://img.shields.io/badge/chromium-97.0.4666.0-blue.svg?logo=google-chrome)](https://www.chromium.org/Home)<!-- GEN:stop --> <!-- GEN:firefox-version-badge -->[![Firefox version](https://img.shields.io/badge/firefox-93.0-blue.svg?logo=mozilla-firefox)](https://www.mozilla.org/en-US/firefox/new/)<!-- GEN:stop --> <!-- GEN:webkit-version-badge -->[![WebKit version](https://img.shields.io/badge/webkit-15.4-blue.svg?logo=safari)](https://webkit.org/)<!-- GEN:stop -->
+[![Go Report Card](https://goreportcard.com/badge/github.com/playwright-community/playwright-go)](https://goreportcard.com/report/github.com/playwright-community/playwright-go) ![Build Status](https://github.com/playwright-community/playwright-go/workflows/Go/badge.svg)
+[![Join Slack](https://img.shields.io/badge/join-slack-infomational)](https://aka.ms/playwright-slack) [![Coverage Status](https://coveralls.io/repos/github/playwright-community/playwright-go/badge.svg?branch=main)](https://coveralls.io/github/playwright-community/playwright-go?branch=main) <!-- GEN:chromium-version-badge -->[![Chromium version](https://img.shields.io/badge/chromium-97.0.4666.0-blue.svg?logo=google-chrome)](https://www.chromium.org/Home)<!-- GEN:stop --> <!-- GEN:firefox-version-badge -->[![Firefox version](https://img.shields.io/badge/firefox-93.0-blue.svg?logo=mozilla-firefox)](https://www.mozilla.org/en-US/firefox/new/)<!-- GEN:stop --> <!-- GEN:webkit-version-badge -->[![WebKit version](https://img.shields.io/badge/webkit-15.4-blue.svg?logo=safari)](https://webkit.org/)<!-- GEN:stop -->
 
-[API reference](https://playwright.dev/docs/api/class-playwright) | [Example recipes](https://github.com/mxschmitt/playwright-go/tree/master/examples)
+[API reference](https://playwright.dev/docs/api/class-playwright) | [Example recipes](https://github.com/playwright-community/playwright-go/tree/main/examples)
 
 Playwright is a Go library to automate [Chromium](https://www.chromium.org/Home), [Firefox](https://www.mozilla.org/en-US/firefox/new/) and [WebKit](https://webkit.org/) with a single API. Playwright is built to enable cross-browser web automation that is **ever-green**, **capable**, **reliable** and **fast**.
 
@@ -22,15 +22,15 @@ Headless execution is supported for all the browsers on all platforms.
 ## Installation
 
 ```txt
-go get github.com/mxschmitt/playwright-go
+go get github.com/playwright-community/playwright-go
 ```
 
 Install the browsers and OS dependencies:
 
 ```bash
-go run github.com/mxschmitt/playwright-go/cmd/playwright install --with-deps
+go run github.com/playwright-community/playwright-go/cmd/playwright install --with-deps
 # Or
-go install github.com/mxschmitt/playwright-go/cmd/playwright
+go install github.com/playwright-community/playwright-go/cmd/playwright
 playwright install --with-deps
 ```
 
@@ -57,7 +57,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/mxschmitt/playwright-go"
+	"github.com/playwright-community/playwright-go"
 )
 
 func main() {
@@ -121,12 +121,12 @@ Playwright is a Node.js library which uses:
 * Patched Firefox to communicate with Firefox
 * Patched WebKit to communicate with WebKit
 
-These patches are based on the original sources of the browsers and don't modify the browser behaviour so the browsers are basically the same (see [here](https://github.com/microsoft/playwright/tree/master/browser_patches)) as you see them in the wild. The support for different programming languages is based on exposing a RPC server in the Node.js land which can be used to allow other languages to use Playwright without implementing all the custom logic:
+These patches are based on the original sources of the browsers and don't modify the browser behaviour so the browsers are basically the same (see [here](https://github.com/microsoft/playwright/tree/main/browser_patches)) as you see them in the wild. The support for different programming languages is based on exposing a RPC server in the Node.js land which can be used to allow other languages to use Playwright without implementing all the custom logic:
 
 * [Playwright for Python](https://github.com/microsoft/playwright-python)
 * [Playwright for .NET](https://github.com/microsoft/playwright-sharp)
 * [Playwright for Java](https://github.com/microsoft/playwright-java)
-* [Playwright for Go](https://github.com/mxschmitt/playwright-go)
+* [Playwright for Go](https://github.com/playwright-community/playwright-go)
 
 The bridge between Node.js and the other languages is basically a Node.js runtime combined with Playwright which gets shipped for each of these languages (around 50MB) and then communicates over stdio to send the relevant commands. This will also download the pre-compiled browsers.
 
@@ -136,6 +136,6 @@ We are ready for your feedback, but we are still covering Playwright Go with the
 
 ## Resources
 
-* [Playwright for Go Documentation](https://pkg.go.dev/github.com/mxschmitt/playwright-go)
+* [Playwright for Go Documentation](https://pkg.go.dev/github.com/playwright-community/playwright-go)
 * [Playwright Documentation](https://playwright.dev/docs/api/class-playwright)
-* [Example recipes](https://github.com/mxschmitt/playwright-go/tree/master/examples)
+* [Example recipes](https://github.com/playwright-community/playwright-go/tree/main/examples)
