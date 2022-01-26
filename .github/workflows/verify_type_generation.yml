@@ -1,9 +1,9 @@
 name: Verify Types
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 jobs:
   verify:
     runs-on: ubuntu-latest

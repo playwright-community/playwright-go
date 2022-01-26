@@ -1,3 +1,4 @@
+//go:build ignore
 // +build ignore
 
 package main
@@ -7,7 +8,7 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/mxschmitt/playwright-go"
+	"github.com/playwright-community/playwright-go"
 )
 
 func assertErrorToNilf(message string, err error) {
