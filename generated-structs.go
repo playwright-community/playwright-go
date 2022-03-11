@@ -349,6 +349,8 @@ type BrowserTypeLaunchOptions struct {
 	// Note that Playwright only works with the bundled Chromium, Firefox or WebKit, use
 	// at your own risk.
 	ExecutablePath *string `json:"executablePath"`
+	// Firefox user preferences. Learn more about the Firefox user preferences at about:config
+	FirefoxUserPrefs map[string]interface{} `json:"firefoxUserPrefs"`
 	// Close the browser process on SIGHUP. Defaults to `true`.
 	HandleSIGHUP *bool `json:"handleSIGHUP"`
 	// Close the browser process on Ctrl-C. Defaults to `true`.
