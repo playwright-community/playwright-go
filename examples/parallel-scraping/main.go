@@ -32,7 +32,7 @@ func worker(id int, jobs chan job, results chan<- bool, browser playwright.Brows
 			results <- true
 			continue
 		}
-		fmt.Printf("starting (%d): %s\n", jobPayload.Try, jobPayload.URL)
+		fmt.Printf("starting (try: %d): %s\n", jobPayload.Try, jobPayload.URL)
 
 		context, err := browser.NewContext(playwright.BrowserNewContextOptions{
 			UserAgent: playwright.String("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36"),

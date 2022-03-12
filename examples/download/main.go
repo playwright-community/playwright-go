@@ -23,7 +23,7 @@ func main() {
 	pw, err := playwright.Run()
 	assertErrorToNilf("could not launch playwright: %w", err)
 	browser, err := pw.Chromium.Launch(playwright.BrowserTypeLaunchOptions{
-		Headless: playwright.Bool(false),
+		Headless: playwright.Bool(true),
 	})
 	assertErrorToNilf("could not launch Chromium: %w", err)
 	context, err := browser.NewContext()
