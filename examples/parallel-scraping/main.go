@@ -6,15 +6,18 @@ package main
 import (
 	"archive/zip"
 	"bytes"
+	"context"
 	"encoding/csv"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/playwright-community/playwright-go"
 )
@@ -25,52 +28,85 @@ func assertErrorToNilf(message string, err error) {
 	}
 }
 
-func worker(id int, jobs chan job, results chan<- bool, browser playwright.Browser) {
-	for jobPayload := range jobs {
-		if jobPayload.Try > 3 {
-			log.Printf("Stopped with domain %s", jobPayload.URL)
-			results <- true
+func worker(id int, jobs chan Job, results chan<- Job, browser playwright.Browser) {
+	for job := range jobs {
+		fmt.Printf("starting (try: %d): %s\n", job.Try, job.URL)
+		if job.Try >= 3 {
+			job.Success = false
+			job.err = fmt.Errorf("Stopped with domain %s (%w)", job.URL, job.err)
+			results <- job
 			continue
 		}
-		fmt.Printf("starting (try: %d): %s\n", jobPayload.Try, jobPayload.URL)
-
-		context, err := browser.NewContext(playwright.BrowserNewContextOptions{
-			UserAgent: playwright.String("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36"),
-		})
-		assertErrorToNilf("could not create context: %w", err)
-
-		page, err := context.NewPage()
-		assertErrorToNilf("could not create page: %w", err)
-
-		_, err = page.Goto("http://"+jobPayload.URL, playwright.PageGotoOptions{
-			WaitUntil: playwright.WaitUntilStateNetworkidle,
-		})
-		if err != nil {
-			log.Printf("could not goto: %s: %v", jobPayload.URL, err)
-			context.Close()
-			jobs <- job{
-				URL: jobPayload.URL,
-				Try: jobPayload.Try + 1,
+		jobCtx, cancel := context.WithTimeout(context.Background(), time.Second*12)
+		internalJobError := make(chan error, 1)
+		go func() {
+			internalJobError <- processJob(browser, job, jobCtx)
+			cancel()
+		}()
+		select {
+		case <-jobCtx.Done():
+			job.err = fmt.Errorf("timeout (try: %d)", job.Try+1)
+			job.Success = false
+			job.Try++
+			jobs <- job
+		case err := <-internalJobError:
+			if err != nil {
+				job.err = err
+				job.Success = false
+				job.Try++
+				jobs <- job
+				cancel()
+			} else {
+				job.Success = true
+				job.err = nil
+				results <- job
 			}
-			continue
 		}
-		cwd, err := os.Getwd()
-		if err != nil {
-			assertErrorToNilf("could not get cwd %w", err)
-		}
-		_, err = page.Screenshot(playwright.PageScreenshotOptions{
-			Path: playwright.String(filepath.Join(cwd, "out", strings.Replace(jobPayload.URL, ".", "-", -1)+".png")),
-		})
-		assertErrorToNilf("could not create screenshot: %w", err)
-		fmt.Println("finish", jobPayload.URL)
-		context.Close()
-		results <- true
 	}
 }
 
-type job struct {
-	URL string
-	Try int
+func processJob(browser playwright.Browser, job Job, ctx context.Context) error {
+	context, err := browser.NewContext(playwright.BrowserNewContextOptions{
+		UserAgent: playwright.String("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36"),
+	})
+	if err != nil {
+		return fmt.Errorf("could not create context: %w", err)
+	}
+	defer context.Close()
+	go func() {
+		<-ctx.Done()
+		context.Close()
+	}()
+
+	page, err := context.NewPage()
+	if err != nil {
+		return fmt.Errorf("could not create page: %w", err)
+	}
+
+	_, err = page.Goto("http://"+job.URL, playwright.PageGotoOptions{
+		WaitUntil: playwright.WaitUntilStateNetworkidle,
+	})
+	if err != nil {
+		return fmt.Errorf("could not goto: %s: %v", job.URL, err)
+	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("could not get cwd %w", err)
+	}
+	_, err = page.Screenshot(playwright.PageScreenshotOptions{
+		Path: playwright.String(filepath.Join(cwd, "out", strings.Replace(job.URL, ".", "-", -1)+".png")),
+	})
+	if err != nil {
+		return fmt.Errorf("could not screenshot: %w", err)
+	}
+	return nil
+}
+
+type Job struct {
+	URL     string
+	Try     int
+	err     error
+	Success bool
 }
 
 func main() {
@@ -78,7 +114,6 @@ func main() {
 	topDomains, err := getAlexaTopDomains()
 	assertErrorToNilf("could not get alexa top domains: %w", err)
 	log.Println("Downloaded Alexa top domains successfully")
-
 	cwd, err := os.Getwd()
 	if err != nil {
 		assertErrorToNilf("could not get cwd %w", err)
@@ -90,24 +125,36 @@ func main() {
 	pw, err := playwright.Run()
 	assertErrorToNilf("could not launch playwright: %w", err)
 	browser, err := pw.Chromium.Launch(playwright.BrowserTypeLaunchOptions{
-		Headless: playwright.Bool(true),
+		Headless: playwright.Bool(false),
 	})
 	assertErrorToNilf("could not launch Chromium: %w", err)
 
-	const numJobs = 30
-	jobs := make(chan job, numJobs)
-	results := make(chan bool, numJobs)
+	numberOfJobs := int(math.Min(30, float64(len(topDomains))))
+
+	jobs := make(chan Job, numberOfJobs)
+	results := make(chan Job, numberOfJobs)
+
 	for w := 1; w <= 3; w++ {
 		go worker(w, jobs, results, browser)
 	}
-	for _, url := range topDomains[:numJobs] {
-		jobs <- job{
+
+	for _, url := range topDomains[:numberOfJobs] {
+		jobs <- Job{
 			URL: url,
 		}
 	}
-	for a := 1; a <= numJobs; a++ {
-		<-results
+
+	for a := 0; a < numberOfJobs; a++ {
+		job := <-results
+		if job.Success {
+			fmt.Println("success:", job.URL)
+		} else {
+			fmt.Println("error:", job.URL, job.err)
+		}
 	}
+
+	close(jobs)
+	close(results)
 
 	assertErrorToNilf("could not close browser: %w", browser.Close())
 	assertErrorToNilf("could not stop Playwright: %w", pw.Stop())
