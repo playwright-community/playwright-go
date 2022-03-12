@@ -15,7 +15,7 @@ import (
 	"runtime"
 )
 
-const playwrightCliVersion = "1.16.3-1635814179000"
+const playwrightCliVersion = "1.20.0-beta-1647057403000"
 
 type PlaywrightDriver struct {
 	DriverDirectory, DriverBinaryLocation, Version string
@@ -242,9 +242,6 @@ func Run(options ...*RunOptions) (*Playwright, error) {
 	driver, err := NewDriver(transformRunOptions(options))
 	if err != nil {
 		return nil, fmt.Errorf("could not get driver instance: %w", err)
-	}
-	if err := driver.install(); err != nil {
-		return nil, fmt.Errorf("could not install driver: %w", err)
 	}
 	connection, err := driver.run()
 	if err != nil {

@@ -77,6 +77,42 @@ var (
 	KeyboardModifierShift                     = getKeyboardModifier("Shift")
 )
 
+func getScreenshotAnimations(in string) *ScreenshotAnimations {
+	v := ScreenshotAnimations(in)
+	return &v
+}
+
+type ScreenshotAnimations string
+
+var (
+	ScreenshotAnimationsDisabled *ScreenshotAnimations = getScreenshotAnimations("disabled")
+	ScreenshotAnimationsAllow                          = getScreenshotAnimations("allow")
+)
+
+func getScreenshotFonts(in string) *ScreenshotFonts {
+	v := ScreenshotFonts(in)
+	return &v
+}
+
+type ScreenshotFonts string
+
+var (
+	ScreenshotFontsReady  *ScreenshotFonts = getScreenshotFonts("ready")
+	ScreenshotFontsNowait                  = getScreenshotFonts("nowait")
+)
+
+func getScreenshotSize(in string) *ScreenshotSize {
+	v := ScreenshotSize(in)
+	return &v
+}
+
+type ScreenshotSize string
+
+var (
+	ScreenshotSizeCss    *ScreenshotSize = getScreenshotSize("css")
+	ScreenshotSizeDevice                 = getScreenshotSize("device")
+)
+
 func getScreenshotType(in string) *ScreenshotType {
 	v := ScreenshotType(in)
 	return &v
@@ -130,6 +166,7 @@ var (
 	WaitUntilStateLoad             *WaitUntilState = getWaitUntilState("load")
 	WaitUntilStateDomcontentloaded                 = getWaitUntilState("domcontentloaded")
 	WaitUntilStateNetworkidle                      = getWaitUntilState("networkidle")
+	WaitUntilStateCommit                           = getWaitUntilState("commit")
 )
 
 func getLoadState(in string) *LoadState {

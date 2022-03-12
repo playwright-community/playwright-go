@@ -66,6 +66,9 @@ func (c *connection) Dispatch(msg *message) {
 		)
 		return
 	}
+	if object == nil {
+		return
+	}
 	if method == "__dispose__" {
 		object.dispose()
 		return

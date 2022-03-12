@@ -363,7 +363,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 		bindings:        make(map[string]BindingCallFunction),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
-	bt.tracing = newTracing(bt)
+	bt.tracing = fromChannel(initializer["tracing"]).(*tracingImpl)
 	bt.channel.On("bindingCall", func(params map[string]interface{}) {
 		bt.onBinding(fromChannel(params["binding"]).(*bindingCallImpl))
 	})

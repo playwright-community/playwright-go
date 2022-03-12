@@ -26,6 +26,12 @@ func createObjectFactory(parent *channelOwner, objectType string, guid string, i
 		return newFrame(parent, objectType, guid, initializer)
 	case "JSHandle":
 		return newJSHandle(parent, objectType, guid, initializer)
+	case "LocalUtils":
+		return nil
+	case "Tracing":
+		return newTracing(parent, objectType, guid, initializer)
+	case "APIRequestContext":
+		return nil
 	case "Page":
 		return newPage(parent, objectType, guid, initializer)
 	case "Playwright":

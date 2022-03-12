@@ -5,7 +5,6 @@ package main
 
 import (
 	"log"
-	"regexp"
 
 	"github.com/playwright-community/playwright-go"
 )
@@ -15,13 +14,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not start playwright: %v", err)
 	}
-	browser, err := pw.WebKit.Launch()
+	browser, err := pw.Chromium.Launch()
 	if err != nil {
 		log.Fatalf("could not launch browser: %v", err)
 	}
-	device := pw.Devices["iPhone 11 Pro"]
+	device := pw.Devices["Pixel 5"]
 	context, err := browser.NewContext(playwright.BrowserNewContextOptions{
-		Locale: playwright.String("en-US"),
 		Geolocation: &playwright.BrowserNewContextOptionsGeolocation{
 			Longitude: playwright.Float(12.492507),
 			Latitude:  playwright.Float(41.889938),
@@ -40,13 +38,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not create page: %v", err)
 	}
-	if _, err = page.Goto("https://maps.google.com"); err != nil {
+	if _, err = page.Goto("https://www.openstreetmap.org"); err != nil {
 		log.Fatalf("could not goto: %v", err)
 	}
-	if err = page.Click(".ml-my-location-fab button"); err != nil {
+	if err = page.Click("a[data-original-title='Show My Location']"); err != nil {
 		log.Fatalf("could not click on location: %v", err)
 	}
-	page.WaitForRequest(regexp.MustCompile(".*preview/pwa"))
 	if _, err = page.Screenshot(playwright.PageScreenshotOptions{
 		Path: playwright.String("colosseum-iphone.png"),
 	}); err != nil {

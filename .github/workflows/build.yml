@@ -33,7 +33,7 @@ jobs:
       id: go
     - run: |
         go install ./...
-        playwright install-deps
+        playwright install --with-deps ${{ matrix.browser }}
     - name: Test
       env:
         BROWSER: ${{ matrix.browser }}
@@ -83,6 +83,11 @@ jobs:
       id: go
     - run: |
         go install ./...
-        playwright install-deps
+        playwright install --with-deps
     - name: Run examples
-      run: xvfb-run bash -c "for dir in examples/*; do go run \$dir/main.go; done"
+      run: |
+        for dir in examples/*; do
+          echo "::group::go run $dir/main.go"
+          xvfb-run go run $dir/main.go
+          echo "::endgroup::"
+        done

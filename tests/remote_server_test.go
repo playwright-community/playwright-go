@@ -27,7 +27,7 @@ func newRemoteServer() (*remoteServer, error) {
 		node = "node.exe"
 	}
 	cliJs := filepath.Join(driver.DriverDirectory, "package", "lib", "cli", "cli.js")
-	cmd := exec.Command(filepath.Join(driver.DriverDirectory, node), cliJs, "launch-server", browserName)
+	cmd := exec.Command(filepath.Join(driver.DriverDirectory, node), cliJs, "launch-server", "--browser", browserName)
 	cmd.Stderr = os.Stderr
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
