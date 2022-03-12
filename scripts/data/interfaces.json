@@ -170,7 +170,7 @@
 			"error"
 		],
 		"StartChunk": [
-			null,
+			"options ...TracingStartChunkOptions",
 			"error"
 		],
 		"StopChunk": [

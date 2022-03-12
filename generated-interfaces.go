@@ -169,7 +169,7 @@ type Tracing interface {
 	// Start a new trace chunk. If you'd like to record multiple traces on the same `BrowserContext`, use
 	// Tracing.start`] once, and then create multiple trace chunks with [`method: Tracing.startChunk() and
 	// Tracing.stopChunk().
-	StartChunk() error
+	StartChunk(options ...TracingStartChunkOptions) error
 	// Stop the trace chunk. See Tracing.startChunk() for more details about multiple trace chunks.
 	StopChunk(options ...TracingStopChunkOptions) error
 }
@@ -246,9 +246,6 @@ type Dialog interface {
 // `Download` objects are dispatched by page via the [`event: Page.download`] event.
 // All the downloaded files belonging to the browser context are deleted when the browser context is closed.
 // Download event is emitted once the download starts. Download path becomes available once download completes:
-// > NOTE: Browser context **must** be created with the `acceptDownloads` set to `true` when user needs access to the
-// downloaded content. If `acceptDownloads` is not set, download events are emitted, but the actual download is not
-// performed and user has no access to the downloaded files.
 type Download interface {
 	// Deletes the downloaded file. Will wait for the download to finish if necessary.
 	Delete() error
@@ -279,12 +276,11 @@ type Download interface {
 
 // ElementHandle represents an in-page DOM element. ElementHandles can be created with the Page.querySelector()
 // method.
+// > NOTE: The use of ElementHandle is discouraged, use `Locator` objects and web-first assertions instead.
 // ElementHandle prevents DOM element from garbage collection unless the handle is disposed with
 // JSHandle.dispose(). ElementHandles are auto-disposed when their origin frame gets navigated.
 // ElementHandle instances can be used as an argument in Page.evalOnSelector`] and [`method: Page.evaluate()
 // methods.
-// > NOTE: In most cases, you would want to use the `Locator` object instead. You should only use `ElementHandle` if you
-// want to retain a handle to a particular DOM Node that you intend to pass into Page.evaluate() as an argument.
 // The difference between the `Locator` and ElementHandle is that the ElementHandle points to a particular element, while
 // `Locator` captures the logic of how to retrieve an element.
 // In the example below, handle points to a particular DOM element on page. If that element changes text or is used by
@@ -645,6 +641,8 @@ type Frame interface {
 	// `JSHandle` instances can be passed as an argument to the Frame.evaluateHandle():
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	// Returns the return value of `expression`.
+	// > NOTE: This method does not wait for the element to pass actionability checks and therefore can lead to the flaky
+	// tests. Use Locator.evaluate(), other `Locator` helper methods or web-first assertions instead.
 	// The method finds an element matching the specified selector within the frame and passes it as a first argument to
 	// `expression`. See [Working with selectors](./selectors.md) for more details. If no elements match the selector, the
 	// method throws an error.
@@ -653,6 +651,8 @@ type Frame interface {
 	// Examples:
 	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
 	// Returns the return value of `expression`.
+	// > NOTE: In most cases, Locator.evaluateAll(), other `Locator` helper methods and web-first assertions do a
+	// better job.
 	// The method finds all elements matching the specified selector within the frame and passes an array of matched elements
 	// as a first argument to `expression`. See [Working with selectors](./selectors.md) for more details.
 	// If `expression` returns a [Promise], then Frame.evalOnSelectorAll() would wait for the promise to resolve and
@@ -745,10 +745,12 @@ type Frame interface {
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	Press(selector, key string, options ...PagePressOptions) error
 	// Returns the ElementHandle pointing to the frame element.
+	// > NOTE: The use of `ElementHandle` is discouraged, use `Locator` objects and web-first assertions instead.
 	// The method finds an element matching the specified selector within the frame. See
 	// [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns `null`.
 	QuerySelector(selector string) (ElementHandle, error)
 	// Returns the ElementHandles pointing to the frame elements.
+	// > NOTE: The use of `ElementHandle` is discouraged, use `Locator` objects instead.
 	// The method finds all elements matching the specified selector within the frame. See
 	// [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns empty array.
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
@@ -821,6 +823,8 @@ type Frame interface {
 	WaitForURL(url string, options ...FrameWaitForURLOptions) error
 	// Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
 	// `detached`.
+	// > NOTE: Playwright automatically waits for element to be ready before performing an action. Using `Locator` objects and
+	// web-first assertions make the code wait-for-selector-free.
 	// Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at
 	// the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the
 	// selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
@@ -1087,6 +1091,8 @@ type Page interface {
 	// A string can also be passed in instead of a function:
 	// `JSHandle` instances can be passed as an argument to the Page.evaluateHandle():
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
+	// > NOTE: This method does not wait for the element to pass actionability checks and therefore can lead to the flaky
+	// tests. Use Locator.evaluate(), other `Locator` helper methods or web-first assertions instead.
 	// The method finds an element matching the specified selector within the page and passes it as a first argument to
 	// `expression`. If no elements match the selector, the method throws an error. Returns the value of `expression`.
 	// If `expression` returns a [Promise], then Page.evalOnSelector() would wait for the promise to resolve and
@@ -1094,6 +1100,8 @@ type Page interface {
 	// Examples:
 	// Shortcut for main frame's Frame.evalOnSelector().
 	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
+	// > NOTE: In most cases, Locator.evaluateAll(), other `Locator` helper methods and web-first assertions do a
+	// better job.
 	// The method finds all elements matching the specified selector within the page and passes an array of matched elements as
 	// a first argument to `expression`. Returns the result of `expression` invocation.
 	// If `expression` returns a [Promise], then Page.evalOnSelectorAll() would wait for the promise to resolve and
@@ -1236,16 +1244,18 @@ type Page interface {
 	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	Press(selector, key string, options ...PagePressOptions) error
+	// > NOTE: The use of `ElementHandle` is discouraged, use `Locator` objects and web-first assertions instead.
 	// The method finds an element matching the specified selector within the page. If no elements match the selector, the
-	// return value resolves to `null`. To wait for an element on the page, use Page.waitForSelector().
+	// return value resolves to `null`. To wait for an element on the page, use Locator.waitFor().
 	// Shortcut for main frame's Frame.querySelector().
 	QuerySelector(selector string) (ElementHandle, error)
+	// > NOTE: The use of `ElementHandle` is discouraged, use `Locator` objects and web-first assertions instead.
 	// The method finds all elements matching the specified selector within the page. If no elements match the selector, the
 	// return value resolves to `[]`.
 	// Shortcut for main frame's Frame.querySelectorAll().
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
-	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
-	// last redirect.
+	// This method reloads the current page, in the same way as if the user had triggered a browser refresh. Returns the main
+	// resource response. In case of multiple redirects, the navigation will resolve with the response of the last redirect.
 	Reload(options ...PageReloadOptions) (Response, error)
 	// Routing provides the capability to modify network requests that are made by a page.
 	// Once routing is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
@@ -1298,9 +1308,10 @@ type Page interface {
 	SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error
 	// In the case of multiple pages in a single browser, each page can have its own viewport size. However,
 	// Browser.newContext() allows to set viewport size (and more) for all pages in the context at once.
-	// `page.setViewportSize` will resize the page. A lot of websites don't expect phones to change size, so you should set the
-	// viewport size before navigating to the page. Page.setViewportSize() will also reset `screen` size, use
-	// Browser.newContext() with `screen` and `viewport` parameters if you need better control of these properties.
+	// Page.setViewportSize() will resize the page. A lot of websites don't expect phones to change size, so you
+	// should set the viewport size before navigating to the page. Page.setViewportSize() will also reset `screen`
+	// size, use Browser.newContext() with `screen` and `viewport` parameters if you need better control of these
+	// properties.
 	SetViewportSize(width, height int) error
 	// This method taps an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
@@ -1374,6 +1385,8 @@ type Page interface {
 	WaitForResponse(url interface{}, options ...interface{}) Response
 	// Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
 	// `detached`.
+	// > NOTE: Playwright automatically waits for element to be ready before performing an action. Using `Locator` objects and
+	// web-first assertions make the code wait-for-selector-free.
 	// Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If at
 	// the moment of calling the method `selector` already satisfies the condition, the method will return immediately. If the
 	// selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.

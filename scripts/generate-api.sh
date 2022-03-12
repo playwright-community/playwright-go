@@ -6,6 +6,8 @@ PWD=$(pwd -P)
 
 $PWD/scripts/apply-patch.sh
 
+go run scripts/install-browsers/main.go
+
 echo "Generating Interfaces"
 node scripts/generate-interfaces.js > generated-interfaces.go
 go fmt generated-interfaces.go > /dev/null
