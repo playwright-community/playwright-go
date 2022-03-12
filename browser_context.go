@@ -53,8 +53,7 @@ func (b *browserContextImpl) Tracing() Tracing {
 
 func (b *browserContextImpl) NewCDPSession(page Page) (CDPSession, error) {
 	channel, err := b.channel.Send("newCDPSession", map[string]interface{}{
-		"sdkLanguage": "javascript",
-		"page":        page.(*pageImpl).channel,
+		"page": page.(*pageImpl).channel,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
