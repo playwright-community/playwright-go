@@ -200,7 +200,7 @@ index 61dd9e3ad4e9b83a8132bc61c026d2c18b35d979..fc440fe38af9dfbd4f6d3c7ef6518906
  * langs: csharp, java
  - `body` <[string]>
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index f214cf943ae2c95c9377a093f0132e237b9bea2e..a9b810fba267f6c99d70e24f8b08ecac07ed6396 100644
+index f214cf943ae2c95c9377a093f0132e237b9bea2e..a2459b14d9d520616ef81d093b4591bfba61a77e 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
 @@ -146,8 +146,8 @@ Defaults to `'visible'`. Can be either:
@@ -250,6 +250,15 @@ index f214cf943ae2c95c9377a093f0132e237b9bea2e..a9b810fba267f6c99d70e24f8b08ecac
  - `viewport` <[null]|[Object]>
    - `width` <[int]> page width in pixels.
    - `height` <[int]> page height in pixels.
+@@ -415,7 +415,7 @@ Function to be evaluated in the worker context.
+ Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
+ 
+ ## python-context-option-no-viewport
+-* langs: python
++* langs: python, go
+ - `noViewport` <[boolean]>
+ 
+ Does not enforce fixed viewport, allows resizing window in the headed mode.
 @@ -557,7 +557,7 @@ call [`method: BrowserContext.close`] for the HAR to be saved.
  Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
  

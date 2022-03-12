@@ -44,6 +44,8 @@ type BrowserNewContextOptions struct {
 	// value, `Accept-Language` request header value as well as number and date formatting
 	// rules.
 	Locale *string `json:"locale"`
+	// Does not enforce fixed viewport, allows resizing window in the headed mode.
+	NoViewport *bool `json:"noViewport"`
 	// Whether to emulate network being offline. Defaults to `false`.
 	Offline *bool `json:"offline"`
 	// A list of permissions to grant to all pages in this context. See BrowserContext.GrantPermissions()
@@ -183,6 +185,8 @@ type BrowserNewPageOptions struct {
 	// value, `Accept-Language` request header value as well as number and date formatting
 	// rules.
 	Locale *string `json:"locale"`
+	// Does not enforce fixed viewport, allows resizing window in the headed mode.
+	NoViewport *bool `json:"noViewport"`
 	// Whether to emulate network being offline. Defaults to `false`.
 	Offline *bool `json:"offline"`
 	// A list of permissions to grant to all pages in this context. See BrowserContext.GrantPermissions()
@@ -467,6 +471,8 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// value, `Accept-Language` request header value as well as number and date formatting
 	// rules.
 	Locale *string `json:"locale"`
+	// Does not enforce fixed viewport, allows resizing window in the headed mode.
+	NoViewport *bool `json:"noViewport"`
 	// Whether to emulate network being offline. Defaults to `false`.
 	Offline *bool `json:"offline"`
 	// A list of permissions to grant to all pages in this context. See BrowserContext.GrantPermissions()
