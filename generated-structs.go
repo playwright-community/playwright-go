@@ -1,8 +1,8 @@
 package playwright
 
 type BrowserNewContextOptions struct {
-	// Whether to automatically download all the attachments. Defaults to `false` where
-	// all the downloads are canceled.
+	// Whether to automatically download all the attachments. Defaults to `true` where
+	// all the downloads are accepted.
 	AcceptDownloads *bool `json:"acceptDownloads"`
 	// When using Page.Goto(), Page.Route(), Page.WaitForURL(), Page.WaitForRequest(),
 	// or Page.WaitForResponse() it takes the base URL in consideration by using the [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL)
@@ -10,6 +10,8 @@ type BrowserNewContextOptions struct {
 	// baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
 	// baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in
 	// `http://localhost:3000/foo/bar.html`
+	// baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to
+	// `./bar.html` results in `http://localhost:3000/bar.html`
 	BaseURL *string `json:"baseURL"`
 	// Toggles bypassing page's Content-Security-Policy.
 	BypassCSP *bool `json:"bypassCSP"`
@@ -138,8 +140,8 @@ type BrowserViewport struct {
 	Height *int `json:"height"`
 }
 type BrowserNewPageOptions struct {
-	// Whether to automatically download all the attachments. Defaults to `false` where
-	// all the downloads are canceled.
+	// Whether to automatically download all the attachments. Defaults to `true` where
+	// all the downloads are accepted.
 	AcceptDownloads *bool `json:"acceptDownloads"`
 	// When using Page.Goto(), Page.Route(), Page.WaitForURL(), Page.WaitForRequest(),
 	// or Page.WaitForResponse() it takes the base URL in consideration by using the [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL)
@@ -147,6 +149,8 @@ type BrowserNewPageOptions struct {
 	// baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
 	// baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in
 	// `http://localhost:3000/foo/bar.html`
+	// baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to
+	// `./bar.html` results in `http://localhost:3000/bar.html`
 	BaseURL *string `json:"baseURL"`
 	// Toggles bypassing page's Content-Security-Policy.
 	BypassCSP *bool `json:"bypassCSP"`
@@ -384,8 +388,8 @@ type BrowserTypeProxy struct {
 	Password *string `json:"password"`
 }
 type BrowserTypeLaunchPersistentContextOptions struct {
-	// Whether to automatically download all the attachments. Defaults to `false` where
-	// all the downloads are canceled.
+	// Whether to automatically download all the attachments. Defaults to `true` where
+	// all the downloads are accepted.
 	AcceptDownloads *bool `json:"acceptDownloads"`
 	// Additional arguments to pass to the browser instance. The list of Chromium flags
 	// can be found [here](http://peter.sh/experiments/chromium-command-line-switches/).
@@ -396,6 +400,8 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// baseURL: `http://localhost:3000` and navigating to `/bar.html` results in `http://localhost:3000/bar.html`
 	// baseURL: `http://localhost:3000/foo/` and navigating to `./bar.html` results in
 	// `http://localhost:3000/foo/bar.html`
+	// baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to
+	// `./bar.html` results in `http://localhost:3000/bar.html`
 	BaseURL *string `json:"baseURL"`
 	// Toggles bypassing page's Content-Security-Policy.
 	BypassCSP *bool `json:"bypassCSP"`
@@ -694,6 +700,17 @@ type ElementHandlePressOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandleScreenshotOptions struct {
+	// When set to `"disabled"`, stops CSS animations, CSS transitions and Web Animations.
+	// Animations get different treatment depending on their duration:
+	// finite animations are fast-forwarded to completion, so they'll fire `transitionend`
+	// event.
+	// infinite animations are canceled to initial state, and then played over after the
+	// screenshot.
+	// Defaults to `"allow"` that leaves animations untouched.
+	Animations *ScreenshotAnimations `json:"animations"`
+	// When set to `"ready"`, screenshot will wait for [`document.fonts.ready`](https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet/ready)
+	// promise to resolve in all frames. Defaults to `"nowait"`.
+	Fonts *ScreenshotFonts `json:"fonts"`
 	// Hides default white background and allows capturing screenshots with transparency.
 	// Not applicable to `jpeg` images. Defaults to `false`.
 	OmitBackground *bool `json:"omitBackground"`
@@ -703,6 +720,11 @@ type ElementHandleScreenshotOptions struct {
 	Path *string `json:"path"`
 	// The quality of the image, between 0-100. Not applicable to `png` images.
 	Quality *int `json:"quality"`
+	// When set to `"css"`, screenshot will have a single pixel per each css pixel on the
+	// page. For high-dpi devices, this will keep screenshots small. Using `"device"` option
+	// will produce a single pixel per each device pixel, so screenhots of high-dpi devices
+	// will be twice as large or even larger. Defaults to `"device"`.
+	Size *ScreenshotSize `json:"size"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -1081,6 +1103,8 @@ type FrameGotoOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type FrameHoverOptions struct {
@@ -1256,6 +1280,8 @@ type FrameSetContentOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type FrameSetInputFilesOptions struct {
@@ -1379,6 +1405,8 @@ type FrameWaitForNavigationOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type FrameWaitForSelectorOptions struct {
@@ -1411,6 +1439,8 @@ type FrameWaitForURLOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type JSHandleEvaluateOptions struct {
@@ -1534,6 +1564,37 @@ type LocatorDispatchEventOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
+}
+type LocatorDragToOptions struct {
+	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	Force *bool `json:"force"`
+	// Actions that initiate navigations are waiting for these navigations to happen and
+	// for pages to start loading. You can opt out of waiting via setting this flag. You
+	// would only need this option in the exceptional cases such as navigating to inaccessible
+	// pages. Defaults to `false`.
+	NoWaitAfter *bool `json:"noWaitAfter"`
+	// Clicks on the source element at this point relative to the top-left corner of the
+	// element's padding box. If not specified, some visible point of the element is used.
+	SourcePosition *LocatorDragToOptionsSourcePosition `json:"sourcePosition"`
+	// Drops on the target element at this point relative to the top-left corner of the
+	// element's padding box. If not specified, some visible point of the element is used.
+	TargetPosition *LocatorDragToOptionsTargetPosition `json:"targetPosition"`
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
+	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// or Page.SetDefaultTimeout() methods.
+	Timeout *float64 `json:"timeout"`
+	// When set, this method only performs the [actionability](./actionability.md) checks
+	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
+	// for the action without performing it.
+	Trial *bool `json:"trial"`
+}
+type LocatorSourcePosition struct {
+	X *float64 `json:"x"`
+	Y *float64 `json:"y"`
+}
+type LocatorTargetPosition struct {
+	X *float64 `json:"x"`
+	Y *float64 `json:"y"`
 }
 type LocatorElementHandleOptions struct {
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
@@ -1667,6 +1728,17 @@ type LocatorPressOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorScreenshotOptions struct {
+	// When set to `"disabled"`, stops CSS animations, CSS transitions and Web Animations.
+	// Animations get different treatment depending on their duration:
+	// finite animations are fast-forwarded to completion, so they'll fire `transitionend`
+	// event.
+	// infinite animations are canceled to initial state, and then played over after the
+	// screenshot.
+	// Defaults to `"allow"` that leaves animations untouched.
+	Animations *ScreenshotAnimations `json:"animations"`
+	// When set to `"ready"`, screenshot will wait for [`document.fonts.ready`](https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet/ready)
+	// promise to resolve in all frames. Defaults to `"nowait"`.
+	Fonts *ScreenshotFonts `json:"fonts"`
 	// Hides default white background and allows capturing screenshots with transparency.
 	// Not applicable to `jpeg` images. Defaults to `false`.
 	OmitBackground *bool `json:"omitBackground"`
@@ -1676,6 +1748,11 @@ type LocatorScreenshotOptions struct {
 	Path *string `json:"path"`
 	// The quality of the image, between 0-100. Not applicable to `png` images.
 	Quality *int `json:"quality"`
+	// When set to `"css"`, screenshot will have a single pixel per each css pixel on the
+	// page. For high-dpi devices, this will keep screenshots small. Using `"device"` option
+	// will produce a single pixel per each device pixel, so screenhots of high-dpi devices
+	// will be twice as large or even larger. Defaults to `"device"`.
+	Size *ScreenshotSize `json:"size"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -1818,6 +1895,19 @@ type LocatorWaitForOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToBeCheckedOptions struct {
+	Checked *bool `json:"checked"`
+}
+type LocatorAssertionsToContainTextOptions struct {
+	// Whether to use `element.innerText` instead of `element.textContent` when retrieving
+	// DOM node text.
+	UseInnerText *bool `json:"useInnerText"`
+}
+type LocatorAssertionsToHaveTextOptions struct {
+	// Whether to use `element.innerText` instead of `element.textContent` when retrieving
+	// DOM node text.
+	UseInnerText *bool `json:"useInnerText"`
 }
 type MouseClickOptions struct {
 	// Defaults to `left`.
@@ -2095,6 +2185,8 @@ type PageGoBackOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageGoForwardOptions struct {
@@ -2109,6 +2201,8 @@ type PageGoForwardOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageGotoOptions struct {
@@ -2126,6 +2220,8 @@ type PageGotoOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageHoverOptions struct {
@@ -2313,6 +2409,8 @@ type PageReloadOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageRouteOptions struct {
@@ -2320,9 +2418,20 @@ type PageRouteOptions struct {
 	Times *int `json:"times"`
 }
 type PageScreenshotOptions struct {
+	// When set to `"disabled"`, stops CSS animations, CSS transitions and Web Animations.
+	// Animations get different treatment depending on their duration:
+	// finite animations are fast-forwarded to completion, so they'll fire `transitionend`
+	// event.
+	// infinite animations are canceled to initial state, and then played over after the
+	// screenshot.
+	// Defaults to `"allow"` that leaves animations untouched.
+	Animations *ScreenshotAnimations `json:"animations"`
 	// An object which specifies clipping of the resulting image. Should have the following
 	// fields:
 	Clip *PageScreenshotOptionsClip `json:"clip"`
+	// When set to `"ready"`, screenshot will wait for [`document.fonts.ready`](https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet/ready)
+	// promise to resolve in all frames. Defaults to `"nowait"`.
+	Fonts *ScreenshotFonts `json:"fonts"`
 	// When true, takes a screenshot of the full scrollable page, instead of the currently
 	// visible viewport. Defaults to `false`.
 	FullPage *bool `json:"fullPage"`
@@ -2335,6 +2444,11 @@ type PageScreenshotOptions struct {
 	Path *string `json:"path"`
 	// The quality of the image, between 0-100. Not applicable to `png` images.
 	Quality *int `json:"quality"`
+	// When set to `"css"`, screenshot will have a single pixel per each css pixel on the
+	// page. For high-dpi devices, this will keep screenshots small. Using `"device"` option
+	// will produce a single pixel per each device pixel, so screenhots of high-dpi devices
+	// will be twice as large or even larger. Defaults to `"device"`.
+	Size *ScreenshotSize `json:"size"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -2403,6 +2517,8 @@ type PageSetContentOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageSetInputFilesOptions struct {
@@ -2538,6 +2654,8 @@ type PageWaitForNavigationOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageWaitForRequestOptions struct {
@@ -2582,6 +2700,8 @@ type PageWaitForURLOptions struct {
 	// `'load'` - consider operation to be finished when the `load` event is fired.
 	// `'networkidle'` - consider operation to be finished when there are no network connections
 	// for at least `500` ms.
+	// `'commit'` - consider operation to be finished when network response is received
+	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 
@@ -2735,8 +2855,16 @@ type TracingStartOptions struct {
 	// Whether to capture screenshots during tracing. Screenshots are used to build a timeline
 	// preview.
 	Screenshots *bool `json:"screenshots"`
-	// Whether to capture DOM snapshot on every action.
+	// If this option is true tracing will
+	// capture DOM snapshot on every action
+	// record network activity
 	Snapshots *bool `json:"snapshots"`
+	// Trace name to be shown in the Trace Viewer.
+	Title *string `json:"title"`
+}
+type TracingStartChunkOptions struct {
+	// Trace name to be shown in the Trace Viewer.
+	Title *string `json:"title"`
 }
 type TracingStopOptions struct {
 	// Export trace into the file with the given path.
@@ -3062,6 +3190,14 @@ type LocatorClickOptionsPosition struct {
 	Y *float64 `json:"y"`
 }
 type LocatorDblclickOptionsPosition struct {
+	X *float64 `json:"x"`
+	Y *float64 `json:"y"`
+}
+type LocatorDragToOptionsSourcePosition struct {
+	X *float64 `json:"x"`
+	Y *float64 `json:"y"`
+}
+type LocatorDragToOptionsTargetPosition struct {
 	X *float64 `json:"x"`
 	Y *float64 `json:"y"`
 }

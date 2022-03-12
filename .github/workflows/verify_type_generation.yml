@@ -17,7 +17,9 @@ jobs:
         with:
           go-version: ^1.16.1
       - name: Install Browsers
-        run: go run scripts/install-browsers/main.go
+        run: |
+          go install ./...
+          playwright install --with-deps
       - name: Regenerate APIs
         run: |
           git config --global user.email "no-reply@github.com"
