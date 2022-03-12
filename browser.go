@@ -21,7 +21,7 @@ func (b *browserImpl) IsConnected() bool {
 }
 
 func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserContext, error) {
-	overrides := map[string]interface{}{"sdkLanguage": "javascript"}
+	overrides := map[string]interface{}{}
 	if len(options) == 1 {
 		if options[0].ExtraHttpHeaders != nil {
 			overrides["extraHTTPHeaders"] = serializeMapToNameAndValue(options[0].ExtraHttpHeaders)
@@ -39,6 +39,10 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 			}
 			options[0].StorageState = storageState
 			options[0].StorageStatePath = nil
+		}
+		if options[0].NoViewport != nil && *options[0].NoViewport {
+			overrides["noDefaultViewport"] = true
+			options[0].NoViewport = nil
 		}
 	}
 	channel, err := b.channel.Send("newContext", overrides, options)
@@ -71,9 +75,7 @@ func (b *browserImpl) NewPage(options ...BrowserNewContextOptions) (Page, error)
 }
 
 func (b *browserImpl) NewBrowserCDPSession() (CDPSession, error) {
-	channel, err := b.channel.Send("newBrowserCDPSession", map[string]interface{}{
-		"sdkLanguage": "javascript",
-	})
+	channel, err := b.channel.Send("newBrowserCDPSession")
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}

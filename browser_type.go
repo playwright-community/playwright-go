@@ -32,7 +32,6 @@ func (b *browserTypeImpl) Launch(options ...BrowserTypeLaunchOptions) (Browser, 
 func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (BrowserContext, error) {
 	overrides := map[string]interface{}{
 		"userDataDir": userDataDir,
-		"sdkLanguage": "javascript",
 	}
 	if len(options) == 1 {
 		if options[0].ExtraHttpHeaders != nil {
@@ -41,6 +40,10 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 		if options[0].Env != nil {
 			overrides["env"] = serializeMapToNameAndValue(options[0].Env)
 			options[0].Env = nil
+		}
+		if options[0].NoViewport != nil && *options[0].NoViewport {
+			overrides["noDefaultViewport"] = true
+			options[0].NoViewport = nil
 		}
 	}
 	channel, err := b.channel.Send("launchPersistentContext", overrides, options)
@@ -88,7 +91,6 @@ func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptio
 func (b *browserTypeImpl) ConnectOverCDP(endpointURL string, options ...BrowserTypeConnectOverCDPOptions) (Browser, error) {
 	overrides := map[string]interface{}{
 		"endpointURL": endpointURL,
-		"sdkLanguage": "javascript",
 	}
 	response, err := b.channel.SendReturnAsDict("connectOverCDP", overrides, options)
 	if err != nil {
