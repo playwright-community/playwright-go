@@ -34,6 +34,12 @@ go install github.com/playwright-community/playwright-go/cmd/playwright
 playwright install --with-deps
 ```
 
+Alternatively you can do it inside your program via which downloads the driver and browsers:
+
+```go
+err := playwright.Install()
+```
+
 ## Capabilities
 
 Playwright is built to automate the broad and growing set of web browser capabilities used by Single Page Apps and Progressive Web Apps.

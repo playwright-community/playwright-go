@@ -114,6 +114,11 @@ go <span class="nb">install </span>github.com/playwright-community/playwright-go
 playwright <span class="nb">install</span> <span class="nt">--with-deps</span>
 </code></pre></div></div>
 
+<p>Alternatively you can do it inside your program via which downloads the driver and browsers:</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">err</span> <span class="o">:=</span> <span class="n">playwright</span><span class="o">.</span><span class="n">Install</span><span class="p">()</span>
+</code></pre></div></div>
+
 <h2 id="capabilities">Capabilities</h2>
 
 <p>Playwright is built to automate the broad and growing set of web browser capabilities used by Single Page Apps and Progressive Web Apps.</p>
