@@ -278,9 +278,17 @@ func (d *PlaywrightDriver) getDriverURL() string {
 	case "windows":
 		platform = "win32_x64"
 	case "darwin":
-		platform = "mac"
+		if runtime.GOARCH == "arm64" {
+			platform = "mac-arm64"
+		} else {
+			platform = "mac"
+		}
 	case "linux":
-		platform = "linux"
+		if runtime.GOARCH == "arm64" {
+			platform = "linux-arm64"
+		} else {
+			platform = "linux"
+		}
 	}
 	return fmt.Sprintf("https://playwright.azureedge.net/builds/driver/next/playwright-%s-%s.zip", d.Version, platform)
 }
