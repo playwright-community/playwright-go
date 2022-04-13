@@ -369,6 +369,12 @@ type BrowserTypeLaunchOptions struct {
 	// and [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode).
 	// Defaults to `true` unless the `devtools` option is `true`.
 	Headless *bool `json:"headless"`
+	// If `true`, Playwright does not pass its own configurations args and only uses the
+	// ones from `args`. Dangerous option; use with care. Defaults to `false`.
+	IgnoreAllDefaultArgs *bool `json:"ignoreAllDefaultArgs"`
+	// If `true`, Playwright does not pass its own configurations args and only uses the
+	// ones from `args`. Dangerous option; use with care.
+	IgnoreDefaultArgs []string `json:"ignoreDefaultArgs"`
 	// Network proxy settings.
 	Proxy *BrowserTypeLaunchOptionsProxy `json:"proxy"`
 	// Slows down Playwright operations by the specified amount of milliseconds. Useful
@@ -460,6 +466,12 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	Headless *bool `json:"headless"`
 	// Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
 	HttpCredentials *BrowserTypeLaunchPersistentContextOptionsHttpCredentials `json:"httpCredentials"`
+	// If `true`, Playwright does not pass its own configurations args and only uses the
+	// ones from `args`. Dangerous option; use with care. Defaults to `false`.
+	IgnoreAllDefaultArgs *bool `json:"ignoreAllDefaultArgs"`
+	// If `true`, Playwright does not pass its own configurations args and only uses the
+	// ones from `args`. Dangerous option; use with care.
+	IgnoreDefaultArgs []string `json:"ignoreDefaultArgs"`
 	// Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
 	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
 	// Whether the `meta viewport` tag is taken into account and touch events are enabled.

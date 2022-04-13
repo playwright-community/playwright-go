@@ -200,7 +200,7 @@ index 61dd9e3ad4e9b83a8132bc61c026d2c18b35d979..fc440fe38af9dfbd4f6d3c7ef6518906
  * langs: csharp, java
  - `body` <[string]>
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index f214cf943ae2c95c9377a093f0132e237b9bea2e..a2459b14d9d520616ef81d093b4591bfba61a77e 100644
+index f214cf943ae2c95c9377a093f0132e237b9bea2e..308a69c17048d940222bd9c4bb26b71cbfa2ba6d 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
 @@ -146,8 +146,8 @@ Defaults to `'visible'`. Can be either:
@@ -214,6 +214,23 @@ index f214cf943ae2c95c9377a093f0132e237b9bea2e..a2459b14d9d520616ef81d093b4591bf
  - `polling` <[float]|"raf">
  
  If [`option: polling`] is `'raf'`, then [`param: expression`] is constantly executed in `requestAnimationFrame`
+@@ -168,14 +168,14 @@ If `true`, Playwright does not pass its own configurations args and only uses th
+ array is given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
+ 
+ ## csharp-java-browser-option-ignoredefaultargs
+-* langs: csharp, java
++* langs: csharp, java, go
+ - `ignoreDefaultArgs` <[Array]<[string]>>
+ 
+ If `true`, Playwright does not pass its own configurations args and only uses the ones from [`option: args`].
+ Dangerous option; use with care.
+ 
+ ## csharp-java-browser-option-ignorealldefaultargs
+-* langs: csharp, java
++* langs: csharp, java, go
+ - `ignoreAllDefaultArgs` <[boolean]>
+ 
+ If `true`, Playwright does not pass its own configurations args and only uses the ones from [`option: args`].
 @@ -194,7 +194,7 @@ Dangerous option; use with care. Defaults to `false`.
  Network proxy settings.
  
