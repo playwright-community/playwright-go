@@ -162,16 +162,19 @@ func TestLocatorIsEditable(t *testing.T) {
 	locator, err := page.Locator("#input1")
 	require.NoError(t, err)
 	result, err := locator.IsEditable()
+	require.NoError(t, err)
 	require.False(t, result)
 
 	locator, err = page.Locator("#input2")
 	require.NoError(t, err)
 	result, err = locator.IsEditable()
+	require.NoError(t, err)
 	require.True(t, result)
 
 	locator, err = page.Locator("textarea")
 	require.NoError(t, err)
 	result, err = locator.IsEditable()
+	require.NoError(t, err)
 	require.True(t, result)
 }
 
