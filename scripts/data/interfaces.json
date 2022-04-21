@@ -592,6 +592,10 @@
 			"selector string, options ...FrameIsVisibleOptions",
 			"bool, error"
 		],
+		"Locator": [
+			"selector string, options ...FrameLocatorOptions",
+			"Locator, error"
+		],
 		"Name": [
 			null,
 			"string"
@@ -742,6 +746,188 @@
 		],
 		"Up": [
 			"key string",
+			"error"
+		]
+	},
+	"Locator": {
+		"AllInnerTexts": [
+			null,
+			"[]string, error"
+		],
+		"AllTextContents": [
+			null,
+			"[]string, error"
+		],
+		"BoundingBox": [
+			"options ...LocatorBoundingBoxOptions",
+			"*Rect, error"
+		],
+		"Check": [
+			"options ...FrameCheckOptions",
+			"error"
+		],
+		"Click": [
+			"options ...PageClickOptions",
+			"error"
+		],
+		"Count": [
+			null,
+			"int, error"
+		],
+		"Dblclick": [
+			"options ...FrameDblclickOptions",
+			"error"
+		],
+		"DispatchEvent": [
+			"typ string, eventInit interface{}, options ...PageDispatchEventOptions",
+			"error"
+		],
+		"DragTo": [
+			"target Locator, options ...FrameDragAndDropOptions",
+			"error"
+		],
+		"ElementHandle": [
+			"options ...LocatorElementHandleOptions",
+			"ElementHandle, error"
+		],
+		"ElementHandles": [
+			null,
+			"[]ElementHandle, error"
+		],
+		"Evaluate": [
+			"expression string, arg interface{}, options ...LocatorEvaluateOptions",
+			"interface{}, error"
+		],
+		"EvaluateAll": [
+			"expression string, options ...interface{}",
+			"interface{}, error"
+		],
+		"EvaluateHandle": [
+			"expression string, arg interface{}, options ...LocatorEvaluateHandleOptions",
+			"interface{}, error"
+		],
+		"Fill": [
+			"value string, options ...FrameFillOptions",
+			"error"
+		],
+		"First": [
+			null,
+			"Locator, error"
+		],
+		"Focus": [
+			"options ...FrameFocusOptions",
+			"error"
+		],
+		"GetAttribute": [
+			"name string, options ...PageGetAttributeOptions",
+			"string, error"
+		],
+		"Highlight": [
+			null,
+			"error"
+		],
+		"Hover": [
+			"options ...PageHoverOptions",
+			"error"
+		],
+		"InnerHTML": [
+			"options ...PageInnerHTMLOptions",
+			"string, error"
+		],
+		"InnerText": [
+			"options ...PageInnerTextOptions",
+			"string, error"
+		],
+		"InputValue": [
+			"options ...FrameInputValueOptions",
+			"string, error"
+		],
+		"IsChecked": [
+			"options ...FrameIsCheckedOptions",
+			"bool, error"
+		],
+		"IsDisabled":[
+			"options ...FrameIsDisabledOptions",
+			"bool, error"
+		],
+		"IsEditable": [
+			"options ...FrameIsEditableOptions",
+			"bool, error"
+		],
+		"IsEnabled": [
+			"options ...FrameIsEnabledOptions",
+			"bool, error"
+		],
+		"IsHidden": [
+			"options ...FrameIsHiddenOptions",
+			"bool, error"
+		],
+		"IsVisible": [
+			"options ...FrameIsVisibleOptions",
+			"bool, error"
+		],
+		"Last": [
+			null,
+			"Locator, error"
+		],
+		"Locator": [
+			"selector string",
+			"Locator, error"
+		],
+		"Nth": [
+			"index int",
+			"Locator, error"
+		],
+		"Page": [
+			null,
+			"Page"
+		],
+		"Press": [
+			"key string, options ...PagePressOptions",
+			"error"
+		],
+		"Screenshot": [
+			"options ...LocatorScreenshotOptions",
+			"[]byte, error"
+		],
+		"ScrollIntoViewIfNeeded": [
+			"options ...LocatorScrollIntoViewIfNeededOptions",
+			"error"
+		],
+		"SelectOption": [
+			"values SelectOptionValues, options ...FrameSelectOptionOptions",
+			"[]string, error"
+		],
+		"SelectText": [
+			"options ...LocatorSelectTextOptions",
+			"error"
+		],
+		"SetChecked": [
+			"checked bool, options ...FrameSetCheckedOptions",
+			"error"
+		],
+		"SetInputFiles": [
+			"files []InputFile, options ...FrameSetInputFilesOptions",
+			"error"
+		],
+		"Tap": [
+			"options ...FrameTapOptions",
+			"error"
+		],
+		"TextContent": [
+			"options ...FrameTextContentOptions",
+			"string, error"
+		],
+		"Type": [
+			"text string, options ...PageTypeOptions",
+			"error"
+		],
+		"Uncheck": [
+			"options ...FrameUncheckOptions",
+			"error"
+		],
+		"WaitFor": [
+			"options ...PageWaitForSelectorOptions",
 			"error"
 		]
 	},
@@ -974,6 +1160,10 @@
 		"IsVisible": [
 			"selector string, options ...FrameIsVisibleOptions",
 			"bool, error"
+		],
+		"Locator": [
+			"selector string, options ...PageLocatorOptions",
+			"Locator, error"
 		],
 		"MainFrame": [
 			null,

@@ -200,7 +200,7 @@ index 61dd9e3ad4e9b83a8132bc61c026d2c18b35d979..fc440fe38af9dfbd4f6d3c7ef6518906
  * langs: csharp, java
  - `body` <[string]>
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index f214cf943ae2c95c9377a093f0132e237b9bea2e..308a69c17048d940222bd9c4bb26b71cbfa2ba6d 100644
+index f214cf943ae2c95c9377a093f0132e237b9bea2e..bb8269a16898d456ffd3601264469a5bda7518ac 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
 @@ -146,8 +146,8 @@ Defaults to `'visible'`. Can be either:
@@ -298,14 +298,14 @@ index f214cf943ae2c95c9377a093f0132e237b9bea2e..308a69c17048d940222bd9c4bb26b71c
  - %%-browser-option-tracesdir-%%
  
  ## locator-option-has-text
-+* langs: js, python, csharp
++* langs: js, python, csharp, go
  - `hasText` <[string]|[RegExp]>
  
  Matches elements containing specified text somewhere inside, possibly in a child or a descendant element.
  For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
  
  ## locator-option-has
-+* langs: js, python, csharp
++* langs: js, python, csharp, go
  - `has` <[Locator]>
  
  Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer one.
@@ -319,10 +319,10 @@ index f214cf943ae2c95c9377a093f0132e237b9bea2e..308a69c17048d940222bd9c4bb26b71c
  Specify locators that should be masked when the screenshot is taken. Masked elements will be overlayed with
 diff --git a/utils/doclint/generateGoApi.js b/utils/doclint/generateGoApi.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..df722cfb131676d6b73ade666eb3b0322333879a
+index 0000000000000000000000000000000000000000..1c30b40e9fe05745829b34acd907bcdb06f53d8e
 --- /dev/null
 +++ b/utils/doclint/generateGoApi.js
-@@ -0,0 +1,763 @@
+@@ -0,0 +1,765 @@
 +/**
 + * Copyright (c) Microsoft Corporation.
 + *
@@ -988,6 +988,8 @@ index 0000000000000000000000000000000000000000..df722cfb131676d6b73ade666eb3b032
 +      return translateType(type.union[1], parent, generateNameCallback);
 +    else if (type.expression === '[float]|"raf"')
 +      return `interface{}`; // hardcoded because there's no other way to denote this
++    else if (type.expression === '[string]|[RegExp]')
++      return "interface{}"
 +    if (type.expression === "[string]|[RegExp]|[function]([URL]):[boolean]")
 +      return "interface{}"
 +    return null;

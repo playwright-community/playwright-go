@@ -395,6 +395,9 @@ func (f *frameImpl) GetAttribute(selector string, name string, options ...PageGe
 	if err != nil {
 		return "", err
 	}
+	if attribute == nil {
+		return "", nil
+	}
 	return attribute.(string), nil
 }
 
@@ -644,4 +647,29 @@ func (f *frameImpl) SetChecked(selector string, checked bool, options ...FrameSe
 		}, options)
 		return err
 	}
+}
+
+func (f *frameImpl) Locator(selector string, options ...FrameLocatorOptions) (Locator, error) {
+	var option LocatorLocatorOptions
+	if len(options) == 1 {
+		option = LocatorLocatorOptions(options[0])
+	}
+	return newLocator(f, selector, option)
+}
+
+func (f *frameImpl) highlight(selector string) error {
+	_, err := f.channel.Send("highlight", map[string]interface{}{
+		"selector": selector,
+	})
+	return err
+}
+
+func (f *frameImpl) queryCount(selector string) (int, error) {
+	response, err := f.channel.Send("queryCount", map[string]interface{}{
+		"selector": selector,
+	})
+	if err != nil {
+		return 0, err
+	}
+	return int(response.(float64)), nil
 }
