@@ -760,7 +760,7 @@
 		],
 		"BoundingBox": [
 			"options ...LocatorBoundingBoxOptions",
-			"*LocatorBoundingBoxResult, error"
+			"*Rect, error"
 		],
 		"Check": [
 			"options ...FrameCheckOptions",

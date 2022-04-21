@@ -665,11 +665,11 @@ func (f *frameImpl) highlight(selector string) error {
 }
 
 func (f *frameImpl) queryCount(selector string) (int, error) {
-	channel, err := f.channel.Send("queryCount", map[string]interface{}{
+	response, err := f.channel.Send("queryCount", map[string]interface{}{
 		"selector": selector,
 	})
 	if err != nil {
 		return 0, err
 	}
-	return int(channel.(float64)), nil
+	return int(response.(float64)), nil
 }

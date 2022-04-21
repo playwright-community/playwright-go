@@ -21,7 +21,7 @@ func TestLocatorAllInnerTexts(t *testing.T) {
 	require.ElementsMatch(t, []string{"A", "B", "C"}, innerHTML)
 }
 
-func TestLocatorAllTextContens(t *testing.T) {
+func TestLocatorAllTextContents(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	_, err := page.Goto(server.EMPTY_PAGE)

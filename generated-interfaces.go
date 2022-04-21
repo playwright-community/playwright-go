@@ -946,7 +946,7 @@ type Locator interface {
 	// [Element.getBoundingClientRect](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect).
 	// Assuming the page is static, it is safe to use bounding box coordinates to perform input. For example, the following
 	// snippet should click the center of the element.
-	BoundingBox(options ...LocatorBoundingBoxOptions) (*LocatorBoundingBoxResult, error)
+	BoundingBox(options ...LocatorBoundingBoxOptions) (*Rect, error)
 	// This method checks the element by performing the following steps:
 	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already checked,
 	// this method returns immediately.
