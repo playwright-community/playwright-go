@@ -776,3 +776,11 @@ func (p *pageImpl) WaitForURL(url string, options ...FrameWaitForURLOptions) err
 func (p *pageImpl) SetChecked(selector string, checked bool, options ...FrameSetCheckedOptions) error {
 	return p.mainFrame.SetChecked(selector, checked, options...)
 }
+
+func (p *pageImpl) Locator(selector string, options ...PageLocatorOptions) (Locator, error) {
+	var option FrameLocatorOptions
+	if len(options) == 1 {
+		option = FrameLocatorOptions(options[0])
+	}
+	return p.mainFrame.Locator(selector, option)
+}

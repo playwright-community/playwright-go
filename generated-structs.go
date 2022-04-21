@@ -1228,6 +1228,17 @@ type FrameIsVisibleOptions struct {
 	// to become visible and returns immediately.
 	Timeout *float64 `json:"timeout"`
 }
+type FrameLocatorOptions struct {
+	// Matches elements containing an element that matches an inner locator. Inner locator
+	// is queried against the outer one. For example, `article` that has `text=Playwright`
+	// matches `<article><div>Playwright</div></article>`.
+	// Note that outer and inner locators must belong to the same frame. Inner locator
+	// must not contain FrameLocators.
+	Has Locator `json:"has"`
+	// Matches elements containing specified text somewhere inside, possibly in a child
+	// or a descendant element. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
+	HasText interface{} `json:"hasText"`
+}
 type FramePressOptions struct {
 	// Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
@@ -1462,6 +1473,17 @@ type FrameWaitForURLOptions struct {
 	// `'commit'` - consider operation to be finished when network response is received
 	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
+}
+type FrameLocatorLocatorOptions struct {
+	// Matches elements containing an element that matches an inner locator. Inner locator
+	// is queried against the outer one. For example, `article` that has `text=Playwright`
+	// matches `<article><div>Playwright</div></article>`.
+	// Note that outer and inner locators must belong to the same frame. Inner locator
+	// must not contain FrameLocators.
+	Has Locator `json:"has"`
+	// Matches elements containing specified text somewhere inside, possibly in a child
+	// or a descendant element. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
+	HasText interface{} `json:"hasText"`
 }
 type JSHandleEvaluateOptions struct {
 	// Optional argument to pass to `expression`.
@@ -1733,6 +1755,17 @@ type LocatorIsVisibleOptions struct {
 	// **DEPRECATED** This option is ignored. Locator.IsVisible() does not wait for the
 	// element to become visible and returns immediately.
 	Timeout *float64 `json:"timeout"`
+}
+type LocatorLocatorOptions struct {
+	// Matches elements containing an element that matches an inner locator. Inner locator
+	// is queried against the outer one. For example, `article` that has `text=Playwright`
+	// matches `<article><div>Playwright</div></article>`.
+	// Note that outer and inner locators must belong to the same frame. Inner locator
+	// must not contain FrameLocators.
+	Has Locator `json:"has"`
+	// Matches elements containing specified text somewhere inside, possibly in a child
+	// or a descendant element. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
+	HasText interface{} `json:"hasText"`
 }
 type LocatorPressOptions struct {
 	// Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
@@ -2344,6 +2377,17 @@ type PageIsVisibleOptions struct {
 	// **DEPRECATED** This option is ignored. Page.IsVisible() does not wait for the element
 	// to become visible and returns immediately.
 	Timeout *float64 `json:"timeout"`
+}
+type PageLocatorOptions struct {
+	// Matches elements containing an element that matches an inner locator. Inner locator
+	// is queried against the outer one. For example, `article` that has `text=Playwright`
+	// matches `<article><div>Playwright</div></article>`.
+	// Note that outer and inner locators must belong to the same frame. Inner locator
+	// must not contain FrameLocators.
+	Has Locator `json:"has"`
+	// Matches elements containing specified text somewhere inside, possibly in a child
+	// or a descendant element. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
+	HasText interface{} `json:"hasText"`
 }
 type PagePdfOptions struct {
 	// Display header and footer. Defaults to `false`.
