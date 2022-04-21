@@ -1236,8 +1236,7 @@ type FrameLocatorOptions struct {
 	// must not contain FrameLocators.
 	Has Locator `json:"has"`
 	// Matches elements containing specified text somewhere inside, possibly in a child
-	// or a descendant element. When passed a [string], matching is case-insensitive and
-	// searches for a substring. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
+	// or a descendant element. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
 	HasText interface{} `json:"hasText"`
 }
 type FramePressOptions struct {
@@ -1483,8 +1482,7 @@ type FrameLocatorLocatorOptions struct {
 	// must not contain FrameLocators.
 	Has Locator `json:"has"`
 	// Matches elements containing specified text somewhere inside, possibly in a child
-	// or a descendant element. When passed a [string], matching is case-insensitive and
-	// searches for a substring. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
+	// or a descendant element. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
 	HasText interface{} `json:"hasText"`
 }
 type JSHandleEvaluateOptions struct {
@@ -1766,8 +1764,7 @@ type LocatorLocatorOptions struct {
 	// must not contain FrameLocators.
 	Has Locator `json:"has"`
 	// Matches elements containing specified text somewhere inside, possibly in a child
-	// or a descendant element. When passed a [string], matching is case-insensitive and
-	// searches for a substring. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
+	// or a descendant element. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
 	HasText interface{} `json:"hasText"`
 }
 type LocatorPressOptions struct {
@@ -2389,8 +2386,7 @@ type PageLocatorOptions struct {
 	// must not contain FrameLocators.
 	Has Locator `json:"has"`
 	// Matches elements containing specified text somewhere inside, possibly in a child
-	// or a descendant element. When passed a [string], matching is case-insensitive and
-	// searches for a substring. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
+	// or a descendant element. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
 	HasText interface{} `json:"hasText"`
 }
 type PagePdfOptions struct {

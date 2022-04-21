@@ -1,5 +1,5 @@
 diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
-index 2d770f86d2d09c14aa097d680df23c12e6d6840e..054e6e3d88f7a62ecdf4e92c62d78e4ad958bf5e 100644
+index 660de17f9e668adebd9ce310ba82879cd14d32e9..6a14a8d872d4943637386fbb658e08bdd508030f 100644
 --- a/docs/src/api/class-browsercontext.md
 +++ b/docs/src/api/class-browsercontext.md
 @@ -215,6 +215,7 @@ await context.AddCookiesAsync(new[] { cookie1, cookie2 });
@@ -44,11 +44,11 @@ index 2d770f86d2d09c14aa097d680df23c12e6d6840e..054e6e3d88f7a62ecdf4e92c62d78e4a
  ### param: BrowserContext.unroute.handler
 -* langs: js, python
 +* langs: js, python, go
- - `handler` ?<[function]\([Route], [Request]\)>
+ - `handler` <[function]\([Route], [Request]\)>
  
  Optional handler function used to register a routing with [`method: BrowserContext.route`].
 diff --git a/docs/src/api/class-frame.md b/docs/src/api/class-frame.md
-index 0eb9bb7fe4a87757f9987b47c53b99515c04294f..2d6f439083f0ee5adb5de98c077ee98afa88be4e 100644
+index 34b59c1a05eae03d9bde75e4a2a34fff180b8b2d..67c810045ea3c4b3a1bd9b87029703c85cc9e3b0 100644
 --- a/docs/src/api/class-frame.md
 +++ b/docs/src/api/class-frame.md
 @@ -1449,7 +1449,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
@@ -61,10 +61,10 @@ index 0eb9bb7fe4a87757f9987b47c53b99515c04294f..2d6f439083f0ee5adb5de98c077ee98a
  ### option: Frame.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
  
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index 9bcf7e1ba5fad40e7bc0aa75649f05c79c1af126..df2f3673e223f0fa76b6133b25d4358af2d3a96a 100644
+index 5979b8d5528b771fd01e1d70d5f9a247b6d183c5..4b0bceb89242f328435020d6d782133a001ea328 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
-@@ -605,6 +605,18 @@ Script to be evaluated in all pages in the browser context.
+@@ -522,6 +522,18 @@ Script to be evaluated in all pages in the browser context.
  
  Optional argument to pass to [`param: script`] (only supported when passing a function).
  
@@ -83,7 +83,7 @@ index 9bcf7e1ba5fad40e7bc0aa75649f05c79c1af126..df2f3673e223f0fa76b6133b25d4358a
  ## async method: Page.addScriptTag
  - returns: <[ElementHandle]>
  
-@@ -1052,7 +1064,7 @@ Changes the CSS media type of the page. The only allowed values are `'screen'`,
+@@ -969,7 +981,7 @@ Changes the CSS media type of the page. The only allowed values are `'screen'`,
  Passing `null` disables CSS media emulation.
  
  ### option: Page.emulateMedia.media
@@ -92,7 +92,7 @@ index 9bcf7e1ba5fad40e7bc0aa75649f05c79c1af126..df2f3673e223f0fa76b6133b25d4358a
  - `media` <[Media]<"screen"|"print"|"null">>
  
  Changes the CSS media type of the page. The only allowed values are `'Screen'`, `'Print'` and `'Null'`.
-@@ -1066,7 +1078,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+@@ -983,7 +995,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
  `null` disables color scheme emulation.
  
  ### option: Page.emulateMedia.colorScheme
@@ -101,7 +101,7 @@ index 9bcf7e1ba5fad40e7bc0aa75649f05c79c1af126..df2f3673e223f0fa76b6133b25d4358a
  - `colorScheme` <[ColorScheme]<"light"|"dark"|"no-preference"|"null">>
  
  Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing
-@@ -1079,7 +1091,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+@@ -996,7 +1008,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
  Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.
  
  ### option: Page.emulateMedia.reducedMotion
@@ -110,7 +110,7 @@ index 9bcf7e1ba5fad40e7bc0aa75649f05c79c1af126..df2f3673e223f0fa76b6133b25d4358a
  - `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"null">>
  
  Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.
-@@ -2367,7 +2379,7 @@ Paper format. If set, takes priority over [`option: width`] or [`option: height`
+@@ -2284,7 +2296,7 @@ Paper format. If set, takes priority over [`option: width`] or [`option: height`
  Paper width, accepts values labeled with units.
  
  ### option: Page.pdf.width
@@ -119,7 +119,7 @@ index 9bcf7e1ba5fad40e7bc0aa75649f05c79c1af126..df2f3673e223f0fa76b6133b25d4358a
  - `width` <[string]>
  
  Paper width, accepts values labeled with units.
-@@ -2379,7 +2391,7 @@ Paper width, accepts values labeled with units.
+@@ -2296,7 +2308,7 @@ Paper width, accepts values labeled with units.
  Paper height, accepts values labeled with units.
  
  ### option: Page.pdf.height
@@ -128,16 +128,16 @@ index 9bcf7e1ba5fad40e7bc0aa75649f05c79c1af126..df2f3673e223f0fa76b6133b25d4358a
  - `height` <[string]>
  
  Paper height, accepts values labeled with units.
-@@ -2395,7 +2407,7 @@ Paper height, accepts values labeled with units.
+@@ -2312,7 +2324,7 @@ Paper height, accepts values labeled with units.
  Paper margins, defaults to none.
  
  ### option: Page.pdf.margin
 -* langs: csharp, java
 +* langs: csharp, java, go
  - `margin` <[Object]>
-   - `top` ?<[string]> Top margin, accepts values labeled with units. Defaults to `0`.
-   - `right` ?<[string]> Right margin, accepts values labeled with units. Defaults to `0`.
-@@ -2711,7 +2723,7 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
+   - `top` <[string]> Top margin, accepts values labeled with units. Defaults to `0`.
+   - `right` <[string]> Right margin, accepts values labeled with units. Defaults to `0`.
+@@ -2627,7 +2639,7 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
  When a [`option: baseURL`] via the context options was provided and the passed URL is a path,
  it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
  ### param: Page.route.handler
@@ -146,16 +146,16 @@ index 9bcf7e1ba5fad40e7bc0aa75649f05c79c1af126..df2f3673e223f0fa76b6133b25d4358a
  - `handler` <[function]\([Route], [Request]\)>
  
  handler function to route the request.
-@@ -3102,7 +3114,7 @@ the [`param: url`].
+@@ -3018,7 +3030,7 @@ the [`param: url`].
  A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
  
  ### param: Page.unroute.handler
 -* langs: js, python
 +* langs: js, python, go
- - `handler` ?<[function]\([Route], [Request]\)>
+ - `handler` <[function]\([Route], [Request]\)>
  
  Optional handler function to route the request.
-@@ -3352,7 +3364,7 @@ Shortcut for main frame's [`method: Frame.waitForFunction`].
+@@ -3268,7 +3280,7 @@ Shortcut for main frame's [`method: Frame.waitForFunction`].
  
  Optional argument to pass to [`param: expression`].
  
@@ -165,7 +165,7 @@ index 9bcf7e1ba5fad40e7bc0aa75649f05c79c1af126..df2f3673e223f0fa76b6133b25d4358a
  ### option: Page.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
  
 diff --git a/docs/src/api/class-route.md b/docs/src/api/class-route.md
-index d1002c5da1ef4ee5ef41318f71e16f9026724dd1..7b98d16cbbe967569b9bead0ec322a298c7c72b2 100644
+index 61dd9e3ad4e9b83a8132bc61c026d2c18b35d979..fc440fe38af9dfbd4f6d3c7ef651890657c16008 100644
 --- a/docs/src/api/class-route.md
 +++ b/docs/src/api/class-route.md
 @@ -103,10 +103,17 @@ If set changes the request URL. New URL must have same protocol as original one.
@@ -200,7 +200,7 @@ index d1002c5da1ef4ee5ef41318f71e16f9026724dd1..7b98d16cbbe967569b9bead0ec322a29
  * langs: csharp, java
  - `body` <[string]>
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index cf58f584d817f39bdb5b3744d5fb3b70c174ff64..82f58998c418b682209aeae62f1678f99a4d94eb 100644
+index f214cf943ae2c95c9377a093f0132e237b9bea2e..bb8269a16898d456ffd3601264469a5bda7518ac 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
 @@ -146,8 +146,8 @@ Defaults to `'visible'`. Can be either:
@@ -284,7 +284,7 @@ index cf58f584d817f39bdb5b3744d5fb3b70c174ff64..82f58998c418b682209aeae62f1678f9
 +* langs: js, go
  - `recordVideo` <[Object]>
    - `dir` <[path]> Path to the directory to put videos into.
-   - `size` ?<[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
+   - `size` <[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
 @@ -831,7 +831,7 @@ Firefox user preferences. Learn more about the Firefox user preferences at
  [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
  
@@ -301,7 +301,7 @@ index cf58f584d817f39bdb5b3744d5fb3b70c174ff64..82f58998c418b682209aeae62f1678f9
 +* langs: js, python, csharp, go
  - `hasText` <[string]|[RegExp]>
  
- Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. When passed a [string], matching is case-insensitive and searches for a substring.
+ Matches elements containing specified text somewhere inside, possibly in a child or a descendant element.
  For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
  
  ## locator-option-has
@@ -343,7 +343,7 @@ index 0000000000000000000000000000000000000000..1c30b40e9fe05745829b34acd907bcdb
 +
 +const path = require('path');
 +const Documentation = require('./documentation');
-+const XmlDoc = require('./dotnetXmlDocumentation')
++const XmlDoc = require('./xmlDocumentation')
 +const PROJECT_DIR = path.join(__dirname, '..', '..');
 +const fs = require('fs');
 +const { parseApi } = require('./api_parser');
