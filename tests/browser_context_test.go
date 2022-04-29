@@ -2,6 +2,7 @@ package playwright_test
 
 import (
 	"fmt"
+	"path/filepath"
 	"runtime"
 	"testing"
 
@@ -41,6 +42,21 @@ func TestBrowserContextClose(t *testing.T) {
 	require.Equal(t, 1, len(browser.Contexts()))
 	require.NoError(t, context2.Close())
 	require.Equal(t, 0, len(browser.Contexts()))
+}
+
+func TestBrowserContextCloseWithHarDownload(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t, false)
+	tmpFile := filepath.Join(t.TempDir(), "test.har")
+	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
+		RecordHarPath:        playwright.String(tmpFile),
+		RecordHarOmitContent: playwright.Bool(true),
+	})
+	require.NoError(t, err)
+	require.NoError(t, context.Close())
+	require.NoFileExists(t, tmpFile)
+	require.NoError(t, context2.Close())
+	require.FileExists(t, tmpFile)
 }
 
 func TestBrowserContextOffline(t *testing.T) {
