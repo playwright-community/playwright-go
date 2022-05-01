@@ -276,7 +276,24 @@ index f214cf943ae2c95c9377a093f0132e237b9bea2e..bb8269a16898d456ffd3601264469a5b
  - `noViewport` <[boolean]>
  
  Does not enforce fixed viewport, allows resizing window in the headed mode.
-@@ -557,7 +557,7 @@ call [`method: BrowserContext.close`] for the HAR to be saved.
+@@ -541,7 +541,7 @@ specified, the HAR is not recorded. Make sure to await [`method: BrowserContext.
+ saved.
+ 
+ ## context-option-recordhar-path
+-* langs: csharp, java, python
++* langs: csharp, java, python, go
+   - alias-python: record_har_path
+ - `recordHarPath` <[path]>
+ 
+@@ -550,14 +550,14 @@ specified HAR file on the filesystem. If not specified, the HAR is not recorded.
+ call [`method: BrowserContext.close`] for the HAR to be saved.
+ 
+ ## context-option-recordhar-omit-content
+-* langs: csharp, java, python
++* langs: csharp, java, python, go
+   - alias-python: record_har_omit_content
+ - `recordHarOmitContent` <[boolean]>
+ 
  Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
  
  ## context-option-recordvideo

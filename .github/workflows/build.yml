@@ -31,6 +31,25 @@ jobs:
       with:
         go-version: ^1.16.1
       id: go
+    - name: Cache modules and build
+      uses: actions/cache@v3
+      with:
+        # In order:
+        # * Module download cache
+        # * Build cache (Linux)
+        # * Build cache (Mac)
+        # * Build cache (Windows)
+        path: |
+          ~/go/pkg/mod
+          ~/.cache/go-build
+          ~/Library/Caches/go-build
+          %LocalAppData%\go-build
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+    - name: Download modules
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: go mod download
     - run: |
         go install ./...
         playwright install --with-deps ${{ matrix.browser }}

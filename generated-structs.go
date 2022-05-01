@@ -57,6 +57,13 @@ type BrowserNewContextOptions struct {
 	// used and can be any string, for example `launch({ proxy: { server: 'http://per-context'
 	// } })`.
 	Proxy *BrowserNewContextOptionsProxy `json:"proxy"`
+	// Optional setting to control whether to omit request content from the HAR. Defaults
+	// to `false`.
+	RecordHarOmitContent *bool `json:"recordHarOmitContent"`
+	// Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all
+	// pages into the specified HAR file on the filesystem. If not specified, the HAR is
+	// not recorded. Make sure to call BrowserContext.Close() for the HAR to be saved.
+	RecordHarPath *string `json:"recordHarPath"`
 	// Enables video recording for all pages into `recordVideo.dir` directory. If not specified
 	// videos are not recorded. Make sure to await BrowserContext.Close() for videos to
 	// be saved.
@@ -198,6 +205,13 @@ type BrowserNewPageOptions struct {
 	// used and can be any string, for example `launch({ proxy: { server: 'http://per-context'
 	// } })`.
 	Proxy *BrowserNewPageOptionsProxy `json:"proxy"`
+	// Optional setting to control whether to omit request content from the HAR. Defaults
+	// to `false`.
+	RecordHarOmitContent *bool `json:"recordHarOmitContent"`
+	// Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all
+	// pages into the specified HAR file on the filesystem. If not specified, the HAR is
+	// not recorded. Make sure to call BrowserContext.Close() for the HAR to be saved.
+	RecordHarPath *string `json:"recordHarPath"`
 	// Enables video recording for all pages into `recordVideo.dir` directory. If not specified
 	// videos are not recorded. Make sure to await BrowserContext.Close() for videos to
 	// be saved.
@@ -492,6 +506,13 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	Permissions []string `json:"permissions"`
 	// Network proxy settings.
 	Proxy *BrowserTypeLaunchPersistentContextOptionsProxy `json:"proxy"`
+	// Optional setting to control whether to omit request content from the HAR. Defaults
+	// to `false`.
+	RecordHarOmitContent *bool `json:"recordHarOmitContent"`
+	// Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all
+	// pages into the specified HAR file on the filesystem. If not specified, the HAR is
+	// not recorded. Make sure to call BrowserContext.Close() for the HAR to be saved.
+	RecordHarPath *string `json:"recordHarPath"`
 	// Enables video recording for all pages into `recordVideo.dir` directory. If not specified
 	// videos are not recorded. Make sure to await BrowserContext.Close() for videos to
 	// be saved.

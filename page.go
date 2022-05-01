@@ -695,6 +695,9 @@ func (p *pageImpl) TextContent(selector string, options ...FrameTextContentOptio
 }
 
 func (p *pageImpl) Video() Video {
+	p.Lock()
+	defer p.Unlock()
+
 	if p.video == nil {
 		p.video = newVideo(p)
 	}
