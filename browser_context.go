@@ -233,6 +233,21 @@ func (b *browserContextImpl) Close() error {
 	b.Lock()
 	b.isClosedOrClosing = true
 	b.Unlock()
+
+	if b.options != nil && b.options.RecordHarPath != nil {
+		response, err := b.channel.Send("harExport")
+		if err != nil {
+			return err
+		}
+		artifact := fromChannel(response).(*artifactImpl)
+		if err := artifact.SaveAs(*b.options.RecordHarPath); err != nil {
+			return err
+		}
+		if err := artifact.Delete(); err != nil {
+			return err
+		}
+	}
+
 	_, err := b.channel.Send("close")
 	return err
 }

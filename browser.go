@@ -44,6 +44,16 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 			overrides["noDefaultViewport"] = true
 			options[0].NoViewport = nil
 		}
+		if options[0].RecordHarPath != nil {
+			recordHar := map[string]interface{}{}
+			recordHar["path"] = *options[0].RecordHarPath
+			if options[0].RecordHarOmitContent != nil {
+				recordHar["omitContent"] = true
+			}
+			overrides["recordHar"] = recordHar
+		} else if options[0].RecordHarOmitContent != nil {
+			return nil, fmt.Errorf("recordHarOmitContent is set but recordHarPath is nil")
+		}
 	}
 	channel, err := b.channel.Send("newContext", overrides, options)
 	if err != nil {

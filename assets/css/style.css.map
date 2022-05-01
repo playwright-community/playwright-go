@@ -3,10 +3,10 @@
 	"file": "style.css",
 	"sources": [
 		"style.scss",
-		"../../../../../tmp/jekyll-remote-theme-20220421-2461-1f1a6pl/_sass/jekyll-theme-cayman.scss",
-		"../../../../../tmp/jekyll-remote-theme-20220421-2461-1f1a6pl/_sass/normalize.scss",
-		"../../../../../tmp/jekyll-remote-theme-20220421-2461-1f1a6pl/_sass/rouge-github.scss",
-		"../../../../../tmp/jekyll-remote-theme-20220421-2461-1f1a6pl/_sass/variables.scss"
+		"../../../../../tmp/jekyll-remote-theme-20220501-2490-153920n/_sass/jekyll-theme-cayman.scss",
+		"../../../../../tmp/jekyll-remote-theme-20220501-2490-153920n/_sass/normalize.scss",
+		"../../../../../tmp/jekyll-remote-theme-20220501-2490-153920n/_sass/rouge-github.scss",
+		"../../../../../tmp/jekyll-remote-theme-20220501-2490-153920n/_sass/variables.scss"
 	],
 	"sourcesContent": [
 		"@import 'jekyll-theme-cayman';\n",
