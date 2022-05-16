@@ -871,7 +871,7 @@
 			"Locator, error"
 		],
 		"Locator": [
-			"selector string",
+			"selector string, options ...LocatorLocatorOptions",
 			"Locator, error"
 		],
 		"Nth": [

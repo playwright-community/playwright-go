@@ -30,7 +30,7 @@ func newLocator(frame *frameImpl, selector string, options ...LocatorLocatorOpti
 			if frame != has.frame {
 				return nil, errors.New("inner 'has' locator must belong to the same frame")
 			}
-			selector += " >> has=" + has.selector
+			selector += fmt.Sprintf(` >> has="%s"`, has.selector)
 		}
 	}
 
@@ -264,8 +264,8 @@ func (l *locatorImpl) Last() (Locator, error) {
 	return newLocator(l.frame, l.selector+" >> nth=-1")
 }
 
-func (l *locatorImpl) Locator(selector string) (Locator, error) {
-	return newLocator(l.frame, l.selector+" >> "+selector)
+func (l *locatorImpl) Locator(selector string, options ...LocatorLocatorOptions) (Locator, error) {
+	return newLocator(l.frame, l.selector+" >> "+selector, options...)
 }
 
 func (l *locatorImpl) Nth(index int) (Locator, error) {
