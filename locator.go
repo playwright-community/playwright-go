@@ -33,7 +33,7 @@ func newLocator(frame *frameImpl, selector string, options ...LocatorLocatorOpti
 			}
 			marshaledSelector, err := json.Marshal(has.selector)
 			if err != nil {
-				return nil, errors.New(fmt.Sprintf("could not marshal selector '%s'", has.selector))
+				return nil, fmt.Errorf("could not marshal selector '%s'", has.selector)
 			}
 			selector += " >> has=" + string(marshaledSelector)
 		}
