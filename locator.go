@@ -1,6 +1,7 @@
 package playwright
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -30,7 +31,11 @@ func newLocator(frame *frameImpl, selector string, options ...LocatorLocatorOpti
 			if frame != has.frame {
 				return nil, errors.New("inner 'has' locator must belong to the same frame")
 			}
-			selector += fmt.Sprintf(` >> has="%s"`, has.selector)
+			marshaledSelector, err := json.Marshal(has.selector)
+			if err != nil {
+				return nil, errors.New(fmt.Sprintf("could not marshal selector '%s'", has.selector))
+			}
+			selector += " >> has=" + string(marshaledSelector)
 		}
 	}
 
