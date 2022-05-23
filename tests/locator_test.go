@@ -267,6 +267,98 @@ func TestLocatorIsVisible(t *testing.T) {
 	require.True(t, result)
 }
 
+func TestLocatorLocatorHas(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+
+	expText := " First item 1 First item 1A1"
+
+	err = page.SetContent(`
+	<section>
+		<ul>
+			<li>
+				<div>
+					<input class="r1" name="r1" type="checkbox"/>
+					<span> First item 1</span>
+					<span> First item 1A1</span>
+				</div>
+			</li>
+			<li>
+				<div>
+					<input name="r2" type="checkbox"/>
+					<span> Second item 1</span>
+					<span> Second item 1<span>A1</span></span>
+				</div>
+			</li>
+		</ul>
+	</section>`)
+	require.NoError(t, err)
+
+	inputLocator, err := page.Locator("input[name='r1']")
+	require.NoError(t, err)
+
+	listLocator, err := page.Locator("ul", playwright.PageLocatorOptions{Has: inputLocator})
+	require.NoError(t, err)
+
+	spanLocator, err := page.Locator("span", playwright.PageLocatorOptions{HasText: "First item 1A"})
+	require.NoError(t, err)
+
+	targetLocator, err := listLocator.Locator("li div", playwright.LocatorLocatorOptions{Has: spanLocator})
+	require.NoError(t, err)
+
+	targetText, err := targetLocator.InnerText()
+	require.NoError(t, err)
+	require.Equal(t, expText, targetText)
+}
+
+func TestLocatorLocatorHasText(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+
+	expText := "A1 B2"
+
+	err = page.SetContent(`
+	<section>
+		<ul>
+			<li>
+				<div>
+					<input name="r2" type="checkbox"/>
+					<span> Second item a1</span>
+					<span> Second item 1<span>A1 B2</span></span>
+				</div>
+			</li>
+		</ul>
+	</section>`)
+	require.NoError(t, err)
+
+	inputLocator, err := page.Locator("input[name='r2']")
+	require.NoError(t, err)
+
+	listLocator, err := page.Locator("ul", playwright.PageLocatorOptions{Has: inputLocator})
+	require.NoError(t, err)
+
+	wrongTargetLocator, err := listLocator.Locator("li div span", playwright.LocatorLocatorOptions{HasText: "A1"})
+	require.NoError(t, err)
+
+	count, err := wrongTargetLocator.Count()
+	require.NoError(t, err)
+	require.Equal(t, 3, count, "Locator count should be equal 3")
+
+	targetParentLocator, err := listLocator.Locator("li div span", playwright.LocatorLocatorOptions{HasText: "1A1"})
+	require.NoError(t, err)
+
+	targetLocator, err := targetParentLocator.Locator("span")
+	require.NoError(t, err)
+
+	targetText, err := targetLocator.InnerText()
+	require.NoError(t, err)
+	require.Equal(t, expText, targetText)
+}
+
 func TestLocatorSelectOption(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
