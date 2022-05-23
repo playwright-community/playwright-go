@@ -1068,7 +1068,7 @@ type Locator interface {
 	// Returns locator to the last matching element.
 	Last() (Locator, error)
 	// The method finds an element matching the specified selector in the `Locator`'s subtree.
-	Locator(selector string) (Locator, error)
+	Locator(selector string, options ...LocatorLocatorOptions) (Locator, error)
 	// Returns locator to the n-th matching element.
 	Nth(index int) (Locator, error)
 	// A page this locator belongs to.
