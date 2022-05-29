@@ -42,19 +42,6 @@ func newLocator(frame *frameImpl, selector string, options ...LocatorLocatorOpti
 	return &locatorImpl{frame: frame, selector: selector, options: option}, nil
 }
 
-func convertRegexp(reg *regexp.Regexp) string {
-	matches := regexp.MustCompile(`\(\?([imsU]+)\)(.+)`).FindStringSubmatch(reg.String())
-
-	var pattern, flags string
-	if len(matches) == 3 {
-		pattern = matches[2]
-		flags = matches[1]
-	} else {
-		pattern = reg.String()
-	}
-	return fmt.Sprintf("'%s', '%s'", pattern, flags)
-}
-
 func (l *locatorImpl) AllInnerTexts() ([]string, error) {
 	innerTexts, err := l.frame.EvalOnSelectorAll(l.selector, "ee => ee.map(e => e.innerText)")
 	if err != nil {
@@ -414,4 +401,38 @@ func (l *locatorImpl) withElement(
 		return nil, err
 	}
 	return result, nil
+}
+
+func (l *locatorImpl) expect(expression string, options frameExpectOptions) (frameExpectResult, error) {
+	overrides := map[string]interface{}{
+		"selector":   l.selector,
+		"expression": expression,
+	}
+	if options.ExpectedValue != nil {
+		overrides["expectedValue"] = serializeArgument(options.ExpectedValue)
+		options.ExpectedValue = nil
+	}
+	response, err := l.frame.channel.SendReturnAsDict("expect", options, overrides)
+	if err != nil {
+		return frameExpectResult{}, err
+	}
+	var (
+		received interface{}
+		matches  bool
+		log      []string
+	)
+	responseMap := response.(map[string]interface{})
+
+	if v, ok := responseMap["received"]; ok {
+		received = parseValue(v)
+	}
+	if v, ok := responseMap["matches"]; ok {
+		matches = v.(bool)
+	}
+	if v, ok := responseMap["log"]; ok {
+		for _, l := range v.([]interface{}) {
+			log = append(log, l.(string))
+		}
+	}
+	return frameExpectResult{Received: received, Matches: matches, Log: log}, nil
 }

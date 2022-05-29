@@ -23,6 +23,7 @@ var pw *playwright.Playwright
 var browser playwright.Browser
 var context playwright.BrowserContext
 var page playwright.Page
+var assertions playwright.PlaywrightAssertions
 var isChromium bool
 var isFirefox bool
 var isWebKit bool
@@ -63,6 +64,7 @@ func BeforeAll() {
 	if err != nil {
 		log.Fatalf("could not launch: %v", err)
 	}
+	assertions = playwright.NewPlaywrightAssertions()
 	isChromium = browserName == "chromium" || browserName == ""
 	isFirefox = browserName == "firefox"
 	isWebKit = browserName == "webkit"

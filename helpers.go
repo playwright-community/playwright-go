@@ -1,6 +1,7 @@
 package playwright
 
 import (
+	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
@@ -413,4 +414,17 @@ func serializeMapToNameAndValue(headers map[string]string) []map[string]string {
 		})
 	}
 	return serialized
+}
+
+func splitRegexpString(reg *regexp.Regexp) (pattern, flags string) {
+	matches := regexp.MustCompile(`\(\?([imsU]+)\)(.+)`).FindStringSubmatch(reg.String())
+	if len(matches) == 3 {
+		return matches[2], matches[1]
+	}
+	return reg.String(), ""
+}
+
+func convertRegexp(reg *regexp.Regexp) string {
+	pattern, flags := splitRegexpString(reg)
+	return fmt.Sprintf("'%s', '%s'", pattern, flags)
 }

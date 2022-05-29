@@ -1156,6 +1156,86 @@ type Locator interface {
 	WaitFor(options ...PageWaitForSelectorOptions) error
 }
 
+// The `LocatorAssertions` class provides assertion methods that can be used to make assertions about the `Locator` state
+// in the tests. A new instance of `LocatorAssertions` is created by calling
+// PlaywrightAssertions.expectLocator():
+type LocatorAssertions interface {
+	// Ensures the `Locator` points to a checked input.
+	ToBeChecked(options ...LocatorAssertionsToBeCheckedOptions) error
+	// Ensures the `Locator` points to a disabled element.
+	ToBeDisabled(options ...LocatorAssertionsToBeDisabledOptions) error
+	// Ensures the `Locator` points to an editable element.
+	ToBeEditable(options ...LocatorAssertionsToBeEditableOptions) error
+	// Ensures the `Locator` points to an empty editable element or to a DOM node that has no text.
+	ToBeEmpty(options ...LocatorAssertionsToBeEmptyOptions) error
+	// Ensures the `Locator` points to an enabled element.
+	ToBeEnabled(options ...LocatorAssertionsToBeEnabledOptions) error
+	// Ensures the `Locator` points to a focused DOM node.
+	ToBeFocused(options ...LocatorAssertionsToBeFocusedOptions) error
+	// Ensures the `Locator` points to a hidden DOM node, which is the opposite of [visible](./actionability.md#visible).
+	ToBeHidden(options ...LocatorAssertionsToBeHiddenOptions) error
+	// Ensures the `Locator` points to a [visible](./actionability.md#visible) DOM node.
+	ToBeVisible(options ...LocatorAssertionsToBeVisibleOptions) error
+	// Ensures the `Locator` points to an element that contains the given text. You can use regular expressions for the value
+	// as well.
+	// Note that if array is passed as an expected value, entire lists of elements can be asserted:
+	ToContainText(expected interface{}, options ...LocatorAssertionsToContainTextOptions) error
+	// Ensures the `Locator` points to an element with given attribute.
+	ToHaveAttribute(name string, value interface{}, options ...LocatorAssertionsToHaveAttributeOptions) error
+	// Ensures the `Locator` points to an element with given CSS class.
+	// Note that if array is passed as an expected value, entire lists of elements can be asserted:
+	ToHaveClass(expected interface{}, options ...LocatorAssertionsToHaveClassOptions) error
+	// Ensures the `Locator` resolves to an exact number of DOM nodes.
+	ToHaveCount(count int, options ...LocatorAssertionsToHaveCountOptions) error
+	// Ensures the `Locator` resolves to an element with the given computed CSS style.
+	ToHaveCSS(name string, value interface{}, options ...LocatorAssertionsToHaveCSSOptions) error
+	// Ensures the `Locator` points to an element with the given DOM Node ID.
+	ToHaveId(id interface{}, options ...LocatorAssertionsToHaveIdOptions) error
+	// Ensures the `Locator` points to an element with given JavaScript property. Note that this property can be of a primitive
+	// type as well as a plain serializable JavaScript object.
+	ToHaveJSProperty(name string, value interface{}, options ...LocatorAssertionsToHaveJSPropertyOptions) error
+	// Ensures the `Locator` points to an element with the given text. You can use regular expressions for the value as well.
+	// Note that if array is passed as an expected value, entire lists of elements can be asserted:
+	ToHaveText(expected interface{}, options ...LocatorAssertionsToHaveTextOptions) error
+	// Ensures the `Locator` points to an element with the given input value. You can use regular expressions for the value as
+	// well.
+	ToHaveValue(value interface{}, options ...LocatorAssertionsToHaveValueOptions) error
+	// The opposite of LocatorAssertions.toBeChecked().
+	NotToBeChecked(options ...LocatorAssertionsToBeCheckedOptions) error
+	// The opposite of LocatorAssertions.toBeDisabled().
+	NotToBeDisabled(options ...LocatorAssertionsToBeDisabledOptions) error
+	// The opposite of LocatorAssertions.toBeEditable().
+	NotToBeEditable(options ...LocatorAssertionsToBeEditableOptions) error
+	// The opposite of LocatorAssertions.toBeEmpty().
+	NotToBeEmpty(options ...LocatorAssertionsToBeEmptyOptions) error
+	// The opposite of LocatorAssertions.toBeEnabled().
+	NotToBeEnabled(options ...LocatorAssertionsToBeEnabledOptions) error
+	// The opposite of LocatorAssertions.toBeFocused().
+	NotToBeFocused(options ...LocatorAssertionsToBeFocusedOptions) error
+	// The opposite of LocatorAssertions.toBeHidden().
+	NotToBeHidden(options ...LocatorAssertionsToBeHiddenOptions) error
+	// The opposite of LocatorAssertions.toBeVisible().
+	NotToBeVisible(options ...LocatorAssertionsToBeVisibleOptions) error
+	// The opposite of LocatorAssertions.toContainText().
+	NotToContainText(expected interface{}, options ...LocatorAssertionsToContainTextOptions) error
+	// The opposite of LocatorAssertions.toHaveAttribute().
+	NotToHaveAttribute(name string, value interface{}, options ...LocatorAssertionsToHaveAttributeOptions) error
+	// The opposite of LocatorAssertions.toHaveClass().
+	NotToHaveClass(expected interface{}, options ...LocatorAssertionsToHaveClassOptions) error
+	// The opposite of LocatorAssertions.toHaveCount().
+	NotToHaveCount(count int, options ...LocatorAssertionsToHaveCountOptions) error
+	// The opposite of LocatorAssertions.toHaveCSS().
+	NotToHaveCSS(name string, value interface{}, options ...LocatorAssertionsToHaveCSSOptions) error
+	// The opposite of LocatorAssertions.toHaveId().
+	NotToHaveId(id interface{}, options ...LocatorAssertionsToHaveIdOptions) error
+	// The opposite of LocatorAssertions.toHaveJSProperty().
+	NotToHaveJSProperty(name string, value interface{}, options ...LocatorAssertionsToHaveJSPropertyOptions) error
+	// The opposite of LocatorAssertions.toHaveText().
+	NotToHaveText(expected interface{}, options ...LocatorAssertionsToHaveTextOptions) error
+	// The opposite of LocatorAssertions.toHaveValue().
+	NotToHaveValue(value interface{}, options ...LocatorAssertionsToHaveValueOptions) error
+}
+
 // The Mouse class operates in main-frame CSS pixels relative to the top-left corner of the viewport.
 // Every `page` object has its own Mouse, accessible with [`property: Page.mouse`].
 type Mouse interface {
@@ -1650,6 +1730,33 @@ type Page interface {
 	// Waits for the main frame to navigate to the given URL.
 	// Shortcut for main frame's Frame.waitForURL().
 	WaitForURL(url string, options ...FrameWaitForURLOptions) error
+}
+
+// The `PageAssertions` class provides assertion methods that can be used to make assertions about the `Page` state in the
+// tests. A new instance of `PageAssertions` is created by calling PlaywrightAssertions.expectPage():
+type PageAssertions interface {
+	// Ensures the page has the given title.
+	ToHaveTitle(titleOrRegExp interface{}, options ...PageAssertionsToHaveTitleOptions) error
+	// Ensures the page is navigated to the given URL.
+	ToHaveURL(urlOrRegExp interface{}, options ...PageAssertionsToHaveURLOptions) error
+	// The opposite of PageAssertions.toHaveTitle().
+	NotToHaveTitle(titleOrRegExp interface{}, options ...PageAssertionsToHaveTitleOptions) error
+	// The opposite of PageAssertions.toHaveURL().
+	NotToHaveURL(urlOrRegExp interface{}, options ...PageAssertionsToHaveURLOptions) error
+}
+
+// Playwright gives you Web-First Assertions with convenience methods for creating assertions that will wait and retry
+// until the expected condition is met.
+// Consider the following example:
+// Playwright will be re-testing the node with the selector `.status` until fetched Node has the `"Submitted"` text. It
+// will be re-fetching the node and checking it over and over, until the condition is met or until the timeout is reached.
+// You can pass this timeout as an option.
+// By default, the timeout for assertions is set to 5 seconds.
+type PlaywrightAssertions interface {
+	// Creates a `LocatorAssertions` object for the given `Locator`.
+	ExpectLocator(locator Locator) LocatorAssertions
+	// Creates a `PageAssertions` object for the given `Page`.
+	ExpectPage(page Page) PageAssertions
 }
 
 // Whenever the page sends a request for a network resource the following sequence of events are emitted by `Page`:

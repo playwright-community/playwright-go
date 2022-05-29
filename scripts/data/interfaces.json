@@ -931,6 +931,144 @@
 			"error"
 		]
 	},
+	"LocatorAssertions": {
+		"ToBeChecked": [
+			"options ...LocatorAssertionsToBeCheckedOptions",
+			"error"
+		],
+		"ToBeDisabled": [
+			"options ...LocatorAssertionsToBeDisabledOptions",
+			"error"
+		],
+		"ToBeEditable": [
+			"options ...LocatorAssertionsToBeEditableOptions",
+			"error"
+		],
+		"ToBeEmpty": [
+			"options ...LocatorAssertionsToBeEmptyOptions",
+			"error"
+		],
+		"ToBeEnabled": [
+			"options ...LocatorAssertionsToBeEnabledOptions",
+			"error"
+		],
+		"ToBeFocused": [
+			"options ...LocatorAssertionsToBeFocusedOptions",
+			"error"
+		],
+		"ToBeHidden": [
+			"options ...LocatorAssertionsToBeHiddenOptions",
+			"error"
+		],
+		"ToBeVisible": [
+			"options ...LocatorAssertionsToBeVisibleOptions",
+			"error"
+		],
+		"ToContainText": [
+			"expected interface{}, options ...LocatorAssertionsToContainTextOptions",
+			"error"
+		],
+		"ToHaveAttribute": [
+			"name string, value interface{}, options ...LocatorAssertionsToHaveAttributeOptions",
+			"error"
+		],
+		"ToHaveClass": [
+			"expected interface{}, options ...LocatorAssertionsToHaveClassOptions",
+			"error"
+		],
+		"ToHaveCount": [
+			"count int, options ...LocatorAssertionsToHaveCountOptions",
+			"error"
+		],
+		"ToHaveCSS": [
+			"name string, value interface{}, options ...LocatorAssertionsToHaveCSSOptions",
+			"error"
+		],
+		"ToHaveId": [
+			"id interface{}, options ...LocatorAssertionsToHaveIdOptions",
+			"error"
+		],
+		"ToHaveJSProperty": [
+			"name string, value interface{}, options ...LocatorAssertionsToHaveJSPropertyOptions",
+			"error"
+		],
+		"ToHaveText": [
+			"expected interface{}, options ...LocatorAssertionsToHaveTextOptions",
+			"error"
+		],
+		"ToHaveValue": [
+			"value interface{}, options ...LocatorAssertionsToHaveValueOptions",
+			"error"
+		],
+		"NotToBeChecked": [
+			"options ...LocatorAssertionsToBeCheckedOptions",
+			"error"
+		],
+		"NotToBeDisabled": [
+			"options ...LocatorAssertionsToBeDisabledOptions",
+			"error"
+		],
+		"NotToBeEditable": [
+			"options ...LocatorAssertionsToBeEditableOptions",
+			"error"
+		],
+		"NotToBeEmpty": [
+			"options ...LocatorAssertionsToBeEmptyOptions",
+			"error"
+		],
+		"NotToBeEnabled": [
+			"options ...LocatorAssertionsToBeEnabledOptions",
+			"error"
+		],
+		"NotToBeFocused": [
+			"options ...LocatorAssertionsToBeFocusedOptions",
+			"error"
+		],
+		"NotToBeHidden": [
+			"options ...LocatorAssertionsToBeHiddenOptions",
+			"error"
+		],
+		"NotToBeVisible": [
+			"options ...LocatorAssertionsToBeVisibleOptions",
+			"error"
+		],
+		"NotToContainText": [
+			"expected interface{}, options ...LocatorAssertionsToContainTextOptions",
+			"error"
+		],
+		"NotToHaveAttribute": [
+			"name string, value interface{}, options ...LocatorAssertionsToHaveAttributeOptions",
+			"error"
+		],
+		"NotToHaveClass": [
+			"expected interface{}, options ...LocatorAssertionsToHaveClassOptions",
+			"error"
+		],
+		"NotToHaveCount": [
+			"count int, options ...LocatorAssertionsToHaveCountOptions",
+			"error"
+		],
+		"NotToHaveCSS": [
+			"name string, value interface{}, options ...LocatorAssertionsToHaveCSSOptions",
+			"error"
+		],
+		"NotToHaveId": [
+			"id interface{}, options ...LocatorAssertionsToHaveIdOptions",
+			"error"
+		],
+		"NotToHaveJSProperty": [
+			"name string, value interface{}, options ...LocatorAssertionsToHaveJSPropertyOptions",
+			"error"
+		],
+		"NotToHaveText": [
+			"expected interface{}, options ...LocatorAssertionsToHaveTextOptions",
+			"error"
+		],
+		"NotToHaveValue": [
+			"value interface{}, options ...LocatorAssertionsToHaveValueOptions",
+			"error"
+		]
+	},
 	"Mouse": {
 		"Click": [
 			"x, y float64, options ...MouseClickOptions",
@@ -1316,6 +1454,34 @@
 		"WaitForURL": [
 			"url string, options ...FrameWaitForURLOptions",
 			"error"
+		]
+	},
+	"PageAssertions": {
+		"ToHaveTitle": [
+			"titleOrRegExp interface{}, options ...PageAssertionsToHaveTitleOptions",
+			"error"
+		],
+		"ToHaveURL": [
+			"urlOrRegExp interface{}, options ...PageAssertionsToHaveURLOptions",
+			"error"
+		],
+		"NotToHaveTitle": [
+			"titleOrRegExp interface{}, options ...PageAssertionsToHaveTitleOptions",
+			"error"
+		],
+		"NotToHaveURL": [
+			"urlOrRegExp interface{}, options ...PageAssertionsToHaveURLOptions",
+			"error"
+		]
+	},
+	"PlaywrightAssertions": {
+		"ExpectLocator": [
+			"locator Locator",
+			"LocatorAssertions"
+		],
+		"ExpectPage": [
+			"page Page",
+			"PageAssertions"
 		]
 	},
 	"Request": {

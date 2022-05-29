@@ -1972,16 +1972,78 @@ type LocatorWaitForOptions struct {
 }
 type LocatorAssertionsToBeCheckedOptions struct {
 	Checked *bool `json:"checked"`
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToBeDisabledOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToBeEditableOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToBeEmptyOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToBeEnabledOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToBeFocusedOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToBeHiddenOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToBeVisibleOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
 }
 type LocatorAssertionsToContainTextOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
 	// Whether to use `element.innerText` instead of `element.textContent` when retrieving
 	// DOM node text.
 	UseInnerText *bool `json:"useInnerText"`
 }
+type LocatorAssertionsToHaveAttributeOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToHaveClassOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToHaveCountOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToHaveCSSOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToHaveIdOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToHaveJSPropertyOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
 type LocatorAssertionsToHaveTextOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
 	// Whether to use `element.innerText` instead of `element.textContent` when retrieving
 	// DOM node text.
 	UseInnerText *bool `json:"useInnerText"`
+}
+type LocatorAssertionsToHaveValueOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
 }
 type MouseClickOptions struct {
 	// Defaults to `left`.
@@ -2788,6 +2850,14 @@ type PageWaitForURLOptions struct {
 	// `'commit'` - consider operation to be finished when network response is received
 	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
+}
+type PageAssertionsToHaveTitleOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type PageAssertionsToHaveURLOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
 }
 
 // Result of calling <see cref="Request.HeadersArray" />.

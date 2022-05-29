@@ -302,6 +302,15 @@ index f214cf943ae2c95c9377a093f0132e237b9bea2e..bb8269a16898d456ffd3601264469a5b
  - `recordVideo` <[Object]>
    - `dir` <[path]> Path to the directory to put videos into.
    - `size` <[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
+@@ -710,7 +710,7 @@ using the [`method: AndroidDevice.setDefaultTimeout`] method.
+ Time to retry the assertion for. Defaults to `timeout` in `TestConfig.expect`.
+ 
+ ## csharp-java-python-assertions-timeout
+-* langs: java, python, csharp
++* langs: java, python, csharp, go
+ - `timeout` <[float]>
+ 
+ Time to retry the assertion for.
 @@ -831,7 +831,7 @@ Firefox user preferences. Learn more about the Firefox user preferences at
  [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
  
