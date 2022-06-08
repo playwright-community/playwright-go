@@ -544,6 +544,10 @@
 			null,
 			"ElementHandle, error"
 		],
+		"FrameLocator": [
+			"selector string",
+			"FrameLocator"
+		],
 		"GetAttribute": [
 			"selector string, name string, options ...PageGetAttributeOptions",
 			"string, error"
@@ -693,6 +697,28 @@
 			"error"
 		]
 	},
+	"FrameLocator": {
+		"First": [
+			null,
+			"FrameLocator"
+		],
+		"FrameLocator": [
+			"selector string",
+			"FrameLocator"
+		],
+		"Last": [
+			null,
+			"FrameLocator"
+		],
+		"Locator": [
+			"selector string, options ...FrameLocatorLocatorOptions",
+			"(Locator, error)"
+		],
+		"Nth": [
+			"index int",
+			"FrameLocator"
+		]
+	},
 	"JSHandle": {
 		"AsElement": [
 			null,
@@ -817,6 +843,10 @@
 		"Focus": [
 			"options ...FrameFocusOptions",
 			"error"
+		],
+		"FrameLocator": [
+			"selector string",
+			"FrameLocator"
 		],
 		"GetAttribute": [
 			"name string, options ...PageGetAttributeOptions",
@@ -1104,6 +1134,10 @@
 		"Frames": [
 			null,
 			"[]Frame"
+		],
+		"FrameLocator": [
+			"selector string",
+			"FrameLocator"
 		],
 		"GetAttribute": [
 			"selector string, name string, options ...PageGetAttributeOptions",

@@ -184,6 +184,10 @@ func (l *locatorImpl) Focus(options ...FrameFocusOptions) error {
 	return l.frame.Focus(l.selector, options...)
 }
 
+func (l *locatorImpl) FrameLocator(selector string) FrameLocator {
+	return newFrameLocator(l.frame, l.selector+" >> "+selector)
+}
+
 func (l *locatorImpl) GetAttribute(name string, options ...PageGetAttributeOptions) (string, error) {
 	if len(options) == 1 {
 		options[0].Strict = Bool(true)

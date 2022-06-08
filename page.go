@@ -787,3 +787,7 @@ func (p *pageImpl) Locator(selector string, options ...PageLocatorOptions) (Loca
 	}
 	return p.mainFrame.Locator(selector, option)
 }
+
+func (p *pageImpl) FrameLocator(selector string) FrameLocator {
+	return p.mainFrame.FrameLocator(selector)
+}
