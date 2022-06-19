@@ -623,6 +623,8 @@ func (p *pageImpl) onFrameDetached(frame *frameImpl) {
 
 func (p *pageImpl) onRoute(route *routeImpl, request *requestImpl) {
 	go func() {
+		p.Lock()
+		defer p.Unlock()
 		for _, handlerEntry := range p.routes {
 			if handlerEntry.matcher.Matches(request.URL()) {
 				handlerEntry.handler(route, request)
