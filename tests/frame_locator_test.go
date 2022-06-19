@@ -6,23 +6,25 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/playwright-community/playwright-go"
 	"github.com/stretchr/testify/require"
+
+	"github.com/playwright-community/playwright-go"
 )
 
 func routeIframe(t *testing.T, page playwright.Page) {
 	t.Helper()
 
 	err := page.Route("**/empty.html", func(route playwright.Route, _ playwright.Request) {
-		route.Fulfill(playwright.RouteFulfillOptions{
+		err := route.Fulfill(playwright.RouteFulfillOptions{
 			Body:        `<iframe id="frame1" src="iframe.html"></iframe>`,
 			ContentType: playwright.String("text/html"),
 		})
+		require.NoError(t, err)
 	})
 	require.NoError(t, err)
 
 	err = page.Route("**/iframe.html", func(route playwright.Route, _ playwright.Request) {
-		route.Fulfill(playwright.RouteFulfillOptions{
+		err = route.Fulfill(playwright.RouteFulfillOptions{
 			Body: `
 	        <html>
 	          <div>
@@ -34,14 +36,16 @@ func routeIframe(t *testing.T, page playwright.Page) {
 	        </html>`,
 			ContentType: playwright.String("text/html"),
 		})
+		require.NoError(t, err)
 	})
 	require.NoError(t, err)
 
 	err = page.Route("**/iframe-2.html", func(route playwright.Route, _ playwright.Request) {
-		route.Fulfill(playwright.RouteFulfillOptions{
+		err = route.Fulfill(playwright.RouteFulfillOptions{
 			Body:        "<html><button>Hello nested iframe</button></html>",
 			ContentType: playwright.String("text/html"),
 		})
+		require.NoError(t, err)
 	})
 	require.NoError(t, err)
 }
@@ -50,12 +54,13 @@ func routeAmbiguous(t *testing.T, page playwright.Page) {
 	t.Helper()
 
 	err := page.Route("**/empty.html", func(route playwright.Route, _ playwright.Request) {
-		route.Fulfill(playwright.RouteFulfillOptions{
+		err := route.Fulfill(playwright.RouteFulfillOptions{
 			Body: `<iframe src="iframe-1.html"></iframe>
              <iframe src="iframe-2.html"></iframe>
              <iframe src="iframe-3.html"></iframe>`,
 			ContentType: playwright.String("text/html"),
 		})
+		require.NoError(t, err)
 	})
 	require.NoError(t, err)
 
@@ -64,10 +69,11 @@ func routeAmbiguous(t *testing.T, page playwright.Page) {
 		u, err := url.Parse(route.Request().URL())
 		require.NoError(t, err)
 		path := strings.TrimLeft(u.Path, "/")
-		route.Fulfill(playwright.RouteFulfillOptions{
+		err = route.Fulfill(playwright.RouteFulfillOptions{
 			Body:        fmt.Sprintf("<html><button>Hello from %s</button></html>", path),
 			ContentType: playwright.String("text/html"),
 		})
+		require.NoError(t, err)
 	})
 	require.NoError(t, err)
 }
