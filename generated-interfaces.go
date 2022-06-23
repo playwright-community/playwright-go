@@ -865,7 +865,7 @@ type FrameLocator interface {
 	// Returns locator to the last matching frame.
 	Last() FrameLocator
 	// The method finds an element matching the specified selector in the FrameLocator's subtree.
-	Locator(selector string, options ...FrameLocatorLocatorOptions) (Locator, error)
+	Locator(selector string, options ...LocatorLocatorOptions) (Locator, error)
 	// Returns locator to the n-th matching frame.
 	Nth(index int) FrameLocator
 }

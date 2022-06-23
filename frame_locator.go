@@ -23,10 +23,10 @@ func (fl *frameLocatorImpl) Last() FrameLocator {
 	return newFrameLocator(fl.frame, fl.frameSelector+" >> nth=-1")
 }
 
-func (fl *frameLocatorImpl) Locator(selector string, options ...FrameLocatorLocatorOptions) (Locator, error) {
-	return newLocator(fl.frame, fl.frameSelector+" >> control=enter-frame >> "+selector)
+func (fl *frameLocatorImpl) Locator(selector string, options ...LocatorLocatorOptions) (Locator, error) {
+	return newLocator(fl.frame, fl.frameSelector+" >> control=enter-frame >> "+selector, options...)
 }
 
-func (lf *frameLocatorImpl) Nth(index int) FrameLocator {
-	return newFrameLocator(lf.frame, lf.frameSelector+" >> nth="+strconv.Itoa(index))
+func (fl *frameLocatorImpl) Nth(index int) FrameLocator {
+	return newFrameLocator(fl.frame, fl.frameSelector+" >> nth="+strconv.Itoa(index))
 }

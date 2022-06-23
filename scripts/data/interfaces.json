@@ -711,7 +711,7 @@
 			"FrameLocator"
 		],
 		"Locator": [
-			"selector string, options ...FrameLocatorLocatorOptions",
+			"selector string, options ...LocatorLocatorOptions",
 			"(Locator, error)"
 		],
 		"Nth": [
