@@ -676,6 +676,10 @@ type Frame interface {
 	// frame.
 	// This method throws an error if the frame has been detached before `frameElement()` returns.
 	FrameElement() (ElementHandle, error)
+	// When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements in
+	// that iframe. Following snippet locates element with text "Submit" in the iframe with id `my-frame`, like `<iframe
+	// id="my-frame">`:
+	FrameLocator(selector string) FrameLocator
 	// Returns element attribute value.
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
@@ -841,6 +845,29 @@ type Frame interface {
 	// Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
 	InputValue(selector string, options ...FrameInputValueOptions) (string, error)
 	DragAndDrop(source, target string, options ...FrameDragAndDropOptions) error
+}
+
+// FrameLocator represents a view to the `iframe` on the page. It captures the logic sufficient to retrieve the `iframe`
+// and locate elements in that iframe. FrameLocator can be created with either Page.frameLocator() or
+// Locator.frameLocator() method.
+// **Strictness**
+// Frame locators are strict. This means that all operations on frame locators will throw if more than one element matches
+// given selector.
+// **Converting Locator to FrameLocator**
+// If you have a `Locator` object pointing to an `iframe` it can be converted to `FrameLocator` using
+// [`:scope`](https://developer.mozilla.org/en-US/docs/Web/CSS/:scope) CSS selector:
+type FrameLocator interface {
+	// Returns locator to the first matching frame.
+	First() FrameLocator
+	// When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements in
+	// that iframe.
+	FrameLocator(selector string) FrameLocator
+	// Returns locator to the last matching frame.
+	Last() FrameLocator
+	// The method finds an element matching the specified selector in the FrameLocator's subtree.
+	Locator(selector string, options ...LocatorLocatorOptions) (Locator, error)
+	// Returns locator to the n-th matching frame.
+	Nth(index int) FrameLocator
 }
 
 // JSHandle represents an in-page JavaScript object. JSHandles can be created with the Page.evaluateHandle()
@@ -1033,6 +1060,9 @@ type Locator interface {
 	First() (Locator, error)
 	// Calls [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the element.
 	Focus(options ...FrameFocusOptions) error
+	// When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements in
+	// that iframe:
+	FrameLocator(selector string) FrameLocator
 	// Returns element attribute value.
 	GetAttribute(name string, options ...PageGetAttributeOptions) (string, error)
 	// Highlight the corresponding element(s) on the screen. Useful for debugging, don't commit the code that uses
@@ -1368,6 +1398,10 @@ type Page interface {
 	Frame(options PageFrameOptions) Frame
 	// An array of all frames attached to the page.
 	Frames() []Frame
+	// When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements in
+	// that iframe. Following snippet locates element with text "Submit" in the iframe with id `my-frame`, like `<iframe
+	// id="my-frame">`:
+	FrameLocator(selector string) FrameLocator
 	// Returns element attribute value.
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the

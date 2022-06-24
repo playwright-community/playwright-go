@@ -623,6 +623,8 @@ func (p *pageImpl) onFrameDetached(frame *frameImpl) {
 
 func (p *pageImpl) onRoute(route *routeImpl, request *requestImpl) {
 	go func() {
+		p.Lock()
+		defer p.Unlock()
 		for _, handlerEntry := range p.routes {
 			if handlerEntry.matcher.Matches(request.URL()) {
 				handlerEntry.handler(route, request)
@@ -786,4 +788,8 @@ func (p *pageImpl) Locator(selector string, options ...PageLocatorOptions) (Loca
 		option = FrameLocatorOptions(options[0])
 	}
 	return p.mainFrame.Locator(selector, option)
+}
+
+func (p *pageImpl) FrameLocator(selector string) FrameLocator {
+	return p.mainFrame.FrameLocator(selector)
 }

@@ -657,6 +657,10 @@ func (f *frameImpl) Locator(selector string, options ...FrameLocatorOptions) (Lo
 	return newLocator(f, selector, option)
 }
 
+func (f *frameImpl) FrameLocator(selector string) FrameLocator {
+	return newFrameLocator(f, selector)
+}
+
 func (f *frameImpl) highlight(selector string) error {
 	_, err := f.channel.Send("highlight", map[string]interface{}{
 		"selector": selector,
