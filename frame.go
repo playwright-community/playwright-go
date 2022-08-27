@@ -138,14 +138,13 @@ func (f *frameImpl) WaitForLoadState(given ...string) {
 }
 
 func (f *frameImpl) WaitForURL(url string, options ...FrameWaitForURLOptions) error {
+	navigationOptions := PageWaitForNavigationOptions{URL: url}
 	if len(options) > 0 {
-		if _, err := f.WaitForNavigation(PageWaitForNavigationOptions{
-			URL:       url,
-			Timeout:   options[0].Timeout,
-			WaitUntil: options[0].WaitUntil,
-		}); err != nil {
-			return err
-		}
+		navigationOptions.Timeout = options[0].Timeout
+		navigationOptions.WaitUntil = options[0].WaitUntil
+	}
+	if _, err := f.WaitForNavigation(navigationOptions); err != nil {
+		return err
 	}
 	return nil
 }
