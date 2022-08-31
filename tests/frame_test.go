@@ -1,10 +1,10 @@
 package playwright_test
 
 import (
-	"testing"
-
 	"github.com/playwright-community/playwright-go"
 	"github.com/stretchr/testify/require"
+	"testing"
+	"time"
 )
 
 func TestFrameWaitForNavigationShouldWork(t *testing.T) {
@@ -19,6 +19,23 @@ func TestFrameWaitForNavigationShouldWork(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, response.Ok())
 	require.Contains(t, response.URL(), "grid.html")
+}
+
+func TestFrameWaitForURLShouldWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+
+	require.NoError(t, page.SetContent(`<a href="grid.html">foobar</a>`))
+	go func() {
+		time.Sleep(2 * time.Second)
+		require.NoError(t, page.Click("a"))
+	}()
+
+	err = page.MainFrame().WaitForURL(server.PREFIX + "/grid.html")
+	require.NoError(t, err)
+	require.Equal(t, server.PREFIX+"/grid.html", page.URL())
 }
 
 func TestFrameWaitForNavigationAnchorLinks(t *testing.T) {
