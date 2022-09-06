@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"reflect"
+	"time"
 )
 
 type pageImpl struct {
@@ -328,7 +329,16 @@ func (p *pageImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (R
 	return p.mainFrame.WaitForNavigation(options...)
 }
 
-func (p *pageImpl) WaitForRequest(url interface{}, options ...interface{}) Request {
+func (p *pageImpl) WaitForRequest(url interface{}, options ...PageWaitForRequestOptions) (Request, error) {
+	option := PageWaitForRequestOptions{}
+
+	if len(options) == 1 {
+		option = options[0]
+	}
+	if option.Timeout == nil {
+		option.Timeout = Float(p.timeoutSettings.timeout)
+	}
+	deadline := time.After(time.Duration(*option.Timeout) * time.Millisecond)
 	var matcher *urlMatcher
 	if url != nil {
 		matcher = newURLMatcher(url)
@@ -342,7 +352,13 @@ func (p *pageImpl) WaitForRequest(url interface{}, options ...interface{}) Reque
 		}
 		return true
 	}
-	return p.WaitForEvent("request", predicate).(*requestImpl)
+
+	select {
+	case <-deadline:
+		return nil, fmt.Errorf("Timeout %.2fms exceeded.", *option.Timeout)
+	case req := <-waitForEvent(p, "request", predicate):
+		return req.(*requestImpl), nil
+	}
 }
 
 func (p *pageImpl) WaitForResponse(url interface{}, options ...interface{}) Response {

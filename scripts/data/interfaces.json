@@ -1316,8 +1316,8 @@
 			"(Response, error)"
 		],
 		"WaitForRequest": [
-			"url interface{}, options ...interface{}",
-			"Request"
+			"url interface{}, options ...PageWaitForRequestOptions",
+			"(Request, error)"
 		],
 		"WaitForResponse": [
 			"url interface{}, options ...interface{}",

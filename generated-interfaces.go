@@ -1689,7 +1689,7 @@ type Page interface {
 	WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error)
 	// Waits for the matching request and returns it. See [waiting for event](../events.md#waiting-for-event) for more details
 	// about events.
-	WaitForRequest(url interface{}, options ...interface{}) Request
+	WaitForRequest(url interface{}, options ...PageWaitForRequestOptions) (Request, error)
 	// Returns the matched response. See [waiting for event](../events.md#waiting-for-event) for more details about events.
 	WaitForResponse(url interface{}, options ...interface{}) Response
 	// Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
