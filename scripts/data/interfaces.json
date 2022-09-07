@@ -1320,8 +1320,8 @@
 			"(Request, error)"
 		],
 		"WaitForResponse": [
-			"url interface{}, options ...interface{}",
-			"Response"
+			"url interface{}, options ...PageWaitForResponseOptions",
+			"(Response, error)"
 		],
 		"WaitForSelector": [
 			"selector string, options ...PageWaitForSelectorOptions",

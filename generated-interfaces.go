@@ -1691,7 +1691,7 @@ type Page interface {
 	// about events.
 	WaitForRequest(url interface{}, options ...PageWaitForRequestOptions) (Request, error)
 	// Returns the matched response. See [waiting for event](../events.md#waiting-for-event) for more details about events.
-	WaitForResponse(url interface{}, options ...interface{}) Response
+	WaitForResponse(url interface{}, options ...PageWaitForResponseOptions) (Response, error)
 	// Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
 	// `detached`.
 	// > NOTE: Playwright automatically waits for element to be ready before performing an action. Using `Locator` objects and

@@ -361,7 +361,15 @@ func (p *pageImpl) WaitForRequest(url interface{}, options ...PageWaitForRequest
 	}
 }
 
-func (p *pageImpl) WaitForResponse(url interface{}, options ...interface{}) Response {
+func (p *pageImpl) WaitForResponse(url interface{}, options ...PageWaitForResponseOptions) (Response, error) {
+	option := PageWaitForResponseOptions{}
+	if len(options) == 1 {
+		option = options[0]
+	}
+	if option.Timeout == nil {
+		option.Timeout = Float(p.timeoutSettings.timeout)
+	}
+	deadline := time.After(time.Duration(*option.Timeout) * time.Millisecond)
 	var matcher *urlMatcher
 	if url != nil {
 		matcher = newURLMatcher(url)
@@ -375,7 +383,13 @@ func (p *pageImpl) WaitForResponse(url interface{}, options ...interface{}) Resp
 		}
 		return true
 	}
-	return p.WaitForEvent("response", predicate).(*responseImpl)
+
+	select {
+	case <-deadline:
+		return nil, fmt.Errorf("Timeout %.2fms exceeded.", *option.Timeout)
+	case res := <-waitForEvent(p, "response", predicate):
+		return res.(*responseImpl), nil
+	}
 }
 
 func (p *pageImpl) ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error) {
