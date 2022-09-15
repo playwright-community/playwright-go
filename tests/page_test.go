@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -930,17 +931,18 @@ func TestPageWaitForRequest(t *testing.T) {
 		BeforeEach(t)
 		defer AfterEach(t)
 
+		var wg sync.WaitGroup
+		wg.Add(1)
 		go func() {
-			time.Sleep(1 * time.Second)
-			_, err := page.Goto(server.PREFIX + "/one-style.html")
-			page.WaitForLoadState()
+			defer wg.Done()
+			request, err := page.WaitForRequest("**/one-style.html", playwright.PageWaitForRequestOptions{Timeout: playwright.Float(3 * 1000)})
 			require.NoError(t, err)
+			require.Equal(t, fmt.Sprintf("%s/one-style.html", server.PREFIX), request.URL())
 		}()
 
-		request, err := page.WaitForRequest("**/one-style.html", playwright.PageWaitForRequestOptions{Timeout: playwright.Float(3 * 1000)})
-
+		_, err := page.Goto(server.PREFIX + "/one-style.html")
 		require.NoError(t, err)
-		require.Equal(t, fmt.Sprintf("%s/one-style.html", server.PREFIX), request.URL())
+		wg.Wait()
 	})
 
 	t.Run("should respect timeout", func(t *testing.T) {
@@ -974,17 +976,18 @@ func TestPageWaitForResponse(t *testing.T) {
 		BeforeEach(t)
 		defer AfterEach(t)
 
+		var wg sync.WaitGroup
+		wg.Add(1)
 		go func() {
-			time.Sleep(1 * time.Second)
-			_, err := page.Goto(server.PREFIX + "/one-style.html")
-			page.WaitForLoadState()
+			defer wg.Done()
+			response, err := page.WaitForResponse("**/one-style.html", playwright.PageWaitForResponseOptions{Timeout: playwright.Float(3 * 1000)})
 			require.NoError(t, err)
+			require.Equal(t, fmt.Sprintf("%s/one-style.html", server.PREFIX), response.URL())
 		}()
 
-		response, err := page.WaitForResponse("**/one-style.html", playwright.PageWaitForResponseOptions{Timeout: playwright.Float(3 * 1000)})
-
+		_, err := page.Goto(server.PREFIX + "/one-style.html")
 		require.NoError(t, err)
-		require.Equal(t, fmt.Sprintf("%s/one-style.html", server.PREFIX), response.URL())
+		wg.Wait()
 	})
 
 	t.Run("should respect timeout", func(t *testing.T) {
