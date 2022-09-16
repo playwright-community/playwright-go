@@ -1,5 +1,70 @@
 package playwright
 
+type APIRequestNewContextOptions struct {
+	// Methods like APIRequestContext.Get() take the base URL into consideration by using
+	// the [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor
+	// for building the corresponding URL. Examples:
+	// baseURL: `http://localhost:3000` and sending request to `/bar.html` results in `http://localhost:3000/bar.html`
+	// baseURL: `http://localhost:3000/foo/` and sending request to `./bar.html` results
+	// in `http://localhost:3000/foo/bar.html`
+	// baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to
+	// `./bar.html` results in `http://localhost:3000/bar.html`
+	BaseURL *string `json:"baseURL"`
+	// An object containing additional HTTP headers to be sent with every request.
+	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
+	// Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
+	HttpCredentials *APIRequestNewContextOptionsHttpCredentials `json:"httpCredentials"`
+	// Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
+	// Network proxy settings.
+	Proxy *APIRequestNewContextOptionsProxy `json:"proxy"`
+	// Populates context with given storage state. This option can be used to initialize
+	// context with logged-in information obtained via BrowserContext.StorageState(). Path
+	// to the file with saved storage state.
+	StorageStatePath *string `json:"storageStatePath"`
+	// Maximum time in milliseconds to wait for the response. Defaults to `30000` (30 seconds).
+	// Pass `0` to disable timeout.
+	Timeout *float64 `json:"timeout"`
+	// Specific user agent to use in this context.
+	UserAgent *string `json:"userAgent"`
+}
+type APIRequestHttpCredentials struct {
+	Username *string `json:"username"`
+	Password *string `json:"password"`
+}
+type APIRequestProxy struct {
+	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example
+	// `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128`
+	// is considered an HTTP proxy.
+	Server *string `json:"server"`
+	// Optional comma-separated domains to bypass proxy, for example `".com, chromium.org,
+	// .domain.com"`.
+	Bypass *string `json:"bypass"`
+	// Optional username to use if HTTP proxy requires authentication.
+	Username *string `json:"username"`
+	// Optional password to use if HTTP proxy requires authentication.
+	Password *string `json:"password"`
+}
+
+// Result of calling <see cref="APIRequestContext.StorageState" />.
+type APIRequestContextStorageStateResult struct {
+	Cookies []APIRequestContextStorageStateResultCookies `json:"cookies"`
+	Origins []APIRequestContextStorageStateResultOrigins `json:"origins"`
+}
+type APIRequestContextStorageStateOptions struct {
+	// The file path to save the storage state to. If `path` is a relative path, then it
+	// is resolved relative to current working directory. If no path is provided, storage
+	// state is still returned, but won't be saved to the disk.
+	Path *string `json:"path"`
+}
+
+// Result of calling <see cref="APIResponse.HeadersArray" />.
+type APIResponseHeadersArrayResult struct {
+	// Name of the header.
+	Name string `json:"name"`
+	// Value of the header.
+	Value string `json:"value"`
+}
 type BrowserNewContextOptions struct {
 	// Whether to automatically download all the attachments. Defaults to `true` where
 	// all the downloads are accepted.
@@ -74,6 +139,11 @@ type BrowserNewContextOptions struct {
 	// Emulates consistent window screen size available inside web page via `window.screen`.
 	// Is only used when the `viewport` is set.
 	Screen *BrowserNewContextOptionsScreen `json:"screen"`
+	// Whether to allow sites to register Service workers. Defaults to `'allow'`.
+	// `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
+	// can be registered.
+	// `'block'`: Playwright will block all registration of Service Workers.
+	ServiceWorkers *ServiceWorkerPolicy `json:"serviceWorkers"`
 	// Populates context with given storage state. This option can be used to initialize
 	// context with logged-in information obtained via BrowserContext.StorageState(). Either
 	// a path to the file with saved storage, or an object with the following fields:
@@ -82,7 +152,7 @@ type BrowserNewContextOptions struct {
 	// context with logged-in information obtained via BrowserContext.StorageState(). Path
 	// to the file with saved storage state.
 	StorageStatePath *string `json:"storageStatePath"`
-	// It specified, enables strict selectors mode for this context. In the strict selectors
+	// If specified, enables strict selectors mode for this context. In the strict selectors
 	// mode all operations on selectors that imply single target DOM element will throw
 	// when more than one element matches the selector. See Locator to learn more about
 	// the strict mode.
@@ -222,6 +292,11 @@ type BrowserNewPageOptions struct {
 	// Emulates consistent window screen size available inside web page via `window.screen`.
 	// Is only used when the `viewport` is set.
 	Screen *BrowserNewPageOptionsScreen `json:"screen"`
+	// Whether to allow sites to register Service workers. Defaults to `'allow'`.
+	// `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
+	// can be registered.
+	// `'block'`: Playwright will block all registration of Service Workers.
+	ServiceWorkers *ServiceWorkerPolicy `json:"serviceWorkers"`
 	// Populates context with given storage state. This option can be used to initialize
 	// context with logged-in information obtained via BrowserContext.StorageState(). Either
 	// a path to the file with saved storage, or an object with the following fields:
@@ -230,7 +305,7 @@ type BrowserNewPageOptions struct {
 	// context with logged-in information obtained via BrowserContext.StorageState(). Path
 	// to the file with saved storage state.
 	StorageStatePath *string `json:"storageStatePath"`
-	// It specified, enables strict selectors mode for this context. In the strict selectors
+	// If specified, enables strict selectors mode for this context. In the strict selectors
 	// mode all operations on selectors that imply single target DOM element will throw
 	// when more than one element matches the selector. See Locator to learn more about
 	// the strict mode.
@@ -302,6 +377,19 @@ type BrowserContextRouteOptions struct {
 	// How often a route should be used. By default it will be used every time.
 	Times *int `json:"times"`
 }
+type BrowserContextRouteFromHAROptions struct {
+	// If set to 'abort' any request not found in the HAR file will be aborted.
+	// If set to 'fallback' falls through to the next route handler in the handler chain.
+	// Defaults to abort.
+	NotFound *HarNotFound `json:"notFound"`
+	// If specified, updates the given HAR with the actual network information instead
+	// of serving from file.
+	Update *bool `json:"update"`
+	// A glob pattern, regular expression or predicate to match the request URL. Only requests
+	// with URL matching the pattern will be served from the HAR file. If not specified,
+	// all requests are served from the HAR file.
+	URL interface{} `json:"url"`
+}
 type BrowserContextGeolocation struct {
 	// Latitude between -90 and 90.
 	Latitude *float64 `json:"latitude"`
@@ -333,7 +421,7 @@ type BrowserTypeConnectOptions struct {
 	// so that you can see what is going on. Defaults to 0.
 	SlowMo *float64 `json:"slowMo"`
 	// Maximum time in milliseconds to wait for the connection to be established. Defaults
-	// to `30000` (30 seconds). Pass `0` to disable timeout.
+	// to `0` (no timeout).
 	Timeout *float64 `json:"timeout"`
 }
 type BrowserTypeConnectOverCDPOptions struct {
@@ -352,7 +440,7 @@ type BrowserTypeLaunchOptions struct {
 	Args []string `json:"args"`
 	// Browser distribution channel.  Supported values are "chrome", "chrome-beta", "chrome-dev",
 	// "chrome-canary", "msedge", "msedge-beta", "msedge-dev", "msedge-canary". Read more
-	// about using [Google Chrome and Microsoft Edge](./browsers.md#google-chrome--microsoft-edge).
+	// about using [Google Chrome and Microsoft Edge](../browsers.md#google-chrome--microsoft-edge).
 	Channel *string `json:"channel"`
 	// Enable Chromium sandboxing. Defaults to `false`.
 	ChromiumSandbox *bool `json:"chromiumSandbox"`
@@ -433,7 +521,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	BypassCSP *bool `json:"bypassCSP"`
 	// Browser distribution channel.  Supported values are "chrome", "chrome-beta", "chrome-dev",
 	// "chrome-canary", "msedge", "msedge-beta", "msedge-dev", "msedge-canary". Read more
-	// about using [Google Chrome and Microsoft Edge](./browsers.md#google-chrome--microsoft-edge).
+	// about using [Google Chrome and Microsoft Edge](../browsers.md#google-chrome--microsoft-edge).
 	Channel *string `json:"channel"`
 	// Enable Chromium sandboxing. Defaults to `false`.
 	ChromiumSandbox *bool `json:"chromiumSandbox"`
@@ -523,10 +611,15 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// Emulates consistent window screen size available inside web page via `window.screen`.
 	// Is only used when the `viewport` is set.
 	Screen *BrowserTypeLaunchPersistentContextOptionsScreen `json:"screen"`
+	// Whether to allow sites to register Service workers. Defaults to `'allow'`.
+	// `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
+	// can be registered.
+	// `'block'`: Playwright will block all registration of Service Workers.
+	ServiceWorkers *ServiceWorkerPolicy `json:"serviceWorkers"`
 	// Slows down Playwright operations by the specified amount of milliseconds. Useful
 	// so that you can see what is going on.
 	SlowMo *float64 `json:"slowMo"`
-	// It specified, enables strict selectors mode for this context. In the strict selectors
+	// If specified, enables strict selectors mode for this context. In the strict selectors
 	// mode all operations on selectors that imply single target DOM element will throw
 	// when more than one element matches the selector. See Locator to learn more about
 	// the strict mode.
@@ -596,7 +689,7 @@ type ElementHandleBoundingBoxResult struct {
 	Height float64 `json:"height"`
 }
 type ElementHandleCheckOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -610,7 +703,7 @@ type ElementHandleCheckOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -626,7 +719,7 @@ type ElementHandleClickOptions struct {
 	ClickCount *int `json:"clickCount"`
 	// Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the
 	// operation, and then restores current modifiers back. If not specified, currently
@@ -644,7 +737,7 @@ type ElementHandleClickOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -654,7 +747,7 @@ type ElementHandleDblclickOptions struct {
 	Button *MouseButton `json:"button"`
 	// Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the
 	// operation, and then restores current modifiers back. If not specified, currently
@@ -672,7 +765,7 @@ type ElementHandleDblclickOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -690,7 +783,7 @@ type ElementHandleEvalOnSelectorAllOptions struct {
 	Arg interface{} `json:"arg"`
 }
 type ElementHandleFillOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -703,7 +796,7 @@ type ElementHandleFillOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandleHoverOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the
 	// operation, and then restores current modifiers back. If not specified, currently
@@ -716,7 +809,7 @@ type ElementHandleHoverOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -749,9 +842,9 @@ type ElementHandleScreenshotOptions struct {
 	// screenshot.
 	// Defaults to `"allow"` that leaves animations untouched.
 	Animations *ScreenshotAnimations `json:"animations"`
-	// When set to `"ready"`, screenshot will wait for [`document.fonts.ready`](https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet/ready)
-	// promise to resolve in all frames. Defaults to `"nowait"`.
-	Fonts *ScreenshotFonts `json:"fonts"`
+	// When set to `"hide"`, screenshot will hide text caret. When set to `"initial"`,
+	// text caret behavior will not be changed.  Defaults to `"hide"`.
+	Caret *ScreenshotCaret `json:"caret"`
 	// Hides default white background and allows capturing screenshots with transparency.
 	// Not applicable to `jpeg` images. Defaults to `false`.
 	OmitBackground *bool `json:"omitBackground"`
@@ -764,8 +857,9 @@ type ElementHandleScreenshotOptions struct {
 	// When set to `"css"`, screenshot will have a single pixel per each css pixel on the
 	// page. For high-dpi devices, this will keep screenshots small. Using `"device"` option
 	// will produce a single pixel per each device pixel, so screenhots of high-dpi devices
-	// will be twice as large or even larger. Defaults to `"device"`.
-	Size *ScreenshotSize `json:"size"`
+	// will be twice as large or even larger.
+	// Defaults to `"device"`.
+	Scale *ScreenshotScale `json:"scale"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -780,7 +874,7 @@ type ElementHandleScrollIntoViewIfNeededOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandleSelectOptionOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -793,7 +887,7 @@ type ElementHandleSelectOptionOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandleSelectTextOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -801,7 +895,7 @@ type ElementHandleSelectTextOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandleSetCheckedOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -815,7 +909,7 @@ type ElementHandleSetCheckedOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -832,7 +926,7 @@ type ElementHandleSetInputFilesOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandleTapOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the
 	// operation, and then restores current modifiers back. If not specified, currently
@@ -850,7 +944,7 @@ type ElementHandleTapOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -869,7 +963,7 @@ type ElementHandleTypeOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandleUncheckOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -883,7 +977,7 @@ type ElementHandleUncheckOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -945,7 +1039,7 @@ type FrameAddStyleTagOptions struct {
 	URL *string `json:"url"`
 }
 type FrameCheckOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -962,7 +1056,7 @@ type FrameCheckOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -978,7 +1072,7 @@ type FrameClickOptions struct {
 	ClickCount *int `json:"clickCount"`
 	// Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the
 	// operation, and then restores current modifiers back. If not specified, currently
@@ -999,7 +1093,7 @@ type FrameClickOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -1009,7 +1103,7 @@ type FrameDblclickOptions struct {
 	Button *MouseButton `json:"button"`
 	// Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the
 	// operation, and then restores current modifiers back. If not specified, currently
@@ -1030,7 +1124,7 @@ type FrameDblclickOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -1045,7 +1139,7 @@ type FrameDispatchEventOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type FrameDragAndDropOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -1065,7 +1159,7 @@ type FrameDragAndDropOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -1096,7 +1190,7 @@ type FrameEvaluateHandleOptions struct {
 	Arg interface{} `json:"arg"`
 }
 type FrameFillOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -1149,7 +1243,7 @@ type FrameGotoOptions struct {
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type FrameHoverOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the
 	// operation, and then restores current modifiers back. If not specified, currently
@@ -1165,7 +1259,7 @@ type FrameHoverOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -1257,7 +1351,8 @@ type FrameLocatorOptions struct {
 	// must not contain FrameLocators.
 	Has Locator `json:"has"`
 	// Matches elements containing specified text somewhere inside, possibly in a child
-	// or a descendant element. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
+	// or a descendant element. When passed a [string], matching is case-insensitive and
+	// searches for a substring. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
 	HasText interface{} `json:"hasText"`
 }
 type FramePressOptions struct {
@@ -1282,7 +1377,7 @@ type FrameQuerySelectorOptions struct {
 	Strict *bool `json:"strict"`
 }
 type FrameSelectOptionOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -1298,7 +1393,7 @@ type FrameSelectOptionOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type FrameSetCheckedOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -1315,7 +1410,7 @@ type FrameSetCheckedOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -1351,7 +1446,7 @@ type FrameSetInputFilesOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type FrameTapOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the
 	// operation, and then restores current modifiers back. If not specified, currently
@@ -1372,7 +1467,7 @@ type FrameTapOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -1403,7 +1498,7 @@ type FrameTypeOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type FrameUncheckOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -1420,7 +1515,7 @@ type FrameUncheckOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -1448,7 +1543,7 @@ type FrameWaitForNavigationOptions struct {
 	// methods.
 	Timeout *float64 `json:"timeout"`
 	// A glob pattern, regex pattern or predicate receiving [URL] to match while waiting
-	// for the navigation. Note that if the parameter is a string without wilcard characters,
+	// for the navigation. Note that if the parameter is a string without wildcard characters,
 	// the method will wait for navigation to URL that is exactly equal to the string.
 	URL interface{} `json:"url"`
 	// When to consider operation succeeded, defaults to `load`. Events can be either:
@@ -1503,7 +1598,8 @@ type FrameLocatorLocatorOptions struct {
 	// must not contain FrameLocators.
 	Has Locator `json:"has"`
 	// Matches elements containing specified text somewhere inside, possibly in a child
-	// or a descendant element. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
+	// or a descendant element. When passed a [string], matching is case-insensitive and
+	// searches for a substring. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
 	HasText interface{} `json:"hasText"`
 }
 type JSHandleEvaluateOptions struct {
@@ -1541,7 +1637,7 @@ type LocatorBoundingBoxOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorCheckOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -1555,7 +1651,7 @@ type LocatorCheckOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -1571,7 +1667,7 @@ type LocatorClickOptions struct {
 	ClickCount *int `json:"clickCount"`
 	// Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the
 	// operation, and then restores current modifiers back. If not specified, currently
@@ -1589,7 +1685,7 @@ type LocatorClickOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -1599,7 +1695,7 @@ type LocatorDblclickOptions struct {
 	Button *MouseButton `json:"button"`
 	// Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the
 	// operation, and then restores current modifiers back. If not specified, currently
@@ -1617,7 +1713,7 @@ type LocatorDblclickOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -1629,7 +1725,7 @@ type LocatorDispatchEventOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorDragToOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -1646,7 +1742,7 @@ type LocatorDragToOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -1682,7 +1778,7 @@ type LocatorEvaluateHandleOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorFillOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -1693,6 +1789,18 @@ type LocatorFillOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
+}
+type LocatorFilterOptions struct {
+	// Matches elements containing an element that matches an inner locator. Inner locator
+	// is queried against the outer one. For example, `article` that has `text=Playwright`
+	// matches `<article><div>Playwright</div></article>`.
+	// Note that outer and inner locators must belong to the same frame. Inner locator
+	// must not contain FrameLocators.
+	Has Locator `json:"has"`
+	// Matches elements containing specified text somewhere inside, possibly in a child
+	// or a descendant element. When passed a [string], matching is case-insensitive and
+	// searches for a substring. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
+	HasText interface{} `json:"hasText"`
 }
 type LocatorFocusOptions struct {
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
@@ -1707,7 +1815,7 @@ type LocatorGetAttributeOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorHoverOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the
 	// operation, and then restores current modifiers back. If not specified, currently
@@ -1720,7 +1828,7 @@ type LocatorHoverOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -1785,7 +1893,8 @@ type LocatorLocatorOptions struct {
 	// must not contain FrameLocators.
 	Has Locator `json:"has"`
 	// Matches elements containing specified text somewhere inside, possibly in a child
-	// or a descendant element. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
+	// or a descendant element. When passed a [string], matching is case-insensitive and
+	// searches for a substring. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
 	HasText interface{} `json:"hasText"`
 }
 type LocatorPressOptions struct {
@@ -1810,9 +1919,9 @@ type LocatorScreenshotOptions struct {
 	// screenshot.
 	// Defaults to `"allow"` that leaves animations untouched.
 	Animations *ScreenshotAnimations `json:"animations"`
-	// When set to `"ready"`, screenshot will wait for [`document.fonts.ready`](https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet/ready)
-	// promise to resolve in all frames. Defaults to `"nowait"`.
-	Fonts *ScreenshotFonts `json:"fonts"`
+	// When set to `"hide"`, screenshot will hide text caret. When set to `"initial"`,
+	// text caret behavior will not be changed.  Defaults to `"hide"`.
+	Caret *ScreenshotCaret `json:"caret"`
 	// Hides default white background and allows capturing screenshots with transparency.
 	// Not applicable to `jpeg` images. Defaults to `false`.
 	OmitBackground *bool `json:"omitBackground"`
@@ -1825,8 +1934,9 @@ type LocatorScreenshotOptions struct {
 	// When set to `"css"`, screenshot will have a single pixel per each css pixel on the
 	// page. For high-dpi devices, this will keep screenshots small. Using `"device"` option
 	// will produce a single pixel per each device pixel, so screenhots of high-dpi devices
-	// will be twice as large or even larger. Defaults to `"device"`.
-	Size *ScreenshotSize `json:"size"`
+	// will be twice as large or even larger.
+	// Defaults to `"device"`.
+	Scale *ScreenshotScale `json:"scale"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -1841,7 +1951,7 @@ type LocatorScrollIntoViewIfNeededOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorSelectOptionOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -1854,7 +1964,7 @@ type LocatorSelectOptionOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorSelectTextOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1862,7 +1972,7 @@ type LocatorSelectTextOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorSetCheckedOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -1876,7 +1986,7 @@ type LocatorSetCheckedOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -1893,7 +2003,7 @@ type LocatorSetInputFilesOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorTapOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the
 	// operation, and then restores current modifiers back. If not specified, currently
@@ -1911,7 +2021,7 @@ type LocatorTapOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -1936,7 +2046,7 @@ type LocatorTypeOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorUncheckOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -1950,7 +2060,7 @@ type LocatorUncheckOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -1974,11 +2084,17 @@ type LocatorAssertionsToBeCheckedOptions struct {
 	Checked *bool `json:"checked"`
 }
 type LocatorAssertionsToContainTextOptions struct {
+	// Whether to perform case-insensitive match. `ignoreCase` option takes precedence
+	// over the corresponding regular expression flag if specified.
+	IgnoreCase *bool `json:"ignoreCase"`
 	// Whether to use `element.innerText` instead of `element.textContent` when retrieving
 	// DOM node text.
 	UseInnerText *bool `json:"useInnerText"`
 }
 type LocatorAssertionsToHaveTextOptions struct {
+	// Whether to perform case-insensitive match. `ignoreCase` option takes precedence
+	// over the corresponding regular expression flag if specified.
+	IgnoreCase *bool `json:"ignoreCase"`
 	// Whether to use `element.innerText` instead of `element.textContent` when retrieving
 	// DOM node text.
 	UseInnerText *bool `json:"useInnerText"`
@@ -2004,7 +2120,7 @@ type MouseDownOptions struct {
 	ClickCount *int `json:"clickCount"`
 }
 type MouseMoveOptions struct {
-	// defaults to 1. Sends intermediate `mousemove` events.
+	// Defaults to 1. Sends intermediate `mousemove` events.
 	Steps *int `json:"steps"`
 }
 type MouseUpOptions struct {
@@ -2041,7 +2157,7 @@ type PageAddStyleTagOptions struct {
 	URL *string `json:"url"`
 }
 type PageCheckOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -2058,7 +2174,7 @@ type PageCheckOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -2074,7 +2190,7 @@ type PageClickOptions struct {
 	ClickCount *int `json:"clickCount"`
 	// Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the
 	// operation, and then restores current modifiers back. If not specified, currently
@@ -2095,7 +2211,7 @@ type PageClickOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -2110,7 +2226,7 @@ type PageDblclickOptions struct {
 	Button *MouseButton `json:"button"`
 	// Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the
 	// operation, and then restores current modifiers back. If not specified, currently
@@ -2131,7 +2247,7 @@ type PageDblclickOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -2146,7 +2262,7 @@ type PageDispatchEventOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type PageDragAndDropOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -2166,7 +2282,7 @@ type PageDragAndDropOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -2214,7 +2330,7 @@ type PageExposeBindingOptions struct {
 	Handle *bool `json:"handle"`
 }
 type PageFillOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -2299,7 +2415,7 @@ type PageGotoOptions struct {
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageHoverOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the
 	// operation, and then restores current modifiers back. If not specified, currently
@@ -2315,7 +2431,7 @@ type PageHoverOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -2407,7 +2523,8 @@ type PageLocatorOptions struct {
 	// must not contain FrameLocators.
 	Has Locator `json:"has"`
 	// Matches elements containing specified text somewhere inside, possibly in a child
-	// or a descendant element. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
+	// or a descendant element. When passed a [string], matching is case-insensitive and
+	// searches for a substring. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
 	HasText interface{} `json:"hasText"`
 }
 type PagePdfOptions struct {
@@ -2502,6 +2619,19 @@ type PageRouteOptions struct {
 	// How often a route should be used. By default it will be used every time.
 	Times *int `json:"times"`
 }
+type PageRouteFromHAROptions struct {
+	// If set to 'abort' any request not found in the HAR file will be aborted.
+	// If set to 'fallback' missing requests will be sent to the network.
+	// Defaults to abort.
+	NotFound *HarNotFound `json:"notFound"`
+	// If specified, updates the given HAR with the actual network information instead
+	// of serving from file.
+	Update *bool `json:"update"`
+	// A glob pattern, regular expression or predicate to match the request URL. Only requests
+	// with URL matching the pattern will be served from the HAR file. If not specified,
+	// all requests are served from the HAR file.
+	URL interface{} `json:"url"`
+}
 type PageScreenshotOptions struct {
 	// When set to `"disabled"`, stops CSS animations, CSS transitions and Web Animations.
 	// Animations get different treatment depending on their duration:
@@ -2511,12 +2641,12 @@ type PageScreenshotOptions struct {
 	// screenshot.
 	// Defaults to `"allow"` that leaves animations untouched.
 	Animations *ScreenshotAnimations `json:"animations"`
+	// When set to `"hide"`, screenshot will hide text caret. When set to `"initial"`,
+	// text caret behavior will not be changed.  Defaults to `"hide"`.
+	Caret *ScreenshotCaret `json:"caret"`
 	// An object which specifies clipping of the resulting image. Should have the following
 	// fields:
 	Clip *PageScreenshotOptionsClip `json:"clip"`
-	// When set to `"ready"`, screenshot will wait for [`document.fonts.ready`](https://developer.mozilla.org/en-US/docs/Web/API/FontFaceSet/ready)
-	// promise to resolve in all frames. Defaults to `"nowait"`.
-	Fonts *ScreenshotFonts `json:"fonts"`
 	// When true, takes a screenshot of the full scrollable page, instead of the currently
 	// visible viewport. Defaults to `false`.
 	FullPage *bool `json:"fullPage"`
@@ -2532,8 +2662,9 @@ type PageScreenshotOptions struct {
 	// When set to `"css"`, screenshot will have a single pixel per each css pixel on the
 	// page. For high-dpi devices, this will keep screenshots small. Using `"device"` option
 	// will produce a single pixel per each device pixel, so screenhots of high-dpi devices
-	// will be twice as large or even larger. Defaults to `"device"`.
-	Size *ScreenshotSize `json:"size"`
+	// will be twice as large or even larger.
+	// Defaults to `"device"`.
+	Scale *ScreenshotScale `json:"scale"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -2552,7 +2683,7 @@ type PageClip struct {
 	Height *float64 `json:"height"`
 }
 type PageSelectOptionOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -2568,7 +2699,7 @@ type PageSelectOptionOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type PageSetCheckedOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -2585,7 +2716,7 @@ type PageSetCheckedOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -2621,7 +2752,7 @@ type PageSetInputFilesOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type PageTapOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the
 	// operation, and then restores current modifiers back. If not specified, currently
@@ -2642,7 +2773,7 @@ type PageTapOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -2673,7 +2804,7 @@ type PageTypeOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type PageUncheckOptions struct {
-	// Whether to bypass the [actionability](./actionability.md) checks. Defaults to `false`.
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
 	// Actions that initiate navigations are waiting for these navigations to happen and
 	// for pages to start loading. You can opt out of waiting via setting this flag. You
@@ -2690,7 +2821,7 @@ type PageUncheckOptions struct {
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
-	// When set, this method only performs the [actionability](./actionability.md) checks
+	// When set, this method only performs the [actionability](../actionability.md) checks
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
@@ -2730,7 +2861,7 @@ type PageWaitForNavigationOptions struct {
 	// methods.
 	Timeout *float64 `json:"timeout"`
 	// A glob pattern, regex pattern or predicate receiving [URL] to match while waiting
-	// for the navigation. Note that if the parameter is a string without wilcard characters,
+	// for the navigation. Note that if the parameter is a string without wildcard characters,
 	// the method will wait for navigation to URL that is exactly equal to the string.
 	URL interface{} `json:"url"`
 	// When to consider operation succeeded, defaults to `load`. Events can be either:
@@ -2912,6 +3043,18 @@ type RouteContinueOptions struct {
 	// If set changes the request URL. New URL must have same protocol as original one.
 	URL *string `json:"url"`
 }
+type RouteFallbackOptions struct {
+	// If set changes the request HTTP headers. Header values will be converted to a string.
+	Headers map[string]string `json:"headers"`
+	// If set changes the request method (e.g. GET or POST)
+	Method *string `json:"method"`
+	// If set changes the post data of request
+	PostData []byte `json:"postData"`
+	// If set changes the request URL. New URL must have same protocol as original one.
+	// Changing the URL won't affect the route matching, all the routes are matched using
+	// the original request URL.
+	URL *string `json:"url"`
+}
 type RouteFulfillOptions struct {
 	// Response body.
 	Body interface{} `json:"body"`
@@ -2975,6 +3118,38 @@ type WorkerEvaluateOptions struct {
 type WorkerEvaluateHandleOptions struct {
 	// Optional argument to pass to `expression`.
 	Arg interface{} `json:"arg"`
+}
+type APIRequestNewContextOptionsHttpCredentials struct {
+	Username *string `json:"username"`
+	Password *string `json:"password"`
+}
+type APIRequestNewContextOptionsProxy struct {
+	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example
+	// `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128`
+	// is considered an HTTP proxy.
+	Server *string `json:"server"`
+	// Optional comma-separated domains to bypass proxy, for example `".com, chromium.org,
+	// .domain.com"`.
+	Bypass *string `json:"bypass"`
+	// Optional username to use if HTTP proxy requires authentication.
+	Username *string `json:"username"`
+	// Optional password to use if HTTP proxy requires authentication.
+	Password *string `json:"password"`
+}
+type APIRequestContextStorageStateResultCookies struct {
+	Name   *string `json:"name"`
+	Value  *string `json:"value"`
+	Domain *string `json:"domain"`
+	Path   *string `json:"path"`
+	// Unix time in seconds.
+	Expires  *float64           `json:"expires"`
+	HttpOnly *bool              `json:"httpOnly"`
+	Secure   *bool              `json:"secure"`
+	SameSite *SameSiteAttribute `json:"sameSite"`
+}
+type APIRequestContextStorageStateResultOrigins struct {
+	Origin       *string                                                  `json:"origin"`
+	LocalStorage []APIRequestContextStorageStateResultOriginsLocalStorage `json:"localStorage"`
 }
 type BrowserNewContextOptionsGeolocation struct {
 	// Latitude between -90 and 90.
@@ -3357,6 +3532,10 @@ type PageTapOptionsPosition struct {
 type PageUncheckOptionsPosition struct {
 	X *float64 `json:"x"`
 	Y *float64 `json:"y"`
+}
+type APIRequestContextStorageStateResultOriginsLocalStorage struct {
+	Name  *string `json:"name"`
+	Value *string `json:"value"`
 }
 type BrowserNewContextOptionsRecordVideoSize struct {
 	// Video frame width.

@@ -50,6 +50,30 @@ var (
 	ReducedMotionNoPreference                = getReducedMotion("no-preference")
 )
 
+func getServiceWorkerPolicy(in string) *ServiceWorkerPolicy {
+	v := ServiceWorkerPolicy(in)
+	return &v
+}
+
+type ServiceWorkerPolicy string
+
+var (
+	ServiceWorkerPolicyAllow *ServiceWorkerPolicy = getServiceWorkerPolicy("allow")
+	ServiceWorkerPolicyBlock                      = getServiceWorkerPolicy("block")
+)
+
+func getHarNotFound(in string) *HarNotFound {
+	v := HarNotFound(in)
+	return &v
+}
+
+type HarNotFound string
+
+var (
+	HarNotFoundAbort    *HarNotFound = getHarNotFound("abort")
+	HarNotFoundFallback              = getHarNotFound("fallback")
+)
+
 func getMouseButton(in string) *MouseButton {
 	v := MouseButton(in)
 	return &v
@@ -89,28 +113,28 @@ var (
 	ScreenshotAnimationsAllow                          = getScreenshotAnimations("allow")
 )
 
-func getScreenshotFonts(in string) *ScreenshotFonts {
-	v := ScreenshotFonts(in)
+func getScreenshotCaret(in string) *ScreenshotCaret {
+	v := ScreenshotCaret(in)
 	return &v
 }
 
-type ScreenshotFonts string
+type ScreenshotCaret string
 
 var (
-	ScreenshotFontsReady  *ScreenshotFonts = getScreenshotFonts("ready")
-	ScreenshotFontsNowait                  = getScreenshotFonts("nowait")
+	ScreenshotCaretHide    *ScreenshotCaret = getScreenshotCaret("hide")
+	ScreenshotCaretInitial                  = getScreenshotCaret("initial")
 )
 
-func getScreenshotSize(in string) *ScreenshotSize {
-	v := ScreenshotSize(in)
+func getScreenshotScale(in string) *ScreenshotScale {
+	v := ScreenshotScale(in)
 	return &v
 }
 
-type ScreenshotSize string
+type ScreenshotScale string
 
 var (
-	ScreenshotSizeCss    *ScreenshotSize = getScreenshotSize("css")
-	ScreenshotSizeDevice                 = getScreenshotSize("device")
+	ScreenshotScaleCss    *ScreenshotScale = getScreenshotScale("css")
+	ScreenshotScaleDevice                  = getScreenshotScale("device")
 )
 
 func getScreenshotType(in string) *ScreenshotType {
