@@ -127,14 +127,15 @@ func (f *frameImpl) WaitForLoadState(given ...string) {
 	if f.loadStates.Has(state) {
 		return
 	}
-	succeed := make(chan bool, 1)
-	f.Once("loadstate", func(ev ...interface{}) {
+	var wg sync.WaitGroup
+	wg.Add(1)
+	f.On("loadstate", func(ev ...interface{}) {
 		gotState := ev[0].(string)
 		if gotState == state {
-			succeed <- true
+			wg.Done()
 		}
 	})
-	<-succeed
+	wg.Wait()
 }
 
 func (f *frameImpl) WaitForURL(url string, options ...FrameWaitForURLOptions) error {

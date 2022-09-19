@@ -13,3 +13,15 @@ You can use the `BROWSER` environment variable to use a different browser than C
 ```
 BROWSER=chromium HEADLESS=1 go test -v --race ./...
 ```
+
+### Roll
+
+1. Find out to which upstream version you want to roll, you need to find out the upstream commit SHA.
+1. `bash scripts/apply-patch.sh`
+1. `cd playwright`
+1. `reset HEAD~1` this reverts the custom patches
+1. `git stash`
+1. checkout new new sha `git checkout <sha>`
+1. apply the patch again `git stash pop` (and fix merge conflicts)
+1. once you are happy you can commit the changes `git commit -am "apply patch"`
+1. regenerate a new patch `bash scripts/update-patch.sh`

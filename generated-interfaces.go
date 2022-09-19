@@ -11,6 +11,9 @@ type Browser interface {
 	// were opened).
 	// In case this browser is connected to, clears all created contexts belonging to this browser and disconnects from the
 	// browser server.
+	// > NOTE: This is similar to force quitting the browser. Therefore, you should call BrowserContext.close() on
+	// any `BrowserContext`'s you explicitly created earlier with Browser.newContext() **before** calling
+	// Browser.close().
 	// The `Browser` object itself is considered to be disposed and cannot be used anymore.
 	Close() error
 	// Returns an array of all open browser contexts. In a newly created browser, this will return zero browser contexts.
@@ -18,6 +21,10 @@ type Browser interface {
 	// Indicates that the browser is connected.
 	IsConnected() bool
 	// Creates a new browser context. It won't share cookies/cache with other browser contexts.
+	// > NOTE: If directly using this method to create `BrowserContext`s, it is best practice to explicitly close the returned
+	// context via BrowserContext.close() when your code is done with the `BrowserContext`, and before calling
+	// Browser.close(). This will ensure the `context` is closed gracefully and any artifacts—like HARs and
+	// videos—are fully flushed and saved.
 	NewContext(options ...BrowserNewContextOptions) (BrowserContext, error)
 	// Creates a new page in a new browser context. Closing this page will close the context as well.
 	// This is a convenience API that should only be used for the single-page scenarios and short snippets. Production code and
@@ -131,9 +138,9 @@ type BrowserContext interface {
 	ResetGeolocation() error
 	// Routing provides the capability to modify network requests that are made by any page in the browser context. Once route
 	// is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
-	// > NOTE: Page.route() will not intercept requests intercepted by Service Worker. See
+	// > NOTE: BrowserContext.route() will not intercept requests intercepted by Service Worker. See
 	// [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when using
-	// request interception. Via `await context.addInitScript(() => delete window.navigator.serviceWorker);`
+	// request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
 	// An example of a naive handler that aborts all image requests:
 	// or the same snippet using a regex pattern instead:
 	// It is possible to examine the request to decide the route action. For example, mocking all requests that contain some
@@ -158,7 +165,7 @@ type BrowserContext interface {
 	BackgroundPages() []Page
 }
 
-// API for collecting and saving Playwright traces. Playwright traces can be opened in [Trace Viewer](./trace-viewer.md)
+// API for collecting and saving Playwright traces. Playwright traces can be opened in [Trace Viewer](../trace-viewer.md)
 // after Playwright script runs.
 // Start recording a trace before performing actions. At the end, stop tracing and save it to a file.
 type Tracing interface {
@@ -202,15 +209,18 @@ type BrowserType interface {
 	LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (BrowserContext, error)
 	// Returns browser name. For example: `'chromium'`, `'webkit'` or `'firefox'`.
 	Name() string
-	// This methods attaches Playwright to an existing browser instance.
+	// This method attaches Playwright to an existing browser instance. When connecting to another browser launched via
+	// `BrowserType.launchServer` in Node.js, the major and minor version needs to match the client version (1.2.3 → is
+	// compatible with 1.2.x).
 	Connect(url string, options ...BrowserTypeConnectOptions) (Browser, error)
-	// This methods attaches Playwright to an existing browser instance using the Chrome DevTools Protocol.
+	// This method attaches Playwright to an existing browser instance using the Chrome DevTools Protocol.
 	// The default browser context is accessible via Browser.contexts().
 	// > NOTE: Connecting over the Chrome DevTools Protocol is only supported for Chromium-based browsers.
 	ConnectOverCDP(endpointURL string, options ...BrowserTypeConnectOverCDPOptions) (Browser, error)
 }
 
-// `ConsoleMessage` objects are dispatched by page via the [`event: Page.console`] event.
+// `ConsoleMessage` objects are dispatched by page via the [`event: Page.console`] event. For each console messages logged
+// in the page there will be corresponding event in the Playwright context.
 type ConsoleMessage interface {
 	// List of arguments passed to a `console` function call. See also [`event: Page.console`].
 	Args() []JSHandle
@@ -292,7 +302,7 @@ type ElementHandle interface {
 	JSHandle
 	// This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
 	// calculated relative to the main frame viewport - which is usually the same as the browser window.
-	// Scrolling affects the returned bonding box, similarly to
+	// Scrolling affects the returned bounding box, similarly to
 	// [Element.getBoundingClientRect](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect). That
 	// means `x` and/or `y` may be negative.
 	// Elements from child frames return the bounding box relative to the main frame, unlike the
@@ -303,7 +313,7 @@ type ElementHandle interface {
 	// This method checks the element by performing the following steps:
 	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already checked,
 	// this method returns immediately.
-	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -315,7 +325,7 @@ type ElementHandle interface {
 	// This method checks or unchecks an element by performing the following steps:
 	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws.
 	// 1. If the element already has the right checked state, this method returns immediately.
-	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
@@ -325,7 +335,7 @@ type ElementHandle interface {
 	// zero timeout disables this.
 	SetChecked(checked bool, options ...ElementHandleSetCheckedOptions) error
 	// This method clicks the element by performing the following steps:
-	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -336,7 +346,7 @@ type ElementHandle interface {
 	// Returns the content frame for element handles referencing iframe nodes, or `null` otherwise
 	ContentFrame() (Frame, error)
 	// This method double clicks the element by performing the following steps:
-	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to double click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the
@@ -363,7 +373,7 @@ type ElementHandle interface {
 	DispatchEvent(typ string, initObjects ...interface{}) error
 	// Returns the return value of `expression`.
 	// The method finds an element matching the specified selector in the `ElementHandle`s subtree and passes it as a first
-	// argument to `expression`. See [Working with selectors](./selectors.md) for more details. If no elements match the
+	// argument to `expression`. See [Working with selectors](../selectors.md) for more details. If no elements match the
 	// selector, the method throws an error.
 	// If `expression` returns a [Promise], then ElementHandle.evalOnSelector() would wait for the promise to resolve
 	// and return its value.
@@ -371,7 +381,7 @@ type ElementHandle interface {
 	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
 	// Returns the return value of `expression`.
 	// The method finds all elements matching the specified selector in the `ElementHandle`'s subtree and passes an array of
-	// matched elements as a first argument to `expression`. See [Working with selectors](./selectors.md) for more details.
+	// matched elements as a first argument to `expression`. See [Working with selectors](../selectors.md) for more details.
 	// If `expression` returns a [Promise], then ElementHandle.evalOnSelectorAll() would wait for the promise to
 	// resolve and return its value.
 	// Examples:
@@ -382,7 +392,7 @@ type ElementHandle interface {
 	// </div>
 	// ```
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
-	// This method waits for [actionability](./actionability.md) checks, focuses the element, fills it and triggers an `input`
+	// This method waits for [actionability](../actionability.md) checks, focuses the element, fills it and triggers an `input`
 	// event after filling. Note that you can pass an empty string to clear the input field.
 	// If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
 	// However, if the element is inside the `<label>` element that has an associated
@@ -395,7 +405,7 @@ type ElementHandle interface {
 	// Returns element attribute value.
 	GetAttribute(name string) (string, error)
 	// This method hovers over the element by performing the following steps:
-	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to hover over the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -409,15 +419,15 @@ type ElementHandle interface {
 	InnerText() (string, error)
 	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
 	IsChecked() (bool, error)
-	// Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
+	// Returns whether the element is disabled, the opposite of [enabled](../actionability.md#enabled).
 	IsDisabled() (bool, error)
-	// Returns whether the element is [editable](./actionability.md#editable).
+	// Returns whether the element is [editable](../actionability.md#editable).
 	IsEditable() (bool, error)
-	// Returns whether the element is [enabled](./actionability.md#enabled).
+	// Returns whether the element is [enabled](../actionability.md#enabled).
 	IsEnabled() (bool, error)
-	// Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+	// Returns whether the element is hidden, the opposite of [visible](../actionability.md#visible).
 	IsHidden() (bool, error)
-	// Returns whether the element is [visible](./actionability.md#visible).
+	// Returns whether the element is [visible](../actionability.md#visible).
 	IsVisible() (bool, error)
 	// Returns the frame containing the given element.
 	OwnerFrame() (Frame, error)
@@ -435,22 +445,25 @@ type ElementHandle interface {
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	Press(key string, options ...ElementHandlePressOptions) error
 	// The method finds an element matching the specified selector in the `ElementHandle`'s subtree. See
-	// [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns `null`.
+	// [Working with selectors](../selectors.md) for more details. If no elements match the selector, returns `null`.
 	QuerySelector(selector string) (ElementHandle, error)
 	// The method finds all elements matching the specified selector in the `ElementHandle`s subtree. See
-	// [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns empty array.
+	// [Working with selectors](../selectors.md) for more details. If no elements match the selector, returns empty array.
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
-	// Returns the buffer with the captured screenshot.
-	// This method waits for the [actionability](./actionability.md) checks, then scrolls element into view before taking a
+	// This method captures a screenshot of the page, clipped to the size and position of this particular element. If the
+	// element is covered by other elements, it will not be actually visible on the screenshot. If the element is a scrollable
+	// container, only the currently scrolled content will be visible on the screenshot.
+	// This method waits for the [actionability](../actionability.md) checks, then scrolls element into view before taking a
 	// screenshot. If the element is detached from DOM, the method throws an error.
+	// Returns the buffer with the captured screenshot.
 	Screenshot(options ...ElementHandleScreenshotOptions) ([]byte, error)
-	// This method waits for [actionability](./actionability.md) checks, then tries to scroll element into view, unless it is
+	// This method waits for [actionability](../actionability.md) checks, then tries to scroll element into view, unless it is
 	// completely visible as defined by
 	// [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)'s `ratio`.
 	// Throws when `elementHandle` does not point to an element
 	// [connected](https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected) to a Document or a ShadowRoot.
 	ScrollIntoViewIfNeeded(options ...ElementHandleScrollIntoViewIfNeededOptions) error
-	// This method waits for [actionability](./actionability.md) checks, waits until all specified options are present in the
+	// This method waits for [actionability](../actionability.md) checks, waits until all specified options are present in the
 	// `<select>` element and selects these options.
 	// If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
 	// `<label>` element that has an associated
@@ -458,16 +471,21 @@ type ElementHandle interface {
 	// Returns the array of option values that have been successfully selected.
 	// Triggers a `change` and `input` event once all the provided options have been selected.
 	SelectOption(values SelectOptionValues, options ...ElementHandleSelectOptionOptions) ([]string, error)
-	// This method waits for [actionability](./actionability.md) checks, then focuses the element and selects all its text
+	// This method waits for [actionability](../actionability.md) checks, then focuses the element and selects all its text
 	// content.
+	// If the element is inside the `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), focuses and selects text in the
+	// control instead.
 	SelectText(options ...ElementHandleSelectTextOptions) error
-	// This method expects `elementHandle` to point to an
-	// [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
 	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
-	// are resolved relative to the the current working directory. For empty array, clears the selected files.
+	// are resolved relative to the current working directory. For empty array, clears the selected files.
+	// This method expects `ElementHandle` to point to an
+	// [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside the
+	// `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), targets the control instead.
 	SetInputFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error
 	// This method taps the element by performing the following steps:
-	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.touchscreen`] to tap the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -485,7 +503,7 @@ type ElementHandle interface {
 	// This method checks the element by performing the following steps:
 	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already
 	// unchecked, this method returns immediately.
-	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -495,16 +513,16 @@ type ElementHandle interface {
 	// zero timeout disables this.
 	Uncheck(options ...ElementHandleUncheckOptions) error
 	// Returns when the element satisfies the `state`.
-	// Depending on the `state` parameter, this method waits for one of the [actionability](./actionability.md) checks to pass.
-	// This method throws when the element is detached while waiting, unless waiting for the `"hidden"` state.
-	// - `"visible"` Wait until the element is [visible](./actionability.md#visible).
-	// - `"hidden"` Wait until the element is [not visible](./actionability.md#visible) or
-	// [not attached](./actionability.md#attached). Note that waiting for hidden does not throw when the element detaches.
-	// - `"stable"` Wait until the element is both [visible](./actionability.md#visible) and
-	// [stable](./actionability.md#stable).
-	// - `"enabled"` Wait until the element is [enabled](./actionability.md#enabled).
-	// - `"disabled"` Wait until the element is [not enabled](./actionability.md#enabled).
-	// - `"editable"` Wait until the element is [editable](./actionability.md#editable).
+	// Depending on the `state` parameter, this method waits for one of the [actionability](../actionability.md) checks to
+	// pass. This method throws when the element is detached while waiting, unless waiting for the `"hidden"` state.
+	// - `"visible"` Wait until the element is [visible](../actionability.md#visible).
+	// - `"hidden"` Wait until the element is [not visible](../actionability.md#visible) or
+	// [not attached](../actionability.md#attached). Note that waiting for hidden does not throw when the element detaches.
+	// - `"stable"` Wait until the element is both [visible](../actionability.md#visible) and
+	// [stable](../actionability.md#stable).
+	// - `"enabled"` Wait until the element is [enabled](../actionability.md#enabled).
+	// - `"disabled"` Wait until the element is [not enabled](../actionability.md#enabled).
+	// - `"editable"` Wait until the element is [editable](../actionability.md#editable).
 	// If the element does not satisfy the condition for the `timeout` milliseconds, this method will throw.
 	WaitForElementState(state string, options ...ElementHandleWaitForElementStateOptions) error
 	// Returns element specified by selector when it satisfies `state` option. Returns `null` if waiting for `hidden` or
@@ -515,7 +533,9 @@ type ElementHandle interface {
 	// throw.
 	// > NOTE: This method does not work across navigations, use Page.waitForSelector() instead.
 	WaitForSelector(selector string, options ...ElementHandleWaitForSelectorOptions) (ElementHandle, error)
-	// Returns `input.value` for `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
+	// Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element.
+	// Throws for non-input elements. However, if the element is inside the `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), returns the value of the control.
 	InputValue(options ...ElementHandleInputValueOptions) (string, error)
 }
 
@@ -536,7 +556,7 @@ type FileChooser interface {
 	// Returns page this file chooser belongs to.
 	Page() Page
 	// Sets the value of the file input this chooser is associated with. If some of the `filePaths` are relative paths, then
-	// they are resolved relative to the the current working directory. For empty array, clears the selected files.
+	// they are resolved relative to the current working directory. For empty array, clears the selected files.
 	SetFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error
 }
 
@@ -554,7 +574,7 @@ type Frame interface {
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws.
 	// 1. If the element already has the right checked state, this method returns immediately.
-	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
@@ -574,7 +594,7 @@ type Frame interface {
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
 	// checked, this method returns immediately.
-	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
@@ -586,7 +606,7 @@ type Frame interface {
 	ChildFrames() []Frame
 	// This method clicks an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element, or the specified `position`.
@@ -598,7 +618,7 @@ type Frame interface {
 	Content() (string, error)
 	// This method double clicks an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to double click in the center of the element, or the specified `position`.
@@ -644,7 +664,7 @@ type Frame interface {
 	// > NOTE: This method does not wait for the element to pass actionability checks and therefore can lead to the flaky
 	// tests. Use Locator.evaluate(), other `Locator` helper methods or web-first assertions instead.
 	// The method finds an element matching the specified selector within the frame and passes it as a first argument to
-	// `expression`. See [Working with selectors](./selectors.md) for more details. If no elements match the selector, the
+	// `expression`. See [Working with selectors](../selectors.md) for more details. If no elements match the selector, the
 	// method throws an error.
 	// If `expression` returns a [Promise], then Frame.evalOnSelector() would wait for the promise to resolve and
 	// return its value.
@@ -654,12 +674,12 @@ type Frame interface {
 	// > NOTE: In most cases, Locator.evaluateAll(), other `Locator` helper methods and web-first assertions do a
 	// better job.
 	// The method finds all elements matching the specified selector within the frame and passes an array of matched elements
-	// as a first argument to `expression`. See [Working with selectors](./selectors.md) for more details.
+	// as a first argument to `expression`. See [Working with selectors](../selectors.md) for more details.
 	// If `expression` returns a [Promise], then Frame.evalOnSelectorAll() would wait for the promise to resolve and
 	// return its value.
 	// Examples:
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
-	// This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, focuses the
+	// This method waits for an element matching `selector`, waits for [actionability](../actionability.md) checks, focuses the
 	// element, fills it and triggers an `input` event after filling. Note that you can pass an empty string to clear the input
 	// field.
 	// If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
@@ -700,7 +720,7 @@ type Frame interface {
 	Goto(url string, options ...PageGotoOptions) (Response, error)
 	// This method hovers over an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to hover over the center of the element, or the specified `position`.
@@ -716,21 +736,22 @@ type Frame interface {
 	IsDetached() bool
 	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
 	IsChecked(selector string, options ...FrameIsCheckedOptions) (bool, error)
-	// Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
+	// Returns whether the element is disabled, the opposite of [enabled](../actionability.md#enabled).
 	IsDisabled(selector string, options ...FrameIsDisabledOptions) (bool, error)
-	// Returns whether the element is [editable](./actionability.md#editable).
+	// Returns whether the element is [editable](../actionability.md#editable).
 	IsEditable(selector string, options ...FrameIsEditableOptions) (bool, error)
-	// Returns whether the element is [enabled](./actionability.md#enabled).
+	// Returns whether the element is [enabled](../actionability.md#enabled).
 	IsEnabled(selector string, options ...FrameIsEnabledOptions) (bool, error)
-	// Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).  `selector` that does not
+	// Returns whether the element is hidden, the opposite of [visible](../actionability.md#visible).  `selector` that does not
 	// match any elements is considered hidden.
 	IsHidden(selector string, options ...FrameIsHiddenOptions) (bool, error)
-	// Returns whether the element is [visible](./actionability.md#visible). `selector` that does not match any elements is
+	// Returns whether the element is [visible](../actionability.md#visible). `selector` that does not match any elements is
 	// considered not visible.
 	IsVisible(selector string, options ...FrameIsVisibleOptions) (bool, error)
 	// The method returns an element locator that can be used to perform actions in the frame. Locator is resolved to the
 	// element immediately before performing an action, so a series of actions on the same locator can in fact be performed on
 	// different DOM elements. That would happen if the DOM structure between those actions has changed.
+	// [Learn more about locators](../locators.md).
 	Locator(selector string, options ...FrameLocatorOptions) (Locator, error)
 	// Returns frame's name attribute as specified in the tag.
 	// If the name is empty, returns the id attribute instead.
@@ -755,15 +776,15 @@ type Frame interface {
 	// Returns the ElementHandle pointing to the frame element.
 	// > NOTE: The use of `ElementHandle` is discouraged, use `Locator` objects and web-first assertions instead.
 	// The method finds an element matching the specified selector within the frame. See
-	// [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns `null`.
+	// [Working with selectors](../selectors.md) for more details. If no elements match the selector, returns `null`.
 	QuerySelector(selector string) (ElementHandle, error)
 	// Returns the ElementHandles pointing to the frame elements.
 	// > NOTE: The use of `ElementHandle` is discouraged, use `Locator` objects instead.
 	// The method finds all elements matching the specified selector within the frame. See
-	// [Working with selectors](./selectors.md) for more details. If no elements match the selector, returns empty array.
+	// [Working with selectors](../selectors.md) for more details. If no elements match the selector, returns empty array.
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
 	SetContent(content string, options ...PageSetContentOptions) error
-	// This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, waits until
+	// This method waits for an element matching `selector`, waits for [actionability](../actionability.md) checks, waits until
 	// all specified options are present in the `<select>` element and selects these options.
 	// If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
 	// `<label>` element that has an associated
@@ -771,14 +792,16 @@ type Frame interface {
 	// Returns the array of option values that have been successfully selected.
 	// Triggers a `change` and `input` event once all the provided options have been selected.
 	SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error)
-	// This method expects `selector` to point to an
-	// [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
 	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
-	// are resolved relative to the the current working directory. For empty array, clears the selected files.
+	// are resolved relative to the current working directory. For empty array, clears the selected files.
+	// This method expects `selector` to point to an
+	// [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside the
+	// `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), targets the control instead.
 	SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error
 	// This method taps an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.touchscreen`] to tap the center of the element, or the specified `position`.
@@ -801,7 +824,7 @@ type Frame interface {
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
 	// unchecked, this method returns immediately.
-	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
@@ -842,7 +865,9 @@ type Frame interface {
 	// Note that `frame.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going to
 	// be flaky. Use signals such as network events, selectors becoming visible and others instead.
 	WaitForTimeout(timeout float64)
-	// Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
+	// Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element.
+	// Throws for non-input elements. However, if the element is inside the `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), returns the value of the control.
 	InputValue(selector string, options ...FrameInputValueOptions) (string, error)
 	DragAndDrop(source, target string, options ...FrameDragAndDropOptions) error
 }
@@ -866,7 +891,7 @@ type FrameLocator interface {
 	Last() FrameLocator
 	// The method finds an element matching the specified selector in the FrameLocator's subtree.
 	Locator(selector string, options ...LocatorLocatorOptions) (Locator, error)
-	// Returns locator to the n-th matching frame.
+	// Returns locator to the n-th matching frame. It's zero based, `nth(0)` selects the first frame.
 	Nth(index int) FrameLocator
 }
 
@@ -958,7 +983,7 @@ type Keyboard interface {
 
 // Locators are the central piece of Playwright's auto-waiting and retry-ability. In a nutshell, locators represent a way
 // to find element(s) on the page at any moment. Locator can be created with the Page.locator() method.
-// [Learn more about locators](./locators.md).
+// [Learn more about locators](../locators.md).
 type Locator interface {
 	// Returns an array of `node.innerText` values for all matching nodes.
 	AllInnerTexts() ([]string, error)
@@ -966,7 +991,7 @@ type Locator interface {
 	AllTextContents() ([]string, error)
 	// This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
 	// calculated relative to the main frame viewport - which is usually the same as the browser window.
-	// Scrolling affects the returned bonding box, similarly to
+	// Scrolling affects the returned bounding box, similarly to
 	// [Element.getBoundingClientRect](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect). That
 	// means `x` and/or `y` may be negative.
 	// Elements from child frames return the bounding box relative to the main frame, unlike the
@@ -977,7 +1002,7 @@ type Locator interface {
 	// This method checks the element by performing the following steps:
 	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already checked,
 	// this method returns immediately.
-	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -987,7 +1012,7 @@ type Locator interface {
 	// zero timeout disables this.
 	Check(options ...FrameCheckOptions) error
 	// This method clicks the element by performing the following steps:
-	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -998,7 +1023,7 @@ type Locator interface {
 	// Returns the number of elements matching given selector.
 	Count() (int, error)
 	// This method double clicks the element by performing the following steps:
-	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to double click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if the
@@ -1048,7 +1073,7 @@ type Locator interface {
 	// Locator.evaluateHandle() would wait for the promise to resolve and return its value.
 	// See Page.evaluateHandle() for more details.
 	EvaluateHandle(expression string, arg interface{}, options ...LocatorEvaluateHandleOptions) (interface{}, error)
-	// This method waits for [actionability](./actionability.md) checks, focuses the element, fills it and triggers an `input`
+	// This method waits for [actionability](../actionability.md) checks, focuses the element, fills it and triggers an `input`
 	// event after filling. Note that you can pass an empty string to clear the input field.
 	// If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
 	// However, if the element is inside the `<label>` element that has an associated
@@ -1069,7 +1094,7 @@ type Locator interface {
 	// Locator.highlight().
 	Highlight() error
 	// This method hovers over the element by performing the following steps:
-	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to hover over the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -1081,25 +1106,28 @@ type Locator interface {
 	InnerHTML(options ...PageInnerHTMLOptions) (string, error)
 	// Returns the `element.innerText`.
 	InnerText(options ...PageInnerTextOptions) (string, error)
-	// Returns `input.value` for `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
+	// Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element.
+	// Throws for non-input elements. However, if the element is inside the `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), returns the value of the control.
 	InputValue(options ...FrameInputValueOptions) (string, error)
 	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
 	IsChecked(options ...FrameIsCheckedOptions) (bool, error)
-	// Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
+	// Returns whether the element is disabled, the opposite of [enabled](../actionability.md#enabled).
 	IsDisabled(options ...FrameIsDisabledOptions) (bool, error)
-	// Returns whether the element is [editable](./actionability.md#editable).
+	// Returns whether the element is [editable](../actionability.md#editable).
 	IsEditable(options ...FrameIsEditableOptions) (bool, error)
-	// Returns whether the element is [enabled](./actionability.md#enabled).
+	// Returns whether the element is [enabled](../actionability.md#enabled).
 	IsEnabled(options ...FrameIsEnabledOptions) (bool, error)
-	// Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).
+	// Returns whether the element is hidden, the opposite of [visible](../actionability.md#visible).
 	IsHidden(options ...FrameIsHiddenOptions) (bool, error)
-	// Returns whether the element is [visible](./actionability.md#visible).
+	// Returns whether the element is [visible](../actionability.md#visible).
 	IsVisible(options ...FrameIsVisibleOptions) (bool, error)
 	// Returns locator to the last matching element.
 	Last() (Locator, error)
-	// The method finds an element matching the specified selector in the `Locator`'s subtree.
+	// The method finds an element matching the specified selector in the `Locator`'s subtree. It also accepts filter options,
+	// similar to Locator.filter() method.
 	Locator(selector string, options ...LocatorLocatorOptions) (Locator, error)
-	// Returns locator to the n-th matching element.
+	// Returns locator to the n-th matching element. It's zero based, `nth(0)` selects the first element.
 	Nth(index int) (Locator, error)
 	// A page this locator belongs to.
 	Page() Page
@@ -1116,15 +1144,18 @@ type Locator interface {
 	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	Press(key string, options ...PagePressOptions) error
-	// Returns the buffer with the captured screenshot.
-	// This method waits for the [actionability](./actionability.md) checks, then scrolls element into view before taking a
+	// This method captures a screenshot of the page, clipped to the size and position of a particular element matching the
+	// locator. If the element is covered by other elements, it will not be actually visible on the screenshot. If the element
+	// is a scrollable container, only the currently scrolled content will be visible on the screenshot.
+	// This method waits for the [actionability](../actionability.md) checks, then scrolls element into view before taking a
 	// screenshot. If the element is detached from DOM, the method throws an error.
+	// Returns the buffer with the captured screenshot.
 	Screenshot(options ...LocatorScreenshotOptions) ([]byte, error)
-	// This method waits for [actionability](./actionability.md) checks, then tries to scroll element into view, unless it is
+	// This method waits for [actionability](../actionability.md) checks, then tries to scroll element into view, unless it is
 	// completely visible as defined by
 	// [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)'s `ratio`.
 	ScrollIntoViewIfNeeded(options ...LocatorScrollIntoViewIfNeededOptions) error
-	// This method waits for [actionability](./actionability.md) checks, waits until all specified options are present in the
+	// This method waits for [actionability](../actionability.md) checks, waits until all specified options are present in the
 	// `<select>` element and selects these options.
 	// If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
 	// `<label>` element that has an associated
@@ -1132,13 +1163,16 @@ type Locator interface {
 	// Returns the array of option values that have been successfully selected.
 	// Triggers a `change` and `input` event once all the provided options have been selected.
 	SelectOption(values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error)
-	// This method waits for [actionability](./actionability.md) checks, then focuses the element and selects all its text
+	// This method waits for [actionability](../actionability.md) checks, then focuses the element and selects all its text
 	// content.
+	// If the element is inside the `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), focuses and selects text in the
+	// control instead.
 	SelectText(options ...LocatorSelectTextOptions) error
 	// This method checks or unchecks an element by performing the following steps:
 	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws.
 	// 1. If the element already has the right checked state, this method returns immediately.
-	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
@@ -1147,13 +1181,15 @@ type Locator interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`. Passing
 	// zero timeout disables this.
 	SetChecked(checked bool, options ...FrameSetCheckedOptions) error
-	// This method expects `element` to point to an
-	// [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
 	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
-	// are resolved relative to the the current working directory. For empty array, clears the selected files.
+	// are resolved relative to the current working directory. For empty array, clears the selected files.
+	// This method expects `Locator` to point to an
+	// [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside the
+	// `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), targets the control instead.
 	SetInputFiles(files []InputFile, options ...FrameSetInputFilesOptions) error
 	// This method taps the element by performing the following steps:
-	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.touchscreen`] to tap the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -1171,7 +1207,7 @@ type Locator interface {
 	// This method checks the element by performing the following steps:
 	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already
 	// unchecked, this method returns immediately.
-	// 1. Wait for [actionability](./actionability.md) checks on the element, unless `force` option is set.
+	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
@@ -1217,7 +1253,7 @@ type Page interface {
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws.
 	// 1. If the element already has the right checked state, this method returns immediately.
-	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
@@ -1254,7 +1290,7 @@ type Page interface {
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
 	// checked, this method returns immediately.
-	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
@@ -1266,7 +1302,7 @@ type Page interface {
 	Check(selector string, options ...FrameCheckOptions) error
 	// This method clicks an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element, or the specified `position`.
@@ -1287,7 +1323,7 @@ type Page interface {
 	Context() BrowserContext
 	// This method double clicks an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to double click in the center of the element, or the specified `position`.
@@ -1380,7 +1416,7 @@ type Page interface {
 	ExpectResponse(url interface{}, cb func() error, options ...interface{}) (Response, error)
 	ExpectWorker(cb func() error) (Worker, error)
 	ExpectedDialog(cb func() error) (Dialog, error)
-	// This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, focuses the
+	// This method waits for an element matching `selector`, waits for [actionability](../actionability.md) checks, focuses the
 	// element, fills it and triggers an `input` event after filling. Note that you can pass an empty string to clear the input
 	// field.
 	// If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an error.
@@ -1412,8 +1448,8 @@ type Page interface {
 	// last redirect. If can not go forward, returns `null`.
 	// Navigate to the next page in history.
 	GoForward(options ...PageGoForwardOptions) (Response, error)
-	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the
-	// last redirect.
+	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the first
+	// non-redirect response.
 	// The method will throw an error if:
 	// - there's an SSL error (e.g. in case of self-signed certificates).
 	// - target URL is invalid.
@@ -1431,7 +1467,7 @@ type Page interface {
 	Goto(url string, options ...PageGotoOptions) (Response, error)
 	// This method hovers over an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to hover over the center of the element, or the specified `position`.
@@ -1448,21 +1484,22 @@ type Page interface {
 	IsClosed() bool
 	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
 	IsChecked(selector string, options ...FrameIsCheckedOptions) (bool, error)
-	// Returns whether the element is disabled, the opposite of [enabled](./actionability.md#enabled).
+	// Returns whether the element is disabled, the opposite of [enabled](../actionability.md#enabled).
 	IsDisabled(selector string, options ...FrameIsDisabledOptions) (bool, error)
-	// Returns whether the element is [editable](./actionability.md#editable).
+	// Returns whether the element is [editable](../actionability.md#editable).
 	IsEditable(selector string, options ...FrameIsEditableOptions) (bool, error)
-	// Returns whether the element is [enabled](./actionability.md#enabled).
+	// Returns whether the element is [enabled](../actionability.md#enabled).
 	IsEnabled(selector string, options ...FrameIsEnabledOptions) (bool, error)
-	// Returns whether the element is hidden, the opposite of [visible](./actionability.md#visible).  `selector` that does not
+	// Returns whether the element is hidden, the opposite of [visible](../actionability.md#visible).  `selector` that does not
 	// match any elements is considered hidden.
 	IsHidden(selector string, options ...FrameIsHiddenOptions) (bool, error)
-	// Returns whether the element is [visible](./actionability.md#visible). `selector` that does not match any elements is
+	// Returns whether the element is [visible](../actionability.md#visible). `selector` that does not match any elements is
 	// considered not visible.
 	IsVisible(selector string, options ...FrameIsVisibleOptions) (bool, error)
 	// The method returns an element locator that can be used to perform actions on the page. Locator is resolved to the
 	// element immediately before performing an action, so a series of actions on the same locator can in fact be performed on
 	// different DOM elements. That would happen if the DOM structure between those actions has changed.
+	// [Learn more about locators](../locators.md).
 	// Shortcut for main frame's Frame.locator().
 	Locator(selector string, options ...PageLocatorOptions) (Locator, error)
 	// The page's main frame. Page is guaranteed to have a main frame which persists during navigations.
@@ -1532,7 +1569,7 @@ type Page interface {
 	// > NOTE: The handler will only be called for the first url if the response is a redirect.
 	// > NOTE: Page.route() will not intercept requests intercepted by Service Worker. See
 	// [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when using
-	// request interception. Via `await context.addInitScript(() => delete window.navigator.serviceWorker);`
+	// request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
 	// An example of a naive handler that aborts all image requests:
 	// or the same snippet using a regex pattern instead:
 	// It is possible to examine the request to decide the route action. For example, mocking all requests that contain some
@@ -1544,7 +1581,7 @@ type Page interface {
 	Route(url interface{}, handler routeHandler) error
 	// Returns the buffer with the captured screenshot.
 	Screenshot(options ...PageScreenshotOptions) ([]byte, error)
-	// This method waits for an element matching `selector`, waits for [actionability](./actionability.md) checks, waits until
+	// This method waits for an element matching `selector`, waits for [actionability](../actionability.md) checks, waits until
 	// all specified options are present in the `<select>` element and selects these options.
 	// If the target element is not a `<select>` element, this method throws an error. However, if the element is inside the
 	// `<label>` element that has an associated
@@ -1571,10 +1608,12 @@ type Page interface {
 	// The extra HTTP headers will be sent with every request the page initiates.
 	// > NOTE: Page.setExtraHTTPHeaders() does not guarantee the order of headers in the outgoing requests.
 	SetExtraHTTPHeaders(headers map[string]string) error
-	// This method expects `selector` to point to an
-	// [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input).
 	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then they
-	// are resolved relative to the the current working directory. For empty array, clears the selected files.
+	// are resolved relative to the current working directory. For empty array, clears the selected files.
+	// This method expects `selector` to point to an
+	// [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside the
+	// `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), targets the control instead.
 	SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error
 	// In the case of multiple pages in a single browser, each page can have its own viewport size. However,
 	// Browser.newContext() allows to set viewport size (and more) for all pages in the context at once.
@@ -1585,7 +1624,7 @@ type Page interface {
 	SetViewportSize(width, height int) error
 	// This method taps an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
-	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.touchscreen`] to tap the center of the element, or the specified `position`.
@@ -1610,7 +1649,7 @@ type Page interface {
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws. If the element is already
 	// unchecked, this method returns immediately.
-	// 1. Wait for [actionability](./actionability.md) checks on the matched element, unless `force` option is set. If the
+	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If the
 	// element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
 	// 1. Use [`property: Page.mouse`] to click in the center of the element.
@@ -1648,10 +1687,10 @@ type Page interface {
 	// considered a navigation.
 	// Shortcut for main frame's Frame.waitForNavigation().
 	WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error)
-	// Waits for the matching request and returns it. See [waiting for event](./events.md#waiting-for-event) for more details
+	// Waits for the matching request and returns it. See [waiting for event](../events.md#waiting-for-event) for more details
 	// about events.
 	WaitForRequest(url interface{}, options ...interface{}) Request
-	// Returns the matched response. See [waiting for event](./events.md#waiting-for-event) for more details about events.
+	// Returns the matched response. See [waiting for event](../events.md#waiting-for-event) for more details about events.
 	WaitForResponse(url interface{}, options ...interface{}) Response
 	// Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
 	// `detached`.
@@ -1679,7 +1718,9 @@ type Page interface {
 	// > NOTE: This method requires Playwright to be started in a headed mode, with a falsy `headless` value in the
 	// BrowserType.launch().
 	Pause() error
-	// Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element. Throws for non-input elements.
+	// Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element.
+	// Throws for non-input elements. However, if the element is inside the `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), returns the value of the control.
 	InputValue(selector string, options ...FrameInputValueOptions) (string, error)
 	// Waits for the main frame to navigate to the given URL.
 	// Shortcut for main frame's Frame.waitForURL().
@@ -1710,7 +1751,9 @@ type Request interface {
 	Failure() *RequestFailure
 	// Returns the `Frame` that initiated this request.
 	Frame() Frame
-	// **DEPRECATED** Incomplete list of headers as seen by the rendering engine. Use Request.allHeaders() instead.
+	// An object with the request HTTP headers. The header names are lower-cased. Note that this method does not return
+	// security-related headers, including cookie-related ones. You can use Request.allHeaders() for complete list of
+	// headers that include `cookie` information.
 	Headers() map[string]string
 	// Whether this request is driving frame's navigation.
 	IsNavigationRequest() bool
@@ -1769,7 +1812,9 @@ type Response interface {
 	Finished()
 	// Returns the `Frame` that initiated this response.
 	Frame() Frame
-	// **DEPRECATED** Incomplete list of headers as seen by the rendering engine. Use Response.allHeaders() instead.
+	// An object with the response HTTP headers. The header names are lower-cased. Note that this method does not return
+	// security-related headers, including cookie-related ones. You can use Response.allHeaders() for complete list
+	// of headers that include `cookie` information.
 	Headers() map[string]string
 	// Returns the JSON representation of response body.
 	// This method will throw if the response body is not parsable via `JSON.parse`.
@@ -1794,6 +1839,7 @@ type Response interface {
 
 // Whenever a network route is set up with Page.route`] or [`method: BrowserContext.route(), the `Route` object
 // allows to handle the route.
+// Learn more about [networking](../network.md).
 type Route interface {
 	// Aborts the route's request.
 	Abort(errorCode ...string) error
