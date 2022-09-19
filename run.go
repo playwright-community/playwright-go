@@ -13,9 +13,13 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
-const playwrightCliVersion = "1.20.0-beta-1647057403000"
+const (
+	playwrightCliVersion = "1.25.2"
+	baseURL              = "https://playwright.azureedge.net/builds/driver"
+)
 
 type PlaywrightDriver struct {
 	DriverDirectory, DriverBinaryLocation, Version string
@@ -290,7 +294,18 @@ func (d *PlaywrightDriver) getDriverURL() string {
 			platform = "linux"
 		}
 	}
-	return fmt.Sprintf("https://playwright.azureedge.net/builds/driver/next/playwright-%s-%s.zip", d.Version, platform)
+
+	if d.isReleaseVersion() {
+		return fmt.Sprintf("%s/playwright-%s-%s.zip", baseURL, d.Version, platform)
+	}
+
+	return fmt.Sprintf("%s/next/playwright-%s-%s.zip", baseURL, d.Version, platform)
+}
+
+// isReleaseVersion checks if the version is not a beta or alpha release
+// this helps to determine the url from where to download the driver
+func (d *PlaywrightDriver) isReleaseVersion() bool {
+	return !strings.Contains(d.Version, "beta") && !strings.Contains(d.Version, "alpha")
 }
 
 func makeFileExecutable(path string) error {

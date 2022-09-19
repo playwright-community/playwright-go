@@ -4,7 +4,7 @@ set -e
 set +x
 PWD=$(pwd -P)
 
-$PWD/scripts/apply-patch.sh
+"$PWD"/scripts/apply-patch.sh
 
 go run scripts/install-browsers/main.go
 
