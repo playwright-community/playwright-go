@@ -119,10 +119,16 @@ func (f *frameImpl) Page() Page {
 	return f.page
 }
 
-func (f *frameImpl) WaitForLoadState(given ...string) {
+func (f *frameImpl) WaitForLoadState(options ...FrameWaitForLoadStateOptions) {
 	state := "load"
-	if len(given) == 1 {
-		state = given[0]
+	timeout := 30000
+	if len(options) == 1 {
+		if options[0].State != nil {
+			state = string(*options[0].State)
+		}
+		if options[0].Timeout != nil {
+			timeout = int(*options[0].Timeout)
+		}
 	}
 	if f.loadStates.Has(state) {
 		return
@@ -135,7 +141,21 @@ func (f *frameImpl) WaitForLoadState(given ...string) {
 			wg.Done()
 		}
 	})
-	wg.Wait()
+	if timeout == 0 {
+		wg.Wait()
+	} else {
+		ch := make(chan struct{})
+		go func() {
+			defer close(ch)
+			wg.Wait()
+		}()
+		select {
+		case <-ch:
+			break
+		case <-time.After(time.Duration(timeout) * time.Millisecond):
+			break
+		}
+	}
 }
 
 func (f *frameImpl) WaitForURL(url string, options ...FrameWaitForURLOptions) error {

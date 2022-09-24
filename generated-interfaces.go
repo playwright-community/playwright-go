@@ -841,7 +841,7 @@ type Frame interface {
 	// Waits for the required load state to be reached.
 	// This returns when the frame reaches a required load state, `load` by default. The navigation must have been committed
 	// when this method is called. If current document has already reached the required state, resolves immediately.
-	WaitForLoadState(given ...string)
+	WaitForLoadState(options ...FrameWaitForLoadStateOptions)
 	// Waits for the frame navigation and returns the main resource response. In case of multiple redirects, the navigation
 	// will resolve with the response of the last redirect. In case of navigation to a different anchor or navigation due to
 	// History API usage, the navigation will resolve with `null`.
@@ -1676,7 +1676,7 @@ type Page interface {
 	// This resolves when the page reaches a required load state, `load` by default. The navigation must have been committed
 	// when this method is called. If current document has already reached the required state, resolves immediately.
 	// Shortcut for main frame's Frame.waitForLoadState().
-	WaitForLoadState(state ...string)
+	WaitForLoadState(options ...PageWaitForLoadStateOptions)
 	// Waits for the main frame navigation and returns the main resource response. In case of multiple redirects, the
 	// navigation will resolve with the response of the last redirect. In case of navigation to a different anchor or
 	// navigation due to History API usage, the navigation will resolve with `null`.

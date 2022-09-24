@@ -188,8 +188,15 @@ func (p *pageImpl) Reload(options ...PageReloadOptions) (Response, error) {
 	return fromChannel(response).(*responseImpl), err
 }
 
-func (p *pageImpl) WaitForLoadState(state ...string) {
-	p.mainFrame.WaitForLoadState(state...)
+func (p *pageImpl) WaitForLoadState(options ...PageWaitForLoadStateOptions) {
+	var frameOptions []FrameWaitForLoadStateOptions
+	if len(options) == 1 {
+		frameOptions = append(frameOptions, FrameWaitForLoadStateOptions{
+			State:   options[0].State,
+			Timeout: options[0].Timeout,
+		})
+	}
+	p.mainFrame.WaitForLoadState(frameOptions...)
 }
 
 func (p *pageImpl) GoBack(options ...PageGoBackOptions) (Response, error) {
