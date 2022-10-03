@@ -31,7 +31,7 @@ func main() {
 		log.Fatalf("could not get entries: %v", err)
 	}
 	for i, entry := range entries {
-		titleElement, err := entry.QuerySelector("td.title > a")
+		titleElement, err := entry.QuerySelector("td.title > span > a")
 		if err != nil {
 			log.Fatalf("could not get title element: %v", err)
 		}
