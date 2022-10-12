@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -923,4 +924,94 @@ func TestPageSetChecked(t *testing.T) {
 	isChecked, err = page.Evaluate("checkbox.checked")
 	require.NoError(t, err)
 	require.False(t, isChecked.(bool))
+}
+
+func TestPageWaitForRequest(t *testing.T) {
+	t.Run("should work", func(t *testing.T) {
+		BeforeEach(t)
+		defer AfterEach(t)
+
+		var wg sync.WaitGroup
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			request, err := page.WaitForRequest("**/one-style.html", playwright.PageWaitForRequestOptions{Timeout: playwright.Float(3 * 1000)})
+			require.NoError(t, err)
+			require.Equal(t, fmt.Sprintf("%s/one-style.html", server.PREFIX), request.URL())
+		}()
+
+		_, err := page.Goto(server.PREFIX + "/one-style.html")
+		require.NoError(t, err)
+		wg.Wait()
+	})
+
+	t.Run("should respect timeout", func(t *testing.T) {
+		BeforeEach(t)
+		defer AfterEach(t)
+		_, err := page.Goto(server.EMPTY_PAGE)
+		require.NoError(t, err)
+		request, err := page.WaitForRequest("**/one-style.html", playwright.PageWaitForRequestOptions{Timeout: playwright.Float(1000)})
+
+		require.Nil(t, request)
+		require.EqualError(t, err, "Timeout 1000.00ms exceeded.")
+	})
+
+	t.Run("should use default timeout", func(t *testing.T) {
+		BeforeEach(t)
+		defer AfterEach(t)
+		_, err := page.Goto(server.EMPTY_PAGE)
+		page.SetDefaultTimeout(500)
+		defer page.SetDefaultTimeout(30 * 1000) // reset
+
+		require.NoError(t, err)
+		request, err := page.WaitForRequest("**/one-style.html")
+
+		require.Nil(t, request)
+		require.EqualError(t, err, "Timeout 500.00ms exceeded.")
+	})
+}
+
+func TestPageWaitForResponse(t *testing.T) {
+	t.Run("should work", func(t *testing.T) {
+		BeforeEach(t)
+		defer AfterEach(t)
+
+		var wg sync.WaitGroup
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			response, err := page.WaitForResponse("**/one-style.html", playwright.PageWaitForResponseOptions{Timeout: playwright.Float(3 * 1000)})
+			require.NoError(t, err)
+			require.Equal(t, fmt.Sprintf("%s/one-style.html", server.PREFIX), response.URL())
+		}()
+
+		_, err := page.Goto(server.PREFIX + "/one-style.html")
+		require.NoError(t, err)
+		wg.Wait()
+	})
+
+	t.Run("should respect timeout", func(t *testing.T) {
+		BeforeEach(t)
+		defer AfterEach(t)
+		_, err := page.Goto(server.EMPTY_PAGE)
+		require.NoError(t, err)
+		response, err := page.WaitForResponse("**/one-style.html", playwright.PageWaitForResponseOptions{Timeout: playwright.Float(1000)})
+
+		require.Nil(t, response)
+		require.EqualError(t, err, "Timeout 1000.00ms exceeded.")
+	})
+
+	t.Run("should use default timeout", func(t *testing.T) {
+		BeforeEach(t)
+		defer AfterEach(t)
+		_, err := page.Goto(server.EMPTY_PAGE)
+		page.SetDefaultTimeout(500)
+		defer page.SetDefaultTimeout(30 * 1000) // reset
+
+		require.NoError(t, err)
+		response, err := page.WaitForResponse("**/one-style.html")
+
+		require.Nil(t, response)
+		require.EqualError(t, err, "Timeout 500.00ms exceeded.")
+	})
 }
