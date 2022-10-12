@@ -11,11 +11,21 @@ import (
 )
 
 func main() {
+	runOption := &playwright.RunOptions{
+		SkipInstallBrowsers: true,
+	}
+	err := playwright.Install(runOption)
+	if err != nil {
+		log.Fatalf("could not install playwright dependencies: %v", err)
+	}
 	pw, err := playwright.Run()
 	if err != nil {
 		log.Fatalf("could not start playwright: %v", err)
 	}
-	browser, err := pw.Chromium.Launch()
+	option := playwright.BrowserTypeLaunchOptions{
+		Channel: playwright.String("chrome"),
+	}
+	browser, err := pw.Chromium.Launch(option)
 	if err != nil {
 		log.Fatalf("could not launch browser: %v", err)
 	}
