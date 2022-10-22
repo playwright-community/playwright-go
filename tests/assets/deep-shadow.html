@@ -32,5 +32,15 @@ window.addEventListener('DOMContentLoaded', () => {
   span4.textContent = 'Hello from root3 #2';
   span4.setAttribute('attr', 'value space');
   shadowRoot3.appendChild(span4);
+
+  const customElement = document.createElement('custom');
+  customElement.setAttribute('id', 'custom');
+  outer.appendChild(customElement);
+  const shadowRoot4 = customElement.attachShadow({mode: 'open'});
+  const span5 = document.createElement('span');
+  span5.setAttribute('data-testid', 'foo');
+  span5.setAttribute('id', 'custom-target');
+  span5.textContent = 'Hello from custom';
+  shadowRoot4.appendChild(span5);
 });
 </script>

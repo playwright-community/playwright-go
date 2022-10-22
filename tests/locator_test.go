@@ -119,6 +119,19 @@ func TestLocatorIsChecked(t *testing.T) {
 	require.True(t, result)
 }
 
+func TestLocatorShadowDom(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.PREFIX + "/deep-shadow.html")
+	require.NoError(t, err)
+
+	locator, err := page.Locator("#custom-target")
+	require.NoError(t, err)
+	result, err := locator.InnerHTML()
+	require.NoError(t, err)
+	require.Equal(t, "Hello from custom", result)
+}
+
 func TestLocatorIsDisabled(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
