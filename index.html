@@ -137,7 +137,8 @@ playwright <span class="nb">install</span> <span class="nt">--with-deps</span>
 
 <p>The following example crawls the current top voted items from <a href="https://news.ycombinator.com">Hacker News</a>.</p>
 
-<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">main</span>
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="k">package</span> <span class="n">main</span>
 
 <span class="k">import</span> <span class="p">(</span>
 	<span class="s">"fmt"</span>
@@ -167,7 +168,7 @@ playwright <span class="nb">install</span> <span class="nt">--with-deps</span>
 		<span class="n">log</span><span class="o">.</span><span class="n">Fatalf</span><span class="p">(</span><span class="s">"could not get entries: %v"</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
 	<span class="p">}</span>
 	<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">entry</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">entries</span> <span class="p">{</span>
-		<span class="n">titleElement</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">entry</span><span class="o">.</span><span class="n">QuerySelector</span><span class="p">(</span><span class="s">"td.title &gt; a"</span><span class="p">)</span>
+		<span class="n">titleElement</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">entry</span><span class="o">.</span><span class="n">QuerySelector</span><span class="p">(</span><span class="s">"td.title &gt; span &gt; a"</span><span class="p">)</span>
 		<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
 			<span class="n">log</span><span class="o">.</span><span class="n">Fatalf</span><span class="p">(</span><span class="s">"could not get title element: %v"</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
 		<span class="p">}</span>

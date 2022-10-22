@@ -57,6 +57,7 @@ Playwright is built to automate the broad and growing set of web browser capabil
 The following example crawls the current top voted items from [Hacker News](https://news.ycombinator.com).
 
 ```go
+
 package main
 
 import (
@@ -87,7 +88,7 @@ func main() {
 		log.Fatalf("could not get entries: %v", err)
 	}
 	for i, entry := range entries {
-		titleElement, err := entry.QuerySelector("td.title > a")
+		titleElement, err := entry.QuerySelector("td.title > span > a")
 		if err != nil {
 			log.Fatalf("could not get title element: %v", err)
 		}
