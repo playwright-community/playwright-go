@@ -108,7 +108,9 @@ func (d *PlaywrightDriver) DownloadDriver() error {
 		return nil
 	}
 
-	log.Printf("Downloading driver to %s", d.DriverDirectory)
+	if d.options.Verbose {
+		log.Printf("Downloading driver to %s", d.DriverDirectory)
+	}
 	driverURL := d.getDriverURL()
 	resp, err := http.Get(driverURL)
 	if err != nil {
@@ -161,7 +163,9 @@ func (d *PlaywrightDriver) DownloadDriver() error {
 		}
 	}
 
-	log.Println("Downloaded driver successfully")
+	if d.options.Verbose {
+		log.Println("Downloaded driver successfully")
+	}
 	return nil
 }
 
