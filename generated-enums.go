@@ -13,43 +13,6 @@ var (
 	MixedStateMixed             = getMixedState("Mixed")
 )
 
-func getColorScheme(in string) *ColorScheme {
-	v := ColorScheme(in)
-	return &v
-}
-
-type ColorScheme string
-
-var (
-	ColorSchemeLight        *ColorScheme = getColorScheme("light")
-	ColorSchemeDark                      = getColorScheme("dark")
-	ColorSchemeNoPreference              = getColorScheme("no-preference")
-)
-
-func getForcedColors(in string) *ForcedColors {
-	v := ForcedColors(in)
-	return &v
-}
-
-type ForcedColors string
-
-var (
-	ForcedColorsActive *ForcedColors = getForcedColors("active")
-	ForcedColorsNone                 = getForcedColors("none")
-)
-
-func getReducedMotion(in string) *ReducedMotion {
-	v := ReducedMotion(in)
-	return &v
-}
-
-type ReducedMotion string
-
-var (
-	ReducedMotionReduce       *ReducedMotion = getReducedMotion("reduce")
-	ReducedMotionNoPreference                = getReducedMotion("no-preference")
-)
-
 func getServiceWorkerPolicy(in string) *ServiceWorkerPolicy {
 	v := ServiceWorkerPolicy(in)
 	return &v
@@ -179,6 +142,98 @@ var (
 	WaitForSelectorStateHidden                         = getWaitForSelectorState("hidden")
 )
 
+func getAriaRole(in string) *AriaRole {
+	v := AriaRole(in)
+	return &v
+}
+
+type AriaRole string
+
+var (
+	AriaRoleAlert            *AriaRole = getAriaRole("alert")
+	AriaRoleAlertdialog                = getAriaRole("alertdialog")
+	AriaRoleApplication                = getAriaRole("application")
+	AriaRoleArticle                    = getAriaRole("article")
+	AriaRoleBanner                     = getAriaRole("banner")
+	AriaRoleBlockquote                 = getAriaRole("blockquote")
+	AriaRoleButton                     = getAriaRole("button")
+	AriaRoleCaption                    = getAriaRole("caption")
+	AriaRoleCell                       = getAriaRole("cell")
+	AriaRoleCheckbox                   = getAriaRole("checkbox")
+	AriaRoleCode                       = getAriaRole("code")
+	AriaRoleColumnheader               = getAriaRole("columnheader")
+	AriaRoleCombobox                   = getAriaRole("combobox")
+	AriaRoleComplementary              = getAriaRole("complementary")
+	AriaRoleContentinfo                = getAriaRole("contentinfo")
+	AriaRoleDefinition                 = getAriaRole("definition")
+	AriaRoleDeletion                   = getAriaRole("deletion")
+	AriaRoleDialog                     = getAriaRole("dialog")
+	AriaRoleDirectory                  = getAriaRole("directory")
+	AriaRoleDocument                   = getAriaRole("document")
+	AriaRoleEmphasis                   = getAriaRole("emphasis")
+	AriaRoleFeed                       = getAriaRole("feed")
+	AriaRoleFigure                     = getAriaRole("figure")
+	AriaRoleForm                       = getAriaRole("form")
+	AriaRoleGeneric                    = getAriaRole("generic")
+	AriaRoleGrid                       = getAriaRole("grid")
+	AriaRoleGridcell                   = getAriaRole("gridcell")
+	AriaRoleGroup                      = getAriaRole("group")
+	AriaRoleHeading                    = getAriaRole("heading")
+	AriaRoleImg                        = getAriaRole("img")
+	AriaRoleInsertion                  = getAriaRole("insertion")
+	AriaRoleLink                       = getAriaRole("link")
+	AriaRoleList                       = getAriaRole("list")
+	AriaRoleListbox                    = getAriaRole("listbox")
+	AriaRoleListitem                   = getAriaRole("listitem")
+	AriaRoleLog                        = getAriaRole("log")
+	AriaRoleMain                       = getAriaRole("main")
+	AriaRoleMarquee                    = getAriaRole("marquee")
+	AriaRoleMath                       = getAriaRole("math")
+	AriaRoleMeter                      = getAriaRole("meter")
+	AriaRoleMenu                       = getAriaRole("menu")
+	AriaRoleMenubar                    = getAriaRole("menubar")
+	AriaRoleMenuitem                   = getAriaRole("menuitem")
+	AriaRoleMenuitemcheckbox           = getAriaRole("menuitemcheckbox")
+	AriaRoleMenuitemradio              = getAriaRole("menuitemradio")
+	AriaRoleNavigation                 = getAriaRole("navigation")
+	AriaRoleNone                       = getAriaRole("none")
+	AriaRoleNote                       = getAriaRole("note")
+	AriaRoleOption                     = getAriaRole("option")
+	AriaRoleParagraph                  = getAriaRole("paragraph")
+	AriaRolePresentation               = getAriaRole("presentation")
+	AriaRoleProgressbar                = getAriaRole("progressbar")
+	AriaRoleRadio                      = getAriaRole("radio")
+	AriaRoleRadiogroup                 = getAriaRole("radiogroup")
+	AriaRoleRegion                     = getAriaRole("region")
+	AriaRoleRow                        = getAriaRole("row")
+	AriaRoleRowgroup                   = getAriaRole("rowgroup")
+	AriaRoleRowheader                  = getAriaRole("rowheader")
+	AriaRoleScrollbar                  = getAriaRole("scrollbar")
+	AriaRoleSearch                     = getAriaRole("search")
+	AriaRoleSearchbox                  = getAriaRole("searchbox")
+	AriaRoleSeparator                  = getAriaRole("separator")
+	AriaRoleSlider                     = getAriaRole("slider")
+	AriaRoleSpinbutton                 = getAriaRole("spinbutton")
+	AriaRoleStatus                     = getAriaRole("status")
+	AriaRoleStrong                     = getAriaRole("strong")
+	AriaRoleSubscript                  = getAriaRole("subscript")
+	AriaRoleSuperscript                = getAriaRole("superscript")
+	AriaRoleSwitch                     = getAriaRole("switch")
+	AriaRoleTab                        = getAriaRole("tab")
+	AriaRoleTable                      = getAriaRole("table")
+	AriaRoleTablist                    = getAriaRole("tablist")
+	AriaRoleTabpanel                   = getAriaRole("tabpanel")
+	AriaRoleTerm                       = getAriaRole("term")
+	AriaRoleTextbox                    = getAriaRole("textbox")
+	AriaRoleTime                       = getAriaRole("time")
+	AriaRoleTimer                      = getAriaRole("timer")
+	AriaRoleToolbar                    = getAriaRole("toolbar")
+	AriaRoleTooltip                    = getAriaRole("tooltip")
+	AriaRoleTree                       = getAriaRole("tree")
+	AriaRoleTreegrid                   = getAriaRole("treegrid")
+	AriaRoleTreeitem                   = getAriaRole("treeitem")
+)
+
 func getWaitUntilState(in string) *WaitUntilState {
 	v := WaitUntilState(in)
 	return &v
@@ -206,6 +261,20 @@ var (
 	LoadStateNetworkidle                 = getLoadState("networkidle")
 )
 
+func getColorScheme(in string) *ColorScheme {
+	v := ColorScheme(in)
+	return &v
+}
+
+type ColorScheme string
+
+var (
+	ColorSchemeLight        *ColorScheme = getColorScheme("light")
+	ColorSchemeDark                      = getColorScheme("dark")
+	ColorSchemeNoPreference              = getColorScheme("no-preference")
+	ColorSchemeNull                      = getColorScheme("null")
+)
+
 func getMedia(in string) *Media {
 	v := Media(in)
 	return &v
@@ -217,6 +286,19 @@ var (
 	MediaScreen *Media = getMedia("screen")
 	MediaPrint         = getMedia("print")
 	MediaNull          = getMedia("null")
+)
+
+func getReducedMotion(in string) *ReducedMotion {
+	v := ReducedMotion(in)
+	return &v
+}
+
+type ReducedMotion string
+
+var (
+	ReducedMotionReduce       *ReducedMotion = getReducedMotion("reduce")
+	ReducedMotionNoPreference                = getReducedMotion("no-preference")
+	ReducedMotionNull                        = getReducedMotion("null")
 )
 
 func getSameSiteAttribute(in string) *SameSiteAttribute {

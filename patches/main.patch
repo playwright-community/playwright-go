@@ -1,5 +1,5 @@
 diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
-index b7da9f113..cf64e6f13 100644
+index ed7cdaaffabc61f1ce2d94763fa9dcd8cb421a49..40095df286b9719143020f895b2bee0aab492701 100644
 --- a/docs/src/api/class-browsercontext.md
 +++ b/docs/src/api/class-browsercontext.md
 @@ -226,6 +226,7 @@ await context.AddCookiesAsync(new[] { cookie1, cookie2 });
@@ -10,11 +10,10 @@ index b7da9f113..cf64e6f13 100644
  - `cookies` <[Array]<[Object]>>
    - `name` <[string]>
    - `value` <[string]>
-@@ -301,7 +302,19 @@ Script to be evaluated in all pages in the browser context.
- * langs: csharp, java
- - `script` <[string]|[path]>
+@@ -305,6 +306,20 @@ Script to be evaluated in all pages in the browser context.
  
--Script to be evaluated in all pages in the browser context.
+ Script to be evaluated in all pages in the browser context.
+ 
 +### param: BrowserContext.addInitScript.script
 +* since: v1.8
 +* langs: go
@@ -28,10 +27,11 @@ index b7da9f113..cf64e6f13 100644
 +- `path` <[string]>
 +
 +Optional Script path to be evaluated in all pages in the browser context.
- 
++
  ### param: BrowserContext.addInitScript.arg
  * since: v1.8
-@@ -1056,7 +1069,7 @@ handler function to route the request.
+ * langs: js
+@@ -1066,7 +1081,7 @@ handler function to route the request.
  
  ### param: BrowserContext.route.handler
  * since: v1.8
@@ -40,7 +40,7 @@ index b7da9f113..cf64e6f13 100644
  - `handler` <[function]\([Route]\)>
  
  handler function to route the request.
-@@ -1276,8 +1289,8 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
+@@ -1286,8 +1301,8 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
  
  ### param: BrowserContext.unroute.handler
  * since: v1.8
@@ -52,10 +52,10 @@ index b7da9f113..cf64e6f13 100644
  Optional handler function used to register a routing with [`method: BrowserContext.route`].
  
 diff --git a/docs/src/api/class-frame.md b/docs/src/api/class-frame.md
-index 12a4a7d10..78357cab3 100644
+index 49b77defd3e4a30f1bb77b9e1ad13fc0fa384f94..86b3bcc7ed14e18ca89eae42313fdb6ae2d29c34 100644
 --- a/docs/src/api/class-frame.md
 +++ b/docs/src/api/class-frame.md
-@@ -1673,7 +1673,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
+@@ -1858,7 +1858,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
  
  Optional argument to pass to [`param: expression`].
  
@@ -65,10 +65,10 @@ index 12a4a7d10..78357cab3 100644
  
  ### option: Frame.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index 747df5399..7588133d3 100644
+index 91fd49bba3d1c495660c7e95e6e10b9b390d4901..e2f9a6f119548085aaf32ef5cef4915b339b09b1 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
-@@ -633,6 +633,20 @@ Script to be evaluated in all pages in the browser context.
+@@ -631,6 +631,20 @@ Script to be evaluated in all pages in the browser context.
  
  Optional argument to pass to [`param: script`] (only supported when passing a function).
  
@@ -89,34 +89,34 @@ index 747df5399..7588133d3 100644
  ## async method: Page.addScriptTag
  * since: v1.8
  - returns: <[ElementHandle]>
-@@ -1145,7 +1159,7 @@ Passing `null` disables CSS media emulation.
+@@ -1223,7 +1237,7 @@ Passing `null` disables CSS media emulation.
  
  ### option: Page.emulateMedia.media
  * since: v1.9
--* langs: csharp
-+* langs: csharp, go
+-* langs: csharp, python
++* langs: csharp, python, go
  - `media` <[Media]<"screen"|"print"|"null">>
  
  Changes the CSS media type of the page. The only allowed values are `'Screen'`, `'Print'` and `'Null'`.
-@@ -1161,7 +1175,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+@@ -1239,7 +1253,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
  
  ### option: Page.emulateMedia.colorScheme
  * since: v1.9
--* langs: csharp
-+* langs: csharp, go
+-* langs: csharp, python
++* langs: csharp, python, go
  - `colorScheme` <[ColorScheme]<"light"|"dark"|"no-preference"|"null">>
  
  Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing
-@@ -1176,7 +1190,7 @@ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce
+@@ -1254,7 +1268,7 @@ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce
  
  ### option: Page.emulateMedia.reducedMotion
  * since: v1.12
--* langs: csharp
-+* langs: csharp, go
+-* langs: csharp, python
++* langs: csharp, python, go
  - `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"null">>
  
  Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.
-@@ -2592,7 +2606,7 @@ Paper width, accepts values labeled with units.
+@@ -2770,7 +2784,7 @@ Paper width, accepts values labeled with units.
  
  ### option: Page.pdf.width
  * since: v1.8
@@ -125,7 +125,7 @@ index 747df5399..7588133d3 100644
  - `width` <[string]>
  
  Paper width, accepts values labeled with units.
-@@ -2606,7 +2620,7 @@ Paper height, accepts values labeled with units.
+@@ -2784,7 +2798,7 @@ Paper height, accepts values labeled with units.
  
  ### option: Page.pdf.height
  * since: v1.8
@@ -134,7 +134,7 @@ index 747df5399..7588133d3 100644
  - `height` <[string]>
  
  Paper height, accepts values labeled with units.
-@@ -2624,7 +2638,7 @@ Paper margins, defaults to none.
+@@ -2802,7 +2816,7 @@ Paper margins, defaults to none.
  
  ### option: Page.pdf.margin
  * since: v1.8
@@ -143,8 +143,8 @@ index 747df5399..7588133d3 100644
  - `margin` <[Object]>
    - `top` ?<[string]> Top margin, accepts values labeled with units. Defaults to `0`.
    - `right` ?<[string]> Right margin, accepts values labeled with units. Defaults to `0`.
-@@ -2961,7 +2975,7 @@ When a [`option: baseURL`] via the context options was provided and the passed U
- it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
+@@ -3137,7 +3151,7 @@ it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/We
+ 
  ### param: Page.route.handler
  * since: v1.8
 -* langs: js, python
@@ -152,7 +152,7 @@ index 747df5399..7588133d3 100644
  - `handler` <[function]\([Route], [Request]\)>
  
  handler function to route the request.
-@@ -3461,7 +3475,7 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
+@@ -3667,7 +3681,7 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
  
  ### param: Page.unroute.handler
  * since: v1.8
@@ -161,7 +161,7 @@ index 747df5399..7588133d3 100644
  - `handler` ?<[function]\([Route], [Request]\)>
  
  Optional handler function to route the request.
-@@ -3732,7 +3746,7 @@ Shortcut for main frame's [`method: Frame.waitForFunction`].
+@@ -3934,7 +3948,7 @@ await page.WaitForFunctionAsync("selector => !!document.querySelector(selector)"
  
  Optional argument to pass to [`param: expression`].
  
@@ -171,17 +171,12 @@ index 747df5399..7588133d3 100644
  
  ### option: Page.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
 diff --git a/docs/src/api/class-route.md b/docs/src/api/class-route.md
-index 139d7e95f..98067e19c 100644
+index 46b539e833e7da645c76139c35c3fbfae6832708..88ba200852cae16035e8670d2b400ba2c33a2edd 100644
 --- a/docs/src/api/class-route.md
 +++ b/docs/src/api/class-route.md
-@@ -112,10 +112,18 @@ If set changes the request method (e.g. GET or POST)
+@@ -133,6 +133,13 @@ If set changes the post data of request.
  
- ### option: Route.continue.postData
- * since: v1.8
-+* langs: js
- - `postData` <[string]|[Buffer]>
- 
- If set changes the post data of request
+ If set changes the post data of request.
  
 +### option: Route.continue.postData
 +* since: v1.8
@@ -193,7 +188,7 @@ index 139d7e95f..98067e19c 100644
  ### option: Route.continue.headers
  * since: v1.8
  - `headers` <[Object]<[string], [string]>>
-@@ -483,6 +491,13 @@ If set, equals to setting `Content-Type` response header.
+@@ -622,6 +629,13 @@ If set, equals to setting `Content-Type` response header.
  
  Response body.
  
@@ -207,7 +202,7 @@ index 139d7e95f..98067e19c 100644
  ### option: Route.fulfill.body
  * since: v1.8
  * langs: csharp, java
-@@ -506,12 +521,14 @@ is resolved relative to the current working directory.
+@@ -652,12 +666,14 @@ is resolved relative to the current working directory.
  
  ### option: Route.fulfill.response
  * since: v1.15
@@ -223,10 +218,10 @@ index 139d7e95f..98067e19c 100644
  
  A request to be routed.
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index f97622067..89054d002 100644
+index 3b11691d6d302f6cf88cc7367b38431b2699736e..111cbb91868e05da66cf0998a4164bd857f8c5ea 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
-@@ -148,8 +148,8 @@ Defaults to `'visible'`. Can be either:
+@@ -145,8 +145,8 @@ Defaults to `'visible'`. Can be either:
  * `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`.
    This is opposite to the `'visible'` option.
  
@@ -237,7 +232,7 @@ index f97622067..89054d002 100644
  - `polling` <[float]|"raf">
  
  If [`option: polling`] is `'raf'`, then [`param: expression`] is constantly executed in `requestAnimationFrame`
-@@ -170,14 +170,14 @@ If `true`, Playwright does not pass its own configurations args and only uses th
+@@ -167,14 +167,14 @@ If `true`, Playwright does not pass its own configurations args and only uses th
  array is given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
  
  ## csharp-java-browser-option-ignoredefaultargs
@@ -254,7 +249,7 @@ index f97622067..89054d002 100644
  - `ignoreAllDefaultArgs` <[boolean]>
  
  If `true`, Playwright does not pass its own configurations args and only uses the ones from [`option: args`].
-@@ -196,7 +196,7 @@ Dangerous option; use with care. Defaults to `false`.
+@@ -193,7 +193,7 @@ Dangerous option; use with care. Defaults to `false`.
  Network proxy settings.
  
  ## csharp-java-browser-option-env
@@ -263,7 +258,7 @@ index f97622067..89054d002 100644
  - `env` <[Object]<[string], [string]>>
  
  Specify environment variables that will be visible to the browser. Defaults to `process.env`.
-@@ -208,7 +208,7 @@ Specify environment variables that will be visible to the browser. Defaults to `
+@@ -205,7 +205,7 @@ Specify environment variables that will be visible to the browser. Defaults to `
  Specify environment variables that will be visible to the browser. Defaults to `process.env`.
  
  ## js-python-context-option-storage-state
@@ -272,7 +267,7 @@ index f97622067..89054d002 100644
  - `storageState` <[path]|[Object]>
    - `cookies` <[Array]<[Object]>> cookies to set for context
      - `name` <[string]>
-@@ -236,7 +236,7 @@ Populates context with given storage state. This option can be used to initializ
+@@ -233,7 +233,7 @@ Populates context with given storage state. This option can be used to initializ
  obtained via [`method: BrowserContext.storageState`].
  
  ## csharp-java-context-option-storage-state-path
@@ -281,7 +276,7 @@ index f97622067..89054d002 100644
  - `storageStatePath` <[path]>
  
  Populates context with given storage state. This option can be used to initialize context with logged-in information
-@@ -436,7 +436,7 @@ Function to be evaluated in the worker context.
+@@ -439,7 +439,7 @@ Function to be evaluated in the worker context.
  Function to be evaluated in the worker context.
  
  ## python-context-option-viewport
@@ -290,7 +285,7 @@ index f97622067..89054d002 100644
  - `viewport` <[null]|[Object]>
    - `width` <[int]> page width in pixels.
    - `height` <[int]> page height in pixels.
-@@ -444,7 +444,7 @@ Function to be evaluated in the worker context.
+@@ -447,7 +447,7 @@ Function to be evaluated in the worker context.
  Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
  
  ## python-context-option-no-viewport
@@ -299,7 +294,7 @@ index f97622067..89054d002 100644
  - `noViewport` <[boolean]>
  
  Does not enforce fixed viewport, allows resizing window in the headed mode.
-@@ -573,7 +573,7 @@ specified, the HAR is not recorded. Make sure to await [`method: BrowserContext.
+@@ -590,7 +590,7 @@ specified, the HAR is not recorded. Make sure to await [`method: BrowserContext.
  saved.
  
  ## context-option-recordhar-path
@@ -308,7 +303,7 @@ index f97622067..89054d002 100644
    - alias-python: record_har_path
  - `recordHarPath` <[path]>
  
-@@ -582,7 +582,7 @@ specified HAR file on the filesystem. If not specified, the HAR is not recorded.
+@@ -599,7 +599,7 @@ specified HAR file on the filesystem. If not specified, the HAR is not recorded.
  call [`method: BrowserContext.close`] for the HAR to be saved.
  
  ## context-option-recordhar-omit-content
@@ -317,7 +312,7 @@ index f97622067..89054d002 100644
    - alias-python: record_har_omit_content
  - `recordHarOmitContent` ?<[boolean]>
  
-@@ -608,7 +608,7 @@ When set to `minimal`, only record information necessary for routing from HAR. T
+@@ -625,7 +625,7 @@ When set to `minimal`, only record information necessary for routing from HAR. T
  - `recordHarUrlFilter` ?<[string]|[RegExp]>
  
  ## context-option-recordvideo
@@ -326,7 +321,7 @@ index f97622067..89054d002 100644
  - `recordVideo` <[Object]>
    - `dir` <[path]> Path to the directory to put videos into.
    - `size` ?<[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
-@@ -894,7 +894,7 @@ Firefox user preferences. Learn more about the Firefox user preferences at
+@@ -917,7 +917,7 @@ Firefox user preferences. Learn more about the Firefox user preferences at
  [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
  
  ## csharp-java-browser-option-firefoxuserprefs
@@ -335,7 +330,7 @@ index f97622067..89054d002 100644
  - `firefoxUserPrefs` <[Object]<[string], [any]>>
  
  Firefox user preferences. Learn more about the Firefox user preferences at
-@@ -947,12 +947,14 @@ Slows down Playwright operations by the specified amount of milliseconds. Useful
+@@ -970,12 +970,14 @@ Slows down Playwright operations by the specified amount of milliseconds. Useful
  - %%-browser-option-tracesdir-%%
  
  ## locator-option-has-text
@@ -350,7 +345,7 @@ index f97622067..89054d002 100644
  - `has` <[Locator]>
  
  Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer one.
-@@ -1006,6 +1008,7 @@ saved to the disk.
+@@ -1029,6 +1031,7 @@ saved to the disk.
  Specify screenshot type, defaults to `png`.
  
  ## screenshot-option-mask
@@ -360,7 +355,7 @@ index f97622067..89054d002 100644
  Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with
 diff --git a/utils/doclint/generateGoApi.js b/utils/doclint/generateGoApi.js
 new file mode 100644
-index 000000000..1c30b40e9
+index 0000000000000000000000000000000000000000..a58b6aebbd53171107720a1137ade99193f64558
 --- /dev/null
 +++ b/utils/doclint/generateGoApi.js
 @@ -0,0 +1,765 @@
@@ -641,12 +636,12 @@ index 000000000..1c30b40e9
 +        const text = member.spec
 +        if (text.length > 0) {
 +          text.forEach(line => {
-+            let words = line.text.split(' ');
++            let words = line.text.replace(/↵/g, ' ').split(' ');
 +            let lines = [];
 +            let lineText = "";
 +            for (let i = 0; i < words.length; i++) {
 +              lineText += ' ' + words[i];
-+              if (lineText.length >= 80) {
++              if (lineText.length >= maxDocumentationColumnWidth) {
 +                lines.push(lineText);
 +                lineText = '';
 +              }
