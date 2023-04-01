@@ -19,7 +19,6 @@ func TestPageRouteContinue(t *testing.T) {
 	intercepted := make(chan bool, 1)
 	err := page.Route("**/empty.html", func(route playwright.Route) {
 		request := route.Request()
-		require.Equal(t, route.Request(), request)
 		require.Contains(t, request.URL(), "empty.html")
 		require.True(t, len(request.Headers()["user-agent"]) > 5)
 		require.Equal(t, "42", request.Headers()["extra-http"])
@@ -94,7 +93,6 @@ func TestRouteFulfill(t *testing.T) {
 	requestsChan := make(chan playwright.Request, 1)
 	err := page.Route("**/empty.html", func(route playwright.Route) {
 		request := route.Request()
-		require.Equal(t, route.Request(), request)
 		require.Contains(t, request.URL(), "empty.html")
 		require.True(t, len(request.Headers()["user-agent"]) > 5)
 		require.Equal(t, "GET", request.Method())
@@ -238,13 +236,12 @@ func TestRequestPostData(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, page.Route("**/foobar", func(route playwright.Route) {
 		var postData map[string]interface{}
-		request := route.Request()
-		require.NoError(t, request.PostDataJSON(&postData))
+		require.NoError(t, route.Request().PostDataJSON(&postData))
 		require.Equal(t, map[string]interface{}{
 			"foo": true,
 			"kek": float64(123),
 		}, postData)
-		raw, err := request.PostDataBuffer()
+		raw, err := route.Request().PostDataBuffer()
 		require.NoError(t, err)
 		require.Equal(t, []byte(`{"foo":true,"kek":123}`), raw)
 		require.NoError(t, route.Continue())
