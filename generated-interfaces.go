@@ -1039,11 +1039,15 @@ type Keyboard interface {
 // [Learn more about locators](../locators.md).
 type Locator interface {
 	// Returns an array of `node.innerText` values for all matching nodes.
+	// **Usage**
 	AllInnerTexts() ([]string, error)
 	// Returns an array of `node.textContent` values for all matching nodes.
+	// **Usage**
 	AllTextContents() ([]string, error)
-	// This method returns the bounding box of the element, or `null` if the element is not visible. The bounding box is
-	// calculated relative to the main frame viewport - which is usually the same as the browser window.
+	// This method returns the bounding box of the element matching the locator, or `null` if the element is not visible.
+	// The bounding box is calculated relative to the main frame viewport - which is usually the same as the browser
+	// window.
+	// **Details**
 	// Scrolling affects the returned bounding box, similarly to
 	// [Element.getBoundingClientRect](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect).
 	// That means `x` and/or `y` may be negative.
@@ -1053,7 +1057,9 @@ type Locator interface {
 	// following snippet should click the center of the element.
 	// **Usage**
 	BoundingBox(options ...LocatorBoundingBoxOptions) (*Rect, error)
-	// This method checks the element by performing the following steps:
+	// Ensure that checkbox or radio element is checked.
+	// **Details**
+	// Performs the following steps:
 	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already
 	// checked, this method returns immediately.
 	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
@@ -1064,6 +1070,7 @@ type Locator interface {
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
+	// **Usage**
 	Check(options ...FrameCheckOptions) error
 	// Click an element.
 	// **Details**
@@ -1075,9 +1082,15 @@ type Locator interface {
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
+	// **Usage**
+	// Click a button:
+	// Shift-right-click at a specific position on a canvas:
 	Click(options ...PageClickOptions) error
-	// Returns the number of elements matching given selector.
+	// Returns the number of elements matching the locator.
+	// **Usage**
 	Count() (int, error)
+	// Double-click an element.
+	// **Details**
 	// This method double clicks the element by performing the following steps:
 	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
@@ -1089,10 +1102,12 @@ type Locator interface {
 	// Passing zero timeout disables this.
 	// **NOTE** `element.dblclick()` dispatches two `click` events and a single `dblclick` event.
 	Dblclick(options ...FrameDblclickOptions) error
-	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
+	// Programmaticaly dispatch an event on the matching element.
+	// **Usage**
+	// **Details**
+	// The snippet above dispatches the `click` event on the element. Regardless of the visibility state of the element,
 	// `click` is dispatched. This is equivalent to calling
 	// [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
-	// **Usage**
 	// Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit`
 	// properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 	// Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
@@ -1105,35 +1120,47 @@ type Locator interface {
 	// - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
 	// You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 	DispatchEvent(typ string, eventInit interface{}, options ...PageDispatchEventOptions) error
+	// Drag the source element towards the target element and drop it.
+	// **Details**
 	// This method drags the locator to another target locator or target position. It will first move to the source
 	// element, perform a `mousedown`, then move to the target element or position and perform a `mouseup`.
 	// **Usage**
 	DragTo(target Locator, options ...FrameDragAndDropOptions) error
-	// Resolves given locator to the first matching DOM element. If no elements matching the query are visible, waits for
-	// them up to a given timeout. If multiple elements match the selector, throws.
+	// Resolves given locator to the first matching DOM element. If there are no matching elements, waits for one. If
+	// multiple elements match the locator, throws.
 	ElementHandle(options ...LocatorElementHandleOptions) (ElementHandle, error)
-	// Resolves given locator to all matching DOM elements.
+	// Resolves given locator to all matching DOM elements. If there are no matching elements, returns an empty list.
 	ElementHandles() ([]ElementHandle, error)
-	// Returns the return value of `expression`.
-	// This method passes this handle as the first argument to `expression`.
-	// If `expression` returns a [Promise], then `handle.evaluate` would wait for the promise to resolve and return its
-	// value.
+	// Execute JavaScript code in the page, taking the matching element as an argument.
+	// **Details**
+	// Returns the return value of `expression`, called with the matching element as a first argument, and `arg` as a
+	// second argument.
+	// If `expression` returns a [Promise], this method will wait for the promise to resolve and return its value.
+	// If `expression` throws or rejects, this method throws.
 	// **Usage**
 	Evaluate(expression string, arg interface{}, options ...LocatorEvaluateOptions) (interface{}, error)
-	// The method finds all elements matching the specified locator and passes an array of matched elements as a first
-	// argument to `expression`. Returns the result of `expression` invocation.
-	// If `expression` returns a [Promise], then Locator.evaluateAll() would wait for the promise to resolve and
-	// return its value.
+	// Execute JavaScript code in the page, taking all matching elements as an argument.
+	// **Details**
+	// Returns the return value of `expression`, called with an array of all matching elements as a first argument, and
+	// `arg` as a second argument.
+	// If `expression` returns a [Promise], this method will wait for the promise to resolve and return its value.
+	// If `expression` throws or rejects, this method throws.
 	// **Usage**
 	EvaluateAll(expression string, options ...interface{}) (interface{}, error)
-	// Returns the return value of `expression` as a `JSHandle`.
-	// This method passes this handle as the first argument to `expression`.
+	// Execute JavaScript code in the page, taking the matching element as an argument, and return a `JSHandle` with the
+	// result.
+	// **Details**
+	// Returns the return value of `expression` as a`JSHandle`, called with the matching element as a first argument, and
+	// `arg` as a second argument.
 	// The only difference between Locator.evaluate`] and [`method: Locator.evaluateHandle() is that
 	// Locator.evaluateHandle() returns `JSHandle`.
-	// If the function passed to the Locator.evaluateHandle() returns a [Promise], then
-	// Locator.evaluateHandle() would wait for the promise to resolve and return its value.
+	// If `expression` returns a [Promise], this method will wait for the promise to resolve and return its value.
+	// If `expression` throws or rejects, this method throws.
 	// See Page.evaluateHandle() for more details.
 	EvaluateHandle(expression string, arg interface{}, options ...LocatorEvaluateHandleOptions) (interface{}, error)
+	// Set a value to the input field.
+	// **Usage**
+	// **Details**
 	// This method waits for [actionability](../actionability.md) checks, focuses the element, fills it and triggers an
 	// `input` event after filling. Note that you can pass an empty string to clear the input field.
 	// If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an
@@ -1144,17 +1171,20 @@ type Locator interface {
 	Fill(value string, options ...FrameFillOptions) error
 	// Returns locator to the first matching element.
 	First() (Locator, error)
-	// Calls [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the element.
+	// Calls [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the matching element.
 	Focus(options ...FrameFocusOptions) error
+	// When working with iframes, you can create a frame locator that will enter the iframe and allow locating elements in
+	// that iframe:
 	// **Usage**
-	// When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements
-	// in that iframe:
 	FrameLocator(selector string) FrameLocator
-	// Returns element attribute value.
+	// Returns the matching element's attribute value.
 	GetAttribute(name string, options ...PageGetAttributeOptions) (string, error)
 	// Highlight the corresponding element(s) on the screen. Useful for debugging, don't commit the code that uses
 	// Locator.highlight().
 	Highlight() error
+	// Hover over the matching element.
+	// **Usage**
+	// **Details**
 	// This method hovers over the element by performing the following steps:
 	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
@@ -1164,37 +1194,51 @@ type Locator interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
 	Hover(options ...PageHoverOptions) error
-	// Returns the `element.innerHTML`.
+	// Returns the [`element.innerHTML`](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML).
 	InnerHTML(options ...PageInnerHTMLOptions) (string, error)
-	// Returns the `element.innerText`.
+	// Returns the [`element.innerText`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/innerText).
 	InnerText(options ...PageInnerTextOptions) (string, error)
-	// Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element.
-	// Throws for non-input elements. However, if the element is inside the `<label>` element that has an associated
+	// Returns the value for the matching `<input>` or `<textarea>` or `<select>` element.
+	// **Usage**
+	// **Details**
+	// Throws elements that are not an input, textarea or a select. However, if the element is inside the `<label>`
+	// element that has an associated
 	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), returns the value of the
 	// control.
 	InputValue(options ...FrameInputValueOptions) (string, error)
 	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
+	// **Usage**
 	IsChecked(options ...FrameIsCheckedOptions) (bool, error)
 	// Returns whether the element is disabled, the opposite of [enabled](../actionability.md#enabled).
+	// **Usage**
 	IsDisabled(options ...FrameIsDisabledOptions) (bool, error)
 	// Returns whether the element is [editable](../actionability.md#editable).
+	// **Usage**
 	IsEditable(options ...FrameIsEditableOptions) (bool, error)
 	// Returns whether the element is [enabled](../actionability.md#enabled).
+	// **Usage**
 	IsEnabled(options ...FrameIsEnabledOptions) (bool, error)
 	// Returns whether the element is hidden, the opposite of [visible](../actionability.md#visible).
+	// **Usage**
 	IsHidden(options ...FrameIsHiddenOptions) (bool, error)
 	// Returns whether the element is [visible](../actionability.md#visible).
+	// **Usage**
 	IsVisible(options ...FrameIsVisibleOptions) (bool, error)
 	// Returns locator to the last matching element.
+	// **Usage**
 	Last() (Locator, error)
 	// The method finds an element matching the specified selector in the locator's subtree. It also accepts filter
 	// options, similar to Locator.filter() method.
 	// [Learn more about locators](../locators.md).
 	Locator(selector string, options ...LocatorLocatorOptions) (Locator, error)
 	// Returns locator to the n-th matching element. It's zero based, `nth(0)` selects the first element.
+	// **Usage**
 	Nth(index int) (Locator, error)
 	// A page this locator belongs to.
 	Page() Page
+	// Focuses the mathing element and presses a combintation of the keys.
+	// **Usage**
+	// **Details**
 	// Focuses the element, and then uses Keyboard.down`] and [`method: Keyboard.up().
 	// `key` can specify the intended
 	// [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) value or a single character
@@ -1210,6 +1254,10 @@ type Locator interface {
 	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	Press(key string, options ...PagePressOptions) error
+	// Take a screenshot of the element matching the locator.
+	// **Usage**
+	// Disable animations and save screenshot to a file:
+	// **Details**
 	// This method captures a screenshot of the page, clipped to the size and position of a particular element matching
 	// the locator. If the element is covered by other elements, it will not be actually visible on the screenshot. If the
 	// element is a scrollable container, only the currently scrolled content will be visible on the screenshot.
@@ -1246,6 +1294,9 @@ type Locator interface {
 	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), focuses and selects text in
 	// the control instead.
 	SelectText(options ...LocatorSelectTextOptions) error
+	// Set the state of a checkbox or a radio element.
+	// **Usage**
+	// **Details**
 	// This method checks or unchecks an element by performing the following steps:
 	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws.
 	// 1. If the element already has the right checked state, this method returns immediately.
@@ -1258,6 +1309,9 @@ type Locator interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
 	SetChecked(checked bool, options ...FrameSetCheckedOptions) error
+	// Upload file or multiple files into `<input type=file>`.
+	// **Usage**
+	// **Details**
 	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then
 	// they are resolved relative to the current working directory. For empty array, clears the selected files.
 	// This method expects `Locator` to point to an
@@ -1265,6 +1319,8 @@ type Locator interface {
 	// the `<label>` element that has an associated
 	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), targets the control instead.
 	SetInputFiles(files []InputFile, options ...FrameSetInputFilesOptions) error
+	// Perform a tap gesture on the element matching the locator.
+	// **Details**
 	// This method taps the element by performing the following steps:
 	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
@@ -1275,7 +1331,7 @@ type Locator interface {
 	// Passing zero timeout disables this.
 	// **NOTE** `element.tap()` requires that the `hasTouch` option of the browser context be set to true.
 	Tap(options ...FrameTapOptions) error
-	// Returns the `node.textContent`.
+	// Returns the [`node.textContent`](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent).
 	TextContent(options ...FrameTextContentOptions) (string, error)
 	// Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the
 	// text.
@@ -1283,7 +1339,10 @@ type Locator interface {
 	// **Usage**
 	// An example of typing into a text field and then submitting the form:
 	Type(text string, options ...PageTypeOptions) error
-	// This method checks the element by performing the following steps:
+	// Ensure that checkbox or radio element is unchecked.
+	// **Usage**
+	// **Details**
+	// This method unchecks the element by performing the following steps:
 	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already
 	// unchecked, this method returns immediately.
 	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.

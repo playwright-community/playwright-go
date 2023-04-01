@@ -391,7 +391,7 @@ type BrowserContextStorageStateOptions struct {
 }
 type BrowserContextUnrouteOptions struct {
 	// Optional handler function used to register a routing with BrowserContext.Route().
-	Handler func(Route, Request) `json:"handler"`
+	Handler func(Route) `json:"handler"`
 }
 type BrowserTypeConnectOptions struct {
 	// Additional HTTP headers to be sent with web socket connect request. Optional.
@@ -3101,7 +3101,7 @@ type PageUncheckOptions struct {
 }
 type PageUnrouteOptions struct {
 	// Optional handler function to route the request.
-	Handler func(Route, Request) `json:"handler"`
+	Handler func(Route) `json:"handler"`
 }
 
 // Result of calling <see cref="Page.ViewportSize" />.
