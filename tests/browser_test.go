@@ -32,8 +32,8 @@ func TestBrowserNewContextWithExtraHTTPHeaders(t *testing.T) {
 	defer AfterEach(t)
 	require.Equal(t, 1, len(context.Pages()))
 	intercepted := make(chan bool, 1)
-	err := page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
-		v, ok := request.Headers()["extra-http"]
+	err := page.Route("**/empty.html", func(route playwright.Route) {
+		v, ok := route.Request().Headers()["extra-http"]
 		require.True(t, ok)
 		require.Equal(t, "42", v)
 		require.NoError(t, route.Continue())
@@ -72,8 +72,8 @@ func TestBrowserNewPageWithExtraHTTPHeaders(t *testing.T) {
 	require.False(t, page.IsClosed())
 
 	intercepted := make(chan bool, 1)
-	err = page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
-		v, ok := request.Headers()["extra-http"]
+	err = page.Route("**/empty.html", func(route playwright.Route) {
+		v, ok := route.Request().Headers()["extra-http"]
 		require.True(t, ok)
 		require.Equal(t, "42", v)
 		require.NoError(t, route.Continue())

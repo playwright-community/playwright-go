@@ -15,7 +15,7 @@ func TestBrowserContextStorageStateShouldCaptureLocalStorage(t *testing.T) {
 	defer AfterEach(t)
 	page1, err := context.NewPage()
 	require.NoError(t, err)
-	require.NoError(t, page1.Route("**/*", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, page1.Route("**/*", func(route playwright.Route) {
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
 			Body: "<html></html>",
 		}))
@@ -77,7 +77,7 @@ func TestBrowserContextStorageStateSetLocalStorage(t *testing.T) {
 	page, err := context.NewPage()
 	require.NoError(t, err)
 	defer page.Close()
-	require.NoError(t, page.Route("**/*", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, page.Route("**/*", func(route playwright.Route) {
 
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
 			Body: "<html></html>",
@@ -96,7 +96,7 @@ func TestBrowserContextStorageStateRoundTripThroughTheFile(t *testing.T) {
 	page1, err := context.NewPage()
 	require.NoError(t, err)
 	defer page1.Close()
-	require.NoError(t, page1.Route("**/*", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, page1.Route("**/*", func(route playwright.Route) {
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
 			Body: "<html></html>",
 		}))
@@ -131,7 +131,7 @@ func TestBrowserContextStorageStateRoundTripThroughTheFile(t *testing.T) {
 	page2, err := context2.NewPage()
 	require.NoError(t, err)
 	defer page2.Close()
-	require.NoError(t, page2.Route("**/*", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, page2.Route("**/*", func(route playwright.Route) {
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
 			Body: "<html></html>",
 		}))

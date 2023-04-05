@@ -336,11 +336,12 @@ func (b *browserContextImpl) onPage(page *pageImpl) {
 	}
 }
 
-func (b *browserContextImpl) onRoute(route *routeImpl, request *requestImpl) {
+func (b *browserContextImpl) onRoute(route *routeImpl) {
 	go func() {
+		url := route.Request().URL()
 		for _, handlerEntry := range b.routes {
-			if handlerEntry.matcher.Matches(request.URL()) {
-				handlerEntry.handler(route, request)
+			if handlerEntry.matcher.Matches(url) {
+				handlerEntry.handler(route)
 				return
 			}
 		}
@@ -433,7 +434,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 		bt.onPage(fromChannel(payload["page"]).(*pageImpl))
 	})
 	bt.channel.On("route", func(params map[string]interface{}) {
-		bt.onRoute(fromChannel(params["route"]).(*routeImpl), fromChannel(params["request"]).(*requestImpl))
+		bt.onRoute(fromChannel(params["route"]).(*routeImpl))
 	})
 	bt.channel.On("backgroundPage", bt.OnBackgroundPage)
 	return bt
