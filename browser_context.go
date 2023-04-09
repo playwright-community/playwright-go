@@ -219,7 +219,8 @@ func (b *browserContextImpl) Unroute(url interface{}, handlers ...routeHandler) 
 }
 
 func (b *browserContextImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	return <-waitForEvent(b, event, predicate...)
+	waiter := newWaiter()
+	return <-waiter.WaitForEvent(b, event, predicate...)
 }
 
 func (b *browserContextImpl) ExpectEvent(event string, cb func() error) (interface{}, error) {

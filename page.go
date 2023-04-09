@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"reflect"
-	"time"
 )
 
 type pageImpl struct {
@@ -322,7 +321,8 @@ func (p *pageImpl) Click(selector string, options ...PageClickOptions) error {
 }
 
 func (p *pageImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	return <-waitForEvent(p, event, predicate...)
+	waiter := newWaiter()
+	return <-waiter.WaitForEvent(p, event, predicate...)
 }
 
 func (p *pageImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error) {
@@ -338,7 +338,6 @@ func (p *pageImpl) WaitForRequest(url interface{}, options ...PageWaitForRequest
 	if option.Timeout == nil {
 		option.Timeout = Float(p.timeoutSettings.timeout)
 	}
-	deadline := time.After(time.Duration(*option.Timeout) * time.Millisecond)
 	var matcher *urlMatcher
 	if url != nil {
 		matcher = newURLMatcher(url)
@@ -353,12 +352,15 @@ func (p *pageImpl) WaitForRequest(url interface{}, options ...PageWaitForRequest
 		return true
 	}
 
-	select {
-	case <-deadline:
-		return nil, fmt.Errorf("Timeout %.2fms exceeded.", *option.Timeout)
-	case req := <-waitForEvent(p, "request", predicate):
-		return req.(*requestImpl), nil
+	waiter := newWaiter()
+	waiter.RejectOnTimeout(*option.Timeout)
+	req := <-waiter.WaitForEvent(p, "request", predicate)
+	err := waiter.Err()
+	if err != nil {
+		return nil, err
 	}
+
+	return req.(*requestImpl), nil
 }
 
 func (p *pageImpl) WaitForResponse(url interface{}, options ...PageWaitForResponseOptions) (Response, error) {
@@ -369,7 +371,6 @@ func (p *pageImpl) WaitForResponse(url interface{}, options ...PageWaitForRespon
 	if option.Timeout == nil {
 		option.Timeout = Float(p.timeoutSettings.timeout)
 	}
-	deadline := time.After(time.Duration(*option.Timeout) * time.Millisecond)
 	var matcher *urlMatcher
 	if url != nil {
 		matcher = newURLMatcher(url)
@@ -383,13 +384,14 @@ func (p *pageImpl) WaitForResponse(url interface{}, options ...PageWaitForRespon
 		}
 		return true
 	}
-
-	select {
-	case <-deadline:
-		return nil, fmt.Errorf("Timeout %.2fms exceeded.", *option.Timeout)
-	case res := <-waitForEvent(p, "response", predicate):
-		return res.(*responseImpl), nil
+	waiter := newWaiter()
+	waiter.RejectOnTimeout(*option.Timeout)
+	res := <-waiter.WaitForEvent(p, "response", predicate)
+	err := waiter.Err()
+	if err != nil {
+		return nil, err
 	}
+	return res.(*responseImpl), nil
 }
 
 func (p *pageImpl) ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error) {

@@ -1,7 +1,6 @@
 package playwright
 
 import (
-	"fmt"
 	"io/ioutil"
 	"sync"
 	"time"
@@ -151,7 +150,8 @@ func (f *frameImpl) WaitForURL(url string, options ...FrameWaitForURLOptions) er
 }
 
 func (f *frameImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	return <-waitForEvent(f, event, predicate...)
+	waiter := newWaiter()
+	return <-waiter.WaitForEvent(f, event, predicate...)
 }
 
 func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error) {
@@ -165,7 +165,6 @@ func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (
 	if option.Timeout == nil {
 		option.Timeout = Float(f.page.timeoutSettings.NavigationTimeout())
 	}
-	deadline := time.After(time.Duration(*option.Timeout) * time.Millisecond)
 	var matcher *urlMatcher
 	if option.URL != nil {
 		matcher = newURLMatcher(option.URL)
@@ -177,15 +176,18 @@ func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (
 		}
 		return matcher == nil || matcher.Matches(ev["url"].(string))
 	}
-	select {
-	case <-deadline:
-		return nil, fmt.Errorf("Timeout %.2fms exceeded.", *option.Timeout)
-	case eventData := <-waitForEvent(f, "navigated", predicate):
-		event := eventData.(map[string]interface{})
-		if event["newDocument"] != nil && event["newDocument"].(map[string]interface{})["request"] != nil {
-			request := fromChannel(event["newDocument"].(map[string]interface{})["request"]).(*requestImpl)
-			return request.Response()
-		}
+	waiter := newWaiter()
+	waiter.RejectOnTimeout(*option.Timeout)
+	eventData := <-waiter.WaitForEvent(f, "navigated", predicate)
+	err := waiter.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	event := eventData.(map[string]interface{})
+	if event["newDocument"] != nil && event["newDocument"].(map[string]interface{})["request"] != nil {
+		request := fromChannel(event["newDocument"].(map[string]interface{})["request"]).(*requestImpl)
+		return request.Response()
 	}
 	return nil, nil
 }
