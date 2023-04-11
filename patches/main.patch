@@ -1,5 +1,5 @@
 diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
-index fe3edc74b882ef472eb7c795b1a97ecc673e629e..ac01b269a3bc71794f66954b3c22a8592acc5d90 100644
+index fe3edc74b..ac01b269a 100644
 --- a/docs/src/api/class-browsercontext.md
 +++ b/docs/src/api/class-browsercontext.md
 @@ -226,6 +226,7 @@ await context.AddCookiesAsync(new[] { cookie1, cookie2 });
@@ -55,7 +55,7 @@ index fe3edc74b882ef472eb7c795b1a97ecc673e629e..ac01b269a3bc71794f66954b3c22a859
  * since: v1.8
  * langs: csharp, java
 diff --git a/docs/src/api/class-frame.md b/docs/src/api/class-frame.md
-index 49b77defd3e4a30f1bb77b9e1ad13fc0fa384f94..86b3bcc7ed14e18ca89eae42313fdb6ae2d29c34 100644
+index 49b77defd..86b3bcc7e 100644
 --- a/docs/src/api/class-frame.md
 +++ b/docs/src/api/class-frame.md
 @@ -1858,7 +1858,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
@@ -68,7 +68,7 @@ index 49b77defd3e4a30f1bb77b9e1ad13fc0fa384f94..86b3bcc7ed14e18ca89eae42313fdb6a
  
  ### option: Frame.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index ef2baf1ab765bce1240e95a10fe3ecbecf1bf529..b1e18b5eb18a60a84df2d38c06ffced3123441f2 100644
+index ef2baf1ab..b1e18b5eb 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
 @@ -631,6 +631,20 @@ Script to be evaluated in all pages in the browser context.
@@ -201,7 +201,7 @@ index ef2baf1ab765bce1240e95a10fe3ecbecf1bf529..b1e18b5eb18a60a84df2d38c06ffced3
  
  ### option: Page.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
 diff --git a/docs/src/api/class-route.md b/docs/src/api/class-route.md
-index 9999aac53173535c8238da24538115217af1fc4c..42be89d6b95b97827ddeab7be7eb92f60dbd9a8f 100644
+index 9999aac53..42be89d6b 100644
 --- a/docs/src/api/class-route.md
 +++ b/docs/src/api/class-route.md
 @@ -133,6 +133,13 @@ If set changes the post data of request.
@@ -248,7 +248,7 @@ index 9999aac53173535c8238da24538115217af1fc4c..42be89d6b95b97827ddeab7be7eb92f6
  
  A request to be routed.
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index a58da7d7750ab5599b6d0342f5a2ce02927819ab..871907eb8bff2b9a5d6227fe0ff762a55edfc8af 100644
+index a58da7d77..871907eb8 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
 @@ -145,8 +145,8 @@ Defaults to `'visible'`. Can be either:
@@ -385,7 +385,7 @@ index a58da7d7750ab5599b6d0342f5a2ce02927819ab..871907eb8bff2b9a5d6227fe0ff762a5
  Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with
 diff --git a/utils/doclint/generateGoApi.js b/utils/doclint/generateGoApi.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..a58b6aebbd53171107720a1137ade99193f64558
+index 000000000..a58b6aebb
 --- /dev/null
 +++ b/utils/doclint/generateGoApi.js
 @@ -0,0 +1,765 @@

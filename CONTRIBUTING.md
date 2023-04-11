@@ -16,7 +16,7 @@ BROWSER=chromium HEADLESS=1 go test -v --race ./...
 
 ### Roll
 
-1. Find out to which upstream version you want to roll, you need to find out the upstream commit SHA.
+1. Find out to which upstream version you want to roll, and change the value of `playwrightCliVersion` in the **run.go** to the new version.
 1. `bash scripts/apply-patch.sh`
 1. `cd playwright`
 1. `git reset HEAD~1` this reverts the custom patches
