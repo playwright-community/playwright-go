@@ -53,14 +53,6 @@ func (e *eventEmitter) On(name string, handler interface{}) {
 	e.addEvent(name, handler, false)
 }
 
-func (e *eventEmitter) addEventHandler(handler func(name string, handler interface{})) {
-	e.addEventHandlers = append(e.addEventHandlers, handler)
-}
-
-func (e *eventEmitter) removeEventHandler(handler func(name string, handler interface{})) {
-	e.removeEventHandlers = append(e.removeEventHandlers, handler)
-}
-
 func (e *eventEmitter) RemoveListener(name string, handler interface{}) {
 	for _, mitm := range e.removeEventHandlers {
 		mitm(name, handler)
