@@ -68,7 +68,7 @@ index 49b77defd3e4a30f1bb77b9e1ad13fc0fa384f94..86b3bcc7ed14e18ca89eae42313fdb6a
  
  ### option: Frame.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index ef2baf1ab765bce1240e95a10fe3ecbecf1bf529..2474b4366cd4952818435dd56001f8c53fd7b852 100644
+index ef2baf1ab765bce1240e95a10fe3ecbecf1bf529..b1e18b5eb18a60a84df2d38c06ffced3123441f2 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
 @@ -631,6 +631,20 @@ Script to be evaluated in all pages in the browser context.
@@ -92,33 +92,50 @@ index ef2baf1ab765bce1240e95a10fe3ecbecf1bf529..2474b4366cd4952818435dd56001f8c5
  ## async method: Page.addScriptTag
  * since: v1.8
  - returns: <[ElementHandle]>
-@@ -1223,7 +1237,7 @@ Passing `null` disables CSS media emulation.
+@@ -1223,8 +1237,8 @@ Passing `null` disables CSS media emulation.
  
  ### option: Page.emulateMedia.media
  * since: v1.9
 -* langs: csharp, python
+-- `media` <[Media]<"screen"|"print"|"null">>
 +* langs: csharp, python, go
- - `media` <[Media]<"screen"|"print"|"null">>
++- `media` <[Media]<"screen"|"print"|"no-override">>
  
  Changes the CSS media type of the page. The only allowed values are `'Screen'`, `'Print'` and `'Null'`.
-@@ -1239,7 +1253,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+ Passing `'Null'` disables CSS media emulation.
+@@ -1239,8 +1253,8 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
  
  ### option: Page.emulateMedia.colorScheme
  * since: v1.9
 -* langs: csharp, python
+-- `colorScheme` <[ColorScheme]<"light"|"dark"|"no-preference"|"null">>
 +* langs: csharp, python, go
- - `colorScheme` <[ColorScheme]<"light"|"dark"|"no-preference"|"null">>
++- `colorScheme` <[ColorScheme]<"light"|"dark"|"no-preference"|"no-override">>
  
  Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing
-@@ -1254,7 +1268,7 @@ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce
+ `'Null'` disables color scheme emulation.
+@@ -1254,8 +1268,8 @@ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce
  
  ### option: Page.emulateMedia.reducedMotion
  * since: v1.12
 -* langs: csharp, python
+-- `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"null">>
 +* langs: csharp, python, go
- - `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"null">>
++- `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"no-override">>
  
  Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.
+ 
+@@ -1268,8 +1282,8 @@ Emulates `'forced-colors'` media feature, supported values are `'active'` and `'
+ 
+ ### option: Page.emulateMedia.forcedColors
+ * since: v1.15
+-* langs: csharp, python
+-- `forcedColors` <[ForcedColors]<"active"|"none"|"null">>
++* langs: csharp, python, go
++- `forcedColors` <[ForcedColors]<"active"|"none"|"no-override">>
+ 
+ ## async method: Page.evalOnSelector
+ * since: v1.9
 @@ -2770,7 +2784,7 @@ Paper width, accepts values labeled with units.
  
  ### option: Page.pdf.width

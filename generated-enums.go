@@ -272,7 +272,20 @@ var (
 	ColorSchemeLight        *ColorScheme = getColorScheme("light")
 	ColorSchemeDark                      = getColorScheme("dark")
 	ColorSchemeNoPreference              = getColorScheme("no-preference")
-	ColorSchemeNull                      = getColorScheme("null")
+	ColorSchemeNoOverride                = getColorScheme("no-override")
+)
+
+func getForcedColors(in string) *ForcedColors {
+	v := ForcedColors(in)
+	return &v
+}
+
+type ForcedColors string
+
+var (
+	ForcedColorsActive     *ForcedColors = getForcedColors("active")
+	ForcedColorsNone                     = getForcedColors("none")
+	ForcedColorsNoOverride               = getForcedColors("no-override")
 )
 
 func getMedia(in string) *Media {
@@ -283,9 +296,9 @@ func getMedia(in string) *Media {
 type Media string
 
 var (
-	MediaScreen *Media = getMedia("screen")
-	MediaPrint         = getMedia("print")
-	MediaNull          = getMedia("null")
+	MediaScreen     *Media = getMedia("screen")
+	MediaPrint             = getMedia("print")
+	MediaNoOverride        = getMedia("no-override")
 )
 
 func getReducedMotion(in string) *ReducedMotion {
@@ -298,7 +311,7 @@ type ReducedMotion string
 var (
 	ReducedMotionReduce       *ReducedMotion = getReducedMotion("reduce")
 	ReducedMotionNoPreference                = getReducedMotion("no-preference")
-	ReducedMotionNull                        = getReducedMotion("null")
+	ReducedMotionNoOverride                  = getReducedMotion("no-override")
 )
 
 func getSameSiteAttribute(in string) *SameSiteAttribute {

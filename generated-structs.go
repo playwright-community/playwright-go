@@ -2502,7 +2502,8 @@ type PageTargetPosition struct {
 type PageEmulateMediaOptions struct {
 	// Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`,
 	// `'dark'`, `'no-preference'`. Passing `'Null'` disables color scheme emulation.
-	ColorScheme *ColorScheme `json:"colorScheme"`
+	ColorScheme  *ColorScheme  `json:"colorScheme"`
+	ForcedColors *ForcedColors `json:"forcedColors"`
 	// Changes the CSS media type of the page. The only allowed values are `'Screen'`,
 	// `'Print'` and `'Null'`. Passing `'Null'` disables CSS media emulation.
 	Media *Media `json:"media"`

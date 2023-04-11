@@ -675,7 +675,7 @@ func TestPageEmulateMedia(t *testing.T) {
 	utils.AssertEval(t, page, "matchMedia('screen').matches", false)
 	utils.AssertEval(t, page, "matchMedia('print').matches", true)
 	require.NoError(t, page.EmulateMedia(playwright.PageEmulateMediaOptions{
-		Media: playwright.MediaNull,
+		Media: playwright.MediaNoOverride,
 	}))
 	utils.AssertEval(t, page, "matchMedia('screen').matches", true)
 	utils.AssertEval(t, page, "matchMedia('print').matches", false)
