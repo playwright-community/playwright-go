@@ -146,7 +146,7 @@ func TestBrowserTypeConnectShouldEmitDisconnectedEvent(t *testing.T) {
 	require.Len(t, disconnected1.Get(), 1)
 	require.Len(t, disconnected2.Get(), 0)
 	remoteServer.Close()
-
+	time.Sleep(1 * time.Millisecond) // TODO: 'title' message may appear before 'closed' causing deadlock
 	_, err = page.Title()
 	require.Error(t, err)
 	require.False(t, browser2.IsConnected())
