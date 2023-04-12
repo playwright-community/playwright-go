@@ -170,7 +170,7 @@ type BrowserContext interface {
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the context closes before the event is fired. Returns the event data value.
 	// **Usage**
-	WaitForEvent(event string, predicate ...interface{}) interface{}
+	WaitForEvent(event string, predicate ...interface{}) (interface{}, error)
 	Tracing() Tracing
 	// **NOTE** Background pages are only supported on Chromium-based browsers.
 	// All existing background pages in the context.
@@ -867,7 +867,7 @@ type Frame interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
 	Uncheck(selector string, options ...FrameUncheckOptions) error
-	WaitForEvent(event string, predicate ...interface{}) interface{}
+	WaitForEvent(event string, predicate ...interface{}) (interface{}, error)
 	// Returns when the `expression` returns a truthy value, returns that value.
 	// **Usage**
 	// The Frame.waitForFunction() can be used to observe viewport size change:
@@ -1803,7 +1803,7 @@ type Page interface {
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the page is closed before the event is fired. Returns the event data value.
 	// **Usage**
-	WaitForEvent(event string, predicate ...interface{}) interface{}
+	WaitForEvent(event string, predicate ...interface{}) (interface{}, error)
 	// Returns when the `expression` returns a truthy value. It resolves to a JSHandle of the truthy value.
 	// **Usage**
 	// The Page.waitForFunction() can be used to observe viewport size change:
@@ -2023,7 +2023,7 @@ type WebSocket interface {
 	URL() string
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the webSocket is closed before the event is fired. Returns the event data value.
-	WaitForEvent(event string, predicate ...interface{}) interface{}
+	WaitForEvent(event string, predicate ...interface{}) (interface{}, error)
 }
 
 // When browser context is created with the `recordVideo` option, each page has a video object associated with it.
@@ -2057,6 +2057,6 @@ type Worker interface {
 	// Worker.evaluateHandle() would wait for the promise to resolve and return its value.
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	URL() string
-	WaitForEvent(event string, predicate ...interface{}) interface{}
+	WaitForEvent(event string, predicate ...interface{}) (interface{}, error)
 	ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error)
 }

@@ -9,33 +9,28 @@ import (
 	"time"
 )
 
-type waiter struct {
-	mu        sync.Mutex
-	err       error
-	timeout   float64
-	fulfill   int32
-	listeners []eventListener
-	errChan   chan error
-}
-
-type eventListener struct {
-	emitter EventEmitter
-	event   string
-	handler interface{}
-}
+type (
+	waiter struct {
+		mu        sync.Mutex
+		timeout   float64
+		fulfill   int32
+		listeners []eventListener
+		errChan   chan error
+		waitFunc  func() (interface{}, error)
+	}
+	eventListener struct {
+		emitter EventEmitter
+		event   string
+		handler interface{}
+	}
+)
 
 func (w *waiter) reject(err error) {
 	atomic.StoreInt32(&w.fulfill, 1)
 	w.errChan <- err
 }
 
-func (w *waiter) Err() error {
-	w.mu.Lock()
-	defer w.mu.Unlock()
-	return w.err
-}
-
-func (w *waiter) RejectOnEvent(emitter EventEmitter, event string, err error, predicate ...interface{}) {
+func (w *waiter) RejectOnEvent(emitter EventEmitter, event string, err error, predicate ...interface{}) *waiter {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	handler := func(ev ...interface{}) {
@@ -57,15 +52,17 @@ func (w *waiter) RejectOnEvent(emitter EventEmitter, event string, err error, pr
 		event:   event,
 		handler: handler,
 	})
+	return w
 }
 
-func (w *waiter) RejectOnTimeout(timeout float64) {
+func (w *waiter) WithTimeout(timeout float64) *waiter {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.timeout = timeout
+	return w
 }
 
-func (w *waiter) WaitForEvent(emitter EventEmitter, event string, predicate ...interface{}) <-chan interface{} {
+func (w *waiter) WaitForEvent(emitter EventEmitter, event string, predicate ...interface{}) *waiter {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	evChan := make(chan interface{}, 1)
@@ -87,17 +84,6 @@ func (w *waiter) WaitForEvent(emitter EventEmitter, event string, predicate ...i
 			}
 		}()
 	}
-	go func() {
-		err := <-w.errChan
-		cancel()
-		w.mu.Lock()
-		defer w.mu.Unlock()
-		for _, l := range w.listeners {
-			l.emitter.RemoveListener(l.event, l.handler)
-		}
-		close(evChan)
-		w.err = err
-	}()
 
 	emitter.On(event, handler)
 	w.listeners = append(w.listeners, eventListener{
@@ -106,7 +92,37 @@ func (w *waiter) WaitForEvent(emitter EventEmitter, event string, predicate ...i
 		handler: handler,
 	})
 
-	return evChan
+	w.waitFunc = func() (interface{}, error) {
+		var (
+			err error
+			val interface{}
+		)
+		select {
+		case err = <-w.errChan:
+			break
+		case val = <-evChan:
+			break
+		}
+		cancel()
+		w.mu.Lock()
+		defer w.mu.Unlock()
+		for _, l := range w.listeners {
+			l.emitter.RemoveListener(l.event, l.handler)
+		}
+		close(evChan)
+		if err != nil {
+			return nil, err
+		}
+		return val, nil
+	}
+	return w
+}
+
+func (w *waiter) Wait() (interface{}, error) {
+	if w.waitFunc == nil {
+		return nil, fmt.Errorf("waiter: call WaitForEvent first")
+	}
+	return w.waitFunc()
 }
 
 func (w *waiter) createHandler(evChan chan<- interface{}, predicate ...interface{}) func(...interface{}) {
@@ -115,17 +131,17 @@ func (w *waiter) createHandler(evChan chan<- interface{}, predicate ...interface
 			return
 		}
 		if len(predicate) == 0 {
+			atomic.StoreInt32(&w.fulfill, 1)
 			if len(ev) == 1 {
 				evChan <- ev[0]
 			} else {
 				evChan <- nil
 			}
-			w.reject(nil)
 		} else if len(predicate) == 1 {
 			result := reflect.ValueOf(predicate[0]).Call([]reflect.Value{reflect.ValueOf(ev[0])})
 			if result[0].Bool() {
+				atomic.StoreInt32(&w.fulfill, 1)
 				evChan <- ev[0]
-				w.reject(nil)
 			}
 		}
 	}

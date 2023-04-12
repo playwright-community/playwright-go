@@ -82,9 +82,8 @@ func (w *workerImpl) onClose() {
 	w.Emit("close", w)
 }
 
-func (w *workerImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	waiter := newWaiter()
-	return <-waiter.WaitForEvent(w, event, predicate...)
+func (w *workerImpl) WaitForEvent(event string, predicate ...interface{}) (interface{}, error) {
+	return newWaiter().WaitForEvent(w, event, predicate...).Wait()
 }
 
 func (w *workerImpl) ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error) {

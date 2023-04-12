@@ -149,7 +149,7 @@
 		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
-			"interface{}"
+			"(interface{}, error)"
 		],
 		"Tracing": [
 			null,
@@ -662,7 +662,7 @@
 		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
-			"interface{}"
+			"(interface{}, error)"
 		],
 		"WaitForFunction": [
 			"expression string, arg interface{}, options ...FrameWaitForFunctionOptions",
@@ -1301,7 +1301,7 @@
 		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
-			"interface{}"
+			"(interface{}, error)"
 		],
 		"WaitForFunction": [
 			"expression string, arg interface{}, options ...FrameWaitForFunctionOptions",
@@ -1538,7 +1538,7 @@
 		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
-			"interface{}"
+			"(interface{}, error)"
 		]
 	},
 	"Video": {
@@ -1573,7 +1573,7 @@
 		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
-			"interface{}"
+			"(interface{}, error)"
 		],
 		"ExpectEvent": [
 			"event string, cb func() error, predicates ...interface{}",

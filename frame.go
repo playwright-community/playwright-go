@@ -149,9 +149,8 @@ func (f *frameImpl) WaitForURL(url string, options ...FrameWaitForURLOptions) er
 	return nil
 }
 
-func (f *frameImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	waiter := newWaiter()
-	return <-waiter.WaitForEvent(f, event, predicate...)
+func (f *frameImpl) WaitForEvent(event string, predicate ...interface{}) (interface{}, error) {
+	return newWaiter().WaitForEvent(f, event, predicate...).Wait()
 }
 
 func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error) {
@@ -176,10 +175,8 @@ func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (
 		}
 		return matcher == nil || matcher.Matches(ev["url"].(string))
 	}
-	waiter := newWaiter()
-	waiter.RejectOnTimeout(*option.Timeout)
-	eventData := <-waiter.WaitForEvent(f, "navigated", predicate)
-	err := waiter.Err()
+	waiter := newWaiter().WithTimeout(*option.Timeout)
+	eventData, err := waiter.WaitForEvent(f, "navigated", predicate).Wait()
 	if err != nil {
 		return nil, err
 	}

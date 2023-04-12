@@ -320,9 +320,8 @@ func (p *pageImpl) Click(selector string, options ...PageClickOptions) error {
 	return p.mainFrame.Click(selector, options...)
 }
 
-func (p *pageImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	waiter := newWaiter()
-	return <-waiter.WaitForEvent(p, event, predicate...)
+func (p *pageImpl) WaitForEvent(event string, predicate ...interface{}) (interface{}, error) {
+	return newWaiter().WaitForEvent(p, event, predicate...).Wait()
 }
 
 func (p *pageImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error) {
@@ -352,10 +351,8 @@ func (p *pageImpl) WaitForRequest(url interface{}, options ...PageWaitForRequest
 		return true
 	}
 
-	waiter := newWaiter()
-	waiter.RejectOnTimeout(*option.Timeout)
-	req := <-waiter.WaitForEvent(p, "request", predicate)
-	err := waiter.Err()
+	waiter := newWaiter().WithTimeout(*option.Timeout)
+	req, err := waiter.WaitForEvent(p, "request", predicate).Wait()
 	if err != nil {
 		return nil, err
 	}
@@ -384,10 +381,8 @@ func (p *pageImpl) WaitForResponse(url interface{}, options ...PageWaitForRespon
 		}
 		return true
 	}
-	waiter := newWaiter()
-	waiter.RejectOnTimeout(*option.Timeout)
-	res := <-waiter.WaitForEvent(p, "response", predicate)
-	err := waiter.Err()
+	waiter := newWaiter().WithTimeout(*option.Timeout)
+	res, err := waiter.WaitForEvent(p, "response", predicate).Wait()
 	if err != nil {
 		return nil, err
 	}
@@ -416,27 +411,34 @@ func (p *pageImpl) ExpectNavigation(cb func() error, options ...PageWaitForNavig
 
 func (p *pageImpl) ExpectConsoleMessage(cb func() error) (ConsoleMessage, error) {
 	consoleMessage, err := newExpectWrapper(p.WaitForEvent, []interface{}{"console"}, cb)
+	if consoleMessage == nil {
+		return nil, err
+	}
 	return consoleMessage.(*consoleMessageImpl), err
 }
 
 func (p *pageImpl) ExpectedDialog(cb func() error) (Dialog, error) {
 	dialog, err := newExpectWrapper(p.WaitForEvent, []interface{}{"dialog"}, cb)
+	if dialog == nil {
+		return nil, err
+	}
 	return dialog.(*dialogImpl), err
 }
 
 func (p *pageImpl) ExpectDownload(cb func() error) (Download, error) {
 	download, err := newExpectWrapper(p.WaitForEvent, []interface{}{"download"}, cb)
+	if download == nil {
+		return nil, err
+	}
 	return download.(*downloadImpl), err
 }
 
 func (p *pageImpl) ExpectFileChooser(cb func() error) (FileChooser, error) {
-	waiter := newWaiter()
-	result := waiter.WaitForEvent(p, "filechooser")
-	if err := cb(); err != nil {
+	fileChooser, err := newExpectWrapper(p.WaitForEvent, []interface{}{"filechooser"}, cb)
+	if fileChooser == nil {
 		return nil, err
 	}
-	response := <-result
-	return response.(*fileChooserImpl), waiter.Err()
+	return fileChooser.(*fileChooserImpl), err
 }
 
 func (p *pageImpl) ExpectLoadState(state string, cb func() error) error {
@@ -446,28 +448,34 @@ func (p *pageImpl) ExpectLoadState(state string, cb func() error) error {
 
 func (p *pageImpl) ExpectPopup(cb func() error) (Page, error) {
 	popup, err := newExpectWrapper(p.WaitForEvent, []interface{}{"popup"}, cb)
+	if popup == nil {
+		return nil, err
+	}
 	return popup.(*pageImpl), err
 }
 
 func (p *pageImpl) ExpectResponse(url interface{}, cb func() error, options ...interface{}) (Response, error) {
-	response, err := newExpectWrapper(p.WaitForResponse, append([]interface{}{url}, options...), cb)
-	if err != nil {
+	resp, err := newExpectWrapper(p.WaitForResponse, append([]interface{}{url}, options...), cb)
+	if resp == nil {
 		return nil, err
 	}
-	return response.(*responseImpl), err
+	return resp.(*responseImpl), err
 }
 
 func (p *pageImpl) ExpectRequest(url interface{}, cb func() error, options ...interface{}) (Request, error) {
-	popup, err := newExpectWrapper(p.WaitForRequest, append([]interface{}{url}, options...), cb)
-	if err != nil {
+	req, err := newExpectWrapper(p.WaitForRequest, append([]interface{}{url}, options...), cb)
+	if req == nil {
 		return nil, err
 	}
-	return popup.(*requestImpl), err
+	return req.(*requestImpl), err
 }
 
 func (p *pageImpl) ExpectWorker(cb func() error) (Worker, error) {
-	response, err := newExpectWrapper(p.WaitForEvent, []interface{}{"worker"}, cb)
-	return response.(*workerImpl), err
+	worker, err := newExpectWrapper(p.WaitForEvent, []interface{}{"worker"}, cb)
+	if worker == nil {
+		return nil, err
+	}
+	return worker.(*workerImpl), err
 }
 
 func (p *pageImpl) Route(url interface{}, handler routeHandler) error {
