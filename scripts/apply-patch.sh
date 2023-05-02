@@ -8,13 +8,14 @@ SCRIPTS_DIR="$(dirname "$0")"
 echo "Applying patches..."
 
 pushd "$SCRIPTS_DIR/.."
+PW_VERSION="$(grep -oE "playwrightCliVersion.+\"[0-9\.]+" ./run.go | sed 's/playwrightCliVersion = "/v/g')"
 git submodule update --init
 pushd playwright
 
 git checkout HEAD --detach
 
 if git show-ref -q --heads "$BRANCH_NAME_BUILD"; then
-  git checkout main
+  git checkout "$PW_VERSION"
   git branch -D "$BRANCH_NAME_BUILD"
 fi
 
