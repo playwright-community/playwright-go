@@ -3,7 +3,7 @@ package playwright
 import (
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"reflect"
 	"time"
 )
@@ -289,7 +289,7 @@ func (p *pageImpl) Screenshot(options ...PageScreenshotOptions) ([]byte, error) 
 		return nil, fmt.Errorf("could not decode base64 :%w", err)
 	}
 	if path != nil {
-		if err := ioutil.WriteFile(*path, image, 0644); err != nil {
+		if err := os.WriteFile(*path, image, 0644); err != nil {
 			return nil, err
 		}
 	}
@@ -310,7 +310,7 @@ func (p *pageImpl) PDF(options ...PagePdfOptions) ([]byte, error) {
 		return nil, fmt.Errorf("could not decode base64 :%w", err)
 	}
 	if path != nil {
-		if err := ioutil.WriteFile(*path, pdf, 0644); err != nil {
+		if err := os.WriteFile(*path, pdf, 0644); err != nil {
 			return nil, err
 		}
 	}
@@ -496,7 +496,7 @@ func (p *pageImpl) AddInitScript(options PageAddInitScriptOptions) error {
 		source = *options.Script
 	}
 	if options.Path != nil {
-		content, err := ioutil.ReadFile(*options.Path)
+		content, err := os.ReadFile(*options.Path)
 		if err != nil {
 			return err
 		}

@@ -3,7 +3,7 @@ package playwright
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 )
 
 type browserImpl struct {
@@ -29,7 +29,7 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 		}
 		if options[0].StorageStatePath != nil {
 			var storageState *BrowserNewContextOptionsStorageState
-			storageString, err := ioutil.ReadFile(*options[0].StorageStatePath)
+			storageString, err := os.ReadFile(*options[0].StorageStatePath)
 			if err != nil {
 				return nil, fmt.Errorf("could not read storage state file: %w", err)
 			}

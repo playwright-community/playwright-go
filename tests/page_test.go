@@ -3,7 +3,6 @@ package playwright_test
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -47,7 +46,7 @@ func TestPageScreenshot(t *testing.T) {
 	defer AfterEach(t)
 
 	require.NoError(t, page.SetContent("<h1>foobar</h1>"))
-	tmpfile, err := ioutil.TempDir("", "screenshot")
+	tmpfile, err := os.MkdirTemp("", "screenshot")
 	require.NoError(t, err)
 	screenshotPath := filepath.Join(tmpfile, "image.png")
 	screenshot, err := page.Screenshot()
@@ -73,7 +72,7 @@ func TestPagePDF(t *testing.T) {
 		t.Skip("Skipping")
 	}
 	require.NoError(t, page.SetContent("<h1>foobar</h1>"))
-	tmpfile, err := ioutil.TempDir("", "pdf")
+	tmpfile, err := os.MkdirTemp("", "pdf")
 	require.NoError(t, err)
 	screenshotPath := filepath.Join(tmpfile, "image.png")
 	screenshot, err := page.PDF()

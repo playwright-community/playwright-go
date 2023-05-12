@@ -2,7 +2,7 @@ package playwright_test
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"log"
 	"mime"
 	"net"
@@ -143,13 +143,13 @@ func (t *testServer) AfterEach() {
 func (t *testServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	t.Lock()
 	defer t.Unlock()
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("Error reading body: %v", err)
 		http.Error(w, "can't read body", http.StatusBadRequest)
 		return
 	}
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	r.Body = io.NopCloser(bytes.NewBuffer(body))
 	if handlers, ok := t.requestSubscriberes[r.URL.Path]; ok {
 		for _, handler := range handlers {
 			handler <- r

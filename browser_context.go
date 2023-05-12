@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 )
@@ -153,7 +152,7 @@ func (b *browserContextImpl) AddInitScript(options BrowserContextAddInitScriptOp
 		source = *options.Script
 	}
 	if options.Path != nil {
-		content, err := ioutil.ReadFile(*options.Path)
+		content, err := os.ReadFile(*options.Path)
 		if err != nil {
 			return err
 		}

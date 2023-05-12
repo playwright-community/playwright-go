@@ -10,7 +10,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
@@ -165,7 +164,7 @@ func getAlexaTopDomains() ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not get: %w", err)
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("could not read body: %w", err)
 	}

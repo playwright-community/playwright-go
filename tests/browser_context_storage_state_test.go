@@ -2,7 +2,6 @@ package playwright_test
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -111,11 +110,11 @@ func TestBrowserContextStorageStateRoundTripThroughTheFile(t *testing.T) {
 	}
 	`)
 	require.NoError(t, err)
-	tempfile, err := ioutil.TempFile(os.TempDir(), "storage-state*.json")
+	tempfile, err := os.CreateTemp(t.TempDir(), "storage-state*.json")
 	require.NoError(t, err)
 	state, err := context.StorageState(tempfile.Name())
 	require.NoError(t, err)
-	stateWritten, err := ioutil.ReadFile(tempfile.Name())
+	stateWritten, err := os.ReadFile(tempfile.Name())
 	require.NoError(t, err)
 	var storageState *playwright.StorageState
 	err = json.Unmarshal(stateWritten, &storageState)

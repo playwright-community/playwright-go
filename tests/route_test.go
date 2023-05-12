@@ -2,7 +2,7 @@ package playwright_test
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -61,7 +61,7 @@ func TestRouteContinueOverwrite(t *testing.T) {
 	serverRequest := <-serverRequestChan
 	require.Equal(t, "POST", serverRequest.Method)
 	require.Equal(t, "bar", serverRequest.Header.Get("Foo"))
-	respData, err := ioutil.ReadAll(serverRequest.Body)
+	respData, err := io.ReadAll(serverRequest.Body)
 	require.NoError(t, err)
 	require.Equal(t, "foobar", string(respData))
 }
@@ -82,7 +82,7 @@ func TestRouteContinueOverwriteBodyBytes(t *testing.T) {
 	require.NoError(t, err)
 	serverRequest := <-serverRequestChan
 	require.Equal(t, "POST", serverRequest.Method)
-	respData, err := ioutil.ReadAll(serverRequest.Body)
+	respData, err := io.ReadAll(serverRequest.Body)
 	require.NoError(t, err)
 	require.Equal(t, "foobar", string(respData))
 }

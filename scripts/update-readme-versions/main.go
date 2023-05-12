@@ -5,8 +5,8 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"regexp"
 
 	"github.com/playwright-community/playwright-go"
@@ -14,7 +14,7 @@ import (
 
 func main() {
 	const readmePath = "README.md"
-	readmeContent, err := ioutil.ReadFile(readmePath)
+	readmeContent, err := os.ReadFile(readmePath)
 	if err != nil {
 		log.Fatalf("could not read readme: %v", err)
 	}
@@ -50,7 +50,7 @@ func main() {
 			log.Fatalf("could not close browser: %v", err)
 		}
 	}
-	if err := ioutil.WriteFile(readmePath, readmeContent, 0644); err != nil {
+	if err := os.WriteFile(readmePath, readmeContent, 0644); err != nil {
 		log.Fatalf("could not write readme: %v", err)
 	}
 	if err := pw.Stop(); err != nil {

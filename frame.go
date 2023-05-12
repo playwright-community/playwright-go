@@ -2,7 +2,7 @@ package playwright
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"sync"
 	"time"
 )
@@ -85,7 +85,7 @@ func (f *frameImpl) Goto(url string, options ...PageGotoOptions) (Response, erro
 
 func (f *frameImpl) AddScriptTag(options PageAddScriptTagOptions) (ElementHandle, error) {
 	if options.Path != nil {
-		file, err := ioutil.ReadFile(*options.Path)
+		file, err := os.ReadFile(*options.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -101,7 +101,7 @@ func (f *frameImpl) AddScriptTag(options PageAddScriptTagOptions) (ElementHandle
 
 func (f *frameImpl) AddStyleTag(options PageAddStyleTagOptions) (ElementHandle, error) {
 	if options.Path != nil {
-		file, err := ioutil.ReadFile(*options.Path)
+		file, err := os.ReadFile(*options.Path)
 		if err != nil {
 			return nil, err
 		}

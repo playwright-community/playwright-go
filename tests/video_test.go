@@ -1,7 +1,7 @@
 package playwright_test
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -26,7 +26,7 @@ func TestVideoShouldWork(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, context.Close())
 
-	files, err := ioutil.ReadDir(recordVideoDir)
+	files, err := os.ReadDir(recordVideoDir)
 	require.NoError(t, err)
 	require.Equal(t, len(files), 1)
 	videoFileLocation := filepath.Join(recordVideoDir, files[0].Name())
@@ -34,7 +34,7 @@ func TestVideoShouldWork(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, videoFileLocation, path)
 	require.FileExists(t, videoFileLocation)
-	content, err := ioutil.ReadFile(videoFileLocation)
+	content, err := os.ReadFile(videoFileLocation)
 	require.NoError(t, err)
 	require.True(t, filetype.IsVideo(content))
 	tmpFile := filepath.Join(t.TempDir(), "test.webm")
