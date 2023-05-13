@@ -9,7 +9,7 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: golangci-lint
       uses: golangci/golangci-lint-action@v2
       with:
@@ -23,13 +23,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     name:  ${{ matrix.browser }} on ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - name: Set up Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v4
       with:
-        go-version: ^1.16.1
+        go-version: ^1.19.9
       id: go
     - name: Cache modules and build
       uses: actions/cache@v3
@@ -77,11 +77,11 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v4
       with:
-        go-version: ^1.16.1
+        go-version: ^1.19.9
       id: go
     - name: Install goveralls
       env:
@@ -94,11 +94,11 @@ jobs:
   test-examples:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Go 1.x
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v4
       with:
-        go-version: ^1.16.1
+        go-version: ^1.19.9
       id: go
     - run: |
         go install ./...
