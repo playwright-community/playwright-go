@@ -795,20 +795,20 @@ func TestPageUnrouteShouldWork(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	intercepted := []int{}
-	handler1 := func(route playwright.Route, request playwright.Request) {
+	handler1 := func(route playwright.Route) {
 		intercepted = append(intercepted, 1)
 		require.NoError(t, route.Continue())
 	}
 	require.NoError(t, page.Route("**/empty.html", handler1))
-	require.NoError(t, page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, page.Route("**/empty.html", func(route playwright.Route) {
 		intercepted = append(intercepted, 2)
 		require.NoError(t, route.Continue())
 	}))
-	require.NoError(t, page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, page.Route("**/empty.html", func(route playwright.Route) {
 		intercepted = append(intercepted, 3)
 		require.NoError(t, route.Continue())
 	}))
-	require.NoError(t, page.Route("**/*", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, page.Route("**/*", func(route playwright.Route) {
 		intercepted = append(intercepted, 4)
 		require.NoError(t, route.Continue())
 	}))

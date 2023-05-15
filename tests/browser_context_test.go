@@ -84,7 +84,7 @@ func TestBrowserContextSetExtraHTTPHeaders(t *testing.T) {
 		"extra-http": "42",
 	}))
 	intercepted := make(chan bool, 1)
-	err := page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	err := page.Route("**/empty.html", func(route playwright.Route) {
 		require.NoError(t, route.Continue())
 		intercepted <- true
 	})
@@ -215,20 +215,20 @@ func TestBrowserContextUnrouteShouldWork(t *testing.T) {
 	defer AfterEach(t)
 
 	intercepted := []int{}
-	handler1 := func(route playwright.Route, request playwright.Request) {
+	handler1 := func(route playwright.Route) {
 		intercepted = append(intercepted, 1)
 		require.NoError(t, route.Continue())
 	}
 	require.NoError(t, context.Route("**/empty.html", handler1))
-	require.NoError(t, context.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, context.Route("**/empty.html", func(route playwright.Route) {
 		intercepted = append(intercepted, 2)
 		require.NoError(t, route.Continue())
 	}))
-	require.NoError(t, context.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, context.Route("**/empty.html", func(route playwright.Route) {
 		intercepted = append(intercepted, 3)
 		require.NoError(t, route.Continue())
 	}))
-	require.NoError(t, context.Route("**/*", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, context.Route("**/*", func(route playwright.Route) {
 		intercepted = append(intercepted, 4)
 		require.NoError(t, route.Continue())
 	}))

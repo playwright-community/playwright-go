@@ -18,8 +18,8 @@ func TestRequestFulfill(t *testing.T) {
 	defer AfterEach(t)
 	requests := make(chan playwright.Request, 1)
 	routes := make(chan playwright.Route, 1)
-	err := page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
-		requests <- request
+	err := page.Route("**/empty.html", func(route playwright.Route) {
+		requests <- route.Request()
 		routes <- route
 		err := route.Fulfill(playwright.RouteFulfillOptions{
 			Body: "Hello World",
@@ -55,7 +55,7 @@ func TestRequestContinue(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	intercepted := make(chan bool, 1)
-	err := page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	err := page.Route("**/empty.html", func(route playwright.Route) {
 		intercepted <- true
 		err := route.Continue()
 		require.NoError(t, err)
