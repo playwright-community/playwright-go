@@ -6,7 +6,29 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const testEventName = "foobar"
+const (
+	testEventName    = "foobar"
+	testEventNameFoo = "foo"
+	testEventNameBar = "bar"
+)
+
+func TestEventEmitterListenerCount(t *testing.T) {
+	handler := &eventEmitter{}
+	handler.initEventEmitter()
+	wasCalled := make(chan interface{}, 1)
+	myHandler := func(payload ...interface{}) {
+		wasCalled <- payload[0]
+	}
+	require.Nil(t, handler.events[testEventNameFoo])
+	handler.On(testEventNameFoo, myHandler)
+	require.Equal(t, 1, handler.ListenerCount(testEventNameFoo))
+	handler.Once(testEventNameFoo, myHandler)
+	require.Equal(t, 2, handler.ListenerCount(testEventNameFoo))
+	require.Nil(t, handler.events[testEventNameBar])
+	handler.Once(testEventNameBar, myHandler)
+	require.Equal(t, 1, handler.ListenerCount(testEventNameBar))
+	require.Equal(t, 3, handler.ListenerCount(""))
+}
 
 func TestEventEmitterOn(t *testing.T) {
 	handler := &eventEmitter{}

@@ -92,11 +92,14 @@ func (e *eventEmitter) RemoveListener(name string, handler interface{}) {
 	e.events[name].once = onceHandlers
 }
 
+// ListenerCount count the listeners by name, count all if name is empty
 func (e *eventEmitter) ListenerCount(name string) int {
 	count := 0
 	e.eventsMutex.Lock()
 	for key := range e.events {
-		count += len(e.events[key].on) + len(e.events[key].once)
+		if name == "" || name == key {
+			count += len(e.events[key].on) + len(e.events[key].once)
+		}
 	}
 	e.eventsMutex.Unlock()
 	return count
