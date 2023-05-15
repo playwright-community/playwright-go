@@ -17,8 +17,8 @@ func TestPageRouteContinue(t *testing.T) {
 		"extra-http": "42",
 	}))
 	intercepted := make(chan bool, 1)
-	err := page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
-		require.Equal(t, route.Request(), request)
+	err := page.Route("**/empty.html", func(route playwright.Route) {
+		request := route.Request()
 		require.Contains(t, request.URL(), "empty.html")
 		require.True(t, len(request.Headers()["user-agent"]) > 5)
 		require.Equal(t, "42", request.Headers()["extra-http"])
@@ -47,8 +47,8 @@ func TestRouteContinueOverwrite(t *testing.T) {
 	serverRequestChan := server.WaitForRequestChan("/sleep.zzz")
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, page.Route("**/*", func(route playwright.Route, request playwright.Request) {
-		headers := request.Headers()
+	require.NoError(t, page.Route("**/*", func(route playwright.Route) {
+		headers := route.Request().Headers()
 		headers["Foo"] = "bar"
 		require.NoError(t, route.Continue(playwright.RouteContinueOptions{
 			Method:   playwright.String("POST"),
@@ -72,7 +72,7 @@ func TestRouteContinueOverwriteBodyBytes(t *testing.T) {
 	serverRequestChan := server.WaitForRequestChan("/sleep.zzz")
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, page.Route("**/*", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, page.Route("**/*", func(route playwright.Route) {
 		require.NoError(t, route.Continue(playwright.RouteContinueOptions{
 			Method:   playwright.String("POST"),
 			PostData: []byte("foobar"),
@@ -91,8 +91,8 @@ func TestRouteFulfill(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	requestsChan := make(chan playwright.Request, 1)
-	err := page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
-		require.Equal(t, route.Request(), request)
+	err := page.Route("**/empty.html", func(route playwright.Route) {
+		request := route.Request()
 		require.Contains(t, request.URL(), "empty.html")
 		require.True(t, len(request.Headers()["user-agent"]) > 5)
 		require.Equal(t, "GET", request.Method())
@@ -131,7 +131,7 @@ func TestRouteFulfillByteSlice(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	intercepted := make(chan bool, 1)
-	err := page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	err := page.Route("**/empty.html", func(route playwright.Route) {
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
 			Body:        []byte("123"),
 			ContentType: playwright.String("text/plain"),
@@ -154,7 +154,7 @@ func TestRouteFulfillPath(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	intercepted := make(chan bool, 1)
-	err := page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	err := page.Route("**/empty.html", func(route playwright.Route) {
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
 			Path: playwright.String(Asset("pptr.png")),
 		}))
@@ -216,7 +216,7 @@ func TestRouteAbort(t *testing.T) {
 	page.Once("requestfailed", func(request playwright.Request) {
 		failedRequests <- request
 	})
-	err := page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	err := page.Route("**/empty.html", func(route playwright.Route) {
 		require.NoError(t, route.Abort("aborted"))
 	})
 	require.NoError(t, err)
@@ -234,8 +234,9 @@ func TestRequestPostData(t *testing.T) {
 	})
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, page.Route("**/foobar", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, page.Route("**/foobar", func(route playwright.Route) {
 		var postData map[string]interface{}
+		request := route.Request()
 		require.NoError(t, request.PostDataJSON(&postData))
 		require.Equal(t, map[string]interface{}{
 			"foo": true,

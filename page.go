@@ -587,7 +587,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		bt.Emit("popup", fromChannel(ev["page"]))
 	})
 	bt.channel.On("route", func(ev map[string]interface{}) {
-		bt.onRoute(fromChannel(ev["route"]).(*routeImpl), fromChannel(ev["request"]).(*requestImpl))
+		bt.onRoute(fromChannel(ev["route"]).(*routeImpl))
 	})
 	bt.channel.On("download", func(ev map[string]interface{}) {
 		url := ev["url"].(string)
@@ -651,17 +651,18 @@ func (p *pageImpl) onFrameDetached(frame *frameImpl) {
 	p.Emit("framedetached", frame)
 }
 
-func (p *pageImpl) onRoute(route *routeImpl, request *requestImpl) {
+func (p *pageImpl) onRoute(route *routeImpl) {
 	go func() {
 		p.Lock()
 		defer p.Unlock()
+		url := route.Request().URL()
 		for _, handlerEntry := range p.routes {
-			if handlerEntry.matcher.Matches(request.URL()) {
-				handlerEntry.handler(route, request)
+			if handlerEntry.matcher.Matches(url) {
+				handlerEntry.handler(route)
 				return
 			}
 		}
-		p.browserContext.onRoute(route, request)
+		p.browserContext.onRoute(route)
 	}()
 }
 

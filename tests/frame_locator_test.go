@@ -14,7 +14,7 @@ import (
 func routeIframe(t *testing.T, page playwright.Page) {
 	t.Helper()
 
-	err := page.Route("**/empty.html", func(route playwright.Route, _ playwright.Request) {
+	err := page.Route("**/empty.html", func(route playwright.Route) {
 		err := route.Fulfill(playwright.RouteFulfillOptions{
 			Body:        `<iframe id="frame1" src="iframe.html"></iframe>`,
 			ContentType: playwright.String("text/html"),
@@ -23,7 +23,7 @@ func routeIframe(t *testing.T, page playwright.Page) {
 	})
 	require.NoError(t, err)
 
-	err = page.Route("**/iframe.html", func(route playwright.Route, _ playwright.Request) {
+	err = page.Route("**/iframe.html", func(route playwright.Route) {
 		err = route.Fulfill(playwright.RouteFulfillOptions{
 			Body: `
 	        <html>
@@ -40,7 +40,7 @@ func routeIframe(t *testing.T, page playwright.Page) {
 	})
 	require.NoError(t, err)
 
-	err = page.Route("**/iframe-2.html", func(route playwright.Route, _ playwright.Request) {
+	err = page.Route("**/iframe-2.html", func(route playwright.Route) {
 		err = route.Fulfill(playwright.RouteFulfillOptions{
 			Body:        "<html><button>Hello nested iframe</button></html>",
 			ContentType: playwright.String("text/html"),
@@ -53,7 +53,7 @@ func routeIframe(t *testing.T, page playwright.Page) {
 func routeAmbiguous(t *testing.T, page playwright.Page) {
 	t.Helper()
 
-	err := page.Route("**/empty.html", func(route playwright.Route, _ playwright.Request) {
+	err := page.Route("**/empty.html", func(route playwright.Route) {
 		err := route.Fulfill(playwright.RouteFulfillOptions{
 			Body: `<iframe src="iframe-1.html"></iframe>
              <iframe src="iframe-2.html"></iframe>
@@ -64,7 +64,7 @@ func routeAmbiguous(t *testing.T, page playwright.Page) {
 	})
 	require.NoError(t, err)
 
-	err = page.Route("**/iframe-*", func(route playwright.Route, _ playwright.Request) {
+	err = page.Route("**/iframe-*", func(route playwright.Route) {
 		// const path = new URL(route.request().url()).pathname.slice(1);
 		u, err := url.Parse(route.Request().URL())
 		require.NoError(t, err)
