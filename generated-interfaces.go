@@ -160,7 +160,7 @@ type BrowserContext interface {
 	// both handlers.
 	// To remove a route with its handler you can use BrowserContext.unroute().
 	// **NOTE** Enabling routing disables http cache.
-	Route(url interface{}, handler routeHandler) error
+	Route(url interface{}, handler routeHandler, times ...int) error
 	SetOffline(offline bool) error
 	// Returns storage state for this browser context, contains current cookies and local storage snapshot.
 	StorageState(path ...string) (*StorageState, error)
@@ -1714,7 +1714,7 @@ type Page interface {
 	// matches both handlers.
 	// To remove a route with its handler you can use Page.unroute().
 	// **NOTE** Enabling routing disables http cache.
-	Route(url interface{}, handler routeHandler) error
+	Route(url interface{}, handler routeHandler, times ...int) error
 	// Returns the buffer with the captured screenshot.
 	Screenshot(options ...PageScreenshotOptions) ([]byte, error)
 	// This method waits for an element matching `selector`, waits for [actionability](../actionability.md) checks, waits

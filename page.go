@@ -3,6 +3,7 @@ package playwright
 import (
 	"encoding/base64"
 	"fmt"
+	"log"
 	"os"
 	"reflect"
 	"time"
@@ -160,13 +161,12 @@ func (p *pageImpl) Unroute(url interface{}, handlers ...routeHandler) error {
 	p.Lock()
 	defer p.Unlock()
 
-	routes, err := unroute(p.channel, p.routes, url, handlers...)
+	routes, err := unroute(p.routes, url, handlers...)
 	if err != nil {
 		return err
 	}
 	p.routes = routes
-
-	return nil
+	return p.updateInterceptionPatterns()
 }
 
 func (p *pageImpl) Content() (string, error) {
@@ -466,19 +466,11 @@ func (p *pageImpl) ExpectWorker(cb func() error) (Worker, error) {
 	return response.(*workerImpl), err
 }
 
-func (p *pageImpl) Route(url interface{}, handler routeHandler) error {
+func (p *pageImpl) Route(url interface{}, handler routeHandler, times ...int) error {
 	p.Lock()
 	defer p.Unlock()
-	p.routes = append(p.routes, newRouteHandlerEntry(newURLMatcher(url), handler))
-	if len(p.routes) == 1 {
-		_, err := p.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
-			"enabled": true,
-		})
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	p.routes = append(p.routes, newRouteHandlerEntry(newURLMatcher(url), handler, times...))
+	return p.updateInterceptionPatterns()
 }
 
 func (p *pageImpl) GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error) {
@@ -562,7 +554,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 			bt.Emit("dialog", fromChannel(ev["dialog"]))
 		}()
 	})
-	bt.channel.On("domcontentloaded", func() {
+	bt.channel.On("domcontentloaded", func(ev map[string]interface{}) {
 		bt.Emit("domcontentloaded")
 	})
 	bt.channel.On("fileChooser", func(ev map[string]interface{}) {
@@ -651,15 +643,36 @@ func (p *pageImpl) onRoute(route *routeImpl) {
 	go func() {
 		p.Lock()
 		defer p.Unlock()
+		routes := make([]*routeHandlerEntry, len(p.routes))
+		copy(routes, p.routes)
 		url := route.Request().URL()
-		for _, handlerEntry := range p.routes {
-			if handlerEntry.matcher.Matches(url) {
-				handlerEntry.handler(route)
-				return
+		for i, handlerEntry := range routes {
+			if !handlerEntry.matcher.Matches(url) {
+				continue
 			}
+			if handlerEntry.WillExceed() {
+				p.routes = append(p.routes[:i], p.routes[i+1:]...)
+			}
+			handlerEntry.Hit()
+			handlerEntry.handler(route)
+			if len(p.routes) == 0 {
+				err := p.updateInterceptionPatterns()
+				if err != nil {
+					log.Printf("could not update interception patterns: %v", err)
+				}
+			}
+			return
 		}
 		p.browserContext.onRoute(route)
 	}()
+}
+
+func (p *pageImpl) updateInterceptionPatterns() error {
+	patterns := prepareInterceptionPatterns(p.routes)
+	_, err := p.channel.Send("setNetworkInterceptionPatterns", map[string]interface{}{
+		"patterns": patterns,
+	})
+	return err
 }
 
 func (p *pageImpl) onWorker(worker *workerImpl) {

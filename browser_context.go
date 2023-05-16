@@ -191,30 +191,21 @@ func (b *browserContextImpl) ExposeFunction(name string, binding ExposedFunction
 	})
 }
 
-func (b *browserContextImpl) Route(url interface{}, handler routeHandler) error {
-	b.routes = append(b.routes, newRouteHandlerEntry(newURLMatcher(url), handler))
-	if len(b.routes) == 1 {
-		_, err := b.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
-			"enabled": true,
-		})
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+func (b *browserContextImpl) Route(url interface{}, handler routeHandler, times ...int) error {
+	b.routes = append(b.routes, newRouteHandlerEntry(newURLMatcher(url), handler, times...))
+	return b.updateInterceptionPatterns()
 }
 
 func (b *browserContextImpl) Unroute(url interface{}, handlers ...routeHandler) error {
 	b.Lock()
 	defer b.Unlock()
 
-	routes, err := unroute(b.channel, b.routes, url, handlers...)
+	routes, err := unroute(b.routes, url, handlers...)
 	if err != nil {
 		return err
 	}
 	b.routes = routes
-
-	return nil
+	return b.updateInterceptionPatterns()
 }
 
 func (b *browserContextImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
@@ -337,10 +328,25 @@ func (b *browserContextImpl) onPage(page *pageImpl) {
 
 func (b *browserContextImpl) onRoute(route *routeImpl) {
 	go func() {
+		b.Lock()
+		defer b.Unlock()
+
+		routes := make([]*routeHandlerEntry, len(b.routes))
+		copy(routes, b.routes)
 		url := route.Request().URL()
-		for _, handlerEntry := range b.routes {
+		for i, handlerEntry := range routes {
 			if handlerEntry.matcher.Matches(url) {
+				if handlerEntry.WillExceed() {
+					b.routes = append(b.routes[:i], b.routes[i+1:]...)
+				}
+				handlerEntry.Hit()
 				handlerEntry.handler(route)
+				if len(b.routes) == 0 {
+					err := b.updateInterceptionPatterns()
+					if err != nil {
+						log.Printf("could not update interception patterns: %v", err)
+					}
+				}
 				return
 			}
 		}
@@ -349,6 +355,15 @@ func (b *browserContextImpl) onRoute(route *routeImpl) {
 		}
 	}()
 }
+
+func (b *browserContextImpl) updateInterceptionPatterns() error {
+	patterns := prepareInterceptionPatterns(b.routes)
+	_, err := b.channel.Send("setNetworkInterceptionPatterns", map[string]interface{}{
+		"patterns": patterns,
+	})
+	return err
+}
+
 func (p *browserContextImpl) Pause() error {
 	_, err := p.channel.Send("pause")
 	return err

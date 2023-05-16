@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/danwakefield/fnmatch"
 )
@@ -201,12 +202,60 @@ func (u *urlMatcher) Matches(url string) bool {
 type routeHandlerEntry struct {
 	matcher *urlMatcher
 	handler routeHandler
+	times   int
+	count   int32
 }
 
-func newRouteHandlerEntry(matcher *urlMatcher, handler routeHandler) *routeHandlerEntry {
+func (r *routeHandlerEntry) Hit() {
+	atomic.AddInt32(&r.count, 1)
+}
+
+func (r *routeHandlerEntry) WillExceed() bool {
+	if r.times == 0 {
+		return false
+	}
+	return int(atomic.LoadInt32(&r.count)+1) >= r.times
+}
+
+func prepareInterceptionPatterns(handlers []*routeHandlerEntry) []map[string]interface{} {
+	patterns := []map[string]interface{}{}
+	all := false
+	for _, h := range handlers {
+		switch h.matcher.urlOrPredicate.(type) {
+		case *regexp.Regexp:
+			pattern, flags := convertRegexp(h.matcher.urlOrPredicate.(*regexp.Regexp))
+			patterns = append(patterns, map[string]interface{}{
+				"regexSource": pattern,
+				"regexFlags":  flags,
+			})
+		case string:
+			patterns = append(patterns, map[string]interface{}{
+				"glob": h.matcher.urlOrPredicate.(string),
+			})
+		default:
+			all = true
+		}
+	}
+	if all {
+		return []map[string]interface{}{
+			{
+				"glob": "**/*",
+			},
+		}
+	}
+	return patterns
+}
+
+func newRouteHandlerEntry(matcher *urlMatcher, handler routeHandler, times ...int) *routeHandlerEntry {
+	n := 0
+	if len(times) > 0 {
+		n = times[0]
+	}
 	return &routeHandlerEntry{
 		matcher: matcher,
 		handler: handler,
+		times:   n,
+		count:   0,
 	}
 }
 
@@ -376,7 +425,7 @@ func convertSelectOptionSet(values SelectOptionValues) map[string]interface{} {
 	return out
 }
 
-func unroute(channel *channel, inRoutes []*routeHandlerEntry, url interface{}, handlers ...routeHandler) ([]*routeHandlerEntry, error) {
+func unroute(inRoutes []*routeHandlerEntry, url interface{}, handlers ...routeHandler) ([]*routeHandlerEntry, error) {
 	var handler routeHandler
 	if len(handlers) == 1 {
 		handler = handlers[0]
@@ -390,15 +439,6 @@ func unroute(channel *channel, inRoutes []*routeHandlerEntry, url interface{}, h
 		if route.matcher.urlOrPredicate != url ||
 			(handler != nil && routeHandlerPtr != handlerPtr) {
 			routes = append(routes, route)
-		}
-	}
-
-	if len(routes) == 0 {
-		_, err := channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
-			"enabled": false,
-		})
-		if err != nil {
-			return nil, err
 		}
 	}
 	return routes, nil

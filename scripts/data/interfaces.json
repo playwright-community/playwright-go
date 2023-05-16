@@ -132,7 +132,7 @@
 			"error"
 		],
 		"Route": [
-			"url interface{}, handler routeHandler",
+			"url interface{}, handler routeHandler, times ...int",
 			"error"
 		],
 		"SetOffline": [
@@ -1228,7 +1228,7 @@
 			"Response, error"
 		],
 		"Route": [
-			"url interface{}, handler routeHandler",
+			"url interface{}, handler routeHandler, times ...int",
 			"error"
 		],
 		"Screenshot": [

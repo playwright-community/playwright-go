@@ -21,7 +21,8 @@ func newLocator(frame *frameImpl, selector string, options ...LocatorLocatorOpti
 		if option.HasText != nil {
 			switch hasText := option.HasText.(type) {
 			case *regexp.Regexp:
-				selector += fmt.Sprintf(" >> :scope:text-matches(%s)", convertRegexp(hasText))
+				pattern, flags := convertRegexp(hasText)
+				selector += fmt.Sprintf(" >> :scope:text-matches('%s', '%s')", pattern, flags)
 			case string:
 				selector += fmt.Sprintf(" >> :scope:has-text('%s')", hasText)
 			}
@@ -42,17 +43,16 @@ func newLocator(frame *frameImpl, selector string, options ...LocatorLocatorOpti
 	return &locatorImpl{frame: frame, selector: selector, options: option}, nil
 }
 
-func convertRegexp(reg *regexp.Regexp) string {
+func convertRegexp(reg *regexp.Regexp) (pattern, flags string) {
 	matches := regexp.MustCompile(`\(\?([imsU]+)\)(.+)`).FindStringSubmatch(reg.String())
 
-	var pattern, flags string
 	if len(matches) == 3 {
 		pattern = matches[2]
 		flags = matches[1]
 	} else {
 		pattern = reg.String()
 	}
-	return fmt.Sprintf("'%s', '%s'", pattern, flags)
+	return
 }
 
 func (l *locatorImpl) AllInnerTexts() ([]string, error) {
