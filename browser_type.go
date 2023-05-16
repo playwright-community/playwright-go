@@ -66,12 +66,13 @@ func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptio
 	overrides := map[string]interface{}{
 		"wsEndpoint": url,
 	}
-	pipe, err := b.channel.Send("connect", overrides, options)
+	localUtils := b.connection.LocalUtils()
+	pipe, err := localUtils.channel.Send("connect", overrides, options)
 	if err != nil {
 		return nil, err
 	}
 	jsonPipe := fromChannel(pipe).(*jsonPipe)
-	connection := newConnection(jsonPipe.Close)
+	connection := newConnection(jsonPipe.Close, localUtils)
 	connection.isRemote = true
 	var browser *browserImpl
 	pipeClosed := func() {

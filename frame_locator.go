@@ -16,7 +16,7 @@ func (fl *frameLocatorImpl) First() FrameLocator {
 }
 
 func (fl *frameLocatorImpl) FrameLocator(selector string) FrameLocator {
-	return newFrameLocator(fl.frame, fl.frameSelector+" >> control=enter-frame >> "+selector)
+	return newFrameLocator(fl.frame, fl.frameSelector+" >> internal:control=enter-frame >> "+selector)
 }
 
 func (fl *frameLocatorImpl) Last() FrameLocator {
@@ -24,7 +24,7 @@ func (fl *frameLocatorImpl) Last() FrameLocator {
 }
 
 func (fl *frameLocatorImpl) Locator(selector string, options ...LocatorLocatorOptions) (Locator, error) {
-	return newLocator(fl.frame, fl.frameSelector+" >> control=enter-frame >> "+selector, options...)
+	return newLocator(fl.frame, fl.frameSelector+" >> internal:control=enter-frame >> "+selector, options...)
 }
 
 func (fl *frameLocatorImpl) Nth(index int) FrameLocator {
