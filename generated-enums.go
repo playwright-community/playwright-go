@@ -77,6 +77,30 @@ var (
 	HarNotFoundFallback              = getHarNotFound("fallback")
 )
 
+func getRouteFromHarUpdateContentPolicy(in string) *RouteFromHarUpdateContentPolicy {
+	v := RouteFromHarUpdateContentPolicy(in)
+	return &v
+}
+
+type RouteFromHarUpdateContentPolicy string
+
+var (
+	RouteFromHarUpdateContentPolicyEmbed  *RouteFromHarUpdateContentPolicy = getRouteFromHarUpdateContentPolicy("embed")
+	RouteFromHarUpdateContentPolicyAttach                                  = getRouteFromHarUpdateContentPolicy("attach")
+)
+
+func getHarMode(in string) *HarMode {
+	v := HarMode(in)
+	return &v
+}
+
+type HarMode string
+
+var (
+	HarModeFull    *HarMode = getHarMode("full")
+	HarModeMinimal          = getHarMode("minimal")
+)
+
 func getMouseButton(in string) *MouseButton {
 	v := MouseButton(in)
 	return &v

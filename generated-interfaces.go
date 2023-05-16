@@ -1102,7 +1102,7 @@ type Locator interface {
 	// Passing zero timeout disables this.
 	// **NOTE** `element.dblclick()` dispatches two `click` events and a single `dblclick` event.
 	Dblclick(options ...FrameDblclickOptions) error
-	// Programmaticaly dispatch an event on the matching element.
+	// Programmatically dispatch an event on the matching element.
 	// **Usage**
 	// **Details**
 	// The snippet above dispatches the `click` event on the element. Regardless of the visibility state of the element,
@@ -1236,7 +1236,7 @@ type Locator interface {
 	Nth(index int) (Locator, error)
 	// A page this locator belongs to.
 	Page() Page
-	// Focuses the mathing element and presses a combintation of the keys.
+	// Focuses the matching element and presses a combination of the keys.
 	// **Usage**
 	// **Details**
 	// Focuses the element, and then uses Keyboard.down`] and [`method: Keyboard.up().
@@ -1769,7 +1769,7 @@ type Page interface {
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
-	// **NOTE** Page.tap() requires that the `hasTouch` option of the browser context be set to true.
+	// **NOTE** Page.tap() the method will throw if `hasTouch` option of the browser context is false.
 	Tap(selector string, options ...FrameTapOptions) error
 	// Returns `element.textContent`.
 	TextContent(selector string, options ...FrameTextContentOptions) (string, error)
@@ -1997,6 +1997,10 @@ type Route interface {
 	Abort(errorCode ...string) error
 	// Continues route's request with optional overrides.
 	// **Usage**
+	// **Details**
+	// Note that any overrides such as `url` or `headers` only apply to the request being routed. If this request results
+	// in a redirect, overrides will not be applied to the new redirected request. If you want to propagate a header
+	// through redirects, use the combination of Route.fetch`] and [`method: Route.fulfill() instead.
 	Continue(options ...RouteContinueOptions) error
 	// Fulfills route's request with given response.
 	// **Usage**
@@ -2011,6 +2015,7 @@ type Route interface {
 // the touchscreen can only be used in browser contexts that have been initialized with `hasTouch` set to true.
 type Touchscreen interface {
 	// Dispatches a `touchstart` and `touchend` event with a single touch at the position (`x`,`y`).
+	// **NOTE** Page.tap() the method will throw if `hasTouch` option of the browser context is false.
 	Tap(x int, y int) error
 }
 

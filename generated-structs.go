@@ -388,6 +388,14 @@ type BrowserContextRouteFromHAROptions struct {
 	// of serving from file. The file is written to disk when BrowserContext.Close() is
 	// called.
 	Update *bool `json:"update"`
+	// Optional setting to control resource content management. If `attach` is specified,
+	// resources are persisted as separate files or entries in the ZIP archive. If `embed`
+	// is specified, content is stored inline the HAR file.
+	UpdateContent *RouteFromHarUpdateContentPolicy `json:"updateContent"`
+	// When set to `minimal`, only record information necessary for routing from HAR. This
+	// omits sizes, timing, page, cookies, security and other types of HAR information
+	// that are not used when replaying from HAR. Defaults to `minimal`.
+	UpdateMode *HarMode `json:"updateMode"`
 	// A glob pattern, regular expression or predicate to match the request URL. Only requests
 	// with URL matching the pattern will be served from the HAR file. If not specified,
 	// all requests are served from the HAR file.
@@ -703,8 +711,8 @@ type ElementHandleCheckOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
 	Position *ElementHandleCheckOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -737,8 +745,8 @@ type ElementHandleClickOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
 	Position *ElementHandleClickOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -765,8 +773,8 @@ type ElementHandleDblclickOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
 	Position *ElementHandleDblclickOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -794,8 +802,8 @@ type ElementHandleFillOptions struct {
 	// would only need this option in the exceptional cases such as navigating to inaccessible
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -814,8 +822,8 @@ type ElementHandleHoverOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
 	Position *ElementHandleHoverOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -824,8 +832,8 @@ type ElementHandleHoverOptions struct {
 	Trial *bool `json:"trial"`
 }
 type ElementHandleInputValueOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -837,8 +845,8 @@ type ElementHandlePressOptions struct {
 	// would only need this option in the exceptional cases such as navigating to inaccessible
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -869,16 +877,16 @@ type ElementHandleScreenshotOptions struct {
 	// will be twice as large or even larger.
 	// Defaults to `"device"`.
 	Scale *ScreenshotScale `json:"scale"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// Specify screenshot type, defaults to `png`.
 	Type *ScreenshotType `json:"type"`
 }
 type ElementHandleScrollIntoViewIfNeededOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -890,16 +898,16 @@ type ElementHandleSelectOptionOptions struct {
 	// would only need this option in the exceptional cases such as navigating to inaccessible
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type ElementHandleSelectTextOptions struct {
 	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -914,8 +922,8 @@ type ElementHandleSetCheckedOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
 	Position *ElementHandleSetCheckedOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -929,8 +937,8 @@ type ElementHandleSetInputFilesOptions struct {
 	// would only need this option in the exceptional cases such as navigating to inaccessible
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -949,8 +957,8 @@ type ElementHandleTapOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
 	Position *ElementHandleTapOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -966,8 +974,8 @@ type ElementHandleTypeOptions struct {
 	// would only need this option in the exceptional cases such as navigating to inaccessible
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -982,8 +990,8 @@ type ElementHandleUncheckOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
 	Position *ElementHandleUncheckOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -992,8 +1000,8 @@ type ElementHandleUncheckOptions struct {
 	Trial *bool `json:"trial"`
 }
 type ElementHandleWaitForElementStateOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1010,8 +1018,8 @@ type ElementHandleWaitForSelectorOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1021,8 +1029,8 @@ type FileChooserSetFilesOptions struct {
 	// would only need this option in the exceptional cases such as navigating to inaccessible
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1061,8 +1069,8 @@ type FrameCheckOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -1098,8 +1106,8 @@ type FrameClickOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -1129,8 +1137,8 @@ type FrameDblclickOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -1142,8 +1150,8 @@ type FrameDispatchEventOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1164,8 +1172,8 @@ type FrameDragAndDropOptions struct {
 	// Drops on the target element at this point relative to the top-left corner of the
 	// element's padding box. If not specified, some visible point of the element is used.
 	TargetPosition *FrameDragAndDropOptionsTargetPosition `json:"targetPosition"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -1209,8 +1217,8 @@ type FrameFillOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1218,8 +1226,8 @@ type FrameFocusOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1227,8 +1235,8 @@ type FrameGetAttributeOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1336,8 +1344,8 @@ type FrameHoverOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -1349,8 +1357,8 @@ type FrameInnerHTMLOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1358,8 +1366,8 @@ type FrameInnerTextOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1367,8 +1375,8 @@ type FrameInputValueOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1376,8 +1384,8 @@ type FrameIsCheckedOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1385,8 +1393,8 @@ type FrameIsDisabledOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1394,8 +1402,8 @@ type FrameIsEditableOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1403,8 +1411,8 @@ type FrameIsEnabledOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1443,8 +1451,8 @@ type FramePressOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1464,8 +1472,8 @@ type FrameSelectOptionOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1483,8 +1491,8 @@ type FrameSetCheckedOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -1517,8 +1525,8 @@ type FrameSetInputFilesOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1540,8 +1548,8 @@ type FrameTapOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -1553,8 +1561,8 @@ type FrameTextContentOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1569,8 +1577,8 @@ type FrameTypeOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1588,8 +1596,8 @@ type FrameUncheckOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -1602,8 +1610,9 @@ type FrameWaitForFunctionOptions struct {
 	// callback. If `polling` is a number, then it is treated as an interval in milliseconds
 	// at which the function would be executed. Defaults to `raf`.
 	Polling interface{} `json:"polling"`
-	// maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
-	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type FrameWaitForLoadStateOptions struct {
@@ -1646,8 +1655,8 @@ type FrameWaitForSelectorOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1763,8 +1772,8 @@ type KeyboardTypeOptions struct {
 	Delay *float64 `json:"delay"`
 }
 type LocatorBlurOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1781,8 +1790,8 @@ type LocatorBoundingBoxResult struct {
 	Height float64 `json:"height"`
 }
 type LocatorBoundingBoxOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1797,8 +1806,8 @@ type LocatorCheckOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
 	Position *LocatorCheckOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -1818,8 +1827,8 @@ type LocatorClearOptions struct {
 	// would only need this option in the exceptional cases such as navigating to inaccessible
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1844,8 +1853,8 @@ type LocatorClickOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
 	Position *LocatorClickOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -1872,8 +1881,8 @@ type LocatorDblclickOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
 	Position *LocatorDblclickOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -1882,8 +1891,8 @@ type LocatorDblclickOptions struct {
 	Trial *bool `json:"trial"`
 }
 type LocatorDispatchEventOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1901,8 +1910,8 @@ type LocatorDragToOptions struct {
 	// Drops on the target element at this point relative to the top-left corner of the
 	// element's padding box. If not specified, some visible point of the element is used.
 	TargetPosition *LocatorDragToOptionsTargetPosition `json:"targetPosition"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -1919,14 +1928,14 @@ type LocatorTargetPosition struct {
 	Y *float64 `json:"y"`
 }
 type LocatorElementHandleOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorEvaluateOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1935,8 +1944,8 @@ type LocatorEvaluateAllOptions struct {
 	Arg interface{} `json:"arg"`
 }
 type LocatorEvaluateHandleOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1948,8 +1957,8 @@ type LocatorFillOptions struct {
 	// would only need this option in the exceptional cases such as navigating to inaccessible
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -1966,14 +1975,14 @@ type LocatorFilterOptions struct {
 	HasText interface{} `json:"hasText"`
 }
 type LocatorFocusOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorGetAttributeOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2059,8 +2068,8 @@ type LocatorHoverOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
 	Position *LocatorHoverOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -2069,44 +2078,44 @@ type LocatorHoverOptions struct {
 	Trial *bool `json:"trial"`
 }
 type LocatorInnerHTMLOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorInnerTextOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorInputValueOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorIsCheckedOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorIsDisabledOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorIsEditableOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorIsEnabledOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2136,8 +2145,8 @@ type LocatorPressOptions struct {
 	// would only need this option in the exceptional cases such as navigating to inaccessible
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2168,16 +2177,16 @@ type LocatorScreenshotOptions struct {
 	// will be twice as large or even larger.
 	// Defaults to `"device"`.
 	Scale *ScreenshotScale `json:"scale"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// Specify screenshot type, defaults to `png`.
 	Type *ScreenshotType `json:"type"`
 }
 type LocatorScrollIntoViewIfNeededOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2189,16 +2198,16 @@ type LocatorSelectOptionOptions struct {
 	// would only need this option in the exceptional cases such as navigating to inaccessible
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorSelectTextOptions struct {
 	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2213,8 +2222,8 @@ type LocatorSetCheckedOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
 	Position *LocatorSetCheckedOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -2228,8 +2237,8 @@ type LocatorSetInputFilesOptions struct {
 	// would only need this option in the exceptional cases such as navigating to inaccessible
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2248,8 +2257,8 @@ type LocatorTapOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
 	Position *LocatorTapOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -2258,8 +2267,8 @@ type LocatorTapOptions struct {
 	Trial *bool `json:"trial"`
 }
 type LocatorTextContentOptions struct {
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2271,8 +2280,8 @@ type LocatorTypeOptions struct {
 	// would only need this option in the exceptional cases such as navigating to inaccessible
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2287,8 +2296,8 @@ type LocatorUncheckOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
 	Position *LocatorUncheckOptionsPosition `json:"position"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -2306,8 +2315,8 @@ type LocatorWaitForOptions struct {
 	// `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding
 	// box or `visibility:hidden`. This is opposite to the `'visible'` option.
 	State *WaitForSelectorState `json:"state"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2319,6 +2328,11 @@ type LocatorAssertionsToBeEditableOptions struct {
 }
 type LocatorAssertionsToBeEnabledOptions struct {
 	Enabled *bool `json:"enabled"`
+}
+type LocatorAssertionsToBeInViewportOptions struct {
+	// The minimal ratio of the element to intersect viewport. If equals to `0`, then element
+	// should intersect viewport at any positive ratio. Defaults to `0`.
+	Ratio *float64 `json:"ratio"`
 }
 type LocatorAssertionsToBeVisibleOptions struct {
 	Visible *bool `json:"visible"`
@@ -2370,10 +2384,10 @@ type MouseUpOptions struct {
 	ClickCount *int `json:"clickCount"`
 }
 type PageAddInitScriptOptions struct {
-	// Optional Script source to be evaluated in all pages in the browser context.
-	Script *string `json:"script"`
 	// Optional Script path to be evaluated in all pages in the browser context.
 	Path *string `json:"path"`
+	// Optional Script source to be evaluated in all pages in the browser context.
+	Script *string `json:"script"`
 }
 type PageAddScriptTagOptions struct {
 	// Raw JavaScript content to be injected into frame.
@@ -2410,8 +2424,8 @@ type PageCheckOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -2447,8 +2461,8 @@ type PageClickOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -2483,8 +2497,8 @@ type PageDblclickOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -2496,8 +2510,8 @@ type PageDispatchEventOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2518,8 +2532,8 @@ type PageDragAndDropOptions struct {
 	// Drops on the target element at this point relative to the top-left corner of the
 	// element's padding box. If not specified, some visible point of the element is used.
 	TargetPosition *PageDragAndDropOptionsTargetPosition `json:"targetPosition"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -2581,8 +2595,8 @@ type PageFillOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2590,8 +2604,8 @@ type PageFocusOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2599,8 +2613,8 @@ type PageGetAttributeOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2740,8 +2754,8 @@ type PageHoverOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -2753,8 +2767,8 @@ type PageInnerHTMLOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2762,8 +2776,8 @@ type PageInnerTextOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2771,8 +2785,8 @@ type PageInputValueOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2780,8 +2794,8 @@ type PageIsCheckedOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2789,8 +2803,8 @@ type PageIsDisabledOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2798,8 +2812,8 @@ type PageIsEditableOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2807,8 +2821,8 @@ type PageIsEnabledOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2898,8 +2912,8 @@ type PagePressOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2937,6 +2951,14 @@ type PageRouteFromHAROptions struct {
 	// of serving from file. The file is written to disk when BrowserContext.Close() is
 	// called.
 	Update *bool `json:"update"`
+	// Optional setting to control resource content management. If `attach` is specified,
+	// resources are persisted as separate files or entries in the ZIP archive. If `embed`
+	// is specified, content is stored inline the HAR file.
+	UpdateContent *RouteFromHarUpdateContentPolicy `json:"updateContent"`
+	// When set to `minimal`, only record information necessary for routing from HAR. This
+	// omits sizes, timing, page, cookies, security and other types of HAR information
+	// that are not used when replaying from HAR. Defaults to `full`.
+	UpdateMode *HarMode `json:"updateMode"`
 	// A glob pattern, regular expression or predicate to match the request URL. Only requests
 	// with URL matching the pattern will be served from the HAR file. If not specified,
 	// all requests are served from the HAR file.
@@ -2975,8 +2997,8 @@ type PageScreenshotOptions struct {
 	// will be twice as large or even larger.
 	// Defaults to `"device"`.
 	Scale *ScreenshotScale `json:"scale"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// Specify screenshot type, defaults to `png`.
@@ -3003,8 +3025,8 @@ type PageSelectOptionOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -3022,8 +3044,8 @@ type PageSetCheckedOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -3056,8 +3078,8 @@ type PageSetInputFilesOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -3079,8 +3101,8 @@ type PageTapOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -3092,8 +3114,8 @@ type PageTextContentOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -3108,8 +3130,8 @@ type PageTypeOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -3127,8 +3149,8 @@ type PageUncheckOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability](../actionability.md) checks
@@ -3153,8 +3175,9 @@ type PageWaitForFunctionOptions struct {
 	// callback. If `polling` is a number, then it is treated as an interval in milliseconds
 	// at which the function would be executed. Defaults to `raf`.
 	Polling interface{} `json:"polling"`
-	// maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
-	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
 type PageWaitForLoadStateOptions struct {
@@ -3209,8 +3232,8 @@ type PageWaitForSelectorOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
 	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
-	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
-	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
@@ -3366,6 +3389,10 @@ type RouteFallbackOptions struct {
 type RouteFetchOptions struct {
 	// If set changes the request HTTP headers. Header values will be converted to a string.
 	Headers map[string]string `json:"headers"`
+	// Maximum number of request redirects that will be followed automatically. An error
+	// will be thrown if the number is exceeded. Defaults to `20`. Pass `0` to not follow
+	// redirects.
+	MaxRedirects *int `json:"maxRedirects"`
 	// If set changes the request method (e.g. GET or POST).
 	Method *string `json:"method"`
 	// If set changes the request URL. New URL must have same protocol as original one.
@@ -3407,6 +3434,9 @@ type TracingStartOptions struct {
 	Title *string `json:"title"`
 }
 type TracingStartChunkOptions struct {
+	// If specified, the trace is going to be saved into the file with the given name inside
+	// the `tracesDir` folder specified in BrowserType.Launch().
+	Name *string `json:"name"`
 	// Trace name to be shown in the Trace Viewer.
 	Title *string `json:"title"`
 }
