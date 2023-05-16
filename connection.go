@@ -5,6 +5,7 @@ import (
 	"log"
 	"reflect"
 	"sync"
+	"sync/atomic"
 
 	"github.com/go-stack/stack"
 )
@@ -26,6 +27,7 @@ type connection struct {
 	onmessage                   func(map[string]interface{}) error
 	isRemote                    bool
 	localUtils                  *localUtilsImpl
+	tracingCount                atomic.Int32
 }
 
 func (c *connection) Start() *Playwright {
@@ -159,15 +161,19 @@ func (c *connection) replaceGuidsWithChannels(payload interface{}) interface{} {
 	return payload
 }
 
-func (c *connection) SendMessageToServer(guid string, method string, params interface{}) (interface{}, error) {
+func (c *connection) setInTracing(isTracing bool) {
+	if isTracing {
+		c.tracingCount.Add(1)
+	} else {
+		c.tracingCount.Add(-1)
+	}
+}
+
+func (c *connection) SendMessageToServer(guid string, method string, metadata map[string]interface{}, params interface{}) (interface{}, error) {
 	c.lastIDLock.Lock()
 	c.lastID++
 	id := c.lastID
 	c.lastIDLock.Unlock()
-	stack := serializeCallStack(stack.Trace())
-	metadata := make(map[string]interface{})
-	metadata["stack"] = stack
-	metadata["apiName"] = ""
 	message := map[string]interface{}{
 		"id":       id,
 		"guid":     guid,
@@ -179,6 +185,11 @@ func (c *connection) SendMessageToServer(guid string, method string, params inte
 	if err := c.onmessage(message); err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
+	stack := serializeCallStack(stack.Trace())
+	if c.tracingCount.Load() > 0 && len(stack) > 0 && guid != "localUtils" {
+		c.LocalUtils().AddStackToTracingNoReply(id, stack)
+	}
+
 	result := <-cb.(chan callback)
 	c.callbacks.Delete(id)
 	if result.Error != nil {
@@ -193,6 +204,7 @@ func serializeCallStack(stack stack.CallStack) []map[string]interface{} {
 		callStack = append(callStack, map[string]interface{}{
 			"file":     s.Frame().File,
 			"line":     s.Frame().Line,
+			"column":   0,
 			"function": s.Frame().Function,
 		})
 	}
