@@ -448,7 +448,7 @@ index ef304b556..c52096e00 100644
  
  ### option: Page.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
 diff --git a/docs/src/api/class-route.md b/docs/src/api/class-route.md
-index 4f1a00757..897d177b3 100644
+index 4f1a00757..dd42cb7dc 100644
 --- a/docs/src/api/class-route.md
 +++ b/docs/src/api/class-route.md
 @@ -137,6 +137,13 @@ If set changes the post data of request.
@@ -507,14 +507,6 @@ index 4f1a00757..897d177b3 100644
  ### option: Route.fulfill.body
  * since: v1.8
  * langs: csharp, java
-@@ -667,6 +695,7 @@ is resolved relative to the current working directory.
- 
- ### option: Route.fulfill.response
- * since: v1.15
-+* langs: js, python, csharp, java
- - `response` <[APIResponse]>
- 
- [APIResponse] to fulfill route's request with. Individual fields of the response (such as headers) can be overridden using fulfill options.
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
 index 22f352719..cc1268d50 100644
 --- a/docs/src/api/params.md

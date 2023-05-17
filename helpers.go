@@ -83,6 +83,21 @@ func transformStructIntoMapIfNeeded(inStruct interface{}) map[string]interface{}
 	return out
 }
 
+func mergeStructIntoMapIfNeeded(inMap map[string]interface{}, inStruct interface{}) map[string]interface{} {
+	v := reflect.ValueOf(inStruct)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	m := transformStructIntoMapIfNeeded(v.Interface())
+	for k, v := range m {
+		_, ok := inMap[k]
+		if !ok {
+			inMap[k] = v
+		}
+	}
+	return inMap
+}
+
 // transformOptions handles the parameter data transformation
 func transformOptions(options ...interface{}) map[string]interface{} {
 	var base map[string]interface{}
@@ -207,8 +222,15 @@ type routeHandlerEntry struct {
 	count   int32
 }
 
-func (r *routeHandlerEntry) Hit() {
+func (r *routeHandlerEntry) Matches(url string) bool {
+	return r.matcher.Matches(url)
+}
+
+func (r *routeHandlerEntry) Handle(route Route) chan bool {
+	handled := route.(*routeImpl).startHandling()
 	atomic.AddInt32(&r.count, 1)
+	r.handler(route)
+	return handled
 }
 
 func (r *routeHandlerEntry) WillExceed() bool {
@@ -512,4 +534,59 @@ func assignStructFields(dest, src interface{}, omitExtra bool) error {
 	}
 
 	return nil
+}
+
+func deserializeNameAndValueToMap(headersArray []map[string]string) map[string]string {
+	unserialized := make(map[string]string)
+	for _, item := range headersArray {
+		unserialized[item["name"]] = item["value"]
+	}
+	return unserialized
+}
+
+type recordHarOptions struct {
+	Path           string            `json:"path"`
+	Content        *HarContentPolicy `json:"content,omitempty"`
+	Mode           *HarMode          `json:"mode,omitempty"`
+	UrlGlob        *string           `json:"urlGlob,omitempty"`
+	UrlRegexSource *string           `json:"urlRegexSource,omitempty"`
+	UrlRegexFlags  *string           `json:"urlRegexFlags,omitempty"`
+}
+
+type recordHarInputOptions struct {
+	Path        string
+	URL         interface{}
+	Mode        *HarMode
+	Content     *HarContentPolicy
+	OmitContent *bool
+}
+
+type harRecordingMetadata struct {
+	Path    string
+	Content *HarContentPolicy
+}
+
+func prepareRecordHarOptions(option recordHarInputOptions) recordHarOptions {
+	out := recordHarOptions{
+		Path: option.Path,
+	}
+	if option.URL != nil {
+		switch option.URL.(type) {
+		case *regexp.Regexp:
+			pattern, flags := convertRegexp(option.URL.(*regexp.Regexp))
+			out.UrlRegexSource = String(pattern)
+			out.UrlRegexFlags = String(flags)
+		case string:
+			out.UrlGlob = String(option.URL.(string))
+		}
+	}
+	if option.Mode != nil {
+		out.Mode = option.Mode
+	}
+	if option.Content != nil {
+		out.Content = option.Content
+	} else if option.OmitContent != nil && *option.OmitContent {
+		out.Content = HarContentPolicyOmit
+	}
+	return out
 }

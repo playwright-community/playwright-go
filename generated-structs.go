@@ -3451,6 +3451,9 @@ type RouteFulfillOptions struct {
 	// If `path` is a relative path, then it is resolved relative to the current working
 	// directory.
 	Path *string `json:"path"`
+	// APIResponse to fulfill route's request with. Individual fields of the response (such
+	// as headers) can be overridden using fulfill options.
+	Response APIResponse `json:"response"`
 	// Response status code, defaults to `200`.
 	Status *int `json:"status"`
 }

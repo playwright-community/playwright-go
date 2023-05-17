@@ -8,10 +8,15 @@ import (
 
 type browserImpl struct {
 	channelOwner
-	isConnected              bool
-	isClosedOrClosing        bool
-	isConnectedOverWebSocket bool
-	contexts                 []BrowserContext
+	isConnected                  bool
+	isClosedOrClosing            bool
+	shouldCloseConnectionOnClose bool
+	contexts                     []BrowserContext
+	browserType                  BrowserType
+}
+
+func (b *browserImpl) BrowserType() BrowserType {
+	return b.browserType
 }
 
 func (b *browserImpl) IsConnected() bool {
@@ -22,6 +27,7 @@ func (b *browserImpl) IsConnected() bool {
 
 func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserContext, error) {
 	overrides := map[string]interface{}{}
+	harOptions := recordHarOptions{}
 	if len(options) == 1 {
 		if options[0].ExtraHttpHeaders != nil {
 			overrides["extraHTTPHeaders"] = serializeMapToNameAndValue(options[0].ExtraHttpHeaders)
@@ -45,15 +51,21 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 			options[0].NoViewport = nil
 		}
 		if options[0].RecordHarPath != nil {
-			recordHar := map[string]interface{}{}
-			recordHar["path"] = *options[0].RecordHarPath
-			if options[0].RecordHarOmitContent != nil {
-				recordHar["omitContent"] = true
-			}
-			overrides["recordHar"] = recordHar
-		} else if options[0].RecordHarOmitContent != nil {
-			return nil, fmt.Errorf("recordHarOmitContent is set but recordHarPath is nil")
+			harOptions = prepareRecordHarOptions(recordHarInputOptions{
+				Path:        *options[0].RecordHarPath,
+				URL:         options[0].RecordHarUrlFilter,
+				Mode:        options[0].RecordHarMode,
+				Content:     options[0].RecordHarContent,
+				OmitContent: options[0].RecordHarOmitContent,
+			})
+			overrides["recordHar"] = harOptions
+			options[0].RecordHarPath = nil
+			options[0].RecordHarUrlFilter = nil
+			options[0].RecordHarMode = nil
+			options[0].RecordHarContent = nil
+			options[0].RecordHarOmitContent = nil
 		}
+		overrides = mergeStructIntoMapIfNeeded(overrides, options[0])
 	}
 	channel, err := b.channel.Send("newContext", overrides, options)
 	if err != nil {
@@ -61,8 +73,15 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 	}
 	context := fromChannel(channel).(*browserContextImpl)
 	if len(options) == 1 {
-		context.options = &options[0]
+		context.options = overrides
+		if overrides["recordHar"] != nil {
+			context.harRecorders[""] = harRecordingMetadata{
+				Path:    harOptions.Path,
+				Content: harOptions.Content,
+			}
+		}
 	}
+	b.browserType.(*browserTypeImpl).didCreateContext(context, overrides, nil)
 	context.browser = b
 	b.Lock()
 	b.contexts = append(b.contexts, context)
@@ -102,11 +121,17 @@ func (b *browserImpl) Contexts() []BrowserContext {
 }
 
 func (b *browserImpl) Close() error {
+	if b.isClosedOrClosing {
+		return nil
+	}
+	b.Lock()
+	b.isClosedOrClosing = true
+	b.Unlock()
 	_, err := b.channel.Send("close")
 	if err != nil {
 		return fmt.Errorf("could not send message: %w", err)
 	}
-	if b.isConnectedOverWebSocket {
+	if b.shouldCloseConnectionOnClose {
 		return b.connection.Stop()
 	}
 	return nil
@@ -118,9 +143,9 @@ func (b *browserImpl) Version() string {
 
 func (b *browserImpl) onClose() {
 	b.Lock()
-	if !b.isClosedOrClosing {
+	b.isClosedOrClosing = true
+	if b.isConnected {
 		b.isConnected = false
-		b.isClosedOrClosing = true
 		b.Emit("disconnected")
 	}
 	b.Unlock()
@@ -132,6 +157,8 @@ func newBrowser(parent *channelOwner, objectType string, guid string, initialize
 		contexts:    make([]BrowserContext, 0),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
+	var p interface{} = parent
+	bt.browserType, _ = p.(*browserTypeImpl)
 	bt.channel.On("close", bt.onClose)
 	return bt
 }

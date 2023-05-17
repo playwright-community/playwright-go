@@ -101,6 +101,10 @@
 		"extends": [
 			"EventEmitter"
 		],
+		"BrowserType": [
+			null,
+			"BrowserType"
+		],
 		"Close": [
 			null,
 			"error"
@@ -219,12 +223,20 @@
 			"gelocation *Geolocation",
 			"error"
 		],
+		"Request": [
+			null,
+			"APIRequestContext"
+		],
 		"ResetGeolocation": [
 			null,
 			"error"
 		],
 		"Route": [
 			"url interface{}, handler routeHandler, times ...int",
+			"error"
+		],
+		"RouteFromHAR": [
+			"har string, options ...BrowserContextRouteFromHAROptions",
 			"error"
 		],
 		"SetOffline": [
@@ -1323,6 +1335,10 @@
 			"url interface{}, handler routeHandler, times ...int",
 			"error"
 		],
+		"RouteFromHAR": [
+			"har string, options ...PageRouteFromHAROptions",
+			"error"
+		],
 		"Screenshot": [
 			"options ...PageScreenshotOptions",
 			"([]byte, error)"
@@ -1600,6 +1616,14 @@
 		"Continue": [
 			"options ...RouteContinueOptions",
 			"error"
+		],
+		"Fallback": [
+			"options ...RouteFallbackOptions",
+			"error"
+		],
+		"Fetch": [
+			"options ...RouteFetchOptions",
+			"(APIResponse, error)"
 		],
 		"Fulfill": [
 			"options RouteFulfillOptions",

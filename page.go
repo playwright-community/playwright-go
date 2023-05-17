@@ -510,6 +510,34 @@ func (p *pageImpl) Mouse() Mouse {
 	return p.mouse
 }
 
+func (p *pageImpl) RouteFromHAR(har string, options ...PageRouteFromHAROptions) error {
+	opt := PageRouteFromHAROptions{}
+	if len(options) == 1 {
+		opt = options[0]
+	}
+	if opt.Update != nil && *opt.Update {
+		var updateContent *HarContentPolicy
+		switch opt.UpdateContent {
+		case RouteFromHarUpdateContentPolicyAttach:
+			updateContent = HarContentPolicyAttach
+		case RouteFromHarUpdateContentPolicyEmbed:
+			updateContent = HarContentPolicyEmbed
+		}
+		return p.browserContext.recordIntoHar(har, browserContextRecordIntoHarOptions{
+			Page:          p,
+			URL:           opt.URL,
+			UpdateContent: updateContent,
+			UpdateMode:    opt.UpdateMode,
+		})
+	}
+	notFound := opt.NotFound
+	if notFound == nil {
+		notFound = HarNotFoundAbort
+	}
+	router := newHarRouter(p.connection.localUtils, har, *notFound, opt.URL)
+	return router.addPageRoute(p)
+}
+
 func (p *pageImpl) Touchscreen() Touchscreen {
 	return p.touchscreen
 }
@@ -647,21 +675,22 @@ func (p *pageImpl) onRoute(route *routeImpl) {
 		copy(routes, p.routes)
 		url := route.Request().URL()
 		for i, handlerEntry := range routes {
-			if !handlerEntry.matcher.Matches(url) {
+			if !handlerEntry.Matches(url) {
 				continue
 			}
 			if handlerEntry.WillExceed() {
 				p.routes = append(p.routes[:i], p.routes[i+1:]...)
 			}
-			handlerEntry.Hit()
-			handlerEntry.handler(route)
+			handled := handlerEntry.Handle(route)
 			if len(p.routes) == 0 {
 				err := p.updateInterceptionPatterns()
 				if err != nil {
 					log.Printf("could not update interception patterns: %v", err)
 				}
 			}
-			return
+			if <-handled {
+				return
+			}
 		}
 		p.browserContext.onRoute(route)
 	}()
@@ -682,7 +711,9 @@ func (p *pageImpl) onWorker(worker *workerImpl) {
 }
 
 func (p *pageImpl) onClose() {
+	p.Lock()
 	p.isClosed = true
+	p.Unlock()
 	newPages := []Page{}
 	newBackgoundPages := []Page{}
 	if p.browserContext != nil {

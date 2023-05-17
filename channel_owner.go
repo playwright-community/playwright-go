@@ -32,7 +32,7 @@ func (c *channelOwner) dispose() {
 }
 
 func (c *channelOwner) adopt(child *channelOwner) {
-	delete(child.objects, child.guid)
+	delete(child.parent.objects, child.guid)
 	c.objects[child.guid] = child
 	child.parent = c
 }

@@ -26,7 +26,9 @@ func (b *browserTypeImpl) Launch(options ...BrowserTypeLaunchOptions) (Browser, 
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
-	return fromChannel(channel).(*browserImpl), nil
+	browser := fromChannel(channel).(*browserImpl)
+	b.didLaunchBrowser(browser)
+	return browser, nil
 }
 
 func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (BrowserContext, error) {
@@ -55,13 +57,18 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 		} else if options[0].RecordHarOmitContent != nil {
 			return nil, fmt.Errorf("recordHarOmitContent is set but recordHarPath is nil")
 		}
+		overrides = mergeStructIntoMapIfNeeded(overrides, options[0])
 	}
-	channel, err := b.channel.Send("launchPersistentContext", overrides, options)
+
+	channel, err := b.channel.Send("launchPersistentContext", overrides)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
-	return fromChannel(channel).(*browserContextImpl), nil
+	context := fromChannel(channel).(*browserContextImpl)
+	b.didCreateContext(context, overrides, overrides)
+	return context, nil
 }
+
 func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptions) (Browser, error) {
 	overrides := map[string]interface{}{
 		"wsEndpoint": url,
@@ -96,7 +103,8 @@ func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptio
 	jsonPipe.On("message", connection.Dispatch)
 	playwright := connection.Start()
 	browser = fromChannel(playwright.initializer["preLaunchedBrowser"]).(*browserImpl)
-	browser.isConnectedOverWebSocket = true
+	b.didLaunchBrowser(browser)
+	browser.shouldCloseConnectionOnClose = true
 	return browser, nil
 }
 func (b *browserTypeImpl) ConnectOverCDP(endpointURL string, options ...BrowserTypeConnectOverCDPOptions) (Browser, error) {
@@ -108,12 +116,22 @@ func (b *browserTypeImpl) ConnectOverCDP(endpointURL string, options ...BrowserT
 		return nil, err
 	}
 	browser := fromChannel(response.(map[string]interface{})["browser"]).(*browserImpl)
+	b.didLaunchBrowser(browser)
 	if defaultContext, ok := response.(map[string]interface{})["defaultContext"]; ok {
 		context := fromChannel(defaultContext).(*browserContextImpl)
+		b.didCreateContext(context, nil, nil)
 		browser.contexts = append(browser.contexts, context)
 		context.browser = browser
 	}
 	return browser, nil
+}
+
+func (b *browserTypeImpl) didCreateContext(context *browserContextImpl, contextOptions, browserOptions map[string]interface{}) {
+	context.setOptions(contextOptions, browserOptions)
+}
+
+func (b *browserTypeImpl) didLaunchBrowser(browser *browserImpl) {
+	browser.browserType = b
 }
 
 func newBrowserType(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserTypeImpl {
