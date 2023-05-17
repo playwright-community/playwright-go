@@ -1,4 +1,96 @@
 {
+	"APIRequest": {
+		"extends": [
+			"EventEmitter"
+		],
+		"NewContext": [
+			"options ...APIRequestNewContextOptions",
+			"(APIRequestContext, error)"
+		]
+	},
+	"APIRequestContext": {
+		"extends": [
+			"EventEmitter"
+		],
+		"Delete": [
+			"url string, options ...APIRequestContextDeleteOptions",
+			"APIResponse, error"
+		],
+		"Dispose": [
+			null,
+			"error"
+		],
+		"Fetch": [
+			"urlOrRequest interface{}, options ...APIRequestContextFetchOptions",
+			"(APIResponse, error)"
+		],
+		"Get": [
+			"url string, options ...APIRequestContextGetOptions",
+			"APIResponse, error"
+		],
+		"Head": [
+			"url string, options ...APIRequestContextHeadOptions",
+			"APIResponse, error"
+		],
+		"Post": [
+			"url string, options ...APIRequestContextPostOptions",
+			"APIResponse, error"
+		],
+		"Put": [
+			"url string, options ...APIRequestContextPutOptions",
+			"APIResponse, error"
+		],
+		"Patch": [
+			"url string, options ...APIRequestContextPatchOptions",
+			"APIResponse, error"
+		],
+		"StorageState": [
+			"path ...string",
+			"*StorageState, error"
+		]
+	},
+	"APIResponse": {
+		"Body": [
+			null,
+			"[]byte, error"
+		],
+		"Dispose": [
+			null,
+			"error"
+		],
+		"Headers": [
+			null,
+			"map[string]string"
+		],
+		"HeadersArray": [
+			null,
+			"HeadersArray"
+		],
+		"JSON": [
+			"v interface{}",
+			"error"
+		],
+		"Ok": [
+			null,
+			"bool"
+		],
+		"Status": [
+			null,
+			"int"
+		],
+		"StatusText": [
+			null,
+			"string"
+		],
+		"Text": [
+			null,
+			"(string, error)"
+		],
+		"URL": [
+			null,
+			"string"
+		]
+	},
 	"BindingCall": {
 		"Call": [
 			"f BindingCallFunction",

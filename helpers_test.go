@@ -138,3 +138,111 @@ func TestConvertSelectOptionSet(t *testing.T) {
 		})
 	}
 }
+
+func TestAssignFields(t *testing.T) {
+	type (
+		A struct {
+			Field1 string
+			Field2 int
+		}
+		B struct {
+			Field1 string
+			Field2 int
+			Field3 float64
+		}
+		args struct {
+			dest      interface{}
+			src       interface{}
+			omitExtra bool
+		}
+	)
+	var testV = "foo"
+
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "src is nil",
+			args: args{
+				dest:      &B{},
+				src:       nil,
+				omitExtra: true,
+			},
+			wantErr: true,
+		},
+		{
+			name: "src is not struct",
+			args: args{
+				dest:      &B{},
+				src:       "foo",
+				omitExtra: true,
+			},
+			wantErr: true,
+		},
+		{
+			name: "dest is nil",
+			args: args{
+				dest:      nil,
+				src:       &A{},
+				omitExtra: true,
+			},
+			wantErr: true,
+		},
+		{
+			name: "dest is not struct",
+			args: args{
+				dest:      &testV,
+				src:       &A{},
+				omitExtra: true,
+			},
+			wantErr: true,
+		},
+		{
+			name: "dest includes all src fields",
+			args: args{
+				dest: &B{},
+				src: &A{
+					Field1: "hello",
+					Field2: 42,
+				},
+				omitExtra: true,
+			},
+			wantErr: false,
+		},
+		{
+			name: "dest does not include all src fields, omit extra fields",
+			args: args{
+				dest: &A{},
+				src: &B{
+					Field1: "hello",
+					Field2: 42,
+					Field3: 3.14,
+				},
+				omitExtra: true,
+			},
+			wantErr: false,
+		},
+		{
+			name: "dest does not include all src fields",
+			args: args{
+				dest: &A{},
+				src: &B{
+					Field1: "hello",
+					Field2: 42,
+					Field3: 3.14,
+				},
+				omitExtra: false,
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := assignStructFields(tt.args.dest, tt.args.src, tt.args.omitExtra); (err != nil) != tt.wantErr {
+				t.Errorf("assignFields() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

@@ -23,9 +23,9 @@ func (f *fileChooserImpl) IsMultiple() bool {
 // - ElementHandle.SetInputFiles()
 // - Page.SetInputFiles()
 type InputFile struct {
-	Name     string
-	MimeType string
-	Buffer   []byte
+	Name     string `json:"name"`
+	MimeType string `json:"mimeType,omitempty"`
+	Buffer   []byte `json:"buffer"`
 }
 
 func (f *fileChooserImpl) SetFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error {

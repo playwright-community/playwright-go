@@ -20,6 +20,7 @@ type Playwright struct {
 	Chromium BrowserType
 	Firefox  BrowserType
 	WebKit   BrowserType
+	Request  APIRequest
 	Devices  map[string]*DeviceDescriptor
 }
 
@@ -44,6 +45,7 @@ func newPlaywright(parent *channelOwner, objectType string, guid string, initial
 	}
 	pw.utils = fromChannel(initializer["utils"]).(*localUtilsImpl)
 	pw.createChannelOwner(pw, parent, objectType, guid, initializer)
+	pw.Request = newApiRequestImpl(pw)
 	return pw
 }
 

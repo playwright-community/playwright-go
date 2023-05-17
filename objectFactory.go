@@ -9,7 +9,7 @@ func createObjectFactory(parent *channelOwner, objectType string, guid string, i
 	case "AndroidDevice":
 		return nil
 	case "APIRequestContext":
-		return nil
+		return newAPIRequestContext(parent, objectType, guid, initializer)
 	case "Artifact":
 		return newArtifact(parent, objectType, guid, initializer)
 	case "BindingCall":
@@ -68,11 +68,9 @@ func createObjectFactory(parent *channelOwner, objectType string, guid string, i
 		return newWorker(parent, objectType, guid, initializer)
 	case "WritableStream":
 		return nil
-	case "FetchRequest":
+	default:
 		c := &channelOwner{}
 		c.createChannelOwner(c, parent, objectType, guid, initializer)
 		return c
-	default:
-		panic(objectType)
 	}
 }

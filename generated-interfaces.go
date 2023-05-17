@@ -1,5 +1,157 @@
 package playwright
 
+// Exposes API that can be used for the Web API testing. This class is used for creating `APIRequestContext` instance
+// which in turn can be used for sending web requests. An instance of this class can be obtained via
+// [`property: Playwright.request`]. For more information see `APIRequestContext`.
+type APIRequest interface {
+	EventEmitter
+	// Creates new instances of `APIRequestContext`.
+	NewContext(options ...APIRequestNewContextOptions) (APIRequestContext, error)
+}
+
+// This API is used for the Web API testing. You can use it to trigger API endpoints, configure micro-services,
+// prepare environment or the service to your e2e test.
+// Each Playwright browser context has associated with it `APIRequestContext` instance which shares cookie storage
+// with the browser context and can be accessed via [`property: BrowserContext.request`] or
+// [`property: Page.request`]. It is also possible to create a new APIRequestContext instance manually by calling
+// APIRequest.newContext().
+// **Cookie management**
+// `APIRequestContext` returned by [`property: BrowserContext.request`] and [`property: Page.request`] shares cookie
+// storage with the corresponding `BrowserContext`. Each API request will have `Cookie` header populated with the
+// values from the browser context. If the API response contains `Set-Cookie` header it will automatically update
+// `BrowserContext` cookies and requests made from the page will pick them up. This means that if you log in using
+// this API, your e2e test will be logged in and vice versa.
+// If you want API requests to not interfere with the browser cookies you should create a new `APIRequestContext` by
+// calling APIRequest.newContext(). Such `APIRequestContext` object will have its own isolated cookie
+// storage.
+type APIRequestContext interface {
+	EventEmitter
+	// Sends HTTP(S) [DELETE](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/DELETE) request and returns its
+	// response. The method will populate request cookies from the context and update context cookies from the response.
+	// The method will automatically follow redirects.
+	Delete(url string, options ...APIRequestContextDeleteOptions) (APIResponse, error)
+	// All responses returned by APIRequestContext.get() and similar methods are stored in the memory, so that
+	// you can later call APIResponse.body(). This method discards all stored responses, and makes
+	// APIResponse.body() throw "Response disposed" error.
+	Dispose() error
+	// Sends HTTP(S) request and returns its response. The method will populate request cookies from the context and
+	// update context cookies from the response. The method will automatically follow redirects. JSON objects can be
+	// passed directly to the request.
+	// **Usage**
+	// ```python
+	// data = {
+	// "title": "Book Title",
+	// "body": "John Doe",
+	// }
+	// api_request_context.fetch("https://example.com/api/createBook", method="post", data=data)
+	// ```
+	// The common way to send file(s) in the body of a request is to encode it as form fields with `multipart/form-data`
+	// encoding. You can achieve that with Playwright API like this:
+	// ```python
+	// api_request_context.fetch(
+	// "https://example.com/api/uploadScrip'",
+	// method="post",
+	// multipart={
+	// "fileField": {
+	// "name": "f.js",
+	// "mimeType": "text/javascript",
+	// "buffer": b"console.log(2022);",
+	// },
+	// })
+	// ```
+	Fetch(urlOrRequest interface{}, options ...APIRequestContextFetchOptions) (APIResponse, error)
+	// Sends HTTP(S) [GET](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET) request and returns its
+	// response. The method will populate request cookies from the context and update context cookies from the response.
+	// The method will automatically follow redirects.
+	// **Usage**
+	// Request parameters can be configured with `params` option, they will be serialized into the URL search parameters:
+	// ```python
+	// query_params = {
+	// "isbn": "1234",
+	// "page": "23"
+	// }
+	// api_request_context.get("https://example.com/api/getText", params=query_params)
+	// ```
+	Get(url string, options ...APIRequestContextGetOptions) (APIResponse, error)
+	// Sends HTTP(S) [HEAD](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD) request and returns its
+	// response. The method will populate request cookies from the context and update context cookies from the response.
+	// The method will automatically follow redirects.
+	Head(url string, options ...APIRequestContextHeadOptions) (APIResponse, error)
+	// Sends HTTP(S) [POST](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST) request and returns its
+	// response. The method will populate request cookies from the context and update context cookies from the response.
+	// The method will automatically follow redirects.
+	// **Usage**
+	// JSON objects can be passed directly to the request:
+	// ```python
+	// data = {
+	// "title": "Book Title",
+	// "body": "John Doe",
+	// }
+	// api_request_context.post("https://example.com/api/createBook", data=data)
+	// ```
+	// To send form data to the server use `form` option. Its value will be encoded into the request body with
+	// `application/x-www-form-urlencoded` encoding (see below how to use `multipart/form-data` form encoding to send
+	// files):
+	// ```python
+	// formData = {
+	// "title": "Book Title",
+	// "body": "John Doe",
+	// }
+	// api_request_context.post("https://example.com/api/findBook", form=formData)
+	// ```
+	// The common way to send file(s) in the body of a request is to upload them as form fields with `multipart/form-data`
+	// encoding. You can achieve that with Playwright API like this:
+	// ```python
+	// api_request_context.post(
+	// "https://example.com/api/uploadScrip'",
+	// multipart={
+	// "fileField": {
+	// "name": "f.js",
+	// "mimeType": "text/javascript",
+	// "buffer": b"console.log(2022);",
+	// },
+	// })
+	// ```
+	Post(url string, options ...APIRequestContextPostOptions) (APIResponse, error)
+	// Sends HTTP(S) [PUT](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT) request and returns its
+	// response. The method will populate request cookies from the context and update context cookies from the response.
+	// The method will automatically follow redirects.
+	Put(url string, options ...APIRequestContextPutOptions) (APIResponse, error)
+	// Sends HTTP(S) [PATCH](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PATCH) request and returns its
+	// response. The method will populate request cookies from the context and update context cookies from the response.
+	// The method will automatically follow redirects.
+	Patch(url string, options ...APIRequestContextPatchOptions) (APIResponse, error)
+	// Returns storage state for this request context, contains current cookies and local storage snapshot if it was
+	// passed to the constructor.
+	StorageState(path ...string) (*StorageState, error)
+}
+
+// `APIResponse` class represents responses returned by APIRequestContext.get() and similar methods.
+type APIResponse interface {
+	// Returns the buffer with response body.
+	Body() ([]byte, error)
+	// Disposes the body of this response. If not called then the body will stay in memory until the context closes.
+	Dispose() error
+	// An object with all the response HTTP headers associated with this response.
+	Headers() map[string]string
+	// An array with all the request HTTP headers associated with this response. Header names are not lower-cased. Headers
+	// with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
+	HeadersArray() HeadersArray
+	// Returns the JSON representation of response body.
+	// This method will throw if the response body is not parsable via `JSON.parse`.
+	JSON(v interface{}) error
+	// Contains a boolean stating whether the response was successful (status in the range 200-299) or not.
+	Ok() bool
+	// Contains the status code of the response (e.g., 200 for a success).
+	Status() int
+	// Contains the status text of the response (e.g. usually an "OK" for a success).
+	StatusText() string
+	// Returns the text representation of response body.
+	Text() (string, error)
+	// Contains the URL of the response.
+	URL() string
+}
+
 type BindingCall interface {
 	Call(f BindingCallFunction)
 }
