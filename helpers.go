@@ -461,3 +461,8 @@ func serializeMapToNameAndValue(headers map[string]string) []map[string]string {
 	}
 	return serialized
 }
+
+type HttpCredentials struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}

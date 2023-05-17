@@ -56,7 +56,7 @@
 			"EventEmitter"
 		],
 		"AddCookies": [
-			"cookies ...BrowserContextAddCookiesOptionsCookies",
+			"cookies ...OptionalCookie",
 			"error"
 		],
 		"AddInitScript": [
@@ -81,7 +81,7 @@
 		],
 		"Cookies": [
 			"urls ...string",
-			"([]*BrowserContextCookiesResult, error)"
+			"([]*Cookie, error)"
 		],
 		"ExpectEvent": [
 			"event string, cb func() error",
@@ -124,7 +124,7 @@
 			"error"
 		],
 		"SetGeolocation": [
-			"gelocation *SetGeolocationOptions",
+			"gelocation *Geolocation",
 			"error"
 		],
 		"ResetGeolocation": [

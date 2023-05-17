@@ -40,6 +40,31 @@ var (
 	ForcedColorsNoOverride               = getForcedColors("no-override")
 )
 
+func getHarContentPolicy(in string) *HarContentPolicy {
+	v := HarContentPolicy(in)
+	return &v
+}
+
+type HarContentPolicy string
+
+var (
+	HarContentPolicyOmit   *HarContentPolicy = getHarContentPolicy("omit")
+	HarContentPolicyEmbed                    = getHarContentPolicy("embed")
+	HarContentPolicyAttach                   = getHarContentPolicy("attach")
+)
+
+func getHarMode(in string) *HarMode {
+	v := HarMode(in)
+	return &v
+}
+
+type HarMode string
+
+var (
+	HarModeFull    *HarMode = getHarMode("full")
+	HarModeMinimal          = getHarMode("minimal")
+)
+
 func getReducedMotion(in string) *ReducedMotion {
 	v := ReducedMotion(in)
 	return &v
@@ -87,18 +112,6 @@ type RouteFromHarUpdateContentPolicy string
 var (
 	RouteFromHarUpdateContentPolicyEmbed  *RouteFromHarUpdateContentPolicy = getRouteFromHarUpdateContentPolicy("embed")
 	RouteFromHarUpdateContentPolicyAttach                                  = getRouteFromHarUpdateContentPolicy("attach")
-)
-
-func getHarMode(in string) *HarMode {
-	v := HarMode(in)
-	return &v
-}
-
-type HarMode string
-
-var (
-	HarModeFull    *HarMode = getHarMode("full")
-	HarModeMinimal          = getHarMode("minimal")
 )
 
 func getMouseButton(in string) *MouseButton {
