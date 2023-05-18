@@ -253,7 +253,7 @@
 		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
-			"interface{}"
+			"interface{}, error"
 		],
 		"Tracing": [
 			null,
@@ -766,15 +766,15 @@
 		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
-			"interface{}"
+			"interface{}, error"
 		],
 		"WaitForFunction": [
 			"expression string, arg interface{}, options ...FrameWaitForFunctionOptions",
 			"(JSHandle, error)"
 		],
 		"WaitForLoadState": [
-			"given ...string",
-			null
+			"options ...PageWaitForLoadStateOptions",
+			"error"
 		],
 		"WaitForNavigation": [
 			"options ...PageWaitForNavigationOptions",
@@ -1409,15 +1409,15 @@
 		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
-			"interface{}"
+			"interface{}, error"
 		],
 		"WaitForFunction": [
 			"expression string, arg interface{}, options ...FrameWaitForFunctionOptions",
 			"(JSHandle, error)"
 		],
 		"WaitForLoadState": [
-			"state ...string",
-			null
+			"options ...PageWaitForLoadStateOptions",
+			"error"
 		],
 		"WaitForNavigation": [
 			"options ...PageWaitForNavigationOptions",
@@ -1654,7 +1654,7 @@
 		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
-			"interface{}"
+			"interface{}, error"
 		]
 	},
 	"Video": {
@@ -1689,7 +1689,7 @@
 		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
-			"interface{}"
+			"interface{}, error"
 		],
 		"ExpectEvent": [
 			"event string, cb func() error, predicates ...interface{}",

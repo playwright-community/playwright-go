@@ -119,23 +119,31 @@ func (f *frameImpl) Page() Page {
 	return f.page
 }
 
-func (f *frameImpl) WaitForLoadState(given ...string) {
-	state := "load"
-	if len(given) == 1 {
-		state = given[0]
+func (f *frameImpl) WaitForLoadState(options ...PageWaitForLoadStateOptions) error {
+	option := PageWaitForLoadStateOptions{}
+	if len(options) == 1 {
+		option = options[0]
 	}
+	if option.State == nil {
+		option.State = LoadStateLoad
+	}
+	if option.Timeout == nil {
+		option.Timeout = Float(f.page.timeoutSettings.NavigationTimeout())
+	}
+	return f.waitForLoadStateImpl(string(*option.State), option.Timeout)
+}
+
+func (f *frameImpl) waitForLoadStateImpl(state string, timeout *float64) error {
 	if f.loadStates.Has(state) {
-		return
+		return nil
 	}
-	var wg sync.WaitGroup
-	wg.Add(1)
-	f.On("loadstate", func(ev ...interface{}) {
-		gotState := ev[0].(string)
-		if gotState == state {
-			wg.Done()
-		}
+	waiter := f.setNavigationWaiter(timeout)
+	waiter.WaitForEvent(f, "loadstate", func(payload interface{}) bool {
+		gotState := payload.(string)
+		return gotState == state
 	})
-	wg.Wait()
+	_, err := waiter.Wait()
+	return err
 }
 
 func (f *frameImpl) WaitForURL(url string, options ...FrameWaitForURLOptions) error {
@@ -150,8 +158,8 @@ func (f *frameImpl) WaitForURL(url string, options ...FrameWaitForURLOptions) er
 	return nil
 }
 
-func (f *frameImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	return <-waitForEvent(f, event, predicate...)
+func (f *frameImpl) WaitForEvent(event string, predicate ...interface{}) (interface{}, error) {
+	return newWaiter().WaitForEvent(f, event, predicate...).Wait()
 }
 
 func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error) {
@@ -165,10 +173,10 @@ func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (
 	if option.Timeout == nil {
 		option.Timeout = Float(f.page.timeoutSettings.NavigationTimeout())
 	}
-	deadline := time.After(time.Duration(*option.Timeout) * time.Millisecond)
+	deadline := time.Now().Add(time.Duration(*option.Timeout) * time.Millisecond)
 	var matcher *urlMatcher
 	if option.URL != nil {
-		matcher = newURLMatcher(option.URL)
+		matcher = newURLMatcher(option.URL, f.page.browserContext.options["baseURL"])
 	}
 	predicate := func(events ...interface{}) bool {
 		ev := events[0].(map[string]interface{})
@@ -177,17 +185,41 @@ func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (
 		}
 		return matcher == nil || matcher.Matches(ev["url"].(string))
 	}
-	select {
-	case <-deadline:
-		return nil, fmt.Errorf("Timeout %.2fms exceeded.", *option.Timeout)
-	case eventData := <-waitForEvent(f, "navigated", predicate):
-		event := eventData.(map[string]interface{})
-		if event["newDocument"] != nil && event["newDocument"].(map[string]interface{})["request"] != nil {
-			request := fromChannel(event["newDocument"].(map[string]interface{})["request"]).(*requestImpl)
-			return request.Response()
+	waiter := f.setNavigationWaiter(option.Timeout)
+
+	eventData, err := waiter.WaitForEvent(f, "navigated", predicate).Wait()
+	if err != nil || eventData == nil {
+		return nil, err
+	}
+
+	t := time.Until(deadline).Milliseconds()
+	if t > 0 {
+		err = f.waitForLoadStateImpl(string(*option.WaitUntil), Float(float64(t)))
+		if err != nil {
+			return nil, err
 		}
 	}
+
+	event := eventData.(map[string]interface{})
+	if event["newDocument"] != nil && event["newDocument"].(map[string]interface{})["request"] != nil {
+		request := fromChannel(event["newDocument"].(map[string]interface{})["request"]).(*requestImpl)
+		return request.Response()
+	}
 	return nil, nil
+}
+
+func (f *frameImpl) setNavigationWaiter(timeout *float64) *waiter {
+	waiter := newWaiter().WithTimeout(*timeout)
+	waiter.RejectOnEvent(f.page, "close", fmt.Errorf("Navigation failed because page was closed!"))
+	waiter.RejectOnEvent(f.page, "crash", fmt.Errorf("Navigation failed because page crashed!"))
+	waiter.RejectOnEvent(f.page, "framedetached", fmt.Errorf("Navigating frame was detached!"), func(payload interface{}) bool {
+		frame, ok := payload.(*frameImpl)
+		if ok && frame == f {
+			return true
+		}
+		return false
+	})
+	return waiter
 }
 
 func (f *frameImpl) onFrameNavigated(ev map[string]interface{}) {

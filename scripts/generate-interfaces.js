@@ -58,7 +58,7 @@ for (const [className, methods] of Object.entries(interfaceData)) {
       for (const inheritedInterface of funcData)
         console.log(inheritedInterface)
     } else {
-      const apiFunc = apiClass?.members.find(member => member.kind === "method" && funcName === transformMethodNamesToGo(member.name))
+      const apiFunc = apiClass?.members.find(member => (member.kind === "method" || member.kind === "property") && funcName === transformMethodNamesToGo(member.name))
       if (apiFunc && apiFunc.comment)
         writeComment(apiFunc.comment)
 

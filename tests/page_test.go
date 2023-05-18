@@ -457,8 +457,10 @@ func TestPageWaitForLoadState(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Goto(server.PREFIX + "/one-style.html")
 	require.NoError(t, err)
-	page.WaitForLoadState()
-	page.WaitForLoadState("networkidle")
+	require.NoError(t, page.WaitForLoadState())
+	require.NoError(t, page.WaitForLoadState(playwright.PageWaitForLoadStateOptions{
+		State: playwright.LoadStateNetworkidle,
+	}))
 }
 
 func TestPlaywrightDevices(t *testing.T) {

@@ -1,24 +1,43 @@
 package playwright_test
 
 import (
-	"github.com/playwright-community/playwright-go"
-	"github.com/stretchr/testify/require"
+	"fmt"
 	"testing"
 	"time"
+
+	"github.com/playwright-community/playwright-go"
+	"github.com/stretchr/testify/require"
 )
 
-func TestFrameWaitForNavigationShouldWork(t *testing.T) {
-	BeforeEach(t)
-	defer AfterEach(t)
-	_, err := page.Goto(server.EMPTY_PAGE)
-	require.NoError(t, err)
-	response, err := page.ExpectNavigation(func() error {
-		_, err := page.Evaluate("url => window.location.href = url", server.PREFIX+"/grid.html")
-		return err
+func TestFrameWaitForNavigation(t *testing.T) {
+
+	t.Run("should work", func(t *testing.T) {
+		BeforeEach(t)
+		defer AfterEach(t)
+		_, err := page.Goto(server.EMPTY_PAGE)
+		require.NoError(t, err)
+		response, err := page.ExpectNavigation(func() error {
+			_, err := page.Evaluate("url => window.location.href = url", server.PREFIX+"/grid.html")
+			return err
+		})
+		require.NoError(t, err)
+		require.True(t, response.Ok())
+		require.Contains(t, response.URL(), "grid.html")
 	})
-	require.NoError(t, err)
-	require.True(t, response.Ok())
-	require.Contains(t, response.URL(), "grid.html")
+
+	t.Run("should respect timeout", func(t *testing.T) {
+		BeforeEach(t)
+		defer AfterEach(t)
+		timeout := 500.0
+		_, err := page.ExpectNavigation(func() error {
+			_, err := page.Evaluate("url => window.location.href = url", server.EMPTY_PAGE)
+			return err
+		}, playwright.PageWaitForNavigationOptions{
+			URL:     "**/frame.html",
+			Timeout: playwright.Float(timeout),
+		})
+		require.ErrorContains(t, err, fmt.Sprintf(`Timeout %.2fms exceeded.`, timeout))
+	})
 }
 
 func TestFrameWaitForURLShouldWork(t *testing.T) {

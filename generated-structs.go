@@ -1724,6 +1724,14 @@ type FrameWaitForFunctionOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type FrameWaitForLoadStateOptions struct {
+	// Optional load state to wait for, defaults to `load`. If the state has been already
+	// reached while loading current document, the method resolves immediately. Can be
+	// one of:
+	// `'load'` - wait for the `load` event to be fired.
+	// `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
+	// `'networkidle'` - wait until there are no network connections for at least `500`
+	// ms.
+	State *LoadState `json:"state"`
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable
 	// timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(),
 	// BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout()
@@ -3235,6 +3243,14 @@ type PageWaitForFunctionOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type PageWaitForLoadStateOptions struct {
+	// Optional load state to wait for, defaults to `load`. If the state has been already
+	// reached while loading current document, the method resolves immediately. Can be
+	// one of:
+	// `'load'` - wait for the `load` event to be fired.
+	// `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
+	// `'networkidle'` - wait until there are no network connections for at least `500`
+	// ms.
+	State *LoadState `json:"state"`
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable
 	// timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(),
 	// BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout()

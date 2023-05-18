@@ -290,7 +290,7 @@ index f3bef29d0..6eb8d5719 100644
  * since: v1.8
  * langs: csharp, java
 diff --git a/docs/src/api/class-frame.md b/docs/src/api/class-frame.md
-index ac7bb4147..260eeb3fc 100644
+index ac7bb4147..6b0445e2b 100644
 --- a/docs/src/api/class-frame.md
 +++ b/docs/src/api/class-frame.md
 @@ -1963,7 +1963,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
@@ -302,8 +302,20 @@ index ac7bb4147..260eeb3fc 100644
  * since: v1.8
  
  ### option: Frame.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
+@@ -2011,6 +2011,11 @@ await frame.WaitForLoadStateAsync(); // Defaults to LoadState.Load
+ ```
+ 
+ ### param: Frame.waitForLoadState.state = %%-wait-for-load-state-state-%%
++* langs: js, python, csharp, java
++* since: v1.8
++
++### option: Frame.waitForLoadState.state = %%-wait-for-load-state-state-%%
++* langs: go
+ * since: v1.8
+ 
+ ### option: Frame.waitForLoadState.timeout = %%-navigation-timeout-%%
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index ef304b556..c52096e00 100644
+index ef304b556..27a2719b0 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
 @@ -645,6 +645,20 @@ Path to the JavaScript file. If `path` is a relative path, then it is resolved r
@@ -447,6 +459,18 @@ index ef304b556..c52096e00 100644
  * since: v1.8
  
  ### option: Page.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
+@@ -4277,6 +4305,11 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
+ ```
+ 
+ ### param: Page.waitForLoadState.state = %%-wait-for-load-state-state-%%
++* langs: js, python, csharp, java
++* since: v1.8
++
++### option: Page.waitForLoadState.state = %%-wait-for-load-state-state-%%
++* langs: go
+ * since: v1.8
+ 
+ ### option: Page.waitForLoadState.timeout = %%-navigation-timeout-%%
 diff --git a/docs/src/api/class-route.md b/docs/src/api/class-route.md
 index 4f1a00757..dd42cb7dc 100644
 --- a/docs/src/api/class-route.md

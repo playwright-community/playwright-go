@@ -70,8 +70,8 @@ func (ws *webSocketImpl) onFrameReceived(opcode float64, data string) {
 	}
 }
 
-func (ws *webSocketImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	return <-waitForEvent(ws, event, predicate...)
+func (ws *webSocketImpl) WaitForEvent(event string, predicate ...interface{}) (interface{}, error) {
+	return newWaiter().WaitForEvent(ws, event, predicate...).Wait()
 }
 
 func (ws *webSocketImpl) IsClosed() bool {

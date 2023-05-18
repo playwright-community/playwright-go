@@ -195,7 +195,7 @@ func (b *browserContextImpl) ExposeFunction(name string, binding ExposedFunction
 }
 
 func (b *browserContextImpl) Route(url interface{}, handler routeHandler, times ...int) error {
-	b.routes = append(b.routes, newRouteHandlerEntry(newURLMatcher(url), handler, times...))
+	b.routes = append(b.routes, newRouteHandlerEntry(newURLMatcher(url, b.options["baseURL"]), handler, times...))
 	return b.updateInterceptionPatterns()
 }
 
@@ -242,8 +242,8 @@ func (b *browserContextImpl) RouteFromHAR(har string, options ...BrowserContextR
 	return router.addContextRoute(b)
 }
 
-func (b *browserContextImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	return <-waitForEvent(b, event, predicate...)
+func (b *browserContextImpl) WaitForEvent(event string, predicate ...interface{}) (interface{}, error) {
+	return newWaiter().WaitForEvent(b, event, predicate...).Wait()
 }
 
 func (b *browserContextImpl) ExpectEvent(event string, cb func() error) (interface{}, error) {
@@ -467,7 +467,7 @@ func (b *browserContextImpl) OnBackgroundPage(ev map[string]interface{}) {
 	p.browserContext = b
 	b.backgroundPages = append(b.backgroundPages, p)
 	b.Unlock()
-	b.Emit("backgroundPage", p)
+	b.Emit("backgroundpage", p)
 }
 
 func (b *browserContextImpl) BackgroundPages() []Page {
@@ -567,7 +567,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 	bt.channel.On("route", func(params map[string]interface{}) {
 		bt.onRoute(fromChannel(params["route"]).(*routeImpl))
 	})
-	bt.channel.On("backgroundPage", bt.OnBackgroundPage)
+	bt.channel.On("backgroundpage", bt.OnBackgroundPage)
 	bt.setEventSubscriptionMapping(map[string]string{
 		"request":         "request",
 		"response":        "response",
