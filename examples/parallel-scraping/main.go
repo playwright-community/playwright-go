@@ -160,7 +160,7 @@ func main() {
 }
 
 func getAlexaTopDomains() ([]string, error) {
-	resp, err := http.Get("http://s3.amazonaws.com/alexa-static/top-1m.csv.zip")
+	resp, err := http.Get("http://s3-us-west-1.amazonaws.com/umbrella-static/top-1m.csv.zip")
 	if err != nil {
 		return nil, fmt.Errorf("could not get: %w", err)
 	}
