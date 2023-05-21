@@ -1,7 +1,6 @@
 package playwright_test
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -492,10 +491,10 @@ func TestPageExpectSelectorTimeout(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	timeoutError := errors.Unwrap(page.Click("foobar", playwright.PageClickOptions{
+	err = page.Click("foobar", playwright.PageClickOptions{
 		Timeout: playwright.Float(500),
-	})).(*playwright.TimeoutError)
-	require.Contains(t, timeoutError.Message, "Timeout 500ms exceeded.")
+	})
+	require.ErrorIs(t, err, playwright.TimeoutError)
 }
 
 func TestPageType(t *testing.T) {

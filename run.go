@@ -31,7 +31,7 @@ func NewDriver(options *RunOptions) (*PlaywrightDriver, error) {
 		var err error
 		baseDriverDirectory, err = getDefaultCacheDirectory()
 		if err != nil {
-			return nil, fmt.Errorf("could not get default cache directory: %v", err)
+			return nil, fmt.Errorf("could not get default cache directory: %w", err)
 		}
 	}
 	driverDirectory := filepath.Join(baseDriverDirectory, "ms-playwright-go", playwrightCliVersion)
@@ -47,7 +47,7 @@ func NewDriver(options *RunOptions) (*PlaywrightDriver, error) {
 func getDefaultCacheDirectory() (string, error) {
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
-		return "", fmt.Errorf("could not get user home directory: %v", err)
+		return "", fmt.Errorf("could not get user home directory: %w", err)
 	}
 	switch runtime.GOOS {
 	case "windows":
