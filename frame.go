@@ -78,6 +78,7 @@ func (f *frameImpl) Goto(url string, options ...PageGotoOptions) (Response, erro
 	}
 	channelOwner := fromNullableChannel(channel)
 	if channelOwner == nil {
+		// navigation to about:blank or navigation to the same URL with a different hash
 		return nil, nil
 	}
 	return channelOwner.(*responseImpl), nil

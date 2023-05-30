@@ -396,9 +396,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 			request.failureText = failureText.(string)
 		}
 		page := fromNullableChannel(ev["page"])
-		if request.timing != nil {
-			request.timing.ResponseEnd = ev["responseEndTiming"].(float64)
-		}
+		request.setResponseEndTiming(ev["responseEndTiming"].(float64))
 		bt.Emit("requestfailed", request)
 		if page != nil {
 			page.(*pageImpl).Emit("requestfailed", request)
@@ -408,16 +406,14 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 	bt.channel.On("requestFinished", func(ev map[string]interface{}) {
 		request := fromChannel(ev["request"]).(*requestImpl)
 		response := fromNullableChannel(ev["response"])
-		if response != nil {
-			response.(*responseImpl).finished <- true
-		}
 		page := fromNullableChannel(ev["page"])
-		if request.timing != nil {
-			request.timing.ResponseEnd = ev["responseEndTiming"].(float64)
-		}
+		request.setResponseEndTiming(ev["responseEndTiming"].(float64))
 		bt.Emit("requestfinished", request)
 		if page != nil {
 			page.(*pageImpl).Emit("requestfinished", request)
+		}
+		if response != nil {
+			response.(*responseImpl).finished <- true
 		}
 	})
 	bt.channel.On("response", func(ev map[string]interface{}) {

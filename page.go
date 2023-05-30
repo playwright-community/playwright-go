@@ -2,6 +2,7 @@ package playwright
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"os"
 	"reflect"
@@ -53,6 +54,7 @@ func (p *pageImpl) Opener() (Page, error) {
 	channel := p.initializer["opener"]
 	channelOwner := fromNullableChannel(channel)
 	if channelOwner == nil {
+		// not popup page or opener has been closed
 		return nil, nil
 	}
 	return channelOwner.(*pageImpl), nil
@@ -182,11 +184,15 @@ func (p *pageImpl) Goto(url string, options ...PageGotoOptions) (Response, error
 }
 
 func (p *pageImpl) Reload(options ...PageReloadOptions) (Response, error) {
-	response, err := p.channel.Send("reload", options)
+	channel, err := p.channel.Send("reload", options)
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(response).(*responseImpl), err
+	channelOwner := fromNullableChannel(channel)
+	if channelOwner == nil {
+		return nil, nil
+	}
+	return channelOwner.(*responseImpl), nil
 }
 
 func (p *pageImpl) WaitForLoadState(state ...string) {
@@ -200,21 +206,23 @@ func (p *pageImpl) GoBack(options ...PageGoBackOptions) (Response, error) {
 	}
 	channelOwner := fromNullableChannel(channel)
 	if channelOwner == nil {
+		// can not go back
 		return nil, nil
 	}
 	return channelOwner.(*responseImpl), nil
 }
 
 func (p *pageImpl) GoForward(options ...PageGoForwardOptions) (Response, error) {
-	resp, err := p.channel.Send("goForward", options)
+	channel, err := p.channel.Send("goForward", options)
 	if err != nil {
 		return nil, err
 	}
-	obj := fromNullableChannel(resp)
-	if obj == nil {
+	channelOwner := fromNullableChannel(channel)
+	if channelOwner == nil {
+		// can not go forward
 		return nil, nil
 	}
-	return obj.(*responseImpl), nil
+	return channelOwner.(*responseImpl), nil
 }
 
 func (p *pageImpl) EmulateMedia(options ...PageEmulateMediaOptions) error {
@@ -357,6 +365,9 @@ func (p *pageImpl) WaitForRequest(url interface{}, options ...PageWaitForRequest
 	case <-deadline:
 		return nil, fmt.Errorf("Timeout %.2fms exceeded.", *option.Timeout)
 	case req := <-waitForEvent(p, "request", predicate):
+		if req == nil {
+			return nil, errors.New("No request received")
+		}
 		return req.(*requestImpl), nil
 	}
 }
@@ -388,6 +399,9 @@ func (p *pageImpl) WaitForResponse(url interface{}, options ...PageWaitForRespon
 	case <-deadline:
 		return nil, fmt.Errorf("Timeout %.2fms exceeded.", *option.Timeout)
 	case res := <-waitForEvent(p, "response", predicate):
+		if res == nil {
+			return nil, errors.New("No response received")
+		}
 		return res.(*responseImpl), nil
 	}
 }
@@ -405,34 +419,43 @@ func (p *pageImpl) ExpectNavigation(cb func() error, options ...PageWaitForNavig
 	for _, option := range options {
 		navigationOptions = append(navigationOptions, option)
 	}
-	response, err := newExpectWrapper(p.WaitForNavigation, navigationOptions, cb)
-	if response == nil {
+	ret, err := newExpectWrapper(p.WaitForNavigation, navigationOptions, cb)
+	if ret == nil {
 		return nil, err
 	}
-	return response.(*responseImpl), err
+	return ret.(*responseImpl), err
 }
 
 func (p *pageImpl) ExpectConsoleMessage(cb func() error) (ConsoleMessage, error) {
-	consoleMessage, err := newExpectWrapper(p.WaitForEvent, []interface{}{"console"}, cb)
-	return consoleMessage.(*consoleMessageImpl), err
+	ret, err := newExpectWrapper(p.WaitForEvent, []interface{}{"console"}, cb)
+	if ret == nil {
+		return nil, err
+	}
+	return ret.(*consoleMessageImpl), err
 }
 
 func (p *pageImpl) ExpectedDialog(cb func() error) (Dialog, error) {
-	dialog, err := newExpectWrapper(p.WaitForEvent, []interface{}{"dialog"}, cb)
-	return dialog.(*dialogImpl), err
+	ret, err := newExpectWrapper(p.WaitForEvent, []interface{}{"dialog"}, cb)
+	if ret == nil {
+		return nil, err
+	}
+	return ret.(*dialogImpl), err
 }
 
 func (p *pageImpl) ExpectDownload(cb func() error) (Download, error) {
-	download, err := newExpectWrapper(p.WaitForEvent, []interface{}{"download"}, cb)
-	return download.(*downloadImpl), err
+	ret, err := newExpectWrapper(p.WaitForEvent, []interface{}{"download"}, cb)
+	if ret == nil {
+		return nil, err
+	}
+	return ret.(*downloadImpl), err
 }
 
 func (p *pageImpl) ExpectFileChooser(cb func() error) (FileChooser, error) {
-	fileChooser, err := newExpectWrapper(p.WaitForEvent, []interface{}{"filechooser"}, cb)
-	if err != nil {
+	ret, err := newExpectWrapper(p.WaitForEvent, []interface{}{"filechooser"}, cb)
+	if ret == nil {
 		return nil, err
 	}
-	return fileChooser.(*fileChooserImpl), err
+	return ret.(*fileChooserImpl), err
 }
 
 func (p *pageImpl) ExpectLoadState(state string, cb func() error) error {
@@ -441,24 +464,27 @@ func (p *pageImpl) ExpectLoadState(state string, cb func() error) error {
 }
 
 func (p *pageImpl) ExpectPopup(cb func() error) (Page, error) {
-	popup, err := newExpectWrapper(p.WaitForEvent, []interface{}{"popup"}, cb)
-	return popup.(*pageImpl), err
+	ret, err := newExpectWrapper(p.WaitForEvent, []interface{}{"popup"}, cb)
+	if ret == nil {
+		return nil, err
+	}
+	return ret.(*pageImpl), err
 }
 
 func (p *pageImpl) ExpectResponse(url interface{}, cb func() error, options ...interface{}) (Response, error) {
-	response, err := newExpectWrapper(p.WaitForResponse, append([]interface{}{url}, options...), cb)
-	if err != nil {
+	ret, err := newExpectWrapper(p.WaitForResponse, append([]interface{}{url}, options...), cb)
+	if ret == nil {
 		return nil, err
 	}
-	return response.(*responseImpl), err
+	return ret.(*responseImpl), err
 }
 
 func (p *pageImpl) ExpectRequest(url interface{}, cb func() error, options ...interface{}) (Request, error) {
-	popup, err := newExpectWrapper(p.WaitForRequest, append([]interface{}{url}, options...), cb)
-	if err != nil {
+	ret, err := newExpectWrapper(p.WaitForRequest, append([]interface{}{url}, options...), cb)
+	if ret == nil {
 		return nil, err
 	}
-	return popup.(*requestImpl), err
+	return ret.(*requestImpl), err
 }
 
 func (p *pageImpl) ExpectWorker(cb func() error) (Worker, error) {
