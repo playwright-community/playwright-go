@@ -7,13 +7,14 @@ import (
 type channelOwner struct {
 	sync.RWMutex
 	eventEmitter
-	objectType  string
-	guid        string
-	channel     *channel
-	objects     map[string]*channelOwner
-	connection  *connection
-	initializer map[string]interface{}
-	parent      *channelOwner
+	objectType                 string
+	guid                       string
+	channel                    *channel
+	objects                    map[string]*channelOwner
+	eventToSubscriptionMapping map[string]string
+	connection                 *connection
+	initializer                map[string]interface{}
+	parent                     *channelOwner
 }
 
 func (c *channelOwner) dispose() {
@@ -28,6 +29,48 @@ func (c *channelOwner) dispose() {
 		object.dispose()
 	}
 	c.objects = make(map[string]*channelOwner)
+}
+
+func (c *channelOwner) adopt(child *channelOwner) {
+	delete(child.parent.objects, child.guid)
+	c.objects[child.guid] = child
+	child.parent = c
+}
+
+func (c *channelOwner) setEventSubscriptionMapping(mapping map[string]string) {
+	c.eventToSubscriptionMapping = mapping
+}
+
+func (c *channelOwner) updateSubscription(event string, enabled bool) {
+	protocolEvent, ok := c.eventToSubscriptionMapping[event]
+	if ok {
+		c.channel.SendNoReply("updateSubscription", map[string]interface{}{
+			"event":   protocolEvent,
+			"enabled": enabled,
+		})
+	}
+}
+
+func (c *channelOwner) Once(name string, handler interface{}) {
+	c.addEvent(name, handler, true)
+}
+
+func (c *channelOwner) On(name string, handler interface{}) {
+	c.addEvent(name, handler, false)
+}
+
+func (c *channelOwner) addEvent(name string, handler interface{}, once bool) {
+	if c.ListenerCount(name) == 0 {
+		c.updateSubscription(name, true)
+	}
+	c.eventEmitter.addEvent(name, handler, once)
+}
+
+func (c *channelOwner) RemoveListener(name string, handler interface{}) {
+	c.eventEmitter.RemoveListener(name, handler)
+	if c.ListenerCount(name) == 0 {
+		c.updateSubscription(name, false)
+	}
 }
 
 func (c *channelOwner) createChannelOwner(self interface{}, parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) {
@@ -45,6 +88,7 @@ func (c *channelOwner) createChannelOwner(self interface{}, parent *channelOwner
 	}
 	c.channel = newChannel(c.connection, guid)
 	c.channel.object = self
+	c.eventToSubscriptionMapping = map[string]string{}
 	c.initEventEmitter()
 }
 

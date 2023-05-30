@@ -436,5 +436,11 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 		bt.onRoute(fromChannel(params["route"]).(*routeImpl))
 	})
 	bt.channel.On("backgroundPage", bt.OnBackgroundPage)
+	bt.setEventSubscriptionMapping(map[string]string{
+		"request":         "request",
+		"response":        "response",
+		"requestfinished": "requestFinished",
+		"responsefailed":  "responseFailed",
+	})
 	return bt
 }

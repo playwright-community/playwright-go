@@ -428,8 +428,11 @@ func (p *pageImpl) ExpectDownload(cb func() error) (Download, error) {
 }
 
 func (p *pageImpl) ExpectFileChooser(cb func() error) (FileChooser, error) {
-	response, err := newExpectWrapper(p.WaitForEvent, []interface{}{"filechooser"}, cb)
-	return response.(*fileChooserImpl), err
+	fileChooser, err := newExpectWrapper(p.WaitForEvent, []interface{}{"filechooser"}, cb)
+	if err != nil {
+		return nil, err
+	}
+	return fileChooser.(*fileChooserImpl), err
 }
 
 func (p *pageImpl) ExpectLoadState(state string, cb func() error) error {
@@ -605,19 +608,12 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 	bt.channel.On("worker", func(ev map[string]interface{}) {
 		bt.onWorker(fromChannel(ev["worker"]).(*workerImpl))
 	})
-	bt.addEventHandler(func(name string, handler interface{}) {
-		if name == "filechooser" && bt.ListenerCount(name) == 0 {
-			bt.channel.SendNoReply("setFileChooserInterceptedNoReply", map[string]interface{}{
-				"intercepted": true,
-			})
-		}
-	})
-	bt.removeEventHandler(func(name string, handler interface{}) {
-		if name == "filechooser" && bt.ListenerCount(name) == 0 {
-			bt.channel.SendNoReply("setFileChooserInterceptedNoReply", map[string]interface{}{
-				"intercepted": false,
-			})
-		}
+	bt.setEventSubscriptionMapping(map[string]string{
+		"request":         "request",
+		"response":        "response",
+		"requestfinished": "requestFinished",
+		"responsefailed":  "responseFailed",
+		"filechooser":     "fileChooser",
 	})
 
 	return bt

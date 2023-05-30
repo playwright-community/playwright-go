@@ -16,6 +16,7 @@ type DeviceDescriptor struct {
 // Playwright represents a Playwright instance
 type Playwright struct {
 	channelOwner
+	utils    *localUtilsImpl
 	Chromium BrowserType
 	Firefox  BrowserType
 	WebKit   BrowserType
@@ -41,6 +42,7 @@ func newPlaywright(parent *channelOwner, objectType string, guid string, initial
 		}
 		remapMapToStruct(entry["descriptor"], pw.Devices[entry["name"].(string)])
 	}
+	pw.utils = fromChannel(initializer["utils"]).(*localUtilsImpl)
 	pw.createChannelOwner(pw, parent, objectType, guid, initializer)
 	return pw
 }
