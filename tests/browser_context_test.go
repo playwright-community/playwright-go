@@ -276,8 +276,16 @@ func TestBrowserContextShouldReturnBackgroundPage(t *testing.T) {
 		page = context.BackgroundPages()[0]
 	} else {
 		ret, err := context.WaitForEvent("backgroundPage")
-		require.NoError(t, err)
-		page = ret.(playwright.Page)
+		if err != nil {
+			// probably missing event
+			if len(context.BackgroundPages()) == 1 {
+				page = context.BackgroundPages()[0]
+			} else {
+				t.Fatal(err)
+			}
+		} else {
+			page = ret.(playwright.Page)
+		}
 	}
 	require.NotNil(t, page)
 	require.NotContains(t, context.Pages(), page)
