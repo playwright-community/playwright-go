@@ -456,8 +456,8 @@ func TestPageWaitForLoadState(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Goto(server.PREFIX + "/one-style.html")
 	require.NoError(t, err)
-	page.WaitForLoadState()
-	page.WaitForLoadState("networkidle")
+	require.NoError(t, page.WaitForLoadState())
+	require.NoError(t, page.WaitForLoadState("networkidle"))
 }
 
 func TestPlaywrightDevices(t *testing.T) {

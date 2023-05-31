@@ -191,8 +191,8 @@ func (b *browserContextImpl) ExposeFunction(name string, binding ExposedFunction
 	})
 }
 
-func (b *browserContextImpl) Route(url interface{}, handler routeHandler) error {
-	b.routes = append(b.routes, newRouteHandlerEntry(newURLMatcher(url), handler))
+func (b *browserContextImpl) Route(url interface{}, handler routeHandler, times ...int) error {
+	b.routes = append(b.routes, newRouteHandlerEntry(newURLMatcher(url, b.options.BaseURL), handler, times...))
 	if len(b.routes) == 1 {
 		_, err := b.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
 			"enabled": true,
@@ -217,12 +217,23 @@ func (b *browserContextImpl) Unroute(url interface{}, handlers ...routeHandler) 
 	return nil
 }
 
-func (b *browserContextImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	return <-waitForEvent(b, event, predicate...)
+func (b *browserContextImpl) WaitForEvent(event string, predicate ...interface{}) (interface{}, error) {
+	return b.waiterForEvent(event, predicate...).Wait()
 }
 
-func (b *browserContextImpl) ExpectEvent(event string, cb func() error) (interface{}, error) {
-	return newExpectWrapper(b.WaitForEvent, []interface{}{event}, cb)
+func (b *browserContextImpl) waiterForEvent(event string, predicates ...interface{}) *waiter {
+	timeout := b.timeoutSettings.NavigationTimeout()
+	var predicate interface{} = nil
+	if len(predicates) == 1 {
+		predicate = predicates[0]
+	}
+	waiter := newWaiter().WithTimeout(timeout)
+	waiter.RejectOnEvent(b, "close", errors.New("context closed"))
+	return waiter.WaitForEvent(b, event, predicate)
+}
+
+func (b *browserContextImpl) ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error) {
+	return b.waiterForEvent(event, predicates...).Expect(cb)
 }
 
 func (b *browserContextImpl) Close() error {
@@ -350,8 +361,16 @@ func (b *browserContextImpl) onRoute(route *routeImpl) {
 	}()
 }
 func (p *browserContextImpl) Pause() error {
-	_, err := p.channel.Send("pause")
-	return err
+	return <-p.pause()
+}
+
+func (p *browserContextImpl) pause() <-chan error {
+	ret := make(chan error, 1)
+	go func() {
+		_, err := p.channel.Send("pause")
+		ret <- err
+	}()
+	return ret
 }
 
 func (b *browserContextImpl) OnBackgroundPage(ev map[string]interface{}) {

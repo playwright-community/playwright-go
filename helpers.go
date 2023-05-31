@@ -1,10 +1,12 @@
 package playwright
 
 import (
+	"path"
 	"reflect"
 	"regexp"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/danwakefield/fnmatch"
 )
@@ -177,7 +179,19 @@ type urlMatcher struct {
 	urlOrPredicate interface{}
 }
 
-func newURLMatcher(urlOrPredicate interface{}) *urlMatcher {
+func newURLMatcher(urlOrPredicate, baseURL interface{}) *urlMatcher {
+	if baseURL != nil {
+		url, ok := urlOrPredicate.(string)
+		if ok && !strings.HasPrefix(url, "*") {
+			base, ok := baseURL.(*string)
+			if ok && base != nil {
+				url = path.Join(*base, url)
+				return &urlMatcher{
+					urlOrPredicate: url,
+				}
+			}
+		}
+	}
 	return &urlMatcher{
 		urlOrPredicate: urlOrPredicate,
 	}
@@ -201,12 +215,31 @@ func (u *urlMatcher) Matches(url string) bool {
 type routeHandlerEntry struct {
 	matcher *urlMatcher
 	handler routeHandler
+	times   int
+	count   int32
 }
 
-func newRouteHandlerEntry(matcher *urlMatcher, handler routeHandler) *routeHandlerEntry {
+func (r *routeHandlerEntry) Hit() {
+	atomic.AddInt32(&r.count, 1)
+}
+
+func (r *routeHandlerEntry) WillExceed() bool {
+	if r.times == 0 {
+		return false
+	}
+	return int(atomic.LoadInt32(&r.count)+1) >= r.times
+}
+
+func newRouteHandlerEntry(matcher *urlMatcher, handler routeHandler, times ...int) *routeHandlerEntry {
+	n := 0
+	if len(times) > 0 {
+		n = times[0]
+	}
 	return &routeHandlerEntry{
 		matcher: matcher,
 		handler: handler,
+		times:   n,
+		count:   0,
 	}
 }
 
@@ -297,33 +330,6 @@ func newTimeoutSettings(parent *timeoutSettings) *timeoutSettings {
 		timeout:           defaultTimeout,
 		navigationTimeout: defaultTimeout,
 	}
-}
-
-func waitForEvent(emitter EventEmitter, event string, predicate ...interface{}) <-chan interface{} {
-	evChan := make(chan interface{}, 1)
-	removeHandler := make(chan bool, 1)
-	handler := func(ev ...interface{}) {
-		if len(predicate) == 0 {
-			if len(ev) == 1 {
-				evChan <- ev[0]
-			} else {
-				evChan <- nil
-			}
-			removeHandler <- true
-		} else if len(predicate) == 1 {
-			result := reflect.ValueOf(predicate[0]).Call([]reflect.Value{reflect.ValueOf(ev[0])})
-			if result[0].Bool() {
-				evChan <- ev[0]
-				removeHandler <- true
-			}
-		}
-	}
-	go func() {
-		<-removeHandler
-		emitter.RemoveListener(event, handler)
-	}()
-	emitter.On(event, handler)
-	return evChan
 }
 
 // SelectOptionValues is the option struct for ElementHandle.Select() etc.

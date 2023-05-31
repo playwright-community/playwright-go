@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"reflect"
 	"time"
 )
 
 type pageImpl struct {
 	channelOwner
 	isClosed        bool
+	closedOrCrashed chan bool
 	video           *videoImpl
 	mouse           *mouseImpl
 	keyboard        *keyboardImpl
@@ -73,7 +73,7 @@ type PageFrameOptions struct {
 func (p *pageImpl) Frame(options PageFrameOptions) Frame {
 	var matcher *urlMatcher
 	if options.URL != nil {
-		matcher = newURLMatcher(options.URL)
+		matcher = newURLMatcher(options.URL, p.browserContext.options.BaseURL)
 	}
 
 	for _, f := range p.frames {
@@ -195,8 +195,8 @@ func (p *pageImpl) Reload(options ...PageReloadOptions) (Response, error) {
 	return channelOwner.(*responseImpl), nil
 }
 
-func (p *pageImpl) WaitForLoadState(state ...string) {
-	p.mainFrame.WaitForLoadState(state...)
+func (p *pageImpl) WaitForLoadState(state ...string) error {
+	return p.mainFrame.WaitForLoadState(state...)
 }
 
 func (p *pageImpl) GoBack(options ...PageGoBackOptions) (Response, error) {
@@ -329,8 +329,20 @@ func (p *pageImpl) Click(selector string, options ...PageClickOptions) error {
 	return p.mainFrame.Click(selector, options...)
 }
 
-func (p *pageImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	return <-waitForEvent(p, event, predicate...)
+func (p *pageImpl) WaitForEvent(event string, predicates ...interface{}) (interface{}, error) {
+	return p.waiterForEvent(event, predicates...).Wait()
+}
+
+func (p *pageImpl) waiterForEvent(event string, predicates ...interface{}) *waiter {
+	timeout := p.timeoutSettings.NavigationTimeout()
+	var predicate interface{} = nil
+	if len(predicates) == 1 {
+		predicate = predicates[0]
+	}
+	waiter := newWaiter().WithTimeout(timeout)
+	waiter.RejectOnEvent(p, "close", errors.New("page closed"))
+	waiter.RejectOnEvent(p, "crash", errors.New("page crashed"))
+	return waiter.WaitForEvent(p, event, predicate)
 }
 
 func (p *pageImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error) {
@@ -338,41 +350,45 @@ func (p *pageImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (R
 }
 
 func (p *pageImpl) WaitForRequest(url interface{}, options ...PageWaitForRequestOptions) (Request, error) {
-	option := PageWaitForRequestOptions{}
+	req, err := p.waiterForRequest(url, options...).Wait()
+	if req == nil {
+		return nil, err
+	}
+	return req.(*requestImpl), nil
+}
 
+func (p *pageImpl) waiterForRequest(url interface{}, options ...PageWaitForRequestOptions) *waiter {
+	option := PageWaitForRequestOptions{}
 	if len(options) == 1 {
 		option = options[0]
 	}
 	if option.Timeout == nil {
 		option.Timeout = Float(p.timeoutSettings.timeout)
 	}
-	deadline := time.After(time.Duration(*option.Timeout) * time.Millisecond)
 	var matcher *urlMatcher
 	if url != nil {
-		matcher = newURLMatcher(url)
+		matcher = newURLMatcher(url, p.browserContext.options.BaseURL)
 	}
 	predicate := func(req *requestImpl) bool {
 		if matcher != nil {
 			return matcher.Matches(req.URL())
 		}
-		if len(options) == 1 {
-			return reflect.ValueOf(options[0]).Call([]reflect.Value{reflect.ValueOf(req)})[0].Bool()
-		}
 		return true
 	}
 
-	select {
-	case <-deadline:
-		return nil, fmt.Errorf("Timeout %.2fms exceeded.", *option.Timeout)
-	case req := <-waitForEvent(p, "request", predicate):
-		if req == nil {
-			return nil, errors.New("No request received")
-		}
-		return req.(*requestImpl), nil
-	}
+	waiter := newWaiter().WithTimeout(*option.Timeout)
+	return waiter.WaitForEvent(p, "request", predicate)
 }
 
 func (p *pageImpl) WaitForResponse(url interface{}, options ...PageWaitForResponseOptions) (Response, error) {
+	res, err := p.waiterForResponse(url, options...).Wait()
+	if res == nil {
+		return nil, err
+	}
+	return res.(*responseImpl), nil
+}
+
+func (p *pageImpl) waiterForResponse(url interface{}, options ...PageWaitForResponseOptions) *waiter {
 	option := PageWaitForResponseOptions{}
 	if len(options) == 1 {
 		option = options[0]
@@ -380,54 +396,73 @@ func (p *pageImpl) WaitForResponse(url interface{}, options ...PageWaitForRespon
 	if option.Timeout == nil {
 		option.Timeout = Float(p.timeoutSettings.timeout)
 	}
-	deadline := time.After(time.Duration(*option.Timeout) * time.Millisecond)
 	var matcher *urlMatcher
 	if url != nil {
-		matcher = newURLMatcher(url)
+		matcher = newURLMatcher(url, p.browserContext.options.BaseURL)
 	}
 	predicate := func(req *responseImpl) bool {
 		if matcher != nil {
 			return matcher.Matches(req.URL())
 		}
-		if len(options) == 1 {
-			return reflect.ValueOf(options[0]).Call([]reflect.Value{reflect.ValueOf(req)})[0].Bool()
-		}
 		return true
 	}
 
-	select {
-	case <-deadline:
-		return nil, fmt.Errorf("Timeout %.2fms exceeded.", *option.Timeout)
-	case res := <-waitForEvent(p, "response", predicate):
-		if res == nil {
-			return nil, errors.New("No response received")
-		}
-		return res.(*responseImpl), nil
-	}
+	waiter := newWaiter().WithTimeout(*option.Timeout)
+	return waiter.WaitForEvent(p, "response", predicate)
 }
 
 func (p *pageImpl) ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error) {
-	args := []interface{}{event}
-	if len(predicates) == 1 {
-		args = append(args, predicates[0])
-	}
-	return newExpectWrapper(p.WaitForEvent, args, cb)
+	return p.waiterForEvent(event, predicates...).Expect(cb)
 }
 
 func (p *pageImpl) ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (Response, error) {
-	navigationOptions := make([]interface{}, 0)
-	for _, option := range options {
-		navigationOptions = append(navigationOptions, option)
+	option := PageWaitForNavigationOptions{}
+	if len(options) == 1 {
+		option = options[0]
 	}
-	ret, err := newExpectWrapper(p.WaitForNavigation, navigationOptions, cb)
-	if ret == nil {
+	if option.WaitUntil == nil {
+		option.WaitUntil = WaitUntilStateLoad
+	}
+	if option.Timeout == nil {
+		option.Timeout = Float(p.timeoutSettings.NavigationTimeout())
+	}
+	deadline := time.Now().Add(time.Duration(*option.Timeout) * time.Millisecond)
+	var matcher *urlMatcher
+	if option.URL != nil {
+		matcher = newURLMatcher(option.URL, p.browserContext.options.BaseURL)
+	}
+	predicate := func(events ...interface{}) bool {
+		ev := events[0].(map[string]interface{})
+		if ev["error"] != nil {
+			print("error")
+		}
+		return matcher == nil || matcher.Matches(ev["url"].(string))
+	}
+	waiter := p.mainFrame.(*frameImpl).setNavigationWaiter(option.Timeout)
+
+	eventData, err := waiter.WaitForEvent(p.mainFrame.(*frameImpl), "navigated", predicate).Expect(cb)
+	if err != nil || eventData == nil {
 		return nil, err
 	}
-	return ret.(*responseImpl), err
+
+	t := time.Until(deadline).Milliseconds()
+	if t > 0 {
+		err = p.mainFrame.(*frameImpl).waitForLoadStateImpl(string(*option.WaitUntil), Float(float64(t)), nil)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	event := eventData.(map[string]interface{})
+	if event["newDocument"] != nil && event["newDocument"].(map[string]interface{})["request"] != nil {
+		request := fromChannel(event["newDocument"].(map[string]interface{})["request"]).(*requestImpl)
+		return request.Response()
+	}
+	return nil, nil
 }
 
 func (p *pageImpl) ExpectConsoleMessage(cb func() error) (ConsoleMessage, error) {
-	ret, err := newExpectWrapper(p.WaitForEvent, []interface{}{"console"}, cb)
+	ret, err := newWaiter().WaitForEvent(p, "console", nil).Expect(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -435,7 +470,7 @@ func (p *pageImpl) ExpectConsoleMessage(cb func() error) (ConsoleMessage, error)
 }
 
 func (p *pageImpl) ExpectedDialog(cb func() error) (Dialog, error) {
-	ret, err := newExpectWrapper(p.WaitForEvent, []interface{}{"dialog"}, cb)
+	ret, err := newWaiter().WaitForEvent(p, "dialog", nil).Expect(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -443,7 +478,7 @@ func (p *pageImpl) ExpectedDialog(cb func() error) (Dialog, error) {
 }
 
 func (p *pageImpl) ExpectDownload(cb func() error) (Download, error) {
-	ret, err := newExpectWrapper(p.WaitForEvent, []interface{}{"download"}, cb)
+	ret, err := newWaiter().WaitForEvent(p, "download", nil).Expect(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -451,7 +486,7 @@ func (p *pageImpl) ExpectDownload(cb func() error) (Download, error) {
 }
 
 func (p *pageImpl) ExpectFileChooser(cb func() error) (FileChooser, error) {
-	ret, err := newExpectWrapper(p.WaitForEvent, []interface{}{"filechooser"}, cb)
+	ret, err := newWaiter().WaitForEvent(p, "filechooser", nil).Expect(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -459,28 +494,28 @@ func (p *pageImpl) ExpectFileChooser(cb func() error) (FileChooser, error) {
 }
 
 func (p *pageImpl) ExpectLoadState(state string, cb func() error) error {
-	_, err := newExpectWrapper(p.mainFrame.WaitForLoadState, []interface{}{state}, cb)
-	return err
+	timeout := Float(p.timeoutSettings.NavigationTimeout())
+	return p.mainFrame.(*frameImpl).waitForLoadStateImpl(state, timeout, cb)
 }
 
 func (p *pageImpl) ExpectPopup(cb func() error) (Page, error) {
-	ret, err := newExpectWrapper(p.WaitForEvent, []interface{}{"popup"}, cb)
+	ret, err := newWaiter().WaitForEvent(p, "popup", nil).Expect(cb)
 	if ret == nil {
 		return nil, err
 	}
 	return ret.(*pageImpl), err
 }
 
-func (p *pageImpl) ExpectResponse(url interface{}, cb func() error, options ...interface{}) (Response, error) {
-	ret, err := newExpectWrapper(p.WaitForResponse, append([]interface{}{url}, options...), cb)
+func (p *pageImpl) ExpectResponse(url interface{}, cb func() error, options ...PageWaitForResponseOptions) (Response, error) {
+	ret, err := p.waiterForResponse(url, options...).Expect(cb)
 	if ret == nil {
 		return nil, err
 	}
 	return ret.(*responseImpl), err
 }
 
-func (p *pageImpl) ExpectRequest(url interface{}, cb func() error, options ...interface{}) (Request, error) {
-	ret, err := newExpectWrapper(p.WaitForRequest, append([]interface{}{url}, options...), cb)
+func (p *pageImpl) ExpectRequest(url interface{}, cb func() error, options ...PageWaitForRequestOptions) (Request, error) {
+	ret, err := p.waiterForRequest(url, options...).Expect(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -488,14 +523,17 @@ func (p *pageImpl) ExpectRequest(url interface{}, cb func() error, options ...in
 }
 
 func (p *pageImpl) ExpectWorker(cb func() error) (Worker, error) {
-	response, err := newExpectWrapper(p.WaitForEvent, []interface{}{"worker"}, cb)
-	return response.(*workerImpl), err
+	ret, err := newWaiter().WaitForEvent(p, "worker", nil).Expect(cb)
+	if ret == nil {
+		return nil, err
+	}
+	return ret.(*workerImpl), err
 }
 
-func (p *pageImpl) Route(url interface{}, handler routeHandler) error {
+func (p *pageImpl) Route(url interface{}, handler routeHandler, times ...int) error {
 	p.Lock()
 	defer p.Unlock()
-	p.routes = append(p.routes, newRouteHandlerEntry(newURLMatcher(url), handler))
+	p.routes = append(p.routes, newRouteHandlerEntry(newURLMatcher(url, p.browserContext.options.BaseURL), handler, times...))
 	if len(p.routes) == 1 {
 		_, err := p.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
 			"enabled": true,
@@ -633,6 +671,19 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 
 	bt.channel.On("worker", func(ev map[string]interface{}) {
 		bt.onWorker(fromChannel(ev["worker"]).(*workerImpl))
+	})
+	bt.closedOrCrashed = make(chan bool, 1)
+	bt.On("close", func() {
+		select {
+		case bt.closedOrCrashed <- true:
+		default:
+		}
+	})
+	bt.On("crash", func() {
+		select {
+		case bt.closedOrCrashed <- true:
+		default:
+		}
 	})
 	bt.setEventSubscriptionMapping(map[string]string{
 		"request":         "request",
@@ -820,7 +871,12 @@ func (p *pageImpl) DragAndDrop(source, target string, options ...FrameDragAndDro
 }
 
 func (p *pageImpl) Pause() error {
-	return p.browserContext.Pause()
+	select {
+	case <-p.closedOrCrashed:
+		return fmt.Errorf("Page is closed or crashed")
+	case err := <-p.browserContext.pause():
+		return err
+	}
 }
 
 func (p *pageImpl) InputValue(selector string, options ...FrameInputValueOptions) (string, error) {

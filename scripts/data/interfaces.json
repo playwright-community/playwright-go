@@ -84,7 +84,7 @@
 			"([]*BrowserContextCookiesResult, error)"
 		],
 		"ExpectEvent": [
-			"event string, cb func() error",
+			"event string, cb func() error, predicates ...interface{}",
 			"(interface{}, error)"
 		],
 		"ExposeBinding": [
@@ -132,7 +132,7 @@
 			"error"
 		],
 		"Route": [
-			"url interface{}, handler routeHandler",
+			"url interface{}, handler routeHandler, times ...int",
 			"error"
 		],
 		"SetOffline": [
@@ -149,7 +149,7 @@
 		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
-			"interface{}"
+			"interface{}, error"
 		],
 		"Tracing": [
 			null,
@@ -662,7 +662,7 @@
 		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
-			"interface{}"
+			"interface{}, error"
 		],
 		"WaitForFunction": [
 			"expression string, arg interface{}, options ...FrameWaitForFunctionOptions",
@@ -670,7 +670,7 @@
 		],
 		"WaitForLoadState": [
 			"given ...string",
-			null
+			"error"
 		],
 		"WaitForNavigation": [
 			"options ...PageWaitForNavigationOptions",
@@ -1104,11 +1104,11 @@
 			"Page, error"
 		],
 		"ExpectRequest": [
-			"url interface{}, cb func() error, options ...interface{}",
+			"url interface{}, cb func() error, options ...PageWaitForRequestOptions",
 			"Request, error"
 		],
 		"ExpectResponse": [
-			"url interface{}, cb func() error, options ...interface{}",
+			"url interface{}, cb func() error, options ...PageWaitForResponseOptions",
 			"Response, error"
 		],
 		"ExpectWorker": [
@@ -1228,7 +1228,7 @@
 			"Response, error"
 		],
 		"Route": [
-			"url interface{}, handler routeHandler",
+			"url interface{}, handler routeHandler, times ...int",
 			"error"
 		],
 		"Screenshot": [
@@ -1301,7 +1301,7 @@
 		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
-			"interface{}"
+			"interface{}, error"
 		],
 		"WaitForFunction": [
 			"expression string, arg interface{}, options ...FrameWaitForFunctionOptions",
@@ -1309,7 +1309,7 @@
 		],
 		"WaitForLoadState": [
 			"state ...string",
-			null
+			"error"
 		],
 		"WaitForNavigation": [
 			"options ...PageWaitForNavigationOptions",
@@ -1538,7 +1538,7 @@
 		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
-			"interface{}"
+			"interface{}, error"
 		]
 	},
 	"Video": {
@@ -1573,7 +1573,7 @@
 		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
-			"interface{}"
+			"interface{}, error"
 		],
 		"ExpectEvent": [
 			"event string, cb func() error, predicates ...interface{}",

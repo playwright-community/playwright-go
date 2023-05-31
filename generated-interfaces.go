@@ -91,7 +91,7 @@ type BrowserContext interface {
 	// If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those
 	// URLs are returned.
 	Cookies(urls ...string) ([]*BrowserContextCookiesResult, error)
-	ExpectEvent(event string, cb func() error) (interface{}, error)
+	ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error)
 	// The method adds a function called `name` on the `window` object of every frame in every page in the context. When
 	// called, the function executes `callback` and returns a [Promise] which resolves to the return value of `callback`.
 	// If the `callback` returns a [Promise], it will be awaited.
@@ -160,7 +160,7 @@ type BrowserContext interface {
 	// both handlers.
 	// To remove a route with its handler you can use BrowserContext.unroute().
 	// **NOTE** Enabling routing disables http cache.
-	Route(url interface{}, handler routeHandler) error
+	Route(url interface{}, handler routeHandler, times ...int) error
 	SetOffline(offline bool) error
 	// Returns storage state for this browser context, contains current cookies and local storage snapshot.
 	StorageState(path ...string) (*StorageState, error)
@@ -170,7 +170,7 @@ type BrowserContext interface {
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the context closes before the event is fired. Returns the event data value.
 	// **Usage**
-	WaitForEvent(event string, predicate ...interface{}) interface{}
+	WaitForEvent(event string, predicate ...interface{}) (interface{}, error)
 	Tracing() Tracing
 	// **NOTE** Background pages are only supported on Chromium-based browsers.
 	// All existing background pages in the context.
@@ -867,7 +867,7 @@ type Frame interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
 	Uncheck(selector string, options ...FrameUncheckOptions) error
-	WaitForEvent(event string, predicate ...interface{}) interface{}
+	WaitForEvent(event string, predicate ...interface{}) (interface{}, error)
 	// Returns when the `expression` returns a truthy value, returns that value.
 	// **Usage**
 	// The Frame.waitForFunction() can be used to observe viewport size change:
@@ -878,7 +878,7 @@ type Frame interface {
 	// committed when this method is called. If current document has already reached the required state, resolves
 	// immediately.
 	// **Usage**
-	WaitForLoadState(given ...string)
+	WaitForLoadState(given ...string) error
 	// Waits for the frame navigation and returns the main resource response. In case of multiple redirects, the
 	// navigation will resolve with the response of the last redirect. In case of navigation to a different anchor or
 	// navigation due to History API usage, the navigation will resolve with `null`.
@@ -1546,8 +1546,8 @@ type Page interface {
 	ExpectLoadState(state string, cb func() error) error
 	ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (Response, error)
 	ExpectPopup(cb func() error) (Page, error)
-	ExpectRequest(url interface{}, cb func() error, options ...interface{}) (Request, error)
-	ExpectResponse(url interface{}, cb func() error, options ...interface{}) (Response, error)
+	ExpectRequest(url interface{}, cb func() error, options ...PageWaitForRequestOptions) (Request, error)
+	ExpectResponse(url interface{}, cb func() error, options ...PageWaitForResponseOptions) (Response, error)
 	ExpectWorker(cb func() error) (Worker, error)
 	ExpectedDialog(cb func() error) (Dialog, error)
 	// This method waits for an element matching `selector`, waits for [actionability](../actionability.md) checks,
@@ -1714,7 +1714,7 @@ type Page interface {
 	// matches both handlers.
 	// To remove a route with its handler you can use Page.unroute().
 	// **NOTE** Enabling routing disables http cache.
-	Route(url interface{}, handler routeHandler) error
+	Route(url interface{}, handler routeHandler, times ...int) error
 	// Returns the buffer with the captured screenshot.
 	Screenshot(options ...PageScreenshotOptions) ([]byte, error)
 	// This method waits for an element matching `selector`, waits for [actionability](../actionability.md) checks, waits
@@ -1803,7 +1803,7 @@ type Page interface {
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the page is closed before the event is fired. Returns the event data value.
 	// **Usage**
-	WaitForEvent(event string, predicate ...interface{}) interface{}
+	WaitForEvent(event string, predicate ...interface{}) (interface{}, error)
 	// Returns when the `expression` returns a truthy value. It resolves to a JSHandle of the truthy value.
 	// **Usage**
 	// The Page.waitForFunction() can be used to observe viewport size change:
@@ -1814,7 +1814,7 @@ type Page interface {
 	// committed when this method is called. If current document has already reached the required state, resolves
 	// immediately.
 	// **Usage**
-	WaitForLoadState(state ...string)
+	WaitForLoadState(state ...string) error
 	// Waits for the main frame navigation and returns the main resource response. In case of multiple redirects, the
 	// navigation will resolve with the response of the last redirect. In case of navigation to a different anchor or
 	// navigation due to History API usage, the navigation will resolve with `null`.
@@ -2023,7 +2023,7 @@ type WebSocket interface {
 	URL() string
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the webSocket is closed before the event is fired. Returns the event data value.
-	WaitForEvent(event string, predicate ...interface{}) interface{}
+	WaitForEvent(event string, predicate ...interface{}) (interface{}, error)
 }
 
 // When browser context is created with the `recordVideo` option, each page has a video object associated with it.
@@ -2057,6 +2057,6 @@ type Worker interface {
 	// Worker.evaluateHandle() would wait for the promise to resolve and return its value.
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	URL() string
-	WaitForEvent(event string, predicate ...interface{}) interface{}
+	WaitForEvent(event string, predicate ...interface{}) (interface{}, error)
 	ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error)
 }
