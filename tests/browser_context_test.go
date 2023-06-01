@@ -95,6 +95,27 @@ func TestBrowserContextSetExtraHTTPHeaders(t *testing.T) {
 	<-intercepted
 }
 
+func TestBrowserContextSetHttpCredentials(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	server.SetBasicAuth("/empty.html", "user", "pass")
+
+	response, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.Equal(t, 401, response.Status())
+	context.Close()
+	newContextWithOptions(t, playwright.BrowserNewContextOptions{
+		AcceptDownloads: playwright.Bool(true),
+		HasTouch:        playwright.Bool(true),
+		HttpCredentials: &playwright.HttpCredentials{
+			Username: "user",
+			Password: "pass",
+		},
+	})
+	response, err = page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.Equal(t, 200, response.Status())
+}
 func TestBrowserContextNewCDPSession(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
@@ -113,7 +134,7 @@ func TestBrowserContextSetGeolocation(t *testing.T) {
 	require.NoError(t, context.GrantPermissions([]string{"geolocation"}))
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, context.SetGeolocation(&playwright.SetGeolocationOptions{
+	require.NoError(t, context.SetGeolocation(&playwright.Geolocation{
 		Longitude: 10,
 		Latitude:  10,
 	}))
@@ -133,7 +154,7 @@ func TestBrowserContextAddCookies(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, context.AddCookies(playwright.BrowserContextAddCookiesOptionsCookies{
+	require.NoError(t, context.AddCookies(playwright.OptionalCookie{
 		URL:   playwright.String(server.EMPTY_PAGE),
 		Name:  playwright.String("password"),
 		Value: playwright.String("123456"),
@@ -148,7 +169,7 @@ func TestBrowserContextAddCookies(t *testing.T) {
 	if isChromium {
 		sameSite = playwright.SameSiteAttributeLax
 	}
-	require.Equal(t, []*playwright.BrowserContextCookiesResult{
+	require.Equal(t, []*playwright.Cookie{
 		{
 			Name:    "password",
 			Value:   "123456",
@@ -158,7 +179,7 @@ func TestBrowserContextAddCookies(t *testing.T) {
 
 			HttpOnly: false,
 			Secure:   false,
-			SameSite: *sameSite,
+			SameSite: sameSite,
 		},
 	}, cookies)
 

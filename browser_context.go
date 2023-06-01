@@ -74,22 +74,22 @@ func (b *browserContextImpl) NewPage(options ...BrowserNewPageOptions) (Page, er
 	return fromChannel(channel).(*pageImpl), nil
 }
 
-func (b *browserContextImpl) Cookies(urls ...string) ([]*BrowserContextCookiesResult, error) {
+func (b *browserContextImpl) Cookies(urls ...string) ([]*Cookie, error) {
 	result, err := b.channel.Send("cookies", map[string]interface{}{
 		"urls": urls,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
-	cookies := make([]*BrowserContextCookiesResult, len(result.([]interface{})))
+	cookies := make([]*Cookie, len(result.([]interface{})))
 	for i, cookie := range result.([]interface{}) {
-		cookies[i] = &BrowserContextCookiesResult{}
+		cookies[i] = &Cookie{}
 		remapMapToStruct(cookie, cookies[i])
 	}
 	return cookies, nil
 }
 
-func (b *browserContextImpl) AddCookies(cookies ...BrowserContextAddCookiesOptionsCookies) error {
+func (b *browserContextImpl) AddCookies(cookies ...OptionalCookie) error {
 	_, err := b.channel.Send("addCookies", map[string]interface{}{
 		"cookies": cookies,
 	})
@@ -113,14 +113,14 @@ func (b *browserContextImpl) ClearPermissions() error {
 	return err
 }
 
-// SetGeolocationOptions represents the options for BrowserContext.SetGeolocation()
-type SetGeolocationOptions struct {
-	Longitude int  `json:"longitude"`
-	Latitude  int  `json:"latitude"`
-	Accuracy  *int `json:"accuracy"`
+// Geolocation represents the options for BrowserContext.SetGeolocation()
+type Geolocation struct {
+	Longitude float64  `json:"longitude"`
+	Latitude  float64  `json:"latitude"`
+	Accuracy  *float64 `json:"accuracy"`
 }
 
-func (b *browserContextImpl) SetGeolocation(gelocation *SetGeolocationOptions) error {
+func (b *browserContextImpl) SetGeolocation(gelocation *Geolocation) error {
 	_, err := b.channel.Send("setGeolocation", map[string]interface{}{
 		"geolocation": gelocation,
 	})
@@ -268,15 +268,15 @@ type StorageState struct {
 }
 
 type Cookie struct {
-	Name     string  `json:"name"`
-	Value    string  `json:"value"`
-	URL      string  `json:"url"`
-	Domain   string  `json:"domain"`
-	Path     string  `json:"path"`
-	Expires  float64 `json:"expires"`
-	HttpOnly bool    `json:"httpOnly"`
-	Secure   bool    `json:"secure"`
-	SameSite string  `json:"sameSite"`
+	Name     string             `json:"name"`
+	Value    string             `json:"value"`
+	URL      string             `json:"url"`
+	Domain   string             `json:"domain"`
+	Path     string             `json:"path"`
+	Expires  float64            `json:"expires"`
+	HttpOnly bool               `json:"httpOnly"`
+	Secure   bool               `json:"secure"`
+	SameSite *SameSiteAttribute `json:"sameSite"`
 }
 type OriginsState struct {
 	Origin       string              `json:"origin"`

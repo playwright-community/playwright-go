@@ -28,7 +28,7 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 			options[0].ExtraHttpHeaders = nil
 		}
 		if options[0].StorageStatePath != nil {
-			var storageState *BrowserNewContextOptionsStorageState
+			var storageState *OptionalStorageState
 			storageString, err := os.ReadFile(*options[0].StorageStatePath)
 			if err != nil {
 				return nil, fmt.Errorf("could not read storage state file: %w", err)

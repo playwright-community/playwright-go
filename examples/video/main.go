@@ -20,7 +20,7 @@ func main() {
 		log.Fatalf("could not launch Chromium: %v", err)
 	}
 	page, err := browser.NewPage(playwright.BrowserNewContextOptions{
-		RecordVideo: &playwright.BrowserNewContextOptionsRecordVideo{
+		RecordVideo: &playwright.RecordVideo{
 			Dir: playwright.String("videos/"),
 		},
 	})

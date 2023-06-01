@@ -66,7 +66,7 @@ type BrowserContext interface {
 	// Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies
 	// can be obtained via BrowserContext.cookies().
 	// **Usage**
-	AddCookies(cookies ...BrowserContextAddCookiesOptionsCookies) error
+	AddCookies(cookies ...OptionalCookie) error
 	// Adds a script which would be evaluated in one of the following scenarios:
 	// - Whenever a page is created in the browser context or is navigated.
 	// - Whenever a child frame is attached or navigated in any page in the browser context. In this case, the script is
@@ -90,7 +90,7 @@ type BrowserContext interface {
 	Close() error
 	// If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those
 	// URLs are returned.
-	Cookies(urls ...string) ([]*BrowserContextCookiesResult, error)
+	Cookies(urls ...string) ([]*Cookie, error)
 	ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error)
 	// The method adds a function called `name` on the `window` object of every frame in every page in the context. When
 	// called, the function executes `callback` and returns a [Promise] which resolves to the return value of `callback`.
@@ -144,7 +144,7 @@ type BrowserContext interface {
 	// **Usage**
 	// **NOTE** Consider using BrowserContext.grantPermissions() to grant permissions for the browser context
 	// pages to read its geolocation.
-	SetGeolocation(gelocation *SetGeolocationOptions) error
+	SetGeolocation(gelocation *Geolocation) error
 	ResetGeolocation() error
 	// Routing provides the capability to modify network requests that are made by any page in the browser context. Once
 	// route is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.

@@ -57,13 +57,13 @@ func TestBrowserContextStorageStateSetLocalStorage(t *testing.T) {
 	defer AfterEach(t)
 	context, err := browser.NewContext(
 		playwright.BrowserNewContextOptions{
-			StorageState: &playwright.BrowserNewContextOptionsStorageState{
-				Origins: []playwright.BrowserNewContextOptionsStorageStateOrigins{{
-					Origin: playwright.String("https://www.example.com"),
-					LocalStorage: []playwright.BrowserNewContextOptionsStorageStateOriginsLocalStorage{
+			StorageState: &playwright.OptionalStorageState{
+				Origins: []playwright.OriginsState{{
+					Origin: "https://www.example.com",
+					LocalStorage: []playwright.LocalStorageEntry{
 						{
-							Name:  playwright.String("name1"),
-							Value: playwright.String("value1"),
+							Name:  "name1",
+							Value: "value1",
 						},
 					},
 				},
