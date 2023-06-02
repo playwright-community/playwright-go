@@ -1,6 +1,7 @@
 package playwright
 
 import (
+	"fmt"
 	"path"
 	"reflect"
 	"regexp"
@@ -426,4 +427,50 @@ func serializeMapToNameAndValue(headers map[string]string) []map[string]string {
 		})
 	}
 	return serialized
+}
+
+// assignStructFields assigns fields from src to dest,
+//
+//	omitExtra determines whether to omit src's extra fields
+func assignStructFields(dest, src interface{}, omitExtra bool) error {
+	destValue := reflect.ValueOf(dest)
+	if destValue.Kind() != reflect.Ptr || destValue.IsNil() {
+		return fmt.Errorf("dest must be a non-nil pointer")
+	}
+	destValue = destValue.Elem()
+	if destValue.Kind() != reflect.Struct {
+		return fmt.Errorf("dest must be a struct")
+	}
+
+	srcValue := reflect.ValueOf(src)
+	if srcValue.Kind() == reflect.Ptr {
+		srcValue = srcValue.Elem()
+	}
+	if srcValue.Kind() != reflect.Struct {
+		return fmt.Errorf("src must be a struct")
+	}
+
+	for i := 0; i < destValue.NumField(); i++ {
+		destField := destValue.Field(i)
+		destFieldType := destField.Type()
+		destFieldName := destValue.Type().Field(i).Name
+
+		if srcField := srcValue.FieldByName(destFieldName); srcField.IsValid() && srcField.Type() != destFieldType {
+			return fmt.Errorf("mismatched field type for field %s", destFieldName)
+		} else if srcField.IsValid() {
+			destField.Set(srcField)
+		}
+	}
+
+	if !omitExtra {
+		for i := 0; i < srcValue.NumField(); i++ {
+			srcFieldName := srcValue.Type().Field(i).Name
+
+			if destField := destValue.FieldByName(srcFieldName); !destField.IsValid() {
+				return fmt.Errorf("extra field %s in src", srcFieldName)
+			}
+		}
+	}
+
+	return nil
 }
