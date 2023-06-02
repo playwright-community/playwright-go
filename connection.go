@@ -42,7 +42,26 @@ func (c *connection) Start() *Playwright {
 }
 
 func (c *connection) Stop() error {
-	return c.onClose()
+	err := c.onClose()
+	if err != nil {
+		return err
+	}
+	c.cleanup()
+	return nil
+}
+
+func (c *connection) cleanup() {
+	c.callbacks.Range(func(key, value any) bool {
+		select {
+		case value.(chan callback) <- callback{
+			Error: &Error{
+				Name:    "Error",
+				Message: "Connection closed",
+			}}:
+		default:
+		}
+		return true
+	})
 }
 
 func (c *connection) Dispatch(msg *message) {

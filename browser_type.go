@@ -84,6 +84,7 @@ func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptio
 			context.(*browserContextImpl).onClose()
 		}
 		browser.onClose()
+		connection.cleanup()
 	}
 	jsonPipe.On("closed", pipeClosed)
 	connection.onmessage = func(message map[string]interface{}) error {
