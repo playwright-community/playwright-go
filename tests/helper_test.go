@@ -82,7 +82,11 @@ var DEFAULT_CONTEXT_OPTIONS = playwright.BrowserNewContextOptions{
 	HasTouch:        playwright.Bool(true),
 }
 
-func BeforeEach(t *testing.T) {
+func BeforeEach(t *testing.T, contextOptions ...playwright.BrowserNewContextOptions) {
+	if len(contextOptions) == 1 {
+		newContextWithOptions(t, contextOptions[0])
+		return
+	}
 	newContextWithOptions(t, DEFAULT_CONTEXT_OPTIONS)
 }
 

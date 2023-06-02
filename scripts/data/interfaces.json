@@ -101,6 +101,10 @@
 		"extends": [
 			"EventEmitter"
 		],
+		"BrowserType": [
+			null,
+			"BrowserType"
+		],
 		"Close": [
 			null,
 			"error"

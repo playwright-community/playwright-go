@@ -8,10 +8,15 @@ import (
 
 type browserImpl struct {
 	channelOwner
-	isConnected              bool
-	isClosedOrClosing        bool
-	isConnectedOverWebSocket bool
-	contexts                 []BrowserContext
+	isConnected                  bool
+	isClosedOrClosing            bool
+	shouldCloseConnectionOnClose bool
+	contexts                     []BrowserContext
+	browserType                  BrowserType
+}
+
+func (b *browserImpl) BrowserType() BrowserType {
+	return b.browserType
 }
 
 func (b *browserImpl) IsConnected() bool {
@@ -102,11 +107,17 @@ func (b *browserImpl) Contexts() []BrowserContext {
 }
 
 func (b *browserImpl) Close() error {
+	if b.isClosedOrClosing {
+		return nil
+	}
+	b.Lock()
+	b.isClosedOrClosing = true
+	b.Unlock()
 	_, err := b.channel.Send("close")
 	if err != nil {
 		return fmt.Errorf("could not send message: %w", err)
 	}
-	if b.isConnectedOverWebSocket {
+	if b.shouldCloseConnectionOnClose {
 		return b.connection.Stop()
 	}
 	return nil
@@ -118,20 +129,22 @@ func (b *browserImpl) Version() string {
 
 func (b *browserImpl) onClose() {
 	b.Lock()
-	if !b.isClosedOrClosing {
+	b.isClosedOrClosing = true
+	if b.isConnected {
 		b.isConnected = false
-		b.isClosedOrClosing = true
 		b.Emit("disconnected")
 	}
 	b.Unlock()
 }
 
 func newBrowser(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserImpl {
-	bt := &browserImpl{
+	b := &browserImpl{
 		isConnected: true,
 		contexts:    make([]BrowserContext, 0),
 	}
-	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
-	bt.channel.On("close", bt.onClose)
-	return bt
+	b.createChannelOwner(b, parent, objectType, guid, initializer)
+	// convert parent to *browserTypeImpl
+	b.browserType = newBrowserType(parent.parent, parent.objectType, parent.guid, parent.initializer)
+	b.channel.On("close", b.onClose)
+	return b
 }

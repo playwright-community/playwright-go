@@ -159,6 +159,8 @@ type BindingCall interface {
 // A Browser is created via BrowserType.launch(). An example of using a `Browser` to create a `Page`:
 type Browser interface {
 	EventEmitter
+	// Get the browser type (chromium, firefox or webkit) that the browser belongs to.
+	BrowserType() BrowserType
 	// In case this browser is obtained using BrowserType.launch(), closes the browser and all of its pages (if
 	// any were opened).
 	// In case this browser is connected to, clears all created contexts belonging to this browser and disconnects from

@@ -96,7 +96,7 @@ func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptio
 	jsonPipe.On("message", connection.Dispatch)
 	playwright := connection.Start()
 	browser = fromChannel(playwright.initializer["preLaunchedBrowser"]).(*browserImpl)
-	browser.isConnectedOverWebSocket = true
+	browser.shouldCloseConnectionOnClose = true
 	return browser, nil
 }
 func (b *browserTypeImpl) ConnectOverCDP(endpointURL string, options ...BrowserTypeConnectOverCDPOptions) (Browser, error) {
