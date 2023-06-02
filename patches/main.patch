@@ -234,7 +234,7 @@ index 1297d2d4f..6ecc65ae7 100644
  
  Returns the JSON representation of response body.
 diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
-index fe3edc74b..ac01b269a 100644
+index fe3edc74b..2e961136c 100644
 --- a/docs/src/api/class-browsercontext.md
 +++ b/docs/src/api/class-browsercontext.md
 @@ -226,6 +226,7 @@ await context.AddCookiesAsync(new[] { cookie1, cookie2 });
@@ -289,6 +289,26 @@ index fe3edc74b..ac01b269a 100644
  ### param: BrowserContext.unroute.handler
  * since: v1.8
  * langs: csharp, java
+@@ -1300,7 +1322,8 @@ Optional handler function used to register a routing with [`method: BrowserConte
+ 
+ ## async method: BrowserContext.waitForEvent
+ * since: v1.8
+-* langs: js, python
++* langs: js, python, go
++  - alias-go: ExpectEvent
+   - alias-python: expect_event
+ - returns: <[any]>
+ 
+@@ -1377,7 +1400,8 @@ Receives the [Page] object and resolves to truthy value when the waiting should
+ 
+ ## async method: BrowserContext.waitForEvent2
+ * since: v1.8
+-* langs: python
++* langs: python, go
++  - alias-go: WaitForEvent
+   - alias-python: wait_for_event
+ - returns: <[any]>
+ 
 diff --git a/docs/src/api/class-frame.md b/docs/src/api/class-frame.md
 index 49b77defd..6ba16526f 100644
 --- a/docs/src/api/class-frame.md
@@ -315,7 +335,7 @@ index 49b77defd..6ba16526f 100644
  
  ### option: Frame.waitForLoadState.timeout = %%-navigation-timeout-%%
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index ef2baf1ab..cedd38d98 100644
+index ef2baf1ab..098414d93 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
 @@ -631,6 +631,20 @@ Script to be evaluated in all pages in the browser context.
@@ -450,7 +470,47 @@ index ef2baf1ab..cedd38d98 100644
  ### param: Page.unroute.handler
  * since: v1.8
  * langs: csharp, java
-@@ -3934,7 +3962,7 @@ await page.WaitForFunctionAsync("selector => !!document.querySelector(selector)"
+@@ -3707,7 +3735,8 @@ Performs action and waits for the Page to close.
+ 
+ ## async method: Page.waitForConsoleMessage
+ * since: v1.9
+-* langs: java, python, csharp
++* langs: java, python, csharp, go
++  - alias-go: ExpectConsoleMessage
+   - alias-python: expect_console_message
+   - alias-csharp: RunAndWaitForConsoleMessage
+ - returns: <[ConsoleMessage]>
+@@ -3727,7 +3756,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
+ 
+ ## async method: Page.waitForDownload
+ * since: v1.9
+-* langs: java, python, csharp
++* langs: java, python, csharp, go
++  - alias-go: ExpectDownload
+   - alias-python: expect_download
+   - alias-csharp: RunAndWaitForDownload
+ - returns: <[Download]>
+@@ -3747,7 +3777,8 @@ Receives the [Download] object and resolves to truthy value when the waiting sho
+ 
+ ## async method: Page.waitForEvent
+ * since: v1.8
+-* langs: js, python
++* langs: js, python, go
++  - alias-go: ExpectEvent
+   - alias-python: expect_event
+ - returns: <[any]>
+ 
+@@ -3790,7 +3821,8 @@ Either a predicate that receives an event or an options object. Optional.
+ 
+ ## async method: Page.waitForFileChooser
+ * since: v1.9
+-* langs: java, python, csharp
++* langs: java, python, csharp, go
++  - alias-go: ExpectFileChooser
+   - alias-python: expect_file_chooser
+   - alias-csharp: RunAndWaitForFileChooser
+ - returns: <[FileChooser]>
+@@ -3934,7 +3966,7 @@ await page.WaitForFunctionAsync("selector => !!document.querySelector(selector)"
  
  Optional argument to pass to [`param: expression`].
  
@@ -459,7 +519,7 @@ index ef2baf1ab..cedd38d98 100644
  * since: v1.8
  
  ### option: Page.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
-@@ -4024,6 +4052,11 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
+@@ -4024,6 +4056,11 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
  ```
  
  ### param: Page.waitForLoadState.state = %%-wait-for-load-state-state-%%
@@ -471,6 +531,46 @@ index ef2baf1ab..cedd38d98 100644
  * since: v1.8
  
  ### option: Page.waitForLoadState.timeout = %%-navigation-timeout-%%
+@@ -4102,7 +4139,8 @@ a navigation.
+ 
+ ## async method: Page.waitForPopup
+ * since: v1.9
+-* langs: java, python, csharp
++* langs: java, python, csharp, go
++  - alias-go: ExpectPopup
+   - alias-python: expect_popup
+   - alias-csharp: RunAndWaitForPopup
+ - returns: <[Page]>
+@@ -4556,7 +4594,8 @@ await page.WaitForURLAsync("**/target.html");
+ 
+ ## async method: Page.waitForWebSocket
+ * since: v1.9
+-* langs: java, python, csharp
++* langs: java, python, csharp, go
++  - alias-go: ExpectWebSocket
+   - alias-python: expect_websocket
+   - alias-csharp: RunAndWaitForWebSocket
+ - returns: <[WebSocket]>
+@@ -4576,7 +4615,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
+ 
+ ## async method: Page.waitForWorker
+ * since: v1.9
+-* langs: java, python, csharp
++* langs: java, python, csharp, go
++  - alias-go: ExpectWorker
+   - alias-python: expect_worker
+   - alias-csharp: RunAndWaitForWorker
+ - returns: <[Worker]>
+@@ -4607,7 +4647,8 @@ This does not contain ServiceWorkers
+ 
+ ## async method: Page.waitForEvent2
+ * since: v1.8
+-* langs: python
++* langs: python, go
++  - alias-go: WaitForEvent
+   - alias-python: wait_for_event
+ - returns: <[any]>
+ 
 diff --git a/docs/src/api/class-route.md b/docs/src/api/class-route.md
 index 9999aac53..430d7637b 100644
 --- a/docs/src/api/class-route.md
@@ -527,7 +627,7 @@ index 9999aac53..430d7637b 100644
  
  A request to be routed.
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index a58da7d77..1328804f6 100644
+index a58da7d77..83ffb2855 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
 @@ -145,8 +145,8 @@ Defaults to `'visible'`. Can be either:
@@ -782,6 +882,15 @@ index a58da7d77..1328804f6 100644
  - `recordVideo` <[Object]>
    - `dir` <[path]> Path to the directory to put videos into.
    - `size` ?<[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
+@@ -767,7 +792,7 @@ only the first option matching one of the passed options is selected. Optional.
+ Receives the event data and resolves to truthy value when the waiting should resolve.
+ 
+ ## wait-for-event-timeout
+-* langs: csharp, java, python
++* langs: csharp, java, python, go
+ - `timeout` <[float]>
+ 
+ Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 @@ -917,7 +942,7 @@ Firefox user preferences. Learn more about the Firefox user preferences at
  [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
  
@@ -801,10 +910,10 @@ index a58da7d77..1328804f6 100644
  Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with
 diff --git a/utils/doclint/generateGoApi.js b/utils/doclint/generateGoApi.js
 new file mode 100644
-index 000000000..e86e807be
+index 000000000..6b3cfa844
 --- /dev/null
 +++ b/utils/doclint/generateGoApi.js
-@@ -0,0 +1,822 @@
+@@ -0,0 +1,821 @@
 +/**
 + * Copyright (c) Microsoft Corporation.
 + *
@@ -1296,7 +1405,7 @@ index 000000000..e86e807be
 +
 +  type = type || typeResolve(member.type);
 +
-+  const optionsStructName = `${parent.name}${makeFirstCharUpperCase(member.name)}Options`
++  const optionsStructName = `${parent.name}${makeFirstCharUpperCase(member.alias)}Options`
 +  let optionsStructMembers = member.argsArray.find(a => a.name === "options")?.type.properties || []
 +  if (!optionsStructMembers.length)
 +    optionsStructMembers = member.argsArray.filter(a => (!a.required || a.langs.only?.includes("go")))
@@ -1596,11 +1705,10 @@ index 000000000..e86e807be
 +      // this is an Action
 +      return `func(${argsList})`;
 +    } else {
-+      let returnType = translateType(type.returnType, parent, generateNameCallback);
++      let returnType = removePointer(translateType(type.returnType, parent, generateNameCallback));
 +      if (returnType == null)
 +        throw new Error('Unexpected null as return type.');
-+
-+      return `Func<${argsList}, ${returnType}>`;
++      return `func(${argsList}) ${returnType}`;
 +    }
 +  }
 +

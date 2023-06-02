@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { transformMethodNamesToGo, getAPIDocs } = require("./helpers")
+const { memberNameForGo, transformMethodNamesToGo, getAPIDocs } = require("./helpers")
 
 const interfaceData = require("./data/interfaces.json")
 const api = getAPIDocs()
@@ -58,7 +58,7 @@ for (const [className, methods] of Object.entries(interfaceData)) {
       for (const inheritedInterface of funcData)
         console.log(inheritedInterface)
     } else {
-      const apiFunc = apiClass?.members.find(member => member.kind === "method" && funcName === transformMethodNamesToGo(member.name))
+      const apiFunc = apiClass?.members.find(member => (member.kind === "method" || member.kind === "property") && funcName === transformMethodNamesToGo(memberNameForGo(member)))
       if (apiFunc && apiFunc.comment)
         writeComment(apiFunc.comment)
 

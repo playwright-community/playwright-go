@@ -578,6 +578,20 @@ type BrowserContextUnrouteOptions struct {
 	// Optional handler function used to register a routing with BrowserContext.Route().
 	Handler func(Route) `json:"handler"`
 }
+type BrowserContextExpectEventOptions struct {
+	// Receives the event data and resolves to truthy value when the waiting should resolve.
+	Predicate interface{} `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
+type BrowserContextWaitForEventOptions struct {
+	// Receives the event data and resolves to truthy value when the waiting should resolve.
+	Predicate interface{} `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
 type BrowserTypeConnectOptions struct {
 	// Additional HTTP headers to be sent with web socket connect request. Optional.
 	Headers map[string]string `json:"headers"`
@@ -3203,6 +3217,37 @@ type PageUnrouteOptions struct {
 	// Optional handler function to route the request.
 	Handler func(Route) `json:"handler"`
 }
+type PageExpectConsoleMessageOptions struct {
+	// Receives the ConsoleMessage object and resolves to truthy value when the waiting
+	// should resolve.
+	Predicate func(ConsoleMessage) bool `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
+type PageExpectDownloadOptions struct {
+	// Receives the Download object and resolves to truthy value when the waiting should
+	// resolve.
+	Predicate func(Download) bool `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
+type PageExpectEventOptions struct {
+	// Receives the event data and resolves to truthy value when the waiting should resolve.
+	Predicate interface{} `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
+type PageExpectFileChooserOptions struct {
+	// Receives the FileChooser object and resolves to truthy value when the waiting should
+	// resolve.
+	Predicate func(FileChooser) bool `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
 type PageWaitForFunctionOptions struct {
 	// If `polling` is `'raf'`, then `expression` is constantly executed in `requestAnimationFrame`
 	// callback. If `polling` is a number, then it is treated as an interval in milliseconds
@@ -3246,6 +3291,13 @@ type PageWaitForNavigationOptions struct {
 	// `'commit'` - consider operation to be finished when network response is received
 	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
+}
+type PageExpectPopupOptions struct {
+	// Receives the Page object and resolves to truthy value when the waiting should resolve.
+	Predicate func(Page) bool `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
 }
 type PageWaitForRequestOptions struct {
 	// Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the
@@ -3292,6 +3344,29 @@ type PageWaitForURLOptions struct {
 	// `'commit'` - consider operation to be finished when network response is received
 	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
+}
+type PageExpectWebSocketOptions struct {
+	// Receives the WebSocket object and resolves to truthy value when the waiting should
+	// resolve.
+	Predicate func(WebSocket) bool `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
+type PageExpectWorkerOptions struct {
+	// Receives the Worker object and resolves to truthy value when the waiting should
+	// resolve.
+	Predicate func(Worker) bool `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
+type PageWaitForEventOptions struct {
+	// Receives the event data and resolves to truthy value when the waiting should resolve.
+	Predicate interface{} `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
 }
 
 // Result of calling <see cref="Request.Sizes" />.

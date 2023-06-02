@@ -31,10 +31,15 @@ const getCliLocation = () => {
 }
 
 const getAPIDocs = () => {
-  return JSON.parse(child_process.execSync(`"${getCliLocation()}" print-api-json`, {
+  return JSON.parse(child_process.execSync(`"node" ./playwright/utils/doclint/generateApiJson.js`, {
     maxBuffer: 1024 * 1024 * 10,
     shell: true
   }).toString())
+}
+
+const memberNameForGo = (member) => {
+  name = member.langs?.aliases?.go ? member.langs.aliases.go : member.name
+  return name
 }
 
 const transformMethodNamesToGo = (funcName) => {
@@ -51,6 +56,7 @@ const transformMethodNamesToGo = (funcName) => {
 }
 
 module.exports = {
+  memberNameForGo,
   getAPIDocs,
   transformMethodNamesToGo,
 }
