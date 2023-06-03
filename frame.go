@@ -121,13 +121,18 @@ func (f *frameImpl) Page() Page {
 	return f.page
 }
 
-func (f *frameImpl) WaitForLoadState(given ...string) error {
-	timeout := Float(f.page.timeoutSettings.NavigationTimeout())
-	state := "load"
-	if len(given) == 1 {
-		state = given[0]
+func (f *frameImpl) WaitForLoadState(options ...PageWaitForLoadStateOptions) error {
+	option := PageWaitForLoadStateOptions{}
+	if len(options) == 1 {
+		option = options[0]
 	}
-	return f.waitForLoadStateImpl(state, timeout, nil)
+	if option.State == nil {
+		option.State = LoadStateLoad
+	}
+	if option.Timeout == nil {
+		option.Timeout = Float(f.page.timeoutSettings.NavigationTimeout())
+	}
+	return f.waitForLoadStateImpl(string(*option.State), option.Timeout, nil)
 }
 
 func (f *frameImpl) waitForLoadStateImpl(state string, timeout *float64, cb func() error) error {
@@ -149,6 +154,20 @@ func (f *frameImpl) waitForLoadStateImpl(state string, timeout *float64, cb func
 }
 
 func (f *frameImpl) WaitForURL(url string, options ...FrameWaitForURLOptions) error {
+	matcher := newURLMatcher(url, f.page.browserContext.options.BaseURL)
+	if matcher.Matches(f.URL()) {
+		state := "load"
+		timeout := Float(f.page.timeoutSettings.NavigationTimeout())
+		if len(options) == 1 {
+			if options[0].WaitUntil != nil {
+				state = string(*options[0].WaitUntil)
+			}
+			if options[0].Timeout != nil {
+				timeout = options[0].Timeout
+			}
+		}
+		return f.waitForLoadStateImpl(state, timeout, nil)
+	}
 	navigationOptions := PageWaitForNavigationOptions{URL: url}
 	if len(options) > 0 {
 		navigationOptions.Timeout = options[0].Timeout
@@ -160,11 +179,14 @@ func (f *frameImpl) WaitForURL(url string, options ...FrameWaitForURLOptions) er
 	return nil
 }
 
-func (f *frameImpl) WaitForEvent(event string, predicates ...interface{}) (interface{}, error) {
-	timeout := f.page.timeoutSettings.NavigationTimeout()
+func (f *frameImpl) WaitForEvent(event string, options ...PageWaitForEventOptions) (interface{}, error) {
+	timeout := f.page.timeoutSettings.Timeout()
 	var predicate interface{} = nil
-	if len(predicates) == 1 {
-		predicate = predicates[0]
+	if len(options) == 1 {
+		if options[0].Timeout != nil {
+			timeout = *options[0].Timeout
+		}
+		predicate = options[0].Predicate
 	}
 	waiter := newWaiter().WithTimeout(timeout)
 	waiter.RejectOnEvent(f.page, "close", errors.New("page closed"))

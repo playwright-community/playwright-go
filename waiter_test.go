@@ -61,7 +61,7 @@ func TestWaiterRejectOnTimeout(t *testing.T) {
 	waiter := newWaiter().WithTimeout(timeout)
 	waiter.WaitForEvent(emitter, testEventNameFoobar, nil)
 	go func() {
-		time.Sleep(time.Duration(timeout+5) * time.Millisecond)
+		time.Sleep(time.Duration(timeout*2) * time.Millisecond)
 		emitter.Emit(testEventNameFoobar, testEventPayload)
 	}()
 	result, err := waiter.Wait()

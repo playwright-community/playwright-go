@@ -457,7 +457,9 @@ func TestPageWaitForLoadState(t *testing.T) {
 	_, err := page.Goto(server.PREFIX + "/one-style.html")
 	require.NoError(t, err)
 	require.NoError(t, page.WaitForLoadState())
-	require.NoError(t, page.WaitForLoadState("networkidle"))
+	require.NoError(t, page.WaitForLoadState(playwright.PageWaitForLoadStateOptions{
+		State: playwright.LoadStateNetworkidle,
+	}))
 }
 
 func TestPlaywrightDevices(t *testing.T) {
@@ -1011,5 +1013,41 @@ func TestPageWaitForResponse(t *testing.T) {
 
 		require.Nil(t, response)
 		require.EqualError(t, err, "Timeout 500.00ms exceeded.")
+	})
+}
+
+func TestPageWaitForURL(t *testing.T) {
+	t.Run("should work", func(t *testing.T) {
+		BeforeEach(t)
+		defer AfterEach(t)
+		_, err := page.Goto(server.EMPTY_PAGE)
+		require.NoError(t, err)
+		_, err = page.Evaluate("url => window.location.href = url", fmt.Sprintf("%s/grid.html", server.PREFIX))
+		require.NoError(t, err)
+		require.NoError(t, page.WaitForURL("**/grid.html"))
+		require.Contains(t, page.URL(), "grid.html")
+	})
+
+	t.Run("should respect timeout", func(t *testing.T) {
+		BeforeEach(t)
+		defer AfterEach(t)
+		_, err := page.Goto(server.EMPTY_PAGE)
+		require.NoError(t, err)
+		require.Error(t, page.WaitForURL("**/grid.html", playwright.FrameWaitForURLOptions{
+			Timeout: playwright.Float(1000),
+		}), "Timeout 1000.00ms exceeded.")
+	})
+
+	t.Run("should work with commit", func(t *testing.T) {
+		BeforeEach(t)
+		defer AfterEach(t)
+		_, err := page.Goto(server.EMPTY_PAGE)
+		require.NoError(t, err)
+		_, err = page.Evaluate("url => window.location.href = url", fmt.Sprintf("%s/grid.html", server.PREFIX))
+		require.NoError(t, err)
+		require.NoError(t, page.WaitForURL("**/grid.html"), playwright.FrameWaitForURLOptions{
+			WaitUntil: playwright.WaitUntilStateCommit,
+		})
+		require.Contains(t, page.URL(), "grid.html")
 	})
 }

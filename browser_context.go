@@ -217,23 +217,26 @@ func (b *browserContextImpl) Unroute(url interface{}, handlers ...routeHandler) 
 	return nil
 }
 
-func (b *browserContextImpl) WaitForEvent(event string, predicate ...interface{}) (interface{}, error) {
-	return b.waiterForEvent(event, predicate...).Wait()
+func (b *browserContextImpl) WaitForEvent(event string, options ...BrowserContextWaitForEventOptions) (interface{}, error) {
+	return b.waiterForEvent(event, options...).Wait()
 }
 
-func (b *browserContextImpl) waiterForEvent(event string, predicates ...interface{}) *waiter {
-	timeout := b.timeoutSettings.NavigationTimeout()
+func (b *browserContextImpl) waiterForEvent(event string, options ...BrowserContextWaitForEventOptions) *waiter {
+	timeout := b.timeoutSettings.Timeout()
 	var predicate interface{} = nil
-	if len(predicates) == 1 {
-		predicate = predicates[0]
+	if len(options) == 1 {
+		if options[0].Timeout != nil {
+			timeout = *options[0].Timeout
+		}
+		predicate = options[0].Predicate
 	}
 	waiter := newWaiter().WithTimeout(timeout)
 	waiter.RejectOnEvent(b, "close", errors.New("context closed"))
 	return waiter.WaitForEvent(b, event, predicate)
 }
 
-func (b *browserContextImpl) ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error) {
-	return b.waiterForEvent(event, predicates...).Expect(cb)
+func (b *browserContextImpl) ExpectEvent(event string, cb func() error, options ...BrowserContextWaitForEventOptions) (interface{}, error) {
+	return b.waiterForEvent(event, options...).Expect(cb)
 }
 
 func (b *browserContextImpl) Close() error {

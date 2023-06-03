@@ -195,8 +195,8 @@ func (p *pageImpl) Reload(options ...PageReloadOptions) (Response, error) {
 	return channelOwner.(*responseImpl), nil
 }
 
-func (p *pageImpl) WaitForLoadState(state ...string) error {
-	return p.mainFrame.WaitForLoadState(state...)
+func (p *pageImpl) WaitForLoadState(options ...PageWaitForLoadStateOptions) error {
+	return p.mainFrame.WaitForLoadState(options...)
 }
 
 func (p *pageImpl) GoBack(options ...PageGoBackOptions) (Response, error) {
@@ -329,15 +329,18 @@ func (p *pageImpl) Click(selector string, options ...PageClickOptions) error {
 	return p.mainFrame.Click(selector, options...)
 }
 
-func (p *pageImpl) WaitForEvent(event string, predicates ...interface{}) (interface{}, error) {
-	return p.waiterForEvent(event, predicates...).Wait()
+func (p *pageImpl) WaitForEvent(event string, options ...PageWaitForEventOptions) (interface{}, error) {
+	return p.waiterForEvent(event, options...).Wait()
 }
 
-func (p *pageImpl) waiterForEvent(event string, predicates ...interface{}) *waiter {
-	timeout := p.timeoutSettings.NavigationTimeout()
+func (p *pageImpl) waiterForEvent(event string, options ...PageWaitForEventOptions) *waiter {
+	timeout := p.timeoutSettings.Timeout()
 	var predicate interface{} = nil
-	if len(predicates) == 1 {
-		predicate = predicates[0]
+	if len(options) == 1 {
+		if options[0].Timeout != nil {
+			timeout = *options[0].Timeout
+		}
+		predicate = options[0].Predicate
 	}
 	waiter := newWaiter().WithTimeout(timeout)
 	waiter.RejectOnEvent(p, "close", errors.New("page closed"))
@@ -411,8 +414,8 @@ func (p *pageImpl) waiterForResponse(url interface{}, options ...PageWaitForResp
 	return waiter.WaitForEvent(p, "response", predicate)
 }
 
-func (p *pageImpl) ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error) {
-	return p.waiterForEvent(event, predicates...).Expect(cb)
+func (p *pageImpl) ExpectEvent(event string, cb func() error, options ...PageWaitForEventOptions) (interface{}, error) {
+	return p.waiterForEvent(event, options...).Expect(cb)
 }
 
 func (p *pageImpl) ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (Response, error) {
@@ -461,8 +464,13 @@ func (p *pageImpl) ExpectNavigation(cb func() error, options ...PageWaitForNavig
 	return nil, nil
 }
 
-func (p *pageImpl) ExpectConsoleMessage(cb func() error) (ConsoleMessage, error) {
-	ret, err := newWaiter().WaitForEvent(p, "console", nil).Expect(cb)
+func (p *pageImpl) ExpectConsoleMessage(cb func() error, options ...PageExpectConsoleMessageOptions) (ConsoleMessage, error) {
+	option := PageWaitForEventOptions{}
+	if len(options) == 1 {
+		option.Timeout = options[0].Timeout
+		option.Predicate = options[0].Predicate
+	}
+	ret, err := p.waiterForEvent("console", option).Expect(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -477,29 +485,53 @@ func (p *pageImpl) ExpectedDialog(cb func() error) (Dialog, error) {
 	return ret.(*dialogImpl), err
 }
 
-func (p *pageImpl) ExpectDownload(cb func() error) (Download, error) {
-	ret, err := newWaiter().WaitForEvent(p, "download", nil).Expect(cb)
+func (p *pageImpl) ExpectDownload(cb func() error, options ...PageExpectDownloadOptions) (Download, error) {
+	option := PageWaitForEventOptions{}
+	if len(options) == 1 {
+		option.Timeout = options[0].Timeout
+		option.Predicate = options[0].Predicate
+	}
+	ret, err := p.waiterForEvent("download", option).Expect(cb)
 	if ret == nil {
 		return nil, err
 	}
 	return ret.(*downloadImpl), err
 }
 
-func (p *pageImpl) ExpectFileChooser(cb func() error) (FileChooser, error) {
-	ret, err := newWaiter().WaitForEvent(p, "filechooser", nil).Expect(cb)
+func (p *pageImpl) ExpectFileChooser(cb func() error, options ...PageExpectFileChooserOptions) (FileChooser, error) {
+	option := PageWaitForEventOptions{}
+	if len(options) == 1 {
+		option.Timeout = options[0].Timeout
+		option.Predicate = options[0].Predicate
+	}
+	ret, err := p.waiterForEvent("filechooser", option).Expect(cb)
 	if ret == nil {
 		return nil, err
 	}
 	return ret.(*fileChooserImpl), err
 }
 
-func (p *pageImpl) ExpectLoadState(state string, cb func() error) error {
-	timeout := Float(p.timeoutSettings.NavigationTimeout())
-	return p.mainFrame.(*frameImpl).waitForLoadStateImpl(state, timeout, cb)
+func (p *pageImpl) ExpectLoadState(cb func() error, options ...PageWaitForLoadStateOptions) error {
+	option := PageWaitForLoadStateOptions{}
+	if len(options) == 1 {
+		option = options[0]
+	}
+	if option.State == nil {
+		option.State = LoadStateLoad
+	}
+	if option.Timeout == nil {
+		option.Timeout = Float(p.timeoutSettings.NavigationTimeout())
+	}
+	return p.mainFrame.(*frameImpl).waitForLoadStateImpl(string(*option.State), option.Timeout, cb)
 }
 
-func (p *pageImpl) ExpectPopup(cb func() error) (Page, error) {
-	ret, err := newWaiter().WaitForEvent(p, "popup", nil).Expect(cb)
+func (p *pageImpl) ExpectPopup(cb func() error, options ...PageExpectPopupOptions) (Page, error) {
+	option := PageWaitForEventOptions{}
+	if len(options) == 1 {
+		option.Timeout = options[0].Timeout
+		option.Predicate = options[0].Predicate
+	}
+	ret, err := p.waiterForEvent("popup", option).Expect(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -522,8 +554,13 @@ func (p *pageImpl) ExpectRequest(url interface{}, cb func() error, options ...Pa
 	return ret.(*requestImpl), err
 }
 
-func (p *pageImpl) ExpectWorker(cb func() error) (Worker, error) {
-	ret, err := newWaiter().WaitForEvent(p, "worker", nil).Expect(cb)
+func (p *pageImpl) ExpectWorker(cb func() error, options ...PageExpectWorkerOptions) (Worker, error) {
+	option := PageWaitForEventOptions{}
+	if len(options) == 1 {
+		option.Timeout = options[0].Timeout
+		option.Predicate = options[0].Predicate
+	}
+	ret, err := p.waiterForEvent("worker", option).Expect(cb)
 	if ret == nil {
 		return nil, err
 	}

@@ -84,7 +84,7 @@
 			"([]*Cookie, error)"
 		],
 		"ExpectEvent": [
-			"event string, cb func() error, predicates ...interface{}",
+			"event string, cb func() error, options ...BrowserContextWaitForEventOptions",
 			"(interface{}, error)"
 		],
 		"ExposeBinding": [
@@ -148,7 +148,7 @@
 			"error"
 		],
 		"WaitForEvent": [
-			"event string, predicate ...interface{}",
+			"event string, options ...BrowserContextWaitForEventOptions",
 			"interface{}, error"
 		],
 		"Tracing": [
@@ -661,7 +661,7 @@
 			"error"
 		],
 		"WaitForEvent": [
-			"event string, predicate ...interface{}",
+			"event string, options ...PageWaitForEventOptions",
 			"interface{}, error"
 		],
 		"WaitForFunction": [
@@ -669,7 +669,7 @@
 			"(JSHandle, error)"
 		],
 		"WaitForLoadState": [
-			"given ...string",
+			"options ...PageWaitForLoadStateOptions",
 			"error"
 		],
 		"WaitForNavigation": [
@@ -1076,23 +1076,23 @@
 			"interface{}, error"
 		],
 		"ExpectConsoleMessage": [
-			"cb func() error",
+			"cb func() error, options ...PageExpectConsoleMessageOptions",
 			"ConsoleMessage, error"
 		],
 		"ExpectDownload": [
-			"cb func() error",
+			"cb func() error, options ...PageExpectDownloadOptions",
 			"Download, error"
 		],
 		"ExpectEvent": [
-			"event string, cb func() error, predicates ...interface{}",
+			"event string, cb func() error, options ...PageWaitForEventOptions",
 			"interface{}, error"
 		],
 		"ExpectFileChooser": [
-			"cb func() error",
+			"cb func() error, options ...PageExpectFileChooserOptions",
 			"FileChooser, error"
 		],
 		"ExpectLoadState": [
-			"state string, cb func() error",
+			"cb func() error, options ...PageWaitForLoadStateOptions",
 			"error"
 		],
 		"ExpectNavigation": [
@@ -1100,7 +1100,7 @@
 			"Response, error"
 		],
 		"ExpectPopup": [
-			"cb func() error",
+			"cb func() error, options ...PageExpectPopupOptions",
 			"Page, error"
 		],
 		"ExpectRequest": [
@@ -1112,7 +1112,7 @@
 			"Response, error"
 		],
 		"ExpectWorker": [
-			"cb func() error",
+			"cb func() error, options ...PageExpectWorkerOptions",
 			"Worker, error"
 		],
 		"ExpectedDialog": [
@@ -1300,7 +1300,7 @@
 			"ViewportSize"
 		],
 		"WaitForEvent": [
-			"event string, predicate ...interface{}",
+			"event string, options ...PageWaitForEventOptions",
 			"interface{}, error"
 		],
 		"WaitForFunction": [
@@ -1308,7 +1308,7 @@
 			"(JSHandle, error)"
 		],
 		"WaitForLoadState": [
-			"state ...string",
+			"options ...PageWaitForLoadStateOptions",
 			"error"
 		],
 		"WaitForNavigation": [
