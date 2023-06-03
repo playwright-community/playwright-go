@@ -245,6 +245,9 @@ type BrowserContext interface {
 	// If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those
 	// URLs are returned.
 	Cookies(urls ...string) ([]*Cookie, error)
+	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
+	// value. Will throw an error if the context closes before the event is fired. Returns the event data value.
+	// **Usage**
 	ExpectEvent(event string, cb func() error, options ...BrowserContextWaitForEventOptions) (interface{}, error)
 	// The method adds a function called `name` on the `window` object of every frame in every page in the context. When
 	// called, the function executes `callback` and returns a [Promise] which resolves to the return value of `callback`.
@@ -321,9 +324,10 @@ type BrowserContext interface {
 	// Removes a route created with BrowserContext.route(). When `handler` is not specified, removes all routes
 	// for the `url`.
 	Unroute(url interface{}, handler ...routeHandler) error
-	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
-	// value. Will throw an error if the context closes before the event is fired. Returns the event data value.
-	// **Usage**
+	// **NOTE** In most cases, you should use BrowserContext.waitForEvent().
+	// Waits for given `event` to fire. If predicate is provided, it passes event's value into the `predicate` function
+	// and waits for `predicate(event)` to return a truthy value. Will throw an error if the browser context is closed
+	// before the `event` is fired.
 	WaitForEvent(event string, options ...BrowserContextWaitForEventOptions) (interface{}, error)
 	Tracing() Tracing
 	// **NOTE** Background pages are only supported on Chromium-based browsers.
@@ -1693,15 +1697,33 @@ type Page interface {
 	// and return its value.
 	// **Usage**
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
+	// Performs action and waits for a `ConsoleMessage` to be logged by in the page. If predicate is provided, it passes
+	// `ConsoleMessage` value into the `predicate` function and waits for `predicate(message)` to return a truthy value.
+	// Will throw an error if the page is closed before the [`event: Page.console`] event is fired.
 	ExpectConsoleMessage(cb func() error, options ...PageExpectConsoleMessageOptions) (ConsoleMessage, error)
+	// Performs action and waits for a new `Download`. If predicate is provided, it passes `Download` value into the
+	// `predicate` function and waits for `predicate(download)` to return a truthy value. Will throw an error if the page
+	// is closed before the download event is fired.
 	ExpectDownload(cb func() error, options ...PageExpectDownloadOptions) (Download, error)
+	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
+	// value. Will throw an error if the page is closed before the event is fired. Returns the event data value.
+	// **Usage**
 	ExpectEvent(event string, cb func() error, options ...PageWaitForEventOptions) (interface{}, error)
+	// Performs action and waits for a new `FileChooser` to be created. If predicate is provided, it passes `FileChooser`
+	// value into the `predicate` function and waits for `predicate(fileChooser)` to return a truthy value. Will throw an
+	// error if the page is closed before the file chooser is opened.
 	ExpectFileChooser(cb func() error, options ...PageExpectFileChooserOptions) (FileChooser, error)
 	ExpectLoadState(cb func() error, options ...PageWaitForLoadStateOptions) error
 	ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (Response, error)
+	// Performs action and waits for a popup `Page`. If predicate is provided, it passes [Popup] value into the
+	// `predicate` function and waits for `predicate(page)` to return a truthy value. Will throw an error if the page is
+	// closed before the popup event is fired.
 	ExpectPopup(cb func() error, options ...PageExpectPopupOptions) (Page, error)
 	ExpectRequest(url interface{}, cb func() error, options ...PageWaitForRequestOptions) (Request, error)
 	ExpectResponse(url interface{}, cb func() error, options ...PageWaitForResponseOptions) (Response, error)
+	// Performs action and waits for a new `Worker`. If predicate is provided, it passes `Worker` value into the
+	// `predicate` function and waits for `predicate(worker)` to return a truthy value. Will throw an error if the page is
+	// closed before the worker event is fired.
 	ExpectWorker(cb func() error, options ...PageExpectWorkerOptions) (Worker, error)
 	ExpectedDialog(cb func() error) (Dialog, error)
 	// This method waits for an element matching `selector`, waits for [actionability](../actionability.md) checks,
@@ -1954,9 +1976,10 @@ type Page interface {
 	// Video object associated with this page.
 	Video() Video
 	ViewportSize() ViewportSize
-	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
-	// value. Will throw an error if the page is closed before the event is fired. Returns the event data value.
-	// **Usage**
+	// **NOTE** In most cases, you should use Page.waitForEvent().
+	// Waits for given `event` to fire. If predicate is provided, it passes event's value into the `predicate` function
+	// and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is closed before the
+	// `event` is fired.
 	WaitForEvent(event string, options ...PageWaitForEventOptions) (interface{}, error)
 	// Returns when the `expression` returns a truthy value. It resolves to a JSHandle of the truthy value.
 	// **Usage**
