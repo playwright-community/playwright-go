@@ -619,6 +619,25 @@ func (p *pageImpl) Mouse() Mouse {
 	return p.mouse
 }
 
+func (p *pageImpl) RouteFromHAR(har string, options ...PageRouteFromHAROptions) error {
+	opt := PageRouteFromHAROptions{}
+	if len(options) == 1 {
+		opt = options[0]
+	}
+	if opt.Update != nil && *opt.Update {
+		return p.browserContext.recordIntoHar(har, browserContextRecordIntoHarOptions{
+			Page: p,
+			URL:  opt.URL,
+		})
+	}
+	notFound := opt.NotFound
+	if notFound == nil {
+		notFound = HarNotFoundAbort
+	}
+	router := newHarRouter(p.connection.localUtils, har, *notFound, opt.URL)
+	return router.addPageRoute(p)
+}
+
 func (p *pageImpl) Touchscreen() Touchscreen {
 	return p.touchscreen
 }
@@ -766,10 +785,27 @@ func (p *pageImpl) onRoute(route *routeImpl) {
 	go func() {
 		p.Lock()
 		defer p.Unlock()
+		routes := make([]*routeHandlerEntry, len(p.routes))
+		copy(routes, p.routes)
+
+		defer func() {
+			if len(p.routes) == 0 {
+				_, _ = p.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
+					"enabled": false,
+				})
+			}
+		}()
+
 		url := route.Request().URL()
-		for _, handlerEntry := range p.routes {
-			if handlerEntry.matcher.Matches(url) {
-				handlerEntry.handler(route)
+		for i, handlerEntry := range routes {
+			if !handlerEntry.Matches(url) {
+				continue
+			}
+			if handlerEntry.WillExceed() {
+				p.routes = append(p.routes[:i], p.routes[i+1:]...)
+			}
+			handled := handlerEntry.Handle(route)
+			if <-handled {
 				return
 			}
 		}

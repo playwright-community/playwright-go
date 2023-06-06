@@ -302,6 +302,8 @@ type BrowserContext interface {
 	// **NOTE** Consider using BrowserContext.grantPermissions() to grant permissions for the browser context
 	// pages to read its geolocation.
 	SetGeolocation(gelocation *Geolocation) error
+	// API testing helper associated with this context. Requests made with this API will use context cookies.
+	Request() APIRequestContext
 	ResetGeolocation() error
 	// Routing provides the capability to modify network requests that are made by any page in the browser context. Once
 	// route is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
@@ -319,6 +321,12 @@ type BrowserContext interface {
 	// **NOTE** Enabling routing disables http cache.
 	Route(url interface{}, handler routeHandler, times ...int) error
 	SetOffline(offline bool) error
+	// If specified the network requests that are made in the context will be served from the HAR file. Read more about
+	// [Replaying from HAR](../network.md#replaying-from-har).
+	// Playwright will not serve requests intercepted by Service Worker from the HAR file. See
+	// [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when
+	// using request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
+	RouteFromHAR(har string, options ...BrowserContextRouteFromHAROptions) error
 	// Returns storage state for this browser context, contains current cookies and local storage snapshot.
 	StorageState(path ...string) (*StorageState, error)
 	// Removes a route created with BrowserContext.route(). When `handler` is not specified, removes all routes
@@ -1891,6 +1899,12 @@ type Page interface {
 	// To remove a route with its handler you can use Page.unroute().
 	// **NOTE** Enabling routing disables http cache.
 	Route(url interface{}, handler routeHandler, times ...int) error
+	// If specified the network requests that are made in the page will be served from the HAR file. Read more about
+	// [Replaying from HAR](../network.md#replaying-from-har).
+	// Playwright will not serve requests intercepted by Service Worker from the HAR file. See
+	// [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when
+	// using request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
+	RouteFromHAR(har string, options ...PageRouteFromHAROptions) error
 	// Returns the buffer with the captured screenshot.
 	Screenshot(options ...PageScreenshotOptions) ([]byte, error)
 	// This method waits for an element matching `selector`, waits for [actionability](../actionability.md) checks, waits
@@ -2175,6 +2189,20 @@ type Route interface {
 	// Continues route's request with optional overrides.
 	// **Usage**
 	Continue(options ...RouteContinueOptions) error
+	// When several routes match the given pattern, they run in the order opposite to their registration. That way the
+	// last registered route can always override all the previous ones. In the example below, request will be handled by
+	// the bottom-most handler first, then it'll fall back to the previous one and in the end will be aborted by the first
+	// registered route.
+	// **Usage**
+	// Registering multiple routes is useful when you want separate handlers to handle different kinds of requests, for
+	// example API calls vs page resources or GET requests vs POST requests as in the example below.
+	// One can also modify request while falling back to the subsequent handler, that way intermediate route handler can
+	// modify url, method, headers and postData of the request.
+	Fallback(options ...RouteFallbackOptions) error
+	// Performs the request and fetches result without fulfilling it, so that the response could be modified and then
+	// fulfilled.
+	// **Usage**
+	Fetch(options ...RouteFetchOptions) (APIResponse, error)
 	// Fulfills route's request with given response.
 	// **Usage**
 	// An example of fulfilling all requests with 404 responses:

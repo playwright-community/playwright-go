@@ -23,6 +23,13 @@ type ResourceTiming struct {
 	ResponseEnd           float64
 }
 
+type serializedFallbackOverrides struct {
+	URL            *string
+	Method         *string
+	Headers        map[string]string
+	PostDataBuffer []byte
+}
+
 type requestImpl struct {
 	channelOwner
 	timing             *ResourceTiming
@@ -31,9 +38,13 @@ type requestImpl struct {
 	redirectedFrom     Request
 	redirectedTo       Request
 	failureText        string
+	fallbackOverrides  *serializedFallbackOverrides
 }
 
 func (r *requestImpl) URL() string {
+	if r.fallbackOverrides.URL != nil {
+		return *r.fallbackOverrides.URL
+	}
 	return r.initializer["url"].(string)
 }
 
@@ -42,6 +53,9 @@ func (r *requestImpl) ResourceType() string {
 }
 
 func (r *requestImpl) Method() string {
+	if r.fallbackOverrides.Method != nil {
+		return *r.fallbackOverrides.Method
+	}
 	return r.initializer["method"].(string)
 }
 
@@ -62,6 +76,9 @@ func (r *requestImpl) PostDataJSON(v interface{}) error {
 }
 
 func (r *requestImpl) PostDataBuffer() ([]byte, error) {
+	if r.fallbackOverrides.PostDataBuffer != nil {
+		return r.fallbackOverrides.PostDataBuffer, nil
+	}
 	if _, ok := r.initializer["postData"]; !ok {
 		return nil, nil
 	}
@@ -69,6 +86,9 @@ func (r *requestImpl) PostDataBuffer() ([]byte, error) {
 }
 
 func (r *requestImpl) Headers() map[string]string {
+	if r.fallbackOverrides.Headers != nil {
+		return newRawHeaders(serializeMapToNameAndValue(r.fallbackOverrides.Headers)).Headers()
+	}
 	return r.provisionalHeaders.Headers()
 }
 
@@ -142,6 +162,9 @@ func (r *requestImpl) HeaderValues(name string) ([]string, error) {
 	return headers.GetAll(name), err
 }
 func (r *requestImpl) ActualHeaders() (*rawHeaders, error) {
+	if r.fallbackOverrides.Headers != nil {
+		return newRawHeaders(serializeMapToNameAndValue(r.fallbackOverrides.Headers)), nil
+	}
 	if r.allHeaders == nil {
 		response, err := r.Response()
 		if err != nil {
@@ -173,6 +196,24 @@ func (r *requestImpl) Sizes() (*RequestSizesResult, error) {
 	return result, nil
 }
 
+func (r *requestImpl) applyFallbackOverrides(options RouteFallbackOptions) {
+	if options.URL != nil {
+		r.fallbackOverrides.URL = options.URL
+	}
+	if options.Method != nil {
+		r.fallbackOverrides.Method = options.Method
+	}
+	r.fallbackOverrides.Headers = options.Headers
+	if options.PostData != nil {
+		switch v := options.PostData.(type) {
+		case string:
+			r.fallbackOverrides.PostDataBuffer = []byte(v)
+		case []byte:
+			r.fallbackOverrides.PostDataBuffer = v
+		}
+	}
+}
+
 func (r *requestImpl) setResponseEndTiming(t float64) {
 	r.timing.ResponseEnd = t
 	if r.timing.ResponseStart == -1 {
@@ -202,5 +243,12 @@ func newRequest(parent *channelOwner, objectType string, guid string, initialize
 		ResponseEnd:           -1,
 	}
 	req.provisionalHeaders = newRawHeaders(req.initializer["headers"])
+	req.fallbackOverrides = &serializedFallbackOverrides{}
+	if _, ok := initializer["postData"]; ok {
+		postDataBuffer, err := base64.StdEncoding.DecodeString(initializer["postData"].(string))
+		if err == nil {
+			req.fallbackOverrides.PostDataBuffer = postDataBuffer
+		}
+	}
 	return req
 }

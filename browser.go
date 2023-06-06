@@ -27,51 +27,56 @@ func (b *browserImpl) IsConnected() bool {
 
 func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserContext, error) {
 	overrides := map[string]interface{}{}
+	option := BrowserNewContextOptions{}
 	if len(options) == 1 {
-		if options[0].ExtraHttpHeaders != nil {
-			overrides["extraHTTPHeaders"] = serializeMapToNameAndValue(options[0].ExtraHttpHeaders)
-			options[0].ExtraHttpHeaders = nil
+		option = options[0]
+	}
+	if option.ExtraHttpHeaders != nil {
+		overrides["extraHTTPHeaders"] = serializeMapToNameAndValue(options[0].ExtraHttpHeaders)
+		options[0].ExtraHttpHeaders = nil
+	}
+	if option.StorageStatePath != nil {
+		var storageState *OptionalStorageState
+		storageString, err := os.ReadFile(*options[0].StorageStatePath)
+		if err != nil {
+			return nil, fmt.Errorf("could not read storage state file: %w", err)
 		}
-		if options[0].StorageStatePath != nil {
-			var storageState *OptionalStorageState
-			storageString, err := os.ReadFile(*options[0].StorageStatePath)
-			if err != nil {
-				return nil, fmt.Errorf("could not read storage state file: %w", err)
-			}
-			err = json.Unmarshal(storageString, &storageState)
-			if err != nil {
-				return nil, fmt.Errorf("could not parse storage state file: %w", err)
-			}
-			options[0].StorageState = storageState
-			options[0].StorageStatePath = nil
+		err = json.Unmarshal(storageString, &storageState)
+		if err != nil {
+			return nil, fmt.Errorf("could not parse storage state file: %w", err)
 		}
-		if options[0].NoViewport != nil && *options[0].NoViewport {
-			overrides["noDefaultViewport"] = true
-			options[0].NoViewport = nil
-		}
-		if options[0].RecordHarPath != nil {
-			recordHar := map[string]interface{}{}
-			recordHar["path"] = *options[0].RecordHarPath
-			if options[0].RecordHarOmitContent != nil {
-				recordHar["omitContent"] = true
-			}
-			overrides["recordHar"] = recordHar
-		} else if options[0].RecordHarOmitContent != nil {
-			return nil, fmt.Errorf("recordHarOmitContent is set but recordHarPath is nil")
-		}
+		options[0].StorageState = storageState
+		options[0].StorageStatePath = nil
+	}
+	if option.NoViewport != nil && *options[0].NoViewport {
+		overrides["noDefaultViewport"] = true
+		options[0].NoViewport = nil
+	}
+	if option.RecordHarPath != nil {
+		overrides["recordHar"] = prepareRecordHarOptions(recordHarInputOptions{
+			Path:        *options[0].RecordHarPath,
+			URL:         options[0].RecordHarUrlFilter,
+			Mode:        options[0].RecordHarMode,
+			Content:     options[0].RecordHarContent,
+			OmitContent: options[0].RecordHarOmitContent,
+		})
+		options[0].RecordHarPath = nil
+		options[0].RecordHarUrlFilter = nil
+		options[0].RecordHarMode = nil
+		options[0].RecordHarContent = nil
+		options[0].RecordHarOmitContent = nil
 	}
 	channel, err := b.channel.Send("newContext", overrides, options)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
 	context := fromChannel(channel).(*browserContextImpl)
-	if len(options) == 1 {
-		context.options = &options[0]
-	}
-	context.browser = b
+	context.options = &option
 	b.Lock()
 	b.contexts = append(b.contexts, context)
 	b.Unlock()
+	context.browser = b
+	context.setBrowserType(b.browserType.(*browserTypeImpl))
 	return context, nil
 }
 
@@ -135,6 +140,13 @@ func (b *browserImpl) onClose() {
 		b.Emit("disconnected")
 	}
 	b.Unlock()
+}
+
+func (b *browserImpl) setBrowserType(bt *browserTypeImpl) {
+	b.browserType = bt
+	for _, c := range b.contexts {
+		c.(*browserContextImpl).setBrowserType(bt)
+	}
 }
 
 func newBrowser(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserImpl {
