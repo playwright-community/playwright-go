@@ -1210,6 +1210,8 @@ type Locator interface {
 	// Returns an array of `node.textContent` values for all matching nodes.
 	// **Usage**
 	AllTextContents() ([]string, error)
+	// Calls [blur](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/blur) on the element.
+	Blur(options ...LocatorBlurOptions) error
 	// This method returns the bounding box of the element matching the locator, or `null` if the element is not visible.
 	// The bounding box is calculated relative to the main frame viewport - which is usually the same as the browser
 	// window.

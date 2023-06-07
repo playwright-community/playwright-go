@@ -385,3 +385,47 @@ func TestLocatorTextContent(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "Text,\nmore text", result)
 }
+
+func TestLocatorShouldFocusAndBlurButton(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.PREFIX + "/input/button.html")
+	require.NoError(t, err)
+	button, err := page.Locator("button")
+	require.NoError(t, err)
+	ret, err := button.Evaluate(`button => document.activeElement === button`, nil)
+	require.NoError(t, err)
+	require.False(t, ret.(bool))
+
+	var (
+		focused = false
+		blurred = false
+	)
+	require.NoError(t, page.ExposeFunction("focusEvent", func(args ...interface{}) interface{} {
+		focused = true
+		return nil
+	}))
+	require.NoError(t, page.ExposeFunction("blurEvent", func(args ...interface{}) interface{} {
+		blurred = true
+		return nil
+	}))
+	_, err = button.Evaluate(`button => {
+		button.addEventListener('focus', window['focusEvent']);
+		button.addEventListener('blur', window['blurEvent']);
+}`, nil)
+	require.NoError(t, err)
+
+	require.NoError(t, button.Focus())
+	ret, err = button.Evaluate(`button => document.activeElement === button`, nil)
+	require.NoError(t, err)
+	require.True(t, ret.(bool))
+	require.True(t, focused)
+	require.False(t, blurred)
+
+	require.NoError(t, button.Blur())
+	ret, err = button.Evaluate(`button => document.activeElement === button`, nil)
+	require.NoError(t, err)
+	require.False(t, ret.(bool))
+	require.True(t, focused)
+	require.True(t, blurred)
+}

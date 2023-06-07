@@ -81,6 +81,20 @@ func (l *locatorImpl) AllTextContents() ([]string, error) {
 	return result, nil
 }
 
+func (l *locatorImpl) Blur(options ...LocatorBlurOptions) error {
+	params := map[string]interface{}{
+		"selector": l.selector,
+		"strict":   true,
+	}
+	if len(options) == 1 {
+		if options[0].Timeout != nil {
+			params["timeout"] = options[0].Timeout
+		}
+	}
+	_, err := l.frame.channel.Send("blur", params)
+	return err
+}
+
 func (l *locatorImpl) BoundingBox(options ...LocatorBoundingBoxOptions) (*Rect, error) {
 	var option PageWaitForSelectorOptions
 	if len(options) == 1 {
