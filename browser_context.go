@@ -266,6 +266,23 @@ func (b *browserContextImpl) ExpectEvent(event string, cb func() error, options 
 	return b.waiterForEvent(event, options...).Expect(cb)
 }
 
+func (b *browserContextImpl) ExpectPage(cb func() error, options ...BrowserContextExpectPageOptions) (Page, error) {
+	var w *waiter
+	if len(options) == 1 {
+		w = b.waiterForEvent("page", BrowserContextWaitForEventOptions{
+			Predicate: options[0].Predicate,
+			Timeout:   options[0].Timeout,
+		})
+	} else {
+		w = b.waiterForEvent("page")
+	}
+	ret, err := w.Expect(cb)
+	if err != nil {
+		return nil, err
+	}
+	return ret.(Page), nil
+}
+
 func (b *browserContextImpl) Close() error {
 	if b.isClosedOrClosing {
 		return nil

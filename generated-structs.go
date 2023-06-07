@@ -585,6 +585,13 @@ type BrowserContextExpectEventOptions struct {
 	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
 	Timeout *float64 `json:"timeout"`
 }
+type BrowserContextExpectPageOptions struct {
+	// Receives the Page object and resolves to truthy value when the waiting should resolve.
+	Predicate func(Page) bool `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
 type BrowserContextWaitForEventOptions struct {
 	// Receives the event data and resolves to truthy value when the waiting should resolve.
 	Predicate interface{} `json:"predicate"`

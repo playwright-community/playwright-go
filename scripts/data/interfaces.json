@@ -183,6 +183,10 @@
 			"event string, cb func() error, options ...BrowserContextWaitForEventOptions",
 			"(interface{}, error)"
 		],
+		"ExpectPage": [
+			"cb func() error, options ...BrowserContextExpectPageOptions",
+			"Page, error"
+		],
 		"ExposeBinding": [
 			"name string, binding BindingCallFunction, handle ...bool",
 			"error"

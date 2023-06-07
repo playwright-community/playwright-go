@@ -249,6 +249,10 @@ type BrowserContext interface {
 	// value. Will throw an error if the context closes before the event is fired. Returns the event data value.
 	// **Usage**
 	ExpectEvent(event string, cb func() error, options ...BrowserContextWaitForEventOptions) (interface{}, error)
+	// Performs action and waits for a new `Page` to be created in the context. If predicate is provided, it passes `Page`
+	// value into the `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error
+	// if the context closes before new `Page` is created.
+	ExpectPage(cb func() error, options ...BrowserContextExpectPageOptions) (Page, error)
 	// The method adds a function called `name` on the `window` object of every frame in every page in the context. When
 	// called, the function executes `callback` and returns a [Promise] which resolves to the return value of `callback`.
 	// If the `callback` returns a [Promise], it will be awaited.
