@@ -211,6 +211,10 @@
 			null,
 			"[]Page"
 		],
+		"ServiceWorkers": [
+			null,
+			"[]Worker"
+		],
 		"SetDefaultNavigationTimeout": [
 			"timeout float64",
 			null
@@ -1093,6 +1097,10 @@
 		"Up": [
 			"options ...MouseUpOptions",
 			"error"
+		],
+		"Wheel": [
+			"deltaX, deltaY float64",
+			"error"
 		]
 	},
 	"Page": {
@@ -1219,9 +1227,17 @@
 			"url interface{}, cb func() error, options ...PageWaitForRequestOptions",
 			"Request, error"
 		],
+		"ExpectRequestFinished": [
+			"cb func() error, options ...PageExpectRequestFinishedOptions",
+			"Request, error"
+		],
 		"ExpectResponse": [
 			"url interface{}, cb func() error, options ...PageWaitForResponseOptions",
 			"Response, error"
+		],
+		"ExpectWebSocket": [
+			"cb func() error, options ...PageExpectWebSocketOptions",
+			"WebSocket, error"
 		],
 		"ExpectWorker": [
 			"cb func() error, options ...PageExpectWorkerOptions",
@@ -1575,6 +1591,10 @@
 			null,
 			"Frame"
 		],
+		"FromServiceWorker": [
+			null,
+			"bool"
+		],
 		"Headers": [
 			null,
 			"map[string]string"
@@ -1660,8 +1680,12 @@
 			null,
 			"string"
 		],
+		"ExpectEvent": [
+			"event string, cb func() error, options ...WebSocketWaitForEventOptions",
+			"interface{}, error"
+		],
 		"WaitForEvent": [
-			"event string, predicate ...interface{}",
+			"event string, options ...WebSocketWaitForEventOptions",
 			"interface{}, error"
 		]
 	},

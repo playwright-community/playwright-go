@@ -18,7 +18,7 @@ type browserContextImpl struct {
 	routes            []*routeHandlerEntry
 	ownedPage         Page
 	browser           *browserImpl
-	serviceWorkers    []*workerImpl
+	serviceWorkers    []Worker
 	backgroundPages   []Page
 	bindings          map[string]BindingCallFunction
 	tracing           *tracingImpl
@@ -521,6 +521,12 @@ func (b *browserContextImpl) BackgroundPages() []Page {
 	b.Lock()
 	defer b.Unlock()
 	return b.backgroundPages
+}
+
+func (b *browserContextImpl) ServiceWorkers() []Worker {
+	b.Lock()
+	defer b.Unlock()
+	return b.serviceWorkers
 }
 
 func newBrowserContext(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserContextImpl {

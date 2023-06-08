@@ -1,6 +1,7 @@
 package playwright_test
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"runtime"
@@ -190,4 +191,24 @@ func TestShouldReportResponseServerAddr(t *testing.T) {
 	url, err := url.Parse(server.PREFIX)
 	require.NoError(t, err)
 	require.Equal(t, url.Port(), strconv.Itoa(server_addr.Port))
+}
+
+func TestShouldReportIfRequestWasFromServiceWorker(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	response, err := page.Goto(fmt.Sprintf("%s/serviceworkers/fetch/sw.html", server.PREFIX))
+	require.NoError(t, err)
+	require.False(t, response.FromServiceWorker())
+
+	_, err = page.Evaluate(`() => window.activationPromise`)
+	require.NoError(t, err)
+	response, err = page.ExpectResponse("**/example.txt", func() error {
+		_, err := page.Evaluate(`() => fetch('/example.txt')`)
+		return err
+	})
+	require.NoError(t, err)
+	require.True(t, response.FromServiceWorker())
+	if isChromium {
+		require.NotZero(t, len(context.ServiceWorkers()))
+	}
 }

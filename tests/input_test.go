@@ -2,6 +2,7 @@ package playwright_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/playwright-community/playwright-go"
 	"github.com/stretchr/testify/require"
@@ -81,6 +82,22 @@ func TestMouseDblclick(t *testing.T) {
 	result, err := page.Evaluate("window.clicked")
 	require.NoError(t, err)
 	require.True(t, result.(bool))
+}
+
+func TestMouseWheel(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent(`<div style="width: 5000px; height: 5000px;"></div>`))
+
+	require.NoError(t, page.Mouse().Wheel(0, 100))
+	time.Sleep(500 * time.Millisecond)
+	h, err := page.WaitForFunction(`window.scrollY === 100`, nil)
+	require.NoError(t, err)
+	value, err := h.JSONValue()
+	require.NoError(t, err)
+	require.True(t, value.(bool))
 }
 
 func TestKeyboardDown(t *testing.T) {

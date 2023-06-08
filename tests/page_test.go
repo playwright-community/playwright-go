@@ -228,6 +228,23 @@ func TestPageExpectRequestFunc(t *testing.T) {
 	require.Equal(t, "GET", request.Method())
 }
 
+func TestPageExpectRequestFinished(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	request, err := page.ExpectRequestFinished(func() error {
+		_, err := page.Goto(server.EMPTY_PAGE)
+		return err
+	}, playwright.PageExpectRequestFinishedOptions{
+		Predicate: func(r playwright.Request) bool {
+			return strings.HasSuffix(r.URL(), "empty.html")
+		},
+	})
+	require.NoError(t, err)
+	require.Equal(t, server.EMPTY_PAGE, request.URL())
+	require.Equal(t, "document", request.ResourceType())
+	require.Equal(t, "GET", request.Method())
+}
+
 func TestPageExpectResponse(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
@@ -267,9 +284,31 @@ func TestPageExpectLoadState(t *testing.T) {
 }
 
 func TestPageExpectFileChooser(t *testing.T) {
-	t.Skip()
 	BeforeEach(t)
 	defer AfterEach(t)
+
+	t.Run("should work for single file pick", func(t *testing.T) {
+		require.NoError(t, page.SetContent(`<input type=file>`))
+		fc, err := page.ExpectFileChooser(func() error {
+			return page.Click("input")
+		}, playwright.PageExpectFileChooserOptions{
+			Timeout: playwright.Float(1000),
+		})
+		require.NoError(t, err)
+		require.False(t, fc.IsMultiple())
+	})
+
+	t.Run("should work for multiple", func(t *testing.T) {
+		require.NoError(t, page.SetContent(`<input multiple type=file>`))
+		_, err := page.ExpectFileChooser(func() error {
+			return page.Click("input")
+		}, playwright.PageExpectFileChooserOptions{
+			Predicate: func(fc playwright.FileChooser) bool {
+				return fc.IsMultiple()
+			},
+		})
+		require.NoError(t, err)
+	})
 }
 
 func TestPageExpectDialog(t *testing.T) {

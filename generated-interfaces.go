@@ -280,6 +280,9 @@ type BrowserContext interface {
 	NewPage(options ...BrowserNewPageOptions) (Page, error)
 	// Returns all open pages in the context.
 	Pages() []Page
+	// **NOTE** Service workers are only supported on Chromium-based browsers.
+	// All existing service workers in the context.
+	ServiceWorkers() []Worker
 	// This setting will change the default maximum navigation time for the following methods and related shortcuts:
 	// - Page.goBack()
 	// - Page.goForward()
@@ -1547,6 +1550,10 @@ type Mouse interface {
 	Move(x float64, y float64, options ...MouseMoveOptions) error
 	// Dispatches a `mouseup` event.
 	Up(options ...MouseUpOptions) error
+	// Dispatches a `wheel` event.
+	// **NOTE** Wheel events may cause scrolling if they are not handled, and this method does not wait for the scrolling
+	// to finish before returning.
+	Wheel(deltaX, deltaY float64) error
 }
 
 // Page provides methods to interact with a single tab in a `Browser`, or an
@@ -1734,7 +1741,15 @@ type Page interface {
 	// closed before the popup event is fired.
 	ExpectPopup(cb func() error, options ...PageExpectPopupOptions) (Page, error)
 	ExpectRequest(url interface{}, cb func() error, options ...PageWaitForRequestOptions) (Request, error)
+	// Performs action and waits for a `Request` to finish loading. If predicate is provided, it passes `Request` value
+	// into the `predicate` function and waits for `predicate(request)` to return a truthy value. Will throw an error if
+	// the page is closed before the [`event: Page.requestFinished`] event is fired.
+	ExpectRequestFinished(cb func() error, options ...PageExpectRequestFinishedOptions) (Request, error)
 	ExpectResponse(url interface{}, cb func() error, options ...PageWaitForResponseOptions) (Response, error)
+	// Performs action and waits for a new `WebSocket`. If predicate is provided, it passes `WebSocket` value into the
+	// `predicate` function and waits for `predicate(webSocket)` to return a truthy value. Will throw an error if the page
+	// is closed before the WebSocket event is fired.
+	ExpectWebSocket(cb func() error, options ...PageExpectWebSocketOptions) (WebSocket, error)
 	// Performs action and waits for a new `Worker`. If predicate is provided, it passes `Worker` value into the
 	// `predicate` function and waits for `predicate(worker)` to return a truthy value. Will throw an error if the page is
 	// closed before the worker event is fired.
@@ -2161,6 +2176,9 @@ type Response interface {
 	Finished()
 	// Returns the `Frame` that initiated this response.
 	Frame() Frame
+	// Indicates whether this Response was fulfilled by a Service Worker's Fetch Handler (i.e. via
+	// [FetchEvent.respondWith](https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent/respondWith)).
+	FromServiceWorker() bool
 	// An object with the response HTTP headers. The header names are lower-cased. Note that this method does not return
 	// security-related headers, including cookie-related ones. You can use Response.allHeaders() for complete
 	// list of headers that include `cookie` information.
@@ -2234,7 +2252,12 @@ type WebSocket interface {
 	URL() string
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the webSocket is closed before the event is fired. Returns the event data value.
-	WaitForEvent(event string, predicate ...interface{}) (interface{}, error)
+	ExpectEvent(event string, cb func() error, options ...WebSocketWaitForEventOptions) (interface{}, error)
+	// **NOTE** In most cases, you should use WebSocket.waitForEvent().
+	// Waits for given `event` to fire. If predicate is provided, it passes event's value into the `predicate` function
+	// and waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is closed before the
+	// `event` is fired.
+	WaitForEvent(event string, options ...WebSocketWaitForEventOptions) (interface{}, error)
 }
 
 // When browser context is created with the `recordVideo` option, each page has a video object associated with it.

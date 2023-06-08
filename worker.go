@@ -70,7 +70,7 @@ func (w *workerImpl) onClose() {
 	}
 	if w.context != nil {
 		w.context.Lock()
-		workers := make([]*workerImpl, 0)
+		workers := make([]Worker, 0)
 		for i := 0; i < len(w.context.serviceWorkers); i++ {
 			if w.context.serviceWorkers[i] != w {
 				workers = append(workers, w.context.serviceWorkers[i])

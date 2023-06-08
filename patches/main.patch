@@ -354,7 +354,7 @@ index 49b77defd..6ba16526f 100644
  
  ### option: Frame.waitForLoadState.timeout = %%-navigation-timeout-%%
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index ef2baf1ab..098414d93 100644
+index ef2baf1ab..832d10c27 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
 @@ -631,6 +631,20 @@ Script to be evaluated in all pages in the browser context.
@@ -560,7 +560,17 @@ index ef2baf1ab..098414d93 100644
    - alias-python: expect_popup
    - alias-csharp: RunAndWaitForPopup
  - returns: <[Page]>
-@@ -4556,7 +4594,8 @@ await page.WaitForURLAsync("**/target.html");
+@@ -4220,7 +4258,8 @@ changed by using the [`method: Page.setDefaultTimeout`] method.
+ 
+ ## async method: Page.waitForRequestFinished
+ * since: v1.12
+-* langs: java, python, csharp
++* langs: java, python, csharp, go
++  - alias-go: ExpectRequestFinished
+   - alias-python: expect_request_finished
+   - alias-csharp: RunAndWaitForRequestFinished
+ - returns: <[Request]>
+@@ -4556,7 +4595,8 @@ await page.WaitForURLAsync("**/target.html");
  
  ## async method: Page.waitForWebSocket
  * since: v1.9
@@ -570,7 +580,7 @@ index ef2baf1ab..098414d93 100644
    - alias-python: expect_websocket
    - alias-csharp: RunAndWaitForWebSocket
  - returns: <[WebSocket]>
-@@ -4576,7 +4615,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
+@@ -4576,7 +4616,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
  
  ## async method: Page.waitForWorker
  * since: v1.9
@@ -580,7 +590,7 @@ index ef2baf1ab..098414d93 100644
    - alias-python: expect_worker
    - alias-csharp: RunAndWaitForWorker
  - returns: <[Worker]>
-@@ -4607,7 +4647,8 @@ This does not contain ServiceWorkers
+@@ -4607,7 +4648,8 @@ This does not contain ServiceWorkers
  
  ## async method: Page.waitForEvent2
  * since: v1.8
@@ -630,6 +640,30 @@ index 9999aac53..0519fd7c0 100644
  - `body` <[string]|[Buffer]>
  
  Response body.
+diff --git a/docs/src/api/class-websocket.md b/docs/src/api/class-websocket.md
+index 95157bddd..59cc7156f 100644
+--- a/docs/src/api/class-websocket.md
++++ b/docs/src/api/class-websocket.md
+@@ -53,7 +53,8 @@ Contains the URL of the WebSocket.
+ 
+ ## async method: WebSocket.waitForEvent
+ * since: v1.8
+-* langs: js, python
++* langs: js, python, go
++  - alias-go: ExpectEvent
+   - alias-python: expect_event
+ - returns: <[any]>
+ 
+@@ -113,7 +114,8 @@ Receives the [WebSocketFrame] object and resolves to truthy value when the waiti
+ 
+ ## async method: WebSocket.waitForEvent2
+ * since: v1.8
+-* langs: python
++* langs: python, go
++  - alias-go: WaitForEvent
+   - alias-python: wait_for_event
+ - returns: <[any]>
+ 
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
 index a58da7d77..83ffb2855 100644
 --- a/docs/src/api/params.md

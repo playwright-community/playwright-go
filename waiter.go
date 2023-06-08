@@ -151,7 +151,7 @@ func (w *waiter) createHandler(evChan chan<- interface{}, predicate interface{})
 		if w.fulfilled.Load() {
 			return
 		}
-		if predicate == nil {
+		if predicate == nil || reflect.ValueOf(predicate).IsNil() {
 			w.fulfilled.Store(true)
 			if len(ev) == 1 {
 				evChan <- ev[0]

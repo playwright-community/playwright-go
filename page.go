@@ -554,6 +554,32 @@ func (p *pageImpl) ExpectRequest(url interface{}, cb func() error, options ...Pa
 	return ret.(*requestImpl), err
 }
 
+func (p *pageImpl) ExpectRequestFinished(cb func() error, options ...PageExpectRequestFinishedOptions) (Request, error) {
+	option := PageWaitForEventOptions{}
+	if len(options) == 1 {
+		option.Timeout = options[0].Timeout
+		option.Predicate = options[0].Predicate
+	}
+	ret, err := p.waiterForEvent("requestfinished", option).Expect(cb)
+	if ret == nil {
+		return nil, err
+	}
+	return ret.(*requestImpl), err
+}
+
+func (p *pageImpl) ExpectWebSocket(cb func() error, options ...PageExpectWebSocketOptions) (WebSocket, error) {
+	option := PageWaitForEventOptions{}
+	if len(options) == 1 {
+		option.Timeout = options[0].Timeout
+		option.Predicate = options[0].Predicate
+	}
+	ret, err := p.waiterForEvent("websocket", option).Expect(cb)
+	if ret == nil {
+		return nil, err
+	}
+	return ret.(*webSocketImpl), err
+}
+
 func (p *pageImpl) ExpectWorker(cb func() error, options ...PageExpectWorkerOptions) (Worker, error) {
 	option := PageWaitForEventOptions{}
 	if len(options) == 1 {
