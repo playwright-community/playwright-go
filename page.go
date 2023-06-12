@@ -415,7 +415,7 @@ func (p *pageImpl) waiterForResponse(url interface{}, options ...PageWaitForResp
 }
 
 func (p *pageImpl) ExpectEvent(event string, cb func() error, options ...PageWaitForEventOptions) (interface{}, error) {
-	return p.waiterForEvent(event, options...).Expect(cb)
+	return p.waiterForEvent(event, options...).RunAndWait(cb)
 }
 
 func (p *pageImpl) ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (Response, error) {
@@ -443,7 +443,7 @@ func (p *pageImpl) ExpectNavigation(cb func() error, options ...PageWaitForNavig
 	}
 	waiter := p.mainFrame.(*frameImpl).setNavigationWaiter(option.Timeout)
 
-	eventData, err := waiter.WaitForEvent(p.mainFrame.(*frameImpl), "navigated", predicate).Expect(cb)
+	eventData, err := waiter.WaitForEvent(p.mainFrame.(*frameImpl), "navigated", predicate).RunAndWait(cb)
 	if err != nil || eventData == nil {
 		return nil, err
 	}
@@ -470,7 +470,7 @@ func (p *pageImpl) ExpectConsoleMessage(cb func() error, options ...PageExpectCo
 		option.Timeout = options[0].Timeout
 		option.Predicate = options[0].Predicate
 	}
-	ret, err := p.waiterForEvent("console", option).Expect(cb)
+	ret, err := p.waiterForEvent("console", option).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -478,7 +478,7 @@ func (p *pageImpl) ExpectConsoleMessage(cb func() error, options ...PageExpectCo
 }
 
 func (p *pageImpl) ExpectedDialog(cb func() error) (Dialog, error) {
-	ret, err := newWaiter().WaitForEvent(p, "dialog", nil).Expect(cb)
+	ret, err := newWaiter().WaitForEvent(p, "dialog", nil).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -491,7 +491,7 @@ func (p *pageImpl) ExpectDownload(cb func() error, options ...PageExpectDownload
 		option.Timeout = options[0].Timeout
 		option.Predicate = options[0].Predicate
 	}
-	ret, err := p.waiterForEvent("download", option).Expect(cb)
+	ret, err := p.waiterForEvent("download", option).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -504,7 +504,7 @@ func (p *pageImpl) ExpectFileChooser(cb func() error, options ...PageExpectFileC
 		option.Timeout = options[0].Timeout
 		option.Predicate = options[0].Predicate
 	}
-	ret, err := p.waiterForEvent("filechooser", option).Expect(cb)
+	ret, err := p.waiterForEvent("filechooser", option).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -531,7 +531,7 @@ func (p *pageImpl) ExpectPopup(cb func() error, options ...PageExpectPopupOption
 		option.Timeout = options[0].Timeout
 		option.Predicate = options[0].Predicate
 	}
-	ret, err := p.waiterForEvent("popup", option).Expect(cb)
+	ret, err := p.waiterForEvent("popup", option).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -539,7 +539,7 @@ func (p *pageImpl) ExpectPopup(cb func() error, options ...PageExpectPopupOption
 }
 
 func (p *pageImpl) ExpectResponse(url interface{}, cb func() error, options ...PageWaitForResponseOptions) (Response, error) {
-	ret, err := p.waiterForResponse(url, options...).Expect(cb)
+	ret, err := p.waiterForResponse(url, options...).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -547,7 +547,7 @@ func (p *pageImpl) ExpectResponse(url interface{}, cb func() error, options ...P
 }
 
 func (p *pageImpl) ExpectRequest(url interface{}, cb func() error, options ...PageWaitForRequestOptions) (Request, error) {
-	ret, err := p.waiterForRequest(url, options...).Expect(cb)
+	ret, err := p.waiterForRequest(url, options...).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -560,7 +560,7 @@ func (p *pageImpl) ExpectRequestFinished(cb func() error, options ...PageExpectR
 		option.Timeout = options[0].Timeout
 		option.Predicate = options[0].Predicate
 	}
-	ret, err := p.waiterForEvent("requestfinished", option).Expect(cb)
+	ret, err := p.waiterForEvent("requestfinished", option).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -573,7 +573,7 @@ func (p *pageImpl) ExpectWebSocket(cb func() error, options ...PageExpectWebSock
 		option.Timeout = options[0].Timeout
 		option.Predicate = options[0].Predicate
 	}
-	ret, err := p.waiterForEvent("websocket", option).Expect(cb)
+	ret, err := p.waiterForEvent("websocket", option).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -586,7 +586,7 @@ func (p *pageImpl) ExpectWorker(cb func() error, options ...PageExpectWorkerOpti
 		option.Timeout = options[0].Timeout
 		option.Predicate = options[0].Predicate
 	}
-	ret, err := p.waiterForEvent("worker", option).Expect(cb)
+	ret, err := p.waiterForEvent("worker", option).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}

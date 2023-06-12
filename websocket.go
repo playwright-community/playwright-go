@@ -102,7 +102,7 @@ func (ws *webSocketImpl) expectEvent(event string, cb func() error, options ...W
 	if cb == nil {
 		return waiter.WaitForEvent(ws, event, predicate).Wait()
 	} else {
-		return waiter.WaitForEvent(ws, event, predicate).Expect(cb)
+		return waiter.WaitForEvent(ws, event, predicate).RunAndWait(cb)
 	}
 }
 

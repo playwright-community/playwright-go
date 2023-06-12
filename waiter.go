@@ -136,7 +136,8 @@ func (w *waiter) Wait() (interface{}, error) {
 	return w.waitFunc()
 }
 
-func (w *waiter) Expect(cb func() error) (interface{}, error) {
+// RunAndWait waits for the waiter to return after calls func.
+func (w *waiter) RunAndWait(cb func() error) (interface{}, error) {
 	if w.waitFunc == nil {
 		return nil, fmt.Errorf("waiter: call WaitForEvent first")
 	}

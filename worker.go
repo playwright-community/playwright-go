@@ -95,7 +95,7 @@ func (w *workerImpl) ExpectEvent(event string, cb func() error, predicates ...in
 	if len(predicates) == 1 {
 		predicate = predicates[0]
 	}
-	return newWaiter().WaitForEvent(w, event, predicate).Expect(cb)
+	return newWaiter().WaitForEvent(w, event, predicate).RunAndWait(cb)
 }
 
 func newWorker(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *workerImpl {

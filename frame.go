@@ -148,7 +148,7 @@ func (f *frameImpl) waitForLoadStateImpl(state string, timeout *float64, cb func
 		_, err := waiter.Wait()
 		return err
 	} else {
-		_, err := waiter.Expect(cb)
+		_, err := waiter.RunAndWait(cb)
 		return err
 	}
 }

@@ -201,7 +201,7 @@ func TestWebSocketShouldEmitBinaryFrameEvents(t *testing.T) {
 	require.Equal(t, received, [][]byte{[]byte("incoming"), {4, 2}})
 }
 
-func TestShouldRejectWaitForEventOnCloseAndError(t *testing.T) {
+func TestWebSocketShouldRejectWaitForEventOnCloseAndError(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	wsServer := newWebsocketServer()
@@ -213,8 +213,9 @@ func TestShouldRejectWaitForEventOnCloseAndError(t *testing.T) {
 		return err
 	})
 	require.NoError(t, err)
-	_, err = ws.WaitForEvent("framereceived")
-	require.NoError(t, err)
+	// event may have been generated before interception
+	// _, err = ws.WaitForEvent("framereceived")
+	// require.NoError(t, err)
 	_, err = ws.ExpectEvent("framesent", func() error {
 		_, err := page.Evaluate(`window.ws.close()`)
 		return err

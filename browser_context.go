@@ -263,7 +263,7 @@ func (b *browserContextImpl) waiterForEvent(event string, options ...BrowserCont
 }
 
 func (b *browserContextImpl) ExpectEvent(event string, cb func() error, options ...BrowserContextWaitForEventOptions) (interface{}, error) {
-	return b.waiterForEvent(event, options...).Expect(cb)
+	return b.waiterForEvent(event, options...).RunAndWait(cb)
 }
 
 func (b *browserContextImpl) ExpectPage(cb func() error, options ...BrowserContextExpectPageOptions) (Page, error) {
@@ -276,7 +276,7 @@ func (b *browserContextImpl) ExpectPage(cb func() error, options ...BrowserConte
 	} else {
 		w = b.waiterForEvent("page")
 	}
-	ret, err := w.Expect(cb)
+	ret, err := w.RunAndWait(cb)
 	if err != nil {
 		return nil, err
 	}
