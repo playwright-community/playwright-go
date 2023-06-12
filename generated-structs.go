@@ -3535,6 +3535,12 @@ type SelectorsRegisterOptions struct {
 	// Defaults to `false`. Note that running as a content script is not guaranteed when
 	// this engine is used together with other registered engines.
 	ContentScript *bool `json:"contentScript"`
+	// Script that evaluates to a selector engine instance. The script is evaluated in
+	// the page context.
+	Path *string `json:"path"`
+	// Script that evaluates to a selector engine instance. The script is evaluated in
+	// the page context.
+	Script *string `json:"script"`
 }
 type TracingStartOptions struct {
 	// If specified, the trace is going to be saved into the file with the given name inside

@@ -664,6 +664,34 @@
 			"selector string, name string, options ...PageGetAttributeOptions",
 			"string, error"
 		],
+		"GetByAltText": [
+			"text interface{}, options ...LocatorGetByAltTextOptions",
+			"Locator, error"
+		],
+		"GetByLabel": [
+			"text interface{}, options ...LocatorGetByLabelOptions",
+			"Locator, error"
+		],
+		"GetByPlaceholder": [
+			"text interface{}, options ...LocatorGetByPlaceholderOptions",
+			"Locator, error"
+		],
+		"GetByRole": [
+			"role AriaRole, options ...LocatorGetByRoleOptions",
+			"Locator, error"
+		],
+		"GetByTestId": [
+			"testId interface{}",
+			"Locator, error"
+		],
+		"GetByText": [
+			"text interface{}, options ...LocatorGetByTextOptions",
+			"Locator, error"
+		],
+		"GetByTitle": [
+			"title interface{}, options ...LocatorGetByTitleOptions",
+			"Locator, error"
+		],
 		"Goto": [
 			"url string, options ...PageGotoOptions",
 			"Response, error"
@@ -826,6 +854,34 @@
 			"selector string, options ...LocatorLocatorOptions",
 			"(Locator, error)"
 		],
+				"GetByAltText": [
+			"text interface{}, options ...LocatorGetByAltTextOptions",
+			"Locator, error"
+		],
+		"GetByLabel": [
+			"text interface{}, options ...LocatorGetByLabelOptions",
+			"Locator, error"
+		],
+		"GetByPlaceholder": [
+			"text interface{}, options ...LocatorGetByPlaceholderOptions",
+			"Locator, error"
+		],
+		"GetByRole": [
+			"role AriaRole, options ...LocatorGetByRoleOptions",
+			"Locator, error"
+		],
+		"GetByTestId": [
+			"testId interface{}",
+			"Locator, error"
+		],
+		"GetByText": [
+			"text interface{}, options ...LocatorGetByTextOptions",
+			"Locator, error"
+		],
+		"GetByTitle": [
+			"title interface{}, options ...LocatorGetByTitleOptions",
+			"Locator, error"
+		],
 		"Nth": [
 			"index int",
 			"FrameLocator"
@@ -888,6 +944,10 @@
 		]
 	},
 	"Locator": {
+		"All": [
+			null,
+			"[]Locator, error"
+		],
 		"AllInnerTexts": [
 			null,
 			"[]string, error"
@@ -906,6 +966,10 @@
 		],
 		"Check": [
 			"options ...FrameCheckOptions",
+			"error"
+		],
+		"Clear": [
+			"options ...LocatorClearOptions",
 			"error"
 		],
 		"Click": [
@@ -952,6 +1016,10 @@
 			"value string, options ...FrameFillOptions",
 			"error"
 		],
+		"Filter": [
+			"options ...LocatorLocatorOptions",
+			"Locator, error"
+		],
 		"First": [
 			null,
 			"Locator, error"
@@ -967,6 +1035,34 @@
 		"GetAttribute": [
 			"name string, options ...PageGetAttributeOptions",
 			"string, error"
+		],
+				"GetByAltText": [
+			"text interface{}, options ...LocatorGetByAltTextOptions",
+			"Locator, error"
+		],
+		"GetByLabel": [
+			"text interface{}, options ...LocatorGetByLabelOptions",
+			"Locator, error"
+		],
+		"GetByPlaceholder": [
+			"text interface{}, options ...LocatorGetByPlaceholderOptions",
+			"Locator, error"
+		],
+		"GetByRole": [
+			"role AriaRole, options ...LocatorGetByRoleOptions",
+			"Locator, error"
+		],
+		"GetByTestId": [
+			"testId interface{}",
+			"Locator, error"
+		],
+		"GetByText": [
+			"text interface{}, options ...LocatorGetByTextOptions",
+			"Locator, error"
+		],
+		"GetByTitle": [
+			"title interface{}, options ...LocatorGetByTitleOptions",
+			"Locator, error"
 		],
 		"Highlight": [
 			null,
@@ -1270,6 +1366,34 @@
 		"GetAttribute": [
 			"selector string, name string, options ...PageGetAttributeOptions",
 			"(string, error)"
+		],
+				"GetByAltText": [
+			"text interface{}, options ...LocatorGetByAltTextOptions",
+			"Locator, error"
+		],
+		"GetByLabel": [
+			"text interface{}, options ...LocatorGetByLabelOptions",
+			"Locator, error"
+		],
+		"GetByPlaceholder": [
+			"text interface{}, options ...LocatorGetByPlaceholderOptions",
+			"Locator, error"
+		],
+		"GetByRole": [
+			"role AriaRole, options ...LocatorGetByRoleOptions",
+			"Locator, error"
+		],
+		"GetByTestId": [
+			"testId interface{}",
+			"Locator, error"
+		],
+		"GetByText": [
+			"text interface{}, options ...LocatorGetByTextOptions",
+			"Locator, error"
+		],
+		"GetByTitle": [
+			"title interface{}, options ...LocatorGetByTitleOptions",
+			"Locator, error"
 		],
 		"GoBack": [
 			"options ...PageGoBackOptions",
@@ -1660,6 +1784,16 @@
 		"Request": [
 			null,
 			"Request"
+		]
+	},
+	"Selectors": {
+		"Register": [
+			"name string, option SelectorsRegisterOptions",
+			"error"
+		],
+		"SetTestIdAttribute": [
+			"name string",
+			null
 		]
 	},
 	"Touchscreen": {

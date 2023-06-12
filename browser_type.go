@@ -6,6 +6,7 @@ import (
 
 type browserTypeImpl struct {
 	channelOwner
+	playwright *Playwright
 }
 
 func (b *browserTypeImpl) Name() string {
@@ -111,6 +112,7 @@ func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptio
 	}
 	jsonPipe.On("message", connection.Dispatch)
 	playwright := connection.Start()
+	playwright.setSelectors(b.playwright.Selectors)
 	browser = fromChannel(playwright.initializer["preLaunchedBrowser"]).(*browserImpl)
 	browser.shouldCloseConnectionOnClose = true
 	browser.setBrowserType(b)

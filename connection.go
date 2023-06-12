@@ -22,6 +22,7 @@ type connection struct {
 	lastIDLock                  sync.Mutex
 	rootObject                  *rootChannelOwner
 	callbacks                   sync.Map
+	afterClose                  func()
 	onClose                     func() error
 	onmessage                   func(map[string]interface{}) error
 	isRemote                    bool
@@ -51,6 +52,9 @@ func (c *connection) Stop() error {
 }
 
 func (c *connection) cleanup() {
+	if c.afterClose != nil {
+		c.afterClose()
+	}
 	c.callbacks.Range(func(key, value any) bool {
 		select {
 		case value.(chan callback) <- callback{

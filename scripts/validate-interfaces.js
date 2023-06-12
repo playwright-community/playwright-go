@@ -4,7 +4,6 @@ const interfaceData = require("./data/interfaces.json")
 const api = getAPIDocs()
 
 const IGNORE_CLASSES = [
-  "APIRequestContext",
   "Android",
   "AndroidDevice",
   "AndroidInput",
@@ -13,14 +12,19 @@ const IGNORE_CLASSES = [
   "Electron",
   "ElectronApplication",
   "Coverage",
-  "Selectors",
   "Logger",
   "BrowserServer",
   "Accessibility",
-  "TimeoutError", 
-  "Locator", 
-  "APIRequest",
-  "APIResponse"
+  "TimeoutError",
+  "Playwright",
+  "RequestOptions",
+  "WebSocketFrame",
+  "FormData",
+  "PlaywrightAssertions",
+  "APIResponseAssertions",
+  "LocatorAssertions",
+  "PageAssertions",
+  "SnapshotAssertions"
 ]
 const shouldIgnoreClass = ({ name }) =>
   !IGNORE_CLASSES.includes(name) &&
@@ -32,6 +36,7 @@ const allowedMissing = [
   "BrowserType.LaunchServer",
   "Download.CreateReadStream",
   "BrowserContext.SetHTTPCredentials",
+  "Page.FrameByUrl",
 ]
 
 const missingFunctions = []
@@ -39,13 +44,16 @@ const missingFunctions = []
 for (const classData of api.filter(shouldIgnoreClass)) {
   const className = classData.name
   for (const funcData of classData.members.filter(member => member.kind === "method")) {
-    if (funcData?.langs?.only?.includes("python"))
-      continue
-    const funcName = funcData.name
+    if (funcData?.langs?.only) {
+      let langs = funcData.langs.only
+      if ((langs.length === 1) && (!langs.includes("python"))) {
+        continue
+      }
+    }
+
+    const funcName = funcData?.langs?.aliases?.go ? funcData.langs.aliases.go : funcData.name
     const goFuncName = transformMethodNamesToGo(funcName)
     const functionSignature = `${className}.${goFuncName}`;
-    if (functionSignature === "WebSocket.WaitForEvent2")
-      debugger
     if (!interfaceData[className] || !interfaceData[className][goFuncName] && !allowedMissing.includes(functionSignature)) {
       missingFunctions.push(functionSignature)
     }

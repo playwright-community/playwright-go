@@ -55,7 +55,7 @@ func createObjectFactory(parent *channelOwner, objectType string, guid string, i
 	case "Route":
 		return newRoute(parent, objectType, guid, initializer)
 	case "Selectors":
-		return nil
+		return newSelectorsOwner(parent, objectType, guid, initializer)
 	case "SocksSupport":
 		return nil
 	case "Stream":

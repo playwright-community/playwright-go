@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 )
+
+var testIdAttributeName = "data-testid"
 
 type locatorImpl struct {
 	frame    *frameImpl
@@ -53,6 +56,22 @@ func convertRegexp(reg *regexp.Regexp) (pattern, flags string) {
 		pattern = reg.String()
 	}
 	return
+}
+
+func (l *locatorImpl) All() ([]Locator, error) {
+	result := make([]Locator, 0)
+	count, err := l.Count()
+	if err != nil {
+		return nil, err
+	}
+	for i := 0; i < count; i++ {
+		item, err := l.Nth(i)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, item)
+	}
+	return result, nil
 }
 
 func (l *locatorImpl) AllInnerTexts() ([]string, error) {
@@ -114,6 +133,18 @@ func (l *locatorImpl) BoundingBox(options ...LocatorBoundingBoxOptions) (*Rect, 
 
 func (l *locatorImpl) Check(options ...FrameCheckOptions) error {
 	return l.frame.Check(l.selector, options...)
+}
+
+func (l *locatorImpl) Clear(options ...LocatorClearOptions) error {
+	if len(options) > 0 {
+		return l.Fill("", FrameFillOptions{
+			Force:       options[0].Force,
+			NoWaitAfter: options[0].NoWaitAfter,
+			Timeout:     options[0].Timeout,
+		})
+	} else {
+		return l.Fill("")
+	}
 }
 
 func (l *locatorImpl) Click(options ...PageClickOptions) error {
@@ -187,6 +218,10 @@ func (l *locatorImpl) Fill(value string, options ...FrameFillOptions) error {
 	return l.frame.Fill(l.selector, value, options...)
 }
 
+func (l *locatorImpl) Filter(options ...LocatorLocatorOptions) (Locator, error) {
+	return newLocator(l.frame, l.selector, options...)
+}
+
 func (l *locatorImpl) First() (Locator, error) {
 	return newLocator(l.frame, l.selector+" >> nth=0")
 }
@@ -207,6 +242,64 @@ func (l *locatorImpl) GetAttribute(name string, options ...PageGetAttributeOptio
 		options[0].Strict = Bool(true)
 	}
 	return l.frame.GetAttribute(l.selector, name, options...)
+}
+
+func (l *locatorImpl) GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return l.Locator(getByAltTextSelector(text, exact))
+}
+
+func (l *locatorImpl) GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return l.Locator(getByLabelSelector(text, exact))
+}
+
+func (l *locatorImpl) GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return l.Locator(getByPlaceholderSelector(text, exact))
+}
+
+func (l *locatorImpl) GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error) {
+	return l.Locator(getByRoleSelector(role, options...))
+}
+
+func (l *locatorImpl) GetByTestId(testId interface{}) (Locator, error) {
+	return l.Locator(getByTestIdSelector(getTestIdAttributeName(), testId))
+}
+
+func (l *locatorImpl) GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return l.Locator(getByTextSelector(text, exact))
+}
+
+func (l *locatorImpl) GetByTitle(text interface{}, options ...LocatorGetByTitleOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return l.Locator(getByTitleSelector(text, exact))
 }
 
 func (l *locatorImpl) Highlight() error {
@@ -432,4 +525,118 @@ func (l *locatorImpl) withElement(
 		return nil, err
 	}
 	return result, nil
+}
+
+func getByRoleSelector(role AriaRole, options ...LocatorGetByRoleOptions) string {
+	props := make(map[string]string)
+	if len(options) == 1 {
+		if options[0].Checked != nil {
+			props["checked"] = fmt.Sprintf("%v", options[0].Checked)
+		}
+		if options[0].Disabled != nil {
+			props["disabled"] = fmt.Sprintf("%v", options[0].Disabled)
+		}
+		if options[0].Selected != nil {
+			props["selected"] = fmt.Sprintf("%v", options[0].Selected)
+		}
+		if options[0].Expanded != nil {
+			props["expanded"] = fmt.Sprintf("%v", options[0].Expanded)
+		}
+		if options[0].IncludeHidden != nil {
+			props["includeHidden"] = fmt.Sprintf("%v", options[0].IncludeHidden)
+		}
+		if options[0].Level != nil {
+			props["level"] = fmt.Sprintf("%d", options[0].Level)
+		}
+		if options[0].Name != nil {
+			exact := false
+			if options[0].Exact != nil {
+				exact = *options[0].Exact
+			}
+			switch options[0].Name.(type) {
+			case string:
+				props["name"] = escapeForAttributeSelector(options[0].Name.(string), exact)
+			case *regexp.Regexp:
+				pattern, flag := convertRegexp(options[0].Name.(*regexp.Regexp))
+				props["name"] = fmt.Sprintf(`/%s/%s`, pattern, flag)
+			}
+		}
+		if options[0].Pressed != nil {
+			props["pressed"] = fmt.Sprintf("%v", options[0].Pressed)
+		}
+	}
+	propsStr := ""
+	for k, v := range props {
+		propsStr += "[" + k + "=" + v + "]"
+	}
+	return fmt.Sprintf("internal:role=%s%s", role, propsStr)
+}
+
+func escapeForAttributeSelector(value string, exact bool) string {
+	suffix := "i"
+	if exact {
+		suffix = ""
+	}
+	return fmt.Sprintf(`"%s"%s`, strings.Replace(value, `"`, `\"`, -1), suffix)
+}
+
+func escapeForTextSelector(text interface{}, exact bool) string {
+	switch text := text.(type) {
+	case *regexp.Regexp:
+		pattern, flag := convertRegexp(text)
+		return fmt.Sprintf(`/%s/%s`, pattern, flag)
+	default:
+		if exact {
+			return fmt.Sprintf(`"%s"s`, text.(string))
+		}
+		return fmt.Sprintf(`"%s"i`, text.(string))
+	}
+}
+
+func getByAttributeTextSelector(attrName string, text interface{}, exact bool) string {
+	switch text := text.(type) {
+	case *regexp.Regexp:
+		pattern, flag := convertRegexp(text)
+		return fmt.Sprintf(`internal:attr=[%s=/%s/%s]`, attrName, pattern, flag)
+	default:
+		return fmt.Sprintf(`internal:attr=[%s=%s]`, attrName, escapeForAttributeSelector(text.(string), exact))
+	}
+}
+
+func getByTextSelector(text interface{}, exact bool) string {
+	return fmt.Sprintf(`internal:text=%s`, escapeForTextSelector(text, exact))
+}
+
+func getByPlaceholderSelector(text interface{}, exact bool) string {
+	return getByAttributeTextSelector("placeholder", text, exact)
+}
+
+func getByTitleSelector(text interface{}, exact bool) string {
+	return getByAttributeTextSelector("title", text, exact)
+}
+
+func getByAltTextSelector(text interface{}, exact bool) string {
+	return getByAttributeTextSelector("alt", text, exact)
+}
+
+func getByLabelSelector(text interface{}, exact bool) string {
+	return fmt.Sprintf(`internal:label=%s`, escapeForTextSelector(text, exact))
+}
+
+func getTestIdAttributeName() string {
+	return testIdAttributeName
+}
+
+func setTestIdAttributeName(name string) {
+	testIdAttributeName = name
+}
+
+func getByTestIdSelector(testIdAttributeName string, testId interface{}) string {
+	switch testId := testId.(type) {
+	case *regexp.Regexp:
+		pattern, flag := convertRegexp(testId)
+		return fmt.Sprintf(`internal:testid=[%s=/%s/%s]`, testIdAttributeName, pattern, flag)
+	default:
+		return fmt.Sprintf(`internal:testid=[%s=%s]`, testIdAttributeName, escapeForAttributeSelector(testId.(string), true))
+	}
 }

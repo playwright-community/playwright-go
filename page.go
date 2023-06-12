@@ -999,6 +999,64 @@ func (p *pageImpl) Locator(selector string, options ...PageLocatorOptions) (Loca
 	return p.mainFrame.Locator(selector, option)
 }
 
+func (p *pageImpl) GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return p.Locator(getByAltTextSelector(text, exact))
+}
+
+func (p *pageImpl) GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return p.Locator(getByLabelSelector(text, exact))
+}
+
+func (p *pageImpl) GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return p.Locator(getByPlaceholderSelector(text, exact))
+}
+
+func (p *pageImpl) GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error) {
+	return p.Locator(getByRoleSelector(role, options...))
+}
+
+func (p *pageImpl) GetByTestId(testId interface{}) (Locator, error) {
+	return p.Locator(getByTestIdSelector(getTestIdAttributeName(), testId))
+}
+
+func (p *pageImpl) GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return p.Locator(getByTextSelector(text, exact))
+}
+
+func (p *pageImpl) GetByTitle(text interface{}, options ...LocatorGetByTitleOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return p.Locator(getByTitleSelector(text, exact))
+}
+
 func (p *pageImpl) FrameLocator(selector string) FrameLocator {
 	return p.mainFrame.FrameLocator(selector)
 }

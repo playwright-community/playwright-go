@@ -640,6 +640,27 @@ index 9999aac53..0519fd7c0 100644
  - `body` <[string]|[Buffer]>
  
  Response body.
+diff --git a/docs/src/api/class-selectors.md b/docs/src/api/class-selectors.md
+index 897f0fab4..492d9cead 100644
+--- a/docs/src/api/class-selectors.md
++++ b/docs/src/api/class-selectors.md
+@@ -202,14 +202,14 @@ Script that evaluates to a selector engine instance. The script is evaluated in
+ 
+ ### option: Selectors.register.script
+ * since: v1.8
+-* langs: csharp
++* langs: csharp, go
+ - `script` <[string]>
+ 
+ Script that evaluates to a selector engine instance. The script is evaluated in the page context.
+ 
+ ### option: Selectors.register.path
+ * since: v1.8
+-* langs: csharp
++* langs: csharp, go
+ - `path` <[path]>
+ 
+ Script that evaluates to a selector engine instance. The script is evaluated in the page context.
 diff --git a/docs/src/api/class-websocket.md b/docs/src/api/class-websocket.md
 index 95157bddd..59cc7156f 100644
 --- a/docs/src/api/class-websocket.md

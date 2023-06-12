@@ -902,6 +902,86 @@ type Frame interface {
 	FrameLocator(selector string) FrameLocator
 	// Returns element attribute value.
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
+	// Allows locating elements by their alt text.
+	// **Usage**
+	// For example, this method will find the image by alt text "Playwright logo":
+	// ```html
+	// <img alt='Playwright logo'>
+	// ```
+	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error)
+	// Allows locating input elements by the text of the associated label.
+	// **Usage**
+	// For example, this method will find the input by label text "Password" in the following DOM:
+	// ```html
+	// <label for="password-input">Password:</label>
+	// <input id="password-input">
+	// ```
+	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error)
+	// Allows locating input elements by the placeholder text.
+	// **Usage**
+	// For example, consider the following DOM structure.
+	// ```html
+	// <input type="email" placeholder="name@example.com" />
+	// ```
+	// You can fill the input after locating it by the placeholder text:
+	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error)
+	// Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
+	// [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
+	// [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	// **Usage**
+	// Consider the following DOM structure.
+	// ```html
+	// <h3>Sign up</h3>
+	// <label>
+	// <input type="checkbox" /> Subscribe
+	// </label>
+	// <br/>
+	// <button>Submit</button>
+	// ```
+	// You can locate each element by it's implicit role:
+	// **Details**
+	// Role selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback
+	// about the ARIA guidelines.
+	// Many html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)
+	// that is recognized by the role selector. You can find all the
+	// [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**
+	// duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
+	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error)
+	// Locate element by the test id.
+	// **Usage**
+	// Consider the following DOM structure.
+	// ```html
+	// <button data-testid="directions">Itinéraire</button>
+	// ```
+	// You can locate the element by it's test id:
+	// **Details**
+	// By default, the `data-testid` attribute is used as a test id. Use Selectors.setTestIdAttribute() to
+	// configure a different test id attribute if necessary.
+	GetByTestId(testId interface{}) (Locator, error)
+	// Allows locating elements that contain given text.
+	// See also Locator.filter() that allows to match by another criteria, like an accessible role, and then
+	// filter by the text content.
+	// **Usage**
+	// Consider the following DOM structure:
+	// ```html
+	// <div>Hello <span>world</span></div>
+	// <div>Hello</div>
+	// ```
+	// You can locate by text substring, exact string, or a regular expression:
+	// **Details**
+	// Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple spaces into
+	// one, turns line breaks into spaces and ignores leading and trailing whitespace.
+	// Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
+	// example, locating by text `"Log in"` matches `<input type=button value="Log in">`.
+	GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error)
+	// Allows locating elements by their title attribute.
+	// **Usage**
+	// Consider the following DOM structure.
+	// ```html
+	// <span title='Issues count'>25 issues</span>
+	// ```
+	// You can check the issues count after locating it by the title text:
+	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) (Locator, error)
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of
 	// the last redirect.
 	// The method will throw an error if:
@@ -1107,6 +1187,86 @@ type FrameLocator interface {
 	// options, similar to Locator.filter() method.
 	// [Learn more about locators](../locators.md).
 	Locator(selector string, options ...LocatorLocatorOptions) (Locator, error)
+	// Allows locating elements by their alt text.
+	// **Usage**
+	// For example, this method will find the image by alt text "Playwright logo":
+	// ```html
+	// <img alt='Playwright logo'>
+	// ```
+	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error)
+	// Allows locating input elements by the text of the associated label.
+	// **Usage**
+	// For example, this method will find the input by label text "Password" in the following DOM:
+	// ```html
+	// <label for="password-input">Password:</label>
+	// <input id="password-input">
+	// ```
+	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error)
+	// Allows locating input elements by the placeholder text.
+	// **Usage**
+	// For example, consider the following DOM structure.
+	// ```html
+	// <input type="email" placeholder="name@example.com" />
+	// ```
+	// You can fill the input after locating it by the placeholder text:
+	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error)
+	// Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
+	// [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
+	// [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	// **Usage**
+	// Consider the following DOM structure.
+	// ```html
+	// <h3>Sign up</h3>
+	// <label>
+	// <input type="checkbox" /> Subscribe
+	// </label>
+	// <br/>
+	// <button>Submit</button>
+	// ```
+	// You can locate each element by it's implicit role:
+	// **Details**
+	// Role selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback
+	// about the ARIA guidelines.
+	// Many html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)
+	// that is recognized by the role selector. You can find all the
+	// [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**
+	// duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
+	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error)
+	// Locate element by the test id.
+	// **Usage**
+	// Consider the following DOM structure.
+	// ```html
+	// <button data-testid="directions">Itinéraire</button>
+	// ```
+	// You can locate the element by it's test id:
+	// **Details**
+	// By default, the `data-testid` attribute is used as a test id. Use Selectors.setTestIdAttribute() to
+	// configure a different test id attribute if necessary.
+	GetByTestId(testId interface{}) (Locator, error)
+	// Allows locating elements that contain given text.
+	// See also Locator.filter() that allows to match by another criteria, like an accessible role, and then
+	// filter by the text content.
+	// **Usage**
+	// Consider the following DOM structure:
+	// ```html
+	// <div>Hello <span>world</span></div>
+	// <div>Hello</div>
+	// ```
+	// You can locate by text substring, exact string, or a regular expression:
+	// **Details**
+	// Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple spaces into
+	// one, turns line breaks into spaces and ignores leading and trailing whitespace.
+	// Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
+	// example, locating by text `"Log in"` matches `<input type=button value="Log in">`.
+	GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error)
+	// Allows locating elements by their title attribute.
+	// **Usage**
+	// Consider the following DOM structure.
+	// ```html
+	// <span title='Issues count'>25 issues</span>
+	// ```
+	// You can check the issues count after locating it by the title text:
+	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) (Locator, error)
 	// Returns locator to the n-th matching frame. It's zero based, `nth(0)` selects the first frame.
 	Nth(index int) FrameLocator
 }
@@ -1211,6 +1371,9 @@ type Keyboard interface {
 // way to find element(s) on the page at any moment. Locator can be created with the Page.locator() method.
 // [Learn more about locators](../locators.md).
 type Locator interface {
+	// When locator points to a list of elements, returns array of locators, pointing to respective elements.
+	// **Usage**
+	All() ([]Locator, error)
 	// Returns an array of `node.innerText` values for all matching nodes.
 	// **Usage**
 	AllInnerTexts() ([]string, error)
@@ -1247,6 +1410,16 @@ type Locator interface {
 	// Passing zero timeout disables this.
 	// **Usage**
 	Check(options ...FrameCheckOptions) error
+	// Clear the input field.
+	// **Details**
+	// This method waits for [actionability](../actionability.md) checks, focuses the element, clears it and triggers an
+	// `input` event after clearing.
+	// If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an
+	// error. However, if the element is inside the `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be cleared
+	// instead.
+	// **Usage**
+	Clear(options ...LocatorClearOptions) error
 	// Click an element.
 	// **Details**
 	// This method clicks the element by performing the following steps:
@@ -1344,6 +1517,10 @@ type Locator interface {
 	// instead.
 	// To send fine-grained keyboard events, use Locator.type().
 	Fill(value string, options ...FrameFillOptions) error
+	// This method narrows existing locator according to the options, for example filters by text. It can be chained to
+	// filter multiple times.
+	// **Usage**
+	Filter(options ...LocatorLocatorOptions) (Locator, error)
 	// Returns locator to the first matching element.
 	First() (Locator, error)
 	// Calls [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the matching element.
@@ -1354,6 +1531,86 @@ type Locator interface {
 	FrameLocator(selector string) FrameLocator
 	// Returns the matching element's attribute value.
 	GetAttribute(name string, options ...PageGetAttributeOptions) (string, error)
+	// Allows locating elements by their alt text.
+	// **Usage**
+	// For example, this method will find the image by alt text "Playwright logo":
+	// ```html
+	// <img alt='Playwright logo'>
+	// ```
+	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error)
+	// Allows locating input elements by the text of the associated label.
+	// **Usage**
+	// For example, this method will find the input by label text "Password" in the following DOM:
+	// ```html
+	// <label for="password-input">Password:</label>
+	// <input id="password-input">
+	// ```
+	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error)
+	// Allows locating input elements by the placeholder text.
+	// **Usage**
+	// For example, consider the following DOM structure.
+	// ```html
+	// <input type="email" placeholder="name@example.com" />
+	// ```
+	// You can fill the input after locating it by the placeholder text:
+	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error)
+	// Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
+	// [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
+	// [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	// **Usage**
+	// Consider the following DOM structure.
+	// ```html
+	// <h3>Sign up</h3>
+	// <label>
+	// <input type="checkbox" /> Subscribe
+	// </label>
+	// <br/>
+	// <button>Submit</button>
+	// ```
+	// You can locate each element by it's implicit role:
+	// **Details**
+	// Role selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback
+	// about the ARIA guidelines.
+	// Many html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)
+	// that is recognized by the role selector. You can find all the
+	// [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**
+	// duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
+	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error)
+	// Locate element by the test id.
+	// **Usage**
+	// Consider the following DOM structure.
+	// ```html
+	// <button data-testid="directions">Itinéraire</button>
+	// ```
+	// You can locate the element by it's test id:
+	// **Details**
+	// By default, the `data-testid` attribute is used as a test id. Use Selectors.setTestIdAttribute() to
+	// configure a different test id attribute if necessary.
+	GetByTestId(testId interface{}) (Locator, error)
+	// Allows locating elements that contain given text.
+	// See also Locator.filter() that allows to match by another criteria, like an accessible role, and then
+	// filter by the text content.
+	// **Usage**
+	// Consider the following DOM structure:
+	// ```html
+	// <div>Hello <span>world</span></div>
+	// <div>Hello</div>
+	// ```
+	// You can locate by text substring, exact string, or a regular expression:
+	// **Details**
+	// Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple spaces into
+	// one, turns line breaks into spaces and ignores leading and trailing whitespace.
+	// Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
+	// example, locating by text `"Log in"` matches `<input type=button value="Log in">`.
+	GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error)
+	// Allows locating elements by their title attribute.
+	// **Usage**
+	// Consider the following DOM structure.
+	// ```html
+	// <span title='Issues count'>25 issues</span>
+	// ```
+	// You can check the issues count after locating it by the title text:
+	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) (Locator, error)
 	// Highlight the corresponding element(s) on the screen. Useful for debugging, don't commit the code that uses
 	// Locator.highlight().
 	Highlight() error
@@ -1780,6 +2037,86 @@ type Page interface {
 	FrameLocator(selector string) FrameLocator
 	// Returns element attribute value.
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
+	// Allows locating elements by their alt text.
+	// **Usage**
+	// For example, this method will find the image by alt text "Playwright logo":
+	// ```html
+	// <img alt='Playwright logo'>
+	// ```
+	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error)
+	// Allows locating input elements by the text of the associated label.
+	// **Usage**
+	// For example, this method will find the input by label text "Password" in the following DOM:
+	// ```html
+	// <label for="password-input">Password:</label>
+	// <input id="password-input">
+	// ```
+	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error)
+	// Allows locating input elements by the placeholder text.
+	// **Usage**
+	// For example, consider the following DOM structure.
+	// ```html
+	// <input type="email" placeholder="name@example.com" />
+	// ```
+	// You can fill the input after locating it by the placeholder text:
+	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error)
+	// Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
+	// [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
+	// [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	// **Usage**
+	// Consider the following DOM structure.
+	// ```html
+	// <h3>Sign up</h3>
+	// <label>
+	// <input type="checkbox" /> Subscribe
+	// </label>
+	// <br/>
+	// <button>Submit</button>
+	// ```
+	// You can locate each element by it's implicit role:
+	// **Details**
+	// Role selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback
+	// about the ARIA guidelines.
+	// Many html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)
+	// that is recognized by the role selector. You can find all the
+	// [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**
+	// duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
+	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error)
+	// Locate element by the test id.
+	// **Usage**
+	// Consider the following DOM structure.
+	// ```html
+	// <button data-testid="directions">Itinéraire</button>
+	// ```
+	// You can locate the element by it's test id:
+	// **Details**
+	// By default, the `data-testid` attribute is used as a test id. Use Selectors.setTestIdAttribute() to
+	// configure a different test id attribute if necessary.
+	GetByTestId(testId interface{}) (Locator, error)
+	// Allows locating elements that contain given text.
+	// See also Locator.filter() that allows to match by another criteria, like an accessible role, and then
+	// filter by the text content.
+	// **Usage**
+	// Consider the following DOM structure:
+	// ```html
+	// <div>Hello <span>world</span></div>
+	// <div>Hello</div>
+	// ```
+	// You can locate by text substring, exact string, or a regular expression:
+	// **Details**
+	// Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple spaces into
+	// one, turns line breaks into spaces and ignores leading and trailing whitespace.
+	// Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
+	// example, locating by text `"Log in"` matches `<input type=button value="Log in">`.
+	GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error)
+	// Allows locating elements by their title attribute.
+	// **Usage**
+	// Consider the following DOM structure.
+	// ```html
+	// <span title='Issues count'>25 issues</span>
+	// ```
+	// You can check the issues count after locating it by the title text:
+	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) (Locator, error)
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of
 	// the last redirect. If can not go back, returns `null`.
 	// Navigate to the previous page in history.
@@ -2234,6 +2571,16 @@ type Route interface {
 	Fulfill(options RouteFulfillOptions) error
 	// A request to be routed.
 	Request() Request
+}
+
+// Selectors can be used to install custom selector engines. See [extensibility](../extensibility.md) for more
+// information.
+type Selectors interface {
+	// **Usage**
+	// An example of registering selector engine that queries elements based on a tag name:
+	Register(name string, option SelectorsRegisterOptions) error
+	// Defines custom attribute name to be used in Page.getByTestId(). `data-testid` is used by default.
+	SetTestIdAttribute(name string)
 }
 
 // The Touchscreen class operates in main-frame CSS pixels relative to the top-left corner of the viewport. Methods on

@@ -720,6 +720,64 @@ func (f *frameImpl) Locator(selector string, options ...FrameLocatorOptions) (Lo
 	return newLocator(f, selector, option)
 }
 
+func (f *frameImpl) GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return f.Locator(getByAltTextSelector(text, exact))
+}
+
+func (f *frameImpl) GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return f.Locator(getByLabelSelector(text, exact))
+}
+
+func (f *frameImpl) GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return f.Locator(getByPlaceholderSelector(text, exact))
+}
+
+func (f *frameImpl) GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error) {
+	return f.Locator(getByRoleSelector(role, options...))
+}
+
+func (f *frameImpl) GetByTestId(testId interface{}) (Locator, error) {
+	return f.Locator(getByTestIdSelector(getTestIdAttributeName(), testId))
+}
+
+func (f *frameImpl) GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return f.Locator(getByTextSelector(text, exact))
+}
+
+func (f *frameImpl) GetByTitle(text interface{}, options ...LocatorGetByTitleOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return f.Locator(getByTitleSelector(text, exact))
+}
+
 func (f *frameImpl) FrameLocator(selector string) FrameLocator {
 	return newFrameLocator(f, selector)
 }

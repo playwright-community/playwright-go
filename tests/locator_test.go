@@ -1,6 +1,7 @@
 package playwright_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/playwright-community/playwright-go"
@@ -428,4 +429,41 @@ func TestLocatorShouldFocusAndBlurButton(t *testing.T) {
 	require.False(t, ret.(bool))
 	require.True(t, focused)
 	require.True(t, blurred)
+}
+
+func TestLocatorAllShouldWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent(`<div><p>A</p><p>B</p><p>C</p></div>`))
+	expected := []string{"A", "B", "C"}
+	texts := make([]string, 0)
+	p, err := page.Locator("p")
+	require.NoError(t, err)
+	locators, err := p.All()
+	require.NoError(t, err)
+	for _, locator := range locators {
+		content, err := locator.TextContent()
+		require.NoError(t, err)
+		texts = append(texts, content)
+	}
+	require.ElementsMatch(t, expected, texts)
+}
+
+func TestLocatorsClearShouldWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(fmt.Sprintf("%s/input/textarea.html", server.PREFIX))
+	require.NoError(t, err)
+	button, err := page.Locator("input")
+	require.NoError(t, err)
+	require.NoError(t, button.Fill("some value"))
+	ret, err := page.Evaluate(`result`)
+	require.NoError(t, err)
+	require.Equal(t, "some value", ret)
+	require.NoError(t, button.Clear())
+	ret, err = page.Evaluate(`result`)
+	require.NoError(t, err)
+	require.Equal(t, "", ret)
 }
