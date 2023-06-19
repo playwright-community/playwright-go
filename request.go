@@ -79,6 +79,7 @@ func (r *requestImpl) Response() (Response, error) {
 	}
 	channelOwner := fromNullableChannel(channel)
 	if channelOwner == nil {
+		// no response
 		return nil, nil
 	}
 	return channelOwner.(*responseImpl), nil
@@ -170,6 +171,13 @@ func (r *requestImpl) Sizes() (*RequestSizesResult, error) {
 	result := &RequestSizesResult{}
 	remapMapToStruct(sizes, result)
 	return result, nil
+}
+
+func (r *requestImpl) setResponseEndTiming(t float64) {
+	r.timing.ResponseEnd = t
+	if r.timing.ResponseStart == -1 {
+		r.timing.ResponseStart = t
+	}
 }
 
 func newRequest(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *requestImpl {

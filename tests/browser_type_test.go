@@ -188,7 +188,7 @@ func TestBrowserTypeConnectArtifactPath(t *testing.T) {
 	defer browser.Close()
 	recordVideoDir := t.TempDir()
 	browserContext, err := browser.NewContext(playwright.BrowserNewContextOptions{
-		RecordVideo: &playwright.BrowserNewContextOptionsRecordVideo{
+		RecordVideo: &playwright.RecordVideo{
 			Dir: &recordVideoDir,
 		},
 	})

@@ -1,7 +1,7 @@
 package playwright_test
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/playwright-community/playwright-go"
@@ -15,7 +15,7 @@ func TestFileChooser(t *testing.T) {
 	require.NoError(t, err)
 	input, err := page.QuerySelector("input")
 	require.NoError(t, err)
-	file, err := ioutil.ReadFile(Asset("file-to-upload.txt"))
+	file, err := os.ReadFile(Asset("file-to-upload.txt"))
 	require.NoError(t, err)
 	require.NoError(t, input.SetInputFiles([]playwright.InputFile{
 		{

@@ -9,9 +9,14 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v4
+      with:
+        go-version: ^1.19.9
+      id: go
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@v2
+      uses: golangci/golangci-lint-action@v3
       with:
         version: latest
   test:
@@ -23,33 +28,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     name:  ${{ matrix.browser }} on ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
     - name: Set up Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v4
       with:
-        go-version: ^1.16.1
+        go-version: ^1.19.9
       id: go
-    - name: Cache modules and build
-      uses: actions/cache@v3
-      with:
-        # In order:
-        # * Module download cache
-        # * Build cache (Linux)
-        # * Build cache (Mac)
-        # * Build cache (Windows)
-        path: |
-          ~/go/pkg/mod
-          ~/.cache/go-build
-          ~/Library/Caches/go-build
-          %LocalAppData%\go-build
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-    - name: Download modules
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: go mod download
     - run: |
         go install ./...
         playwright install --with-deps ${{ matrix.browser }}
@@ -77,11 +63,11 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v4
       with:
-        go-version: ^1.16.1
+        go-version: ^1.19.9
       id: go
     - name: Install goveralls
       env:
@@ -94,11 +80,11 @@ jobs:
   test-examples:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Go 1.x
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v4
       with:
-        go-version: ^1.16.1
+        go-version: ^1.19.9
       id: go
     - run: |
         go install ./...

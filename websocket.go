@@ -2,6 +2,7 @@ package playwright
 
 import (
 	"encoding/base64"
+	"errors"
 	"log"
 )
 
@@ -70,8 +71,19 @@ func (ws *webSocketImpl) onFrameReceived(opcode float64, data string) {
 	}
 }
 
-func (ws *webSocketImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	return <-waitForEvent(ws, event, predicate...)
+func (ws *webSocketImpl) WaitForEvent(event string, predicates ...interface{}) (interface{}, error) {
+	var predicate interface{} = nil
+	if len(predicates) == 1 {
+		predicate = predicates[0]
+	}
+	waiter := newWaiter()
+	if event != "close" {
+		waiter.RejectOnEvent(ws, "close", errors.New("websocket closed"))
+	}
+	if event != "error" {
+		waiter.RejectOnEvent(ws, "error", errors.New("websocket error"))
+	}
+	return waiter.WaitForEvent(ws, event, predicate).Wait()
 }
 
 func (ws *webSocketImpl) IsClosed() bool {

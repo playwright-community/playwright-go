@@ -25,6 +25,7 @@ type connection struct {
 	onClose                     func() error
 	onmessage                   func(map[string]interface{}) error
 	isRemote                    bool
+	localUtils                  *localUtilsImpl
 }
 
 func (c *connection) Start() *Playwright {
@@ -41,7 +42,26 @@ func (c *connection) Start() *Playwright {
 }
 
 func (c *connection) Stop() error {
-	return c.onClose()
+	err := c.onClose()
+	if err != nil {
+		return err
+	}
+	c.cleanup()
+	return nil
+}
+
+func (c *connection) cleanup() {
+	c.callbacks.Range(func(key, value any) bool {
+		select {
+		case value.(chan callback) <- callback{
+			Error: &Error{
+				Name:    "Error",
+				Message: "Connection closed",
+			}}:
+		default:
+		}
+		return true
+	})
 }
 
 func (c *connection) Dispatch(msg *message) {
@@ -69,6 +89,14 @@ func (c *connection) Dispatch(msg *message) {
 	if object == nil {
 		return
 	}
+	if method == "__adopt__" {
+		child, ok := c.objects[msg.Params["guid"].(string)]
+		if !ok {
+			return
+		}
+		object.adopt(child)
+		return
+	}
 	if method == "__dispose__" {
 		object.dispose()
 		return
@@ -78,6 +106,10 @@ func (c *connection) Dispatch(msg *message) {
 	} else {
 		object.channel.Emit(method, c.replaceGuidsWithChannels(msg.Params))
 	}
+}
+
+func (c *connection) LocalUtils() *localUtilsImpl {
+	return c.localUtils
 }
 
 func (c *connection) createRemoteObject(parent *channelOwner, objectType string, guid string, initializer interface{}) interface{} {
@@ -186,12 +218,15 @@ func serializeCallStack(stack stack.CallStack) []map[string]interface{} {
 	return callStack
 }
 
-func newConnection(onClose func() error) *connection {
+func newConnection(onClose func() error, localUtils ...*localUtilsImpl) *connection {
 	connection := &connection{
 		waitingForRemoteObjects: make(map[string]chan interface{}),
 		objects:                 make(map[string]*channelOwner),
 		onClose:                 onClose,
 		isRemote:                false,
+	}
+	if len(localUtils) > 0 {
+		connection.localUtils = localUtils[0]
 	}
 	connection.rootObject = newRootChannelOwner(connection)
 	return connection

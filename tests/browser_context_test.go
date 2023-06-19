@@ -84,7 +84,7 @@ func TestBrowserContextSetExtraHTTPHeaders(t *testing.T) {
 		"extra-http": "42",
 	}))
 	intercepted := make(chan bool, 1)
-	err := page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	err := page.Route("**/empty.html", func(route playwright.Route) {
 		require.NoError(t, route.Continue())
 		intercepted <- true
 	})
@@ -95,6 +95,27 @@ func TestBrowserContextSetExtraHTTPHeaders(t *testing.T) {
 	<-intercepted
 }
 
+func TestBrowserContextSetHttpCredentials(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	server.SetBasicAuth("/empty.html", "user", "pass")
+
+	response, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.Equal(t, 401, response.Status())
+	context.Close()
+	newContextWithOptions(t, playwright.BrowserNewContextOptions{
+		AcceptDownloads: playwright.Bool(true),
+		HasTouch:        playwright.Bool(true),
+		HttpCredentials: &playwright.HttpCredentials{
+			Username: "user",
+			Password: "pass",
+		},
+	})
+	response, err = page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.Equal(t, 200, response.Status())
+}
 func TestBrowserContextNewCDPSession(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
@@ -113,7 +134,7 @@ func TestBrowserContextSetGeolocation(t *testing.T) {
 	require.NoError(t, context.GrantPermissions([]string{"geolocation"}))
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, context.SetGeolocation(&playwright.SetGeolocationOptions{
+	require.NoError(t, context.SetGeolocation(&playwright.Geolocation{
 		Longitude: 10,
 		Latitude:  10,
 	}))
@@ -133,7 +154,7 @@ func TestBrowserContextAddCookies(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, context.AddCookies(playwright.BrowserContextAddCookiesOptionsCookies{
+	require.NoError(t, context.AddCookies(playwright.OptionalCookie{
 		URL:   playwright.String(server.EMPTY_PAGE),
 		Name:  playwright.String("password"),
 		Value: playwright.String("123456"),
@@ -148,7 +169,7 @@ func TestBrowserContextAddCookies(t *testing.T) {
 	if isChromium {
 		sameSite = playwright.SameSiteAttributeLax
 	}
-	require.Equal(t, []*playwright.BrowserContextCookiesResult{
+	require.Equal(t, []*playwright.Cookie{
 		{
 			Name:    "password",
 			Value:   "123456",
@@ -158,7 +179,7 @@ func TestBrowserContextAddCookies(t *testing.T) {
 
 			HttpOnly: false,
 			Secure:   false,
-			SameSite: *sameSite,
+			SameSite: sameSite,
 		},
 	}, cookies)
 
@@ -215,20 +236,20 @@ func TestBrowserContextUnrouteShouldWork(t *testing.T) {
 	defer AfterEach(t)
 
 	intercepted := []int{}
-	handler1 := func(route playwright.Route, request playwright.Request) {
+	handler1 := func(route playwright.Route) {
 		intercepted = append(intercepted, 1)
 		require.NoError(t, route.Continue())
 	}
 	require.NoError(t, context.Route("**/empty.html", handler1))
-	require.NoError(t, context.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, context.Route("**/empty.html", func(route playwright.Route) {
 		intercepted = append(intercepted, 2)
 		require.NoError(t, route.Continue())
 	}))
-	require.NoError(t, context.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, context.Route("**/empty.html", func(route playwright.Route) {
 		intercepted = append(intercepted, 3)
 		require.NoError(t, route.Continue())
 	}))
-	require.NoError(t, context.Route("**/*", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, context.Route("**/*", func(route playwright.Route) {
 		intercepted = append(intercepted, 4)
 		require.NoError(t, route.Continue())
 	}))
@@ -275,7 +296,17 @@ func TestBrowserContextShouldReturnBackgroundPage(t *testing.T) {
 	if len(context.BackgroundPages()) == 1 {
 		page = context.BackgroundPages()[0]
 	} else {
-		page = context.WaitForEvent("backgroundpage").(playwright.Page)
+		ret, err := context.WaitForEvent("backgroundPage")
+		if err != nil {
+			// probably missing event
+			if len(context.BackgroundPages()) == 1 {
+				page = context.BackgroundPages()[0]
+			} else {
+				t.Fatal(err)
+			}
+		} else {
+			page = ret.(playwright.Page)
+		}
 	}
 	require.NotNil(t, page)
 	require.NotContains(t, context.Pages(), page)

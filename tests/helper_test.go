@@ -2,7 +2,7 @@ package playwright_test
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"log"
 	"mime"
 	"net"
@@ -82,7 +82,11 @@ var DEFAULT_CONTEXT_OPTIONS = playwright.BrowserNewContextOptions{
 	HasTouch:        playwright.Bool(true),
 }
 
-func BeforeEach(t *testing.T) {
+func BeforeEach(t *testing.T, contextOptions ...playwright.BrowserNewContextOptions) {
+	if len(contextOptions) == 1 {
+		newContextWithOptions(t, contextOptions[0])
+		return
+	}
 	newContextWithOptions(t, DEFAULT_CONTEXT_OPTIONS)
 }
 
@@ -111,12 +115,16 @@ func AfterEach(t *testing.T, closeContext ...bool) {
 	server.AfterEach()
 }
 
-func newTestServer() *testServer {
+func newTestServer(tls ...bool) *testServer {
 	ts := &testServer{
 		routes:              make(map[string]http.HandlerFunc),
 		requestSubscriberes: make(map[string][]chan *http.Request),
 	}
-	ts.testServer = httptest.NewServer(http.HandlerFunc(ts.serveHTTP))
+	if len(tls) > 0 && tls[0] {
+		ts.testServer = httptest.NewTLSServer(http.HandlerFunc(ts.serveHTTP))
+	} else {
+		ts.testServer = httptest.NewServer(http.HandlerFunc(ts.serveHTTP))
+	}
 	ts.PREFIX = ts.testServer.URL
 	ts.EMPTY_PAGE = ts.testServer.URL + "/empty.html"
 	ts.CROSS_PROCESS_PREFIX = strings.Replace(ts.testServer.URL, "127.0.0.1", "localhost", 1)
@@ -143,13 +151,13 @@ func (t *testServer) AfterEach() {
 func (t *testServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	t.Lock()
 	defer t.Unlock()
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("Error reading body: %v", err)
 		http.Error(w, "can't read body", http.StatusBadRequest)
 		return
 	}
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	r.Body = io.NopCloser(bytes.NewBuffer(body))
 	if handlers, ok := t.requestSubscriberes[r.URL.Path]; ok {
 		for _, handler := range handlers {
 			handler <- r
@@ -161,6 +169,16 @@ func (t *testServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Add("Cache-Control", "no-cache, no-store")
 	http.FileServer(http.Dir("assets")).ServeHTTP(w, r)
+}
+
+func (s *testServer) SetBasicAuth(path, username, password string) {
+	s.SetRoute(path, func(w http.ResponseWriter, r *http.Request) {
+		u, p, ok := r.BasicAuth()
+		if !ok || u != username || p != password {
+			w.Header().Add("WWW-Authenticate", "Basic") // needed or playwright will do not send auth header
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+		}
+	})
 }
 
 func (s *testServer) SetRoute(path string, f http.HandlerFunc) {

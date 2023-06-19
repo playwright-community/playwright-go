@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 )
@@ -75,22 +74,22 @@ func (b *browserContextImpl) NewPage(options ...BrowserNewPageOptions) (Page, er
 	return fromChannel(channel).(*pageImpl), nil
 }
 
-func (b *browserContextImpl) Cookies(urls ...string) ([]*BrowserContextCookiesResult, error) {
+func (b *browserContextImpl) Cookies(urls ...string) ([]*Cookie, error) {
 	result, err := b.channel.Send("cookies", map[string]interface{}{
 		"urls": urls,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
-	cookies := make([]*BrowserContextCookiesResult, len(result.([]interface{})))
+	cookies := make([]*Cookie, len(result.([]interface{})))
 	for i, cookie := range result.([]interface{}) {
-		cookies[i] = &BrowserContextCookiesResult{}
+		cookies[i] = &Cookie{}
 		remapMapToStruct(cookie, cookies[i])
 	}
 	return cookies, nil
 }
 
-func (b *browserContextImpl) AddCookies(cookies ...BrowserContextAddCookiesOptionsCookies) error {
+func (b *browserContextImpl) AddCookies(cookies ...OptionalCookie) error {
 	_, err := b.channel.Send("addCookies", map[string]interface{}{
 		"cookies": cookies,
 	})
@@ -114,14 +113,14 @@ func (b *browserContextImpl) ClearPermissions() error {
 	return err
 }
 
-// SetGeolocationOptions represents the options for BrowserContext.SetGeolocation()
-type SetGeolocationOptions struct {
-	Longitude int  `json:"longitude"`
-	Latitude  int  `json:"latitude"`
-	Accuracy  *int `json:"accuracy"`
+// Geolocation represents the options for BrowserContext.SetGeolocation()
+type Geolocation struct {
+	Longitude float64  `json:"longitude"`
+	Latitude  float64  `json:"latitude"`
+	Accuracy  *float64 `json:"accuracy"`
 }
 
-func (b *browserContextImpl) SetGeolocation(gelocation *SetGeolocationOptions) error {
+func (b *browserContextImpl) SetGeolocation(gelocation *Geolocation) error {
 	_, err := b.channel.Send("setGeolocation", map[string]interface{}{
 		"geolocation": gelocation,
 	})
@@ -153,7 +152,7 @@ func (b *browserContextImpl) AddInitScript(options BrowserContextAddInitScriptOp
 		source = *options.Script
 	}
 	if options.Path != nil {
-		content, err := ioutil.ReadFile(*options.Path)
+		content, err := os.ReadFile(*options.Path)
 		if err != nil {
 			return err
 		}
@@ -192,8 +191,8 @@ func (b *browserContextImpl) ExposeFunction(name string, binding ExposedFunction
 	})
 }
 
-func (b *browserContextImpl) Route(url interface{}, handler routeHandler) error {
-	b.routes = append(b.routes, newRouteHandlerEntry(newURLMatcher(url), handler))
+func (b *browserContextImpl) Route(url interface{}, handler routeHandler, times ...int) error {
+	b.routes = append(b.routes, newRouteHandlerEntry(newURLMatcher(url, b.options.BaseURL), handler, times...))
 	if len(b.routes) == 1 {
 		_, err := b.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
 			"enabled": true,
@@ -218,12 +217,26 @@ func (b *browserContextImpl) Unroute(url interface{}, handlers ...routeHandler) 
 	return nil
 }
 
-func (b *browserContextImpl) WaitForEvent(event string, predicate ...interface{}) interface{} {
-	return <-waitForEvent(b, event, predicate...)
+func (b *browserContextImpl) WaitForEvent(event string, options ...BrowserContextWaitForEventOptions) (interface{}, error) {
+	return b.waiterForEvent(event, options...).Wait()
 }
 
-func (b *browserContextImpl) ExpectEvent(event string, cb func() error) (interface{}, error) {
-	return newExpectWrapper(b.WaitForEvent, []interface{}{event}, cb)
+func (b *browserContextImpl) waiterForEvent(event string, options ...BrowserContextWaitForEventOptions) *waiter {
+	timeout := b.timeoutSettings.Timeout()
+	var predicate interface{} = nil
+	if len(options) == 1 {
+		if options[0].Timeout != nil {
+			timeout = *options[0].Timeout
+		}
+		predicate = options[0].Predicate
+	}
+	waiter := newWaiter().WithTimeout(timeout)
+	waiter.RejectOnEvent(b, "close", errors.New("context closed"))
+	return waiter.WaitForEvent(b, event, predicate)
+}
+
+func (b *browserContextImpl) ExpectEvent(event string, cb func() error, options ...BrowserContextWaitForEventOptions) (interface{}, error) {
+	return b.waiterForEvent(event, options...).Expect(cb)
 }
 
 func (b *browserContextImpl) Close() error {
@@ -258,15 +271,15 @@ type StorageState struct {
 }
 
 type Cookie struct {
-	Name     string  `json:"name"`
-	Value    string  `json:"value"`
-	URL      string  `json:"url"`
-	Domain   string  `json:"domain"`
-	Path     string  `json:"path"`
-	Expires  float64 `json:"expires"`
-	HttpOnly bool    `json:"httpOnly"`
-	Secure   bool    `json:"secure"`
-	SameSite string  `json:"sameSite"`
+	Name     string             `json:"name"`
+	Value    string             `json:"value"`
+	URL      string             `json:"url"`
+	Domain   string             `json:"domain"`
+	Path     string             `json:"path"`
+	Expires  float64            `json:"expires"`
+	HttpOnly bool               `json:"httpOnly"`
+	Secure   bool               `json:"secure"`
+	SameSite *SameSiteAttribute `json:"sameSite"`
 }
 type OriginsState struct {
 	Origin       string              `json:"origin"`
@@ -336,11 +349,12 @@ func (b *browserContextImpl) onPage(page *pageImpl) {
 	}
 }
 
-func (b *browserContextImpl) onRoute(route *routeImpl, request *requestImpl) {
+func (b *browserContextImpl) onRoute(route *routeImpl) {
 	go func() {
+		url := route.Request().URL()
 		for _, handlerEntry := range b.routes {
-			if handlerEntry.matcher.Matches(request.URL()) {
-				handlerEntry.handler(route, request)
+			if handlerEntry.matcher.Matches(url) {
+				handlerEntry.handler(route)
 				return
 			}
 		}
@@ -350,8 +364,16 @@ func (b *browserContextImpl) onRoute(route *routeImpl, request *requestImpl) {
 	}()
 }
 func (p *browserContextImpl) Pause() error {
-	_, err := p.channel.Send("pause")
-	return err
+	return <-p.pause()
+}
+
+func (p *browserContextImpl) pause() <-chan error {
+	ret := make(chan error, 1)
+	go func() {
+		_, err := p.channel.Send("pause")
+		ret <- err
+	}()
+	return ret
 }
 
 func (b *browserContextImpl) OnBackgroundPage(ev map[string]interface{}) {
@@ -396,9 +418,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 			request.failureText = failureText.(string)
 		}
 		page := fromNullableChannel(ev["page"])
-		if request.timing != nil {
-			request.timing.ResponseEnd = ev["responseEndTiming"].(float64)
-		}
+		request.setResponseEndTiming(ev["responseEndTiming"].(float64))
 		bt.Emit("requestfailed", request)
 		if page != nil {
 			page.(*pageImpl).Emit("requestfailed", request)
@@ -408,16 +428,14 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 	bt.channel.On("requestFinished", func(ev map[string]interface{}) {
 		request := fromChannel(ev["request"]).(*requestImpl)
 		response := fromNullableChannel(ev["response"])
-		if response != nil {
-			response.(*responseImpl).finished <- true
-		}
 		page := fromNullableChannel(ev["page"])
-		if request.timing != nil {
-			request.timing.ResponseEnd = ev["responseEndTiming"].(float64)
-		}
+		request.setResponseEndTiming(ev["responseEndTiming"].(float64))
 		bt.Emit("requestfinished", request)
 		if page != nil {
 			page.(*pageImpl).Emit("requestfinished", request)
+		}
+		if response != nil {
+			response.(*responseImpl).finished <- true
 		}
 	})
 	bt.channel.On("response", func(ev map[string]interface{}) {
@@ -433,8 +451,14 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 		bt.onPage(fromChannel(payload["page"]).(*pageImpl))
 	})
 	bt.channel.On("route", func(params map[string]interface{}) {
-		bt.onRoute(fromChannel(params["route"]).(*routeImpl), fromChannel(params["request"]).(*requestImpl))
+		bt.onRoute(fromChannel(params["route"]).(*routeImpl))
 	})
 	bt.channel.On("backgroundPage", bt.OnBackgroundPage)
+	bt.setEventSubscriptionMapping(map[string]string{
+		"request":         "request",
+		"response":        "response",
+		"requestfinished": "requestFinished",
+		"responsefailed":  "responseFailed",
+	})
 	return bt
 }

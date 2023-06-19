@@ -13,11 +13,17 @@ type APIRequestNewContextOptions struct {
 	// An object containing additional HTTP headers to be sent with every request.
 	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
 	// Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
-	HttpCredentials *APIRequestNewContextOptionsHttpCredentials `json:"httpCredentials"`
+	HttpCredentials *HttpCredentials `json:"httpCredentials"`
 	// Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
 	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
 	// Network proxy settings.
-	Proxy *APIRequestNewContextOptionsProxy `json:"proxy"`
+	Proxy *Proxy `json:"proxy"`
+	// Populates context with given storage state. This option can be used to initialize
+	// context with logged-in information obtained via BrowserContext.StorageState() or
+	// APIRequestContext.StorageState(). Either a path to the file with saved storage,
+	// or the value returned by one of BrowserContext.StorageState() or APIRequestContext.StorageState()
+	// methods.
+	StorageState *StorageState `json:"storageState"`
 	// Populates context with given storage state. This option can be used to initialize
 	// context with logged-in information obtained via BrowserContext.StorageState(). Path
 	// to the file with saved storage state.
@@ -28,11 +34,7 @@ type APIRequestNewContextOptions struct {
 	// Specific user agent to use in this context.
 	UserAgent *string `json:"userAgent"`
 }
-type APIRequestHttpCredentials struct {
-	Username *string `json:"username"`
-	Password *string `json:"password"`
-}
-type APIRequestProxy struct {
+type Proxy struct {
 	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example
 	// `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128`
 	// is considered an HTTP proxy.
@@ -45,25 +47,246 @@ type APIRequestProxy struct {
 	// Optional password to use if HTTP proxy requires authentication.
 	Password *string `json:"password"`
 }
-
-// Result of calling <see cref="APIRequestContext.StorageState" />.
-type APIRequestContextStorageStateResult struct {
-	Cookies []APIRequestContextStorageStateResultCookies `json:"cookies"`
-	Origins []APIRequestContextStorageStateResultOrigins `json:"origins"`
+type APIRequestContextDeleteOptions struct {
+	// Allows to set post data of the request. If the data parameter is an object, it will
+	// be serialized to json string and `content-type` header will be set to `application/json`
+	// if not explicitly set. Otherwise the `content-type` header will be set to `application/octet-stream`
+	// if not explicitly set.
+	Data interface{} `json:"data"`
+	// Whether to throw on response codes other than 2xx and 3xx. By default response object
+	// is returned for all status codes.
+	FailOnStatusCode *bool `json:"failOnStatusCode"`
+	// Provides an object that will be serialized as html form using `application/x-www-form-urlencoded`
+	// encoding and sent as this request body. If this parameter is specified `content-type`
+	// header will be set to `application/x-www-form-urlencoded` unless explicitly provided.
+	Form interface{} `json:"form"`
+	// Allows to set HTTP headers.
+	Headers map[string]string `json:"headers"`
+	// Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
+	// Maximum number of request redirects that will be followed automatically. An error
+	// will be thrown if the number is exceeded. Defaults to `20`. Pass `0` to not follow
+	// redirects.
+	MaxRedirects *int `json:"maxRedirects"`
+	// Provides an object that will be serialized as html form using `multipart/form-data`
+	// encoding and sent as this request body. If this parameter is specified `content-type`
+	// header will be set to `multipart/form-data` unless explicitly provided. File values
+	// can be passed either as [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream)
+	// or as file-like object containing file name, mime-type and its content.
+	Multipart interface{} `json:"multipart"`
+	// Query parameters to be sent with the URL.
+	Params map[string]interface{} `json:"params"`
+	// Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout.
+	Timeout *float64 `json:"timeout"`
+}
+type APIRequestContextFetchOptions struct {
+	// Allows to set post data of the request. If the data parameter is an object, it will
+	// be serialized to json string and `content-type` header will be set to `application/json`
+	// if not explicitly set. Otherwise the `content-type` header will be set to `application/octet-stream`
+	// if not explicitly set.
+	Data interface{} `json:"data"`
+	// Whether to throw on response codes other than 2xx and 3xx. By default response object
+	// is returned for all status codes.
+	FailOnStatusCode *bool `json:"failOnStatusCode"`
+	// Provides an object that will be serialized as html form using `application/x-www-form-urlencoded`
+	// encoding and sent as this request body. If this parameter is specified `content-type`
+	// header will be set to `application/x-www-form-urlencoded` unless explicitly provided.
+	Form interface{} `json:"form"`
+	// Allows to set HTTP headers.
+	Headers map[string]string `json:"headers"`
+	// Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
+	// Maximum number of request redirects that will be followed automatically. An error
+	// will be thrown if the number is exceeded. Defaults to `20`. Pass `0` to not follow
+	// redirects.
+	MaxRedirects *int `json:"maxRedirects"`
+	// If set changes the fetch method (e.g. [PUT](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT)
+	// or [POST](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST)). If not
+	// specified, GET method is used.
+	Method *string `json:"method"`
+	// Provides an object that will be serialized as html form using `multipart/form-data`
+	// encoding and sent as this request body. If this parameter is specified `content-type`
+	// header will be set to `multipart/form-data` unless explicitly provided. File values
+	// can be passed either as [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream)
+	// or as file-like object containing file name, mime-type and its content.
+	Multipart interface{} `json:"multipart"`
+	// Query parameters to be sent with the URL.
+	Params map[string]interface{} `json:"params"`
+	// Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout.
+	Timeout *float64 `json:"timeout"`
+}
+type APIRequestContextGetOptions struct {
+	// Allows to set post data of the request. If the data parameter is an object, it will
+	// be serialized to json string and `content-type` header will be set to `application/json`
+	// if not explicitly set. Otherwise the `content-type` header will be set to `application/octet-stream`
+	// if not explicitly set.
+	Data interface{} `json:"data"`
+	// Whether to throw on response codes other than 2xx and 3xx. By default response object
+	// is returned for all status codes.
+	FailOnStatusCode *bool `json:"failOnStatusCode"`
+	// Provides an object that will be serialized as html form using `application/x-www-form-urlencoded`
+	// encoding and sent as this request body. If this parameter is specified `content-type`
+	// header will be set to `application/x-www-form-urlencoded` unless explicitly provided.
+	Form interface{} `json:"form"`
+	// Allows to set HTTP headers.
+	Headers map[string]string `json:"headers"`
+	// Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
+	// Maximum number of request redirects that will be followed automatically. An error
+	// will be thrown if the number is exceeded. Defaults to `20`. Pass `0` to not follow
+	// redirects.
+	MaxRedirects *int `json:"maxRedirects"`
+	// Provides an object that will be serialized as html form using `multipart/form-data`
+	// encoding and sent as this request body. If this parameter is specified `content-type`
+	// header will be set to `multipart/form-data` unless explicitly provided. File values
+	// can be passed either as [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream)
+	// or as file-like object containing file name, mime-type and its content.
+	Multipart interface{} `json:"multipart"`
+	// Query parameters to be sent with the URL.
+	Params map[string]interface{} `json:"params"`
+	// Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout.
+	Timeout *float64 `json:"timeout"`
+}
+type APIRequestContextHeadOptions struct {
+	// Allows to set post data of the request. If the data parameter is an object, it will
+	// be serialized to json string and `content-type` header will be set to `application/json`
+	// if not explicitly set. Otherwise the `content-type` header will be set to `application/octet-stream`
+	// if not explicitly set.
+	Data interface{} `json:"data"`
+	// Whether to throw on response codes other than 2xx and 3xx. By default response object
+	// is returned for all status codes.
+	FailOnStatusCode *bool `json:"failOnStatusCode"`
+	// Provides an object that will be serialized as html form using `application/x-www-form-urlencoded`
+	// encoding and sent as this request body. If this parameter is specified `content-type`
+	// header will be set to `application/x-www-form-urlencoded` unless explicitly provided.
+	Form interface{} `json:"form"`
+	// Allows to set HTTP headers.
+	Headers map[string]string `json:"headers"`
+	// Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
+	// Maximum number of request redirects that will be followed automatically. An error
+	// will be thrown if the number is exceeded. Defaults to `20`. Pass `0` to not follow
+	// redirects.
+	MaxRedirects *int `json:"maxRedirects"`
+	// Provides an object that will be serialized as html form using `multipart/form-data`
+	// encoding and sent as this request body. If this parameter is specified `content-type`
+	// header will be set to `multipart/form-data` unless explicitly provided. File values
+	// can be passed either as [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream)
+	// or as file-like object containing file name, mime-type and its content.
+	Multipart interface{} `json:"multipart"`
+	// Query parameters to be sent with the URL.
+	Params map[string]interface{} `json:"params"`
+	// Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout.
+	Timeout *float64 `json:"timeout"`
+}
+type APIRequestContextPatchOptions struct {
+	// Allows to set post data of the request. If the data parameter is an object, it will
+	// be serialized to json string and `content-type` header will be set to `application/json`
+	// if not explicitly set. Otherwise the `content-type` header will be set to `application/octet-stream`
+	// if not explicitly set.
+	Data interface{} `json:"data"`
+	// Whether to throw on response codes other than 2xx and 3xx. By default response object
+	// is returned for all status codes.
+	FailOnStatusCode *bool `json:"failOnStatusCode"`
+	// Provides an object that will be serialized as html form using `application/x-www-form-urlencoded`
+	// encoding and sent as this request body. If this parameter is specified `content-type`
+	// header will be set to `application/x-www-form-urlencoded` unless explicitly provided.
+	Form interface{} `json:"form"`
+	// Allows to set HTTP headers.
+	Headers map[string]string `json:"headers"`
+	// Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
+	// Maximum number of request redirects that will be followed automatically. An error
+	// will be thrown if the number is exceeded. Defaults to `20`. Pass `0` to not follow
+	// redirects.
+	MaxRedirects *int `json:"maxRedirects"`
+	// Provides an object that will be serialized as html form using `multipart/form-data`
+	// encoding and sent as this request body. If this parameter is specified `content-type`
+	// header will be set to `multipart/form-data` unless explicitly provided. File values
+	// can be passed either as [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream)
+	// or as file-like object containing file name, mime-type and its content.
+	Multipart interface{} `json:"multipart"`
+	// Query parameters to be sent with the URL.
+	Params map[string]interface{} `json:"params"`
+	// Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout.
+	Timeout *float64 `json:"timeout"`
+}
+type APIRequestContextPostOptions struct {
+	// Allows to set post data of the request. If the data parameter is an object, it will
+	// be serialized to json string and `content-type` header will be set to `application/json`
+	// if not explicitly set. Otherwise the `content-type` header will be set to `application/octet-stream`
+	// if not explicitly set.
+	Data interface{} `json:"data"`
+	// Whether to throw on response codes other than 2xx and 3xx. By default response object
+	// is returned for all status codes.
+	FailOnStatusCode *bool `json:"failOnStatusCode"`
+	// Provides an object that will be serialized as html form using `application/x-www-form-urlencoded`
+	// encoding and sent as this request body. If this parameter is specified `content-type`
+	// header will be set to `application/x-www-form-urlencoded` unless explicitly provided.
+	Form interface{} `json:"form"`
+	// Allows to set HTTP headers.
+	Headers map[string]string `json:"headers"`
+	// Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
+	// Maximum number of request redirects that will be followed automatically. An error
+	// will be thrown if the number is exceeded. Defaults to `20`. Pass `0` to not follow
+	// redirects.
+	MaxRedirects *int `json:"maxRedirects"`
+	// Provides an object that will be serialized as html form using `multipart/form-data`
+	// encoding and sent as this request body. If this parameter is specified `content-type`
+	// header will be set to `multipart/form-data` unless explicitly provided. File values
+	// can be passed either as [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream)
+	// or as file-like object containing file name, mime-type and its content.
+	Multipart interface{} `json:"multipart"`
+	// Query parameters to be sent with the URL.
+	Params map[string]interface{} `json:"params"`
+	// Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout.
+	Timeout *float64 `json:"timeout"`
+}
+type APIRequestContextPutOptions struct {
+	// Allows to set post data of the request. If the data parameter is an object, it will
+	// be serialized to json string and `content-type` header will be set to `application/json`
+	// if not explicitly set. Otherwise the `content-type` header will be set to `application/octet-stream`
+	// if not explicitly set.
+	Data interface{} `json:"data"`
+	// Whether to throw on response codes other than 2xx and 3xx. By default response object
+	// is returned for all status codes.
+	FailOnStatusCode *bool `json:"failOnStatusCode"`
+	// Provides an object that will be serialized as html form using `application/x-www-form-urlencoded`
+	// encoding and sent as this request body. If this parameter is specified `content-type`
+	// header will be set to `application/x-www-form-urlencoded` unless explicitly provided.
+	Form interface{} `json:"form"`
+	// Allows to set HTTP headers.
+	Headers map[string]string `json:"headers"`
+	// Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
+	// Maximum number of request redirects that will be followed automatically. An error
+	// will be thrown if the number is exceeded. Defaults to `20`. Pass `0` to not follow
+	// redirects.
+	MaxRedirects *int `json:"maxRedirects"`
+	// Provides an object that will be serialized as html form using `multipart/form-data`
+	// encoding and sent as this request body. If this parameter is specified `content-type`
+	// header will be set to `multipart/form-data` unless explicitly provided. File values
+	// can be passed either as [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream)
+	// or as file-like object containing file name, mime-type and its content.
+	Multipart interface{} `json:"multipart"`
+	// Query parameters to be sent with the URL.
+	Params map[string]interface{} `json:"params"`
+	// Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable
+	// timeout.
+	Timeout *float64 `json:"timeout"`
 }
 type APIRequestContextStorageStateOptions struct {
 	// The file path to save the storage state to. If `path` is a relative path, then it
 	// is resolved relative to current working directory. If no path is provided, storage
 	// state is still returned, but won't be saved to the disk.
 	Path *string `json:"path"`
-}
-
-// Result of calling <see cref="APIResponse.HeadersArray" />.
-type APIResponseHeadersArrayResult struct {
-	// Name of the header.
-	Name string `json:"name"`
-	// Value of the header.
-	Value string `json:"value"`
 }
 type BrowserNewContextOptions struct {
 	// Whether to automatically download all the attachments. Defaults to `true` where
@@ -81,23 +304,22 @@ type BrowserNewContextOptions struct {
 	// Toggles bypassing page's Content-Security-Policy.
 	BypassCSP *bool `json:"bypassCSP"`
 	// Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`,
-	// `'dark'`, `'no-preference'`. See Page.EmulateMedia() for more details. Defaults
-	// to `'light'`.
+	// `'dark'`, `'no-preference'`. See Page.EmulateMedia() for more details. Passing `'no-override'`
+	// resets emulation to system defaults. Defaults to `'light'`.
 	ColorScheme *ColorScheme `json:"colorScheme"`
 	// Specify device scale factor (can be thought of as dpr). Defaults to `1`.
 	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
 	// An object containing additional HTTP headers to be sent with every request.
 	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
 	// Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`.
-	// See Page.EmulateMedia() for more details. Defaults to `'none'`.
-	// It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281)
-	// in their issue tracker.
-	ForcedColors *ForcedColors                        `json:"forcedColors"`
-	Geolocation  *BrowserNewContextOptionsGeolocation `json:"geolocation"`
+	// See Page.EmulateMedia() for more details. Passing `'no-override'` resets emulation
+	// to system defaults. Defaults to `'none'`.
+	ForcedColors *ForcedColors `json:"forcedColors"`
+	Geolocation  *Geolocation  `json:"geolocation"`
 	// Specifies if viewport supports touch events. Defaults to false.
 	HasTouch *bool `json:"hasTouch"`
 	// Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
-	HttpCredentials *BrowserNewContextOptionsHttpCredentials `json:"httpCredentials"`
+	HttpCredentials *HttpCredentials `json:"httpCredentials"`
 	// Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
 	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
 	// Whether the `meta viewport` tag is taken into account and touch events are enabled.
@@ -121,24 +343,35 @@ type BrowserNewContextOptions struct {
 	// this option to work. If all contexts override the proxy, global proxy will be never
 	// used and can be any string, for example `launch({ proxy: { server: 'http://per-context'
 	// } })`.
-	Proxy *BrowserNewContextOptionsProxy `json:"proxy"`
+	Proxy *Proxy `json:"proxy"`
+	// Optional setting to control resource content management. If `omit` is specified,
+	// content is not persisted. If `attach` is specified, resources are persisted as separate
+	// files and all of these files are archived along with the HAR file. Defaults to `embed`,
+	// which stores content inline the HAR file as per HAR specification.
+	RecordHarContent *HarContentPolicy `json:"recordHarContent"`
+	// When set to `minimal`, only record information necessary for routing from HAR. This
+	// omits sizes, timing, page, cookies, security and other types of HAR information
+	// that are not used when replaying from HAR. Defaults to `full`.
+	RecordHarMode *HarMode `json:"recordHarMode"`
 	// Optional setting to control whether to omit request content from the HAR. Defaults
 	// to `false`.
 	RecordHarOmitContent *bool `json:"recordHarOmitContent"`
 	// Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all
 	// pages into the specified HAR file on the filesystem. If not specified, the HAR is
 	// not recorded. Make sure to call BrowserContext.Close() for the HAR to be saved.
-	RecordHarPath *string `json:"recordHarPath"`
+	RecordHarPath      *string     `json:"recordHarPath"`
+	RecordHarUrlFilter interface{} `json:"recordHarUrlFilter"`
 	// Enables video recording for all pages into `recordVideo.dir` directory. If not specified
 	// videos are not recorded. Make sure to await BrowserContext.Close() for videos to
 	// be saved.
-	RecordVideo *BrowserNewContextOptionsRecordVideo `json:"recordVideo"`
+	RecordVideo *RecordVideo `json:"recordVideo"`
 	// Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`,
-	// `'no-preference'`. See Page.EmulateMedia() for more details. Defaults to `'no-preference'`.
+	// `'no-preference'`. See Page.EmulateMedia() for more details. Passing `'no-override'`
+	// resets emulation to system defaults. Defaults to `'no-preference'`.
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
 	// Emulates consistent window screen size available inside web page via `window.screen`.
 	// Is only used when the `viewport` is set.
-	Screen *BrowserNewContextOptionsScreen `json:"screen"`
+	Screen *ScreenSize `json:"screen"`
 	// Whether to allow sites to register Service workers. Defaults to `'allow'`.
 	// `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
 	// can be registered.
@@ -147,15 +380,16 @@ type BrowserNewContextOptions struct {
 	// Populates context with given storage state. This option can be used to initialize
 	// context with logged-in information obtained via BrowserContext.StorageState(). Either
 	// a path to the file with saved storage, or an object with the following fields:
-	StorageState *BrowserNewContextOptionsStorageState `json:"storageState"`
+	StorageState *OptionalStorageState `json:"storageState"`
 	// Populates context with given storage state. This option can be used to initialize
 	// context with logged-in information obtained via BrowserContext.StorageState(). Path
 	// to the file with saved storage state.
 	StorageStatePath *string `json:"storageStatePath"`
-	// If specified, enables strict selectors mode for this context. In the strict selectors
+	// If set to true, enables strict selectors mode for this context. In the strict selectors
 	// mode all operations on selectors that imply single target DOM element will throw
-	// when more than one element matches the selector. See Locator to learn more about
-	// the strict mode.
+	// when more than one element matches the selector. This option does not affect any
+	// Locator APIs (Locators are always strict). See Locator to learn more about the strict
+	// mode.
 	StrictSelectors *bool `json:"strictSelectors"`
 	// Changes the timezone of the context. See [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
 	// for a list of supported timezone IDs.
@@ -164,55 +398,18 @@ type BrowserNewContextOptions struct {
 	UserAgent *string `json:"userAgent"`
 	// Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport`
 	// disables the fixed viewport.
-	Viewport *BrowserNewContextOptionsViewport `json:"viewport"`
+	Viewport *ViewportSize `json:"viewport"`
 }
-type BrowserGeolocation struct {
-	// Latitude between -90 and 90.
-	Latitude *float64 `json:"latitude"`
-	// Longitude between -180 and 180.
-	Longitude *float64 `json:"longitude"`
-	// Non-negative accuracy value. Defaults to `0`.
-	Accuracy *float64 `json:"accuracy"`
-}
-type BrowserHttpCredentials struct {
-	Username *string `json:"username"`
-	Password *string `json:"password"`
-}
-type BrowserProxy struct {
-	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example
-	// `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128`
-	// is considered an HTTP proxy.
-	Server *string `json:"server"`
-	// Optional comma-separated domains to bypass proxy, for example `".com, chromium.org,
-	// .domain.com"`.
-	Bypass *string `json:"bypass"`
-	// Optional username to use if HTTP proxy requires authentication.
-	Username *string `json:"username"`
-	// Optional password to use if HTTP proxy requires authentication.
-	Password *string `json:"password"`
-}
-type BrowserRecordVideo struct {
+type RecordVideo struct {
 	// Path to the directory to put videos into.
 	Dir *string `json:"dir"`
 	// Optional dimensions of the recorded videos. If not specified the size will be equal
 	// to `viewport` scaled down to fit into 800x800. If `viewport` is not configured explicitly
 	// the video size defaults to 800x450. Actual picture of each page will be scaled down
 	// if necessary to fit the specified size.
-	Size *BrowserRecordVideoSize `json:"size"`
+	Size *RecordVideoSize `json:"size"`
 }
-type BrowserScreen struct {
-	// page width in pixels.
-	Width *int `json:"width"`
-	// page height in pixels.
-	Height *int `json:"height"`
-}
-type BrowserStorageState struct {
-	// cookies to set for context
-	Cookies []BrowserStorageStateCookies `json:"cookies"`
-	// localStorage to set for context
-	Origins []BrowserStorageStateOrigins `json:"origins"`
-}
-type BrowserViewport struct {
+type ScreenSize struct {
 	// page width in pixels.
 	Width *int `json:"width"`
 	// page height in pixels.
@@ -234,23 +431,22 @@ type BrowserNewPageOptions struct {
 	// Toggles bypassing page's Content-Security-Policy.
 	BypassCSP *bool `json:"bypassCSP"`
 	// Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`,
-	// `'dark'`, `'no-preference'`. See Page.EmulateMedia() for more details. Defaults
-	// to `'light'`.
+	// `'dark'`, `'no-preference'`. See Page.EmulateMedia() for more details. Passing `'no-override'`
+	// resets emulation to system defaults. Defaults to `'light'`.
 	ColorScheme *ColorScheme `json:"colorScheme"`
 	// Specify device scale factor (can be thought of as dpr). Defaults to `1`.
 	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
 	// An object containing additional HTTP headers to be sent with every request.
 	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
 	// Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`.
-	// See Page.EmulateMedia() for more details. Defaults to `'none'`.
-	// It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281)
-	// in their issue tracker.
-	ForcedColors *ForcedColors                     `json:"forcedColors"`
-	Geolocation  *BrowserNewPageOptionsGeolocation `json:"geolocation"`
+	// See Page.EmulateMedia() for more details. Passing `'no-override'` resets emulation
+	// to system defaults. Defaults to `'none'`.
+	ForcedColors *ForcedColors `json:"forcedColors"`
+	Geolocation  *Geolocation  `json:"geolocation"`
 	// Specifies if viewport supports touch events. Defaults to false.
 	HasTouch *bool `json:"hasTouch"`
 	// Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
-	HttpCredentials *BrowserNewPageOptionsHttpCredentials `json:"httpCredentials"`
+	HttpCredentials *HttpCredentials `json:"httpCredentials"`
 	// Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
 	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
 	// Whether the `meta viewport` tag is taken into account and touch events are enabled.
@@ -274,24 +470,35 @@ type BrowserNewPageOptions struct {
 	// this option to work. If all contexts override the proxy, global proxy will be never
 	// used and can be any string, for example `launch({ proxy: { server: 'http://per-context'
 	// } })`.
-	Proxy *BrowserNewPageOptionsProxy `json:"proxy"`
+	Proxy *Proxy `json:"proxy"`
+	// Optional setting to control resource content management. If `omit` is specified,
+	// content is not persisted. If `attach` is specified, resources are persisted as separate
+	// files and all of these files are archived along with the HAR file. Defaults to `embed`,
+	// which stores content inline the HAR file as per HAR specification.
+	RecordHarContent *HarContentPolicy `json:"recordHarContent"`
+	// When set to `minimal`, only record information necessary for routing from HAR. This
+	// omits sizes, timing, page, cookies, security and other types of HAR information
+	// that are not used when replaying from HAR. Defaults to `full`.
+	RecordHarMode *HarMode `json:"recordHarMode"`
 	// Optional setting to control whether to omit request content from the HAR. Defaults
 	// to `false`.
 	RecordHarOmitContent *bool `json:"recordHarOmitContent"`
 	// Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all
 	// pages into the specified HAR file on the filesystem. If not specified, the HAR is
 	// not recorded. Make sure to call BrowserContext.Close() for the HAR to be saved.
-	RecordHarPath *string `json:"recordHarPath"`
+	RecordHarPath      *string     `json:"recordHarPath"`
+	RecordHarUrlFilter interface{} `json:"recordHarUrlFilter"`
 	// Enables video recording for all pages into `recordVideo.dir` directory. If not specified
 	// videos are not recorded. Make sure to await BrowserContext.Close() for videos to
 	// be saved.
-	RecordVideo *BrowserNewPageOptionsRecordVideo `json:"recordVideo"`
+	RecordVideo *RecordVideo `json:"recordVideo"`
 	// Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`,
-	// `'no-preference'`. See Page.EmulateMedia() for more details. Defaults to `'no-preference'`.
+	// `'no-preference'`. See Page.EmulateMedia() for more details. Passing `'no-override'`
+	// resets emulation to system defaults. Defaults to `'no-preference'`.
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
 	// Emulates consistent window screen size available inside web page via `window.screen`.
 	// Is only used when the `viewport` is set.
-	Screen *BrowserNewPageOptionsScreen `json:"screen"`
+	Screen *ScreenSize `json:"screen"`
 	// Whether to allow sites to register Service workers. Defaults to `'allow'`.
 	// `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
 	// can be registered.
@@ -300,15 +507,16 @@ type BrowserNewPageOptions struct {
 	// Populates context with given storage state. This option can be used to initialize
 	// context with logged-in information obtained via BrowserContext.StorageState(). Either
 	// a path to the file with saved storage, or an object with the following fields:
-	StorageState *BrowserNewPageOptionsStorageState `json:"storageState"`
+	StorageState *OptionalStorageState `json:"storageState"`
 	// Populates context with given storage state. This option can be used to initialize
 	// context with logged-in information obtained via BrowserContext.StorageState(). Path
 	// to the file with saved storage state.
 	StorageStatePath *string `json:"storageStatePath"`
-	// If specified, enables strict selectors mode for this context. In the strict selectors
+	// If set to true, enables strict selectors mode for this context. In the strict selectors
 	// mode all operations on selectors that imply single target DOM element will throw
-	// when more than one element matches the selector. See Locator to learn more about
-	// the strict mode.
+	// when more than one element matches the selector. This option does not affect any
+	// Locator APIs (Locators are always strict). See Locator to learn more about the strict
+	// mode.
 	StrictSelectors *bool `json:"strictSelectors"`
 	// Changes the timezone of the context. See [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
 	// for a list of supported timezone IDs.
@@ -317,47 +525,16 @@ type BrowserNewPageOptions struct {
 	UserAgent *string `json:"userAgent"`
 	// Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport`
 	// disables the fixed viewport.
-	Viewport *BrowserNewPageOptionsViewport `json:"viewport"`
+	Viewport *ViewportSize `json:"viewport"`
 }
 type BrowserContextAddCookiesOptions struct {
-	Cookies []BrowserContextAddCookiesOptionsCookies `json:"cookies"`
-}
-type BrowserContextCookies struct {
-	Name  *string `json:"name"`
-	Value *string `json:"value"`
-	// either url or domain / path are required. Optional.
-	URL *string `json:"url"`
-	// either url or domain / path are required Optional.
-	Domain *string `json:"domain"`
-	// either url or domain / path are required Optional.
-	Path *string `json:"path"`
-	// Unix time in seconds. Optional.
-	Expires *float64 `json:"expires"`
-	// Optional.
-	HttpOnly *bool `json:"httpOnly"`
-	// Optional.
-	Secure *bool `json:"secure"`
-	// Optional.
-	SameSite *SameSiteAttribute `json:"sameSite"`
+	Cookies []OptionalCookie `json:"cookies"`
 }
 type BrowserContextAddInitScriptOptions struct {
 	// Optional Script source to be evaluated in all pages in the browser context.
 	Script *string `json:"script"`
 	// Optional Script path to be evaluated in all pages in the browser context.
 	Path *string `json:"path"`
-}
-
-// Result of calling <see cref="BrowserContext.Cookies" />.
-type BrowserContextCookiesResult struct {
-	Name   string `json:"name"`
-	Value  string `json:"value"`
-	Domain string `json:"domain"`
-	Path   string `json:"path"`
-	// Unix time in seconds.
-	Expires  float64           `json:"expires"`
-	HttpOnly bool              `json:"httpOnly"`
-	Secure   bool              `json:"secure"`
-	SameSite SameSiteAttribute `json:"sameSite"`
 }
 type BrowserContextCookiesOptions struct {
 	// Optional list of URLs.
@@ -383,26 +560,13 @@ type BrowserContextRouteFromHAROptions struct {
 	// Defaults to abort.
 	NotFound *HarNotFound `json:"notFound"`
 	// If specified, updates the given HAR with the actual network information instead
-	// of serving from file.
+	// of serving from file. The file is written to disk when BrowserContext.Close() is
+	// called.
 	Update *bool `json:"update"`
 	// A glob pattern, regular expression or predicate to match the request URL. Only requests
 	// with URL matching the pattern will be served from the HAR file. If not specified,
 	// all requests are served from the HAR file.
 	URL interface{} `json:"url"`
-}
-type BrowserContextGeolocation struct {
-	// Latitude between -90 and 90.
-	Latitude *float64 `json:"latitude"`
-	// Longitude between -180 and 180.
-	Longitude *float64 `json:"longitude"`
-	// Non-negative accuracy value. Defaults to `0`.
-	Accuracy *float64 `json:"accuracy"`
-}
-
-// Result of calling <see cref="BrowserContext.StorageState" />.
-type BrowserContextStorageStateResult struct {
-	Cookies []BrowserContextStorageStateResultCookies `json:"cookies"`
-	Origins []BrowserContextStorageStateResultOrigins `json:"origins"`
 }
 type BrowserContextStorageStateOptions struct {
 	// The file path to save the storage state to. If `path` is a relative path, then it
@@ -412,7 +576,21 @@ type BrowserContextStorageStateOptions struct {
 }
 type BrowserContextUnrouteOptions struct {
 	// Optional handler function used to register a routing with BrowserContext.Route().
-	Handler func(Route, Request) `json:"handler"`
+	Handler func(Route) `json:"handler"`
+}
+type BrowserContextExpectEventOptions struct {
+	// Receives the event data and resolves to truthy value when the waiting should resolve.
+	Predicate interface{} `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
+type BrowserContextWaitForEventOptions struct {
+	// Receives the event data and resolves to truthy value when the waiting should resolve.
+	Predicate interface{} `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
 }
 type BrowserTypeConnectOptions struct {
 	// Additional HTTP headers to be sent with web socket connect request. Optional.
@@ -478,7 +656,7 @@ type BrowserTypeLaunchOptions struct {
 	// ones from `args`. Dangerous option; use with care.
 	IgnoreDefaultArgs []string `json:"ignoreDefaultArgs"`
 	// Network proxy settings.
-	Proxy *BrowserTypeLaunchOptionsProxy `json:"proxy"`
+	Proxy *Proxy `json:"proxy"`
 	// Slows down Playwright operations by the specified amount of milliseconds. Useful
 	// so that you can see what is going on.
 	SlowMo *float64 `json:"slowMo"`
@@ -487,19 +665,6 @@ type BrowserTypeLaunchOptions struct {
 	Timeout *float64 `json:"timeout"`
 	// If specified, traces are saved into this directory.
 	TracesDir *string `json:"tracesDir"`
-}
-type BrowserTypeProxy struct {
-	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example
-	// `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128`
-	// is considered an HTTP proxy.
-	Server *string `json:"server"`
-	// Optional comma-separated domains to bypass proxy, for example `".com, chromium.org,
-	// .domain.com"`.
-	Bypass *string `json:"bypass"`
-	// Optional username to use if HTTP proxy requires authentication.
-	Username *string `json:"username"`
-	// Optional password to use if HTTP proxy requires authentication.
-	Password *string `json:"password"`
 }
 type BrowserTypeLaunchPersistentContextOptions struct {
 	// Whether to automatically download all the attachments. Defaults to `true` where
@@ -526,8 +691,8 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// Enable Chromium sandboxing. Defaults to `false`.
 	ChromiumSandbox *bool `json:"chromiumSandbox"`
 	// Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`,
-	// `'dark'`, `'no-preference'`. See Page.EmulateMedia() for more details. Defaults
-	// to `'light'`.
+	// `'dark'`, `'no-preference'`. See Page.EmulateMedia() for more details. Passing `'no-override'`
+	// resets emulation to system defaults. Defaults to `'light'`.
 	ColorScheme *ColorScheme `json:"colorScheme"`
 	// Specify device scale factor (can be thought of as dpr). Defaults to `1`.
 	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
@@ -549,11 +714,10 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// An object containing additional HTTP headers to be sent with every request.
 	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
 	// Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`.
-	// See Page.EmulateMedia() for more details. Defaults to `'none'`.
-	// It's not supported in WebKit, see [here](https://bugs.webkit.org/show_bug.cgi?id=225281)
-	// in their issue tracker.
-	ForcedColors *ForcedColors                                         `json:"forcedColors"`
-	Geolocation  *BrowserTypeLaunchPersistentContextOptionsGeolocation `json:"geolocation"`
+	// See Page.EmulateMedia() for more details. Passing `'no-override'` resets emulation
+	// to system defaults. Defaults to `'none'`.
+	ForcedColors *ForcedColors `json:"forcedColors"`
+	Geolocation  *Geolocation  `json:"geolocation"`
 	// Close the browser process on SIGHUP. Defaults to `true`.
 	HandleSIGHUP *bool `json:"handleSIGHUP"`
 	// Close the browser process on Ctrl-C. Defaults to `true`.
@@ -567,7 +731,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// Defaults to `true` unless the `devtools` option is `true`.
 	Headless *bool `json:"headless"`
 	// Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
-	HttpCredentials *BrowserTypeLaunchPersistentContextOptionsHttpCredentials `json:"httpCredentials"`
+	HttpCredentials *HttpCredentials `json:"httpCredentials"`
 	// If `true`, Playwright does not pass its own configurations args and only uses the
 	// ones from `args`. Dangerous option; use with care. Defaults to `false`.
 	IgnoreAllDefaultArgs *bool `json:"ignoreAllDefaultArgs"`
@@ -593,24 +757,35 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// for more details.
 	Permissions []string `json:"permissions"`
 	// Network proxy settings.
-	Proxy *BrowserTypeLaunchPersistentContextOptionsProxy `json:"proxy"`
+	Proxy *Proxy `json:"proxy"`
+	// Optional setting to control resource content management. If `omit` is specified,
+	// content is not persisted. If `attach` is specified, resources are persisted as separate
+	// files and all of these files are archived along with the HAR file. Defaults to `embed`,
+	// which stores content inline the HAR file as per HAR specification.
+	RecordHarContent *HarContentPolicy `json:"recordHarContent"`
+	// When set to `minimal`, only record information necessary for routing from HAR. This
+	// omits sizes, timing, page, cookies, security and other types of HAR information
+	// that are not used when replaying from HAR. Defaults to `full`.
+	RecordHarMode *HarMode `json:"recordHarMode"`
 	// Optional setting to control whether to omit request content from the HAR. Defaults
 	// to `false`.
 	RecordHarOmitContent *bool `json:"recordHarOmitContent"`
 	// Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all
 	// pages into the specified HAR file on the filesystem. If not specified, the HAR is
 	// not recorded. Make sure to call BrowserContext.Close() for the HAR to be saved.
-	RecordHarPath *string `json:"recordHarPath"`
+	RecordHarPath      *string     `json:"recordHarPath"`
+	RecordHarUrlFilter interface{} `json:"recordHarUrlFilter"`
 	// Enables video recording for all pages into `recordVideo.dir` directory. If not specified
 	// videos are not recorded. Make sure to await BrowserContext.Close() for videos to
 	// be saved.
-	RecordVideo *BrowserTypeLaunchPersistentContextOptionsRecordVideo `json:"recordVideo"`
+	RecordVideo *RecordVideo `json:"recordVideo"`
 	// Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`,
-	// `'no-preference'`. See Page.EmulateMedia() for more details. Defaults to `'no-preference'`.
+	// `'no-preference'`. See Page.EmulateMedia() for more details. Passing `'no-override'`
+	// resets emulation to system defaults. Defaults to `'no-preference'`.
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
 	// Emulates consistent window screen size available inside web page via `window.screen`.
 	// Is only used when the `viewport` is set.
-	Screen *BrowserTypeLaunchPersistentContextOptionsScreen `json:"screen"`
+	Screen *ScreenSize `json:"screen"`
 	// Whether to allow sites to register Service workers. Defaults to `'allow'`.
 	// `'allow'`: [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
 	// can be registered.
@@ -619,10 +794,11 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// Slows down Playwright operations by the specified amount of milliseconds. Useful
 	// so that you can see what is going on.
 	SlowMo *float64 `json:"slowMo"`
-	// If specified, enables strict selectors mode for this context. In the strict selectors
+	// If set to true, enables strict selectors mode for this context. In the strict selectors
 	// mode all operations on selectors that imply single target DOM element will throw
-	// when more than one element matches the selector. See Locator to learn more about
-	// the strict mode.
+	// when more than one element matches the selector. This option does not affect any
+	// Locator APIs (Locators are always strict). See Locator to learn more about the strict
+	// mode.
 	StrictSelectors *bool `json:"strictSelectors"`
 	// Maximum time in milliseconds to wait for the browser instance to start. Defaults
 	// to `30000` (30 seconds). Pass `0` to disable timeout.
@@ -636,57 +812,12 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	UserAgent *string `json:"userAgent"`
 	// Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport`
 	// disables the fixed viewport.
-	Viewport *BrowserTypeLaunchPersistentContextOptionsViewport `json:"viewport"`
-}
-type BrowserTypeGeolocation struct {
-	// Latitude between -90 and 90.
-	Latitude *float64 `json:"latitude"`
-	// Longitude between -180 and 180.
-	Longitude *float64 `json:"longitude"`
-	// Non-negative accuracy value. Defaults to `0`.
-	Accuracy *float64 `json:"accuracy"`
-}
-type BrowserTypeHttpCredentials struct {
-	Username *string `json:"username"`
-	Password *string `json:"password"`
-}
-type BrowserTypeRecordVideo struct {
-	// Path to the directory to put videos into.
-	Dir *string `json:"dir"`
-	// Optional dimensions of the recorded videos. If not specified the size will be equal
-	// to `viewport` scaled down to fit into 800x800. If `viewport` is not configured explicitly
-	// the video size defaults to 800x450. Actual picture of each page will be scaled down
-	// if necessary to fit the specified size.
-	Size *BrowserTypeRecordVideoSize `json:"size"`
-}
-type BrowserTypeScreen struct {
-	// page width in pixels.
-	Width *int `json:"width"`
-	// page height in pixels.
-	Height *int `json:"height"`
-}
-type BrowserTypeViewport struct {
-	// page width in pixels.
-	Width *int `json:"width"`
-	// page height in pixels.
-	Height *int `json:"height"`
+	Viewport *ViewportSize `json:"viewport"`
 }
 type DialogAcceptOptions struct {
 	// A text to enter in prompt. Does not cause any effects if the dialog's `type` is
 	// not prompt. Optional.
 	PromptText *string `json:"promptText"`
-}
-
-// Result of calling <see cref="ElementHandle.BoundingBox" />.
-type ElementHandleBoundingBoxResult struct {
-	// the x coordinate of the element in pixels.
-	X float64 `json:"x"`
-	// the y coordinate of the element in pixels.
-	Y float64 `json:"y"`
-	// the width of the element in pixels.
-	Width float64 `json:"width"`
-	// the height of the element in pixels.
-	Height float64 `json:"height"`
 }
 type ElementHandleCheckOptions struct {
 	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
@@ -698,7 +829,7 @@ type ElementHandleCheckOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *ElementHandleCheckOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -708,7 +839,7 @@ type ElementHandleCheckOptions struct {
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
 }
-type ElementHandlePosition struct {
+type Position struct {
 	X *float64 `json:"x"`
 	Y *float64 `json:"y"`
 }
@@ -732,7 +863,7 @@ type ElementHandleClickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *ElementHandleClickOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -760,7 +891,7 @@ type ElementHandleDblclickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *ElementHandleDblclickOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -802,9 +933,14 @@ type ElementHandleHoverOptions struct {
 	// operation, and then restores current modifiers back. If not specified, currently
 	// pressed modifiers are used.
 	Modifiers []KeyboardModifier `json:"modifiers"`
+	// Actions that initiate navigations are waiting for these navigations to happen and
+	// for pages to start loading. You can opt out of waiting via setting this flag. You
+	// would only need this option in the exceptional cases such as navigating to inaccessible
+	// pages. Defaults to `false`.
+	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *ElementHandleHoverOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -856,7 +992,7 @@ type ElementHandleScreenshotOptions struct {
 	Quality *int `json:"quality"`
 	// When set to `"css"`, screenshot will have a single pixel per each css pixel on the
 	// page. For high-dpi devices, this will keep screenshots small. Using `"device"` option
-	// will produce a single pixel per each device pixel, so screenhots of high-dpi devices
+	// will produce a single pixel per each device pixel, so screenshots of high-dpi devices
 	// will be twice as large or even larger.
 	// Defaults to `"device"`.
 	Scale *ScreenshotScale `json:"scale"`
@@ -904,7 +1040,7 @@ type ElementHandleSetCheckedOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *ElementHandleSetCheckedOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -939,7 +1075,7 @@ type ElementHandleTapOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *ElementHandleTapOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -972,7 +1108,7 @@ type ElementHandleUncheckOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *ElementHandleUncheckOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -999,7 +1135,7 @@ type ElementHandleWaitForSelectorOptions struct {
 	// box or `visibility:hidden`. This is opposite to the `'visible'` option.
 	State *WaitForSelectorState `json:"state"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1048,9 +1184,9 @@ type FrameCheckOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *FrameCheckOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1060,10 +1196,6 @@ type FrameCheckOptions struct {
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
-}
-type FramePosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
 }
 type FrameClickOptions struct {
 	// Defaults to `left`.
@@ -1085,9 +1217,9 @@ type FrameClickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *FrameClickOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1116,9 +1248,9 @@ type FrameDblclickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *FrameDblclickOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1131,7 +1263,7 @@ type FrameDblclickOptions struct {
 }
 type FrameDispatchEventOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1148,13 +1280,13 @@ type FrameDragAndDropOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Clicks on the source element at this point relative to the top-left corner of the
 	// element's padding box. If not specified, some visible point of the element is used.
-	SourcePosition *FrameDragAndDropOptionsSourcePosition `json:"sourcePosition"`
+	SourcePosition *Position `json:"sourcePosition"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Drops on the target element at this point relative to the top-left corner of the
 	// element's padding box. If not specified, some visible point of the element is used.
-	TargetPosition *FrameDragAndDropOptionsTargetPosition `json:"targetPosition"`
+	TargetPosition *Position `json:"targetPosition"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -1164,17 +1296,9 @@ type FrameDragAndDropOptions struct {
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
 }
-type FrameSourcePosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type FrameTargetPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
 type FrameEvalOnSelectorOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 }
 type FrameEvalOnSelectorAllOptions struct {
@@ -1198,7 +1322,7 @@ type FrameFillOptions struct {
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1207,7 +1331,7 @@ type FrameFillOptions struct {
 }
 type FrameFocusOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1216,12 +1340,79 @@ type FrameFocusOptions struct {
 }
 type FrameGetAttributeOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
+}
+type FrameGetByAltTextOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
+}
+type FrameGetByLabelOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
+}
+type FrameGetByPlaceholderOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
+}
+type FrameGetByRoleOptions struct {
+	// An attribute that is usually set by `aria-checked` or native `<input type=checkbox>`
+	// controls.
+	// Learn more about [`aria-checked`](https://www.w3.org/TR/wai-aria-1.2/#aria-checked).
+	Checked *bool `json:"checked"`
+	// An attribute that is usually set by `aria-disabled` or `disabled`.
+	// Unlike most other attributes, `disabled` is inherited through the DOM hierarchy.
+	// Learn more about [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
+	Disabled *bool `json:"disabled"`
+	// Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to
+	// false. Ignored when `name` is a regular expression. Note that exact match still
+	// trims whitespace.
+	Exact *bool `json:"exact"`
+	// An attribute that is usually set by `aria-expanded`.
+	// Learn more about [`aria-expanded`](https://www.w3.org/TR/wai-aria-1.2/#aria-expanded).
+	Expanded *bool `json:"expanded"`
+	// Option that controls whether hidden elements are matched. By default, only non-hidden
+	// elements, as [defined by ARIA](https://www.w3.org/TR/wai-aria-1.2/#tree_exclusion),
+	// are matched by role selector.
+	// Learn more about [`aria-hidden`](https://www.w3.org/TR/wai-aria-1.2/#aria-hidden).
+	IncludeHidden *bool `json:"includeHidden"`
+	// A number attribute that is usually present for roles `heading`, `listitem`, `row`,
+	// `treeitem`, with default values for `<h1>-<h6>` elements.
+	// Learn more about [`aria-level`](https://www.w3.org/TR/wai-aria-1.2/#aria-level).
+	Level *int `json:"level"`
+	// Option to match the [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	// By default, matching is case-insensitive and searches for a substring, use `exact`
+	// to control this behavior.
+	// Learn more about [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	Name interface{} `json:"name"`
+	// An attribute that is usually set by `aria-pressed`.
+	// Learn more about [`aria-pressed`](https://www.w3.org/TR/wai-aria-1.2/#aria-pressed).
+	Pressed *bool `json:"pressed"`
+	// An attribute that is usually set by `aria-selected`.
+	// Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
+	Selected *bool `json:"selected"`
+}
+type FrameGetByTextOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
+}
+type FrameGetByTitleOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
 }
 type FrameGotoOptions struct {
 	// Referer header value. If provided it will take preference over the referer header
@@ -1249,11 +1440,16 @@ type FrameHoverOptions struct {
 	// operation, and then restores current modifiers back. If not specified, currently
 	// pressed modifiers are used.
 	Modifiers []KeyboardModifier `json:"modifiers"`
+	// Actions that initiate navigations are waiting for these navigations to happen and
+	// for pages to start loading. You can opt out of waiting via setting this flag. You
+	// would only need this option in the exceptional cases such as navigating to inaccessible
+	// pages. Defaults to `false`.
+	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *FrameHoverOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1266,7 +1462,7 @@ type FrameHoverOptions struct {
 }
 type FrameInnerHTMLOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1275,7 +1471,7 @@ type FrameInnerHTMLOptions struct {
 }
 type FrameInnerTextOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1284,7 +1480,7 @@ type FrameInnerTextOptions struct {
 }
 type FrameInputValueOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1293,7 +1489,7 @@ type FrameInputValueOptions struct {
 }
 type FrameIsCheckedOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1302,7 +1498,7 @@ type FrameIsCheckedOptions struct {
 }
 type FrameIsDisabledOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1311,7 +1507,7 @@ type FrameIsDisabledOptions struct {
 }
 type FrameIsEditableOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1320,7 +1516,7 @@ type FrameIsEditableOptions struct {
 }
 type FrameIsEnabledOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1329,18 +1525,14 @@ type FrameIsEnabledOptions struct {
 }
 type FrameIsHiddenOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
-	Strict *bool `json:"strict"`
-	// **DEPRECATED** This option is ignored. Frame.IsHidden() does not wait for the element
-	// to become hidden and returns immediately.
+	// resolves to more than one element, the call throws an exception.
+	Strict  *bool    `json:"strict"`
 	Timeout *float64 `json:"timeout"`
 }
 type FrameIsVisibleOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
-	Strict *bool `json:"strict"`
-	// **DEPRECATED** This option is ignored. Frame.IsVisible() does not wait for the element
-	// to become visible and returns immediately.
+	// resolves to more than one element, the call throws an exception.
+	Strict  *bool    `json:"strict"`
 	Timeout *float64 `json:"timeout"`
 }
 type FrameLocatorOptions struct {
@@ -1364,7 +1556,7 @@ type FramePressOptions struct {
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1373,7 +1565,7 @@ type FramePressOptions struct {
 }
 type FrameQuerySelectorOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 }
 type FrameSelectOptionOptions struct {
@@ -1385,7 +1577,7 @@ type FrameSelectOptionOptions struct {
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1402,9 +1594,9 @@ type FrameSetCheckedOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *FrameSetCheckedOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1438,7 +1630,7 @@ type FrameSetInputFilesOptions struct {
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1459,9 +1651,9 @@ type FrameTapOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *FrameTapOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1474,7 +1666,7 @@ type FrameTapOptions struct {
 }
 type FrameTextContentOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1490,7 +1682,7 @@ type FrameTypeOptions struct {
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1507,9 +1699,9 @@ type FrameUncheckOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *FrameUncheckOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1530,6 +1722,14 @@ type FrameWaitForFunctionOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type FrameWaitForLoadStateOptions struct {
+	// Optional load state to wait for, defaults to `load`. If the state has been already
+	// reached while loading current document, the method resolves immediately. Can be
+	// one of:
+	// `'load'` - wait for the `load` event to be fired.
+	// `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
+	// `'networkidle'` - wait until there are no network connections for at least `500`
+	// ms.
+	State *LoadState `json:"state"`
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable
 	// timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(),
 	// BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout()
@@ -1567,7 +1767,7 @@ type FrameWaitForSelectorOptions struct {
 	// box or `visibility:hidden`. This is opposite to the `'visible'` option.
 	State *WaitForSelectorState `json:"state"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -1589,6 +1789,73 @@ type FrameWaitForURLOptions struct {
 	// `'commit'` - consider operation to be finished when network response is received
 	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
+}
+type FrameLocatorGetByAltTextOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
+}
+type FrameLocatorGetByLabelOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
+}
+type FrameLocatorGetByPlaceholderOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
+}
+type FrameLocatorGetByRoleOptions struct {
+	// An attribute that is usually set by `aria-checked` or native `<input type=checkbox>`
+	// controls.
+	// Learn more about [`aria-checked`](https://www.w3.org/TR/wai-aria-1.2/#aria-checked).
+	Checked *bool `json:"checked"`
+	// An attribute that is usually set by `aria-disabled` or `disabled`.
+	// Unlike most other attributes, `disabled` is inherited through the DOM hierarchy.
+	// Learn more about [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
+	Disabled *bool `json:"disabled"`
+	// Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to
+	// false. Ignored when `name` is a regular expression. Note that exact match still
+	// trims whitespace.
+	Exact *bool `json:"exact"`
+	// An attribute that is usually set by `aria-expanded`.
+	// Learn more about [`aria-expanded`](https://www.w3.org/TR/wai-aria-1.2/#aria-expanded).
+	Expanded *bool `json:"expanded"`
+	// Option that controls whether hidden elements are matched. By default, only non-hidden
+	// elements, as [defined by ARIA](https://www.w3.org/TR/wai-aria-1.2/#tree_exclusion),
+	// are matched by role selector.
+	// Learn more about [`aria-hidden`](https://www.w3.org/TR/wai-aria-1.2/#aria-hidden).
+	IncludeHidden *bool `json:"includeHidden"`
+	// A number attribute that is usually present for roles `heading`, `listitem`, `row`,
+	// `treeitem`, with default values for `<h1>-<h6>` elements.
+	// Learn more about [`aria-level`](https://www.w3.org/TR/wai-aria-1.2/#aria-level).
+	Level *int `json:"level"`
+	// Option to match the [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	// By default, matching is case-insensitive and searches for a substring, use `exact`
+	// to control this behavior.
+	// Learn more about [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	Name interface{} `json:"name"`
+	// An attribute that is usually set by `aria-pressed`.
+	// Learn more about [`aria-pressed`](https://www.w3.org/TR/wai-aria-1.2/#aria-pressed).
+	Pressed *bool `json:"pressed"`
+	// An attribute that is usually set by `aria-selected`.
+	// Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
+	Selected *bool `json:"selected"`
+}
+type FrameLocatorGetByTextOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
+}
+type FrameLocatorGetByTitleOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
 }
 type FrameLocatorLocatorOptions struct {
 	// Matches elements containing an element that matches an inner locator. Inner locator
@@ -1618,17 +1885,11 @@ type KeyboardTypeOptions struct {
 	// Time to wait between key presses in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
 }
-
-// Result of calling <see cref="Locator.BoundingBox" />.
-type LocatorBoundingBoxResult struct {
-	// the x coordinate of the element in pixels.
-	X float64 `json:"x"`
-	// the y coordinate of the element in pixels.
-	Y float64 `json:"y"`
-	// the width of the element in pixels.
-	Width float64 `json:"width"`
-	// the height of the element in pixels.
-	Height float64 `json:"height"`
+type LocatorBlurOptions struct {
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
+	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// or Page.SetDefaultTimeout() methods.
+	Timeout *float64 `json:"timeout"`
 }
 type LocatorBoundingBoxOptions struct {
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
@@ -1646,7 +1907,7 @@ type LocatorCheckOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *LocatorCheckOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -1656,9 +1917,18 @@ type LocatorCheckOptions struct {
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
 }
-type LocatorPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
+type LocatorClearOptions struct {
+	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
+	Force *bool `json:"force"`
+	// Actions that initiate navigations are waiting for these navigations to happen and
+	// for pages to start loading. You can opt out of waiting via setting this flag. You
+	// would only need this option in the exceptional cases such as navigating to inaccessible
+	// pages. Defaults to `false`.
+	NoWaitAfter *bool `json:"noWaitAfter"`
+	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
+	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
+	// or Page.SetDefaultTimeout() methods.
+	Timeout *float64 `json:"timeout"`
 }
 type LocatorClickOptions struct {
 	// Defaults to `left`.
@@ -1680,7 +1950,7 @@ type LocatorClickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *LocatorClickOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -1708,7 +1978,7 @@ type LocatorDblclickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *LocatorDblclickOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -1734,10 +2004,10 @@ type LocatorDragToOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Clicks on the source element at this point relative to the top-left corner of the
 	// element's padding box. If not specified, some visible point of the element is used.
-	SourcePosition *LocatorDragToOptionsSourcePosition `json:"sourcePosition"`
+	SourcePosition *Position `json:"sourcePosition"`
 	// Drops on the target element at this point relative to the top-left corner of the
 	// element's padding box. If not specified, some visible point of the element is used.
-	TargetPosition *LocatorDragToOptionsTargetPosition `json:"targetPosition"`
+	TargetPosition *Position `json:"targetPosition"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -1746,14 +2016,6 @@ type LocatorDragToOptions struct {
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
-}
-type LocatorSourcePosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type LocatorTargetPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
 }
 type LocatorElementHandleOptions struct {
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
@@ -1814,6 +2076,73 @@ type LocatorGetAttributeOptions struct {
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
 }
+type LocatorGetByAltTextOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
+}
+type LocatorGetByLabelOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
+}
+type LocatorGetByPlaceholderOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
+}
+type LocatorGetByRoleOptions struct {
+	// An attribute that is usually set by `aria-checked` or native `<input type=checkbox>`
+	// controls.
+	// Learn more about [`aria-checked`](https://www.w3.org/TR/wai-aria-1.2/#aria-checked).
+	Checked *bool `json:"checked"`
+	// An attribute that is usually set by `aria-disabled` or `disabled`.
+	// Unlike most other attributes, `disabled` is inherited through the DOM hierarchy.
+	// Learn more about [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
+	Disabled *bool `json:"disabled"`
+	// Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to
+	// false. Ignored when `name` is a regular expression. Note that exact match still
+	// trims whitespace.
+	Exact *bool `json:"exact"`
+	// An attribute that is usually set by `aria-expanded`.
+	// Learn more about [`aria-expanded`](https://www.w3.org/TR/wai-aria-1.2/#aria-expanded).
+	Expanded *bool `json:"expanded"`
+	// Option that controls whether hidden elements are matched. By default, only non-hidden
+	// elements, as [defined by ARIA](https://www.w3.org/TR/wai-aria-1.2/#tree_exclusion),
+	// are matched by role selector.
+	// Learn more about [`aria-hidden`](https://www.w3.org/TR/wai-aria-1.2/#aria-hidden).
+	IncludeHidden *bool `json:"includeHidden"`
+	// A number attribute that is usually present for roles `heading`, `listitem`, `row`,
+	// `treeitem`, with default values for `<h1>-<h6>` elements.
+	// Learn more about [`aria-level`](https://www.w3.org/TR/wai-aria-1.2/#aria-level).
+	Level *int `json:"level"`
+	// Option to match the [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	// By default, matching is case-insensitive and searches for a substring, use `exact`
+	// to control this behavior.
+	// Learn more about [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	Name interface{} `json:"name"`
+	// An attribute that is usually set by `aria-pressed`.
+	// Learn more about [`aria-pressed`](https://www.w3.org/TR/wai-aria-1.2/#aria-pressed).
+	Pressed *bool `json:"pressed"`
+	// An attribute that is usually set by `aria-selected`.
+	// Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
+	Selected *bool `json:"selected"`
+}
+type LocatorGetByTextOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
+}
+type LocatorGetByTitleOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
+}
 type LocatorHoverOptions struct {
 	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
@@ -1821,9 +2150,14 @@ type LocatorHoverOptions struct {
 	// operation, and then restores current modifiers back. If not specified, currently
 	// pressed modifiers are used.
 	Modifiers []KeyboardModifier `json:"modifiers"`
+	// Actions that initiate navigations are waiting for these navigations to happen and
+	// for pages to start loading. You can opt out of waiting via setting this flag. You
+	// would only need this option in the exceptional cases such as navigating to inaccessible
+	// pages. Defaults to `false`.
+	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *LocatorHoverOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -1876,13 +2210,9 @@ type LocatorIsEnabledOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorIsHiddenOptions struct {
-	// **DEPRECATED** This option is ignored. Locator.IsHidden() does not wait for the
-	// element to become hidden and returns immediately.
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorIsVisibleOptions struct {
-	// **DEPRECATED** This option is ignored. Locator.IsVisible() does not wait for the
-	// element to become visible and returns immediately.
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorLocatorOptions struct {
@@ -1933,7 +2263,7 @@ type LocatorScreenshotOptions struct {
 	Quality *int `json:"quality"`
 	// When set to `"css"`, screenshot will have a single pixel per each css pixel on the
 	// page. For high-dpi devices, this will keep screenshots small. Using `"device"` option
-	// will produce a single pixel per each device pixel, so screenhots of high-dpi devices
+	// will produce a single pixel per each device pixel, so screenshots of high-dpi devices
 	// will be twice as large or even larger.
 	// Defaults to `"device"`.
 	Scale *ScreenshotScale `json:"scale"`
@@ -1981,7 +2311,7 @@ type LocatorSetCheckedOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *LocatorSetCheckedOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -2016,7 +2346,7 @@ type LocatorTapOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *LocatorTapOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -2055,7 +2385,7 @@ type LocatorUncheckOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *LocatorUncheckOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -2082,6 +2412,15 @@ type LocatorWaitForOptions struct {
 }
 type LocatorAssertionsToBeCheckedOptions struct {
 	Checked *bool `json:"checked"`
+}
+type LocatorAssertionsToBeEditableOptions struct {
+	Editable *bool `json:"editable"`
+}
+type LocatorAssertionsToBeEnabledOptions struct {
+	Enabled *bool `json:"enabled"`
+}
+type LocatorAssertionsToBeVisibleOptions struct {
+	Visible *bool `json:"visible"`
 }
 type LocatorAssertionsToContainTextOptions struct {
 	// Whether to perform case-insensitive match. `ignoreCase` option takes precedence
@@ -2166,9 +2505,9 @@ type PageCheckOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *PageCheckOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2178,10 +2517,6 @@ type PageCheckOptions struct {
 	// and skips the action. Defaults to `false`. Useful to wait until the element is ready
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
-}
-type PagePosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
 }
 type PageClickOptions struct {
 	// Defaults to `left`.
@@ -2203,9 +2538,9 @@ type PageClickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *PageClickOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2239,9 +2574,9 @@ type PageDblclickOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *PageDblclickOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2254,7 +2589,7 @@ type PageDblclickOptions struct {
 }
 type PageDispatchEventOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2271,13 +2606,13 @@ type PageDragAndDropOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Clicks on the source element at this point relative to the top-left corner of the
 	// element's padding box. If not specified, some visible point of the element is used.
-	SourcePosition *PageDragAndDropOptionsSourcePosition `json:"sourcePosition"`
+	SourcePosition *Position `json:"sourcePosition"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Drops on the target element at this point relative to the top-left corner of the
 	// element's padding box. If not specified, some visible point of the element is used.
-	TargetPosition *PageDragAndDropOptionsTargetPosition `json:"targetPosition"`
+	TargetPosition *Position `json:"targetPosition"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
@@ -2287,28 +2622,21 @@ type PageDragAndDropOptions struct {
 	// for the action without performing it.
 	Trial *bool `json:"trial"`
 }
-type PageSourcePosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type PageTargetPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
 type PageEmulateMediaOptions struct {
 	// Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`,
-	// `'dark'`, `'no-preference'`. Passing `'Null'` disables color scheme emulation.
-	ColorScheme *ColorScheme `json:"colorScheme"`
-	// Changes the CSS media type of the page. The only allowed values are `'Screen'`,
-	// `'Print'` and `'Null'`. Passing `'Null'` disables CSS media emulation.
+	// `'dark'`, `'no-preference'`. Passing `'no-override'` disables color scheme emulation.
+	ColorScheme  *ColorScheme  `json:"colorScheme"`
+	ForcedColors *ForcedColors `json:"forcedColors"`
+	// Changes the CSS media type of the page. The only allowed values are `'screen'`,
+	// `'print'` and `'no-override'`. Passing `'no-override'` disables CSS media emulation.
 	Media *Media `json:"media"`
 	// Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`,
-	// `'no-preference'`. Passing `null` disables reduced motion emulation.
+	// `'no-preference'`. Passing `no-override` disables reduced motion emulation.
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
 }
 type PageEvalOnSelectorOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 }
 type PageEvalOnSelectorAllOptions struct {
@@ -2338,7 +2666,7 @@ type PageFillOptions struct {
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2347,7 +2675,7 @@ type PageFillOptions struct {
 }
 type PageFocusOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2356,12 +2684,79 @@ type PageFocusOptions struct {
 }
 type PageGetAttributeOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
 	// or Page.SetDefaultTimeout() methods.
 	Timeout *float64 `json:"timeout"`
+}
+type PageGetByAltTextOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
+}
+type PageGetByLabelOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
+}
+type PageGetByPlaceholderOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
+}
+type PageGetByRoleOptions struct {
+	// An attribute that is usually set by `aria-checked` or native `<input type=checkbox>`
+	// controls.
+	// Learn more about [`aria-checked`](https://www.w3.org/TR/wai-aria-1.2/#aria-checked).
+	Checked *bool `json:"checked"`
+	// An attribute that is usually set by `aria-disabled` or `disabled`.
+	// Unlike most other attributes, `disabled` is inherited through the DOM hierarchy.
+	// Learn more about [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
+	Disabled *bool `json:"disabled"`
+	// Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to
+	// false. Ignored when `name` is a regular expression. Note that exact match still
+	// trims whitespace.
+	Exact *bool `json:"exact"`
+	// An attribute that is usually set by `aria-expanded`.
+	// Learn more about [`aria-expanded`](https://www.w3.org/TR/wai-aria-1.2/#aria-expanded).
+	Expanded *bool `json:"expanded"`
+	// Option that controls whether hidden elements are matched. By default, only non-hidden
+	// elements, as [defined by ARIA](https://www.w3.org/TR/wai-aria-1.2/#tree_exclusion),
+	// are matched by role selector.
+	// Learn more about [`aria-hidden`](https://www.w3.org/TR/wai-aria-1.2/#aria-hidden).
+	IncludeHidden *bool `json:"includeHidden"`
+	// A number attribute that is usually present for roles `heading`, `listitem`, `row`,
+	// `treeitem`, with default values for `<h1>-<h6>` elements.
+	// Learn more about [`aria-level`](https://www.w3.org/TR/wai-aria-1.2/#aria-level).
+	Level *int `json:"level"`
+	// Option to match the [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	// By default, matching is case-insensitive and searches for a substring, use `exact`
+	// to control this behavior.
+	// Learn more about [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	Name interface{} `json:"name"`
+	// An attribute that is usually set by `aria-pressed`.
+	// Learn more about [`aria-pressed`](https://www.w3.org/TR/wai-aria-1.2/#aria-pressed).
+	Pressed *bool `json:"pressed"`
+	// An attribute that is usually set by `aria-selected`.
+	// Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
+	Selected *bool `json:"selected"`
+}
+type PageGetByTextOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
+}
+type PageGetByTitleOptions struct {
+	// Whether to find an exact match: case-sensitive and whole-string. Default to false.
+	// Ignored when locating by a regular expression. Note that exact match still trims
+	// whitespace.
+	Exact *bool `json:"exact"`
 }
 type PageGoBackOptions struct {
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable
@@ -2421,11 +2816,16 @@ type PageHoverOptions struct {
 	// operation, and then restores current modifiers back. If not specified, currently
 	// pressed modifiers are used.
 	Modifiers []KeyboardModifier `json:"modifiers"`
+	// Actions that initiate navigations are waiting for these navigations to happen and
+	// for pages to start loading. You can opt out of waiting via setting this flag. You
+	// would only need this option in the exceptional cases such as navigating to inaccessible
+	// pages. Defaults to `false`.
+	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *PageHoverOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2438,7 +2838,7 @@ type PageHoverOptions struct {
 }
 type PageInnerHTMLOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2447,7 +2847,7 @@ type PageInnerHTMLOptions struct {
 }
 type PageInnerTextOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2456,7 +2856,7 @@ type PageInnerTextOptions struct {
 }
 type PageInputValueOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2465,7 +2865,7 @@ type PageInputValueOptions struct {
 }
 type PageIsCheckedOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2474,7 +2874,7 @@ type PageIsCheckedOptions struct {
 }
 type PageIsDisabledOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2483,7 +2883,7 @@ type PageIsDisabledOptions struct {
 }
 type PageIsEditableOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2492,7 +2892,7 @@ type PageIsEditableOptions struct {
 }
 type PageIsEnabledOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2501,18 +2901,14 @@ type PageIsEnabledOptions struct {
 }
 type PageIsHiddenOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
-	Strict *bool `json:"strict"`
-	// **DEPRECATED** This option is ignored. Page.IsHidden() does not wait for the element
-	// to become hidden and returns immediately.
+	// resolves to more than one element, the call throws an exception.
+	Strict  *bool    `json:"strict"`
 	Timeout *float64 `json:"timeout"`
 }
 type PageIsVisibleOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
-	Strict *bool `json:"strict"`
-	// **DEPRECATED** This option is ignored. Page.IsVisible() does not wait for the element
-	// to become visible and returns immediately.
+	// resolves to more than one element, the call throws an exception.
+	Strict  *bool    `json:"strict"`
 	Timeout *float64 `json:"timeout"`
 }
 type PageLocatorOptions struct {
@@ -2548,7 +2944,7 @@ type PagePdfOptions struct {
 	// Paper orientation. Defaults to `false`.
 	Landscape *bool `json:"landscape"`
 	// Paper margins, defaults to none.
-	Margin *PagePdfOptionsMargin `json:"margin"`
+	Margin *Margin `json:"margin"`
 	// Paper ranges to print, e.g., '1-5, 8, 11-13'. Defaults to the empty string, which
 	// means print all pages.
 	PageRanges *string `json:"pageRanges"`
@@ -2568,7 +2964,7 @@ type PagePdfOptions struct {
 	// Paper width, accepts values labeled with units.
 	Width *string `json:"width"`
 }
-type PageMargin struct {
+type Margin struct {
 	// Top margin, accepts values labeled with units. Defaults to `0`.
 	Top *string `json:"top"`
 	// Right margin, accepts values labeled with units. Defaults to `0`.
@@ -2587,7 +2983,7 @@ type PagePressOptions struct {
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2596,7 +2992,7 @@ type PagePressOptions struct {
 }
 type PageQuerySelectorOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 }
 type PageReloadOptions struct {
@@ -2625,7 +3021,8 @@ type PageRouteFromHAROptions struct {
 	// Defaults to abort.
 	NotFound *HarNotFound `json:"notFound"`
 	// If specified, updates the given HAR with the actual network information instead
-	// of serving from file.
+	// of serving from file. The file is written to disk when BrowserContext.Close() is
+	// called.
 	Update *bool `json:"update"`
 	// A glob pattern, regular expression or predicate to match the request URL. Only requests
 	// with URL matching the pattern will be served from the HAR file. If not specified,
@@ -2646,7 +3043,7 @@ type PageScreenshotOptions struct {
 	Caret *ScreenshotCaret `json:"caret"`
 	// An object which specifies clipping of the resulting image. Should have the following
 	// fields:
-	Clip *PageScreenshotOptionsClip `json:"clip"`
+	Clip *Rect `json:"clip"`
 	// When true, takes a screenshot of the full scrollable page, instead of the currently
 	// visible viewport. Defaults to `false`.
 	FullPage *bool `json:"fullPage"`
@@ -2661,7 +3058,7 @@ type PageScreenshotOptions struct {
 	Quality *int `json:"quality"`
 	// When set to `"css"`, screenshot will have a single pixel per each css pixel on the
 	// page. For high-dpi devices, this will keep screenshots small. Using `"device"` option
-	// will produce a single pixel per each device pixel, so screenhots of high-dpi devices
+	// will produce a single pixel per each device pixel, so screenshots of high-dpi devices
 	// will be twice as large or even larger.
 	// Defaults to `"device"`.
 	Scale *ScreenshotScale `json:"scale"`
@@ -2672,16 +3069,6 @@ type PageScreenshotOptions struct {
 	// Specify screenshot type, defaults to `png`.
 	Type *ScreenshotType `json:"type"`
 }
-type PageClip struct {
-	// x-coordinate of top-left corner of clip area
-	X *float64 `json:"x"`
-	// y-coordinate of top-left corner of clip area
-	Y *float64 `json:"y"`
-	// width of clipping area
-	Width *float64 `json:"width"`
-	// height of clipping area
-	Height *float64 `json:"height"`
-}
 type PageSelectOptionOptions struct {
 	// Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 	Force *bool `json:"force"`
@@ -2691,7 +3078,7 @@ type PageSelectOptionOptions struct {
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2708,9 +3095,9 @@ type PageSetCheckedOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *PageSetCheckedOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2744,7 +3131,7 @@ type PageSetInputFilesOptions struct {
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2765,9 +3152,9 @@ type PageTapOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *PageTapOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2780,7 +3167,7 @@ type PageTapOptions struct {
 }
 type PageTextContentOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2796,7 +3183,7 @@ type PageTypeOptions struct {
 	// pages. Defaults to `false`.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2813,9 +3200,9 @@ type PageUncheckOptions struct {
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified,
 	// uses some visible point of the element.
-	Position *PageUncheckOptionsPosition `json:"position"`
+	Position *Position `json:"position"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2828,15 +3215,38 @@ type PageUncheckOptions struct {
 }
 type PageUnrouteOptions struct {
 	// Optional handler function to route the request.
-	Handler func(Route, Request) `json:"handler"`
+	Handler func(Route) `json:"handler"`
 }
-
-// Result of calling <see cref="Page.ViewportSize" />.
-type PageViewportSizeResult struct {
-	// page width in pixels.
-	Width int `json:"width"`
-	// page height in pixels.
-	Height int `json:"height"`
+type PageExpectConsoleMessageOptions struct {
+	// Receives the ConsoleMessage object and resolves to truthy value when the waiting
+	// should resolve.
+	Predicate func(ConsoleMessage) bool `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
+type PageExpectDownloadOptions struct {
+	// Receives the Download object and resolves to truthy value when the waiting should
+	// resolve.
+	Predicate func(Download) bool `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
+type PageExpectEventOptions struct {
+	// Receives the event data and resolves to truthy value when the waiting should resolve.
+	Predicate interface{} `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
+type PageExpectFileChooserOptions struct {
+	// Receives the FileChooser object and resolves to truthy value when the waiting should
+	// resolve.
+	Predicate func(FileChooser) bool `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
 }
 type PageWaitForFunctionOptions struct {
 	// If `polling` is `'raf'`, then `expression` is constantly executed in `requestAnimationFrame`
@@ -2848,6 +3258,14 @@ type PageWaitForFunctionOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type PageWaitForLoadStateOptions struct {
+	// Optional load state to wait for, defaults to `load`. If the state has been already
+	// reached while loading current document, the method resolves immediately. Can be
+	// one of:
+	// `'load'` - wait for the `load` event to be fired.
+	// `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
+	// `'networkidle'` - wait until there are no network connections for at least `500`
+	// ms.
+	State *LoadState `json:"state"`
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable
 	// timeout. The default value can be changed by using the BrowserContext.SetDefaultNavigationTimeout(),
 	// BrowserContext.SetDefaultTimeout(), Page.SetDefaultNavigationTimeout() or Page.SetDefaultTimeout()
@@ -2874,6 +3292,13 @@ type PageWaitForNavigationOptions struct {
 	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
+type PageExpectPopupOptions struct {
+	// Receives the Page object and resolves to truthy value when the waiting should resolve.
+	Predicate func(Page) bool `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
 type PageWaitForRequestOptions struct {
 	// Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the
 	// timeout. The default value can be changed by using the Page.SetDefaultTimeout()
@@ -2897,7 +3322,7 @@ type PageWaitForSelectorOptions struct {
 	// box or `visibility:hidden`. This is opposite to the `'visible'` option.
 	State *WaitForSelectorState `json:"state"`
 	// When true, the call requires selector to resolve to a single element. If given selector
-	// resolves to more then one element, the call throws an exception.
+	// resolves to more than one element, the call throws an exception.
 	Strict *bool `json:"strict"`
 	// Maximum time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout.
 	// The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -2920,13 +3345,28 @@ type PageWaitForURLOptions struct {
 	// and the document started loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
-
-// Result of calling <see cref="Request.HeadersArray" />.
-type RequestHeadersArrayResult struct {
-	// Name of the header.
-	Name string `json:"name"`
-	// Value of the header.
-	Value string `json:"value"`
+type PageExpectWebSocketOptions struct {
+	// Receives the WebSocket object and resolves to truthy value when the waiting should
+	// resolve.
+	Predicate func(WebSocket) bool `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
+type PageExpectWorkerOptions struct {
+	// Receives the Worker object and resolves to truthy value when the waiting should
+	// resolve.
+	Predicate func(Worker) bool `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
+type PageWaitForEventOptions struct {
+	// Receives the event data and resolves to truthy value when the waiting should resolve.
+	Predicate interface{} `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
 }
 
 // Result of calling <see cref="Request.Sizes" />.
@@ -2980,14 +3420,6 @@ type RequestTimingResult struct {
 	ResponseEnd float64 `json:"responseEnd"`
 }
 
-// Result of calling <see cref="Response.HeadersArray" />.
-type ResponseHeadersArrayResult struct {
-	// Name of the header.
-	Name string `json:"name"`
-	// Value of the header.
-	Value string `json:"value"`
-}
-
 // Result of calling <see cref="Response.SecurityDetails" />.
 type ResponseSecurityDetailsResult struct {
 	// Common Name component of the Issuer field. from the certificate. This should only
@@ -3036,9 +3468,9 @@ type RouteAbortOptions struct {
 type RouteContinueOptions struct {
 	// If set changes the request HTTP headers. Header values will be converted to a string.
 	Headers map[string]string `json:"headers"`
-	// If set changes the request method (e.g. GET or POST)
+	// If set changes the request method (e.g. GET or POST).
 	Method *string `json:"method"`
-	// If set changes the post data of request
+	// If set changes the post data of request.
 	PostData interface{} `json:"postData"`
 	// If set changes the request URL. New URL must have same protocol as original one.
 	URL *string `json:"url"`
@@ -3046,13 +3478,23 @@ type RouteContinueOptions struct {
 type RouteFallbackOptions struct {
 	// If set changes the request HTTP headers. Header values will be converted to a string.
 	Headers map[string]string `json:"headers"`
-	// If set changes the request method (e.g. GET or POST)
+	// If set changes the request method (e.g. GET or POST).
 	Method *string `json:"method"`
-	// If set changes the post data of request
-	PostData []byte `json:"postData"`
+	// If set changes the post data of request.
+	PostData interface{} `json:"postData"`
 	// If set changes the request URL. New URL must have same protocol as original one.
 	// Changing the URL won't affect the route matching, all the routes are matched using
 	// the original request URL.
+	URL *string `json:"url"`
+}
+type RouteFetchOptions struct {
+	// If set changes the request HTTP headers. Header values will be converted to a string.
+	Headers map[string]string `json:"headers"`
+	// If set changes the request method (e.g. GET or POST).
+	Method *string `json:"method"`
+	// If set changes the post data of request.
+	PostData interface{} `json:"postData"`
+	// If set changes the request URL. New URL must have same protocol as original one.
 	URL *string `json:"url"`
 }
 type RouteFulfillOptions struct {
@@ -3105,11 +3547,11 @@ type TracingStopChunkOptions struct {
 }
 type FrameReceivedPayload struct {
 	// frame payload
-	Payload []byte `json:"payload"`
+	Payload interface{} `json:"payload"`
 }
 type FrameSentPayload struct {
 	// frame payload
-	Payload []byte `json:"payload"`
+	Payload interface{} `json:"payload"`
 }
 type WorkerEvaluateOptions struct {
 	// Optional argument to pass to `expression`.
@@ -3119,167 +3561,19 @@ type WorkerEvaluateHandleOptions struct {
 	// Optional argument to pass to `expression`.
 	Arg interface{} `json:"arg"`
 }
-type APIRequestNewContextOptionsHttpCredentials struct {
-	Username *string `json:"username"`
-	Password *string `json:"password"`
-}
-type APIRequestNewContextOptionsProxy struct {
-	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example
-	// `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128`
-	// is considered an HTTP proxy.
-	Server *string `json:"server"`
-	// Optional comma-separated domains to bypass proxy, for example `".com, chromium.org,
-	// .domain.com"`.
-	Bypass *string `json:"bypass"`
-	// Optional username to use if HTTP proxy requires authentication.
-	Username *string `json:"username"`
-	// Optional password to use if HTTP proxy requires authentication.
-	Password *string `json:"password"`
-}
-type APIRequestContextStorageStateResultCookies struct {
-	Name   *string `json:"name"`
-	Value  *string `json:"value"`
-	Domain *string `json:"domain"`
-	Path   *string `json:"path"`
-	// Unix time in seconds.
-	Expires  *float64           `json:"expires"`
-	HttpOnly *bool              `json:"httpOnly"`
-	Secure   *bool              `json:"secure"`
-	SameSite *SameSiteAttribute `json:"sameSite"`
-}
-type APIRequestContextStorageStateResultOrigins struct {
-	Origin       *string                                                  `json:"origin"`
-	LocalStorage []APIRequestContextStorageStateResultOriginsLocalStorage `json:"localStorage"`
-}
-type BrowserNewContextOptionsGeolocation struct {
-	// Latitude between -90 and 90.
-	Latitude *float64 `json:"latitude"`
-	// Longitude between -180 and 180.
-	Longitude *float64 `json:"longitude"`
-	// Non-negative accuracy value. Defaults to `0`.
-	Accuracy *float64 `json:"accuracy"`
-}
-type BrowserNewContextOptionsHttpCredentials struct {
-	Username *string `json:"username"`
-	Password *string `json:"password"`
-}
-type BrowserNewContextOptionsProxy struct {
-	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example
-	// `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128`
-	// is considered an HTTP proxy.
-	Server *string `json:"server"`
-	// Optional comma-separated domains to bypass proxy, for example `".com, chromium.org,
-	// .domain.com"`.
-	Bypass *string `json:"bypass"`
-	// Optional username to use if HTTP proxy requires authentication.
-	Username *string `json:"username"`
-	// Optional password to use if HTTP proxy requires authentication.
-	Password *string `json:"password"`
-}
-type BrowserNewContextOptionsRecordVideo struct {
-	// Path to the directory to put videos into.
-	Dir *string `json:"dir"`
-	// Optional dimensions of the recorded videos. If not specified the size will be equal
-	// to `viewport` scaled down to fit into 800x800. If `viewport` is not configured explicitly
-	// the video size defaults to 800x450. Actual picture of each page will be scaled down
-	// if necessary to fit the specified size.
-	Size *BrowserNewContextOptionsRecordVideoSize `json:"size"`
-}
-type BrowserNewContextOptionsScreen struct {
-	// page width in pixels.
-	Width *int `json:"width"`
-	// page height in pixels.
-	Height *int `json:"height"`
-}
-type BrowserNewContextOptionsStorageState struct {
+type OptionalStorageState struct {
 	// cookies to set for context
-	Cookies []BrowserNewContextOptionsStorageStateCookies `json:"cookies"`
+	Cookies []OptionalCookie `json:"cookies"`
 	// localStorage to set for context
-	Origins []BrowserNewContextOptionsStorageStateOrigins `json:"origins"`
+	Origins []OriginsState `json:"origins"`
 }
-type BrowserNewContextOptionsViewport struct {
-	// page width in pixels.
-	Width *int `json:"width"`
-	// page height in pixels.
-	Height *int `json:"height"`
-}
-type BrowserRecordVideoSize struct {
+type RecordVideoSize struct {
 	// Video frame width.
 	Width *int `json:"width"`
 	// Video frame height.
 	Height *int `json:"height"`
 }
-type BrowserStorageStateCookies struct {
-	Name  *string `json:"name"`
-	Value *string `json:"value"`
-	// domain and path are required
-	Domain *string `json:"domain"`
-	// domain and path are required
-	Path *string `json:"path"`
-	// Unix time in seconds.
-	Expires  *float64 `json:"expires"`
-	HttpOnly *bool    `json:"httpOnly"`
-	Secure   *bool    `json:"secure"`
-	// sameSite flag
-	SameSite *SameSiteAttribute `json:"sameSite"`
-}
-type BrowserStorageStateOrigins struct {
-	Origin       *string                                  `json:"origin"`
-	LocalStorage []BrowserStorageStateOriginsLocalStorage `json:"localStorage"`
-}
-type BrowserNewPageOptionsGeolocation struct {
-	// Latitude between -90 and 90.
-	Latitude *float64 `json:"latitude"`
-	// Longitude between -180 and 180.
-	Longitude *float64 `json:"longitude"`
-	// Non-negative accuracy value. Defaults to `0`.
-	Accuracy *float64 `json:"accuracy"`
-}
-type BrowserNewPageOptionsHttpCredentials struct {
-	Username *string `json:"username"`
-	Password *string `json:"password"`
-}
-type BrowserNewPageOptionsProxy struct {
-	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example
-	// `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128`
-	// is considered an HTTP proxy.
-	Server *string `json:"server"`
-	// Optional comma-separated domains to bypass proxy, for example `".com, chromium.org,
-	// .domain.com"`.
-	Bypass *string `json:"bypass"`
-	// Optional username to use if HTTP proxy requires authentication.
-	Username *string `json:"username"`
-	// Optional password to use if HTTP proxy requires authentication.
-	Password *string `json:"password"`
-}
-type BrowserNewPageOptionsRecordVideo struct {
-	// Path to the directory to put videos into.
-	Dir *string `json:"dir"`
-	// Optional dimensions of the recorded videos. If not specified the size will be equal
-	// to `viewport` scaled down to fit into 800x800. If `viewport` is not configured explicitly
-	// the video size defaults to 800x450. Actual picture of each page will be scaled down
-	// if necessary to fit the specified size.
-	Size *BrowserNewPageOptionsRecordVideoSize `json:"size"`
-}
-type BrowserNewPageOptionsScreen struct {
-	// page width in pixels.
-	Width *int `json:"width"`
-	// page height in pixels.
-	Height *int `json:"height"`
-}
-type BrowserNewPageOptionsStorageState struct {
-	// cookies to set for context
-	Cookies []BrowserNewPageOptionsStorageStateCookies `json:"cookies"`
-	// localStorage to set for context
-	Origins []BrowserNewPageOptionsStorageStateOrigins `json:"origins"`
-}
-type BrowserNewPageOptionsViewport struct {
-	// page width in pixels.
-	Width *int `json:"width"`
-	// page height in pixels.
-	Height *int `json:"height"`
-}
-type BrowserContextAddCookiesOptionsCookies struct {
+type OptionalCookie struct {
 	Name  *string `json:"name"`
 	Value *string `json:"value"`
 	// either url or domain / path are required. Optional.
@@ -3296,314 +3590,4 @@ type BrowserContextAddCookiesOptionsCookies struct {
 	Secure *bool `json:"secure"`
 	// Optional.
 	SameSite *SameSiteAttribute `json:"sameSite"`
-}
-type BrowserContextStorageStateResultCookies struct {
-	Name   *string `json:"name"`
-	Value  *string `json:"value"`
-	Domain *string `json:"domain"`
-	Path   *string `json:"path"`
-	// Unix time in seconds.
-	Expires  *float64           `json:"expires"`
-	HttpOnly *bool              `json:"httpOnly"`
-	Secure   *bool              `json:"secure"`
-	SameSite *SameSiteAttribute `json:"sameSite"`
-}
-type BrowserContextStorageStateResultOrigins struct {
-	Origin       *string                                               `json:"origin"`
-	LocalStorage []BrowserContextStorageStateResultOriginsLocalStorage `json:"localStorage"`
-}
-type BrowserTypeLaunchOptionsProxy struct {
-	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example
-	// `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128`
-	// is considered an HTTP proxy.
-	Server *string `json:"server"`
-	// Optional comma-separated domains to bypass proxy, for example `".com, chromium.org,
-	// .domain.com"`.
-	Bypass *string `json:"bypass"`
-	// Optional username to use if HTTP proxy requires authentication.
-	Username *string `json:"username"`
-	// Optional password to use if HTTP proxy requires authentication.
-	Password *string `json:"password"`
-}
-type BrowserTypeLaunchPersistentContextOptionsGeolocation struct {
-	// Latitude between -90 and 90.
-	Latitude *float64 `json:"latitude"`
-	// Longitude between -180 and 180.
-	Longitude *float64 `json:"longitude"`
-	// Non-negative accuracy value. Defaults to `0`.
-	Accuracy *float64 `json:"accuracy"`
-}
-type BrowserTypeLaunchPersistentContextOptionsHttpCredentials struct {
-	Username *string `json:"username"`
-	Password *string `json:"password"`
-}
-type BrowserTypeLaunchPersistentContextOptionsProxy struct {
-	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example
-	// `http://myproxy.com:3128` or `socks5://myproxy.com:3128`. Short form `myproxy.com:3128`
-	// is considered an HTTP proxy.
-	Server *string `json:"server"`
-	// Optional comma-separated domains to bypass proxy, for example `".com, chromium.org,
-	// .domain.com"`.
-	Bypass *string `json:"bypass"`
-	// Optional username to use if HTTP proxy requires authentication.
-	Username *string `json:"username"`
-	// Optional password to use if HTTP proxy requires authentication.
-	Password *string `json:"password"`
-}
-type BrowserTypeLaunchPersistentContextOptionsRecordVideo struct {
-	// Path to the directory to put videos into.
-	Dir *string `json:"dir"`
-	// Optional dimensions of the recorded videos. If not specified the size will be equal
-	// to `viewport` scaled down to fit into 800x800. If `viewport` is not configured explicitly
-	// the video size defaults to 800x450. Actual picture of each page will be scaled down
-	// if necessary to fit the specified size.
-	Size *BrowserTypeLaunchPersistentContextOptionsRecordVideoSize `json:"size"`
-}
-type BrowserTypeLaunchPersistentContextOptionsScreen struct {
-	// page width in pixels.
-	Width *int `json:"width"`
-	// page height in pixels.
-	Height *int `json:"height"`
-}
-type BrowserTypeLaunchPersistentContextOptionsViewport struct {
-	// page width in pixels.
-	Width *int `json:"width"`
-	// page height in pixels.
-	Height *int `json:"height"`
-}
-type BrowserTypeRecordVideoSize struct {
-	// Video frame width.
-	Width *int `json:"width"`
-	// Video frame height.
-	Height *int `json:"height"`
-}
-type ElementHandleCheckOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type ElementHandleClickOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type ElementHandleDblclickOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type ElementHandleHoverOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type ElementHandleSetCheckedOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type ElementHandleTapOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type ElementHandleUncheckOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type FrameCheckOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type FrameClickOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type FrameDblclickOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type FrameDragAndDropOptionsSourcePosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type FrameDragAndDropOptionsTargetPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type FrameHoverOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type FrameSetCheckedOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type FrameTapOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type FrameUncheckOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type LocatorCheckOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type LocatorClickOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type LocatorDblclickOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type LocatorDragToOptionsSourcePosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type LocatorDragToOptionsTargetPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type LocatorHoverOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type LocatorSetCheckedOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type LocatorTapOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type LocatorUncheckOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type PageCheckOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type PageClickOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type PageDblclickOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type PageDragAndDropOptionsSourcePosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type PageDragAndDropOptionsTargetPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type PageHoverOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type PagePdfOptionsMargin struct {
-	// Top margin, accepts values labeled with units. Defaults to `0`.
-	Top *string `json:"top"`
-	// Right margin, accepts values labeled with units. Defaults to `0`.
-	Right *string `json:"right"`
-	// Bottom margin, accepts values labeled with units. Defaults to `0`.
-	Bottom *string `json:"bottom"`
-	// Left margin, accepts values labeled with units. Defaults to `0`.
-	Left *string `json:"left"`
-}
-type PageScreenshotOptionsClip struct {
-	// x-coordinate of top-left corner of clip area
-	X *float64 `json:"x"`
-	// y-coordinate of top-left corner of clip area
-	Y *float64 `json:"y"`
-	// width of clipping area
-	Width *float64 `json:"width"`
-	// height of clipping area
-	Height *float64 `json:"height"`
-}
-type PageSetCheckedOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type PageTapOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type PageUncheckOptionsPosition struct {
-	X *float64 `json:"x"`
-	Y *float64 `json:"y"`
-}
-type APIRequestContextStorageStateResultOriginsLocalStorage struct {
-	Name  *string `json:"name"`
-	Value *string `json:"value"`
-}
-type BrowserNewContextOptionsRecordVideoSize struct {
-	// Video frame width.
-	Width *int `json:"width"`
-	// Video frame height.
-	Height *int `json:"height"`
-}
-type BrowserNewContextOptionsStorageStateCookies struct {
-	Name  *string `json:"name"`
-	Value *string `json:"value"`
-	// domain and path are required
-	Domain *string `json:"domain"`
-	// domain and path are required
-	Path *string `json:"path"`
-	// Unix time in seconds.
-	Expires  *float64 `json:"expires"`
-	HttpOnly *bool    `json:"httpOnly"`
-	Secure   *bool    `json:"secure"`
-	// sameSite flag
-	SameSite *SameSiteAttribute `json:"sameSite"`
-}
-type BrowserNewContextOptionsStorageStateOrigins struct {
-	Origin       *string                                                   `json:"origin"`
-	LocalStorage []BrowserNewContextOptionsStorageStateOriginsLocalStorage `json:"localStorage"`
-}
-type BrowserStorageStateOriginsLocalStorage struct {
-	Name  *string `json:"name"`
-	Value *string `json:"value"`
-}
-type BrowserNewPageOptionsRecordVideoSize struct {
-	// Video frame width.
-	Width *int `json:"width"`
-	// Video frame height.
-	Height *int `json:"height"`
-}
-type BrowserNewPageOptionsStorageStateCookies struct {
-	Name  *string `json:"name"`
-	Value *string `json:"value"`
-	// domain and path are required
-	Domain *string `json:"domain"`
-	// domain and path are required
-	Path *string `json:"path"`
-	// Unix time in seconds.
-	Expires  *float64 `json:"expires"`
-	HttpOnly *bool    `json:"httpOnly"`
-	Secure   *bool    `json:"secure"`
-	// sameSite flag
-	SameSite *SameSiteAttribute `json:"sameSite"`
-}
-type BrowserNewPageOptionsStorageStateOrigins struct {
-	Origin       *string                                                `json:"origin"`
-	LocalStorage []BrowserNewPageOptionsStorageStateOriginsLocalStorage `json:"localStorage"`
-}
-type BrowserContextStorageStateResultOriginsLocalStorage struct {
-	Name  *string `json:"name"`
-	Value *string `json:"value"`
-}
-type BrowserTypeLaunchPersistentContextOptionsRecordVideoSize struct {
-	// Video frame width.
-	Width *int `json:"width"`
-	// Video frame height.
-	Height *int `json:"height"`
-}
-type BrowserNewContextOptionsStorageStateOriginsLocalStorage struct {
-	Name  *string `json:"name"`
-	Value *string `json:"value"`
-}
-type BrowserNewPageOptionsStorageStateOriginsLocalStorage struct {
-	Name  *string `json:"name"`
-	Value *string `json:"value"`
 }

@@ -118,7 +118,8 @@ func TestWebSocketShouldEmitCloseEvents(t *testing.T) {
 	ws := wsEvent.(playwright.WebSocket)
 	require.Equal(t, ws.URL(), fmt.Sprintf("ws://localhost:%d/ws", wsServer.PORT))
 	if !ws.IsClosed() {
-		ws.WaitForEvent("close")
+		_, err = ws.WaitForEvent("close")
+		require.NoError(t, err)
 	}
 	require.True(t, ws.IsClosed())
 }
@@ -152,7 +153,8 @@ func TestWebSocketShouldEmitFrameEvents(t *testing.T) {
 	require.NoError(t, err)
 	ws := wsEvent.(playwright.WebSocket)
 	if !ws.IsClosed() {
-		ws.WaitForEvent("close")
+		_, err = ws.WaitForEvent("close")
+		require.NoError(t, err)
 	}
 
 	require.Equal(t, sent, [][]byte{[]byte("echo-text")})
@@ -192,7 +194,8 @@ func TestWebSocketShouldEmitBinaryFrameEvents(t *testing.T) {
 	require.NoError(t, err)
 	ws := wsEvent.(playwright.WebSocket)
 	if !ws.IsClosed() {
-		ws.WaitForEvent("close")
+		_, err = ws.WaitForEvent("close")
+		require.NoError(t, err)
 	}
 
 	require.Equal(t, sent, [][]byte{{0, 1, 2, 3, 4}, []byte("echo-bin")})

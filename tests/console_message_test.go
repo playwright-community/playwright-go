@@ -148,8 +148,10 @@ func TestConsoleShouldHaveLocation(t *testing.T) {
 	messageEvent, err := page.ExpectEvent("console", func() error {
 		_, err := page.Goto(server.PREFIX + "/consolelog.html")
 		return err
-	}, func(m playwright.ConsoleMessage) bool {
-		return m.Text() == "yellow"
+	}, playwright.PageWaitForEventOptions{
+		Predicate: func(m playwright.ConsoleMessage) bool {
+			return m.Text() == "yellow"
+		},
 	})
 	require.NoError(t, err)
 	message := messageEvent.(playwright.ConsoleMessage)

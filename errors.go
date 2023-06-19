@@ -11,21 +11,26 @@ func (e *Error) Error() string {
 	return e.Message
 }
 
-// TimeoutError represents a Playwright TimeoutError
-type TimeoutError Error
+func (e *Error) Is(target error) bool {
+	err, ok := target.(*Error)
+	if !ok {
+		return false
+	}
+	if err.Name != e.Name {
+		return false
+	}
+	if e.Name != "Error" {
+		return true // same name and not normal error
+	}
+	return e.Message == err.Message
+}
 
-func (e *TimeoutError) Error() string {
-	return e.Message
+// TimeoutError represents a Playwright TimeoutError
+var TimeoutError = &Error{
+	Name: "TimeoutError",
 }
 
 func parseError(err errorPayload) error {
-	if err.Name == "TimeoutError" {
-		return &TimeoutError{
-			Name:    "TimeoutError",
-			Message: err.Message,
-			Stack:   err.Stack,
-		}
-	}
 	return &Error{
 		Name:    err.Name,
 		Message: err.Message,
