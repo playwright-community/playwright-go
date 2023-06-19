@@ -5,20 +5,22 @@ package playwright
 
 // DeviceDescriptor represents a single device
 type DeviceDescriptor struct {
-	UserAgent          string                            `json:"userAgent"`
-	Viewport           *BrowserNewContextOptionsViewport `json:"viewport"`
-	DeviceScaleFactor  float64                           `json:"deviceScaleFactor"`
-	IsMobile           bool                              `json:"isMobile"`
-	HasTouch           bool                              `json:"hasTouch"`
-	DefaultBrowserType string                            `json:"defaultBrowserType"`
+	UserAgent          string        `json:"userAgent"`
+	Viewport           *ViewportSize `json:"viewport"`
+	DeviceScaleFactor  float64       `json:"deviceScaleFactor"`
+	IsMobile           bool          `json:"isMobile"`
+	HasTouch           bool          `json:"hasTouch"`
+	DefaultBrowserType string        `json:"defaultBrowserType"`
 }
 
 // Playwright represents a Playwright instance
 type Playwright struct {
 	channelOwner
+	utils    *localUtilsImpl
 	Chromium BrowserType
 	Firefox  BrowserType
 	WebKit   BrowserType
+	Request  APIRequest
 	Devices  map[string]*DeviceDescriptor
 }
 
@@ -37,11 +39,13 @@ func newPlaywright(parent *channelOwner, objectType string, guid string, initial
 	for _, dd := range initializer["deviceDescriptors"].([]interface{}) {
 		entry := dd.(map[string]interface{})
 		pw.Devices[entry["name"].(string)] = &DeviceDescriptor{
-			Viewport: &BrowserNewContextOptionsViewport{},
+			Viewport: &ViewportSize{},
 		}
 		remapMapToStruct(entry["descriptor"], pw.Devices[entry["name"].(string)])
 	}
+	pw.utils = fromChannel(initializer["utils"]).(*localUtilsImpl)
 	pw.createChannelOwner(pw, parent, objectType, guid, initializer)
+	pw.Request = newApiRequestImpl(pw)
 	return pw
 }
 

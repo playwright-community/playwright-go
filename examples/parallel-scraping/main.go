@@ -10,7 +10,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
@@ -161,11 +160,11 @@ func main() {
 }
 
 func getAlexaTopDomains() ([]string, error) {
-	resp, err := http.Get("http://s3.amazonaws.com/alexa-static/top-1m.csv.zip")
+	resp, err := http.Get("http://s3-us-west-1.amazonaws.com/umbrella-static/top-1m.csv.zip")
 	if err != nil {
 		return nil, fmt.Errorf("could not get: %w", err)
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("could not read body: %w", err)
 	}

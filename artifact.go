@@ -29,7 +29,7 @@ func (a *artifactImpl) SaveAs(path string) error {
 	if err != nil {
 		return err
 	}
-	stream := streamChannel.(*streamImpl)
+	stream := fromChannel(streamChannel).(*streamImpl)
 	return stream.SaveAs(path)
 }
 

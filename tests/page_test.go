@@ -1,9 +1,7 @@
 package playwright_test
 
 import (
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -47,7 +45,7 @@ func TestPageScreenshot(t *testing.T) {
 	defer AfterEach(t)
 
 	require.NoError(t, page.SetContent("<h1>foobar</h1>"))
-	tmpfile, err := ioutil.TempDir("", "screenshot")
+	tmpfile, err := os.MkdirTemp("", "screenshot")
 	require.NoError(t, err)
 	screenshotPath := filepath.Join(tmpfile, "image.png")
 	screenshot, err := page.Screenshot()
@@ -73,7 +71,7 @@ func TestPagePDF(t *testing.T) {
 		t.Skip("Skipping")
 	}
 	require.NoError(t, page.SetContent("<h1>foobar</h1>"))
-	tmpfile, err := ioutil.TempDir("", "pdf")
+	tmpfile, err := os.MkdirTemp("", "pdf")
 	require.NoError(t, err)
 	screenshotPath := filepath.Join(tmpfile, "image.png")
 	screenshot, err := page.PDF()
@@ -458,8 +456,10 @@ func TestPageWaitForLoadState(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Goto(server.PREFIX + "/one-style.html")
 	require.NoError(t, err)
-	page.WaitForLoadState()
-	page.WaitForLoadState("networkidle")
+	require.NoError(t, page.WaitForLoadState())
+	require.NoError(t, page.WaitForLoadState(playwright.PageWaitForLoadStateOptions{
+		State: playwright.LoadStateNetworkidle,
+	}))
 }
 
 func TestPlaywrightDevices(t *testing.T) {
@@ -493,10 +493,10 @@ func TestPageExpectSelectorTimeout(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	timeoutError := errors.Unwrap(page.Click("foobar", playwright.PageClickOptions{
+	err = page.Click("foobar", playwright.PageClickOptions{
 		Timeout: playwright.Float(500),
-	})).(*playwright.TimeoutError)
-	require.Contains(t, timeoutError.Message, "Timeout 500ms exceeded.")
+	})
+	require.ErrorIs(t, err, playwright.TimeoutError)
 }
 
 func TestPageType(t *testing.T) {
@@ -675,7 +675,7 @@ func TestPageEmulateMedia(t *testing.T) {
 	utils.AssertEval(t, page, "matchMedia('screen').matches", false)
 	utils.AssertEval(t, page, "matchMedia('print').matches", true)
 	require.NoError(t, page.EmulateMedia(playwright.PageEmulateMediaOptions{
-		Media: playwright.MediaNull,
+		Media: playwright.MediaNoOverride,
 	}))
 	utils.AssertEval(t, page, "matchMedia('screen').matches", true)
 	utils.AssertEval(t, page, "matchMedia('print').matches", false)
@@ -796,20 +796,20 @@ func TestPageUnrouteShouldWork(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	intercepted := []int{}
-	handler1 := func(route playwright.Route, request playwright.Request) {
+	handler1 := func(route playwright.Route) {
 		intercepted = append(intercepted, 1)
 		require.NoError(t, route.Continue())
 	}
 	require.NoError(t, page.Route("**/empty.html", handler1))
-	require.NoError(t, page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, page.Route("**/empty.html", func(route playwright.Route) {
 		intercepted = append(intercepted, 2)
 		require.NoError(t, route.Continue())
 	}))
-	require.NoError(t, page.Route("**/empty.html", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, page.Route("**/empty.html", func(route playwright.Route) {
 		intercepted = append(intercepted, 3)
 		require.NoError(t, route.Continue())
 	}))
-	require.NoError(t, page.Route("**/*", func(route playwright.Route, request playwright.Request) {
+	require.NoError(t, page.Route("**/*", func(route playwright.Route) {
 		intercepted = append(intercepted, 4)
 		require.NoError(t, route.Continue())
 	}))
@@ -1013,5 +1013,41 @@ func TestPageWaitForResponse(t *testing.T) {
 
 		require.Nil(t, response)
 		require.EqualError(t, err, "Timeout 500.00ms exceeded.")
+	})
+}
+
+func TestPageWaitForURL(t *testing.T) {
+	t.Run("should work", func(t *testing.T) {
+		BeforeEach(t)
+		defer AfterEach(t)
+		_, err := page.Goto(server.EMPTY_PAGE)
+		require.NoError(t, err)
+		_, err = page.Evaluate("url => window.location.href = url", fmt.Sprintf("%s/grid.html", server.PREFIX))
+		require.NoError(t, err)
+		require.NoError(t, page.WaitForURL("**/grid.html"))
+		require.Contains(t, page.URL(), "grid.html")
+	})
+
+	t.Run("should respect timeout", func(t *testing.T) {
+		BeforeEach(t)
+		defer AfterEach(t)
+		_, err := page.Goto(server.EMPTY_PAGE)
+		require.NoError(t, err)
+		require.Error(t, page.WaitForURL("**/grid.html", playwright.FrameWaitForURLOptions{
+			Timeout: playwright.Float(1000),
+		}), "Timeout 1000.00ms exceeded.")
+	})
+
+	t.Run("should work with commit", func(t *testing.T) {
+		BeforeEach(t)
+		defer AfterEach(t)
+		_, err := page.Goto(server.EMPTY_PAGE)
+		require.NoError(t, err)
+		_, err = page.Evaluate("url => window.location.href = url", fmt.Sprintf("%s/grid.html", server.PREFIX))
+		require.NoError(t, err)
+		require.NoError(t, page.WaitForURL("**/grid.html"), playwright.FrameWaitForURLOptions{
+			WaitUntil: playwright.WaitUntilStateCommit,
+		})
+		require.Contains(t, page.URL(), "grid.html")
 	})
 }

@@ -20,9 +20,9 @@ func main() {
 	}
 	device := pw.Devices["Pixel 5"]
 	context, err := browser.NewContext(playwright.BrowserNewContextOptions{
-		Geolocation: &playwright.BrowserNewContextOptionsGeolocation{
-			Longitude: playwright.Float(12.492507),
-			Latitude:  playwright.Float(41.889938),
+		Geolocation: &playwright.Geolocation{
+			Longitude: 12.492507,
+			Latitude:  41.889938,
 		},
 		Permissions:       []string{"geolocation"},
 		Viewport:          device.Viewport,

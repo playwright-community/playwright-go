@@ -56,7 +56,7 @@ func (t *tracingImpl) doStopChunk(filePath string) error {
 			mode = "compressTrace"
 		}
 	}
-	artifactChannel, err := t.channel.Send("tracingStopChunk", map[string]interface{}{
+	result, err := t.channel.SendReturnAsDict("tracingStopChunk", map[string]interface{}{
 		"mode": mode,
 	})
 	if err != nil {
@@ -66,12 +66,13 @@ func (t *tracingImpl) doStopChunk(filePath string) error {
 	if filePath == "" {
 		return nil
 	}
+	artifactChannel := result.(map[string]interface{})["artifact"]
+	artifact := fromNullableChannel(artifactChannel).(*artifactImpl)
 	// The artifact may be missing if the browser closed while stopping tracing.
-	if artifactChannel == nil {
+	if artifact == nil {
 		return nil
 	}
 	// Save trace to the final local file.
-	artifact := fromChannel(artifactChannel).(*artifactImpl)
 	if err := artifact.SaveAs(filePath); err != nil {
 		return err
 	}

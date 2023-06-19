@@ -2,8 +2,8 @@ package playwright
 
 import (
 	"encoding/base64"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -46,7 +46,7 @@ func (r *routeImpl) Fulfill(options RouteFulfillOptions) error {
 		length = len(body)
 		isBase64 = true
 	} else if options.Path != nil {
-		content, err := ioutil.ReadFile(*options.Path)
+		content, err := os.ReadFile(*options.Path)
 		if err != nil {
 			return err
 		}

@@ -1,16 +1,19 @@
 package playwright
 
 import (
+	"fmt"
+	"path"
 	"reflect"
 	"regexp"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/danwakefield/fnmatch"
 )
 
 type (
-	routeHandler = func(Route, Request)
+	routeHandler = func(Route)
 )
 
 func skipFieldSerialization(val reflect.Value) bool {
@@ -177,7 +180,19 @@ type urlMatcher struct {
 	urlOrPredicate interface{}
 }
 
-func newURLMatcher(urlOrPredicate interface{}) *urlMatcher {
+func newURLMatcher(urlOrPredicate, baseURL interface{}) *urlMatcher {
+	if baseURL != nil {
+		url, ok := urlOrPredicate.(string)
+		if ok && !strings.HasPrefix(url, "*") {
+			base, ok := baseURL.(*string)
+			if ok && base != nil {
+				url = path.Join(*base, url)
+				return &urlMatcher{
+					urlOrPredicate: url,
+				}
+			}
+		}
+	}
 	return &urlMatcher{
 		urlOrPredicate: urlOrPredicate,
 	}
@@ -201,12 +216,31 @@ func (u *urlMatcher) Matches(url string) bool {
 type routeHandlerEntry struct {
 	matcher *urlMatcher
 	handler routeHandler
+	times   int
+	count   int32
 }
 
-func newRouteHandlerEntry(matcher *urlMatcher, handler routeHandler) *routeHandlerEntry {
+func (r *routeHandlerEntry) Hit() {
+	atomic.AddInt32(&r.count, 1)
+}
+
+func (r *routeHandlerEntry) WillExceed() bool {
+	if r.times == 0 {
+		return false
+	}
+	return int(atomic.LoadInt32(&r.count)+1) >= r.times
+}
+
+func newRouteHandlerEntry(matcher *urlMatcher, handler routeHandler, times ...int) *routeHandlerEntry {
+	n := 0
+	if len(times) > 0 {
+		n = times[0]
+	}
 	return &routeHandlerEntry{
 		matcher: matcher,
 		handler: handler,
+		times:   n,
+		count:   0,
 	}
 }
 
@@ -299,39 +333,13 @@ func newTimeoutSettings(parent *timeoutSettings) *timeoutSettings {
 	}
 }
 
-func waitForEvent(emitter EventEmitter, event string, predicate ...interface{}) <-chan interface{} {
-	evChan := make(chan interface{}, 1)
-	removeHandler := make(chan bool, 1)
-	handler := func(ev ...interface{}) {
-		if len(predicate) == 0 {
-			if len(ev) == 1 {
-				evChan <- ev[0]
-			} else {
-				evChan <- nil
-			}
-			removeHandler <- true
-		} else if len(predicate) == 1 {
-			result := reflect.ValueOf(predicate[0]).Call([]reflect.Value{reflect.ValueOf(ev[0])})
-			if result[0].Bool() {
-				evChan <- ev[0]
-				removeHandler <- true
-			}
-		}
-	}
-	go func() {
-		<-removeHandler
-		emitter.RemoveListener(event, handler)
-	}()
-	emitter.On(event, handler)
-	return evChan
-}
-
 // SelectOptionValues is the option struct for ElementHandle.Select() etc.
 type SelectOptionValues struct {
-	Values   *[]string
-	Indexes  *[]int
-	Labels   *[]string
-	Elements *[]ElementHandle
+	ValuesOrLabels *[]string
+	Values         *[]string
+	Indexes        *[]int
+	Labels         *[]string
+	Elements       *[]ElementHandle
 }
 
 func convertSelectOptionSet(values SelectOptionValues) map[string]interface{} {
@@ -341,6 +349,12 @@ func convertSelectOptionSet(values SelectOptionValues) map[string]interface{} {
 	}
 
 	var o []map[string]interface{}
+	if values.ValuesOrLabels != nil {
+		for _, v := range *values.ValuesOrLabels {
+			m := map[string]interface{}{"valueOrLabel": v}
+			o = append(o, m)
+		}
+	}
 	if values.Values != nil {
 		for _, v := range *values.Values {
 			m := map[string]interface{}{"value": v}
@@ -413,4 +427,50 @@ func serializeMapToNameAndValue(headers map[string]string) []map[string]string {
 		})
 	}
 	return serialized
+}
+
+// assignStructFields assigns fields from src to dest,
+//
+//	omitExtra determines whether to omit src's extra fields
+func assignStructFields(dest, src interface{}, omitExtra bool) error {
+	destValue := reflect.ValueOf(dest)
+	if destValue.Kind() != reflect.Ptr || destValue.IsNil() {
+		return fmt.Errorf("dest must be a non-nil pointer")
+	}
+	destValue = destValue.Elem()
+	if destValue.Kind() != reflect.Struct {
+		return fmt.Errorf("dest must be a struct")
+	}
+
+	srcValue := reflect.ValueOf(src)
+	if srcValue.Kind() == reflect.Ptr {
+		srcValue = srcValue.Elem()
+	}
+	if srcValue.Kind() != reflect.Struct {
+		return fmt.Errorf("src must be a struct")
+	}
+
+	for i := 0; i < destValue.NumField(); i++ {
+		destField := destValue.Field(i)
+		destFieldType := destField.Type()
+		destFieldName := destValue.Type().Field(i).Name
+
+		if srcField := srcValue.FieldByName(destFieldName); srcField.IsValid() && srcField.Type() != destFieldType {
+			return fmt.Errorf("mismatched field type for field %s", destFieldName)
+		} else if srcField.IsValid() {
+			destField.Set(srcField)
+		}
+	}
+
+	if !omitExtra {
+		for i := 0; i < srcValue.NumField(); i++ {
+			srcFieldName := srcValue.Type().Field(i).Name
+
+			if destField := destValue.FieldByName(srcFieldName); !destField.IsValid() {
+				return fmt.Errorf("extra field %s in src", srcFieldName)
+			}
+		}
+	}
+
+	return nil
 }

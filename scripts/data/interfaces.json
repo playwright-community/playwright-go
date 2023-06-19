@@ -1,4 +1,96 @@
 {
+	"APIRequest": {
+		"extends": [
+			"EventEmitter"
+		],
+		"NewContext": [
+			"options ...APIRequestNewContextOptions",
+			"(APIRequestContext, error)"
+		]
+	},
+	"APIRequestContext": {
+		"extends": [
+			"EventEmitter"
+		],
+		"Delete": [
+			"url string, options ...APIRequestContextDeleteOptions",
+			"APIResponse, error"
+		],
+		"Dispose": [
+			null,
+			"error"
+		],
+		"Fetch": [
+			"urlOrRequest interface{}, options ...APIRequestContextFetchOptions",
+			"(APIResponse, error)"
+		],
+		"Get": [
+			"url string, options ...APIRequestContextGetOptions",
+			"APIResponse, error"
+		],
+		"Head": [
+			"url string, options ...APIRequestContextHeadOptions",
+			"APIResponse, error"
+		],
+		"Post": [
+			"url string, options ...APIRequestContextPostOptions",
+			"APIResponse, error"
+		],
+		"Put": [
+			"url string, options ...APIRequestContextPutOptions",
+			"APIResponse, error"
+		],
+		"Patch": [
+			"url string, options ...APIRequestContextPatchOptions",
+			"APIResponse, error"
+		],
+		"StorageState": [
+			"path ...string",
+			"*StorageState, error"
+		]
+	},
+	"APIResponse": {
+		"Body": [
+			null,
+			"[]byte, error"
+		],
+		"Dispose": [
+			null,
+			"error"
+		],
+		"Headers": [
+			null,
+			"map[string]string"
+		],
+		"HeadersArray": [
+			null,
+			"HeadersArray"
+		],
+		"JSON": [
+			"v interface{}",
+			"error"
+		],
+		"Ok": [
+			null,
+			"bool"
+		],
+		"Status": [
+			null,
+			"int"
+		],
+		"StatusText": [
+			null,
+			"string"
+		],
+		"Text": [
+			null,
+			"(string, error)"
+		],
+		"URL": [
+			null,
+			"string"
+		]
+	},
 	"BindingCall": {
 		"Call": [
 			"f BindingCallFunction",
@@ -8,6 +100,10 @@
 	"Browser": {
 		"extends": [
 			"EventEmitter"
+		],
+		"BrowserType": [
+			null,
+			"BrowserType"
 		],
 		"Close": [
 			null,
@@ -56,7 +152,7 @@
 			"EventEmitter"
 		],
 		"AddCookies": [
-			"cookies ...BrowserContextAddCookiesOptionsCookies",
+			"cookies ...OptionalCookie",
 			"error"
 		],
 		"AddInitScript": [
@@ -81,10 +177,10 @@
 		],
 		"Cookies": [
 			"urls ...string",
-			"([]*BrowserContextCookiesResult, error)"
+			"([]*Cookie, error)"
 		],
 		"ExpectEvent": [
-			"event string, cb func() error",
+			"event string, cb func() error, options ...BrowserContextWaitForEventOptions",
 			"(interface{}, error)"
 		],
 		"ExposeBinding": [
@@ -124,7 +220,7 @@
 			"error"
 		],
 		"SetGeolocation": [
-			"gelocation *SetGeolocationOptions",
+			"gelocation *Geolocation",
 			"error"
 		],
 		"ResetGeolocation": [
@@ -132,7 +228,7 @@
 			"error"
 		],
 		"Route": [
-			"url interface{}, handler routeHandler",
+			"url interface{}, handler routeHandler, times ...int",
 			"error"
 		],
 		"SetOffline": [
@@ -148,8 +244,8 @@
 			"error"
 		],
 		"WaitForEvent": [
-			"event string, predicate ...interface{}",
-			"interface{}"
+			"event string, options ...BrowserContextWaitForEventOptions",
+			"interface{}, error"
 		],
 		"Tracing": [
 			null,
@@ -661,16 +757,16 @@
 			"error"
 		],
 		"WaitForEvent": [
-			"event string, predicate ...interface{}",
-			"interface{}"
+			"event string, options ...PageWaitForEventOptions",
+			"interface{}, error"
 		],
 		"WaitForFunction": [
 			"expression string, arg interface{}, options ...FrameWaitForFunctionOptions",
 			"(JSHandle, error)"
 		],
 		"WaitForLoadState": [
-			"given ...string",
-			null
+			"options ...PageWaitForLoadStateOptions",
+			"error"
 		],
 		"WaitForNavigation": [
 			"options ...PageWaitForNavigationOptions",
@@ -876,7 +972,7 @@
 			"options ...FrameIsCheckedOptions",
 			"bool, error"
 		],
-		"IsDisabled":[
+		"IsDisabled": [
 			"options ...FrameIsDisabledOptions",
 			"bool, error"
 		],
@@ -1076,23 +1172,23 @@
 			"interface{}, error"
 		],
 		"ExpectConsoleMessage": [
-			"cb func() error",
+			"cb func() error, options ...PageExpectConsoleMessageOptions",
 			"ConsoleMessage, error"
 		],
 		"ExpectDownload": [
-			"cb func() error",
+			"cb func() error, options ...PageExpectDownloadOptions",
 			"Download, error"
 		],
 		"ExpectEvent": [
-			"event string, cb func() error, predicates ...interface{}",
+			"event string, cb func() error, options ...PageWaitForEventOptions",
 			"interface{}, error"
 		],
 		"ExpectFileChooser": [
-			"cb func() error",
+			"cb func() error, options ...PageExpectFileChooserOptions",
 			"FileChooser, error"
 		],
 		"ExpectLoadState": [
-			"state string, cb func() error",
+			"cb func() error, options ...PageWaitForLoadStateOptions",
 			"error"
 		],
 		"ExpectNavigation": [
@@ -1100,19 +1196,19 @@
 			"Response, error"
 		],
 		"ExpectPopup": [
-			"cb func() error",
+			"cb func() error, options ...PageExpectPopupOptions",
 			"Page, error"
 		],
 		"ExpectRequest": [
-			"url interface{}, cb func() error, options ...interface{}",
+			"url interface{}, cb func() error, options ...PageWaitForRequestOptions",
 			"Request, error"
 		],
 		"ExpectResponse": [
-			"url interface{}, cb func() error, options ...interface{}",
+			"url interface{}, cb func() error, options ...PageWaitForResponseOptions",
 			"Response, error"
 		],
 		"ExpectWorker": [
-			"cb func() error",
+			"cb func() error, options ...PageExpectWorkerOptions",
 			"Worker, error"
 		],
 		"ExpectedDialog": [
@@ -1228,7 +1324,7 @@
 			"Response, error"
 		],
 		"Route": [
-			"url interface{}, handler routeHandler",
+			"url interface{}, handler routeHandler, times ...int",
 			"error"
 		],
 		"Screenshot": [
@@ -1300,16 +1396,16 @@
 			"ViewportSize"
 		],
 		"WaitForEvent": [
-			"event string, predicate ...interface{}",
-			"interface{}"
+			"event string, options ...PageWaitForEventOptions",
+			"interface{}, error"
 		],
 		"WaitForFunction": [
 			"expression string, arg interface{}, options ...FrameWaitForFunctionOptions",
 			"(JSHandle, error)"
 		],
 		"WaitForLoadState": [
-			"state ...string",
-			null
+			"options ...PageWaitForLoadStateOptions",
+			"error"
 		],
 		"WaitForNavigation": [
 			"options ...PageWaitForNavigationOptions",
@@ -1538,7 +1634,7 @@
 		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
-			"interface{}"
+			"interface{}, error"
 		]
 	},
 	"Video": {
@@ -1573,7 +1669,7 @@
 		],
 		"WaitForEvent": [
 			"event string, predicate ...interface{}",
-			"interface{}"
+			"interface{}, error"
 		],
 		"ExpectEvent": [
 			"event string, cb func() error, predicates ...interface{}",

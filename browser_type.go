@@ -66,12 +66,13 @@ func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptio
 	overrides := map[string]interface{}{
 		"wsEndpoint": url,
 	}
-	pipe, err := b.channel.Send("connect", overrides, options)
+	localUtils := b.connection.LocalUtils()
+	pipe, err := localUtils.channel.Send("connect", overrides, options)
 	if err != nil {
 		return nil, err
 	}
 	jsonPipe := fromChannel(pipe).(*jsonPipe)
-	connection := newConnection(jsonPipe.Close)
+	connection := newConnection(jsonPipe.Close, localUtils)
 	connection.isRemote = true
 	var browser *browserImpl
 	pipeClosed := func() {
@@ -83,6 +84,7 @@ func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptio
 			context.(*browserContextImpl).onClose()
 		}
 		browser.onClose()
+		connection.cleanup()
 	}
 	jsonPipe.On("closed", pipeClosed)
 	connection.onmessage = func(message map[string]interface{}) error {
@@ -95,7 +97,7 @@ func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptio
 	jsonPipe.On("message", connection.Dispatch)
 	playwright := connection.Start()
 	browser = fromChannel(playwright.initializer["preLaunchedBrowser"]).(*browserImpl)
-	browser.isConnectedOverWebSocket = true
+	browser.shouldCloseConnectionOnClose = true
 	return browser, nil
 }
 func (b *browserTypeImpl) ConnectOverCDP(endpointURL string, options ...BrowserTypeConnectOverCDPOptions) (Browser, error) {

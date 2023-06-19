@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -17,7 +16,7 @@ import (
 )
 
 const (
-	playwrightCliVersion = "1.25.2"
+	playwrightCliVersion = "1.30.0"
 	baseURL              = "https://playwright.azureedge.net/builds/driver"
 )
 
@@ -32,7 +31,7 @@ func NewDriver(options *RunOptions) (*PlaywrightDriver, error) {
 		var err error
 		baseDriverDirectory, err = getDefaultCacheDirectory()
 		if err != nil {
-			return nil, fmt.Errorf("could not get default cache directory: %v", err)
+			return nil, fmt.Errorf("could not get default cache directory: %w", err)
 		}
 	}
 	driverDirectory := filepath.Join(baseDriverDirectory, "ms-playwright-go", playwrightCliVersion)
@@ -48,7 +47,7 @@ func NewDriver(options *RunOptions) (*PlaywrightDriver, error) {
 func getDefaultCacheDirectory() (string, error) {
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
-		return "", fmt.Errorf("could not get user home directory: %v", err)
+		return "", fmt.Errorf("could not get user home directory: %w", err)
 	}
 	switch runtime.GOOS {
 	case "windows":
@@ -119,7 +118,7 @@ func (d *PlaywrightDriver) DownloadDriver() error {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("could not read response body: %w", err)
 	}

@@ -1,5 +1,240 @@
+diff --git a/docs/src/api/class-apirequest.md b/docs/src/api/class-apirequest.md
+index 164de27b2..a19100289 100644
+--- a/docs/src/api/class-apirequest.md
++++ b/docs/src/api/class-apirequest.md
+@@ -45,7 +45,7 @@ Methods like [`method: APIRequestContext.get`] take the base URL into considerat
+ 
+ ### option: APIRequest.newContext.storageState
+ * since: v1.16
+-* langs: js, python
++* langs: js, python, go
+ - `storageState` <[path]|[Object]>
+   - `cookies` <[Array]<[Object]>>
+     - `name` <[string]>
+diff --git a/docs/src/api/class-apirequestcontext.md b/docs/src/api/class-apirequestcontext.md
+index 4a5debdb1..61b673ed5 100644
+--- a/docs/src/api/class-apirequestcontext.md
++++ b/docs/src/api/class-apirequestcontext.md
+@@ -153,18 +153,27 @@ context cookies from the response. The method will automatically follow redirect
+ ### option: APIRequestContext.delete.data = %%-js-python-csharp-fetch-option-data-%%
+ * since: v1.17
+ 
++### option: APIRequestContext.delete.data = %%-go-fetch-option-data-%%
++* since: v1.17
++
+ ### option: APIRequestContext.delete.form = %%-js-python-fetch-option-form-%%
+ * since: v1.17
+ 
+ ### option: APIRequestContext.delete.form = %%-csharp-fetch-option-form-%%
+ * since: v1.17
+ 
++### option: APIRequestContext.delete.form = %%-go-fetch-option-form-%%
++* since: v1.17
++
+ ### option: APIRequestContext.delete.multipart = %%-js-python-fetch-option-multipart-%%
+ * since: v1.17
+ 
+ ### option: APIRequestContext.delete.multipart = %%-csharp-fetch-option-multipart-%%
+ * since: v1.17
+ 
++### option: APIRequestContext.delete.multipart = %%-go-fetch-option-multipart-%%
++* since: v1.17
++
+ ### option: APIRequestContext.delete.timeout = %%-js-python-csharp-fetch-option-timeout-%%
+ * since: v1.16
+ 
+@@ -307,7 +316,7 @@ Target URL or Request to get all parameters from.
+ 
+ ### option: APIRequestContext.fetch.method
+ * since: v1.16
+-* langs: js, python, csharp
++* langs: js, python, csharp, go
+ - `method` <[string]>
+ 
+ If set changes the fetch method (e.g. [PUT](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT) or
+@@ -319,18 +328,27 @@ If set changes the fetch method (e.g. [PUT](https://developer.mozilla.org/en-US/
+ ### option: APIRequestContext.fetch.data = %%-js-python-csharp-fetch-option-data-%%
+ * since: v1.16
+ 
++### option: APIRequestContext.fetch.data = %%-go-fetch-option-data-%%
++* since: v1.16
++
+ ### option: APIRequestContext.fetch.form = %%-js-python-fetch-option-form-%%
+ * since: v1.16
+ 
+ ### option: APIRequestContext.fetch.form = %%-csharp-fetch-option-form-%%
+ * since: v1.16
+ 
++### option: APIRequestContext.fetch.form = %%-go-fetch-option-form-%%
++* since: v1.16
++
+ ### option: APIRequestContext.fetch.multipart = %%-js-python-fetch-option-multipart-%%
+ * since: v1.16
+ 
+ ### option: APIRequestContext.fetch.multipart = %%-csharp-fetch-option-multipart-%%
+ * since: v1.16
+ 
++### option: APIRequestContext.fetch.multipart = %%-go-fetch-option-multipart-%%
++* since: v1.16
++
+ ### option: APIRequestContext.fetch.timeout = %%-js-python-csharp-fetch-option-timeout-%%
+ * since: v1.16
+ 
+@@ -405,18 +423,27 @@ await request.GetAsync("https://example.com/api/getText", new() { Params = param
+ ### option: APIRequestContext.get.data = %%-js-python-csharp-fetch-option-data-%%
+ * since: v1.26
+ 
++### option: APIRequestContext.get.data = %%-go-fetch-option-data-%%
++* since: v1.26
++
+ ### option: APIRequestContext.get.form = %%-js-python-fetch-option-form-%%
+ * since: v1.26
+ 
+ ### option: APIRequestContext.get.form = %%-csharp-fetch-option-form-%%
+ * since: v1.26
+ 
++### option: APIRequestContext.get.form = %%-go-fetch-option-form-%%
++* since: v1.26
++
+ ### option: APIRequestContext.get.multipart = %%-js-python-fetch-option-multipart-%%
+ * since: v1.26
+ 
+ ### option: APIRequestContext.get.multipart = %%-csharp-fetch-option-multipart-%%
+ * since: v1.26
+ 
++### option: APIRequestContext.get.multipart = %%-go-fetch-option-multipart-%%
++* since: v1.26
++
+ ### option: APIRequestContext.get.timeout = %%-js-python-csharp-fetch-option-timeout-%%
+ * since: v1.16
+ 
+@@ -455,18 +482,27 @@ context cookies from the response. The method will automatically follow redirect
+ ### option: APIRequestContext.head.data = %%-js-python-csharp-fetch-option-data-%%
+ * since: v1.26
+ 
++### option: APIRequestContext.head.data = %%-go-fetch-option-data-%%
++* since: v1.26
++
+ ### option: APIRequestContext.head.form = %%-js-python-fetch-option-form-%%
+ * since: v1.26
+ 
+ ### option: APIRequestContext.head.form = %%-csharp-fetch-option-form-%%
+ * since: v1.26
+ 
++### option: APIRequestContext.head.form = %%-go-fetch-option-form-%%
++* since: v1.26
++
+ ### option: APIRequestContext.head.multipart = %%-js-python-fetch-option-multipart-%%
+ * since: v1.26
+ 
+ ### option: APIRequestContext.head.multipart = %%-csharp-fetch-option-multipart-%%
+ * since: v1.26
+ 
++### option: APIRequestContext.head.multipart = %%-go-fetch-option-multipart-%%
++* since: v1.26
++
+ ### option: APIRequestContext.head.timeout = %%-js-python-csharp-fetch-option-timeout-%%
+ * since: v1.16
+ 
+@@ -505,18 +541,27 @@ context cookies from the response. The method will automatically follow redirect
+ ### option: APIRequestContext.patch.data = %%-js-python-csharp-fetch-option-data-%%
+ * since: v1.16
+ 
++### option: APIRequestContext.patch.data = %%-go-fetch-option-data-%%
++* since: v1.16
++
+ ### option: APIRequestContext.patch.form = %%-js-python-fetch-option-form-%%
+ * since: v1.16
+ 
+ ### option: APIRequestContext.patch.form = %%-csharp-fetch-option-form-%%
+ * since: v1.16
+ 
++### option: APIRequestContext.patch.form = %%-go-fetch-option-form-%%
++* since: v1.16
++
+ ### option: APIRequestContext.patch.multipart = %%-js-python-fetch-option-multipart-%%
+ * since: v1.16
+ 
+ ### option: APIRequestContext.patch.multipart = %%-csharp-fetch-option-multipart-%%
+ * since: v1.16
+ 
++### option: APIRequestContext.patch.multipart = %%-go-fetch-option-multipart-%%
++* since: v1.16
++
+ ### option: APIRequestContext.patch.timeout = %%-js-python-csharp-fetch-option-timeout-%%
+ * since: v1.16
+ 
+@@ -685,18 +730,27 @@ await request.PostAsync("https://example.com/api/uploadScript", new() { Multipar
+ ### option: APIRequestContext.post.data = %%-js-python-csharp-fetch-option-data-%%
+ * since: v1.16
+ 
++### option: APIRequestContext.post.data = %%-go-fetch-option-data-%%
++* since: v1.16
++
+ ### option: APIRequestContext.post.form = %%-js-python-fetch-option-form-%%
+ * since: v1.16
+ 
+ ### option: APIRequestContext.post.form = %%-csharp-fetch-option-form-%%
+ * since: v1.16
+ 
++### option: APIRequestContext.post.form = %%-go-fetch-option-form-%%
++* since: v1.16
++
+ ### option: APIRequestContext.post.multipart = %%-js-python-fetch-option-multipart-%%
+ * since: v1.16
+ 
+ ### option: APIRequestContext.post.multipart = %%-csharp-fetch-option-multipart-%%
+ * since: v1.16
+ 
++### option: APIRequestContext.post.multipart = %%-go-fetch-option-multipart-%%
++* since: v1.16
++
+ ### option: APIRequestContext.post.timeout = %%-js-python-csharp-fetch-option-timeout-%%
+ * since: v1.16
+ 
+@@ -735,18 +789,27 @@ context cookies from the response. The method will automatically follow redirect
+ ### option: APIRequestContext.put.data = %%-js-python-csharp-fetch-option-data-%%
+ * since: v1.16
+ 
++### option: APIRequestContext.put.data = %%-go-fetch-option-data-%%
++* since: v1.16
++
+ ### option: APIRequestContext.put.form = %%-js-python-fetch-option-form-%%
+ * since: v1.16
+ 
+ ### option: APIRequestContext.put.form = %%-csharp-fetch-option-form-%%
+ * since: v1.16
+ 
++### option: APIRequestContext.put.form = %%-go-fetch-option-form-%%
++* since: v1.16
++
+ ### option: APIRequestContext.put.multipart = %%-js-python-fetch-option-multipart-%%
+ * since: v1.16
+ 
+ ### option: APIRequestContext.put.multipart = %%-csharp-fetch-option-multipart-%%
+ * since: v1.16
+ 
++### option: APIRequestContext.put.multipart = %%-go-fetch-option-multipart-%%
++* since: v1.16
++
+ ### option: APIRequestContext.put.timeout = %%-js-python-csharp-fetch-option-timeout-%%
+ * since: v1.16
+ 
+diff --git a/docs/src/api/class-apiresponse.md b/docs/src/api/class-apiresponse.md
+index 1297d2d4f..6ecc65ae7 100644
+--- a/docs/src/api/class-apiresponse.md
++++ b/docs/src/api/class-apiresponse.md
+@@ -65,7 +65,7 @@ Headers with multiple entries, such as `Set-Cookie`, appear in the array multipl
+ 
+ ## async method: APIResponse.json
+ * since: v1.16
+-* langs: js, python
++* langs: js, python, go
+ - returns: <[Serializable]>
+ 
+ Returns the JSON representation of response body.
 diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
-index b7da9f113..cf64e6f13 100644
+index fe3edc74b..2e961136c 100644
 --- a/docs/src/api/class-browsercontext.md
 +++ b/docs/src/api/class-browsercontext.md
 @@ -226,6 +226,7 @@ await context.AddCookiesAsync(new[] { cookie1, cookie2 });
@@ -10,11 +245,10 @@ index b7da9f113..cf64e6f13 100644
  - `cookies` <[Array]<[Object]>>
    - `name` <[string]>
    - `value` <[string]>
-@@ -301,7 +302,19 @@ Script to be evaluated in all pages in the browser context.
- * langs: csharp, java
- - `script` <[string]|[path]>
+@@ -305,6 +306,20 @@ Script to be evaluated in all pages in the browser context.
  
--Script to be evaluated in all pages in the browser context.
+ Script to be evaluated in all pages in the browser context.
+ 
 +### param: BrowserContext.addInitScript.script
 +* since: v1.8
 +* langs: go
@@ -28,10 +262,11 @@ index b7da9f113..cf64e6f13 100644
 +- `path` <[string]>
 +
 +Optional Script path to be evaluated in all pages in the browser context.
- 
++
  ### param: BrowserContext.addInitScript.arg
  * since: v1.8
-@@ -1056,7 +1069,7 @@ handler function to route the request.
+ * langs: js
+@@ -1066,7 +1081,7 @@ handler function to route the request.
  
  ### param: BrowserContext.route.handler
  * since: v1.8
@@ -40,22 +275,45 @@ index b7da9f113..cf64e6f13 100644
  - `handler` <[function]\([Route]\)>
  
  handler function to route the request.
-@@ -1276,8 +1289,8 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
- 
- ### param: BrowserContext.unroute.handler
- * since: v1.8
--* langs: js, python
--- `handler` ?<[function]\([Route], [Request]\)>
-+* langs: js, python, go
-+- `handler` <[function]\([Route], [Request]\)>
+@@ -1291,6 +1306,13 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
  
  Optional handler function used to register a routing with [`method: BrowserContext.route`].
  
++### param: BrowserContext.unroute.handler
++* since: v1.8
++* langs: go
++- `handler` <[function]\([Route]\)>
++
++Optional handler function used to register a routing with [`method: BrowserContext.route`].
++
+ ### param: BrowserContext.unroute.handler
+ * since: v1.8
+ * langs: csharp, java
+@@ -1300,7 +1322,8 @@ Optional handler function used to register a routing with [`method: BrowserConte
+ 
+ ## async method: BrowserContext.waitForEvent
+ * since: v1.8
+-* langs: js, python
++* langs: js, python, go
++  - alias-go: ExpectEvent
+   - alias-python: expect_event
+ - returns: <[any]>
+ 
+@@ -1377,7 +1400,8 @@ Receives the [Page] object and resolves to truthy value when the waiting should
+ 
+ ## async method: BrowserContext.waitForEvent2
+ * since: v1.8
+-* langs: python
++* langs: python, go
++  - alias-go: WaitForEvent
+   - alias-python: wait_for_event
+ - returns: <[any]>
+ 
 diff --git a/docs/src/api/class-frame.md b/docs/src/api/class-frame.md
-index 12a4a7d10..78357cab3 100644
+index 49b77defd..6ba16526f 100644
 --- a/docs/src/api/class-frame.md
 +++ b/docs/src/api/class-frame.md
-@@ -1673,7 +1673,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
+@@ -1858,7 +1858,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
  
  Optional argument to pass to [`param: expression`].
  
@@ -64,11 +322,23 @@ index 12a4a7d10..78357cab3 100644
  * since: v1.8
  
  ### option: Frame.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
+@@ -1903,6 +1903,11 @@ await frame.WaitForLoadStateAsync(); // Defaults to LoadState.Load
+ ```
+ 
+ ### param: Frame.waitForLoadState.state = %%-wait-for-load-state-state-%%
++* langs: js, python, csharp, java
++* since: v1.8
++
++### option: Frame.waitForLoadState.state = %%-wait-for-load-state-state-%%
++* langs: go
+ * since: v1.8
+ 
+ ### option: Frame.waitForLoadState.timeout = %%-navigation-timeout-%%
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index 747df5399..7588133d3 100644
+index ef2baf1ab..098414d93 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
-@@ -633,6 +633,20 @@ Script to be evaluated in all pages in the browser context.
+@@ -631,6 +631,20 @@ Script to be evaluated in all pages in the browser context.
  
  Optional argument to pass to [`param: script`] (only supported when passing a function).
  
@@ -89,34 +359,63 @@ index 747df5399..7588133d3 100644
  ## async method: Page.addScriptTag
  * since: v1.8
  - returns: <[ElementHandle]>
-@@ -1145,7 +1159,7 @@ Passing `null` disables CSS media emulation.
+@@ -1223,11 +1237,11 @@ Passing `null` disables CSS media emulation.
  
  ### option: Page.emulateMedia.media
  * since: v1.9
--* langs: csharp
-+* langs: csharp, go
- - `media` <[Media]<"screen"|"print"|"null">>
+-* langs: csharp, python
+-- `media` <[Media]<"screen"|"print"|"null">>
++* langs: csharp, python, go
++- `media` <[Media]<"screen"|"print"|"no-override">>
  
- Changes the CSS media type of the page. The only allowed values are `'Screen'`, `'Print'` and `'Null'`.
-@@ -1161,7 +1175,7 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+-Changes the CSS media type of the page. The only allowed values are `'Screen'`, `'Print'` and `'Null'`.
+-Passing `'Null'` disables CSS media emulation.
++Changes the CSS media type of the page. The only allowed values are `'screen'`, `'print'` and `'no-override'`.
++Passing `'no-override'` disables CSS media emulation.
  
  ### option: Page.emulateMedia.colorScheme
  * since: v1.9
--* langs: csharp
-+* langs: csharp, go
- - `colorScheme` <[ColorScheme]<"light"|"dark"|"no-preference"|"null">>
+@@ -1239,11 +1253,11 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+ 
+ ### option: Page.emulateMedia.colorScheme
+ * since: v1.9
+-* langs: csharp, python
+-- `colorScheme` <[ColorScheme]<"light"|"dark"|"no-preference"|"null">>
++* langs: csharp, python, go
++- `colorScheme` <[ColorScheme]<"light"|"dark"|"no-preference"|"no-override">>
  
  Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing
-@@ -1176,7 +1190,7 @@ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce
+-`'Null'` disables color scheme emulation.
++`'no-override'` disables color scheme emulation.
  
  ### option: Page.emulateMedia.reducedMotion
  * since: v1.12
--* langs: csharp
-+* langs: csharp, go
- - `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"null">>
+@@ -1254,10 +1268,10 @@ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce
  
- Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.
-@@ -2592,7 +2606,7 @@ Paper width, accepts values labeled with units.
+ ### option: Page.emulateMedia.reducedMotion
+ * since: v1.12
+-* langs: csharp, python
+-- `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"null">>
++* langs: csharp, python, go
++- `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"no-override">>
+ 
+-Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.
++Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `no-override` disables reduced motion emulation.
+ 
+ ### option: Page.emulateMedia.forcedColors
+ * since: v1.15
+@@ -1268,8 +1282,8 @@ Emulates `'forced-colors'` media feature, supported values are `'active'` and `'
+ 
+ ### option: Page.emulateMedia.forcedColors
+ * since: v1.15
+-* langs: csharp, python
+-- `forcedColors` <[ForcedColors]<"active"|"none"|"null">>
++* langs: csharp, python, go
++- `forcedColors` <[ForcedColors]<"active"|"none"|"no-override">>
+ 
+ ## async method: Page.evalOnSelector
+ * since: v1.9
+@@ -2770,7 +2784,7 @@ Paper width, accepts values labeled with units.
  
  ### option: Page.pdf.width
  * since: v1.8
@@ -125,7 +424,7 @@ index 747df5399..7588133d3 100644
  - `width` <[string]>
  
  Paper width, accepts values labeled with units.
-@@ -2606,7 +2620,7 @@ Paper height, accepts values labeled with units.
+@@ -2784,7 +2798,7 @@ Paper height, accepts values labeled with units.
  
  ### option: Page.pdf.height
  * since: v1.8
@@ -134,7 +433,7 @@ index 747df5399..7588133d3 100644
  - `height` <[string]>
  
  Paper height, accepts values labeled with units.
-@@ -2624,7 +2638,7 @@ Paper margins, defaults to none.
+@@ -2802,7 +2816,7 @@ Paper margins, defaults to none.
  
  ### option: Page.pdf.margin
  * since: v1.8
@@ -143,25 +442,75 @@ index 747df5399..7588133d3 100644
  - `margin` <[Object]>
    - `top` ?<[string]> Top margin, accepts values labeled with units. Defaults to `0`.
    - `right` ?<[string]> Right margin, accepts values labeled with units. Defaults to `0`.
-@@ -2961,7 +2975,7 @@ When a [`option: baseURL`] via the context options was provided and the passed U
- it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
- ### param: Page.route.handler
- * since: v1.8
--* langs: js, python
-+* langs: js, python, go
- - `handler` <[function]\([Route], [Request]\)>
+@@ -3142,6 +3156,13 @@ it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/We
  
  handler function to route the request.
-@@ -3461,7 +3475,7 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
  
++### param: Page.route.handler
++* since: v1.8
++* langs: go
++- `handler` <[function]\([Route]\)>
++
++handler function to route the request.
++
+ ### param: Page.route.handler
+ * since: v1.8
+ * langs: csharp, java
+@@ -3672,6 +3693,13 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
+ 
+ Optional handler function to route the request.
+ 
++### param: Page.unroute.handler
++* since: v1.8
++* langs: go
++- `handler` ?<[function]\([Route]\)>
++
++Optional handler function to route the request.
++
  ### param: Page.unroute.handler
+ * since: v1.8
+ * langs: csharp, java
+@@ -3707,7 +3735,8 @@ Performs action and waits for the Page to close.
+ 
+ ## async method: Page.waitForConsoleMessage
+ * since: v1.9
+-* langs: java, python, csharp
++* langs: java, python, csharp, go
++  - alias-go: ExpectConsoleMessage
+   - alias-python: expect_console_message
+   - alias-csharp: RunAndWaitForConsoleMessage
+ - returns: <[ConsoleMessage]>
+@@ -3727,7 +3756,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
+ 
+ ## async method: Page.waitForDownload
+ * since: v1.9
+-* langs: java, python, csharp
++* langs: java, python, csharp, go
++  - alias-go: ExpectDownload
+   - alias-python: expect_download
+   - alias-csharp: RunAndWaitForDownload
+ - returns: <[Download]>
+@@ -3747,7 +3777,8 @@ Receives the [Download] object and resolves to truthy value when the waiting sho
+ 
+ ## async method: Page.waitForEvent
  * since: v1.8
 -* langs: js, python
 +* langs: js, python, go
- - `handler` ?<[function]\([Route], [Request]\)>
++  - alias-go: ExpectEvent
+   - alias-python: expect_event
+ - returns: <[any]>
  
- Optional handler function to route the request.
-@@ -3732,7 +3746,7 @@ Shortcut for main frame's [`method: Frame.waitForFunction`].
+@@ -3790,7 +3821,8 @@ Either a predicate that receives an event or an options object. Optional.
+ 
+ ## async method: Page.waitForFileChooser
+ * since: v1.9
+-* langs: java, python, csharp
++* langs: java, python, csharp, go
++  - alias-go: ExpectFileChooser
+   - alias-python: expect_file_chooser
+   - alias-csharp: RunAndWaitForFileChooser
+ - returns: <[FileChooser]>
+@@ -3934,7 +3966,7 @@ await page.WaitForFunctionAsync("selector => !!document.querySelector(selector)"
  
  Optional argument to pass to [`param: expression`].
  
@@ -170,44 +519,99 @@ index 747df5399..7588133d3 100644
  * since: v1.8
  
  ### option: Page.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
+@@ -4024,6 +4056,11 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
+ ```
+ 
+ ### param: Page.waitForLoadState.state = %%-wait-for-load-state-state-%%
++* langs: js, python, csharp, java
++* since: v1.8
++
++### option: Page.waitForLoadState.state = %%-wait-for-load-state-state-%%
++* langs: go
+ * since: v1.8
+ 
+ ### option: Page.waitForLoadState.timeout = %%-navigation-timeout-%%
+@@ -4102,7 +4139,8 @@ a navigation.
+ 
+ ## async method: Page.waitForPopup
+ * since: v1.9
+-* langs: java, python, csharp
++* langs: java, python, csharp, go
++  - alias-go: ExpectPopup
+   - alias-python: expect_popup
+   - alias-csharp: RunAndWaitForPopup
+ - returns: <[Page]>
+@@ -4556,7 +4594,8 @@ await page.WaitForURLAsync("**/target.html");
+ 
+ ## async method: Page.waitForWebSocket
+ * since: v1.9
+-* langs: java, python, csharp
++* langs: java, python, csharp, go
++  - alias-go: ExpectWebSocket
+   - alias-python: expect_websocket
+   - alias-csharp: RunAndWaitForWebSocket
+ - returns: <[WebSocket]>
+@@ -4576,7 +4615,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
+ 
+ ## async method: Page.waitForWorker
+ * since: v1.9
+-* langs: java, python, csharp
++* langs: java, python, csharp, go
++  - alias-go: ExpectWorker
+   - alias-python: expect_worker
+   - alias-csharp: RunAndWaitForWorker
+ - returns: <[Worker]>
+@@ -4607,7 +4647,8 @@ This does not contain ServiceWorkers
+ 
+ ## async method: Page.waitForEvent2
+ * since: v1.8
+-* langs: python
++* langs: python, go
++  - alias-go: WaitForEvent
+   - alias-python: wait_for_event
+ - returns: <[any]>
+ 
 diff --git a/docs/src/api/class-route.md b/docs/src/api/class-route.md
-index 139d7e95f..98067e19c 100644
+index 9999aac53..430d7637b 100644
 --- a/docs/src/api/class-route.md
 +++ b/docs/src/api/class-route.md
-@@ -112,10 +112,18 @@ If set changes the request method (e.g. GET or POST)
+@@ -121,7 +121,7 @@ If set changes the post data of request.
  
  ### option: Route.continue.postData
  * since: v1.8
-+* langs: js
+-* langs: java
++* langs: java, go
  - `postData` <[string]|[Buffer]>
  
- If set changes the post data of request
+ If set changes the post data of request.
+@@ -404,7 +404,7 @@ If set changes the post data of request.
  
-+### option: Route.continue.postData
-+* since: v1.8
-+* langs: go
-+- `postData` <[any]>
-+
-+If set changes the post data of request
-+
- ### option: Route.continue.headers
- * since: v1.8
- - `headers` <[Object]<[string], [string]>>
-@@ -483,6 +491,13 @@ If set, equals to setting `Content-Type` response header.
+ ### option: Route.fallback.postData
+ * since: v1.23
+-* langs: java
++* langs: java, go
+ - `postData` <[string]|[Buffer]>
  
- Response body.
+ If set changes the post data of request.
+@@ -504,7 +504,7 @@ and `content-type` header will be set to `application/json` if not explicitly se
+ set to `application/octet-stream` if not explicitly set.
  
-+### option: Route.fulfill.body
-+* since: v1.8
-+* langs: go
-+- `body` <[any]>
-+
-+Response body.
-+
+ ### option: Route.fetch.postData
+-* langs: java
++* langs: java, go
+ * since: v1.29
+ - `postData` <[string]|[Buffer]>
+ 
+@@ -617,7 +617,7 @@ If set, equals to setting `Content-Type` response header.
+ 
  ### option: Route.fulfill.body
  * since: v1.8
- * langs: csharp, java
-@@ -506,12 +521,14 @@ is resolved relative to the current working directory.
+-* langs: js, python
++* langs: js, python, go
+ - `body` <[string]|[Buffer]>
+ 
+ Response body.
+@@ -652,12 +652,14 @@ is resolved relative to the current working directory.
  
  ### option: Route.fulfill.response
  * since: v1.15
@@ -223,10 +627,10 @@ index 139d7e95f..98067e19c 100644
  
  A request to be routed.
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index f97622067..89054d002 100644
+index a58da7d77..83ffb2855 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
-@@ -148,8 +148,8 @@ Defaults to `'visible'`. Can be either:
+@@ -145,8 +145,8 @@ Defaults to `'visible'`. Can be either:
  * `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or `visibility:hidden`.
    This is opposite to the `'visible'` option.
  
@@ -237,7 +641,7 @@ index f97622067..89054d002 100644
  - `polling` <[float]|"raf">
  
  If [`option: polling`] is `'raf'`, then [`param: expression`] is constantly executed in `requestAnimationFrame`
-@@ -170,14 +170,14 @@ If `true`, Playwright does not pass its own configurations args and only uses th
+@@ -167,14 +167,14 @@ If `true`, Playwright does not pass its own configurations args and only uses th
  array is given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
  
  ## csharp-java-browser-option-ignoredefaultargs
@@ -254,7 +658,7 @@ index f97622067..89054d002 100644
  - `ignoreAllDefaultArgs` <[boolean]>
  
  If `true`, Playwright does not pass its own configurations args and only uses the ones from [`option: args`].
-@@ -196,7 +196,7 @@ Dangerous option; use with care. Defaults to `false`.
+@@ -193,7 +193,7 @@ Dangerous option; use with care. Defaults to `false`.
  Network proxy settings.
  
  ## csharp-java-browser-option-env
@@ -263,7 +667,7 @@ index f97622067..89054d002 100644
  - `env` <[Object]<[string], [string]>>
  
  Specify environment variables that will be visible to the browser. Defaults to `process.env`.
-@@ -208,7 +208,7 @@ Specify environment variables that will be visible to the browser. Defaults to `
+@@ -205,7 +205,7 @@ Specify environment variables that will be visible to the browser. Defaults to `
  Specify environment variables that will be visible to the browser. Defaults to `process.env`.
  
  ## js-python-context-option-storage-state
@@ -272,7 +676,7 @@ index f97622067..89054d002 100644
  - `storageState` <[path]|[Object]>
    - `cookies` <[Array]<[Object]>> cookies to set for context
      - `name` <[string]>
-@@ -236,7 +236,7 @@ Populates context with given storage state. This option can be used to initializ
+@@ -233,7 +233,7 @@ Populates context with given storage state. This option can be used to initializ
  obtained via [`method: BrowserContext.storageState`].
  
  ## csharp-java-context-option-storage-state-path
@@ -281,7 +685,95 @@ index f97622067..89054d002 100644
  - `storageStatePath` <[path]>
  
  Populates context with given storage state. This option can be used to initialize context with logged-in information
-@@ -436,7 +436,7 @@ Function to be evaluated in the worker context.
+@@ -310,7 +310,7 @@ Target URL.
+ Query parameters to be sent with the URL.
+ 
+ ## csharp-fetch-option-params
+-* langs: csharp
++* langs: csharp, go
+ - `params` <[Object]<[string], [Serializable]>>
+ 
+ Query parameters to be sent with the URL.
+@@ -322,19 +322,19 @@ Query parameters to be sent with the URL.
+ Optional request parameters.
+ 
+ ## js-python-csharp-fetch-option-headers
+-* langs: js, python, csharp
++* langs: js, python, csharp, go
+ - `headers` <[Object]<[string], [string]>>
+ 
+ Allows to set HTTP headers.
+ 
+ ## js-python-csharp-fetch-option-timeout
+-* langs: js, python, csharp
++* langs: js, python, csharp, go
+ - `timeout` <[float]>
+ 
+ Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+ 
+ ## js-python-csharp-fetch-option-failonstatuscode
+-* langs: js, python, csharp
++* langs: js, python, csharp, go
+ - `failOnStatusCode` <[boolean]>
+ 
+ Whether to throw on response codes other than 2xx and 3xx. By default response object is returned
+@@ -358,6 +358,14 @@ unless explicitly provided.
+ 
+ An instance of [FormData] can be created via [`method: APIRequestContext.createFormData`].
+ 
++## go-fetch-option-form
++* langs: go
++- `form` <[any]>
++
++Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent as
++this request body. If this parameter is specified `content-type` header will be set to `application/x-www-form-urlencoded`
++unless explicitly provided.
++
+ ## js-python-fetch-option-multipart
+ * langs: js, python
+ - `multipart` <[Object]<[string], [string]|[float]|[boolean]|[ReadStream]|[Object]>>
+@@ -381,6 +389,15 @@ or as file-like object containing file name, mime-type and its content.
+ 
+ An instance of [FormData] can be created via [`method: APIRequestContext.createFormData`].
+ 
++## go-fetch-option-multipart
++* langs: go
++- `multipart` <[any]>
++
++Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as
++this request body. If this parameter is specified `content-type` header will be set to `multipart/form-data`
++unless explicitly provided. File values can be passed either as [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream)
++or as file-like object containing file name, mime-type and its content.
++
+ ## js-python-csharp-fetch-option-data
+ * langs: js, python, csharp
+ - `data` <[string]|[Buffer]|[Serializable]>
+@@ -389,14 +406,22 @@ Allows to set post data of the request. If the data parameter is an object, it w
+ and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type` header will be
+ set to `application/octet-stream` if not explicitly set.
+ 
++## go-fetch-option-data
++* langs: go
++- `data` <[any]>
++
++Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
++and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type` header will be
++set to `application/octet-stream` if not explicitly set.
++
+ ## js-python-csharp-fetch-option-ignorehttpserrors
+-* langs: js, python, csharp
++* langs: js, python, csharp, go
+ - `ignoreHTTPSErrors` <[boolean]>
+ 
+ Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
+ 
+ ## js-python-csharp-fetch-option-maxredirects
+-* langs: js, python, csharp
++* langs: js, python, csharp, go
+ - `maxRedirects` <[int]>
+ 
+ Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is exceeded.
+@@ -439,7 +464,7 @@ Function to be evaluated in the worker context.
  Function to be evaluated in the worker context.
  
  ## python-context-option-viewport
@@ -290,7 +782,7 @@ index f97622067..89054d002 100644
  - `viewport` <[null]|[Object]>
    - `width` <[int]> page width in pixels.
    - `height` <[int]> page height in pixels.
-@@ -444,7 +444,7 @@ Function to be evaluated in the worker context.
+@@ -447,7 +472,7 @@ Function to be evaluated in the worker context.
  Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport.
  
  ## python-context-option-no-viewport
@@ -299,7 +791,50 @@ index f97622067..89054d002 100644
  - `noViewport` <[boolean]>
  
  Does not enforce fixed viewport, allows resizing window in the headed mode.
-@@ -573,7 +573,7 @@ specified, the HAR is not recorded. Make sure to await [`method: BrowserContext.
+@@ -527,11 +552,11 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+ [`method: Page.emulateMedia`] for more details. Passing `null` resets emulation to system defaults. Defaults to `'light'`.
+ 
+ ## context-option-colorscheme-csharp-python
+-* langs: csharp, python
+-- `colorScheme` <[ColorScheme]<"light"|"dark"|"no-preference"|"null">>
++* langs: csharp, python, go
++- `colorScheme` <[ColorScheme]<"light"|"dark"|"no-preference"|"no-override">>
+ 
+ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
+-[`method: Page.emulateMedia`] for more details. Passing `'null'` resets emulation to system defaults. Defaults to `'light'`.
++[`method: Page.emulateMedia`] for more details. Passing `'no-override'` resets emulation to system defaults. Defaults to `'light'`.
+ 
+ ## context-option-reducedMotion
+ * langs: js, java
+@@ -540,10 +565,10 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See [`method: Page.emulateMedia`] for more details. Passing `null` resets emulation to system defaults. Defaults to `'no-preference'`.
+ 
+ ## context-option-reducedMotion-csharp-python
+-* langs: csharp, python
+-- `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"null">>
++* langs: csharp, python, go
++- `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"no-override">>
+ 
+-Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See [`method: Page.emulateMedia`] for more details. Passing `'null'` resets emulation to system defaults. Defaults to `'no-preference'`.
++Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See [`method: Page.emulateMedia`] for more details. Passing `'no-override'` resets emulation to system defaults. Defaults to `'no-preference'`.
+ 
+ ## context-option-forcedColors
+ * langs: js, java
+@@ -552,10 +577,10 @@ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce
+ Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See [`method: Page.emulateMedia`] for more details. Passing `null` resets emulation to system defaults. Defaults to `'none'`.
+ 
+ ## context-option-forcedColors-csharp-python
+-* langs: csharp, python
+-- `forcedColors` <[ForcedColors]<"active"|"none"|"null">>
++* langs: csharp, python, go
++- `forcedColors` <[ForcedColors]<"active"|"none"|"no-override">>
+ 
+-Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See [`method: Page.emulateMedia`] for more details. Passing `'null'` resets emulation to system defaults. Defaults to `'none'`.
++Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See [`method: Page.emulateMedia`] for more details. Passing `'no-override'` resets emulation to system defaults. Defaults to `'none'`.
+ 
+ ## context-option-logger
+ * langs: js
+@@ -590,7 +615,7 @@ specified, the HAR is not recorded. Make sure to await [`method: BrowserContext.
  saved.
  
  ## context-option-recordhar-path
@@ -308,7 +843,7 @@ index f97622067..89054d002 100644
    - alias-python: record_har_path
  - `recordHarPath` <[path]>
  
-@@ -582,7 +582,7 @@ specified HAR file on the filesystem. If not specified, the HAR is not recorded.
+@@ -599,33 +624,33 @@ specified HAR file on the filesystem. If not specified, the HAR is not recorded.
  call [`method: BrowserContext.close`] for the HAR to be saved.
  
  ## context-option-recordhar-omit-content
@@ -317,7 +852,28 @@ index f97622067..89054d002 100644
    - alias-python: record_har_omit_content
  - `recordHarOmitContent` ?<[boolean]>
  
-@@ -608,7 +608,7 @@ When set to `minimal`, only record information necessary for routing from HAR. T
+ Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
+ 
+ ## context-option-recordhar-content
+-* langs: csharp, java, python
++* langs: csharp, java, python, go
+   - alias-python: record_har_content
+ - `recordHarContent` ?<[HarContentPolicy]<"omit"|"embed"|"attach">>
+ 
+ Optional setting to control resource content management. If `omit` is specified, content is not persisted. If `attach` is specified, resources are persisted as separate files and all of these files are archived along with the HAR file. Defaults to `embed`, which stores content inline the HAR file as per HAR specification.
+ 
+ ## context-option-recordhar-mode
+-* langs: csharp, java, python
++* langs: csharp, java, python, go
+   - alias-python: record_har_mode
+ - `recordHarMode` ?<[HarMode]<"full"|"minimal">>
+ 
+ When set to `minimal`, only record information necessary for routing from HAR. This omits sizes, timing, page, cookies, security and other types of HAR information that are not used when replaying from HAR. Defaults to `full`.
+ 
+ ## context-option-recordhar-url-filter
+-* langs: csharp, java, python
++* langs: csharp, java, python, go
+   - alias-python: record_har_url_filter
  - `recordHarUrlFilter` ?<[string]|[RegExp]>
  
  ## context-option-recordvideo
@@ -326,7 +882,16 @@ index f97622067..89054d002 100644
  - `recordVideo` <[Object]>
    - `dir` <[path]> Path to the directory to put videos into.
    - `size` ?<[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
-@@ -894,7 +894,7 @@ Firefox user preferences. Learn more about the Firefox user preferences at
+@@ -767,7 +792,7 @@ only the first option matching one of the passed options is selected. Optional.
+ Receives the event data and resolves to truthy value when the waiting should resolve.
+ 
+ ## wait-for-event-timeout
+-* langs: csharp, java, python
++* langs: csharp, java, python, go
+ - `timeout` <[float]>
+ 
+ Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+@@ -917,7 +942,7 @@ Firefox user preferences. Learn more about the Firefox user preferences at
  [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
  
  ## csharp-java-browser-option-firefoxuserprefs
@@ -335,22 +900,7 @@ index f97622067..89054d002 100644
  - `firefoxUserPrefs` <[Object]<[string], [any]>>
  
  Firefox user preferences. Learn more about the Firefox user preferences at
-@@ -947,12 +947,14 @@ Slows down Playwright operations by the specified amount of milliseconds. Useful
- - %%-browser-option-tracesdir-%%
- 
- ## locator-option-has-text
-+* langs: js, python, csharp, go
- - `hasText` <[string]|[RegExp]>
- 
- Matches elements containing specified text somewhere inside, possibly in a child or a descendant element. When passed a [string], matching is case-insensitive and searches for a substring.
- For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
- 
- ## locator-option-has
-+* langs: js, python, csharp, go
- - `has` <[Locator]>
- 
- Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer one.
-@@ -1006,6 +1008,7 @@ saved to the disk.
+@@ -1029,6 +1054,7 @@ saved to the disk.
  Specify screenshot type, defaults to `png`.
  
  ## screenshot-option-mask
@@ -360,10 +910,10 @@ index f97622067..89054d002 100644
  Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with
 diff --git a/utils/doclint/generateGoApi.js b/utils/doclint/generateGoApi.js
 new file mode 100644
-index 000000000..1c30b40e9
+index 000000000..6b3cfa844
 --- /dev/null
 +++ b/utils/doclint/generateGoApi.js
-@@ -0,0 +1,765 @@
+@@ -0,0 +1,821 @@
 +/**
 + * Copyright (c) Microsoft Corporation.
 + *
@@ -404,6 +954,8 @@ index 000000000..1c30b40e9
 +let documentation;
 +/** @type {Map<string, string>} */
 +let classNameMap;
++/** @type {Map<string, string>} */
++let shortNameMap = new Map();
 +
 +{
 +  const typesDir = process.argv[2] || path.join(__dirname, 'generate_types', 'go');
@@ -444,8 +996,60 @@ index 000000000..1c30b40e9
 +  classNameMap.set('URL', 'string');
 +  classNameMap.set('RegExp', 'Regex');
 +
++  // map some types that keep the name short
++  shortNameMap.set('HttpCredentials', 'HttpCredentials')
++  shortNameMap.set('Proxy', 'Proxy')
++  shortNameMap.set('APIRequestContextStorageState', 'StorageState')
++  shortNameMap.set('BrowserContextStorageState', 'StorageState')
++  shortNameMap.set('APIRequestNewContextOptionsStorageState', 'StorageState')
++  shortNameMap.set('APIRequestNewContextStorageState', 'StorageState')
++  shortNameMap.set('BrowserNewContextOptionsStorageState', 'OptionalStorageState')
++  shortNameMap.set('BrowserNewPageOptionsStorageState', 'OptionalStorageState')
++  shortNameMap.set('OptionalStorageStateOrigins', 'OriginsState')
++  shortNameMap.set('RecordVideo', 'RecordVideo')
++  shortNameMap.set('Screen', 'ScreenSize')
++  shortNameMap.set('Viewport', 'ViewportSize')
++  shortNameMap.set('PageViewportSizeResult', 'ViewportSize')
++  shortNameMap.set('BrowserNewContextOptionsGeolocation', 'Geolocation')
++  shortNameMap.set('BrowserNewPageOptionsGeolocation', 'Geolocation')
++  shortNameMap.set('BrowserTypeLaunchPersistentContextOptionsGeolocation', 'Geolocation')
++  shortNameMap.set('OptionalStorageStateCookies', 'OptionalCookie')
++  shortNameMap.set('BrowserContextAddCookiesOptionsCookies', 'OptionalCookie')
++  shortNameMap.set('BrowserContextCookies', 'Cookie')
++  shortNameMap.set('Position', 'Position')
++  shortNameMap.set('SourcePosition', 'Position')
++  shortNameMap.set('TargetPosition', 'Position')
++  shortNameMap.set('Margin', 'Margin')
++  shortNameMap.set('HeadersArray', 'NameValue')
++  shortNameMap.set('PageScreenshotOptionsClip', 'Rect')
++
 +  // this are types that we don't explicility render even if we get the specs
-+  const ignoredTypes = ['TimeoutException'];
++  const ignoredTypes = [
++    'TimeoutException',
++    'APIRequestStorageState',
++    'APIRequestContextStorageStateResult',
++    'APIResponseHeadersArrayResult',
++    'BrowserGeolocation',
++    'BrowserStorageState',
++    'BrowserContextGeolocation',
++    'BrowserContextStorageStateResult',
++    'BrowserContextCookiesResult',
++    'BrowserTypeGeolocation',
++    'Cookie',
++    'ElementHandleBoundingBoxResult',
++    'Geolocation',
++    'HttpCredentials',
++    'LocatorBoundingBoxResult',
++    'NameValue',
++    'OriginsState',
++    'PageClip',
++    'PageViewportSizeResult',
++    'Rect',
++    'RequestHeadersArrayResult',
++    'ResponseHeadersArrayResult',
++    'StorageState',
++    'ViewportSize'
++  ];
 +
 +  /**
 +   * @param {string} file
@@ -494,7 +1098,7 @@ index 000000000..1c30b40e9
 +  }
 +
 +  additionalTypes.forEach((type, name) => {
-+    if (name.startsWith("Android") || !type.properties?.length)
++    if (name.startsWith("Android") || name.startsWith("Electron") || ignoredTypes.includes(name) || !type.properties?.length)
 +      return
 +    const out = []
 +    let ownDocumentation = documentedResults.get(name);
@@ -641,12 +1245,12 @@ index 000000000..1c30b40e9
 +        const text = member.spec
 +        if (text.length > 0) {
 +          text.forEach(line => {
-+            let words = line.text.split(' ');
++            let words = line.text.replace(/↵/g, ' ').split(' ');
 +            let lines = [];
 +            let lineText = "";
 +            for (let i = 0; i < words.length; i++) {
 +              lineText += ' ' + words[i];
-+              if (lineText.length >= 80) {
++              if (lineText.length >= maxDocumentationColumnWidth) {
 +                lines.push(lineText);
 +                lineText = '';
 +              }
@@ -693,7 +1297,10 @@ index 000000000..1c30b40e9
 +  if (!enumName && member) {
 +    if (member.kind === 'method' || member.kind === 'property') {
 +      // this should be easy to name... let's call it the same as the argument (eternal optimist)
-+      let probableName = `${parent.name}${translateMemberName(``, name, null)}`;
++      let memberName = `${translateMemberName(``, name, null)}`;
++      let probableName = `${parent.name}${memberName}`;
++      let shortName = shortNameMap.get(`${probableName}`) ? shortNameMap.get(`${probableName}`) : shortNameMap.get(`${memberName}`);
++      probableName = shortName ? shortName : probableName
 +      let probableType = additionalTypes.get(probableName);
 +      if (probableType) {
 +        // compare it with what?
@@ -798,7 +1405,7 @@ index 000000000..1c30b40e9
 +
 +  type = type || typeResolve(member.type);
 +
-+  const optionsStructName = `${parent.name}${makeFirstCharUpperCase(member.name)}Options`
++  const optionsStructName = `${parent.name}${makeFirstCharUpperCase(member.alias)}Options`
 +  let optionsStructMembers = member.argsArray.find(a => a.name === "options")?.type.properties || []
 +  if (!optionsStructMembers.length)
 +    optionsStructMembers = member.argsArray.filter(a => (!a.required || a.langs.only?.includes("go")))
@@ -1016,7 +1623,7 @@ index 000000000..1c30b40e9
 +    }
 +
 +    if (type.expression === '[string]|[Buffer]')
-+      return `[]byte`; // TODO: make sure we implement extension methods for this!
++      return `interface{}`; // TODO: make sure we implement extension methods for this!
 +    else if (type.expression === '[string]|[float]'
 +      || type.expression === '[string]|[float]|[boolean]') {
 +      console.warn(`${type.name} should be a 'string', but was a ${type.expression}`);
@@ -1098,11 +1705,10 @@ index 000000000..1c30b40e9
 +      // this is an Action
 +      return `func(${argsList})`;
 +    } else {
-+      let returnType = translateType(type.returnType, parent, generateNameCallback);
++      let returnType = removePointer(translateType(type.returnType, parent, generateNameCallback));
 +      if (returnType == null)
 +        throw new Error('Unexpected null as return type.');
-+
-+      return `Func<${argsList}, ${returnType}>`;
++      return `func(${argsList}) ${returnType}`;
 +    }
 +  }
 +

@@ -10,7 +10,7 @@ import (
 	"os"
 	"sync"
 
-	"gopkg.in/square/go-jose.v2/json"
+	"github.com/go-jose/go-jose/v3/json"
 )
 
 type pipeTransport struct {
@@ -37,8 +37,8 @@ func (t *pipeTransport) Start() error {
 			return fmt.Errorf("could not decode json: %w", err)
 		}
 		if os.Getenv("DEBUGP") != "" {
-			fmt.Print("RECV>")
-			if err := json.NewEncoder(os.Stderr).Encode(msg); err != nil {
+			fmt.Fprint(os.Stdout, "\x1b[33mRECV>\x1b[0m\n")
+			if err := json.NewEncoder(os.Stdout).Encode(msg); err != nil {
 				log.Printf("could not encode json: %v", err)
 			}
 		}
@@ -55,12 +55,12 @@ type errorPayload struct {
 type message struct {
 	ID     int                    `json:"id"`
 	GUID   string                 `json:"guid"`
-	Method string                 `json:"method"`
-	Params map[string]interface{} `json:"params"`
-	Result interface{}            `json:"result"`
+	Method string                 `json:"method,omitempty"`
+	Params map[string]interface{} `json:"params,omitempty"`
+	Result interface{}            `json:"result,omitempty"`
 	Error  *struct {
 		Error errorPayload `json:"error"`
-	} `json:"error"`
+	} `json:"error,omitempty"`
 }
 
 func (t *pipeTransport) Send(message map[string]interface{}) error {
@@ -69,8 +69,8 @@ func (t *pipeTransport) Send(message map[string]interface{}) error {
 		return fmt.Errorf("could not marshal json: %w", err)
 	}
 	if os.Getenv("DEBUGP") != "" {
-		fmt.Print("SEND>")
-		if err := json.NewEncoder(os.Stderr).Encode(message); err != nil {
+		fmt.Fprint(os.Stdout, "\x1b[32mSEND>\x1b[0m\n")
+		if err := json.NewEncoder(os.Stdout).Encode(message); err != nil {
 			log.Printf("could not encode json: %v", err)
 		}
 	}

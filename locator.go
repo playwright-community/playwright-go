@@ -35,7 +35,7 @@ func newLocator(frame *frameImpl, selector string, options ...LocatorLocatorOpti
 			if err != nil {
 				return nil, fmt.Errorf("could not marshal selector '%s'", has.selector)
 			}
-			selector += " >> has=" + string(marshaledSelector)
+			selector += " >> internal:has=" + string(marshaledSelector)
 		}
 	}
 
