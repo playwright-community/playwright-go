@@ -169,13 +169,6 @@ func remapMapToStruct(inputMap interface{}, outStruct interface{}) {
 	remapValue(reflect.ValueOf(inputMap), reflect.ValueOf(outStruct).Elem())
 }
 
-func isFunctionBody(expression string) bool {
-	expression = strings.TrimSpace(expression)
-	return strings.HasPrefix(expression, "function") ||
-		strings.HasPrefix(expression, "async ") ||
-		strings.Contains(expression, "=> ")
-}
-
 type urlMatcher struct {
 	urlOrPredicate interface{}
 }

@@ -304,19 +304,11 @@ func (f *frameImpl) QuerySelectorAll(selector string) ([]ElementHandle, error) {
 
 func (f *frameImpl) Evaluate(expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
-	forceExpression := false
-	if !isFunctionBody(expression) {
-		forceExpression = true
-	}
 	if len(options) == 1 {
 		arg = options[0]
-	} else if len(options) == 2 {
-		arg = options[0]
-		forceExpression = options[1].(bool)
 	}
 	result, err := f.channel.Send("evaluateExpression", map[string]interface{}{
 		"expression": expression,
-		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
 	})
 	if err != nil {
@@ -327,20 +319,12 @@ func (f *frameImpl) Evaluate(expression string, options ...interface{}) (interfa
 
 func (f *frameImpl) EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
-	forceExpression := false
-	if !isFunctionBody(expression) {
-		forceExpression = true
-	}
 	if len(options) == 1 {
 		arg = options[0]
-	} else if len(options) == 2 {
-		arg = options[0]
-		forceExpression = options[1].(bool)
 	}
 	result, err := f.channel.Send("evalOnSelector", map[string]interface{}{
 		"selector":   selector,
 		"expression": expression,
-		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
 	})
 	if err != nil {
@@ -351,20 +335,12 @@ func (f *frameImpl) EvalOnSelector(selector string, expression string, options .
 
 func (f *frameImpl) EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
-	forceExpression := false
-	if !isFunctionBody(expression) {
-		forceExpression = true
-	}
 	if len(options) == 1 {
 		arg = options[0]
-	} else if len(options) == 2 {
-		arg = options[0]
-		forceExpression = options[1].(bool)
 	}
 	result, err := f.channel.Send("evalOnSelectorAll", map[string]interface{}{
 		"selector":   selector,
 		"expression": expression,
-		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
 	})
 	if err != nil {
@@ -375,19 +351,11 @@ func (f *frameImpl) EvalOnSelectorAll(selector string, expression string, option
 
 func (f *frameImpl) EvaluateHandle(expression string, options ...interface{}) (JSHandle, error) {
 	var arg interface{}
-	forceExpression := false
-	if !isFunctionBody(expression) {
-		forceExpression = true
-	}
 	if len(options) == 1 {
 		arg = options[0]
-	} else if len(options) == 2 {
-		arg = options[0]
-		forceExpression = options[1].(bool)
 	}
 	result, err := f.channel.Send("evaluateExpressionHandle", map[string]interface{}{
 		"expression": expression,
-		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
 	})
 	if err != nil {
@@ -518,13 +486,8 @@ func (f *frameImpl) WaitForFunction(expression string, arg interface{}, options 
 	if len(options) == 1 {
 		option = options[0]
 	}
-	forceExpression := false
-	if !isFunctionBody(expression) {
-		forceExpression = true
-	}
 	result, err := f.channel.Send("waitForFunction", map[string]interface{}{
 		"expression": expression,
-		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
 		"timeout":    option.Timeout,
 		"polling":    option.Polling,
