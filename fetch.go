@@ -359,6 +359,20 @@ func (r *apiResponseImpl) fetchUid() string {
 	return r.initializer["fetchUid"].(string)
 }
 
+func (r *apiResponseImpl) fetchLog() ([]string, error) {
+	ret, err := r.request.channel.Send("fetchLog", map[string]interface{}{
+		"fetchUid": r.fetchUid(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	result := make([]string, len(ret.([]interface{})))
+	for i, v := range ret.([]interface{}) {
+		result[i] = v.(string)
+	}
+	return result, nil
+}
+
 func newAPIResponse(context *apiRequestContextImpl, initializer map[string]interface{}) *apiResponseImpl {
 	return &apiResponseImpl{
 		request:     context,

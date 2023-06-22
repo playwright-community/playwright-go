@@ -527,6 +527,40 @@ func (l *locatorImpl) withElement(
 	return result, nil
 }
 
+func (l *locatorImpl) expect(expression string, options frameExpectOptions) (frameExpectResult, error) {
+	overrides := map[string]interface{}{
+		"selector":   l.selector,
+		"expression": expression,
+	}
+	if options.ExpectedValue != nil {
+		overrides["expectedValue"] = serializeArgument(options.ExpectedValue)
+		options.ExpectedValue = nil
+	}
+	response, err := l.frame.channel.SendReturnAsDict("expect", options, overrides)
+	if err != nil {
+		return frameExpectResult{}, err
+	}
+	var (
+		received interface{}
+		matches  bool
+		log      []string
+	)
+	responseMap := response.(map[string]interface{})
+
+	if v, ok := responseMap["received"]; ok {
+		received = parseResult(v)
+	}
+	if v, ok := responseMap["matches"]; ok {
+		matches = v.(bool)
+	}
+	if v, ok := responseMap["log"]; ok {
+		for _, l := range v.([]interface{}) {
+			log = append(log, l.(string))
+		}
+	}
+	return frameExpectResult{Received: received, Matches: matches, Log: log}, nil
+}
+
 func getByRoleSelector(role AriaRole, options ...LocatorGetByRoleOptions) string {
 	props := make(map[string]string)
 	if len(options) == 1 {

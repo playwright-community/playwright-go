@@ -20,10 +20,6 @@ const IGNORE_CLASSES = [
   "RequestOptions",
   "WebSocketFrame",
   "FormData",
-  "PlaywrightAssertions",
-  "APIResponseAssertions",
-  "LocatorAssertions",
-  "PageAssertions",
   "SnapshotAssertions"
 ]
 const shouldIgnoreClass = ({ name }) =>

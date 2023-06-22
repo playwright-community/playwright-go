@@ -283,6 +283,10 @@ func (p *pageImpl) Workers() []Worker {
 	return p.workers
 }
 
+func (p *pageImpl) Request() APIRequestContext {
+	return p.Context().Request()
+}
+
 func (p *pageImpl) Screenshot(options ...PageScreenshotOptions) ([]byte, error) {
 	var path *string
 	if len(options) > 0 {

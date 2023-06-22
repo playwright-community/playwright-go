@@ -250,7 +250,9 @@ func TestShouldContextRouteFromHarMatchingTheMethodAndFollowingRedirects(t *test
 	require.NoError(t, err)
 	require.Equal(t, "foo", data)
 	// HAR contains a POST for the css file that should not be used.
-	// TODO add "expect have css" test
+	locator, err := page.Locator("body")
+	require.NoError(t, err)
+	require.NoError(t, expect.Locator(locator).ToHaveCSS("background-color", "rgb(255, 0, 0)"))
 }
 
 func TestShouldPageRouteFromHarMatchingTheMethodAndFollowingRedirects(t *testing.T) {
@@ -265,7 +267,9 @@ func TestShouldPageRouteFromHarMatchingTheMethodAndFollowingRedirects(t *testing
 	require.NoError(t, err)
 	require.Equal(t, "foo", data)
 	// HAR contains a POST for the css file that should not be used.
-	// TODO add "expect have css" test
+	locator, err := page.Locator("body")
+	require.NoError(t, err)
+	require.NoError(t, expect.Locator(locator).ToHaveCSS("background-color", "rgb(255, 0, 0)"))
 }
 
 func TestFallbackContinueShouldContinueWhenNotFoundInHar(t *testing.T) {
@@ -277,7 +281,9 @@ func TestFallbackContinueShouldContinueWhenNotFoundInHar(t *testing.T) {
 	require.NoError(t, err)
 	_, err = page.Goto(server.PREFIX + "/one-style.html")
 	require.NoError(t, err)
-	// TODO add "expect have css" test
+	locator, err := page.Locator("body")
+	require.NoError(t, err)
+	require.NoError(t, expect.Locator(locator).ToHaveCSS("background-color", "rgb(255, 192, 203)"))
 }
 
 func TestByDefaultShouldAbortRequestsNotFoundInHar(t *testing.T) {
@@ -308,7 +314,9 @@ func TestFallbackContinueShouldContinueRequestsOnBadHar(t *testing.T) {
 	require.NoError(t, err)
 	_, err = page.Goto(server.PREFIX + "/one-style.html")
 	require.NoError(t, err)
-	// TODO add "expect have css" test
+	locator, err := page.Locator("body")
+	require.NoError(t, err)
+	require.NoError(t, expect.Locator(locator).ToHaveCSS("background-color", "rgb(255, 192, 203)"))
 }
 
 func TestShouldOnlyHandleRequestsMatchingUrlFilter(t *testing.T) {
@@ -334,7 +342,9 @@ func TestShouldOnlyHandleRequestsMatchingUrlFilter(t *testing.T) {
 	data, err := page.Evaluate(`window.value`)
 	require.NoError(t, err)
 	require.Equal(t, "foo", data)
-	// TODO add "expect have css" test
+	locator, err := page.Locator("body")
+	require.NoError(t, err)
+	require.NoError(t, expect.Locator(locator).ToHaveCSS("background-color", "rgba(0, 0, 0, 0)"))
 }
 
 func TestShouldOnlyHandleRequestsMatchingUrlFilterNoFallback(t *testing.T) {
@@ -359,7 +369,9 @@ func TestShouldOnlyHandleRequestsMatchingUrlFilterNoFallback(t *testing.T) {
 	data, err := page.Evaluate(`window.value`)
 	require.NoError(t, err)
 	require.Equal(t, "foo", data)
-	// TODO add "expect have css" test
+	locator, err := page.Locator("body")
+	require.NoError(t, err)
+	require.NoError(t, expect.Locator(locator).ToHaveCSS("background-color", "rgba(0, 0, 0, 0)"))
 }
 
 func TestShouldOnlyHandleRequestsMatchingUrlFilterNoFallbackPage(t *testing.T) {
@@ -384,7 +396,9 @@ func TestShouldOnlyHandleRequestsMatchingUrlFilterNoFallbackPage(t *testing.T) {
 	data, err := page.Evaluate(`window.value`)
 	require.NoError(t, err)
 	require.Equal(t, "foo", data)
-	// TODO add "expect have css" test
+	locator, err := page.Locator("body")
+	require.NoError(t, err)
+	require.NoError(t, expect.Locator(locator).ToHaveCSS("background-color", "rgba(0, 0, 0, 0)"))
 }
 
 func TestShouldSupportRegexFilter(t *testing.T) {
@@ -400,7 +414,9 @@ func TestShouldSupportRegexFilter(t *testing.T) {
 	data, err := page.Evaluate(`window.value`)
 	require.NoError(t, err)
 	require.Equal(t, "foo", data)
-	// TODO add "expect have css" test
+	locator, err := page.Locator("body")
+	require.NoError(t, err)
+	require.NoError(t, expect.Locator(locator).ToHaveCSS("background-color", "rgb(255, 0, 0)"))
 }
 
 func TestShouldGoBackToRedirectedNavigation(t *testing.T) {
@@ -678,7 +694,9 @@ func TestShouldProduceExtractedZip(t *testing.T) {
 	body, err := response.Body()
 	require.NoError(t, err)
 	require.Contains(t, string(body), "hello, world!")
-	// TODO  expect to have css
+	locator, err := page2.Locator("body")
+	require.NoError(t, err)
+	require.NoError(t, expect.Locator(locator).ToHaveCSS("background-color", "rgb(255, 192, 203)"))
 }
 
 func TestShouldUpdateHarZipForContext(t *testing.T) {
@@ -711,7 +729,9 @@ func TestShouldUpdateHarZipForContext(t *testing.T) {
 	body, err := response.Body()
 	require.NoError(t, err)
 	require.Contains(t, string(body), "hello, world!")
-	// TODO  expect to have css
+	locator, err := page2.Locator("body")
+	require.NoError(t, err)
+	require.NoError(t, expect.Locator(locator).ToHaveCSS("background-color", "rgb(255, 192, 203)"))
 }
 
 func TestShouldUpdateHarZipForPage(t *testing.T) {
@@ -744,7 +764,9 @@ func TestShouldUpdateHarZipForPage(t *testing.T) {
 	body, err := response.Body()
 	require.NoError(t, err)
 	require.Contains(t, string(body), "hello, world!")
-	// TODO  expect to have css
+	locator, err := page2.Locator("body")
+	require.NoError(t, err)
+	require.NoError(t, expect.Locator(locator).ToHaveCSS("background-color", "rgb(255, 192, 203)"))
 }
 
 func TestShouldUpdateHarZipForPageWithDifferentOptions(t *testing.T) {
@@ -779,7 +801,9 @@ func TestShouldUpdateHarZipForPageWithDifferentOptions(t *testing.T) {
 	body, err := response.Body()
 	require.NoError(t, err)
 	require.Contains(t, string(body), "hello, world!")
-	// TODO  expect to have css
+	locator, err := page2.Locator("body")
+	require.NoError(t, err)
+	require.NoError(t, expect.Locator(locator).ToHaveCSS("background-color", "rgb(255, 192, 203)"))
 }
 
 func TestShouldUpdateExtractedHarZipForPage(t *testing.T) {
@@ -816,5 +840,7 @@ func TestShouldUpdateExtractedHarZipForPage(t *testing.T) {
 	body, err := response.Body()
 	require.NoError(t, err)
 	require.Contains(t, string(body), "hello, world!")
-	// TODO  expect to have css
+	locator, err := page2.Locator("body")
+	require.NoError(t, err)
+	require.NoError(t, expect.Locator(locator).ToHaveCSS("background-color", "rgb(255, 192, 203)"))
 }
