@@ -60,7 +60,7 @@ func (w *waiter) WithTimeout(timeout float64) *waiter {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	if w.waitFunc != nil {
-		w.reject(fmt.Errorf("waiter: set timeout before WaitForEvent"))
+		w.reject(fmt.Errorf("waiter: please set timeout before WaitForEvent"))
 		return w
 	}
 	w.timeout = timeout

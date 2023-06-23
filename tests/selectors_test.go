@@ -26,8 +26,10 @@ func TestSelectorsRegisterShouldWork(t *testing.T) {
 	selectorName := "tag_" + browserName
 	selector2Name := "tag2_" + browserName
 
+	err := pw.Selectors.Register(selectorName, playwright.SelectorsRegisterOptions{})
+	require.ErrorContains(t, err, `Either source or path should be specified`)
 	// Register one engine before creating context.
-	err := pw.Selectors.Register(selectorName, playwright.SelectorsRegisterOptions{
+	err = pw.Selectors.Register(selectorName, playwright.SelectorsRegisterOptions{
 		Script: &tagSelector,
 	})
 	require.NoError(t, err)
@@ -70,4 +72,44 @@ func TestSelectorsRegisterShouldWork(t *testing.T) {
 	require.ErrorContains(t, err, `Unknown engine "tAG" while parsing selector tAG=DIV`)
 
 	require.NoError(t, context2.Close())
+}
+
+func TestSelectorsShouldUseDataTestIdInStrictErrors(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	pw.Selectors.SetTestIdAttribute("data-custom-id")
+	require.NoError(t, page.SetContent(`
+	<div>
+		<div></div>
+		<div>
+			<div></div>
+			<div></div>
+		</div>
+	</div>
+	<div>
+		<div class='foo bar:0' data-custom-id='One'>
+		</div>
+		<div class='foo bar:1' data-custom-id='Two'>
+		</div>
+	</div>`))
+	locator, err := page.Locator(".foo")
+	require.NoError(t, err)
+	err = locator.Hover(playwright.PageHoverOptions{Timeout: playwright.Float(200)})
+	require.ErrorContains(t, err, "strict mode violation")
+	require.ErrorContains(t, err, `<div class="foo bar:0`)
+	require.ErrorContains(t, err, `<div class="foo bar:1`)
+	require.ErrorContains(t, err, `aka getByTestId('One')`)
+}
+
+func TestSelectorsShouldWorkWithPath(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, pw.Selectors.Register("foo", playwright.SelectorsRegisterOptions{
+		Path: playwright.String(Asset("sectionselectorengine.js")),
+	}))
+	require.NoError(t, page.SetContent(`<section></section>`))
+
+	ret, err := page.EvalOnSelector("foo=whatever", `e => e.nodeName`)
+	require.NoError(t, err)
+	require.Equal(t, "SECTION", ret)
 }

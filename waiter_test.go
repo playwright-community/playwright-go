@@ -120,3 +120,25 @@ func TestWaiterRejectOnEventWithPredicate(t *testing.T) {
 	require.Equal(t, 0, emitter.ListenerCount(testEventNameReject))
 	require.Nil(t, result)
 }
+
+func TestWaiterReturnErrorWhenMisuse(t *testing.T) {
+	emitter := &eventEmitter{}
+	emitter.initEventEmitter()
+	waiter := newWaiter()
+	waiter.WaitForEvent(emitter, testEventNameFoobar, nil)
+	waiter.WithTimeout(500)
+	_, err := waiter.Wait()
+	require.ErrorContains(t, err, "please set timeout before WaitForEvent")
+
+	waiter = newWaiter()
+	waiter.WaitForEvent(emitter, testEventNameFoobar, nil)
+	waiter.WaitForEvent(emitter, testEventNameFoo, nil)
+	_, err = waiter.Wait()
+	require.ErrorContains(t, err, "WaitForEvent can only be called once")
+
+	waiter = newWaiter()
+	waiter.WaitForEvent(emitter, testEventNameFoobar, nil)
+	waiter.RejectOnEvent(emitter, testEventNameFoo, nil)
+	_, err = waiter.Wait()
+	require.ErrorContains(t, err, "call RejectOnEvent before WaitForEvent")
+}

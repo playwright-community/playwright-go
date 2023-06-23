@@ -259,3 +259,51 @@ func TestRequestPostData(t *testing.T) {
 	})`, server.PREFIX+"/foobar")
 	require.NoError(t, err)
 }
+
+func TestFulfillWithURLOverride(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.Route("**/*.html", func(route playwright.Route) {
+		response, err := route.Fetch(playwright.RouteFetchOptions{
+			URL: playwright.String(server.PREFIX + "/one-style.html"),
+		})
+		require.NoError(t, err)
+		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
+			Response: response,
+			Headers: map[string]string{
+				"Foo": "bar",
+			},
+		}))
+	}))
+	response, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.True(t, response.Ok())
+	body, err := response.Text()
+	require.NoError(t, err)
+	require.Contains(t, body, "one-style.css")
+	headers, err := response.AllHeaders()
+	require.NoError(t, err)
+	require.Equal(t, "bar", headers["foo"])
+}
+
+func TestResponseSecurityDetails(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	if isWebKit {
+		t.Skip("https://github.com/microsoft/playwright/issues/6759")
+	}
+	tlsServer := newTestServer(true)
+	defer tlsServer.testServer.Close()
+	page2, err := browser.NewPage(playwright.BrowserNewContextOptions{
+		IgnoreHttpsErrors: playwright.Bool(true),
+	})
+	require.NoError(t, err)
+	response, err := page2.Goto(tlsServer.EMPTY_PAGE)
+	require.NoError(t, err)
+	response.Finished()
+	securityDetails, err := response.SecurityDetails()
+	require.NoError(t, err)
+
+	require.Equal(t, "TLS 1.3", securityDetails.Protocol)
+	require.NoError(t, page2.Close())
+}

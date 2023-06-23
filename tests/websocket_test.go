@@ -219,6 +219,11 @@ func TestWebSocketShouldRejectWaitForEventOnCloseAndError(t *testing.T) {
 	_, err = ws.ExpectEvent("framesent", func() error {
 		_, err := page.Evaluate(`window.ws.close()`)
 		return err
+	}, playwright.WebSocketWaitForEventOptions{
+		Timeout: playwright.Float(1000),
+		Predicate: func(ev interface{}) bool {
+			return true
+		},
 	})
 	require.ErrorContains(t, err, "websocket closed")
 }

@@ -387,3 +387,28 @@ func TestShouldSerializeNullValuesInJson(t *testing.T) {
 	require.Equal(t, `{"foo": null}`, text)
 	require.NoError(t, request.Dispose())
 }
+
+func TestShouldSupportMultipartFormData(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	server.SetRoute("/empty.html", func(w http.ResponseWriter, r *http.Request) {
+		_, err := io.ReadAll(r.Body)
+		require.NoError(t, err)
+		require.Equal(t, "POST", r.Method)
+		require.Contains(t, r.Header.Get("content-type"), "multipart")
+		w.WriteHeader(200)
+	})
+
+	_, err := context.Request().Post(server.EMPTY_PAGE, playwright.APIRequestContextPostOptions{
+		Multipart: map[string]interface{}{
+			"firstName": "John",
+			"lastName":  "Doe",
+			"file": map[string]interface{}{
+				"name":     "f.js",
+				"mimeType": "text/javascript",
+				"buffer":   []byte("var x = 10;\r\n;console.log(x);"),
+			},
+		},
+	})
+	require.NoError(t, err)
+}
