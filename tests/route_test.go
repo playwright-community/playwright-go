@@ -268,11 +268,11 @@ func TestFulfillWithURLOverride(t *testing.T) {
 			URL: playwright.String(server.PREFIX + "/one-style.html"),
 		})
 		require.NoError(t, err)
+		headers := response.Headers() // require for webkit on linux
+		headers["foo"] = "bar"
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
 			Response: response,
-			Headers: map[string]string{
-				"Foo": "bar",
-			},
+			Headers:  headers,
 		}))
 	}))
 	response, err := page.Goto(server.EMPTY_PAGE)

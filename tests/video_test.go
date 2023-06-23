@@ -28,7 +28,7 @@ func TestVideoShouldWork(t *testing.T) {
 	require.NoError(t, err)
 	_, err = page.Reload()
 	require.NoError(t, err)
-	page.WaitForTimeout(1000) // make sure video has some data
+	page.WaitForTimeout(500) // make sure video has some data
 	require.NoError(t, context.Close())
 
 	path, err := page.Video().Path()
@@ -69,7 +69,7 @@ func TestVideo(t *testing.T) {
 		path, err := video.Path()
 		require.NoError(t, err)
 		require.Contains(t, path, recordVideoDir)
-		page.WaitForTimeout(1000)
+		page.WaitForTimeout(500)
 		require.NoError(t, page.Context().Close())
 	})
 
@@ -87,7 +87,7 @@ func TestVideo(t *testing.T) {
 		defer AfterEach(t)
 		_, err := page.Goto(server.PREFIX + "/grid.html")
 		require.NoError(t, err)
-		page.WaitForTimeout(1000)
+		page.WaitForTimeout(500)
 		require.NoError(t, page.Close())
 		video := page.Video()
 		require.NotNil(t, video)
@@ -113,7 +113,7 @@ func TestVideo(t *testing.T) {
 		require.NoError(t, err)
 		video := page.Video()
 		require.NotNil(t, video)
-		page.WaitForTimeout(1000)
+		page.WaitForTimeout(500)
 		require.NoError(t, page.Close())
 		require.NoError(t, video.Delete())
 		path, err := video.Path()
@@ -162,7 +162,7 @@ func TestVideo(t *testing.T) {
 		path, err := video.Path()
 		require.NoError(t, err)
 		require.Contains(t, path, tmpDir)
-		page.WaitForTimeout(1000)
+		page.WaitForTimeout(500)
 		require.NoError(t, context.Close())
 		require.FileExists(t, path)
 	})
@@ -187,7 +187,7 @@ func TestVideo(t *testing.T) {
 		require.NoError(t, err)
 		_, err = page.Goto(server.PREFIX + "/grid.html")
 		require.NoError(t, err)
-		page.WaitForTimeout(1000)
+		page.WaitForTimeout(500)
 		video := page.Video()
 		_, err = video.Path()
 		require.ErrorContains(t, err, "Path is not available when connecting remotely")
