@@ -204,6 +204,20 @@ type Browser interface {
 	// **NOTE** CDP Sessions are only supported on Chromium-based browsers.
 	// Returns the newly created browser session.
 	NewBrowserCDPSession() (CDPSession, error)
+	// **NOTE** This API controls
+	// [Chromium Tracing](https://www.chromium.org/developers/how-tos/trace-event-profiling-tool) which is a low-level
+	// chromium-specific debugging tool. API to control [Playwright Tracing](../trace-viewer) could be found
+	// [here](./class-tracing).
+	// You can use Browser.startTracing`] and [`method: Browser.stopTracing() to create a trace file that can be
+	// opened in Chrome DevTools performance panel.
+	// **Usage**
+	StartTracing(options ...BrowserStartTracingOptions) error
+	// **NOTE** This API controls
+	// [Chromium Tracing](https://www.chromium.org/developers/how-tos/trace-event-profiling-tool) which is a low-level
+	// chromium-specific debugging tool. API to control [Playwright Tracing](../trace-viewer) could be found
+	// [here](./class-tracing).
+	// Returns the buffer with trace data.
+	StopTracing() ([]byte, error)
 	// Returns the browser version.
 	Version() string
 }

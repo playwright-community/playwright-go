@@ -246,6 +246,47 @@ index b46565f0a..bf9e2535c 100644
  - returns: <[APIResponseAssertions]>
  
  Makes the assertion check for the opposite condition. For example, this code tests that the response status is not successful:
+diff --git a/docs/src/api/class-browser.md b/docs/src/api/class-browser.md
+index bb516be61..4ce1d6a0b 100644
+--- a/docs/src/api/class-browser.md
++++ b/docs/src/api/class-browser.md
+@@ -287,7 +287,7 @@ testing frameworks should explicitly create [`method: Browser.newContext`] follo
+ 
+ ## async method: Browser.startTracing
+ * since: v1.11
+-* langs: java, js, python
++* langs: java, js, python, go
+ 
+ :::note
+ This API controls [Chromium Tracing](https://www.chromium.org/developers/how-tos/trace-event-profiling-tool) which is a low-level chromium-specific debugging tool. API to control [Playwright Tracing](../trace-viewer) could be found [here](./class-tracing).
+@@ -325,10 +325,18 @@ browser.stop_tracing()
+ 
+ ### param: Browser.startTracing.page
+ * since: v1.11
++* langs: js, java, python, csharp
+ - `page` ?<[Page]>
+ 
+ Optional, if specified, tracing includes screenshots of the given page.
+ 
++### option: Browser.startTracing.page
++* since: v1.11
++* langs: go
++- `page` <[Page]>
++
++Optional, if specified, tracing includes screenshots of the given page.
++
+ ### option: Browser.startTracing.path
+ * since: v1.11
+ - `path` <[path]>
+@@ -349,7 +357,7 @@ specify custom categories to use instead of default.
+ 
+ ## async method: Browser.stopTracing
+ * since: v1.11
+-* langs: java, js, python
++* langs: java, js, python, go
+ - returns: <[Buffer]>
+ 
+ :::note
 diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
 index fe3edc74b..4724d280a 100644
 --- a/docs/src/api/class-browsercontext.md

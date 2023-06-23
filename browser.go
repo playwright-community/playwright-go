@@ -1,6 +1,7 @@
 package playwright
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -130,6 +131,32 @@ func (b *browserImpl) Close() error {
 
 func (b *browserImpl) Version() string {
 	return b.initializer["version"].(string)
+}
+
+func (b *browserImpl) StartTracing(options ...BrowserStartTracingOptions) error {
+	overrides := map[string]interface{}{}
+	option := BrowserStartTracingOptions{}
+	if len(options) == 1 {
+		option = options[0]
+	}
+	if option.Page != nil {
+		overrides["page"] = option.Page.(*pageImpl).channel
+		option.Page = nil
+	}
+	_, err := b.channel.Send("startTracing", option, overrides)
+	return err
+}
+
+func (b *browserImpl) StopTracing() ([]byte, error) {
+	data, err := b.channel.Send("stopTracing")
+	if err != nil {
+		return nil, err
+	}
+	binary, err := base64.StdEncoding.DecodeString(data.(string))
+	if err != nil {
+		return nil, fmt.Errorf("could not decode base64 :%w", err)
+	}
+	return binary, nil
 }
 
 func (b *browserImpl) onClose() {

@@ -143,6 +143,14 @@
 			null,
 			"(CDPSession, error)"
 		],
+		"StartTracing": [
+			"options ...BrowserStartTracingOptions",
+			"error"
+		],
+		"StopTracing": [
+			null,
+			"[]byte, error"
+		],
 		"Version": [
 			null,
 			"string"

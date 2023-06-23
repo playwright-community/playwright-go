@@ -527,6 +527,16 @@ type BrowserNewPageOptions struct {
 	// disables the fixed viewport.
 	Viewport *ViewportSize `json:"viewport"`
 }
+type BrowserStartTracingOptions struct {
+	// specify custom categories to use instead of default.
+	Categories []string `json:"categories"`
+	// Optional, if specified, tracing includes screenshots of the given page.
+	Page Page `json:"page"`
+	// A path to write the trace file to.
+	Path *string `json:"path"`
+	// captures screenshots in the trace.
+	Screenshots *bool `json:"screenshots"`
+}
 type BrowserContextAddCookiesOptions struct {
 	Cookies []OptionalCookie `json:"cookies"`
 }
