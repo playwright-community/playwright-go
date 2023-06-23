@@ -20,7 +20,9 @@ const transformReturnParameters = (input) => {
  * @param {string} comment
  */
 const writeComment = (comment) => {
-  comment = comment.replace(/\[`method: (.*)`\]/g, "$1()")
+  comment = comment.replace(/\[`method: ([^\]]*)`\]/g, "$1()")
+    .replace(/\[`property: ([^\]]*)`\]/g, "$1()")
+    .replace(/should use ([^\(]*).waitFor/g, "should use $1.ExpectFor")
     .replace(/- extends: .*\n\n/, "")
   const lines = comment.split("\n")
   let inExample = false
@@ -31,7 +33,10 @@ const writeComment = (comment) => {
       lastWasBlank = true
       continue
     }
-    if (["js", "js browser", "py", "python sync", "python async", "java", "csharp"].includes(line.trim().substr(3)) && line.trim().startsWith("```"))
+    if (line.trim() === "**Usage**") {
+      break // ignore all usage
+    }
+    if (["js", "js browser", "py", "python sync", "python async", "java", "csharp", "python"].includes(line.trim().substr(3)) && line.trim().startsWith("```"))
       inExample = true
     if (!inExample) {
       if (lastWasBlank)
