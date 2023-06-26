@@ -283,6 +283,10 @@ func (p *pageImpl) Workers() []Worker {
 	return p.workers
 }
 
+func (p *pageImpl) Request() APIRequestContext {
+	return p.Context().Request()
+}
+
 func (p *pageImpl) Screenshot(options ...PageScreenshotOptions) ([]byte, error) {
 	var path *string
 	if len(options) > 0 {
@@ -415,7 +419,7 @@ func (p *pageImpl) waiterForResponse(url interface{}, options ...PageWaitForResp
 }
 
 func (p *pageImpl) ExpectEvent(event string, cb func() error, options ...PageWaitForEventOptions) (interface{}, error) {
-	return p.waiterForEvent(event, options...).Expect(cb)
+	return p.waiterForEvent(event, options...).RunAndWait(cb)
 }
 
 func (p *pageImpl) ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (Response, error) {
@@ -443,7 +447,7 @@ func (p *pageImpl) ExpectNavigation(cb func() error, options ...PageWaitForNavig
 	}
 	waiter := p.mainFrame.(*frameImpl).setNavigationWaiter(option.Timeout)
 
-	eventData, err := waiter.WaitForEvent(p.mainFrame.(*frameImpl), "navigated", predicate).Expect(cb)
+	eventData, err := waiter.WaitForEvent(p.mainFrame.(*frameImpl), "navigated", predicate).RunAndWait(cb)
 	if err != nil || eventData == nil {
 		return nil, err
 	}
@@ -470,7 +474,7 @@ func (p *pageImpl) ExpectConsoleMessage(cb func() error, options ...PageExpectCo
 		option.Timeout = options[0].Timeout
 		option.Predicate = options[0].Predicate
 	}
-	ret, err := p.waiterForEvent("console", option).Expect(cb)
+	ret, err := p.waiterForEvent("console", option).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -478,7 +482,7 @@ func (p *pageImpl) ExpectConsoleMessage(cb func() error, options ...PageExpectCo
 }
 
 func (p *pageImpl) ExpectedDialog(cb func() error) (Dialog, error) {
-	ret, err := newWaiter().WaitForEvent(p, "dialog", nil).Expect(cb)
+	ret, err := newWaiter().WaitForEvent(p, "dialog", nil).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -491,7 +495,7 @@ func (p *pageImpl) ExpectDownload(cb func() error, options ...PageExpectDownload
 		option.Timeout = options[0].Timeout
 		option.Predicate = options[0].Predicate
 	}
-	ret, err := p.waiterForEvent("download", option).Expect(cb)
+	ret, err := p.waiterForEvent("download", option).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -504,7 +508,7 @@ func (p *pageImpl) ExpectFileChooser(cb func() error, options ...PageExpectFileC
 		option.Timeout = options[0].Timeout
 		option.Predicate = options[0].Predicate
 	}
-	ret, err := p.waiterForEvent("filechooser", option).Expect(cb)
+	ret, err := p.waiterForEvent("filechooser", option).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -531,7 +535,7 @@ func (p *pageImpl) ExpectPopup(cb func() error, options ...PageExpectPopupOption
 		option.Timeout = options[0].Timeout
 		option.Predicate = options[0].Predicate
 	}
-	ret, err := p.waiterForEvent("popup", option).Expect(cb)
+	ret, err := p.waiterForEvent("popup", option).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -539,7 +543,7 @@ func (p *pageImpl) ExpectPopup(cb func() error, options ...PageExpectPopupOption
 }
 
 func (p *pageImpl) ExpectResponse(url interface{}, cb func() error, options ...PageWaitForResponseOptions) (Response, error) {
-	ret, err := p.waiterForResponse(url, options...).Expect(cb)
+	ret, err := p.waiterForResponse(url, options...).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -547,11 +551,37 @@ func (p *pageImpl) ExpectResponse(url interface{}, cb func() error, options ...P
 }
 
 func (p *pageImpl) ExpectRequest(url interface{}, cb func() error, options ...PageWaitForRequestOptions) (Request, error) {
-	ret, err := p.waiterForRequest(url, options...).Expect(cb)
+	ret, err := p.waiterForRequest(url, options...).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}
 	return ret.(*requestImpl), err
+}
+
+func (p *pageImpl) ExpectRequestFinished(cb func() error, options ...PageExpectRequestFinishedOptions) (Request, error) {
+	option := PageWaitForEventOptions{}
+	if len(options) == 1 {
+		option.Timeout = options[0].Timeout
+		option.Predicate = options[0].Predicate
+	}
+	ret, err := p.waiterForEvent("requestfinished", option).RunAndWait(cb)
+	if ret == nil {
+		return nil, err
+	}
+	return ret.(*requestImpl), err
+}
+
+func (p *pageImpl) ExpectWebSocket(cb func() error, options ...PageExpectWebSocketOptions) (WebSocket, error) {
+	option := PageWaitForEventOptions{}
+	if len(options) == 1 {
+		option.Timeout = options[0].Timeout
+		option.Predicate = options[0].Predicate
+	}
+	ret, err := p.waiterForEvent("websocket", option).RunAndWait(cb)
+	if ret == nil {
+		return nil, err
+	}
+	return ret.(*webSocketImpl), err
 }
 
 func (p *pageImpl) ExpectWorker(cb func() error, options ...PageExpectWorkerOptions) (Worker, error) {
@@ -560,7 +590,7 @@ func (p *pageImpl) ExpectWorker(cb func() error, options ...PageExpectWorkerOpti
 		option.Timeout = options[0].Timeout
 		option.Predicate = options[0].Predicate
 	}
-	ret, err := p.waiterForEvent("worker", option).Expect(cb)
+	ret, err := p.waiterForEvent("worker", option).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
 	}
@@ -617,6 +647,25 @@ func (p *pageImpl) Keyboard() Keyboard {
 }
 func (p *pageImpl) Mouse() Mouse {
 	return p.mouse
+}
+
+func (p *pageImpl) RouteFromHAR(har string, options ...PageRouteFromHAROptions) error {
+	opt := PageRouteFromHAROptions{}
+	if len(options) == 1 {
+		opt = options[0]
+	}
+	if opt.Update != nil && *opt.Update {
+		return p.browserContext.recordIntoHar(har, browserContextRecordIntoHarOptions{
+			Page: p,
+			URL:  opt.URL,
+		})
+	}
+	notFound := opt.NotFound
+	if notFound == nil {
+		notFound = HarNotFoundAbort
+	}
+	router := newHarRouter(p.connection.localUtils, har, *notFound, opt.URL)
+	return router.addPageRoute(p)
 }
 
 func (p *pageImpl) Touchscreen() Touchscreen {
@@ -766,10 +815,27 @@ func (p *pageImpl) onRoute(route *routeImpl) {
 	go func() {
 		p.Lock()
 		defer p.Unlock()
+		routes := make([]*routeHandlerEntry, len(p.routes))
+		copy(routes, p.routes)
+
+		defer func() {
+			if len(p.routes) == 0 {
+				_, _ = p.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
+					"enabled": false,
+				})
+			}
+		}()
+
 		url := route.Request().URL()
-		for _, handlerEntry := range p.routes {
-			if handlerEntry.matcher.Matches(url) {
-				handlerEntry.handler(route)
+		for i, handlerEntry := range routes {
+			if !handlerEntry.Matches(url) {
+				continue
+			}
+			if handlerEntry.WillExceed() {
+				p.routes = append(p.routes[:i], p.routes[i+1:]...)
+			}
+			handled := handlerEntry.Handle(route)
+			if <-handled {
 				return
 			}
 		}
@@ -935,6 +1001,64 @@ func (p *pageImpl) Locator(selector string, options ...PageLocatorOptions) (Loca
 		option = FrameLocatorOptions(options[0])
 	}
 	return p.mainFrame.Locator(selector, option)
+}
+
+func (p *pageImpl) GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return p.Locator(getByAltTextSelector(text, exact))
+}
+
+func (p *pageImpl) GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return p.Locator(getByLabelSelector(text, exact))
+}
+
+func (p *pageImpl) GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return p.Locator(getByPlaceholderSelector(text, exact))
+}
+
+func (p *pageImpl) GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error) {
+	return p.Locator(getByRoleSelector(role, options...))
+}
+
+func (p *pageImpl) GetByTestId(testId interface{}) (Locator, error) {
+	return p.Locator(getByTestIdSelector(getTestIdAttributeName(), testId))
+}
+
+func (p *pageImpl) GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return p.Locator(getByTextSelector(text, exact))
+}
+
+func (p *pageImpl) GetByTitle(text interface{}, options ...LocatorGetByTitleOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return p.Locator(getByTitleSelector(text, exact))
 }
 
 func (p *pageImpl) FrameLocator(selector string) FrameLocator {

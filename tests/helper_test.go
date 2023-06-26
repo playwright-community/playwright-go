@@ -1,7 +1,9 @@
 package playwright_test
 
 import (
+	"archive/zip"
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"mime"
@@ -23,6 +25,7 @@ var pw *playwright.Playwright
 var browser playwright.Browser
 var context playwright.BrowserContext
 var page playwright.Page
+var expect playwright.PlaywrightAssertions
 var isChromium bool
 var isFirefox bool
 var isWebKit bool
@@ -63,6 +66,7 @@ func BeforeAll() {
 	if err != nil {
 		log.Fatalf("could not launch: %v", err)
 	}
+	expect = playwright.NewPlaywrightAssertions(1000)
 	isChromium = browserName == "chromium" || browserName == ""
 	isFirefox = browserName == "firefox"
 	isWebKit = browserName == "webkit"
@@ -311,4 +315,32 @@ func getFreePort() (int, error) {
 	}
 	defer l.Close()
 	return l.Addr().(*net.TCPAddr).Port, nil
+}
+
+func readFromZip(zipFile string, fileName string) ([]byte, error) {
+	r, err := zip.OpenReader(zipFile)
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+
+	for _, f := range r.File {
+		if f.Name == fileName {
+			rc, err := f.Open()
+			if err != nil {
+				return nil, err
+			}
+			defer rc.Close()
+
+			buf := new(bytes.Buffer)
+			_, err = io.Copy(buf, rc)
+			if err != nil {
+				return nil, err
+			}
+
+			return buf.Bytes(), nil
+		}
+	}
+
+	return nil, fmt.Errorf("file %s not found in %s", fileName, zipFile)
 }

@@ -60,7 +60,7 @@ func (w *waiter) WithTimeout(timeout float64) *waiter {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	if w.waitFunc != nil {
-		w.reject(fmt.Errorf("waiter: set timeout before WaitForEvent"))
+		w.reject(fmt.Errorf("waiter: please set timeout before WaitForEvent"))
 		return w
 	}
 	w.timeout = timeout
@@ -136,7 +136,8 @@ func (w *waiter) Wait() (interface{}, error) {
 	return w.waitFunc()
 }
 
-func (w *waiter) Expect(cb func() error) (interface{}, error) {
+// RunAndWait waits for the waiter to return after calls func.
+func (w *waiter) RunAndWait(cb func() error) (interface{}, error) {
 	if w.waitFunc == nil {
 		return nil, fmt.Errorf("waiter: call WaitForEvent first")
 	}
@@ -151,7 +152,7 @@ func (w *waiter) createHandler(evChan chan<- interface{}, predicate interface{})
 		if w.fulfilled.Load() {
 			return
 		}
-		if predicate == nil {
+		if predicate == nil || reflect.ValueOf(predicate).IsNil() {
 			w.fulfilled.Store(true)
 			if len(ev) == 1 {
 				evChan <- ev[0]

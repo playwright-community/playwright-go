@@ -6,6 +6,7 @@ import (
 
 type browserTypeImpl struct {
 	channelOwner
+	playwright *Playwright
 }
 
 func (b *browserTypeImpl) Name() string {
@@ -26,16 +27,24 @@ func (b *browserTypeImpl) Launch(options ...BrowserTypeLaunchOptions) (Browser, 
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
-	return fromChannel(channel).(*browserImpl), nil
+	browser := fromChannel(channel).(*browserImpl)
+	browser.setBrowserType(b)
+	return browser, nil
 }
 
 func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (BrowserContext, error) {
 	overrides := map[string]interface{}{
 		"userDataDir": userDataDir,
 	}
+	option := &BrowserNewContextOptions{}
 	if len(options) == 1 {
+		err := assignStructFields(option, options[0], true)
+		if err != nil {
+			return nil, fmt.Errorf("can not convert options: %w", err)
+		}
 		if options[0].ExtraHttpHeaders != nil {
 			overrides["extraHTTPHeaders"] = serializeMapToNameAndValue(options[0].ExtraHttpHeaders)
+			options[0].ExtraHttpHeaders = nil
 		}
 		if options[0].Env != nil {
 			overrides["env"] = serializeMapToNameAndValue(options[0].Env)
@@ -46,21 +55,28 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 			options[0].NoViewport = nil
 		}
 		if options[0].RecordHarPath != nil {
-			recordHar := map[string]interface{}{}
-			recordHar["path"] = *options[0].RecordHarPath
-			if options[0].RecordHarOmitContent != nil {
-				recordHar["omitContent"] = true
-			}
-			overrides["recordHar"] = recordHar
-		} else if options[0].RecordHarOmitContent != nil {
-			return nil, fmt.Errorf("recordHarOmitContent is set but recordHarPath is nil")
+			overrides["recordHar"] = prepareRecordHarOptions(recordHarInputOptions{
+				Path:        *options[0].RecordHarPath,
+				URL:         options[0].RecordHarUrlFilter,
+				Mode:        options[0].RecordHarMode,
+				Content:     options[0].RecordHarContent,
+				OmitContent: options[0].RecordHarOmitContent,
+			})
+			options[0].RecordHarPath = nil
+			options[0].RecordHarUrlFilter = nil
+			options[0].RecordHarMode = nil
+			options[0].RecordHarContent = nil
+			options[0].RecordHarOmitContent = nil
 		}
 	}
 	channel, err := b.channel.Send("launchPersistentContext", overrides, options)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
-	return fromChannel(channel).(*browserContextImpl), nil
+	context := fromChannel(channel).(*browserContextImpl)
+	context.options = option
+	context.setBrowserType(b)
+	return context, nil
 }
 func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptions) (Browser, error) {
 	overrides := map[string]interface{}{
@@ -96,8 +112,10 @@ func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptio
 	}
 	jsonPipe.On("message", connection.Dispatch)
 	playwright := connection.Start()
+	playwright.setSelectors(b.playwright.Selectors)
 	browser = fromChannel(playwright.initializer["preLaunchedBrowser"]).(*browserImpl)
 	browser.shouldCloseConnectionOnClose = true
+	browser.setBrowserType(b)
 	return browser, nil
 }
 func (b *browserTypeImpl) ConnectOverCDP(endpointURL string, options ...BrowserTypeConnectOverCDPOptions) (Browser, error) {
@@ -114,6 +132,7 @@ func (b *browserTypeImpl) ConnectOverCDP(endpointURL string, options ...BrowserT
 		browser.contexts = append(browser.contexts, context)
 		context.browser = browser
 	}
+	browser.setBrowserType(b)
 	return browser, nil
 }
 

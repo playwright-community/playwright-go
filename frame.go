@@ -148,7 +148,7 @@ func (f *frameImpl) waitForLoadStateImpl(state string, timeout *float64, cb func
 		_, err := waiter.Wait()
 		return err
 	} else {
-		_, err := waiter.Expect(cb)
+		_, err := waiter.RunAndWait(cb)
 		return err
 	}
 }
@@ -304,19 +304,11 @@ func (f *frameImpl) QuerySelectorAll(selector string) ([]ElementHandle, error) {
 
 func (f *frameImpl) Evaluate(expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
-	forceExpression := false
-	if !isFunctionBody(expression) {
-		forceExpression = true
-	}
 	if len(options) == 1 {
 		arg = options[0]
-	} else if len(options) == 2 {
-		arg = options[0]
-		forceExpression = options[1].(bool)
 	}
 	result, err := f.channel.Send("evaluateExpression", map[string]interface{}{
 		"expression": expression,
-		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
 	})
 	if err != nil {
@@ -327,20 +319,12 @@ func (f *frameImpl) Evaluate(expression string, options ...interface{}) (interfa
 
 func (f *frameImpl) EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
-	forceExpression := false
-	if !isFunctionBody(expression) {
-		forceExpression = true
-	}
 	if len(options) == 1 {
 		arg = options[0]
-	} else if len(options) == 2 {
-		arg = options[0]
-		forceExpression = options[1].(bool)
 	}
 	result, err := f.channel.Send("evalOnSelector", map[string]interface{}{
 		"selector":   selector,
 		"expression": expression,
-		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
 	})
 	if err != nil {
@@ -351,20 +335,12 @@ func (f *frameImpl) EvalOnSelector(selector string, expression string, options .
 
 func (f *frameImpl) EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
-	forceExpression := false
-	if !isFunctionBody(expression) {
-		forceExpression = true
-	}
 	if len(options) == 1 {
 		arg = options[0]
-	} else if len(options) == 2 {
-		arg = options[0]
-		forceExpression = options[1].(bool)
 	}
 	result, err := f.channel.Send("evalOnSelectorAll", map[string]interface{}{
 		"selector":   selector,
 		"expression": expression,
-		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
 	})
 	if err != nil {
@@ -375,19 +351,11 @@ func (f *frameImpl) EvalOnSelectorAll(selector string, expression string, option
 
 func (f *frameImpl) EvaluateHandle(expression string, options ...interface{}) (JSHandle, error) {
 	var arg interface{}
-	forceExpression := false
-	if !isFunctionBody(expression) {
-		forceExpression = true
-	}
 	if len(options) == 1 {
 		arg = options[0]
-	} else if len(options) == 2 {
-		arg = options[0]
-		forceExpression = options[1].(bool)
 	}
 	result, err := f.channel.Send("evaluateExpressionHandle", map[string]interface{}{
 		"expression": expression,
-		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
 	})
 	if err != nil {
@@ -518,13 +486,8 @@ func (f *frameImpl) WaitForFunction(expression string, arg interface{}, options 
 	if len(options) == 1 {
 		option = options[0]
 	}
-	forceExpression := false
-	if !isFunctionBody(expression) {
-		forceExpression = true
-	}
 	result, err := f.channel.Send("waitForFunction", map[string]interface{}{
 		"expression": expression,
-		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
 		"timeout":    option.Timeout,
 		"polling":    option.Polling,
@@ -718,6 +681,64 @@ func (f *frameImpl) Locator(selector string, options ...FrameLocatorOptions) (Lo
 		option = LocatorLocatorOptions(options[0])
 	}
 	return newLocator(f, selector, option)
+}
+
+func (f *frameImpl) GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return f.Locator(getByAltTextSelector(text, exact))
+}
+
+func (f *frameImpl) GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return f.Locator(getByLabelSelector(text, exact))
+}
+
+func (f *frameImpl) GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return f.Locator(getByPlaceholderSelector(text, exact))
+}
+
+func (f *frameImpl) GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error) {
+	return f.Locator(getByRoleSelector(role, options...))
+}
+
+func (f *frameImpl) GetByTestId(testId interface{}) (Locator, error) {
+	return f.Locator(getByTestIdSelector(getTestIdAttributeName(), testId))
+}
+
+func (f *frameImpl) GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return f.Locator(getByTextSelector(text, exact))
+}
+
+func (f *frameImpl) GetByTitle(text interface{}, options ...LocatorGetByTitleOptions) (Locator, error) {
+	exact := false
+	if len(options) == 1 {
+		if *options[0].Exact {
+			exact = true
+		}
+	}
+	return f.Locator(getByTitleSelector(text, exact))
 }
 
 func (f *frameImpl) FrameLocator(selector string) FrameLocator {

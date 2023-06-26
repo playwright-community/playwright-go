@@ -2,7 +2,7 @@ package playwright
 
 // Exposes API that can be used for the Web API testing. This class is used for creating `APIRequestContext` instance
 // which in turn can be used for sending web requests. An instance of this class can be obtained via
-// [`property: Playwright.request`]. For more information see `APIRequestContext`.
+// Playwright.request(). For more information see `APIRequestContext`.
 type APIRequest interface {
 	EventEmitter
 	// Creates new instances of `APIRequestContext`.
@@ -12,11 +12,11 @@ type APIRequest interface {
 // This API is used for the Web API testing. You can use it to trigger API endpoints, configure micro-services,
 // prepare environment or the service to your e2e test.
 // Each Playwright browser context has associated with it `APIRequestContext` instance which shares cookie storage
-// with the browser context and can be accessed via [`property: BrowserContext.request`] or
-// [`property: Page.request`]. It is also possible to create a new APIRequestContext instance manually by calling
+// with the browser context and can be accessed via BrowserContext.request() or
+// Page.request(). It is also possible to create a new APIRequestContext instance manually by calling
 // APIRequest.newContext().
 // **Cookie management**
-// `APIRequestContext` returned by [`property: BrowserContext.request`] and [`property: Page.request`] shares cookie
+// `APIRequestContext` returned by BrowserContext.request() and Page.request() shares cookie
 // storage with the corresponding `BrowserContext`. Each API request will have `Cookie` header populated with the
 // values from the browser context. If the API response contains `Set-Cookie` header it will automatically update
 // `BrowserContext` cookies and requests made from the page will pick them up. This means that if you log in using
@@ -37,41 +37,10 @@ type APIRequestContext interface {
 	// Sends HTTP(S) request and returns its response. The method will populate request cookies from the context and
 	// update context cookies from the response. The method will automatically follow redirects. JSON objects can be
 	// passed directly to the request.
-	// **Usage**
-	// ```python
-	// data = {
-	// "title": "Book Title",
-	// "body": "John Doe",
-	// }
-	// api_request_context.fetch("https://example.com/api/createBook", method="post", data=data)
-	// ```
-	// The common way to send file(s) in the body of a request is to encode it as form fields with `multipart/form-data`
-	// encoding. You can achieve that with Playwright API like this:
-	// ```python
-	// api_request_context.fetch(
-	// "https://example.com/api/uploadScrip'",
-	// method="post",
-	// multipart={
-	// "fileField": {
-	// "name": "f.js",
-	// "mimeType": "text/javascript",
-	// "buffer": b"console.log(2022);",
-	// },
-	// })
-	// ```
 	Fetch(urlOrRequest interface{}, options ...APIRequestContextFetchOptions) (APIResponse, error)
 	// Sends HTTP(S) [GET](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET) request and returns its
 	// response. The method will populate request cookies from the context and update context cookies from the response.
 	// The method will automatically follow redirects.
-	// **Usage**
-	// Request parameters can be configured with `params` option, they will be serialized into the URL search parameters:
-	// ```python
-	// query_params = {
-	// "isbn": "1234",
-	// "page": "23"
-	// }
-	// api_request_context.get("https://example.com/api/getText", params=query_params)
-	// ```
 	Get(url string, options ...APIRequestContextGetOptions) (APIResponse, error)
 	// Sends HTTP(S) [HEAD](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD) request and returns its
 	// response. The method will populate request cookies from the context and update context cookies from the response.
@@ -80,38 +49,6 @@ type APIRequestContext interface {
 	// Sends HTTP(S) [POST](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST) request and returns its
 	// response. The method will populate request cookies from the context and update context cookies from the response.
 	// The method will automatically follow redirects.
-	// **Usage**
-	// JSON objects can be passed directly to the request:
-	// ```python
-	// data = {
-	// "title": "Book Title",
-	// "body": "John Doe",
-	// }
-	// api_request_context.post("https://example.com/api/createBook", data=data)
-	// ```
-	// To send form data to the server use `form` option. Its value will be encoded into the request body with
-	// `application/x-www-form-urlencoded` encoding (see below how to use `multipart/form-data` form encoding to send
-	// files):
-	// ```python
-	// formData = {
-	// "title": "Book Title",
-	// "body": "John Doe",
-	// }
-	// api_request_context.post("https://example.com/api/findBook", form=formData)
-	// ```
-	// The common way to send file(s) in the body of a request is to upload them as form fields with `multipart/form-data`
-	// encoding. You can achieve that with Playwright API like this:
-	// ```python
-	// api_request_context.post(
-	// "https://example.com/api/uploadScrip'",
-	// multipart={
-	// "fileField": {
-	// "name": "f.js",
-	// "mimeType": "text/javascript",
-	// "buffer": b"console.log(2022);",
-	// },
-	// })
-	// ```
 	Post(url string, options ...APIRequestContextPostOptions) (APIResponse, error)
 	// Sends HTTP(S) [PUT](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT) request and returns its
 	// response. The method will populate request cookies from the context and update context cookies from the response.
@@ -152,6 +89,19 @@ type APIResponse interface {
 	URL() string
 }
 
+// The `APIResponseAssertions` class provides assertion methods that can be used to make assertions about the
+// `APIResponse` in the tests. A new instance of `APIResponseAssertions` is created by calling
+// PlaywrightAssertions.expectAPIResponse():
+type APIResponseAssertions interface {
+	// Makes the assertion check for the opposite condition. For example, this code tests that the response status is not
+	// successful:
+	Not() APIResponseAssertions
+	// Ensures the response status code is within `200..299` range.
+	ToBeOK() error
+	// The opposite of APIResponseAssertions.toBeOK().
+	NotToBeOK() error
+}
+
 type BindingCall interface {
 	Call(f BindingCallFunction)
 }
@@ -171,7 +121,6 @@ type Browser interface {
 	// The `Browser` object itself is considered to be disposed and cannot be used anymore.
 	Close() error
 	// Returns an array of all open browser contexts. In a newly created browser, this will return zero browser contexts.
-	// **Usage**
 	Contexts() []BrowserContext
 	// Indicates that the browser is connected.
 	IsConnected() bool
@@ -180,7 +129,6 @@ type Browser interface {
 	// returned context via BrowserContext.close() when your code is done with the `BrowserContext`, and before
 	// calling Browser.close(). This will ensure the `context` is closed gracefully and any artifacts—like HARs
 	// and videos—are fully flushed and saved.
-	// **Usage**
 	NewContext(options ...BrowserNewContextOptions) (BrowserContext, error)
 	// Creates a new page in a new browser context. Closing this page will close the context as well.
 	// This is a convenience API that should only be used for the single-page scenarios and short snippets. Production
@@ -190,6 +138,19 @@ type Browser interface {
 	// **NOTE** CDP Sessions are only supported on Chromium-based browsers.
 	// Returns the newly created browser session.
 	NewBrowserCDPSession() (CDPSession, error)
+	// **NOTE** This API controls
+	// [Chromium Tracing](https://www.chromium.org/developers/how-tos/trace-event-profiling-tool) which is a low-level
+	// chromium-specific debugging tool. API to control [Playwright Tracing](../trace-viewer) could be found
+	// [here](./class-tracing).
+	// You can use Browser.startTracing() and Browser.stopTracing() to create a trace file that can be
+	// opened in Chrome DevTools performance panel.
+	StartTracing(options ...BrowserStartTracingOptions) error
+	// **NOTE** This API controls
+	// [Chromium Tracing](https://www.chromium.org/developers/how-tos/trace-event-profiling-tool) which is a low-level
+	// chromium-specific debugging tool. API to control [Playwright Tracing](../trace-viewer) could be found
+	// [here](./class-tracing).
+	// Returns the buffer with trace data.
+	StopTracing() ([]byte, error)
 	// Returns the browser version.
 	Version() string
 }
@@ -219,7 +180,6 @@ type BrowserContext interface {
 	EventEmitter
 	// Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies
 	// can be obtained via BrowserContext.cookies().
-	// **Usage**
 	AddCookies(cookies ...OptionalCookie) error
 	// Adds a script which would be evaluated in one of the following scenarios:
 	// - Whenever a page is created in the browser context or is navigated.
@@ -227,17 +187,12 @@ type BrowserContext interface {
 	// evaluated in the context of the newly attached frame.
 	// The script is evaluated after the document was created but before any of its scripts were run. This is useful to
 	// amend the JavaScript environment, e.g. to seed `Math.random`.
-	// **Usage**
-	// An example of overriding `Math.random` before the page loads:
-	// **NOTE** The order of evaluation of multiple scripts installed via BrowserContext.addInitScript() and
-	// Page.addInitScript() is not defined.
 	AddInitScript(script BrowserContextAddInitScriptOptions) error
 	// Returns the browser instance of the context. If it was launched as a persistent context null gets returned.
 	Browser() Browser
 	// Clears context cookies.
 	ClearCookies() error
 	// Clears all permission overrides for the browser context.
-	// **Usage**
 	ClearPermissions() error
 	// Closes the browser context. All the pages that belong to the browser context will be closed.
 	// **NOTE** The default browser context cannot be closed.
@@ -247,24 +202,22 @@ type BrowserContext interface {
 	Cookies(urls ...string) ([]*Cookie, error)
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the context closes before the event is fired. Returns the event data value.
-	// **Usage**
 	ExpectEvent(event string, cb func() error, options ...BrowserContextWaitForEventOptions) (interface{}, error)
+	// Performs action and waits for a new `Page` to be created in the context. If predicate is provided, it passes `Page`
+	// value into the `predicate` function and waits for `predicate(event)` to return a truthy value. Will throw an error
+	// if the context closes before new `Page` is created.
+	ExpectPage(cb func() error, options ...BrowserContextExpectPageOptions) (Page, error)
 	// The method adds a function called `name` on the `window` object of every frame in every page in the context. When
 	// called, the function executes `callback` and returns a [Promise] which resolves to the return value of `callback`.
 	// If the `callback` returns a [Promise], it will be awaited.
 	// The first argument of the `callback` function contains information about the caller: `{ browserContext:
 	// BrowserContext, page: Page, frame: Frame }`.
 	// See Page.exposeBinding() for page-only version.
-	// **Usage**
-	// An example of exposing page URL to all frames in all pages in the context:
-	// An example of passing an element handle:
 	ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error
 	// The method adds a function called `name` on the `window` object of every frame in every page in the context. When
 	// called, the function executes `callback` and returns a [Promise] which resolves to the return value of `callback`.
 	// If the `callback` returns a [Promise], it will be awaited.
 	// See Page.exposeFunction() for page-only version.
-	// **Usage**
-	// An example of adding a `sha256` function to all pages in the context:
 	ExposeFunction(name string, binding ExposedFunction) error
 	// Grants specified permissions to the browser context. Only grants corresponding permissions to the given origin if
 	// specified.
@@ -276,6 +229,9 @@ type BrowserContext interface {
 	NewPage(options ...BrowserNewPageOptions) (Page, error)
 	// Returns all open pages in the context.
 	Pages() []Page
+	// **NOTE** Service workers are only supported on Chromium-based browsers.
+	// All existing service workers in the context.
+	ServiceWorkers() []Worker
 	// This setting will change the default maximum navigation time for the following methods and related shortcuts:
 	// - Page.goBack()
 	// - Page.goForward()
@@ -283,11 +239,11 @@ type BrowserContext interface {
 	// - Page.reload()
 	// - Page.setContent()
 	// - Page.waitForNavigation()
-	// **NOTE** Page.setDefaultNavigationTimeout`] and [`method: Page.setDefaultTimeout() take priority over
+	// **NOTE** Page.setDefaultNavigationTimeout() and Page.setDefaultTimeout() take priority over
 	// BrowserContext.setDefaultNavigationTimeout().
 	SetDefaultNavigationTimeout(timeout float64)
 	// This setting will change the default maximum time for all the methods accepting `timeout` option.
-	// **NOTE** Page.setDefaultNavigationTimeout`], [`method: Page.setDefaultTimeout() and
+	// **NOTE** Page.setDefaultNavigationTimeout(), Page.setDefaultTimeout() and
 	// BrowserContext.setDefaultNavigationTimeout() take priority over
 	// BrowserContext.setDefaultTimeout().
 	SetDefaultTimeout(timeout float64)
@@ -298,33 +254,29 @@ type BrowserContext interface {
 	// requests.
 	SetExtraHTTPHeaders(headers map[string]string) error
 	// Sets the context's geolocation. Passing `null` or `undefined` emulates position unavailable.
-	// **Usage**
-	// **NOTE** Consider using BrowserContext.grantPermissions() to grant permissions for the browser context
-	// pages to read its geolocation.
 	SetGeolocation(gelocation *Geolocation) error
+	// API testing helper associated with this context. Requests made with this API will use context cookies.
+	Request() APIRequestContext
 	ResetGeolocation() error
 	// Routing provides the capability to modify network requests that are made by any page in the browser context. Once
 	// route is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or aborted.
 	// **NOTE** BrowserContext.route() will not intercept requests intercepted by Service Worker. See
 	// [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when
 	// using request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
-	// **Usage**
-	// An example of a naive handler that aborts all image requests:
-	// or the same snippet using a regex pattern instead:
-	// It is possible to examine the request to decide the route action. For example, mocking all requests that contain
-	// some post data, and leaving all other requests as is:
-	// Page routes (set up with Page.route()) take precedence over browser context routes when request matches
-	// both handlers.
-	// To remove a route with its handler you can use BrowserContext.unroute().
-	// **NOTE** Enabling routing disables http cache.
 	Route(url interface{}, handler routeHandler, times ...int) error
 	SetOffline(offline bool) error
+	// If specified the network requests that are made in the context will be served from the HAR file. Read more about
+	// [Replaying from HAR](../network.md#replaying-from-har).
+	// Playwright will not serve requests intercepted by Service Worker from the HAR file. See
+	// [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when
+	// using request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
+	RouteFromHAR(har string, options ...BrowserContextRouteFromHAROptions) error
 	// Returns storage state for this browser context, contains current cookies and local storage snapshot.
 	StorageState(path ...string) (*StorageState, error)
 	// Removes a route created with BrowserContext.route(). When `handler` is not specified, removes all routes
 	// for the `url`.
 	Unroute(url interface{}, handler ...routeHandler) error
-	// **NOTE** In most cases, you should use BrowserContext.waitForEvent().
+	// **NOTE** In most cases, you should use BrowserContext.ExpectForEvent().
 	// Waits for given `event` to fire. If predicate is provided, it passes event's value into the `predicate` function
 	// and waits for `predicate(event)` to return a truthy value. Will throw an error if the browser context is closed
 	// before the `event` is fired.
@@ -340,14 +292,12 @@ type BrowserContext interface {
 // Start recording a trace before performing actions. At the end, stop tracing and save it to a file.
 type Tracing interface {
 	// Start tracing.
-	// **Usage**
 	Start(options ...TracingStartOptions) error
 	// Stop tracing.
 	Stop(options ...TracingStopOptions) error
 	// Start a new trace chunk. If you'd like to record multiple traces on the same `BrowserContext`, use
-	// Tracing.start`] once, and then create multiple trace chunks with [`method: Tracing.startChunk() and
+	// Tracing.start() once, and then create multiple trace chunks with Tracing.startChunk() and
 	// Tracing.stopChunk().
-	// **Usage**
 	StartChunk(options ...TracingStartChunkOptions) error
 	// Stop the trace chunk. See Tracing.startChunk() for more details about multiple trace chunks.
 	StopChunk(options ...TracingStopChunkOptions) error
@@ -359,22 +309,6 @@ type BrowserType interface {
 	// A path where Playwright expects to find a bundled browser executable.
 	ExecutablePath() string
 	// Returns the browser instance.
-	// **Usage**
-	// You can use `ignoreDefaultArgs` to filter out `--mute-audio` from default arguments:
-	// > **Chromium-only** Playwright can also be used to control the Google Chrome or Microsoft Edge browsers, but it
-	// works best with the version of Chromium it is bundled with. There is no guarantee it will work with any other
-	// version. Use `executablePath` option with extreme caution.
-	// >
-	// > If Google Chrome (rather than Chromium) is preferred, a
-	// [Chrome Canary](https://www.google.com/chrome/browser/canary.html) or
-	// [Dev Channel](https://www.chromium.org/getting-involved/dev-channel) build is suggested.
-	// >
-	// > Stock browsers like Google Chrome and Microsoft Edge are suitable for tests that require proprietary media codecs
-	// for video playback. See
-	// [this article](https://www.howtogeek.com/202825/what%E2%80%99s-the-difference-between-chromium-and-chrome/) for
-	// other differences between Chromium and Chrome.
-	// [This article](https://chromium.googlesource.com/chromium/src/+/lkgr/docs/chromium_browser_vs_google_chrome.md)
-	// describes some differences for Linux users.
 	Launch(options ...BrowserTypeLaunchOptions) (Browser, error)
 	// Returns the persistent browser context instance.
 	// Launches browser that uses persistent storage located at `userDataDir` and returns the only context. Closing this
@@ -389,7 +323,6 @@ type BrowserType interface {
 	// This method attaches Playwright to an existing browser instance using the Chrome DevTools Protocol.
 	// The default browser context is accessible via Browser.contexts().
 	// **NOTE** Connecting over the Chrome DevTools Protocol is only supported for Chromium-based browsers.
-	// **Usage**
 	ConnectOverCDP(endpointURL string, options ...BrowserTypeConnectOverCDPOptions) (Browser, error)
 }
 
@@ -411,7 +344,7 @@ type ConsoleMessage interface {
 // `Dialog` objects are dispatched by page via the [`event: Page.dialog`] event.
 // An example of using `Dialog` class:
 // **NOTE** Dialogs are dismissed automatically, unless there is a [`event: Page.dialog`] listener. When listener is
-// present, it **must** either Dialog.accept`] or [`method: Dialog.dismiss() the dialog - otherwise the page
+// present, it **must** either Dialog.accept() or Dialog.dismiss() the dialog - otherwise the page
 // will [freeze](https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop#never_blocking) waiting for the
 // dialog, and actions like click will never finish.
 type Dialog interface {
@@ -463,7 +396,7 @@ type Download interface {
 // **NOTE** The use of ElementHandle is discouraged, use `Locator` objects and web-first assertions instead.
 // ElementHandle prevents DOM element from garbage collection unless the handle is disposed with
 // JSHandle.dispose(). ElementHandles are auto-disposed when their origin frame gets navigated.
-// ElementHandle instances can be used as an argument in Page.evalOnSelector`] and [`method: Page.evaluate()
+// ElementHandle instances can be used as an argument in Page.evalOnSelector() and Page.evaluate()
 // methods.
 // The difference between the `Locator` and ElementHandle is that the ElementHandle points to a particular element,
 // while `Locator` captures the logic of how to retrieve an element.
@@ -483,14 +416,13 @@ type ElementHandle interface {
 	// [Element.getBoundingClientRect](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect).
 	// Assuming the page is static, it is safe to use bounding box coordinates to perform input. For example, the
 	// following snippet should click the center of the element.
-	// **Usage**
 	BoundingBox() (*Rect, error)
 	// This method checks the element by performing the following steps:
 	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already
 	// checked, this method returns immediately.
 	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to click in the center of the element.
+	// 1. Use Page.mouse() to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// 1. Ensure that the element is now checked. If not, this method throws.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
@@ -503,7 +435,7 @@ type ElementHandle interface {
 	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If
 	// the element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to click in the center of the element.
+	// 1. Use Page.mouse() to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// 1. Ensure that the element is now checked or unchecked. If not, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -512,7 +444,7 @@ type ElementHandle interface {
 	// This method clicks the element by performing the following steps:
 	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to click in the center of the element, or the specified `position`.
+	// 1. Use Page.mouse() to click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -523,7 +455,7 @@ type ElementHandle interface {
 	// This method double clicks the element by performing the following steps:
 	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to double click in the center of the element, or the specified `position`.
+	// 1. Use Page.mouse() to double click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if
 	// the first click of the `dblclick()` triggers a navigation event, this method will throw.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
@@ -534,38 +466,18 @@ type ElementHandle interface {
 	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
 	// `click` is dispatched. This is equivalent to calling
 	// [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
-	// **Usage**
-	// Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit`
-	// properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
-	// Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
-	// - [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)
-	// - [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent)
-	// - [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent)
-	// - [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent)
-	// - [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent)
-	// - [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)
-	// - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
-	// You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 	DispatchEvent(typ string, initObjects ...interface{}) error
 	// Returns the return value of `expression`.
 	// The method finds an element matching the specified selector in the `ElementHandle`s subtree and passes it as a
 	// first argument to `expression`. If no elements match the selector, the method throws an error.
 	// If `expression` returns a [Promise], then ElementHandle.evalOnSelector() would wait for the promise to
 	// resolve and return its value.
-	// **Usage**
 	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
 	// Returns the return value of `expression`.
 	// The method finds all elements matching the specified selector in the `ElementHandle`'s subtree and passes an array
 	// of matched elements as a first argument to `expression`.
 	// If `expression` returns a [Promise], then ElementHandle.evalOnSelectorAll() would wait for the promise to
 	// resolve and return its value.
-	// **Usage**
-	// ```html
-	// <div class="feed">
-	// <div class="tweet">Hello!</div>
-	// <div class="tweet">Hi!</div>
-	// </div>
-	// ```
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
 	// This method waits for [actionability](../actionability.md) checks, focuses the element, fills it and triggers an
 	// `input` event after filling. Note that you can pass an empty string to clear the input field.
@@ -582,7 +494,7 @@ type ElementHandle interface {
 	// This method hovers over the element by performing the following steps:
 	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to hover over the center of the element, or the specified `position`.
+	// 1. Use Page.mouse() to hover over the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -606,7 +518,7 @@ type ElementHandle interface {
 	IsVisible() (bool, error)
 	// Returns the frame containing the given element.
 	OwnerFrame() (Frame, error)
-	// Focuses the element, and then uses Keyboard.down`] and [`method: Keyboard.up().
+	// Focuses the element, and then uses Keyboard.down() and Keyboard.up().
 	// `key` can specify the intended
 	// [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) value or a single character
 	// to generate the text for. A superset of the `key` values can be found
@@ -648,7 +560,6 @@ type ElementHandle interface {
 	// instead.
 	// Returns the array of option values that have been successfully selected.
 	// Triggers a `change` and `input` event once all the provided options have been selected.
-	// **Usage**
 	SelectOption(values SelectOptionValues, options ...ElementHandleSelectOptionOptions) ([]string, error)
 	// This method waits for [actionability](../actionability.md) checks, then focuses the element and selects all its
 	// text content.
@@ -666,7 +577,7 @@ type ElementHandle interface {
 	// This method taps the element by performing the following steps:
 	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.touchscreen`] to tap the center of the element, or the specified `position`.
+	// 1. Use Page.touchscreen() to tap the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -678,15 +589,13 @@ type ElementHandle interface {
 	// Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the
 	// text.
 	// To press a special key, like `Control` or `ArrowDown`, use ElementHandle.press().
-	// **Usage**
-	// An example of typing into a text field and then submitting the form:
 	Type(value string, options ...ElementHandleTypeOptions) error
 	// This method checks the element by performing the following steps:
 	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already
 	// unchecked, this method returns immediately.
 	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to click in the center of the element.
+	// 1. Use Page.mouse() to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// 1. Ensure that the element is now unchecked. If not, this method throws.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
@@ -713,8 +622,6 @@ type ElementHandle interface {
 	// or become visible/hidden). If at the moment of calling the method `selector` already satisfies the condition, the
 	// method will return immediately. If the selector doesn't satisfy the condition for the `timeout` milliseconds, the
 	// function will throw.
-	// **Usage**
-	// **NOTE** This method does not work across navigations, use Page.waitForSelector() instead.
 	WaitForSelector(selector string, options ...ElementHandleWaitForSelectorOptions) (ElementHandle, error)
 	// Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element.
 	// Throws for non-input elements. However, if the element is inside the `<label>` element that has an associated
@@ -761,7 +668,7 @@ type Frame interface {
 	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If
 	// the element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to click in the center of the element.
+	// 1. Use Page.mouse() to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// 1. Ensure that the element is now checked or unchecked. If not, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -781,7 +688,7 @@ type Frame interface {
 	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If
 	// the element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to click in the center of the element.
+	// 1. Use Page.mouse() to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// 1. Ensure that the element is now checked. If not, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -793,7 +700,7 @@ type Frame interface {
 	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If
 	// the element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to click in the center of the element, or the specified `position`.
+	// 1. Use Page.mouse() to click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
@@ -805,7 +712,7 @@ type Frame interface {
 	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If
 	// the element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to double click in the center of the element, or the specified `position`.
+	// 1. Use Page.mouse() to double click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if
 	// the first click of the `dblclick()` triggers a navigation event, this method will throw.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -815,51 +722,31 @@ type Frame interface {
 	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
 	// `click` is dispatched. This is equivalent to calling
 	// [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
-	// **Usage**
-	// Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit`
-	// properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
-	// Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
-	// - [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)
-	// - [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent)
-	// - [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent)
-	// - [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent)
-	// - [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent)
-	// - [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)
-	// - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
-	// You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 	DispatchEvent(selector, typ string, eventInit interface{}, options ...PageDispatchEventOptions) error
 	// Returns the return value of `expression`.
-	// If the function passed to the Frame.evaluate`] returns a [Promise], then [`method: Frame.evaluate() would
+	// If the function passed to the Frame.evaluate() returns a [Promise], then Frame.evaluate() would
 	// wait for the promise to resolve and return its value.
 	// If the function passed to the Frame.evaluate() returns a non-[Serializable] value, then
 	// Frame.evaluate() returns `undefined`. Playwright also supports transferring some additional values that
 	// are not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`.
-	// **Usage**
-	// A string can also be passed in instead of a function.
-	// `ElementHandle` instances can be passed as an argument to the Frame.evaluate():
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
 	// Returns the return value of `expression` as a `JSHandle`.
-	// The only difference between Frame.evaluate`] and [`method: Frame.evaluateHandle() is that
+	// The only difference between Frame.evaluate() and Frame.evaluateHandle() is that
 	// Frame.evaluateHandle() returns `JSHandle`.
 	// If the function, passed to the Frame.evaluateHandle(), returns a [Promise], then
 	// Frame.evaluateHandle() would wait for the promise to resolve and return its value.
-	// **Usage**
-	// A string can also be passed in instead of a function.
-	// `JSHandle` instances can be passed as an argument to the Frame.evaluateHandle():
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	// Returns the return value of `expression`.
 	// The method finds an element matching the specified selector within the frame and passes it as a first argument to
 	// `expression`. If no elements match the selector, the method throws an error.
 	// If `expression` returns a [Promise], then Frame.evalOnSelector() would wait for the promise to resolve
 	// and return its value.
-	// **Usage**
 	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
 	// Returns the return value of `expression`.
 	// The method finds all elements matching the specified selector within the frame and passes an array of matched
 	// elements as a first argument to `expression`.
 	// If `expression` returns a [Promise], then Frame.evalOnSelectorAll() would wait for the promise to resolve
 	// and return its value.
-	// **Usage**
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
 	// This method waits for an element matching `selector`, waits for [actionability](../actionability.md) checks,
 	// focuses the element, fills it and triggers an `input` event after filling. Note that you can pass an empty string
@@ -877,16 +764,30 @@ type Frame interface {
 	// This is an inverse of ElementHandle.contentFrame(). Note that returned handle actually belongs to the
 	// parent frame.
 	// This method throws an error if the frame has been detached before `frameElement()` returns.
-	// **Usage**
 	FrameElement() (ElementHandle, error)
 	// When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements
 	// in that iframe.
-	// **Usage**
-	// Following snippet locates element with text "Submit" in the iframe with id `my-frame`, like `<iframe
-	// id="my-frame">`:
 	FrameLocator(selector string) FrameLocator
 	// Returns element attribute value.
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
+	// Allows locating elements by their alt text.
+	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error)
+	// Allows locating input elements by the text of the associated label.
+	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error)
+	// Allows locating input elements by the placeholder text.
+	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error)
+	// Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
+	// [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
+	// [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error)
+	// Locate element by the test id.
+	GetByTestId(testId interface{}) (Locator, error)
+	// Allows locating elements that contain given text.
+	// See also Locator.filter() that allows to match by another criteria, like an accessible role, and then
+	// filter by the text content.
+	GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error)
+	// Allows locating elements by their title attribute.
+	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) (Locator, error)
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of
 	// the last redirect.
 	// The method will throw an error if:
@@ -908,7 +809,7 @@ type Frame interface {
 	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If
 	// the element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to hover over the center of the element, or the specified `position`.
+	// 1. Use Page.mouse() to hover over the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
@@ -981,7 +882,6 @@ type Frame interface {
 	// instead.
 	// Returns the array of option values that have been successfully selected.
 	// Triggers a `change` and `input` event once all the provided options have been selected.
-	// **Usage**
 	SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error)
 	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then
 	// they are resolved relative to the current working directory. For empty array, clears the selected files.
@@ -995,7 +895,7 @@ type Frame interface {
 	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If
 	// the element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.touchscreen`] to tap the center of the element, or the specified `position`.
+	// 1. Use Page.touchscreen() to tap the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
@@ -1008,7 +908,6 @@ type Frame interface {
 	// Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text. `frame.type` can be used
 	// to send fine-grained keyboard events. To fill values in form fields, use Frame.fill().
 	// To press a special key, like `Control` or `ArrowDown`, use Keyboard.press().
-	// **Usage**
 	Type(selector, text string, options ...PageTypeOptions) error
 	// Returns frame's url.
 	URL() string
@@ -1019,7 +918,7 @@ type Frame interface {
 	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If
 	// the element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to click in the center of the element.
+	// 1. Use Page.mouse() to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// 1. Ensure that the element is now unchecked. If not, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -1027,27 +926,17 @@ type Frame interface {
 	Uncheck(selector string, options ...FrameUncheckOptions) error
 	WaitForEvent(event string, options ...PageWaitForEventOptions) (interface{}, error)
 	// Returns when the `expression` returns a truthy value, returns that value.
-	// **Usage**
-	// The Frame.waitForFunction() can be used to observe viewport size change:
-	// To pass an argument to the predicate of `frame.waitForFunction` function:
 	WaitForFunction(expression string, arg interface{}, options ...FrameWaitForFunctionOptions) (JSHandle, error)
 	// Waits for the required load state to be reached.
 	// This returns when the frame reaches a required load state, `load` by default. The navigation must have been
 	// committed when this method is called. If current document has already reached the required state, resolves
 	// immediately.
-	// **Usage**
 	WaitForLoadState(options ...PageWaitForLoadStateOptions) error
 	// Waits for the frame navigation and returns the main resource response. In case of multiple redirects, the
 	// navigation will resolve with the response of the last redirect. In case of navigation to a different anchor or
 	// navigation due to History API usage, the navigation will resolve with `null`.
-	// **Usage**
-	// This method waits for the frame to navigate to a new URL. It is useful for when you run code which will indirectly
-	// cause the frame to navigate. Consider this example:
-	// **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL
-	// is considered a navigation.
 	WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error)
 	// Waits for the frame to navigate to the given URL.
-	// **Usage**
 	WaitForURL(url string, options ...FrameWaitForURLOptions) error
 	// Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
 	// `detached`.
@@ -1056,8 +945,6 @@ type Frame interface {
 	// Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If
 	// at the moment of calling the method `selector` already satisfies the condition, the method will return immediately.
 	// If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
-	// **Usage**
-	// This method works across navigations:
 	WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandle, error)
 	// Waits for the given `timeout` in milliseconds.
 	// Note that `frame.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going
@@ -1092,6 +979,24 @@ type FrameLocator interface {
 	// options, similar to Locator.filter() method.
 	// [Learn more about locators](../locators.md).
 	Locator(selector string, options ...LocatorLocatorOptions) (Locator, error)
+	// Allows locating elements by their alt text.
+	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error)
+	// Allows locating input elements by the text of the associated label.
+	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error)
+	// Allows locating input elements by the placeholder text.
+	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error)
+	// Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
+	// [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
+	// [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error)
+	// Locate element by the test id.
+	GetByTestId(testId interface{}) (Locator, error)
+	// Allows locating elements that contain given text.
+	// See also Locator.filter() that allows to match by another criteria, like an accessible role, and then
+	// filter by the text content.
+	GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error)
+	// Allows locating elements by their title attribute.
+	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) (Locator, error)
 	// Returns locator to the n-th matching frame. It's zero based, `nth(0)` selects the first frame.
 	Nth(index int) FrameLocator
 }
@@ -1101,7 +1006,7 @@ type FrameLocator interface {
 // JSHandle prevents the referenced JavaScript object being garbage collected unless the handle is exposed with
 // JSHandle.dispose(). JSHandles are auto-disposed when their origin frame gets navigated or the parent
 // context gets destroyed.
-// JSHandle instances can be used as an argument in Page.evalOnSelector`], [`method: Page.evaluate() and
+// JSHandle instances can be used as an argument in Page.evalOnSelector(), Page.evaluate() and
 // Page.evaluateHandle() methods.
 type JSHandle interface {
 	// Returns either `null` or the object handle itself, if the object handle is an instance of `ElementHandle`.
@@ -1112,7 +1017,6 @@ type JSHandle interface {
 	// This method passes this handle as the first argument to `expression`.
 	// If `expression` returns a [Promise], then `handle.evaluate` would wait for the promise to resolve and return its
 	// value.
-	// **Usage**
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
 	// Returns the return value of `expression` as a `JSHandle`.
 	// This method passes this handle as the first argument to `expression`.
@@ -1123,7 +1027,6 @@ type JSHandle interface {
 	// See Page.evaluateHandle() for more details.
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	// The method returns a map with **own property names** as keys and JSHandle instances for the property values.
-	// **Usage**
 	GetProperties() (map[string]JSHandle, error)
 	// Fetches a single property from the referenced object.
 	GetProperty(name string) (JSHandle, error)
@@ -1136,7 +1039,7 @@ type JSHandle interface {
 
 // Keyboard provides an api for managing a virtual keyboard. The high level api is Keyboard.type(), which
 // takes raw characters and generates proper `keydown`, `keypress`/`input`, and `keyup` events on your page.
-// For finer control, you can use Keyboard.down`], [`method: Keyboard.up(), and
+// For finer control, you can use Keyboard.down(), Keyboard.up(), and
 // Keyboard.insertText() to manually fire events as if they were generated from a real keyboard.
 // An example of holding down `Shift` in order to select and delete some text:
 // An example of pressing uppercase `A`
@@ -1162,9 +1065,6 @@ type Keyboard interface {
 	// **NOTE** Modifier keys DO influence `keyboard.down`. Holding down `Shift` will type the text in upper case.
 	Down(key string) error
 	// Dispatches only `input` event, does not emit the `keydown`, `keyup` or `keypress` events.
-	// **Usage**
-	// **NOTE** Modifier keys DO NOT effect `keyboard.insertText`. Holding down `Shift` will not type the text in upper
-	// case.
 	InsertText(text string) error
 	// `key` can specify the intended
 	// [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) value or a single character
@@ -1179,14 +1079,9 @@ type Keyboard interface {
 	// texts.
 	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
-	// **Usage**
-	// Shortcut for Keyboard.down`] and [`method: Keyboard.up().
 	Press(key string, options ...KeyboardPressOptions) error
 	// Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
 	// To press a special key, like `Control` or `ArrowDown`, use Keyboard.press().
-	// **Usage**
-	// **NOTE** Modifier keys DO NOT effect `keyboard.type`. Holding down `Shift` will not type the text in upper case.
-	// **NOTE** For characters that are not on a US keyboard, only an `input` event will be sent.
 	Type(text string, options ...KeyboardTypeOptions) error
 	// Dispatches a `keyup` event.
 	Up(key string) error
@@ -1196,12 +1091,14 @@ type Keyboard interface {
 // way to find element(s) on the page at any moment. Locator can be created with the Page.locator() method.
 // [Learn more about locators](../locators.md).
 type Locator interface {
+	// When locator points to a list of elements, returns array of locators, pointing to respective elements.
+	All() ([]Locator, error)
 	// Returns an array of `node.innerText` values for all matching nodes.
-	// **Usage**
 	AllInnerTexts() ([]string, error)
 	// Returns an array of `node.textContent` values for all matching nodes.
-	// **Usage**
 	AllTextContents() ([]string, error)
+	// Calls [blur](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/blur) on the element.
+	Blur(options ...LocatorBlurOptions) error
 	// This method returns the bounding box of the element matching the locator, or `null` if the element is not visible.
 	// The bounding box is calculated relative to the main frame viewport - which is usually the same as the browser
 	// window.
@@ -1213,7 +1110,6 @@ type Locator interface {
 	// [Element.getBoundingClientRect](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect).
 	// Assuming the page is static, it is safe to use bounding box coordinates to perform input. For example, the
 	// following snippet should click the center of the element.
-	// **Usage**
 	BoundingBox(options ...LocatorBoundingBoxOptions) (*Rect, error)
 	// Ensure that checkbox or radio element is checked.
 	// **Details**
@@ -1222,37 +1118,41 @@ type Locator interface {
 	// checked, this method returns immediately.
 	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to click in the center of the element.
+	// 1. Use Page.mouse() to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// 1. Ensure that the element is now checked. If not, this method throws.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
-	// **Usage**
 	Check(options ...FrameCheckOptions) error
+	// Clear the input field.
+	// **Details**
+	// This method waits for [actionability](../actionability.md) checks, focuses the element, clears it and triggers an
+	// `input` event after clearing.
+	// If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an
+	// error. However, if the element is inside the `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be cleared
+	// instead.
+	Clear(options ...LocatorClearOptions) error
 	// Click an element.
 	// **Details**
 	// This method clicks the element by performing the following steps:
 	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to click in the center of the element, or the specified `position`.
+	// 1. Use Page.mouse() to click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
-	// **Usage**
-	// Click a button:
-	// Shift-right-click at a specific position on a canvas:
 	Click(options ...PageClickOptions) error
 	// Returns the number of elements matching the locator.
-	// **Usage**
 	Count() (int, error)
 	// Double-click an element.
 	// **Details**
 	// This method double clicks the element by performing the following steps:
 	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to double click in the center of the element, or the specified `position`.
+	// 1. Use Page.mouse() to double click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if
 	// the first click of the `dblclick()` triggers a navigation event, this method will throw.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
@@ -1261,28 +1161,11 @@ type Locator interface {
 	// **NOTE** `element.dblclick()` dispatches two `click` events and a single `dblclick` event.
 	Dblclick(options ...FrameDblclickOptions) error
 	// Programmaticaly dispatch an event on the matching element.
-	// **Usage**
-	// **Details**
-	// The snippet above dispatches the `click` event on the element. Regardless of the visibility state of the element,
-	// `click` is dispatched. This is equivalent to calling
-	// [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
-	// Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit`
-	// properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
-	// Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
-	// - [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)
-	// - [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent)
-	// - [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent)
-	// - [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent)
-	// - [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent)
-	// - [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)
-	// - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
-	// You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 	DispatchEvent(typ string, eventInit interface{}, options ...PageDispatchEventOptions) error
 	// Drag the source element towards the target element and drop it.
 	// **Details**
 	// This method drags the locator to another target locator or target position. It will first move to the source
 	// element, perform a `mousedown`, then move to the target element or position and perform a `mouseup`.
-	// **Usage**
 	DragTo(target Locator, options ...FrameDragAndDropOptions) error
 	// Resolves given locator to the first matching DOM element. If there are no matching elements, waits for one. If
 	// multiple elements match the locator, throws.
@@ -1295,7 +1178,6 @@ type Locator interface {
 	// second argument.
 	// If `expression` returns a [Promise], this method will wait for the promise to resolve and return its value.
 	// If `expression` throws or rejects, this method throws.
-	// **Usage**
 	Evaluate(expression string, arg interface{}, options ...LocatorEvaluateOptions) (interface{}, error)
 	// Execute JavaScript code in the page, taking all matching elements as an argument.
 	// **Details**
@@ -1303,125 +1185,86 @@ type Locator interface {
 	// `arg` as a second argument.
 	// If `expression` returns a [Promise], this method will wait for the promise to resolve and return its value.
 	// If `expression` throws or rejects, this method throws.
-	// **Usage**
 	EvaluateAll(expression string, options ...interface{}) (interface{}, error)
 	// Execute JavaScript code in the page, taking the matching element as an argument, and return a `JSHandle` with the
 	// result.
 	// **Details**
 	// Returns the return value of `expression` as a`JSHandle`, called with the matching element as a first argument, and
 	// `arg` as a second argument.
-	// The only difference between Locator.evaluate`] and [`method: Locator.evaluateHandle() is that
+	// The only difference between Locator.evaluate() and Locator.evaluateHandle() is that
 	// Locator.evaluateHandle() returns `JSHandle`.
 	// If `expression` returns a [Promise], this method will wait for the promise to resolve and return its value.
 	// If `expression` throws or rejects, this method throws.
 	// See Page.evaluateHandle() for more details.
 	EvaluateHandle(expression string, arg interface{}, options ...LocatorEvaluateHandleOptions) (interface{}, error)
 	// Set a value to the input field.
-	// **Usage**
-	// **Details**
-	// This method waits for [actionability](../actionability.md) checks, focuses the element, fills it and triggers an
-	// `input` event after filling. Note that you can pass an empty string to clear the input field.
-	// If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an
-	// error. However, if the element is inside the `<label>` element that has an associated
-	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be filled
-	// instead.
-	// To send fine-grained keyboard events, use Locator.type().
 	Fill(value string, options ...FrameFillOptions) error
+	// This method narrows existing locator according to the options, for example filters by text. It can be chained to
+	// filter multiple times.
+	Filter(options ...LocatorLocatorOptions) (Locator, error)
 	// Returns locator to the first matching element.
 	First() (Locator, error)
 	// Calls [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the matching element.
 	Focus(options ...FrameFocusOptions) error
 	// When working with iframes, you can create a frame locator that will enter the iframe and allow locating elements in
 	// that iframe:
-	// **Usage**
 	FrameLocator(selector string) FrameLocator
 	// Returns the matching element's attribute value.
 	GetAttribute(name string, options ...PageGetAttributeOptions) (string, error)
+	// Allows locating elements by their alt text.
+	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error)
+	// Allows locating input elements by the text of the associated label.
+	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error)
+	// Allows locating input elements by the placeholder text.
+	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error)
+	// Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
+	// [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
+	// [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error)
+	// Locate element by the test id.
+	GetByTestId(testId interface{}) (Locator, error)
+	// Allows locating elements that contain given text.
+	// See also Locator.filter() that allows to match by another criteria, like an accessible role, and then
+	// filter by the text content.
+	GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error)
+	// Allows locating elements by their title attribute.
+	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) (Locator, error)
 	// Highlight the corresponding element(s) on the screen. Useful for debugging, don't commit the code that uses
 	// Locator.highlight().
 	Highlight() error
 	// Hover over the matching element.
-	// **Usage**
-	// **Details**
-	// This method hovers over the element by performing the following steps:
-	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
-	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to hover over the center of the element, or the specified `position`.
-	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// If the element is detached from the DOM at any moment during the action, this method throws.
-	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
-	// Passing zero timeout disables this.
 	Hover(options ...PageHoverOptions) error
 	// Returns the [`element.innerHTML`](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML).
 	InnerHTML(options ...PageInnerHTMLOptions) (string, error)
 	// Returns the [`element.innerText`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/innerText).
 	InnerText(options ...PageInnerTextOptions) (string, error)
 	// Returns the value for the matching `<input>` or `<textarea>` or `<select>` element.
-	// **Usage**
-	// **Details**
-	// Throws elements that are not an input, textarea or a select. However, if the element is inside the `<label>`
-	// element that has an associated
-	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), returns the value of the
-	// control.
 	InputValue(options ...FrameInputValueOptions) (string, error)
 	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
-	// **Usage**
 	IsChecked(options ...FrameIsCheckedOptions) (bool, error)
 	// Returns whether the element is disabled, the opposite of [enabled](../actionability.md#enabled).
-	// **Usage**
 	IsDisabled(options ...FrameIsDisabledOptions) (bool, error)
 	// Returns whether the element is [editable](../actionability.md#editable).
-	// **Usage**
 	IsEditable(options ...FrameIsEditableOptions) (bool, error)
 	// Returns whether the element is [enabled](../actionability.md#enabled).
-	// **Usage**
 	IsEnabled(options ...FrameIsEnabledOptions) (bool, error)
 	// Returns whether the element is hidden, the opposite of [visible](../actionability.md#visible).
-	// **Usage**
 	IsHidden(options ...FrameIsHiddenOptions) (bool, error)
 	// Returns whether the element is [visible](../actionability.md#visible).
-	// **Usage**
 	IsVisible(options ...FrameIsVisibleOptions) (bool, error)
 	// Returns locator to the last matching element.
-	// **Usage**
 	Last() (Locator, error)
 	// The method finds an element matching the specified selector in the locator's subtree. It also accepts filter
 	// options, similar to Locator.filter() method.
 	// [Learn more about locators](../locators.md).
 	Locator(selector string, options ...LocatorLocatorOptions) (Locator, error)
 	// Returns locator to the n-th matching element. It's zero based, `nth(0)` selects the first element.
-	// **Usage**
 	Nth(index int) (Locator, error)
 	// A page this locator belongs to.
 	Page() Page
 	// Focuses the mathing element and presses a combintation of the keys.
-	// **Usage**
-	// **Details**
-	// Focuses the element, and then uses Keyboard.down`] and [`method: Keyboard.up().
-	// `key` can specify the intended
-	// [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) value or a single character
-	// to generate the text for. A superset of the `key` values can be found
-	// [here](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values). Examples of the keys are:
-	// `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`,
-	// `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`,
-	// etc.
-	// Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
-	// Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
-	// If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
-	// texts.
-	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
-	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	Press(key string, options ...PagePressOptions) error
 	// Take a screenshot of the element matching the locator.
-	// **Usage**
-	// Disable animations and save screenshot to a file:
-	// **Details**
-	// This method captures a screenshot of the page, clipped to the size and position of a particular element matching
-	// the locator. If the element is covered by other elements, it will not be actually visible on the screenshot. If the
-	// element is a scrollable container, only the currently scrolled content will be visible on the screenshot.
-	// This method waits for the [actionability](../actionability.md) checks, then scrolls element into view before taking
-	// a screenshot. If the element is detached from DOM, the method throws an error.
-	// Returns the buffer with the captured screenshot.
 	Screenshot(options ...LocatorScreenshotOptions) ([]byte, error)
 	// This method waits for [actionability](../actionability.md) checks, then tries to scroll element into view, unless
 	// it is completely visible as defined by
@@ -1437,14 +1280,6 @@ type Locator interface {
 	// instead.
 	// Returns the array of option values that have been successfully selected.
 	// Triggers a `change` and `input` event once all the provided options have been selected.
-	// **Usage**
-	// ```html
-	// <select multiple>
-	// <option value="red">Red</div>
-	// <option value="green">Green</div>
-	// <option value="blue">Blue</div>
-	// </select>
-	// ```
 	SelectOption(values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error)
 	// This method waits for [actionability](../actionability.md) checks, then focuses the element and selects all its
 	// text content.
@@ -1453,36 +1288,15 @@ type Locator interface {
 	// the control instead.
 	SelectText(options ...LocatorSelectTextOptions) error
 	// Set the state of a checkbox or a radio element.
-	// **Usage**
-	// **Details**
-	// This method checks or unchecks an element by performing the following steps:
-	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws.
-	// 1. If the element already has the right checked state, this method returns immediately.
-	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If
-	// the element is detached during the checks, the whole action is retried.
-	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to click in the center of the element.
-	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// 1. Ensure that the element is now checked or unchecked. If not, this method throws.
-	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
-	// Passing zero timeout disables this.
 	SetChecked(checked bool, options ...FrameSetCheckedOptions) error
 	// Upload file or multiple files into `<input type=file>`.
-	// **Usage**
-	// **Details**
-	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then
-	// they are resolved relative to the current working directory. For empty array, clears the selected files.
-	// This method expects `Locator` to point to an
-	// [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside
-	// the `<label>` element that has an associated
-	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), targets the control instead.
 	SetInputFiles(files []InputFile, options ...FrameSetInputFilesOptions) error
 	// Perform a tap gesture on the element matching the locator.
 	// **Details**
 	// This method taps the element by performing the following steps:
 	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.touchscreen`] to tap the center of the element, or the specified `position`.
+	// 1. Use Page.touchscreen() to tap the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -1494,37 +1308,114 @@ type Locator interface {
 	// Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the
 	// text.
 	// To press a special key, like `Control` or `ArrowDown`, use Locator.press().
-	// **Usage**
-	// An example of typing into a text field and then submitting the form:
 	Type(text string, options ...PageTypeOptions) error
 	// Ensure that checkbox or radio element is unchecked.
-	// **Usage**
-	// **Details**
-	// This method unchecks the element by performing the following steps:
-	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already
-	// unchecked, this method returns immediately.
-	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
-	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to click in the center of the element.
-	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
-	// 1. Ensure that the element is now unchecked. If not, this method throws.
-	// If the element is detached from the DOM at any moment during the action, this method throws.
-	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
-	// Passing zero timeout disables this.
 	Uncheck(options ...FrameUncheckOptions) error
 	// Returns when element specified by locator satisfies the `state` option.
 	// If target element already satisfies the condition, the method returns immediately. Otherwise, waits for up to
 	// `timeout` milliseconds until the condition is met.
-	// **Usage**
 	WaitFor(options ...PageWaitForSelectorOptions) error
 }
 
+// The `LocatorAssertions` class provides assertion methods that can be used to make assertions about the `Locator`
+// state in the tests. A new instance of `LocatorAssertions` is created by calling
+// PlaywrightAssertions.expectLocator():
+type LocatorAssertions interface {
+	// Makes the assertion check for the opposite condition. For example, this code tests that the Locator doesn't contain
+	// text `"error"`:
+	Not() LocatorAssertions
+	// Ensures the `Locator` points to a checked input.
+	ToBeChecked(options ...LocatorAssertionsToBeCheckedOptions) error
+	// Ensures the `Locator` points to a disabled element. Element is disabled if it has "disabled" attribute or is
+	// disabled via
+	// ['aria-disabled'](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-disabled). Note
+	// that only native control elements such as HTML `button`, `input`, `select`, `textarea`, `option`, `optgroup` can be
+	// disabled by setting "disabled" attribute. "disabled" attribute on other elements is ignored by the browser.
+	ToBeDisabled(options ...LocatorAssertionsToBeDisabledOptions) error
+	// Ensures the `Locator` points to an editable element.
+	ToBeEditable(options ...LocatorAssertionsToBeEditableOptions) error
+	// Ensures the `Locator` points to an empty editable element or to a DOM node that has no text.
+	ToBeEmpty(options ...LocatorAssertionsToBeEmptyOptions) error
+	// Ensures the `Locator` points to an enabled element.
+	ToBeEnabled(options ...LocatorAssertionsToBeEnabledOptions) error
+	// Ensures the `Locator` points to a focused DOM node.
+	ToBeFocused(options ...LocatorAssertionsToBeFocusedOptions) error
+	// Ensures that `Locator` either does not resolve to any DOM node, or resolves to a
+	// [non-visible](../actionability.md#visible) one.
+	ToBeHidden(options ...LocatorAssertionsToBeHiddenOptions) error
+	// Ensures that `Locator` points to an [attached](../actionability.md#attached) and
+	// [visible](../actionability.md#visible) DOM node.
+	ToBeVisible(options ...LocatorAssertionsToBeVisibleOptions) error
+	// Ensures the `Locator` points to an element that contains the given text. You can use regular expressions for the
+	// value as well.
+	ToContainText(expected interface{}, options ...LocatorAssertionsToContainTextOptions) error
+	// Ensures the `Locator` points to an element with given attribute.
+	ToHaveAttribute(name string, value interface{}, options ...LocatorAssertionsToHaveAttributeOptions) error
+	// Ensures the `Locator` points to an element with given CSS classes. This needs to be a full match or using a relaxed
+	// regular expression.
+	ToHaveClass(expected interface{}, options ...LocatorAssertionsToHaveClassOptions) error
+	// Ensures the `Locator` resolves to an exact number of DOM nodes.
+	ToHaveCount(count int, options ...LocatorAssertionsToHaveCountOptions) error
+	// Ensures the `Locator` resolves to an element with the given computed CSS style.
+	ToHaveCSS(name string, value interface{}, options ...LocatorAssertionsToHaveCSSOptions) error
+	// Ensures the `Locator` points to an element with the given DOM Node ID.
+	ToHaveId(id interface{}, options ...LocatorAssertionsToHaveIdOptions) error
+	// Ensures the `Locator` points to an element with given JavaScript property. Note that this property can be of a
+	// primitive type as well as a plain serializable JavaScript object.
+	ToHaveJSProperty(name string, value interface{}, options ...LocatorAssertionsToHaveJSPropertyOptions) error
+	// Ensures the `Locator` points to an element with the given text. You can use regular expressions for the value as
+	// well.
+	ToHaveText(expected interface{}, options ...LocatorAssertionsToHaveTextOptions) error
+	// Ensures the `Locator` points to an element with the given input value. You can use regular expressions for the
+	// value as well.
+	ToHaveValue(value interface{}, options ...LocatorAssertionsToHaveValueOptions) error
+	// Ensures the `Locator` points to multi-select/combobox (i.e. a `select` with the `multiple` attribute) and the
+	// specified values are selected.
+	ToHaveValues(values []interface{}, options ...LocatorAssertionsToHaveValuesOptions) error
+	// The opposite of LocatorAssertions.toBeChecked().
+	NotToBeChecked(options ...LocatorAssertionsToBeCheckedOptions) error
+	// The opposite of LocatorAssertions.toBeDisabled().
+	NotToBeDisabled(options ...LocatorAssertionsToBeDisabledOptions) error
+	// The opposite of LocatorAssertions.toBeEditable().
+	NotToBeEditable(options ...LocatorAssertionsToBeEditableOptions) error
+	// The opposite of LocatorAssertions.toBeEmpty().
+	NotToBeEmpty(options ...LocatorAssertionsToBeEmptyOptions) error
+	// The opposite of LocatorAssertions.toBeEnabled().
+	NotToBeEnabled(options ...LocatorAssertionsToBeEnabledOptions) error
+	// The opposite of LocatorAssertions.toBeFocused().
+	NotToBeFocused(options ...LocatorAssertionsToBeFocusedOptions) error
+	// The opposite of LocatorAssertions.toBeHidden().
+	NotToBeHidden(options ...LocatorAssertionsToBeHiddenOptions) error
+	// The opposite of LocatorAssertions.toBeVisible().
+	NotToBeVisible(options ...LocatorAssertionsToBeVisibleOptions) error
+	// The opposite of LocatorAssertions.toContainText().
+	NotToContainText(expected interface{}, options ...LocatorAssertionsToContainTextOptions) error
+	// The opposite of LocatorAssertions.toHaveAttribute().
+	NotToHaveAttribute(name string, value interface{}, options ...LocatorAssertionsToHaveAttributeOptions) error
+	// The opposite of LocatorAssertions.toHaveClass().
+	NotToHaveClass(expected interface{}, options ...LocatorAssertionsToHaveClassOptions) error
+	// The opposite of LocatorAssertions.toHaveCount().
+	NotToHaveCount(count int, options ...LocatorAssertionsToHaveCountOptions) error
+	// The opposite of LocatorAssertions.toHaveCSS().
+	NotToHaveCSS(name string, value interface{}, options ...LocatorAssertionsToHaveCSSOptions) error
+	// The opposite of LocatorAssertions.toHaveId().
+	NotToHaveId(id interface{}, options ...LocatorAssertionsToHaveIdOptions) error
+	// The opposite of LocatorAssertions.toHaveJSProperty().
+	NotToHaveJSProperty(name string, value interface{}, options ...LocatorAssertionsToHaveJSPropertyOptions) error
+	// The opposite of LocatorAssertions.toHaveText().
+	NotToHaveText(expected interface{}, options ...LocatorAssertionsToHaveTextOptions) error
+	// The opposite of LocatorAssertions.toHaveValue().
+	NotToHaveValue(value interface{}, options ...LocatorAssertionsToHaveValueOptions) error
+	// The opposite of LocatorAssertions.toHaveValues().
+	NotToHaveValues(values []interface{}, options ...LocatorAssertionsToHaveValuesOptions) error
+}
+
 // The Mouse class operates in main-frame CSS pixels relative to the top-left corner of the viewport.
-// Every `page` object has its own Mouse, accessible with [`property: Page.mouse`].
+// Every `page` object has its own Mouse, accessible with Page.mouse().
 type Mouse interface {
-	// Shortcut for Mouse.move`], [`method: Mouse.down`], [`method: Mouse.up().
+	// Shortcut for Mouse.move(), Mouse.down(), Mouse.up().
 	Click(x, y float64, options ...MouseClickOptions) error
-	// Shortcut for Mouse.move`], [`method: Mouse.down`], [`method: Mouse.up`], [`method: Mouse.down() and
+	// Shortcut for Mouse.move(), Mouse.down(), Mouse.up(), Mouse.down() and
 	// Mouse.up().
 	Dblclick(x, y float64, options ...MouseDblclickOptions) error
 	// Dispatches a `mousedown` event.
@@ -1533,6 +1424,10 @@ type Mouse interface {
 	Move(x float64, y float64, options ...MouseMoveOptions) error
 	// Dispatches a `mouseup` event.
 	Up(options ...MouseUpOptions) error
+	// Dispatches a `wheel` event.
+	// **NOTE** Wheel events may cause scrolling if they are not handled, and this method does not wait for the scrolling
+	// to finish before returning.
+	Wheel(deltaX, deltaY float64) error
 }
 
 // Page provides methods to interact with a single tab in a `Browser`, or an
@@ -1553,7 +1448,7 @@ type Page interface {
 	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If
 	// the element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to click in the center of the element.
+	// 1. Use Page.mouse() to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// 1. Ensure that the element is now checked or unchecked. If not, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -1568,10 +1463,6 @@ type Page interface {
 	// newly attached frame.
 	// The script is evaluated after the document was created but before any of its scripts were run. This is useful to
 	// amend the JavaScript environment, e.g. to seed `Math.random`.
-	// **Usage**
-	// An example of overriding `Math.random` before the page loads:
-	// **NOTE** The order of evaluation of multiple scripts installed via BrowserContext.addInitScript() and
-	// Page.addInitScript() is not defined.
 	AddInitScript(script PageAddInitScriptOptions) error
 	// Adds a `<script>` tag into the page with the desired url or content. Returns the added tag when the script's onload
 	// fires or when the script content was injected into frame.
@@ -1588,7 +1479,7 @@ type Page interface {
 	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If
 	// the element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to click in the center of the element.
+	// 1. Use Page.mouse() to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// 1. Ensure that the element is now checked. If not, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -1599,7 +1490,7 @@ type Page interface {
 	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If
 	// the element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to click in the center of the element, or the specified `position`.
+	// 1. Use Page.mouse() to click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
@@ -1619,7 +1510,7 @@ type Page interface {
 	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If
 	// the element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to double click in the center of the element, or the specified `position`.
+	// 1. Use Page.mouse() to double click in the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if
 	// the first click of the `dblclick()` triggers a navigation event, this method will throw.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -1629,18 +1520,6 @@ type Page interface {
 	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
 	// `click` is dispatched. This is equivalent to calling
 	// [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
-	// **Usage**
-	// Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit`
-	// properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
-	// Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
-	// - [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)
-	// - [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent)
-	// - [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent)
-	// - [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent)
-	// - [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent)
-	// - [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)
-	// - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
-	// You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 	DispatchEvent(selector string, typ string, options ...PageDispatchEventOptions) error
 	// The method adds a function called `name` on the `window` object of every frame in this page. When called, the
 	// function executes `callback` and returns a [Promise] which resolves to the return value of `callback`. If the
@@ -1649,53 +1528,38 @@ type Page interface {
 	// BrowserContext, page: Page, frame: Frame }`.
 	// See BrowserContext.exposeBinding() for the context-wide version.
 	// **NOTE** Functions installed via Page.exposeBinding() survive navigations.
-	// **Usage**
-	// An example of exposing page URL to all frames in a page:
-	// An example of passing an element handle:
 	ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error
 	// The method adds a function called `name` on the `window` object of every frame in the page. When called, the
 	// function executes `callback` and returns a [Promise] which resolves to the return value of `callback`.
 	// If the `callback` returns a [Promise], it will be awaited.
 	// See BrowserContext.exposeFunction() for context-wide exposed function.
 	// **NOTE** Functions installed via Page.exposeFunction() survive navigations.
-	// **Usage**
-	// An example of adding a `sha256` function to the page:
 	ExposeFunction(name string, binding ExposedFunction) error
 	// This method changes the `CSS media type` through the `media` argument, and/or the `'prefers-colors-scheme'` media
 	// feature, using the `colorScheme` argument.
-	// **Usage**
 	EmulateMedia(options ...PageEmulateMediaOptions) error
 	// Returns the value of the `expression` invocation.
-	// If the function passed to the Page.evaluate`] returns a [Promise], then [`method: Page.evaluate() would
+	// If the function passed to the Page.evaluate() returns a [Promise], then Page.evaluate() would
 	// wait for the promise to resolve and return its value.
 	// If the function passed to the Page.evaluate() returns a non-[Serializable] value, then
 	// Page.evaluate() resolves to `undefined`. Playwright also supports transferring some additional values
 	// that are not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`.
-	// **Usage**
-	// Passing argument to `expression`:
-	// A string can also be passed in instead of a function:
-	// `ElementHandle` instances can be passed as an argument to the Page.evaluate():
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
 	// Returns the value of the `expression` invocation as a `JSHandle`.
-	// The only difference between Page.evaluate`] and [`method: Page.evaluateHandle() is that
+	// The only difference between Page.evaluate() and Page.evaluateHandle() is that
 	// Page.evaluateHandle() returns `JSHandle`.
 	// If the function passed to the Page.evaluateHandle() returns a [Promise], then
 	// Page.evaluateHandle() would wait for the promise to resolve and return its value.
-	// **Usage**
-	// A string can also be passed in instead of a function:
-	// `JSHandle` instances can be passed as an argument to the Page.evaluateHandle():
 	EvaluateHandle(expression string, options ...interface{}) (JSHandle, error)
 	// The method finds an element matching the specified selector within the page and passes it as a first argument to
 	// `expression`. If no elements match the selector, the method throws an error. Returns the value of `expression`.
 	// If `expression` returns a [Promise], then Page.evalOnSelector() would wait for the promise to resolve and
 	// return its value.
-	// **Usage**
 	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
 	// The method finds all elements matching the specified selector within the page and passes an array of matched
 	// elements as a first argument to `expression`. Returns the result of `expression` invocation.
 	// If `expression` returns a [Promise], then Page.evalOnSelectorAll() would wait for the promise to resolve
 	// and return its value.
-	// **Usage**
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
 	// Performs action and waits for a `ConsoleMessage` to be logged by in the page. If predicate is provided, it passes
 	// `ConsoleMessage` value into the `predicate` function and waits for `predicate(message)` to return a truthy value.
@@ -1707,7 +1571,6 @@ type Page interface {
 	ExpectDownload(cb func() error, options ...PageExpectDownloadOptions) (Download, error)
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the page is closed before the event is fired. Returns the event data value.
-	// **Usage**
 	ExpectEvent(event string, cb func() error, options ...PageWaitForEventOptions) (interface{}, error)
 	// Performs action and waits for a new `FileChooser` to be created. If predicate is provided, it passes `FileChooser`
 	// value into the `predicate` function and waits for `predicate(fileChooser)` to return a truthy value. Will throw an
@@ -1720,7 +1583,15 @@ type Page interface {
 	// closed before the popup event is fired.
 	ExpectPopup(cb func() error, options ...PageExpectPopupOptions) (Page, error)
 	ExpectRequest(url interface{}, cb func() error, options ...PageWaitForRequestOptions) (Request, error)
+	// Performs action and waits for a `Request` to finish loading. If predicate is provided, it passes `Request` value
+	// into the `predicate` function and waits for `predicate(request)` to return a truthy value. Will throw an error if
+	// the page is closed before the [`event: Page.requestFinished`] event is fired.
+	ExpectRequestFinished(cb func() error, options ...PageExpectRequestFinishedOptions) (Request, error)
 	ExpectResponse(url interface{}, cb func() error, options ...PageWaitForResponseOptions) (Response, error)
+	// Performs action and waits for a new `WebSocket`. If predicate is provided, it passes `WebSocket` value into the
+	// `predicate` function and waits for `predicate(webSocket)` to return a truthy value. Will throw an error if the page
+	// is closed before the WebSocket event is fired.
+	ExpectWebSocket(cb func() error, options ...PageExpectWebSocketOptions) (WebSocket, error)
 	// Performs action and waits for a new `Worker`. If predicate is provided, it passes `Worker` value into the
 	// `predicate` function and waits for `predicate(worker)` to return a truthy value. Will throw an error if the page is
 	// closed before the worker event is fired.
@@ -1739,18 +1610,32 @@ type Page interface {
 	// method waits until a matching element appears in the DOM.
 	Focus(expression string, options ...FrameFocusOptions) error
 	// Returns frame matching the specified criteria. Either `name` or `url` must be specified.
-	// **Usage**
 	Frame(options PageFrameOptions) Frame
 	// An array of all frames attached to the page.
 	Frames() []Frame
 	// When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements
 	// in that iframe.
-	// **Usage**
-	// Following snippet locates element with text "Submit" in the iframe with id `my-frame`, like `<iframe
-	// id="my-frame">`:
 	FrameLocator(selector string) FrameLocator
 	// Returns element attribute value.
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
+	// Allows locating elements by their alt text.
+	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error)
+	// Allows locating input elements by the text of the associated label.
+	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error)
+	// Allows locating input elements by the placeholder text.
+	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error)
+	// Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
+	// [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
+	// [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error)
+	// Locate element by the test id.
+	GetByTestId(testId interface{}) (Locator, error)
+	// Allows locating elements that contain given text.
+	// See also Locator.filter() that allows to match by another criteria, like an accessible role, and then
+	// filter by the text content.
+	GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error)
+	// Allows locating elements by their title attribute.
+	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) (Locator, error)
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of
 	// the last redirect. If can not go back, returns `null`.
 	// Navigate to the previous page in history.
@@ -1780,7 +1665,7 @@ type Page interface {
 	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If
 	// the element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to hover over the center of the element, or the specified `position`.
+	// 1. Use Page.mouse() to hover over the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
@@ -1821,34 +1706,8 @@ type Page interface {
 	// **NOTE** By default, `page.pdf()` generates a pdf with modified colors for printing. Use the
 	// [`-webkit-print-color-adjust`](https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-print-color-adjust)
 	// property to force rendering of exact colors.
-	// **Usage**
-	// The `width`, `height`, and `margin` options accept values labeled with units. Unlabeled values are treated as
-	// pixels.
-	// A few examples:
-	// - `page.pdf({width: 100})` - prints with width set to 100 pixels
-	// - `page.pdf({width: '100px'})` - prints with width set to 100 pixels
-	// - `page.pdf({width: '10cm'})` - prints with width set to 10 centimeters.
-	// All possible units are:
-	// - `px` - pixel
-	// - `in` - inch
-	// - `cm` - centimeter
-	// - `mm` - millimeter
-	// The `format` options are:
-	// - `Letter`: 8.5in x 11in
-	// - `Legal`: 8.5in x 14in
-	// - `Tabloid`: 11in x 17in
-	// - `Ledger`: 17in x 11in
-	// - `A0`: 33.1in x 46.8in
-	// - `A1`: 23.4in x 33.1in
-	// - `A2`: 16.54in x 23.4in
-	// - `A3`: 11.7in x 16.54in
-	// - `A4`: 8.27in x 11.7in
-	// - `A5`: 5.83in x 8.27in
-	// - `A6`: 4.13in x 5.83in
-	// **NOTE** `headerTemplate` and `footerTemplate` markup have the following limitations: > 1. Script tags inside
-	// templates are not evaluated. > 2. Page styles are not visible inside templates.
 	PDF(options ...PagePdfOptions) ([]byte, error)
-	// Focuses the element, and then uses Keyboard.down`] and [`method: Keyboard.up().
+	// Focuses the element, and then uses Keyboard.down() and Keyboard.up().
 	// `key` can specify the intended
 	// [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) value or a single character
 	// to generate the text for. A superset of the `key` values can be found
@@ -1862,7 +1721,6 @@ type Page interface {
 	// texts.
 	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
-	// **Usage**
 	Press(selector, key string, options ...PagePressOptions) error
 	// The method finds an element matching the specified selector within the page. If no elements match the selector, the
 	// return value resolves to `null`. To wait for an element on the page, use Locator.waitFor().
@@ -1874,6 +1732,10 @@ type Page interface {
 	// main resource response. In case of multiple redirects, the navigation will resolve with the response of the last
 	// redirect.
 	Reload(options ...PageReloadOptions) (Response, error)
+	// API testing helper associated with this page. This method returns the same instance as
+	// BrowserContext.request() on the page's context. See BrowserContext.request() for more
+	// details.
+	Request() APIRequestContext
 	// Routing provides the capability to modify network requests that are made by a page.
 	// Once routing is enabled, every request matching the url pattern will stall unless it's continued, fulfilled or
 	// aborted.
@@ -1881,16 +1743,13 @@ type Page interface {
 	// **NOTE** Page.route() will not intercept requests intercepted by Service Worker. See
 	// [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when
 	// using request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
-	// **Usage**
-	// An example of a naive handler that aborts all image requests:
-	// or the same snippet using a regex pattern instead:
-	// It is possible to examine the request to decide the route action. For example, mocking all requests that contain
-	// some post data, and leaving all other requests as is:
-	// Page routes take precedence over browser context routes (set up with BrowserContext.route()) when request
-	// matches both handlers.
-	// To remove a route with its handler you can use Page.unroute().
-	// **NOTE** Enabling routing disables http cache.
 	Route(url interface{}, handler routeHandler, times ...int) error
+	// If specified the network requests that are made in the page will be served from the HAR file. Read more about
+	// [Replaying from HAR](../network.md#replaying-from-har).
+	// Playwright will not serve requests intercepted by Service Worker from the HAR file. See
+	// [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when
+	// using request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
+	RouteFromHAR(har string, options ...PageRouteFromHAROptions) error
 	// Returns the buffer with the captured screenshot.
 	Screenshot(options ...PageScreenshotOptions) ([]byte, error)
 	// This method waits for an element matching `selector`, waits for [actionability](../actionability.md) checks, waits
@@ -1901,7 +1760,6 @@ type Page interface {
 	// instead.
 	// Returns the array of option values that have been successfully selected.
 	// Triggers a `change` and `input` event once all the provided options have been selected.
-	// **Usage**
 	SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error)
 	SetContent(content string, options ...PageSetContentOptions) error
 	// This setting will change the default maximum navigation time for the following methods and related shortcuts:
@@ -1912,11 +1770,11 @@ type Page interface {
 	// - Page.setContent()
 	// - Page.waitForNavigation()
 	// - Page.waitForURL()
-	// **NOTE** Page.setDefaultNavigationTimeout`] takes priority over [`method: Page.setDefaultTimeout(),
-	// BrowserContext.setDefaultTimeout`] and [`method: BrowserContext.setDefaultNavigationTimeout().
+	// **NOTE** Page.setDefaultNavigationTimeout() takes priority over Page.setDefaultTimeout(),
+	// BrowserContext.setDefaultTimeout() and BrowserContext.setDefaultNavigationTimeout().
 	SetDefaultNavigationTimeout(timeout float64)
 	// This setting will change the default maximum time for all the methods accepting `timeout` option.
-	// **NOTE** Page.setDefaultNavigationTimeout`] takes priority over [`method: Page.setDefaultTimeout().
+	// **NOTE** Page.setDefaultNavigationTimeout() takes priority over Page.setDefaultTimeout().
 	SetDefaultTimeout(timeout float64)
 	// The extra HTTP headers will be sent with every request the page initiates.
 	// **NOTE** Page.setExtraHTTPHeaders() does not guarantee the order of headers in the outgoing requests.
@@ -1934,14 +1792,13 @@ type Page interface {
 	// should set the viewport size before navigating to the page. Page.setViewportSize() will also reset
 	// `screen` size, use Browser.newContext() with `screen` and `viewport` parameters if you need better
 	// control of these properties.
-	// **Usage**
 	SetViewportSize(width, height int) error
 	// This method taps an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
 	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If
 	// the element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.touchscreen`] to tap the center of the element, or the specified `position`.
+	// 1. Use Page.touchscreen() to tap the center of the element, or the specified `position`.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
@@ -1954,7 +1811,6 @@ type Page interface {
 	// Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text. `page.type` can be used to
 	// send fine-grained keyboard events. To fill values in form fields, use Page.fill().
 	// To press a special key, like `Control` or `ArrowDown`, use Keyboard.press().
-	// **Usage**
 	Type(selector, text string, options ...PageTypeOptions) error
 	URL() string
 	// This method unchecks an element matching `selector` by performing the following steps:
@@ -1964,7 +1820,7 @@ type Page interface {
 	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If
 	// the element is detached during the checks, the whole action is retried.
 	// 1. Scroll the element into view if needed.
-	// 1. Use [`property: Page.mouse`] to click in the center of the element.
+	// 1. Use Page.mouse() to click in the center of the element.
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// 1. Ensure that the element is now unchecked. If not, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -1976,39 +1832,27 @@ type Page interface {
 	// Video object associated with this page.
 	Video() Video
 	ViewportSize() ViewportSize
-	// **NOTE** In most cases, you should use Page.waitForEvent().
+	// **NOTE** In most cases, you should use Page.ExpectForEvent().
 	// Waits for given `event` to fire. If predicate is provided, it passes event's value into the `predicate` function
 	// and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is closed before the
 	// `event` is fired.
 	WaitForEvent(event string, options ...PageWaitForEventOptions) (interface{}, error)
 	// Returns when the `expression` returns a truthy value. It resolves to a JSHandle of the truthy value.
-	// **Usage**
-	// The Page.waitForFunction() can be used to observe viewport size change:
-	// To pass an argument to the predicate of Page.waitForFunction() function:
 	WaitForFunction(expression string, arg interface{}, options ...FrameWaitForFunctionOptions) (JSHandle, error)
 	// Returns when the required load state has been reached.
 	// This resolves when the page reaches a required load state, `load` by default. The navigation must have been
 	// committed when this method is called. If current document has already reached the required state, resolves
 	// immediately.
-	// **Usage**
 	WaitForLoadState(options ...PageWaitForLoadStateOptions) error
 	// Waits for the main frame navigation and returns the main resource response. In case of multiple redirects, the
 	// navigation will resolve with the response of the last redirect. In case of navigation to a different anchor or
 	// navigation due to History API usage, the navigation will resolve with `null`.
-	// **Usage**
-	// This resolves when the page navigates to a new URL or reloads. It is useful for when you run code which will
-	// indirectly cause the page to navigate. e.g. The click target has an `onclick` handler that triggers navigation from
-	// a `setTimeout`. Consider this example:
-	// **NOTE** Usage of the [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) to change the URL
-	// is considered a navigation.
 	WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error)
 	// Waits for the matching request and returns it. See [waiting for event](../events.md#waiting-for-event) for more
 	// details about events.
-	// **Usage**
 	WaitForRequest(url interface{}, options ...PageWaitForRequestOptions) (Request, error)
 	// Returns the matched response. See [waiting for event](../events.md#waiting-for-event) for more details about
 	// events.
-	// **Usage**
 	WaitForResponse(url interface{}, options ...PageWaitForResponseOptions) (Response, error)
 	// Returns when element specified by selector satisfies `state` option. Returns `null` if waiting for `hidden` or
 	// `detached`.
@@ -2017,13 +1861,10 @@ type Page interface {
 	// Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If
 	// at the moment of calling the method `selector` already satisfies the condition, the method will return immediately.
 	// If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
-	// **Usage**
-	// This method works across navigations:
 	WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandle, error)
 	// Waits for the given `timeout` in milliseconds.
 	// Note that `page.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going
 	// to be flaky. Use signals such as network events, selectors becoming visible and others instead.
-	// **Usage**
 	WaitForTimeout(timeout float64)
 	// This method returns all of the dedicated
 	// [WebWorkers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) associated with the page.
@@ -2031,7 +1872,6 @@ type Page interface {
 	Workers() []Worker
 	// This method drags the source element to the target element. It will first move to the source element, perform a
 	// `mousedown`, then move to the target element and perform a `mouseup`.
-	// **Usage**
 	DragAndDrop(source, target string, options ...FrameDragAndDropOptions) error
 	// Pauses script execution. Playwright will stop executing the script and wait for the user to either press 'Resume'
 	// button in the page overlay or to call `playwright.resume()` in the DevTools console.
@@ -2046,8 +1886,39 @@ type Page interface {
 	// control.
 	InputValue(selector string, options ...FrameInputValueOptions) (string, error)
 	// Waits for the main frame to navigate to the given URL.
-	// **Usage**
 	WaitForURL(url string, options ...FrameWaitForURLOptions) error
+}
+
+// The `PageAssertions` class provides assertion methods that can be used to make assertions about the `Page` state in
+// the tests. A new instance of `PageAssertions` is created by calling PlaywrightAssertions.expectPage():
+type PageAssertions interface {
+	// Makes the assertion check for the opposite condition. For example, this code tests that the page URL doesn't
+	// contain `"error"`:
+	Not() PageAssertions
+	// Ensures the page has the given title.
+	ToHaveTitle(titleOrRegExp interface{}, options ...PageAssertionsToHaveTitleOptions) error
+	// Ensures the page is navigated to the given URL.
+	ToHaveURL(urlOrRegExp interface{}, options ...PageAssertionsToHaveURLOptions) error
+	// The opposite of PageAssertions.toHaveTitle().
+	NotToHaveTitle(titleOrRegExp interface{}, options ...PageAssertionsToHaveTitleOptions) error
+	// The opposite of PageAssertions.toHaveURL().
+	NotToHaveURL(urlOrRegExp interface{}, options ...PageAssertionsToHaveURLOptions) error
+}
+
+// Playwright gives you Web-First Assertions with convenience methods for creating assertions that will wait and retry
+// until the expected condition is met.
+// Consider the following example:
+// Playwright will be re-testing the node with the selector `.status` until fetched Node has the `"Submitted"` text.
+// It will be re-fetching the node and checking it over and over, until the condition is met or until the timeout is
+// reached. You can pass this timeout as an option.
+// By default, the timeout for assertions is set to 5 seconds.
+type PlaywrightAssertions interface {
+	// Creates a `APIResponseAssertions` object for the given `APIResponse`.
+	APIResponse(response APIResponse) APIResponseAssertions
+	// Creates a `LocatorAssertions` object for the given `Locator`.
+	Locator(locator Locator) LocatorAssertions
+	// Creates a `PageAssertions` object for the given `Page`.
+	Page(page Page) PageAssertions
 }
 
 // Whenever the page sends a request for a network resource the following sequence of events are emitted by `Page`:
@@ -2071,8 +1942,6 @@ type Request interface {
 	HeaderValue(name string) (string, error)
 	HeaderValues(name string) ([]string, error)
 	// The method returns `null` unless this request has failed, as reported by `requestfailed` event.
-	// **Usage**
-	// Example of logging of all the failed requests:
 	Failure() *RequestFailure
 	// Returns the `Frame` that initiated this request.
 	Frame() Frame
@@ -2096,13 +1965,8 @@ type Request interface {
 	// When the server responds with a redirect, Playwright creates a new `Request` object. The two requests are connected
 	// by `redirectedFrom()` and `redirectedTo()` methods. When multiple server redirects has happened, it is possible to
 	// construct the whole redirect chain by repeatedly calling `redirectedFrom()`.
-	// **Usage**
-	// For example, if the website `http://example.com` redirects to `https://example.com`:
-	// If the website `https://google.com` has no redirects:
 	RedirectedFrom() Request
 	// New request issued by the browser if the server responded with redirect.
-	// **Usage**
-	// This method is the opposite of Request.redirectedFrom():
 	RedirectedTo() Request
 	// Contains the request's resource type as it was perceived by the rendering engine. ResourceType will be one of the
 	// following: `document`, `stylesheet`, `image`, `media`, `font`, `script`, `texttrack`, `xhr`, `fetch`,
@@ -2113,7 +1977,6 @@ type Request interface {
 	// Returns resource timing information for given request. Most of the timing values become available upon the
 	// response, `responseEnd` becomes available when request finishes. Find more information at
 	// [Resource Timing API](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceResourceTiming).
-	// **Usage**
 	Timing() *ResourceTiming
 	// URL of the request.
 	URL() string
@@ -2141,6 +2004,9 @@ type Response interface {
 	Finished()
 	// Returns the `Frame` that initiated this response.
 	Frame() Frame
+	// Indicates whether this Response was fulfilled by a Service Worker's Fetch Handler (i.e. via
+	// [FetchEvent.respondWith](https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent/respondWith)).
+	FromServiceWorker() bool
 	// An object with the response HTTP headers. The header names are lower-cased. Note that this method does not return
 	// security-related headers, including cookie-related ones. You can use Response.allHeaders() for complete
 	// list of headers that include `cookie` information.
@@ -2166,22 +2032,34 @@ type Response interface {
 	ServerAddr() (*ResponseServerAddrResult, error)
 }
 
-// Whenever a network route is set up with Page.route`] or [`method: BrowserContext.route(), the `Route`
+// Whenever a network route is set up with Page.route() or BrowserContext.route(), the `Route`
 // object allows to handle the route.
 // Learn more about [networking](../network.md).
 type Route interface {
 	// Aborts the route's request.
 	Abort(errorCode ...string) error
 	// Continues route's request with optional overrides.
-	// **Usage**
 	Continue(options ...RouteContinueOptions) error
+	// When several routes match the given pattern, they run in the order opposite to their registration. That way the
+	// last registered route can always override all the previous ones. In the example below, request will be handled by
+	// the bottom-most handler first, then it'll fall back to the previous one and in the end will be aborted by the first
+	// registered route.
+	Fallback(options ...RouteFallbackOptions) error
+	// Performs the request and fetches result without fulfilling it, so that the response could be modified and then
+	// fulfilled.
+	Fetch(options ...RouteFetchOptions) (APIResponse, error)
 	// Fulfills route's request with given response.
-	// **Usage**
-	// An example of fulfilling all requests with 404 responses:
-	// An example of serving static file:
 	Fulfill(options RouteFulfillOptions) error
 	// A request to be routed.
 	Request() Request
+}
+
+// Selectors can be used to install custom selector engines. See [extensibility](../extensibility.md) for more
+// information.
+type Selectors interface {
+	Register(name string, option SelectorsRegisterOptions) error
+	// Defines custom attribute name to be used in Page.getByTestId(). `data-testid` is used by default.
+	SetTestIdAttribute(name string)
 }
 
 // The Touchscreen class operates in main-frame CSS pixels relative to the top-left corner of the viewport. Methods on
@@ -2200,7 +2078,12 @@ type WebSocket interface {
 	URL() string
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the webSocket is closed before the event is fired. Returns the event data value.
-	WaitForEvent(event string, predicate ...interface{}) (interface{}, error)
+	ExpectEvent(event string, cb func() error, options ...WebSocketWaitForEventOptions) (interface{}, error)
+	// **NOTE** In most cases, you should use WebSocket.ExpectForEvent().
+	// Waits for given `event` to fire. If predicate is provided, it passes event's value into the `predicate` function
+	// and waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is closed before the
+	// `event` is fired.
+	WaitForEvent(event string, options ...WebSocketWaitForEventOptions) (interface{}, error)
 }
 
 // When browser context is created with the `recordVideo` option, each page has a video object associated with it.
@@ -2221,14 +2104,14 @@ type Video interface {
 type Worker interface {
 	EventEmitter
 	// Returns the return value of `expression`.
-	// If the function passed to the Worker.evaluate`] returns a [Promise], then [`method: Worker.evaluate()
+	// If the function passed to the Worker.evaluate() returns a [Promise], then Worker.evaluate()
 	// would wait for the promise to resolve and return its value.
 	// If the function passed to the Worker.evaluate() returns a non-[Serializable] value, then
 	// Worker.evaluate() returns `undefined`. Playwright also supports transferring some additional values that
 	// are not serializable by `JSON`: `-0`, `NaN`, `Infinity`, `-Infinity`.
 	Evaluate(expression string, options ...interface{}) (interface{}, error)
 	// Returns the return value of `expression` as a `JSHandle`.
-	// The only difference between Worker.evaluate`] and [`method: Worker.evaluateHandle() is that
+	// The only difference between Worker.evaluate() and Worker.evaluateHandle() is that
 	// Worker.evaluateHandle() returns `JSHandle`.
 	// If the function passed to the Worker.evaluateHandle() returns a [Promise], then
 	// Worker.evaluateHandle() would wait for the promise to resolve and return its value.

@@ -91,6 +91,20 @@
 			"string"
 		]
 	},
+	"APIResponseAssertions": {
+		"Not": [
+			null,
+			"APIResponseAssertions"
+		],
+		"ToBeOK": [
+			null,
+			"error"
+		],
+		"NotToBeOK": [
+			null,
+			"error"
+		]
+	},
 	"BindingCall": {
 		"Call": [
 			"f BindingCallFunction",
@@ -128,6 +142,14 @@
 		"NewBrowserCDPSession": [
 			null,
 			"(CDPSession, error)"
+		],
+		"StartTracing": [
+			"options ...BrowserStartTracingOptions",
+			"error"
+		],
+		"StopTracing": [
+			null,
+			"[]byte, error"
 		],
 		"Version": [
 			null,
@@ -183,6 +205,10 @@
 			"event string, cb func() error, options ...BrowserContextWaitForEventOptions",
 			"(interface{}, error)"
 		],
+		"ExpectPage": [
+			"cb func() error, options ...BrowserContextExpectPageOptions",
+			"Page, error"
+		],
 		"ExposeBinding": [
 			"name string, binding BindingCallFunction, handle ...bool",
 			"error"
@@ -207,6 +233,10 @@
 			null,
 			"[]Page"
 		],
+		"ServiceWorkers": [
+			null,
+			"[]Worker"
+		],
 		"SetDefaultNavigationTimeout": [
 			"timeout float64",
 			null
@@ -223,6 +253,10 @@
 			"gelocation *Geolocation",
 			"error"
 		],
+		"Request": [
+			null,
+			"APIRequestContext"
+		],
 		"ResetGeolocation": [
 			null,
 			"error"
@@ -233,6 +267,10 @@
 		],
 		"SetOffline": [
 			"offline bool",
+			"error"
+		],
+		"RouteFromHAR": [
+			"har string, options ...BrowserContextRouteFromHAROptions",
 			"error"
 		],
 		"StorageState": [
@@ -648,6 +686,34 @@
 			"selector string, name string, options ...PageGetAttributeOptions",
 			"string, error"
 		],
+		"GetByAltText": [
+			"text interface{}, options ...LocatorGetByAltTextOptions",
+			"Locator, error"
+		],
+		"GetByLabel": [
+			"text interface{}, options ...LocatorGetByLabelOptions",
+			"Locator, error"
+		],
+		"GetByPlaceholder": [
+			"text interface{}, options ...LocatorGetByPlaceholderOptions",
+			"Locator, error"
+		],
+		"GetByRole": [
+			"role AriaRole, options ...LocatorGetByRoleOptions",
+			"Locator, error"
+		],
+		"GetByTestId": [
+			"testId interface{}",
+			"Locator, error"
+		],
+		"GetByText": [
+			"text interface{}, options ...LocatorGetByTextOptions",
+			"Locator, error"
+		],
+		"GetByTitle": [
+			"title interface{}, options ...LocatorGetByTitleOptions",
+			"Locator, error"
+		],
 		"Goto": [
 			"url string, options ...PageGotoOptions",
 			"Response, error"
@@ -810,6 +876,34 @@
 			"selector string, options ...LocatorLocatorOptions",
 			"(Locator, error)"
 		],
+				"GetByAltText": [
+			"text interface{}, options ...LocatorGetByAltTextOptions",
+			"Locator, error"
+		],
+		"GetByLabel": [
+			"text interface{}, options ...LocatorGetByLabelOptions",
+			"Locator, error"
+		],
+		"GetByPlaceholder": [
+			"text interface{}, options ...LocatorGetByPlaceholderOptions",
+			"Locator, error"
+		],
+		"GetByRole": [
+			"role AriaRole, options ...LocatorGetByRoleOptions",
+			"Locator, error"
+		],
+		"GetByTestId": [
+			"testId interface{}",
+			"Locator, error"
+		],
+		"GetByText": [
+			"text interface{}, options ...LocatorGetByTextOptions",
+			"Locator, error"
+		],
+		"GetByTitle": [
+			"title interface{}, options ...LocatorGetByTitleOptions",
+			"Locator, error"
+		],
 		"Nth": [
 			"index int",
 			"FrameLocator"
@@ -872,6 +966,10 @@
 		]
 	},
 	"Locator": {
+		"All": [
+			null,
+			"[]Locator, error"
+		],
 		"AllInnerTexts": [
 			null,
 			"[]string, error"
@@ -880,12 +978,20 @@
 			null,
 			"[]string, error"
 		],
+		"Blur": [
+			"options ...LocatorBlurOptions",
+			"error"
+		],
 		"BoundingBox": [
 			"options ...LocatorBoundingBoxOptions",
 			"*Rect, error"
 		],
 		"Check": [
 			"options ...FrameCheckOptions",
+			"error"
+		],
+		"Clear": [
+			"options ...LocatorClearOptions",
 			"error"
 		],
 		"Click": [
@@ -932,6 +1038,10 @@
 			"value string, options ...FrameFillOptions",
 			"error"
 		],
+		"Filter": [
+			"options ...LocatorLocatorOptions",
+			"Locator, error"
+		],
 		"First": [
 			null,
 			"Locator, error"
@@ -947,6 +1057,34 @@
 		"GetAttribute": [
 			"name string, options ...PageGetAttributeOptions",
 			"string, error"
+		],
+				"GetByAltText": [
+			"text interface{}, options ...LocatorGetByAltTextOptions",
+			"Locator, error"
+		],
+		"GetByLabel": [
+			"text interface{}, options ...LocatorGetByLabelOptions",
+			"Locator, error"
+		],
+		"GetByPlaceholder": [
+			"text interface{}, options ...LocatorGetByPlaceholderOptions",
+			"Locator, error"
+		],
+		"GetByRole": [
+			"role AriaRole, options ...LocatorGetByRoleOptions",
+			"Locator, error"
+		],
+		"GetByTestId": [
+			"testId interface{}",
+			"Locator, error"
+		],
+		"GetByText": [
+			"text interface{}, options ...LocatorGetByTextOptions",
+			"Locator, error"
+		],
+		"GetByTitle": [
+			"title interface{}, options ...LocatorGetByTitleOptions",
+			"Locator, error"
 		],
 		"Highlight": [
 			null,
@@ -1057,6 +1195,156 @@
 			"error"
 		]
 	},
+	"LocatorAssertions": {
+		"Not": [
+			null,
+			"LocatorAssertions"
+		],
+		"ToBeChecked": [
+			"options ...LocatorAssertionsToBeCheckedOptions",
+			"error"
+		],
+		"ToBeDisabled": [
+			"options ...LocatorAssertionsToBeDisabledOptions",
+			"error"
+		],
+		"ToBeEditable": [
+			"options ...LocatorAssertionsToBeEditableOptions",
+			"error"
+		],
+		"ToBeEmpty": [
+			"options ...LocatorAssertionsToBeEmptyOptions",
+			"error"
+		],
+		"ToBeEnabled": [
+			"options ...LocatorAssertionsToBeEnabledOptions",
+			"error"
+		],
+		"ToBeFocused": [
+			"options ...LocatorAssertionsToBeFocusedOptions",
+			"error"
+		],
+		"ToBeHidden": [
+			"options ...LocatorAssertionsToBeHiddenOptions",
+			"error"
+		],
+		"ToBeVisible": [
+			"options ...LocatorAssertionsToBeVisibleOptions",
+			"error"
+		],
+		"ToContainText": [
+			"expected interface{}, options ...LocatorAssertionsToContainTextOptions",
+			"error"
+		],
+		"ToHaveAttribute": [
+			"name string, value interface{}, options ...LocatorAssertionsToHaveAttributeOptions",
+			"error"
+		],
+		"ToHaveClass": [
+			"expected interface{}, options ...LocatorAssertionsToHaveClassOptions",
+			"error"
+		],
+		"ToHaveCount": [
+			"count int, options ...LocatorAssertionsToHaveCountOptions",
+			"error"
+		],
+		"ToHaveCSS": [
+			"name string, value interface{}, options ...LocatorAssertionsToHaveCSSOptions",
+			"error"
+		],
+		"ToHaveId": [
+			"id interface{}, options ...LocatorAssertionsToHaveIdOptions",
+			"error"
+		],
+		"ToHaveJSProperty": [
+			"name string, value interface{}, options ...LocatorAssertionsToHaveJSPropertyOptions",
+			"error"
+		],
+		"ToHaveText": [
+			"expected interface{}, options ...LocatorAssertionsToHaveTextOptions",
+			"error"
+		],
+		"ToHaveValue": [
+			"value interface{}, options ...LocatorAssertionsToHaveValueOptions",
+			"error"
+		],
+		"ToHaveValues": [
+			"values []interface{}, options ...LocatorAssertionsToHaveValuesOptions",
+			"error"
+		],
+		"NotToBeChecked": [
+			"options ...LocatorAssertionsToBeCheckedOptions",
+			"error"
+		],
+		"NotToBeDisabled": [
+			"options ...LocatorAssertionsToBeDisabledOptions",
+			"error"
+		],
+		"NotToBeEditable": [
+			"options ...LocatorAssertionsToBeEditableOptions",
+			"error"
+		],
+		"NotToBeEmpty": [
+			"options ...LocatorAssertionsToBeEmptyOptions",
+			"error"
+		],
+		"NotToBeEnabled": [
+			"options ...LocatorAssertionsToBeEnabledOptions",
+			"error"
+		],
+		"NotToBeFocused": [
+			"options ...LocatorAssertionsToBeFocusedOptions",
+			"error"
+		],
+		"NotToBeHidden": [
+			"options ...LocatorAssertionsToBeHiddenOptions",
+			"error"
+		],
+		"NotToBeVisible": [
+			"options ...LocatorAssertionsToBeVisibleOptions",
+			"error"
+		],
+		"NotToContainText": [
+			"expected interface{}, options ...LocatorAssertionsToContainTextOptions",
+			"error"
+		],
+		"NotToHaveAttribute": [
+			"name string, value interface{}, options ...LocatorAssertionsToHaveAttributeOptions",
+			"error"
+		],
+		"NotToHaveClass": [
+			"expected interface{}, options ...LocatorAssertionsToHaveClassOptions",
+			"error"
+		],
+		"NotToHaveCount": [
+			"count int, options ...LocatorAssertionsToHaveCountOptions",
+			"error"
+		],
+		"NotToHaveCSS": [
+			"name string, value interface{}, options ...LocatorAssertionsToHaveCSSOptions",
+			"error"
+		],
+		"NotToHaveId": [
+			"id interface{}, options ...LocatorAssertionsToHaveIdOptions",
+			"error"
+		],
+		"NotToHaveJSProperty": [
+			"name string, value interface{}, options ...LocatorAssertionsToHaveJSPropertyOptions",
+			"error"
+		],
+		"NotToHaveText": [
+			"expected interface{}, options ...LocatorAssertionsToHaveTextOptions",
+			"error"
+		],
+		"NotToHaveValue": [
+			"value interface{}, options ...LocatorAssertionsToHaveValueOptions",
+			"error"
+		],
+		"NotToHaveValues": [
+			"values []interface{}, options ...LocatorAssertionsToHaveValuesOptions",
+			"error"
+		]
+	},
 	"Mouse": {
 		"Click": [
 			"x, y float64, options ...MouseClickOptions",
@@ -1076,6 +1364,10 @@
 		],
 		"Up": [
 			"options ...MouseUpOptions",
+			"error"
+		],
+		"Wheel": [
+			"deltaX, deltaY float64",
 			"error"
 		]
 	},
@@ -1203,9 +1495,17 @@
 			"url interface{}, cb func() error, options ...PageWaitForRequestOptions",
 			"Request, error"
 		],
+		"ExpectRequestFinished": [
+			"cb func() error, options ...PageExpectRequestFinishedOptions",
+			"Request, error"
+		],
 		"ExpectResponse": [
 			"url interface{}, cb func() error, options ...PageWaitForResponseOptions",
 			"Response, error"
+		],
+		"ExpectWebSocket": [
+			"cb func() error, options ...PageExpectWebSocketOptions",
+			"WebSocket, error"
 		],
 		"ExpectWorker": [
 			"cb func() error, options ...PageExpectWorkerOptions",
@@ -1238,6 +1538,34 @@
 		"GetAttribute": [
 			"selector string, name string, options ...PageGetAttributeOptions",
 			"(string, error)"
+		],
+				"GetByAltText": [
+			"text interface{}, options ...LocatorGetByAltTextOptions",
+			"Locator, error"
+		],
+		"GetByLabel": [
+			"text interface{}, options ...LocatorGetByLabelOptions",
+			"Locator, error"
+		],
+		"GetByPlaceholder": [
+			"text interface{}, options ...LocatorGetByPlaceholderOptions",
+			"Locator, error"
+		],
+		"GetByRole": [
+			"role AriaRole, options ...LocatorGetByRoleOptions",
+			"Locator, error"
+		],
+		"GetByTestId": [
+			"testId interface{}",
+			"Locator, error"
+		],
+		"GetByText": [
+			"text interface{}, options ...LocatorGetByTextOptions",
+			"Locator, error"
+		],
+		"GetByTitle": [
+			"title interface{}, options ...LocatorGetByTitleOptions",
+			"Locator, error"
 		],
 		"GoBack": [
 			"options ...PageGoBackOptions",
@@ -1323,8 +1651,16 @@
 			"options ...PageReloadOptions",
 			"Response, error"
 		],
+		"Request": [
+			null,
+			"APIRequestContext"
+		],
 		"Route": [
 			"url interface{}, handler routeHandler, times ...int",
+			"error"
+		],
+		"RouteFromHAR": [
+			"har string, options ...PageRouteFromHAROptions",
 			"error"
 		],
 		"Screenshot": [
@@ -1448,6 +1784,42 @@
 			"error"
 		]
 	},
+	"PageAssertions": {
+		"Not": [
+			null,
+			"PageAssertions"
+		],
+		"ToHaveTitle": [
+			"titleOrRegExp interface{}, options ...PageAssertionsToHaveTitleOptions",
+			"error"
+		],
+		"ToHaveURL": [
+			"urlOrRegExp interface{}, options ...PageAssertionsToHaveURLOptions",
+			"error"
+		],
+		"NotToHaveTitle": [
+			"titleOrRegExp interface{}, options ...PageAssertionsToHaveTitleOptions",
+			"error"
+		],
+		"NotToHaveURL": [
+			"urlOrRegExp interface{}, options ...PageAssertionsToHaveURLOptions",
+			"error"
+		]
+	},
+	"PlaywrightAssertions": {
+		"APIResponse": [
+			"response APIResponse",
+			"APIResponseAssertions"
+		],
+		"Locator": [
+			"locator Locator",
+			"LocatorAssertions"
+		],
+		"Page": [
+			"page Page",
+			"PageAssertions"
+		]
+	},
 	"Request": {
 		"AllHeaders": [
 			null,
@@ -1555,6 +1927,10 @@
 			null,
 			"Frame"
 		],
+		"FromServiceWorker": [
+			null,
+			"bool"
+		],
 		"Headers": [
 			null,
 			"map[string]string"
@@ -1605,6 +1981,14 @@
 			"options ...RouteContinueOptions",
 			"error"
 		],
+		"Fallback": [
+			"options ...RouteFallbackOptions",
+			"error"
+		],
+		"Fetch": [
+			"options ...RouteFetchOptions",
+			"(APIResponse, error)"
+		],
 		"Fulfill": [
 			"options RouteFulfillOptions",
 			"error"
@@ -1612,6 +1996,16 @@
 		"Request": [
 			null,
 			"Request"
+		]
+	},
+	"Selectors": {
+		"Register": [
+			"name string, option SelectorsRegisterOptions",
+			"error"
+		],
+		"SetTestIdAttribute": [
+			"name string",
+			null
 		]
 	},
 	"Touchscreen": {
@@ -1632,8 +2026,12 @@
 			null,
 			"string"
 		],
+		"ExpectEvent": [
+			"event string, cb func() error, options ...WebSocketWaitForEventOptions",
+			"interface{}, error"
+		],
 		"WaitForEvent": [
-			"event string, predicate ...interface{}",
+			"event string, options ...WebSocketWaitForEventOptions",
 			"interface{}, error"
 		]
 	},

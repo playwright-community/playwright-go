@@ -1,6 +1,7 @@
 package playwright_test
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/playwright-community/playwright-go"
@@ -124,4 +125,24 @@ func TestBrowserClose(t *testing.T) {
 	require.NoError(t, browser.Close())
 	<-onCloseWasCalled
 	require.False(t, browser.IsConnected())
+}
+
+func TestBrowserShoulOutputATrace(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	if !isChromium {
+		t.Skip("This is only supported on Chromium")
+	}
+	outputFile := filepath.Join(t.TempDir(), "trace.json")
+	require.NoError(t, browser.StartTracing(playwright.BrowserStartTracingOptions{
+		Page:        page,
+		Screenshots: playwright.Bool(true),
+		Path:        playwright.String(outputFile),
+	}))
+	_, err := page.Goto(server.PREFIX + "/grid.html")
+	require.NoError(t, err)
+	binary, err := browser.StopTracing()
+	require.NoError(t, err)
+	require.FileExists(t, outputFile)
+	require.NotZero(t, len(binary))
 }

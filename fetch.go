@@ -229,7 +229,7 @@ func (r *apiRequestContextImpl) Patch(url string, options ...APIRequestContextPa
 
 func (r *apiRequestContextImpl) Put(url string, options ...APIRequestContextPutOptions) (APIResponse, error) {
 	opts := APIRequestContextFetchOptions{
-		Method: String("GET"),
+		Method: String("PUT"),
 	}
 	if len(options) == 1 {
 		err := assignStructFields(&opts, options[0], false)
@@ -243,7 +243,7 @@ func (r *apiRequestContextImpl) Put(url string, options ...APIRequestContextPutO
 
 func (r *apiRequestContextImpl) Post(url string, options ...APIRequestContextPostOptions) (APIResponse, error) {
 	opts := APIRequestContextFetchOptions{
-		Method: String("GET"),
+		Method: String("POST"),
 	}
 	if len(options) == 1 {
 		err := assignStructFields(&opts, options[0], false)
@@ -357,6 +357,20 @@ func (r *apiResponseImpl) URL() string {
 
 func (r *apiResponseImpl) fetchUid() string {
 	return r.initializer["fetchUid"].(string)
+}
+
+func (r *apiResponseImpl) fetchLog() ([]string, error) {
+	ret, err := r.request.channel.Send("fetchLog", map[string]interface{}{
+		"fetchUid": r.fetchUid(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	result := make([]string, len(ret.([]interface{})))
+	for i, v := range ret.([]interface{}) {
+		result[i] = v.(string)
+	}
+	return result, nil
 }
 
 func newAPIResponse(context *apiRequestContextImpl, initializer map[string]interface{}) *apiResponseImpl {

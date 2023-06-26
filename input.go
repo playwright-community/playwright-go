@@ -48,6 +48,14 @@ func (m *mouseImpl) Dblclick(x, y float64, options ...MouseDblclickOptions) erro
 	})
 }
 
+func (m *mouseImpl) Wheel(deltaX, deltaY float64) error {
+	_, err := m.channel.Send("mouseWheel", map[string]interface{}{
+		"deltaX": deltaX,
+		"deltaY": deltaY,
+	})
+	return err
+}
+
 type keyboardImpl struct {
 	channel *channel
 }

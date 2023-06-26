@@ -527,6 +527,16 @@ type BrowserNewPageOptions struct {
 	// disables the fixed viewport.
 	Viewport *ViewportSize `json:"viewport"`
 }
+type BrowserStartTracingOptions struct {
+	// specify custom categories to use instead of default.
+	Categories []string `json:"categories"`
+	// Optional, if specified, tracing includes screenshots of the given page.
+	Page Page `json:"page"`
+	// A path to write the trace file to.
+	Path *string `json:"path"`
+	// captures screenshots in the trace.
+	Screenshots *bool `json:"screenshots"`
+}
 type BrowserContextAddCookiesOptions struct {
 	Cookies []OptionalCookie `json:"cookies"`
 }
@@ -581,6 +591,13 @@ type BrowserContextUnrouteOptions struct {
 type BrowserContextExpectEventOptions struct {
 	// Receives the event data and resolves to truthy value when the waiting should resolve.
 	Predicate interface{} `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
+type BrowserContextExpectPageOptions struct {
+	// Receives the Page object and resolves to truthy value when the waiting should resolve.
+	Predicate func(Page) bool `json:"predicate"`
 	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
 	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
 	Timeout *float64 `json:"timeout"`
@@ -2412,31 +2429,91 @@ type LocatorWaitForOptions struct {
 }
 type LocatorAssertionsToBeCheckedOptions struct {
 	Checked *bool `json:"checked"`
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToBeDisabledOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
 }
 type LocatorAssertionsToBeEditableOptions struct {
 	Editable *bool `json:"editable"`
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToBeEmptyOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
 }
 type LocatorAssertionsToBeEnabledOptions struct {
 	Enabled *bool `json:"enabled"`
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToBeFocusedOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToBeHiddenOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
 }
 type LocatorAssertionsToBeVisibleOptions struct {
-	Visible *bool `json:"visible"`
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+	Visible *bool    `json:"visible"`
 }
 type LocatorAssertionsToContainTextOptions struct {
 	// Whether to perform case-insensitive match. `ignoreCase` option takes precedence
 	// over the corresponding regular expression flag if specified.
 	IgnoreCase *bool `json:"ignoreCase"`
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
 	// Whether to use `element.innerText` instead of `element.textContent` when retrieving
 	// DOM node text.
 	UseInnerText *bool `json:"useInnerText"`
+}
+type LocatorAssertionsToHaveAttributeOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToHaveClassOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToHaveCountOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToHaveCSSOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToHaveIdOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToHaveJSPropertyOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
 }
 type LocatorAssertionsToHaveTextOptions struct {
 	// Whether to perform case-insensitive match. `ignoreCase` option takes precedence
 	// over the corresponding regular expression flag if specified.
 	IgnoreCase *bool `json:"ignoreCase"`
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
 	// Whether to use `element.innerText` instead of `element.textContent` when retrieving
 	// DOM node text.
 	UseInnerText *bool `json:"useInnerText"`
+}
+type LocatorAssertionsToHaveValueOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToHaveValuesOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
 }
 type MouseClickOptions struct {
 	// Defaults to `left`.
@@ -3305,6 +3382,14 @@ type PageWaitForRequestOptions struct {
 	// method.
 	Timeout *float64 `json:"timeout"`
 }
+type PageExpectRequestFinishedOptions struct {
+	// Receives the Request object and resolves to truthy value when the waiting should
+	// resolve.
+	Predicate func(Request) bool `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
 type PageWaitForResponseOptions struct {
 	// Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the
 	// timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout()
@@ -3366,6 +3451,14 @@ type PageWaitForEventOptions struct {
 	Predicate interface{} `json:"predicate"`
 	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
 	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
+type PageAssertionsToHaveTitleOptions struct {
+	// Time to retry the assertion for.
+	Timeout *float64 `json:"timeout"`
+}
+type PageAssertionsToHaveURLOptions struct {
+	// Time to retry the assertion for.
 	Timeout *float64 `json:"timeout"`
 }
 
@@ -3508,6 +3601,9 @@ type RouteFulfillOptions struct {
 	// If `path` is a relative path, then it is resolved relative to the current working
 	// directory.
 	Path *string `json:"path"`
+	// APIResponse to fulfill route's request with. Individual fields of the response (such
+	// as headers) can be overridden using fulfill options.
+	Response APIResponse `json:"response"`
 	// Response status code, defaults to `200`.
 	Status *int `json:"status"`
 }
@@ -3517,6 +3613,12 @@ type SelectorsRegisterOptions struct {
 	// Defaults to `false`. Note that running as a content script is not guaranteed when
 	// this engine is used together with other registered engines.
 	ContentScript *bool `json:"contentScript"`
+	// Script that evaluates to a selector engine instance. The script is evaluated in
+	// the page context.
+	Path *string `json:"path"`
+	// Script that evaluates to a selector engine instance. The script is evaluated in
+	// the page context.
+	Script *string `json:"script"`
 }
 type TracingStartOptions struct {
 	// If specified, the trace is going to be saved into the file with the given name inside
@@ -3552,6 +3654,20 @@ type FrameReceivedPayload struct {
 type FrameSentPayload struct {
 	// frame payload
 	Payload interface{} `json:"payload"`
+}
+type WebSocketExpectEventOptions struct {
+	// Receives the event data and resolves to truthy value when the waiting should resolve.
+	Predicate interface{} `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
+type WebSocketWaitForEventOptions struct {
+	// Receives the event data and resolves to truthy value when the waiting should resolve.
+	Predicate interface{} `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
 }
 type WorkerEvaluateOptions struct {
 	// Optional argument to pass to `expression`.

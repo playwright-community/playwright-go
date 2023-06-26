@@ -13,6 +13,10 @@ type responseImpl struct {
 	finished           chan bool
 }
 
+func (r *responseImpl) FromServiceWorker() bool {
+	return r.initializer["fromServiceWorker"].(bool)
+}
+
 func (r *responseImpl) URL() string {
 	return r.initializer["url"].(string)
 }
