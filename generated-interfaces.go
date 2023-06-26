@@ -90,8 +90,7 @@ type APIResponse interface {
 }
 
 // The `APIResponseAssertions` class provides assertion methods that can be used to make assertions about the
-// `APIResponse` in the tests. A new instance of `APIResponseAssertions` is created by calling
-// PlaywrightAssertions.expectAPIResponse():
+// `APIResponse` in the tests.
 type APIResponseAssertions interface {
 	// Makes the assertion check for the opposite condition. For example, this code tests that the response status is not
 	// successful:
@@ -772,7 +771,8 @@ type Frame interface {
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
 	// Allows locating elements by their alt text.
 	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error)
-	// Allows locating input elements by the text of the associated label.
+	// Allows locating input elements by the text of the associated `<label>` or `aria-labelledby` element, or by the
+	// `aria-label` attribute.
 	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error)
 	// Allows locating input elements by the placeholder text.
 	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error)
@@ -981,7 +981,8 @@ type FrameLocator interface {
 	Locator(selector string, options ...LocatorLocatorOptions) (Locator, error)
 	// Allows locating elements by their alt text.
 	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error)
-	// Allows locating input elements by the text of the associated label.
+	// Allows locating input elements by the text of the associated `<label>` or `aria-labelledby` element, or by the
+	// `aria-label` attribute.
 	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error)
 	// Allows locating input elements by the placeholder text.
 	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error)
@@ -1092,6 +1093,10 @@ type Keyboard interface {
 // [Learn more about locators](../locators.md).
 type Locator interface {
 	// When locator points to a list of elements, returns array of locators, pointing to respective elements.
+	// **NOTE** Locator.all() does not wait for elements to match the locator, and instead immediately returns
+	// whatever is present in the page.  When the list of elements changes dynamically, Locator.all() will
+	// produce unpredictable and flaky results.  When the list of elements is stable, but loaded dynamically, wait for the
+	// full list to finish loading before calling Locator.all().
 	All() ([]Locator, error)
 	// Returns an array of `node.innerText` values for all matching nodes.
 	AllInnerTexts() ([]string, error)
@@ -1160,7 +1165,7 @@ type Locator interface {
 	// Passing zero timeout disables this.
 	// **NOTE** `element.dblclick()` dispatches two `click` events and a single `dblclick` event.
 	Dblclick(options ...FrameDblclickOptions) error
-	// Programmaticaly dispatch an event on the matching element.
+	// Programmatically dispatch an event on the matching element.
 	DispatchEvent(typ string, eventInit interface{}, options ...PageDispatchEventOptions) error
 	// Drag the source element towards the target element and drop it.
 	// **Details**
@@ -1213,7 +1218,8 @@ type Locator interface {
 	GetAttribute(name string, options ...PageGetAttributeOptions) (string, error)
 	// Allows locating elements by their alt text.
 	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error)
-	// Allows locating input elements by the text of the associated label.
+	// Allows locating input elements by the text of the associated `<label>` or `aria-labelledby` element, or by the
+	// `aria-label` attribute.
 	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error)
 	// Allows locating input elements by the placeholder text.
 	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error)
@@ -1262,7 +1268,7 @@ type Locator interface {
 	Nth(index int) (Locator, error)
 	// A page this locator belongs to.
 	Page() Page
-	// Focuses the mathing element and presses a combintation of the keys.
+	// Focuses the matching element and presses a combination of the keys.
 	Press(key string, options ...PagePressOptions) error
 	// Take a screenshot of the element matching the locator.
 	Screenshot(options ...LocatorScreenshotOptions) ([]byte, error)
@@ -1318,8 +1324,7 @@ type Locator interface {
 }
 
 // The `LocatorAssertions` class provides assertion methods that can be used to make assertions about the `Locator`
-// state in the tests. A new instance of `LocatorAssertions` is created by calling
-// PlaywrightAssertions.expectLocator():
+// state in the tests.
 type LocatorAssertions interface {
 	// Makes the assertion check for the opposite condition. For example, this code tests that the Locator doesn't contain
 	// text `"error"`:
@@ -1620,7 +1625,8 @@ type Page interface {
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
 	// Allows locating elements by their alt text.
 	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error)
-	// Allows locating input elements by the text of the associated label.
+	// Allows locating input elements by the text of the associated `<label>` or `aria-labelledby` element, or by the
+	// `aria-label` attribute.
 	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error)
 	// Allows locating input elements by the placeholder text.
 	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error)
@@ -1802,7 +1808,7 @@ type Page interface {
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
-	// **NOTE** Page.tap() requires that the `hasTouch` option of the browser context be set to true.
+	// **NOTE** Page.tap() the method will throw if `hasTouch` option of the browser context is false.
 	Tap(selector string, options ...FrameTapOptions) error
 	// Returns `element.textContent`.
 	TextContent(selector string, options ...FrameTextContentOptions) (string, error)
@@ -1890,7 +1896,7 @@ type Page interface {
 }
 
 // The `PageAssertions` class provides assertion methods that can be used to make assertions about the `Page` state in
-// the tests. A new instance of `PageAssertions` is created by calling PlaywrightAssertions.expectPage():
+// the tests.
 type PageAssertions interface {
 	// Makes the assertion check for the opposite condition. For example, this code tests that the page URL doesn't
 	// contain `"error"`:
@@ -2057,6 +2063,7 @@ type Route interface {
 // Selectors can be used to install custom selector engines. See [extensibility](../extensibility.md) for more
 // information.
 type Selectors interface {
+	// Selectors must be registered before creating the page.
 	Register(name string, option SelectorsRegisterOptions) error
 	// Defines custom attribute name to be used in Page.getByTestId(). `data-testid` is used by default.
 	SetTestIdAttribute(name string)
@@ -2066,6 +2073,7 @@ type Selectors interface {
 // the touchscreen can only be used in browser contexts that have been initialized with `hasTouch` set to true.
 type Touchscreen interface {
 	// Dispatches a `touchstart` and `touchend` event with a single touch at the position (`x`,`y`).
+	// **NOTE** Page.tap() the method will throw if `hasTouch` option of the browser context is false.
 	Tap(x int, y int) error
 }
 
