@@ -1,6 +1,7 @@
 package playwright_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/playwright-community/playwright-go"
@@ -142,7 +143,7 @@ func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
 	require.Equal(t, "error", message.Type())
 }
 
-func TestConsoleShouldHaveLocation(t *testing.T) {
+func TestConsoleShouldHaveLocationForConsoleAPICalls(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	messageEvent, err := page.ExpectEvent("console", func() error {
@@ -150,7 +151,7 @@ func TestConsoleShouldHaveLocation(t *testing.T) {
 		return err
 	}, playwright.PageWaitForEventOptions{
 		Predicate: func(m playwright.ConsoleMessage) bool {
-			return m.Text() == "yellow"
+			return strings.HasPrefix(m.Text(), "here:")
 		},
 	})
 	require.NoError(t, err)

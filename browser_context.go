@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 type browserContextImpl struct {
@@ -17,10 +18,14 @@ type browserContextImpl struct {
 	routes            []*routeHandlerEntry
 	ownedPage         Page
 	browser           *browserImpl
-	serviceWorkers    []*workerImpl
+	serviceWorkers    []Worker
 	backgroundPages   []Page
 	bindings          map[string]BindingCallFunction
 	tracing           *tracingImpl
+	request           *apiRequestContextImpl
+	harRecorders      map[string]harRecordingMetadata
+	closed            chan struct{}
+	browserType       *browserTypeImpl
 }
 
 func (b *browserContextImpl) SetDefaultNavigationTimeout(timeout float64) {
@@ -217,6 +222,28 @@ func (b *browserContextImpl) Unroute(url interface{}, handlers ...routeHandler) 
 	return nil
 }
 
+func (b *browserContextImpl) Request() APIRequestContext {
+	return b.request
+}
+
+func (b *browserContextImpl) RouteFromHAR(har string, options ...BrowserContextRouteFromHAROptions) error {
+	opt := BrowserContextRouteFromHAROptions{}
+	if len(options) == 1 {
+		opt = options[0]
+	}
+	if opt.Update != nil && *opt.Update {
+		return b.recordIntoHar(har, browserContextRecordIntoHarOptions{
+			URL: opt.URL,
+		})
+	}
+	notFound := opt.NotFound
+	if notFound == nil {
+		notFound = HarNotFoundAbort
+	}
+	router := newHarRouter(b.connection.localUtils, har, *notFound, opt.URL)
+	return router.addContextRoute(b)
+}
+
 func (b *browserContextImpl) WaitForEvent(event string, options ...BrowserContextWaitForEventOptions) (interface{}, error) {
 	return b.waiterForEvent(event, options...).Wait()
 }
@@ -236,7 +263,24 @@ func (b *browserContextImpl) waiterForEvent(event string, options ...BrowserCont
 }
 
 func (b *browserContextImpl) ExpectEvent(event string, cb func() error, options ...BrowserContextWaitForEventOptions) (interface{}, error) {
-	return b.waiterForEvent(event, options...).Expect(cb)
+	return b.waiterForEvent(event, options...).RunAndWait(cb)
+}
+
+func (b *browserContextImpl) ExpectPage(cb func() error, options ...BrowserContextExpectPageOptions) (Page, error) {
+	var w *waiter
+	if len(options) == 1 {
+		w = b.waiterForEvent("page", BrowserContextWaitForEventOptions{
+			Predicate: options[0].Predicate,
+			Timeout:   options[0].Timeout,
+		})
+	} else {
+		w = b.waiterForEvent("page")
+	}
+	ret, err := w.RunAndWait(cb)
+	if err != nil {
+		return nil, err
+	}
+	return ret.(Page), nil
 }
 
 func (b *browserContextImpl) Close() error {
@@ -246,15 +290,31 @@ func (b *browserContextImpl) Close() error {
 	b.Lock()
 	b.isClosedOrClosing = true
 	b.Unlock()
-
-	if b.options != nil && b.options.RecordHarPath != nil {
-		response, err := b.channel.Send("harExport")
+	for harId, harMetaData := range b.harRecorders {
+		overrides := map[string]interface{}{}
+		if harId != "" {
+			overrides["harId"] = harId
+		}
+		response, err := b.channel.Send("harExport", overrides)
 		if err != nil {
 			return err
 		}
 		artifact := fromChannel(response).(*artifactImpl)
-		if err := artifact.SaveAs(*b.options.RecordHarPath); err != nil {
-			return err
+		// Server side will compress artifact if content is attach or if file is .zip.
+		needCompressed := strings.HasSuffix(strings.ToLower(harMetaData.Path), ".zip")
+		if !needCompressed && harMetaData.Content == HarContentPolicyAttach {
+			tmpPath := harMetaData.Path + ".tmp"
+			if err := artifact.SaveAs(tmpPath); err != nil {
+				return err
+			}
+			err = b.connection.localUtils.HarUnzip(tmpPath, harMetaData.Path)
+			if err != nil {
+				return err
+			}
+		} else {
+			if err := artifact.SaveAs(harMetaData.Path); err != nil {
+				return err
+			}
 		}
 		if err := artifact.Delete(); err != nil {
 			return err
@@ -262,7 +322,41 @@ func (b *browserContextImpl) Close() error {
 	}
 
 	_, err := b.channel.Send("close")
+	<-b.closed
 	return err
+}
+
+type browserContextRecordIntoHarOptions struct {
+	Page Page
+	URL  interface{}
+	// UpdateContent *HarContentPolicy
+	// UpdateMode    *HarMode
+}
+
+func (b *browserContextImpl) recordIntoHar(har string, options ...browserContextRecordIntoHarOptions) error {
+	overrides := map[string]interface{}{}
+	harOptions := recordHarInputOptions{
+		Path: har,
+	}
+	content := HarContentPolicyAttach
+	harOptions.Content = content
+	harOptions.Mode = HarModeMinimal
+	if len(options) == 1 {
+		harOptions.URL = options[0].URL
+		overrides["options"] = prepareRecordHarOptions(harOptions)
+		if options[0].Page != nil {
+			overrides["page"] = options[0].Page.(*pageImpl).channel
+		}
+	}
+	harId, err := b.channel.Send("harStart", overrides)
+	if err != nil {
+		return err
+	}
+	b.harRecorders[harId.(string)] = harRecordingMetadata{
+		Path:    har,
+		Content: content,
+	}
+	return nil
 }
 
 type StorageState struct {
@@ -322,7 +416,9 @@ func (b *browserContextImpl) onBinding(binding *bindingCallImpl) {
 }
 
 func (b *browserContextImpl) onClose() {
+	b.Lock()
 	b.isClosedOrClosing = true
+	b.Unlock()
 	if b.browser != nil {
 		contexts := make([]BrowserContext, 0)
 		b.browser.Lock()
@@ -334,7 +430,7 @@ func (b *browserContextImpl) onClose() {
 		b.browser.contexts = contexts
 		b.browser.Unlock()
 	}
-	b.Emit("close")
+	b.Emit("close", b)
 }
 
 func (b *browserContextImpl) onPage(page *pageImpl) {
@@ -351,14 +447,34 @@ func (b *browserContextImpl) onPage(page *pageImpl) {
 
 func (b *browserContextImpl) onRoute(route *routeImpl) {
 	go func() {
+		b.Lock()
+		defer b.Unlock()
+		routes := make([]*routeHandlerEntry, len(b.routes))
+		copy(routes, b.routes)
+
+		defer func() {
+			if len(b.routes) == 0 {
+				_, _ = b.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
+					"enabled": false,
+				})
+			}
+		}()
+
 		url := route.Request().URL()
-		for _, handlerEntry := range b.routes {
-			if handlerEntry.matcher.Matches(url) {
-				handlerEntry.handler(route)
+		for i, handlerEntry := range routes {
+			if !handlerEntry.Matches(url) {
+				continue
+			}
+			if handlerEntry.WillExceed() {
+				b.routes = append(b.routes[:i], b.routes[i+1:]...)
+			}
+			handled := handlerEntry.Handle(route)
+			yes := <-handled
+			if yes {
 				return
 			}
 		}
-		if err := route.Continue(); err != nil {
+		if err := route.internalContinue(true); err != nil {
 			log.Printf("could not continue request: %v", err)
 		}
 	}()
@@ -385,10 +501,32 @@ func (b *browserContextImpl) OnBackgroundPage(ev map[string]interface{}) {
 	b.Emit("backgroundpage", p)
 }
 
+func (b *browserContextImpl) onServiceWorker(worker *workerImpl) {
+	worker.context = b
+	b.serviceWorkers = append(b.serviceWorkers, worker)
+	b.Emit("serviceworker", worker)
+}
+
+func (b *browserContextImpl) setBrowserType(bt *browserTypeImpl) {
+	b.browserType = bt
+	if b.options != nil && b.options.RecordHarPath != nil {
+		b.harRecorders[""] = harRecordingMetadata{
+			Path:    *b.options.RecordHarPath,
+			Content: b.options.RecordHarContent,
+		}
+	}
+}
+
 func (b *browserContextImpl) BackgroundPages() []Page {
 	b.Lock()
 	defer b.Unlock()
 	return b.backgroundPages
+}
+
+func (b *browserContextImpl) ServiceWorkers() []Worker {
+	b.Lock()
+	defer b.Unlock()
+	return b.serviceWorkers
 }
 
 func newBrowserContext(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserContextImpl {
@@ -397,11 +535,26 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 		pages:           make([]Page, 0),
 		routes:          make([]*routeHandlerEntry, 0),
 		bindings:        make(map[string]BindingCallFunction),
+		harRecorders:    make(map[string]harRecordingMetadata),
+		closed:          make(chan struct{}, 1),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.tracing = fromChannel(initializer["tracing"]).(*tracingImpl)
+	bt.request = fromChannel(initializer["requestContext"]).(*apiRequestContextImpl)
 	bt.channel.On("bindingCall", func(params map[string]interface{}) {
 		bt.onBinding(fromChannel(params["binding"]).(*bindingCallImpl))
+	})
+
+	bt.channel.On("close", bt.onClose)
+	bt.channel.On("page", func(payload map[string]interface{}) {
+		bt.onPage(fromChannel(payload["page"]).(*pageImpl))
+	})
+	bt.channel.On("route", func(params map[string]interface{}) {
+		bt.onRoute(fromChannel(params["route"]).(*routeImpl))
+	})
+	bt.channel.On("backgroundPage", bt.OnBackgroundPage)
+	bt.channel.On("serviceWorker", func(params map[string]interface{}) {
+		bt.onServiceWorker(fromChannel(params["worker"]).(*workerImpl))
 	})
 	bt.channel.On("request", func(ev map[string]interface{}) {
 		request := fromChannel(ev["request"]).(*requestImpl)
@@ -446,14 +599,9 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 			page.(*pageImpl).Emit("response", response)
 		}
 	})
-	bt.channel.On("close", bt.onClose)
-	bt.channel.On("page", func(payload map[string]interface{}) {
-		bt.onPage(fromChannel(payload["page"]).(*pageImpl))
+	bt.Once("close", func() {
+		bt.closed <- struct{}{}
 	})
-	bt.channel.On("route", func(params map[string]interface{}) {
-		bt.onRoute(fromChannel(params["route"]).(*routeImpl))
-	})
-	bt.channel.On("backgroundPage", bt.OnBackgroundPage)
 	bt.setEventSubscriptionMapping(map[string]string{
 		"request":         "request",
 		"response":        "response",

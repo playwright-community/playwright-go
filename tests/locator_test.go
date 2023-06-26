@@ -1,6 +1,7 @@
 package playwright_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/playwright-community/playwright-go"
@@ -384,4 +385,85 @@ func TestLocatorTextContent(t *testing.T) {
 	result, err := locator.TextContent()
 	require.NoError(t, err)
 	require.Equal(t, "Text,\nmore text", result)
+}
+
+func TestLocatorShouldFocusAndBlurButton(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.PREFIX + "/input/button.html")
+	require.NoError(t, err)
+	button, err := page.Locator("button")
+	require.NoError(t, err)
+	ret, err := button.Evaluate(`button => document.activeElement === button`, nil)
+	require.NoError(t, err)
+	require.False(t, ret.(bool))
+
+	var (
+		focused = false
+		blurred = false
+	)
+	require.NoError(t, page.ExposeFunction("focusEvent", func(args ...interface{}) interface{} {
+		focused = true
+		return nil
+	}))
+	require.NoError(t, page.ExposeFunction("blurEvent", func(args ...interface{}) interface{} {
+		blurred = true
+		return nil
+	}))
+	_, err = button.Evaluate(`button => {
+		button.addEventListener('focus', window['focusEvent']);
+		button.addEventListener('blur', window['blurEvent']);
+}`, nil)
+	require.NoError(t, err)
+
+	require.NoError(t, button.Focus())
+	ret, err = button.Evaluate(`button => document.activeElement === button`, nil)
+	require.NoError(t, err)
+	require.True(t, ret.(bool))
+	require.True(t, focused)
+	require.False(t, blurred)
+
+	require.NoError(t, button.Blur())
+	ret, err = button.Evaluate(`button => document.activeElement === button`, nil)
+	require.NoError(t, err)
+	require.False(t, ret.(bool))
+	require.True(t, focused)
+	require.True(t, blurred)
+}
+
+func TestLocatorAllShouldWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent(`<div><p>A</p><p>B</p><p>C</p></div>`))
+	expected := []string{"A", "B", "C"}
+	texts := make([]string, 0)
+	p, err := page.Locator("p")
+	require.NoError(t, err)
+	locators, err := p.All()
+	require.NoError(t, err)
+	for _, locator := range locators {
+		content, err := locator.TextContent()
+		require.NoError(t, err)
+		texts = append(texts, content)
+	}
+	require.ElementsMatch(t, expected, texts)
+}
+
+func TestLocatorsClearShouldWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(fmt.Sprintf("%s/input/textarea.html", server.PREFIX))
+	require.NoError(t, err)
+	button, err := page.Locator("input")
+	require.NoError(t, err)
+	require.NoError(t, button.Fill("some value"))
+	ret, err := page.Evaluate(`result`)
+	require.NoError(t, err)
+	require.Equal(t, "some value", ret)
+	require.NoError(t, button.Clear())
+	ret, err = page.Evaluate(`result`)
+	require.NoError(t, err)
+	require.Equal(t, "", ret)
 }

@@ -315,3 +315,14 @@ func TestBrowserContextShouldReturnBackgroundPage(t *testing.T) {
 	require.Len(t, context.BackgroundPages(), 0)
 	require.Len(t, context.Pages(), 0)
 }
+
+func TestPageEventShouldHaveURL(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	newPage, err := context.ExpectPage(func() error {
+		_, err := page.Evaluate("url => window.open(url)", server.EMPTY_PAGE)
+		return err
+	})
+	require.NoError(t, err)
+	require.Equal(t, server.EMPTY_PAGE, newPage.URL())
+}

@@ -16,12 +16,13 @@ type DeviceDescriptor struct {
 // Playwright represents a Playwright instance
 type Playwright struct {
 	channelOwner
-	utils    *localUtilsImpl
-	Chromium BrowserType
-	Firefox  BrowserType
-	WebKit   BrowserType
-	Request  APIRequest
-	Devices  map[string]*DeviceDescriptor
+	utils     *localUtilsImpl
+	Selectors Selectors
+	Chromium  BrowserType
+	Firefox   BrowserType
+	WebKit    BrowserType
+	Request   APIRequest
+	Devices   map[string]*DeviceDescriptor
 }
 
 // Stop stops the Playwright instance
@@ -29,12 +30,30 @@ func (p *Playwright) Stop() error {
 	return p.connection.Stop()
 }
 
+func (p *Playwright) setSelectors(selectors Selectors) {
+	selectorsOwner := fromChannel(p.initializer["selectors"]).(*selectorsOwnerImpl)
+	p.Selectors.(*selectorsImpl).removeChannel(selectorsOwner)
+	p.Selectors = selectors
+	p.Selectors.(*selectorsImpl).addChannel(selectorsOwner)
+}
+
 func newPlaywright(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *Playwright {
 	pw := &Playwright{
-		Chromium: fromChannel(initializer["chromium"]).(*browserTypeImpl),
-		Firefox:  fromChannel(initializer["firefox"]).(*browserTypeImpl),
-		WebKit:   fromChannel(initializer["webkit"]).(*browserTypeImpl),
-		Devices:  make(map[string]*DeviceDescriptor),
+		Selectors: newSelectorsImpl(),
+		Chromium:  fromChannel(initializer["chromium"]).(*browserTypeImpl),
+		Firefox:   fromChannel(initializer["firefox"]).(*browserTypeImpl),
+		WebKit:    fromChannel(initializer["webkit"]).(*browserTypeImpl),
+		Devices:   make(map[string]*DeviceDescriptor),
+	}
+	pw.createChannelOwner(pw, parent, objectType, guid, initializer)
+	pw.Request = newApiRequestImpl(pw)
+	pw.Chromium.(*browserTypeImpl).playwright = pw
+	pw.Firefox.(*browserTypeImpl).playwright = pw
+	pw.WebKit.(*browserTypeImpl).playwright = pw
+	selectorsOwner := fromChannel(initializer["selectors"]).(*selectorsOwnerImpl)
+	pw.Selectors.(*selectorsImpl).addChannel(selectorsOwner)
+	pw.connection.afterClose = func() {
+		pw.Selectors.(*selectorsImpl).removeChannel(selectorsOwner)
 	}
 	for _, dd := range initializer["deviceDescriptors"].([]interface{}) {
 		entry := dd.(map[string]interface{})
@@ -44,8 +63,6 @@ func newPlaywright(parent *channelOwner, objectType string, guid string, initial
 		remapMapToStruct(entry["descriptor"], pw.Devices[entry["name"].(string)])
 	}
 	pw.utils = fromChannel(initializer["utils"]).(*localUtilsImpl)
-	pw.createChannelOwner(pw, parent, objectType, guid, initializer)
-	pw.Request = newApiRequestImpl(pw)
 	return pw
 }
 

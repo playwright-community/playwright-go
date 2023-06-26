@@ -12,19 +12,13 @@ func (w *workerImpl) URL() string {
 
 func (w *workerImpl) Evaluate(expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
-	forceExpression := false
-	if !isFunctionBody(expression) {
-		forceExpression = true
-	}
 	if len(options) == 1 {
 		arg = options[0]
 	} else if len(options) == 2 {
 		arg = options[0]
-		forceExpression = options[1].(bool)
 	}
 	result, err := w.channel.Send("evaluateExpression", map[string]interface{}{
 		"expression": expression,
-		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
 	})
 	if err != nil {
@@ -35,19 +29,13 @@ func (w *workerImpl) Evaluate(expression string, options ...interface{}) (interf
 
 func (w *workerImpl) EvaluateHandle(expression string, options ...interface{}) (JSHandle, error) {
 	var arg interface{}
-	forceExpression := false
-	if !isFunctionBody(expression) {
-		forceExpression = true
-	}
 	if len(options) == 1 {
 		arg = options[0]
 	} else if len(options) == 2 {
 		arg = options[0]
-		forceExpression = options[1].(bool)
 	}
 	result, err := w.channel.Send("evaluateExpressionHandle", map[string]interface{}{
 		"expression": expression,
-		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
 	})
 	if err != nil {
@@ -70,7 +58,7 @@ func (w *workerImpl) onClose() {
 	}
 	if w.context != nil {
 		w.context.Lock()
-		workers := make([]*workerImpl, 0)
+		workers := make([]Worker, 0)
 		for i := 0; i < len(w.context.serviceWorkers); i++ {
 			if w.context.serviceWorkers[i] != w {
 				workers = append(workers, w.context.serviceWorkers[i])
@@ -95,7 +83,7 @@ func (w *workerImpl) ExpectEvent(event string, cb func() error, predicates ...in
 	if len(predicates) == 1 {
 		predicate = predicates[0]
 	}
-	return newWaiter().WaitForEvent(w, event, predicate).Expect(cb)
+	return newWaiter().WaitForEvent(w, event, predicate).RunAndWait(cb)
 }
 
 func newWorker(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *workerImpl {

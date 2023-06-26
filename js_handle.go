@@ -17,19 +17,11 @@ type jsHandleImpl struct {
 
 func (j *jsHandleImpl) Evaluate(expression string, options ...interface{}) (interface{}, error) {
 	var arg interface{}
-	forceExpression := false
-	if !isFunctionBody(expression) {
-		forceExpression = true
-	}
 	if len(options) == 1 {
 		arg = options[0]
-	} else if len(options) == 2 {
-		arg = options[0]
-		forceExpression = options[1].(bool)
 	}
 	result, err := j.channel.Send("evaluateExpression", map[string]interface{}{
 		"expression": expression,
-		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
 	})
 	if err != nil {
@@ -40,19 +32,11 @@ func (j *jsHandleImpl) Evaluate(expression string, options ...interface{}) (inte
 
 func (j *jsHandleImpl) EvaluateHandle(expression string, options ...interface{}) (JSHandle, error) {
 	var arg interface{}
-	forceExpression := false
-	if !isFunctionBody(expression) {
-		forceExpression = true
-	}
 	if len(options) == 1 {
 		arg = options[0]
-	} else if len(options) == 2 {
-		arg = options[0]
-		forceExpression = options[1].(bool)
 	}
 	result, err := j.channel.Send("evaluateExpressionHandle", map[string]interface{}{
 		"expression": expression,
-		"isFunction": !forceExpression,
 		"arg":        serializeArgument(arg),
 	})
 	if err != nil {
