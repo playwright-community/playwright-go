@@ -72,12 +72,8 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
 	context := fromChannel(channel).(*browserContextImpl)
-	context.options = &option
-	b.Lock()
-	b.contexts = append(b.contexts, context)
-	b.Unlock()
 	context.browser = b
-	context.setBrowserType(b.browserType.(*browserTypeImpl))
+	b.browserType.(*browserTypeImpl).didCreateContext(context, &option, nil)
 	return context, nil
 }
 
@@ -167,13 +163,6 @@ func (b *browserImpl) onClose() {
 		b.Emit("disconnected")
 	}
 	b.Unlock()
-}
-
-func (b *browserImpl) setBrowserType(bt *browserTypeImpl) {
-	b.browserType = bt
-	for _, c := range b.contexts {
-		c.(*browserContextImpl).setBrowserType(bt)
-	}
 }
 
 func newBrowser(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserImpl {

@@ -25,18 +25,17 @@ type browserContextImpl struct {
 	request           *apiRequestContextImpl
 	harRecorders      map[string]harRecordingMetadata
 	closed            chan struct{}
-	browserType       *browserTypeImpl
 }
 
 func (b *browserContextImpl) SetDefaultNavigationTimeout(timeout float64) {
-	b.timeoutSettings.SetNavigationTimeout(timeout)
+	b.timeoutSettings.SetDefaultNavigationTimeout(&timeout)
 	b.channel.SendNoReply("setDefaultNavigationTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
 	})
 }
 
 func (b *browserContextImpl) SetDefaultTimeout(timeout float64) {
-	b.timeoutSettings.SetTimeout(timeout)
+	b.timeoutSettings.SetDefaultTimeout(&timeout)
 	b.channel.SendNoReply("setDefaultTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
 	})
@@ -174,7 +173,7 @@ func (b *browserContextImpl) ExposeBinding(name string, binding BindingCallFunct
 	if len(handle) == 1 {
 		needsHandle = handle[0]
 	}
-	for _, page := range b.pages {
+	for _, page := range b.Pages() {
 		if _, ok := page.(*pageImpl).bindings[name]; ok {
 			return fmt.Errorf("Function '%s' has been already registered in one of the pages", name)
 		}
@@ -198,28 +197,20 @@ func (b *browserContextImpl) ExposeFunction(name string, binding ExposedFunction
 
 func (b *browserContextImpl) Route(url interface{}, handler routeHandler, times ...int) error {
 	b.routes = append(b.routes, newRouteHandlerEntry(newURLMatcher(url, b.options.BaseURL), handler, times...))
-	if len(b.routes) == 1 {
-		_, err := b.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
-			"enabled": true,
-		})
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return b.updateInterceptionPatterns()
 }
 
 func (b *browserContextImpl) Unroute(url interface{}, handlers ...routeHandler) error {
 	b.Lock()
 	defer b.Unlock()
 
-	routes, err := unroute(b.channel, b.routes, url, handlers...)
+	routes, err := unroute(b.routes, url, handlers...)
 	if err != nil {
 		return err
 	}
 	b.routes = routes
 
-	return nil
+	return b.updateInterceptionPatterns()
 }
 
 func (b *browserContextImpl) Request() APIRequestContext {
@@ -232,8 +223,17 @@ func (b *browserContextImpl) RouteFromHAR(har string, options ...BrowserContextR
 		opt = options[0]
 	}
 	if opt.Update != nil && *opt.Update {
+		var updateContent *HarContentPolicy
+		switch opt.UpdateContent {
+		case RouteFromHarUpdateContentPolicyAttach:
+			updateContent = HarContentPolicyAttach
+		case RouteFromHarUpdateContentPolicyEmbed:
+			updateContent = HarContentPolicyEmbed
+		}
 		return b.recordIntoHar(har, browserContextRecordIntoHarOptions{
-			URL: opt.URL,
+			URL:           opt.URL,
+			UpdateContent: updateContent,
+			UpdateMode:    opt.UpdateMode,
 		})
 	}
 	notFound := opt.NotFound
@@ -260,6 +260,23 @@ func (b *browserContextImpl) waiterForEvent(event string, options ...BrowserCont
 	waiter := newWaiter().WithTimeout(timeout)
 	waiter.RejectOnEvent(b, "close", errors.New("context closed"))
 	return waiter.WaitForEvent(b, event, predicate)
+}
+
+func (b *browserContextImpl) ExpectConsoleMessage(cb func() error, options ...BrowserContextExpectConsoleMessageOptions) (ConsoleMessage, error) {
+	var w *waiter
+	if len(options) == 1 {
+		w = b.waiterForEvent("console", BrowserContextWaitForEventOptions{
+			Predicate: options[0].Predicate,
+			Timeout:   options[0].Timeout,
+		})
+	} else {
+		w = b.waiterForEvent("console")
+	}
+	ret, err := w.RunAndWait(cb)
+	if err != nil {
+		return nil, err
+	}
+	return ret.(ConsoleMessage), nil
 }
 
 func (b *browserContextImpl) ExpectEvent(event string, cb func() error, options ...BrowserContextWaitForEventOptions) (interface{}, error) {
@@ -290,58 +307,71 @@ func (b *browserContextImpl) Close() error {
 	b.Lock()
 	b.isClosedOrClosing = true
 	b.Unlock()
-	for harId, harMetaData := range b.harRecorders {
-		overrides := map[string]interface{}{}
-		if harId != "" {
-			overrides["harId"] = harId
-		}
-		response, err := b.channel.Send("harExport", overrides)
-		if err != nil {
-			return err
-		}
-		artifact := fromChannel(response).(*artifactImpl)
-		// Server side will compress artifact if content is attach or if file is .zip.
-		needCompressed := strings.HasSuffix(strings.ToLower(harMetaData.Path), ".zip")
-		if !needCompressed && harMetaData.Content == HarContentPolicyAttach {
-			tmpPath := harMetaData.Path + ".tmp"
-			if err := artifact.SaveAs(tmpPath); err != nil {
-				return err
+	innerClose := func() (interface{}, error) {
+		for harId, harMetaData := range b.harRecorders {
+			overrides := map[string]interface{}{}
+			if harId != "" {
+				overrides["harId"] = harId
 			}
-			err = b.connection.localUtils.HarUnzip(tmpPath, harMetaData.Path)
+			response, err := b.channel.Send("harExport", overrides)
 			if err != nil {
-				return err
+				return nil, err
 			}
-		} else {
-			if err := artifact.SaveAs(harMetaData.Path); err != nil {
-				return err
+			artifact := fromChannel(response).(*artifactImpl)
+			// Server side will compress artifact if content is attach or if file is .zip.
+			needCompressed := strings.HasSuffix(strings.ToLower(harMetaData.Path), ".zip")
+			if !needCompressed && harMetaData.Content == HarContentPolicyAttach {
+				tmpPath := harMetaData.Path + ".tmp"
+				if err := artifact.SaveAs(tmpPath); err != nil {
+					return nil, err
+				}
+				err = b.connection.localUtils.HarUnzip(tmpPath, harMetaData.Path)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				if err := artifact.SaveAs(harMetaData.Path); err != nil {
+					return nil, err
+				}
+			}
+			if err := artifact.Delete(); err != nil {
+				return nil, err
 			}
 		}
-		if err := artifact.Delete(); err != nil {
-			return err
-		}
+		return nil, nil
 	}
 
-	_, err := b.channel.Send("close")
+	_, err := b.channel.connection.WrapAPICall(innerClose, true)
+	if err != nil {
+		return err
+	}
+
+	_, err = b.channel.Send("close")
 	<-b.closed
 	return err
 }
 
 type browserContextRecordIntoHarOptions struct {
-	Page Page
-	URL  interface{}
-	// UpdateContent *HarContentPolicy
-	// UpdateMode    *HarMode
+	Page          Page
+	URL           interface{}
+	UpdateContent *HarContentPolicy
+	UpdateMode    *HarMode
 }
 
 func (b *browserContextImpl) recordIntoHar(har string, options ...browserContextRecordIntoHarOptions) error {
 	overrides := map[string]interface{}{}
 	harOptions := recordHarInputOptions{
-		Path: har,
+		Path:    har,
+		Content: HarContentPolicyAttach,
+		Mode:    HarModeMinimal,
 	}
-	content := HarContentPolicyAttach
-	harOptions.Content = content
-	harOptions.Mode = HarModeMinimal
 	if len(options) == 1 {
+		if options[0].UpdateContent != nil {
+			harOptions.Content = options[0].UpdateContent
+		}
+		if options[0].UpdateMode != nil {
+			harOptions.Mode = options[0].UpdateMode
+		}
 		harOptions.URL = options[0].URL
 		overrides["options"] = prepareRecordHarOptions(harOptions)
 		if options[0].Page != nil {
@@ -354,7 +384,7 @@ func (b *browserContextImpl) recordIntoHar(har string, options ...browserContext
 	}
 	b.harRecorders[harId.(string)] = harRecordingMetadata{
 		Path:    har,
-		Content: content,
+		Content: harOptions.Content,
 	}
 	return nil
 }
@@ -416,9 +446,6 @@ func (b *browserContextImpl) onBinding(binding *bindingCallImpl) {
 }
 
 func (b *browserContextImpl) onClose() {
-	b.Lock()
-	b.isClosedOrClosing = true
-	b.Unlock()
 	if b.browser != nil {
 		contexts := make([]BrowserContext, 0)
 		b.browser.Lock()
@@ -434,7 +461,6 @@ func (b *browserContextImpl) onClose() {
 }
 
 func (b *browserContextImpl) onPage(page *pageImpl) {
-	page.setBrowserContext(b)
 	b.Lock()
 	b.pages = append(b.pages, page)
 	b.Unlock()
@@ -452,14 +478,6 @@ func (b *browserContextImpl) onRoute(route *routeImpl) {
 		routes := make([]*routeHandlerEntry, len(b.routes))
 		copy(routes, b.routes)
 
-		defer func() {
-			if len(b.routes) == 0 {
-				_, _ = b.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
-					"enabled": false,
-				})
-			}
-		}()
-
 		url := route.Request().URL()
 		for i, handlerEntry := range routes {
 			if !handlerEntry.Matches(url) {
@@ -469,6 +487,15 @@ func (b *browserContextImpl) onRoute(route *routeImpl) {
 				b.routes = append(b.routes[:i], b.routes[i+1:]...)
 			}
 			handled := handlerEntry.Handle(route)
+			if len(b.routes) == 0 {
+				_, err := b.connection.WrapAPICall(func() (interface{}, error) {
+					err := b.updateInterceptionPatterns()
+					return nil, err
+				}, true)
+				if err != nil {
+					log.Printf("could not update interception patterns: %v", err)
+				}
+			}
 			yes := <-handled
 			if yes {
 				return
@@ -479,14 +506,19 @@ func (b *browserContextImpl) onRoute(route *routeImpl) {
 		}
 	}()
 }
-func (p *browserContextImpl) Pause() error {
-	return <-p.pause()
+
+func (b *browserContextImpl) updateInterceptionPatterns() error {
+	patterns := prepareInterceptionPatterns(b.routes)
+	_, err := b.channel.Send("setNetworkInterceptionPatterns", map[string]interface{}{
+		"patterns": patterns,
+	})
+	return err
 }
 
-func (p *browserContextImpl) pause() <-chan error {
+func (b *browserContextImpl) pause() <-chan error {
 	ret := make(chan error, 1)
 	go func() {
-		_, err := p.channel.Send("pause")
+		_, err := b.channel.Send("pause")
 		ret <- err
 	}()
 	return ret
@@ -507,13 +539,16 @@ func (b *browserContextImpl) onServiceWorker(worker *workerImpl) {
 	b.Emit("serviceworker", worker)
 }
 
-func (b *browserContextImpl) setBrowserType(bt *browserTypeImpl) {
-	b.browserType = bt
+func (b *browserContextImpl) setOptions(options *BrowserNewContextOptions, tracesDir *string) {
+	b.options = options
 	if b.options != nil && b.options.RecordHarPath != nil {
 		b.harRecorders[""] = harRecordingMetadata{
 			Path:    *b.options.RecordHarPath,
 			Content: b.options.RecordHarContent,
 		}
+	}
+	if tracesDir != nil {
+		b.tracing.tracesDir = *tracesDir
 	}
 }
 
@@ -539,6 +574,10 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 		closed:          make(chan struct{}, 1),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
+	if parent.objectType == "Browser" {
+		bt.browser = fromChannel(parent.channel).(*browserImpl)
+		bt.browser.contexts = append(bt.browser.contexts, bt)
+	}
 	bt.tracing = fromChannel(initializer["tracing"]).(*tracingImpl)
 	bt.request = fromChannel(initializer["requestContext"]).(*apiRequestContextImpl)
 	bt.channel.On("bindingCall", func(params map[string]interface{}) {
@@ -555,6 +594,36 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 	bt.channel.On("backgroundPage", bt.OnBackgroundPage)
 	bt.channel.On("serviceWorker", func(params map[string]interface{}) {
 		bt.onServiceWorker(fromChannel(params["worker"]).(*workerImpl))
+	})
+	bt.channel.On("console", func(params map[string]interface{}) {
+		message := fromChannel(params["message"]).(*consoleMessageImpl)
+		bt.Emit("console", message)
+		if message.page != nil {
+			message.page.Emit("console", message)
+		}
+	})
+	bt.channel.On("dialog", func(params map[string]interface{}) {
+		dialog := fromChannel(params["dialog"]).(*dialogImpl)
+		go func() {
+			hasListeners := bt.Emit("dialog", dialog)
+			page := dialog.page
+			if page != nil {
+				if page.Emit("dialog", dialog) {
+					hasListeners = true
+				}
+			}
+			if !hasListeners {
+				// Although we do similar handling on the server side, we still need this logic
+				// on the client side due to a possible race condition between two async calls:
+				// a) removing "dialog" listener subscription (client->server)
+				// b) actual "dialog" event (server->client)
+				if dialog.Type() == "beforeunload" {
+					_ = dialog.Accept()
+				} else {
+					_ = dialog.Dismiss()
+				}
+			}
+		}()
 	})
 	bt.channel.On("request", func(ev map[string]interface{}) {
 		request := fromChannel(ev["request"]).(*requestImpl)
@@ -603,6 +672,8 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 		bt.closed <- struct{}{}
 	})
 	bt.setEventSubscriptionMapping(map[string]string{
+		"console":         "console",
+		"dialog":          "dialog",
 		"request":         "request",
 		"response":        "response",
 		"requestfinished": "requestFinished",

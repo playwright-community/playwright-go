@@ -64,7 +64,8 @@ func (r *routeImpl) Abort(errorCode ...string) error {
 	}
 	err = r.raceWithPageClose(func() error {
 		_, err := r.channel.Send("abort", map[string]interface{}{
-			"errorCode": unpackOptionalArgument(errorCode),
+			"errorCode":  unpackOptionalArgument(errorCode),
+			"requestUrl": r.Request().(*requestImpl).initializer["url"],
 		})
 		return err
 	})
@@ -154,6 +155,7 @@ func (r *routeImpl) Fulfill(options RouteFulfillOptions) error {
 	}
 	overrides["headers"] = serializeMapToNameAndValue(headers)
 	overrides["isBase64"] = isBase64
+	overrides["requestUrl"] = r.Request().(*requestImpl).initializer["url"]
 
 	options.Path = nil
 	err = r.raceWithPageClose(func() error {
@@ -224,10 +226,16 @@ func (r *routeImpl) internalContinue(isInternal bool) error {
 	if postDataBuf != nil {
 		overrides["postData"] = base64.StdEncoding.EncodeToString(postDataBuf)
 	}
-	return r.raceWithPageClose(func() error {
-		_, err := r.channel.Send("continue", overrides)
-		return err
-	})
+	overrides["requestUrl"] = r.Request().(*requestImpl).initializer["url"]
+	overrides["isFallback"] = isInternal
+	_, err := r.channel.connection.WrapAPICall(func() (interface{}, error) {
+		err := r.raceWithPageClose(func() error {
+			_, err := r.channel.Send("continue", overrides)
+			return err
+		})
+		return nil, err
+	}, isInternal)
+	return err
 }
 
 func (r *routeImpl) redirectedNavigationRequest(url string) error {

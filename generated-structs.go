@@ -627,6 +627,14 @@ type BrowserContextUnrouteOptions struct {
 	// Optional handler function used to register a routing with BrowserContext.Route().
 	Handler func(Route) `json:"handler"`
 }
+type BrowserContextExpectConsoleMessageOptions struct {
+	// Receives the ConsoleMessage object and resolves to truthy value when the waiting
+	// should resolve.
+	Predicate func(ConsoleMessage) bool `json:"predicate"`
+	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass
+	// `0` to disable timeout. The default value can be changed by using the BrowserContext.SetDefaultTimeout().
+	Timeout *float64 `json:"timeout"`
+}
 type BrowserContextExpectEventOptions struct {
 	// Receives the event data and resolves to truthy value when the waiting should resolve.
 	Predicate interface{} `json:"predicate"`

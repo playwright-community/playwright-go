@@ -201,6 +201,10 @@
 			"urls ...string",
 			"([]*Cookie, error)"
 		],
+		"ExpectConsoleMessage": [
+			"cb func() error, options ...BrowserContextExpectConsoleMessageOptions",
+			"ConsoleMessage, error"
+		],
 		"ExpectEvent": [
 			"event string, cb func() error, options ...BrowserContextWaitForEventOptions",
 			"(interface{}, error)"
@@ -347,6 +351,10 @@
 			null,
 			"ConsoleMessageLocation"
 		],
+		"Page": [
+			null,
+			"Page"
+		],
 		"String": [
 			null,
 			"string"
@@ -376,6 +384,10 @@
 		"Message": [
 			null,
 			"string"
+		],
+		"Page": [
+			null,
+			"Page"
 		],
 		"Type": [
 			null,
@@ -576,7 +588,7 @@
 	"EventEmitter": {
 		"Emit": [
 			"name string, payload ...interface{}",
-			null
+			"bool"
 		],
 		"ListenerCount": [
 			"name string",
@@ -1921,7 +1933,7 @@
 		],
 		"Finished": [
 			null,
-			null
+			"error"
 		],
 		"Frame": [
 			null,

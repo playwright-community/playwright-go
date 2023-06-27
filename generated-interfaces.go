@@ -199,6 +199,11 @@ type BrowserContext interface {
 	// If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those
 	// URLs are returned.
 	Cookies(urls ...string) ([]*Cookie, error)
+	// Performs action and waits for a `ConsoleMessage` to be logged by in the pages in the context. If predicate is
+	// provided, it passes `ConsoleMessage` value into the `predicate` function and waits for `predicate(message)` to
+	// return a truthy value. Will throw an error if the page is closed before the [`event: BrowserContext.console`] event
+	// is fired.
+	ExpectConsoleMessage(cb func() error, options ...BrowserContextExpectConsoleMessageOptions) (ConsoleMessage, error)
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the context closes before the event is fired. Returns the event data value.
 	ExpectEvent(event string, cb func() error, options ...BrowserContextWaitForEventOptions) (interface{}, error)
@@ -331,6 +336,8 @@ type ConsoleMessage interface {
 	// List of arguments passed to a `console` function call. See also [`event: Page.console`].
 	Args() []JSHandle
 	Location() ConsoleMessageLocation
+	// The page that produced this console message, if any.
+	Page() Page
 	String() string
 	// The text of the console message.
 	Text() string
@@ -355,6 +362,8 @@ type Dialog interface {
 	Dismiss() error
 	// A message displayed in the dialog.
 	Message() string
+	// The page that initiated this dialog, if available.
+	Page() Page
 	// Returns dialog's type, can be one of `alert`, `beforeunload`, `confirm` or `prompt`.
 	Type() string
 }
@@ -630,7 +639,7 @@ type ElementHandle interface {
 }
 
 type EventEmitter interface {
-	Emit(name string, payload ...interface{})
+	Emit(name string, payload ...interface{}) bool
 	ListenerCount(name string) int
 	On(name string, handler interface{})
 	Once(name string, handler interface{})
@@ -2007,7 +2016,7 @@ type Response interface {
 	// Returns the buffer with response body.
 	Body() ([]byte, error)
 	// Waits for this response to finish, returns always `null`.
-	Finished()
+	Finished() error
 	// Returns the `Frame` that initiated this response.
 	Frame() Frame
 	// Indicates whether this Response was fulfilled by a Service Worker's Fetch Handler (i.e. via

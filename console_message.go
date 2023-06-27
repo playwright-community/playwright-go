@@ -2,6 +2,7 @@ package playwright
 
 type consoleMessageImpl struct {
 	channelOwner
+	page Page
 }
 
 // ConsoleMessageLocation represents where a console message was logged in the browser
@@ -38,8 +39,19 @@ func (c *consoleMessageImpl) Location() ConsoleMessageLocation {
 	return locations
 }
 
+func (c *consoleMessageImpl) Page() Page {
+	return c.page
+}
+
 func newConsoleMessage(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *consoleMessageImpl {
 	bt := &consoleMessageImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
+	// Note: currently, we only report console messages for pages and they always have a page.
+	// However, in the future we might report console messages for service workers or something else,
+	// where page() would be null.
+	page := fromNullableChannel(initializer["page"])
+	if page != nil {
+		bt.page = page.(*pageImpl)
+	}
 	return bt
 }

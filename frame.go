@@ -129,9 +129,6 @@ func (f *frameImpl) WaitForLoadState(options ...PageWaitForLoadStateOptions) err
 	if option.State == nil {
 		option.State = LoadStateLoad
 	}
-	if option.Timeout == nil {
-		option.Timeout = Float(f.page.timeoutSettings.NavigationTimeout())
-	}
 	return f.waitForLoadStateImpl(string(*option.State), option.Timeout, nil)
 }
 
@@ -240,7 +237,12 @@ func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (
 }
 
 func (f *frameImpl) setNavigationWaiter(timeout *float64) *waiter {
-	waiter := newWaiter().WithTimeout(*timeout)
+	waiter := newWaiter()
+	if timeout != nil {
+		waiter.WithTimeout(*timeout)
+	} else {
+		waiter.WithTimeout(f.page.timeoutSettings.NavigationTimeout())
+	}
 	waiter.RejectOnEvent(f.page, "close", fmt.Errorf("Navigation failed because page was closed!"))
 	waiter.RejectOnEvent(f.page, "crash", fmt.Errorf("Navigation failed because page crashed!"))
 	waiter.RejectOnEvent(f.page, "framedetached", fmt.Errorf("Navigating frame was detached!"), func(payload interface{}) bool {

@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"time"
 )
@@ -33,13 +34,11 @@ func (p *pageImpl) Context() BrowserContext {
 
 func (p *pageImpl) Close(options ...PageCloseOptions) error {
 	_, err := p.channel.Send("close", options)
-	if err != nil {
-		return err
+	if err == nil && p.ownedContext != nil {
+		err = p.ownedContext.Close()
 	}
-	if p.ownedContext != nil {
-		return p.ownedContext.Close()
-	}
-	return nil
+	// TODO(canstand): check safe close and runBeforUnload
+	return err
 }
 
 func (p *pageImpl) InnerText(selector string, options ...PageInnerTextOptions) (string, error) {
@@ -94,14 +93,14 @@ func (p *pageImpl) Frames() []Frame {
 }
 
 func (p *pageImpl) SetDefaultNavigationTimeout(timeout float64) {
-	p.timeoutSettings.SetNavigationTimeout(timeout)
+	p.timeoutSettings.SetDefaultNavigationTimeout(&timeout)
 	p.channel.SendNoReply("setDefaultNavigationTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
 	})
 }
 
 func (p *pageImpl) SetDefaultTimeout(timeout float64) {
-	p.timeoutSettings.SetTimeout(timeout)
+	p.timeoutSettings.SetDefaultTimeout(&timeout)
 	p.channel.SendNoReply("setDefaultTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
 	})
@@ -162,13 +161,13 @@ func (p *pageImpl) Unroute(url interface{}, handlers ...routeHandler) error {
 	p.Lock()
 	defer p.Unlock()
 
-	routes, err := unroute(p.channel, p.routes, url, handlers...)
+	routes, err := unroute(p.routes, url, handlers...)
 	if err != nil {
 		return err
 	}
 	p.routes = routes
 
-	return nil
+	return p.updateInterceptionPatterns()
 }
 
 func (p *pageImpl) Content() (string, error) {
@@ -370,7 +369,7 @@ func (p *pageImpl) waiterForRequest(url interface{}, options ...PageWaitForReque
 		option = options[0]
 	}
 	if option.Timeout == nil {
-		option.Timeout = Float(p.timeoutSettings.timeout)
+		option.Timeout = Float(p.timeoutSettings.Timeout())
 	}
 	var matcher *urlMatcher
 	if url != nil {
@@ -401,7 +400,7 @@ func (p *pageImpl) waiterForResponse(url interface{}, options ...PageWaitForResp
 		option = options[0]
 	}
 	if option.Timeout == nil {
-		option.Timeout = Float(p.timeoutSettings.timeout)
+		option.Timeout = Float(p.timeoutSettings.Timeout())
 	}
 	var matcher *urlMatcher
 	if url != nil {
@@ -523,9 +522,6 @@ func (p *pageImpl) ExpectLoadState(cb func() error, options ...PageWaitForLoadSt
 	if option.State == nil {
 		option.State = LoadStateLoad
 	}
-	if option.Timeout == nil {
-		option.Timeout = Float(p.timeoutSettings.NavigationTimeout())
-	}
 	return p.mainFrame.(*frameImpl).waitForLoadStateImpl(string(*option.State), option.Timeout, cb)
 }
 
@@ -601,15 +597,7 @@ func (p *pageImpl) Route(url interface{}, handler routeHandler, times ...int) er
 	p.Lock()
 	defer p.Unlock()
 	p.routes = append(p.routes, newRouteHandlerEntry(newURLMatcher(url, p.browserContext.options.BaseURL), handler, times...))
-	if len(p.routes) == 1 {
-		_, err := p.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
-			"enabled": true,
-		})
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return p.updateInterceptionPatterns()
 }
 
 func (p *pageImpl) GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error) {
@@ -672,11 +660,6 @@ func (p *pageImpl) Touchscreen() Touchscreen {
 	return p.touchscreen
 }
 
-func (p *pageImpl) setBrowserContext(browserContext *browserContextImpl) {
-	p.browserContext = browserContext
-	p.timeoutSettings = newTimeoutSettings(browserContext.timeoutSettings)
-}
-
 func newPage(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *pageImpl {
 	viewportSize := &ViewportSize{}
 	if _, ok := initializer["viewportSize"].(map[string]interface{}); ok {
@@ -684,16 +667,18 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		viewportSize.Width = int(initializer["viewportSize"].(map[string]interface{})["width"].(float64))
 	}
 	bt := &pageImpl{
-		mainFrame:       fromChannel(initializer["mainFrame"]).(*frameImpl),
-		workers:         make([]Worker, 0),
-		routes:          make([]*routeHandlerEntry, 0),
-		bindings:        make(map[string]BindingCallFunction),
-		viewportSize:    *viewportSize,
-		timeoutSettings: newTimeoutSettings(nil),
+		workers:      make([]Worker, 0),
+		routes:       make([]*routeHandlerEntry, 0),
+		bindings:     make(map[string]BindingCallFunction),
+		viewportSize: *viewportSize,
 	}
-	bt.frames = []Frame{bt.mainFrame}
-	bt.mainFrame.(*frameImpl).page = bt
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
+	bt.browserContext = fromChannel(parent.channel).(*browserContextImpl)
+	bt.timeoutSettings = newTimeoutSettings(bt.browserContext.timeoutSettings)
+	mainframe := fromChannel(initializer["mainFrame"]).(*frameImpl)
+	mainframe.page = bt
+	bt.mainFrame = mainframe
+	bt.frames = []Frame{mainframe}
 	bt.mouse = newMouse(bt.channel)
 	bt.keyboard = newKeyboard(bt.channel)
 	bt.touchscreen = newTouchscreen(bt.channel)
@@ -701,16 +686,8 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		bt.onBinding(fromChannel(params["binding"]).(*bindingCallImpl))
 	})
 	bt.channel.On("close", bt.onClose)
-	bt.channel.On("console", func(ev map[string]interface{}) {
-		bt.Emit("console", fromChannel(ev["message"]))
-	})
 	bt.channel.On("crash", func() {
 		bt.Emit("crash")
-	})
-	bt.channel.On("dialog", func(ev map[string]interface{}) {
-		go func() {
-			bt.Emit("dialog", fromChannel(ev["dialog"]))
-		}()
 	})
 	bt.channel.On("domcontentloaded", func() {
 		bt.Emit("domcontentloaded")
@@ -773,6 +750,8 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		}
 	})
 	bt.setEventSubscriptionMapping(map[string]string{
+		"console":         "console",
+		"dialog":          "dialog",
 		"request":         "request",
 		"response":        "response",
 		"requestfinished": "requestFinished",
@@ -818,14 +797,6 @@ func (p *pageImpl) onRoute(route *routeImpl) {
 		routes := make([]*routeHandlerEntry, len(p.routes))
 		copy(routes, p.routes)
 
-		defer func() {
-			if len(p.routes) == 0 {
-				_, _ = p.channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
-					"enabled": false,
-				})
-			}
-		}()
-
 		url := route.Request().URL()
 		for i, handlerEntry := range routes {
 			if !handlerEntry.Matches(url) {
@@ -835,12 +806,29 @@ func (p *pageImpl) onRoute(route *routeImpl) {
 				p.routes = append(p.routes[:i], p.routes[i+1:]...)
 			}
 			handled := handlerEntry.Handle(route)
+			if len(p.routes) == 0 {
+				_, err := p.connection.WrapAPICall(func() (interface{}, error) {
+					err := p.updateInterceptionPatterns()
+					return nil, err
+				}, true)
+				if err != nil {
+					log.Printf("could not update interception patterns: %v", err)
+				}
+			}
 			if <-handled {
 				return
 			}
 		}
 		p.browserContext.onRoute(route)
 	}()
+}
+
+func (p *pageImpl) updateInterceptionPatterns() error {
+	patterns := prepareInterceptionPatterns(p.routes)
+	_, err := p.channel.Send("setNetworkInterceptionPatterns", map[string]interface{}{
+		"patterns": patterns,
+	})
+	return err
 }
 
 func (p *pageImpl) onWorker(worker *workerImpl) {
@@ -974,13 +962,22 @@ func (p *pageImpl) DragAndDrop(source, target string, options ...FrameDragAndDro
 	return p.mainFrame.DragAndDrop(source, target, options...)
 }
 
-func (p *pageImpl) Pause() error {
+func (p *pageImpl) Pause() (err error) {
+	defaultNavigationTimout := p.browserContext.timeoutSettings.DefaultNavigationTimeout()
+	defaultTimeout := p.browserContext.timeoutSettings.DefaultTimeout()
+	p.browserContext.SetDefaultNavigationTimeout(0)
+	p.browserContext.SetDefaultTimeout(0)
 	select {
 	case <-p.closedOrCrashed:
-		return fmt.Errorf("Page is closed or crashed")
-	case err := <-p.browserContext.pause():
+		err = fmt.Errorf("Page is closed or crashed")
+	case err = <-p.browserContext.pause():
+	}
+	if err != nil {
 		return err
 	}
+	p.browserContext.SetDefaultNavigationTimeout(*defaultNavigationTimout)
+	p.browserContext.SetDefaultTimeout(*defaultTimeout)
+	return
 }
 
 func (p *pageImpl) InputValue(selector string, options ...FrameInputValueOptions) (string, error) {

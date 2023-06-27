@@ -14,16 +14,20 @@ type channel struct {
 }
 
 func (c *channel) Send(method string, options ...interface{}) (interface{}, error) {
-	return c.innerSend(method, false, options...)
+	return c.connection.WrapAPICall(func() (interface{}, error) {
+		return c.innerSend(method, false, options...)
+	}, false)
 }
 
 func (c *channel) SendReturnAsDict(method string, options ...interface{}) (interface{}, error) {
-	return c.innerSend(method, true, options...)
+	return c.connection.WrapAPICall(func() (interface{}, error) {
+		return c.innerSend(method, true, options...)
+	}, true)
 }
 
 func (c *channel) innerSend(method string, returnAsDict bool, options ...interface{}) (interface{}, error) {
 	params := transformOptions(options...)
-	result, err := c.connection.SendMessageToServer(c.guid, method, params)
+	result, err := c.connection.sendMessageToServer(c.guid, method, params)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message to server: %w", err)
 	}
@@ -47,7 +51,9 @@ func (c *channel) innerSend(method string, returnAsDict bool, options ...interfa
 
 func (c *channel) SendNoReply(method string, options ...interface{}) {
 	params := transformOptions(options...)
-	_, err := c.connection.SendMessageToServer(c.guid, method, params)
+	_, err := c.connection.WrapAPICall(func() (interface{}, error) {
+		return c.connection.sendMessageToServer(c.guid, method, params)
+	}, false)
 	if err != nil {
 		log.Printf("could not send message to server from noreply: %v", err)
 	}

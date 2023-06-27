@@ -31,6 +31,61 @@ func TestBrowserContextOutputTrace(t *testing.T) {
 	require.FileExists(t, filepath.Join(dir, "trace.zip"))
 }
 
+func TestBrowserContextShouldNoErrorWhenStoppingWithoutStart(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	context, err := browser.NewContext()
+	require.NoError(t, err)
+	defer context.Close()
+	require.NoError(t, context.Tracing().Stop())
+}
+
+func TestBrowserContextOutputTraceChunk(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	context, err := browser.NewContext()
+	require.NoError(t, err)
+	defer context.Close()
+	require.NoError(t, context.Tracing().Start(playwright.TracingStartOptions{
+		Screenshots: playwright.Bool(true),
+		Snapshots:   playwright.Bool(true),
+	}))
+	page, err := context.NewPage()
+	require.NoError(t, err)
+	defer page.Close()
+	_, err = page.Goto(server.PREFIX + "/grid.html")
+	require.NoError(t, err)
+	dir := t.TempDir()
+	locator, err := page.Locator(".box")
+	require.NoError(t, err)
+	button, err := locator.First()
+	require.NoError(t, err)
+
+	err = context.Tracing().StartChunk(playwright.TracingStartChunkOptions{
+		Title: playwright.String("foo"),
+	})
+	require.NoError(t, err)
+	err = button.Click()
+	require.NoError(t, err)
+	err = context.Tracing().StopChunk(playwright.TracingStopChunkOptions{
+		Path: playwright.String(filepath.Join(dir, "trace1.zip")),
+	})
+	require.NoError(t, err)
+	require.FileExists(t, filepath.Join(dir, "trace1.zip"))
+
+	err = context.Tracing().StartChunk(playwright.TracingStartChunkOptions{
+		Title: playwright.String("foo"),
+	})
+	require.NoError(t, err)
+	err = button.Click()
+	require.NoError(t, err)
+	err = context.Tracing().StopChunk(playwright.TracingStopChunkOptions{
+		Path: playwright.String(filepath.Join(dir, "trace2.zip")),
+	})
+	require.NoError(t, err)
+	require.FileExists(t, filepath.Join(dir, "trace2.zip"))
+}
+
 func TestBrowserContextMultipleChunks(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)

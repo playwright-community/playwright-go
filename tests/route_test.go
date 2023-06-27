@@ -185,7 +185,7 @@ func TestRequestFinished(t *testing.T) {
 	})
 	response, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	response.Finished()
+	require.NoError(t, response.Finished())
 	eventsStorage.Append("requestfinished")
 	require.Equal(t, []interface{}{"request", "response", "requestfinished"}, eventsStorage.Get())
 	require.Equal(t, response.Request(), request)
@@ -300,7 +300,7 @@ func TestResponseSecurityDetails(t *testing.T) {
 	require.NoError(t, err)
 	response, err := page2.Goto(tlsServer.EMPTY_PAGE)
 	require.NoError(t, err)
-	response.Finished()
+	require.NoError(t, response.Finished())
 	securityDetails, err := response.SecurityDetails()
 	require.NoError(t, err)
 
