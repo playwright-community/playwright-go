@@ -37,11 +37,15 @@ func TestWorkerShouldEmitCreatedAndDestroyedEvents(t *testing.T) {
 		return err
 	})
 	require.NoError(t, err)
+	workerThisObj, err := worker.EvaluateHandle(`() => this`)
+	require.NoError(t, err)
 	_, err = worker.ExpectEvent("close", func() error {
 		_, err := page.Evaluate("workerObj => workerObj.terminate()", workerObj)
 		return err
 	})
 	require.NoError(t, err)
+	_, err = workerThisObj.GetProperty("self")
+	require.Error(t, err)
 }
 
 func TestWorkerShouldReportConsoleLogs(t *testing.T) {

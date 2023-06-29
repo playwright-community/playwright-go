@@ -11,10 +11,9 @@ type pageAssertionsImpl struct {
 }
 
 func newPageAssertions(page Page, isNot bool, defaultTimeout *float64) *pageAssertionsImpl {
-	locator, _ := page.Locator(":root")
 	return &pageAssertionsImpl{
 		assertionsBase: assertionsBase{
-			actualLocator:  locator,
+			actualLocator:  page.Locator(":root"),
 			isNot:          isNot,
 			defaultTimeout: defaultTimeout,
 		},

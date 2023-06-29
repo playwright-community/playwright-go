@@ -4,9 +4,19 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"regexp"
+	"strconv"
+	"strings"
 	"sync"
+	"sync/atomic"
+	"time"
 
 	"github.com/go-stack/stack"
+)
+
+var (
+	pkgSourcePathPattern = regexp.MustCompile(`.+[\\/]playwright-go[\\/][^\\/]+\.go`)
+	apiNameTransform     = regexp.MustCompile(`(?U)\(\*(.+)(Impl)?\)`)
 )
 
 type callback struct {
@@ -15,18 +25,18 @@ type callback struct {
 }
 
 type connection struct {
-	waitingForRemoteObjectsLock sync.Mutex
-	waitingForRemoteObjects     map[string]chan interface{}
-	objects                     map[string]*channelOwner
-	lastID                      int
-	lastIDLock                  sync.Mutex
-	rootObject                  *rootChannelOwner
-	callbacks                   sync.Map
-	afterClose                  func()
-	onClose                     func() error
-	onmessage                   func(map[string]interface{}) error
-	isRemote                    bool
-	localUtils                  *localUtilsImpl
+	apiZone      sync.Map
+	objects      map[string]*channelOwner
+	lastID       int
+	lastIDLock   sync.Mutex
+	rootObject   *rootChannelOwner
+	callbacks    sync.Map
+	afterClose   func()
+	onClose      func() error
+	onmessage    func(map[string]interface{}) error
+	isRemote     bool
+	localUtils   *localUtilsImpl
+	tracingCount atomic.Int32
 }
 
 func (c *connection) Start() *Playwright {
@@ -119,13 +129,35 @@ func (c *connection) LocalUtils() *localUtilsImpl {
 func (c *connection) createRemoteObject(parent *channelOwner, objectType string, guid string, initializer interface{}) interface{} {
 	initializer = c.replaceGuidsWithChannels(initializer)
 	result := createObjectFactory(parent, objectType, guid, initializer.(map[string]interface{}))
-	c.waitingForRemoteObjectsLock.Lock()
-	if _, ok := c.waitingForRemoteObjects[guid]; ok {
-		c.waitingForRemoteObjects[guid] <- result
-		delete(c.waitingForRemoteObjects, guid)
-	}
-	c.waitingForRemoteObjectsLock.Unlock()
 	return result
+}
+
+func (c *connection) WrapAPICall(cb func() (interface{}, error), isInternal bool) (interface{}, error) {
+	call := func() (interface{}, error) {
+		result := reflect.ValueOf(cb).Call(nil)
+		// accept 0 to 2 return values
+		switch len(result) {
+		case 2:
+			val := result[0].Interface()
+			err, ok := result[1].Interface().(error)
+			if ok && err != nil {
+				return val, err
+			}
+			return val, nil
+		case 1:
+			return result[0].Interface(), nil
+		default:
+			return nil, nil
+		}
+	}
+	if _, ok := c.apiZone.Load("apiZone"); !ok {
+		return call()
+	}
+	defer func() {
+		c.apiZone.Delete("apiZone")
+	}()
+	c.apiZone.Store("apiZone", serializeCallStack(isInternal))
+	return call()
 }
 
 func (c *connection) replaceChannelsWithGuids(payload interface{}) interface{} {
@@ -182,15 +214,21 @@ func (c *connection) replaceGuidsWithChannels(payload interface{}) interface{} {
 	return payload
 }
 
-func (c *connection) SendMessageToServer(guid string, method string, params interface{}) (interface{}, error) {
+func (c *connection) sendMessageToServer(guid string, method string, params interface{}) (interface{}, error) {
 	c.lastIDLock.Lock()
 	c.lastID++
 	id := c.lastID
 	c.lastIDLock.Unlock()
-	stack := serializeCallStack(stack.Trace())
-	metadata := make(map[string]interface{})
-	metadata["stack"] = stack
-	metadata["apiName"] = ""
+	var (
+		metadata = make(map[string]interface{}, 0)
+		stack    = make([]map[string]interface{}, 0)
+	)
+	apiZone, ok := c.apiZone.Load("apiZone")
+	if ok {
+		metadata = apiZone.(*parsedStackTrace).metadata
+		stack = apiZone.(*parsedStackTrace).frames
+	}
+	metadata["wallTime"] = time.Now().Nanosecond()
 	message := map[string]interface{}{
 		"id":       id,
 		"guid":     guid,
@@ -202,6 +240,10 @@ func (c *connection) SendMessageToServer(guid string, method string, params inte
 	if err := c.onmessage(message); err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
+
+	if c.tracingCount.Load() > 0 && len(stack) > 0 && guid != "localUtils" {
+		c.LocalUtils().AddStackToTracingNoReply(id, stack)
+	}
 	result := <-cb.(chan callback)
 	c.callbacks.Delete(id)
 	if result.Error != nil {
@@ -210,24 +252,75 @@ func (c *connection) SendMessageToServer(guid string, method string, params inte
 	return result.Data, nil
 }
 
-func serializeCallStack(stack stack.CallStack) []map[string]interface{} {
+func (c *connection) setInTracing(isTracing bool) {
+	if isTracing {
+		c.tracingCount.Add(1)
+	} else {
+		c.tracingCount.Add(-1)
+	}
+}
+
+type parsedStackTrace struct {
+	frames   []map[string]interface{}
+	metadata map[string]interface{}
+}
+
+func serializeCallStack(isInternal bool) *parsedStackTrace {
+	st := stack.Trace().TrimRuntime()
+
+	lastInternalIndex := 0
+	for i, s := range st {
+		if pkgSourcePathPattern.MatchString(s.Frame().File) {
+			lastInternalIndex = i
+		}
+	}
+	apiName := ""
+	if !isInternal {
+		apiName = fmt.Sprintf("%n", st[lastInternalIndex])
+	}
+	st = st.TrimBelow(st[lastInternalIndex])
+
 	callStack := make([]map[string]interface{}, 0)
-	for _, s := range stack {
+	for i, s := range st {
+		if i == 0 {
+			continue
+		}
 		callStack = append(callStack, map[string]interface{}{
 			"file":     s.Frame().File,
 			"line":     s.Frame().Line,
+			"column":   0,
 			"function": s.Frame().Function,
 		})
 	}
-	return callStack
+	metadata := make(map[string]interface{})
+	if len(st) > 1 {
+		metadata["location"] = serializeCallLocation(st[1])
+	}
+	apiName = apiNameTransform.ReplaceAllString(apiName, "$1")
+	if len(apiName) > 1 {
+		apiName = strings.ToUpper(apiName[:1]) + apiName[1:]
+	}
+	metadata["apiName"] = apiName
+	metadata["isInternal"] = isInternal
+	return &parsedStackTrace{
+		metadata: metadata,
+		frames:   callStack,
+	}
+}
+
+func serializeCallLocation(caller stack.Call) map[string]interface{} {
+	line, _ := strconv.Atoi(fmt.Sprintf("%d", caller))
+	return map[string]interface{}{
+		"file": fmt.Sprintf("%s", caller),
+		"line": line,
+	}
 }
 
 func newConnection(onClose func() error, localUtils ...*localUtilsImpl) *connection {
 	connection := &connection{
-		waitingForRemoteObjects: make(map[string]chan interface{}),
-		objects:                 make(map[string]*channelOwner),
-		onClose:                 onClose,
-		isRemote:                false,
+		objects:  make(map[string]*channelOwner),
+		onClose:  onClose,
+		isRemote: false,
 	}
 	if len(localUtils) > 0 {
 		connection.localUtils = localUtils[0]

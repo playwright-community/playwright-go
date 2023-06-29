@@ -129,9 +129,6 @@ func (f *frameImpl) WaitForLoadState(options ...PageWaitForLoadStateOptions) err
 	if option.State == nil {
 		option.State = LoadStateLoad
 	}
-	if option.Timeout == nil {
-		option.Timeout = Float(f.page.timeoutSettings.NavigationTimeout())
-	}
 	return f.waitForLoadStateImpl(string(*option.State), option.Timeout, nil)
 }
 
@@ -240,7 +237,12 @@ func (f *frameImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (
 }
 
 func (f *frameImpl) setNavigationWaiter(timeout *float64) *waiter {
-	waiter := newWaiter().WithTimeout(*timeout)
+	waiter := newWaiter()
+	if timeout != nil {
+		waiter.WithTimeout(*timeout)
+	} else {
+		waiter.WithTimeout(f.page.timeoutSettings.NavigationTimeout())
+	}
 	waiter.RejectOnEvent(f.page, "close", fmt.Errorf("Navigation failed because page was closed!"))
 	waiter.RejectOnEvent(f.page, "crash", fmt.Errorf("Navigation failed because page crashed!"))
 	waiter.RejectOnEvent(f.page, "framedetached", fmt.Errorf("Navigating frame was detached!"), func(payload interface{}) bool {
@@ -675,7 +677,7 @@ func (f *frameImpl) SetChecked(selector string, checked bool, options ...FrameSe
 	}
 }
 
-func (f *frameImpl) Locator(selector string, options ...FrameLocatorOptions) (Locator, error) {
+func (f *frameImpl) Locator(selector string, options ...FrameLocatorOptions) Locator {
 	var option LocatorLocatorOptions
 	if len(options) == 1 {
 		option = LocatorLocatorOptions(options[0])
@@ -683,7 +685,7 @@ func (f *frameImpl) Locator(selector string, options ...FrameLocatorOptions) (Lo
 	return newLocator(f, selector, option)
 }
 
-func (f *frameImpl) GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error) {
+func (f *frameImpl) GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -693,7 +695,7 @@ func (f *frameImpl) GetByAltText(text interface{}, options ...LocatorGetByAltTex
 	return f.Locator(getByAltTextSelector(text, exact))
 }
 
-func (f *frameImpl) GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error) {
+func (f *frameImpl) GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -703,7 +705,7 @@ func (f *frameImpl) GetByLabel(text interface{}, options ...LocatorGetByLabelOpt
 	return f.Locator(getByLabelSelector(text, exact))
 }
 
-func (f *frameImpl) GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error) {
+func (f *frameImpl) GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -713,15 +715,15 @@ func (f *frameImpl) GetByPlaceholder(text interface{}, options ...LocatorGetByPl
 	return f.Locator(getByPlaceholderSelector(text, exact))
 }
 
-func (f *frameImpl) GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error) {
+func (f *frameImpl) GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) Locator {
 	return f.Locator(getByRoleSelector(role, options...))
 }
 
-func (f *frameImpl) GetByTestId(testId interface{}) (Locator, error) {
+func (f *frameImpl) GetByTestId(testId interface{}) Locator {
 	return f.Locator(getByTestIdSelector(getTestIdAttributeName(), testId))
 }
 
-func (f *frameImpl) GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error) {
+func (f *frameImpl) GetByText(text interface{}, options ...LocatorGetByTextOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -731,7 +733,7 @@ func (f *frameImpl) GetByText(text interface{}, options ...LocatorGetByTextOptio
 	return f.Locator(getByTextSelector(text, exact))
 }
 
-func (f *frameImpl) GetByTitle(text interface{}, options ...LocatorGetByTitleOptions) (Locator, error) {
+func (f *frameImpl) GetByTitle(text interface{}, options ...LocatorGetByTitleOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {

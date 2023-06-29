@@ -23,7 +23,7 @@ func TestPageAssertionsToHaveTitle(t *testing.T) {
 
 	_, err = page.Evaluate(`setTimeout(() => {
 		document.title = 'great title';
-	}, 500);
+	}, 300);
 	`)
 	require.NoError(t, err)
 	require.NoError(t, expect.Page(page).ToHaveTitle("great title"))
@@ -37,7 +37,9 @@ func TestPageAssertionsToHaveURL(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NoError(t, expect.Page(page).ToHaveURL(server.EMPTY_PAGE))
-	require.NoError(t, expect.Page(page).ToHaveURL(regexp.MustCompile(`.*/empty\.html`)))
+	require.NoError(t, expect.Page(page).ToHaveURL(regexp.MustCompile(`.*/empty\.html`), playwright.PageAssertionsToHaveURLOptions{
+		Timeout: playwright.Float(750),
+	}))
 	require.NoError(t, expect.Page(page).NotToHaveURL("https://playwright.dev"))
 }
 

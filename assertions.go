@@ -42,7 +42,7 @@ type expectedTextValue struct {
 type frameExpectOptions struct {
 	ExpressionArg  interface{}         `json:"expressionArg"`
 	ExpectedText   []expectedTextValue `json:"expectedText"`
-	ExpectedNumber *int                `json:"expectedNumber"`
+	ExpectedNumber *float64            `json:"expectedNumber"`
 	ExpectedValue  interface{}         `json:"expectedValue"`
 	UseInnerText   *bool               `json:"useInnerText"`
 	IsNot          bool                `json:"isNot"`

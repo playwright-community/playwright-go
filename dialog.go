@@ -2,6 +2,7 @@ package playwright
 
 type dialogImpl struct {
 	channelOwner
+	page Page
 }
 
 func (d *dialogImpl) Type() string {
@@ -32,8 +33,16 @@ func (d *dialogImpl) Dismiss() error {
 	return err
 }
 
+func (d *dialogImpl) Page() Page {
+	return d.page
+}
+
 func newDialog(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *dialogImpl {
 	bt := &dialogImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
+	page := fromNullableChannel(initializer["page"])
+	if page != nil {
+		bt.page = page.(*pageImpl)
+	}
 	return bt
 }

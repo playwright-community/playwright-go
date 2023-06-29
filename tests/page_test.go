@@ -1075,3 +1075,33 @@ func TestPageWaitForURL(t *testing.T) {
 		require.Contains(t, page.URL(), "grid.html")
 	})
 }
+
+func TestCloseShouldRunBeforunloadIfAskedFor(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(fmt.Sprintf("%s/beforeunload.html", server.PREFIX))
+	require.NoError(t, err)
+
+	dialogInfo, err := page.ExpectEvent("dialog", func() error {
+		// We have to interact with a page so that 'beforeunload' handlers fire.
+		require.NoError(t, page.Click("body"))
+		return page.Close(playwright.PageCloseOptions{
+			RunBeforeUnload: playwright.Bool(true),
+		})
+	})
+	require.NoError(t, err)
+	dialog := dialogInfo.(playwright.Dialog)
+	require.Equal(t, "beforeunload", dialog.Type())
+	if isChromium {
+		require.Equal(t, "", dialog.Message())
+	} else if isWebKit {
+		require.Equal(t, "Leave?", dialog.Message())
+	} else {
+		require.Contains(t, dialog.Message(), "This page is asking you to confirm that you want to leave")
+	}
+	_, err = page.ExpectEvent("close", func() error {
+		require.NoError(t, dialog.Accept())
+		return nil
+	})
+	require.Error(t, err)
+}

@@ -29,7 +29,7 @@ func TestRequestFulfill(t *testing.T) {
 	})
 	require.NoError(t, err)
 	response, err := page.Goto(server.EMPTY_PAGE)
-	response.Finished()
+	require.NoError(t, response.Finished())
 	require.NoError(t, err)
 	require.True(t, response.Ok())
 	text, err := response.Text()
@@ -63,7 +63,7 @@ func TestRequestContinue(t *testing.T) {
 	})
 	require.NoError(t, err)
 	response, err := page.Goto(server.EMPTY_PAGE)
-	response.Finished()
+	require.NoError(t, response.Finished())
 	require.NoError(t, err)
 	require.True(t, response.Ok())
 	require.True(t, <-intercepted)
@@ -78,7 +78,7 @@ func TestRequestShouldFireForNavigationRequests(t *testing.T) {
 	})
 	response, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	response.Finished()
+	require.NoError(t, response.Finished())
 	require.True(t, response.Ok())
 	<-requests
 }
