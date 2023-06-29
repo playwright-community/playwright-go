@@ -1949,28 +1949,6 @@ type FrameLocatorGetByTitleOptions struct {
 	// whitespace.
 	Exact *bool `json:"exact"`
 }
-type FrameLocatorLocatorOptions struct {
-	// Matches elements containing an element that matches an inner locator. Inner locator
-	// is queried against the outer one. For example, `article` that has `text=Playwright`
-	// matches `<article><div>Playwright</div></article>`.
-	// Note that outer and inner locators must belong to the same frame. Inner locator
-	// must not contain FrameLocators.
-	Has Locator `json:"has"`
-	// Matches elements that do not contain an element that matches an inner locator. Inner
-	// locator is queried against the outer one. For example, `article` that does not have
-	// `div` matches `<article><span>Playwright</span></article>`.
-	// Note that outer and inner locators must belong to the same frame. Inner locator
-	// must not contain FrameLocators.
-	HasNot Locator `json:"hasNot"`
-	// Matches elements that do not contain specified text somewhere inside, possibly in
-	// a child or a descendant element. When passed a [string], matching is case-insensitive
-	// and searches for a substring.
-	HasNotText interface{} `json:"hasNotText"`
-	// Matches elements containing specified text somewhere inside, possibly in a child
-	// or a descendant element. When passed a [string], matching is case-insensitive and
-	// searches for a substring. For example, `"Playwright"` matches `<article><div>Playwright</div></article>`.
-	HasText interface{} `json:"hasText"`
-}
 type JSHandleEvaluateOptions struct {
 	// Optional argument to pass to `expression`.
 	Arg interface{} `json:"arg"`

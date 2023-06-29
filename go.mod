@@ -10,6 +10,7 @@ require (
 	github.com/h2non/filetype v1.1.3
 	github.com/stretchr/testify v1.8.2
 	github.com/tidwall/gjson v1.14.4
+	go.uber.org/multierr v1.11.0
 )
 
 require (

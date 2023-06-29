@@ -31,6 +31,13 @@ func TestBrowserContextOutputTrace(t *testing.T) {
 	require.FileExists(t, filepath.Join(dir, "trace.zip"))
 }
 
+func TestTracingStartStop(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, context.Tracing().Start())
+	require.NoError(t, context.Tracing().Stop())
+}
+
 func TestBrowserContextShouldNoErrorWhenStoppingWithoutStart(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
@@ -56,10 +63,8 @@ func TestBrowserContextOutputTraceChunk(t *testing.T) {
 	_, err = page.Goto(server.PREFIX + "/grid.html")
 	require.NoError(t, err)
 	dir := t.TempDir()
-	locator, err := page.Locator(".box")
-	require.NoError(t, err)
-	button, err := locator.First()
-	require.NoError(t, err)
+
+	button := page.Locator(".box").First()
 
 	err = context.Tracing().StartChunk(playwright.TracingStartChunkOptions{
 		Title: playwright.String("foo"),

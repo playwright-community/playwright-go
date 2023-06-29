@@ -17,14 +17,13 @@ type (
 	}
 )
 
-func (e *eventEmitter) Emit(name string, payload ...interface{}) bool {
+func (e *eventEmitter) Emit(name string, payload ...interface{}) (handled bool) {
 	e.eventsMutex.Lock()
 	defer e.eventsMutex.Unlock()
 	if _, ok := e.events[name]; !ok {
-		return false
+		return
 	}
 
-	handled := false
 	if len(e.events[name].once) > 0 || len(e.events[name].on) > 0 {
 		handled = true
 	}
@@ -46,7 +45,7 @@ func (e *eventEmitter) Emit(name string, payload ...interface{}) bool {
 	callHandlers(e.events[name].once)
 
 	e.events[name].once = make([]interface{}, 0)
-	return handled
+	return
 }
 
 func (e *eventEmitter) Once(name string, handler interface{}) {

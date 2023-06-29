@@ -37,7 +37,9 @@ func (p *pageImpl) Close(options ...PageCloseOptions) error {
 	if err == nil && p.ownedContext != nil {
 		err = p.ownedContext.Close()
 	}
-	// TODO(canstand): check safe close and runBeforUnload
+	if isSafeCloseError(err) || (len(options) == 1 && *(options[0].RunBeforeUnload)) {
+		return nil
+	}
 	return err
 }
 
@@ -992,7 +994,7 @@ func (p *pageImpl) SetChecked(selector string, checked bool, options ...FrameSet
 	return p.mainFrame.SetChecked(selector, checked, options...)
 }
 
-func (p *pageImpl) Locator(selector string, options ...PageLocatorOptions) (Locator, error) {
+func (p *pageImpl) Locator(selector string, options ...PageLocatorOptions) Locator {
 	var option FrameLocatorOptions
 	if len(options) == 1 {
 		option = FrameLocatorOptions(options[0])
@@ -1000,7 +1002,7 @@ func (p *pageImpl) Locator(selector string, options ...PageLocatorOptions) (Loca
 	return p.mainFrame.Locator(selector, option)
 }
 
-func (p *pageImpl) GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error) {
+func (p *pageImpl) GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -1010,7 +1012,7 @@ func (p *pageImpl) GetByAltText(text interface{}, options ...LocatorGetByAltText
 	return p.Locator(getByAltTextSelector(text, exact))
 }
 
-func (p *pageImpl) GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error) {
+func (p *pageImpl) GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -1020,7 +1022,7 @@ func (p *pageImpl) GetByLabel(text interface{}, options ...LocatorGetByLabelOpti
 	return p.Locator(getByLabelSelector(text, exact))
 }
 
-func (p *pageImpl) GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error) {
+func (p *pageImpl) GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -1030,15 +1032,15 @@ func (p *pageImpl) GetByPlaceholder(text interface{}, options ...LocatorGetByPla
 	return p.Locator(getByPlaceholderSelector(text, exact))
 }
 
-func (p *pageImpl) GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error) {
+func (p *pageImpl) GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) Locator {
 	return p.Locator(getByRoleSelector(role, options...))
 }
 
-func (p *pageImpl) GetByTestId(testId interface{}) (Locator, error) {
+func (p *pageImpl) GetByTestId(testId interface{}) Locator {
 	return p.Locator(getByTestIdSelector(getTestIdAttributeName(), testId))
 }
 
-func (p *pageImpl) GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error) {
+func (p *pageImpl) GetByText(text interface{}, options ...LocatorGetByTextOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -1048,7 +1050,7 @@ func (p *pageImpl) GetByText(text interface{}, options ...LocatorGetByTextOption
 	return p.Locator(getByTextSelector(text, exact))
 }
 
-func (p *pageImpl) GetByTitle(text interface{}, options ...LocatorGetByTitleOptions) (Locator, error) {
+func (p *pageImpl) GetByTitle(text interface{}, options ...LocatorGetByTitleOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {

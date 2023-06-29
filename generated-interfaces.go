@@ -779,24 +779,24 @@ type Frame interface {
 	// Returns element attribute value.
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
 	// Allows locating elements by their alt text.
-	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error)
+	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) Locator
 	// Allows locating input elements by the text of the associated `<label>` or `aria-labelledby` element, or by the
 	// `aria-label` attribute.
-	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error)
+	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) Locator
 	// Allows locating input elements by the placeholder text.
-	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error)
+	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) Locator
 	// Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
 	// [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
 	// [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
-	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error)
+	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) Locator
 	// Locate element by the test id.
-	GetByTestId(testId interface{}) (Locator, error)
+	GetByTestId(testId interface{}) Locator
 	// Allows locating elements that contain given text.
 	// See also Locator.filter() that allows to match by another criteria, like an accessible role, and then
 	// filter by the text content.
-	GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error)
+	GetByText(text interface{}, options ...LocatorGetByTextOptions) Locator
 	// Allows locating elements by their title attribute.
-	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) (Locator, error)
+	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) Locator
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of
 	// the last redirect.
 	// The method will throw an error if:
@@ -848,7 +848,7 @@ type Frame interface {
 	// performed on different DOM elements. That would happen if the DOM structure between those actions has changed.
 	// [Learn more about locators](../locators.md).
 	// [Learn more about locators](../locators.md).
-	Locator(selector string, options ...FrameLocatorOptions) (Locator, error)
+	Locator(selector string, options ...FrameLocatorOptions) Locator
 	// Returns frame's name attribute as specified in the tag.
 	// If the name is empty, returns the id attribute instead.
 	// **NOTE** This value is calculated once when the frame is created, and will not update if the attribute is changed
@@ -987,26 +987,26 @@ type FrameLocator interface {
 	// The method finds an element matching the specified selector in the locator's subtree. It also accepts filter
 	// options, similar to Locator.filter() method.
 	// [Learn more about locators](../locators.md).
-	Locator(selector string, options ...LocatorLocatorOptions) (Locator, error)
+	Locator(selector string, options ...FrameLocatorOptions) Locator
 	// Allows locating elements by their alt text.
-	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error)
+	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) Locator
 	// Allows locating input elements by the text of the associated `<label>` or `aria-labelledby` element, or by the
 	// `aria-label` attribute.
-	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error)
+	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) Locator
 	// Allows locating input elements by the placeholder text.
-	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error)
+	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) Locator
 	// Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
 	// [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
 	// [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
-	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error)
+	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) Locator
 	// Locate element by the test id.
-	GetByTestId(testId interface{}) (Locator, error)
+	GetByTestId(testId interface{}) Locator
 	// Allows locating elements that contain given text.
 	// See also Locator.filter() that allows to match by another criteria, like an accessible role, and then
 	// filter by the text content.
-	GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error)
+	GetByText(text interface{}, options ...LocatorGetByTextOptions) Locator
 	// Allows locating elements by their title attribute.
-	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) (Locator, error)
+	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) Locator
 	// Returns locator to the n-th matching frame. It's zero based, `nth(0)` selects the first frame.
 	Nth(index int) FrameLocator
 }
@@ -1111,6 +1111,8 @@ type Locator interface {
 	AllInnerTexts() ([]string, error)
 	// Returns an array of `node.textContent` values for all matching nodes.
 	AllTextContents() ([]string, error)
+	// Creates a locator that matches both this locator and the argument locator.
+	And(locator Locator) Locator
 	// Calls [blur](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/blur) on the element.
 	Blur(options ...LocatorBlurOptions) error
 	// This method returns the bounding box of the element matching the locator, or `null` if the element is not visible.
@@ -1186,6 +1188,7 @@ type Locator interface {
 	ElementHandle(options ...LocatorElementHandleOptions) (ElementHandle, error)
 	// Resolves given locator to all matching DOM elements. If there are no matching elements, returns an empty list.
 	ElementHandles() ([]ElementHandle, error)
+	Err() error
 	// Execute JavaScript code in the page, taking the matching element as an argument.
 	// **Details**
 	// Returns the return value of `expression`, called with the matching element as a first argument, and `arg` as a
@@ -1215,9 +1218,9 @@ type Locator interface {
 	Fill(value string, options ...FrameFillOptions) error
 	// This method narrows existing locator according to the options, for example filters by text. It can be chained to
 	// filter multiple times.
-	Filter(options ...LocatorLocatorOptions) (Locator, error)
+	Filter(options ...LocatorLocatorOptions) Locator
 	// Returns locator to the first matching element.
-	First() (Locator, error)
+	First() Locator
 	// Calls [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the matching element.
 	Focus(options ...FrameFocusOptions) error
 	// When working with iframes, you can create a frame locator that will enter the iframe and allow locating elements in
@@ -1226,24 +1229,24 @@ type Locator interface {
 	// Returns the matching element's attribute value.
 	GetAttribute(name string, options ...PageGetAttributeOptions) (string, error)
 	// Allows locating elements by their alt text.
-	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error)
+	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) Locator
 	// Allows locating input elements by the text of the associated `<label>` or `aria-labelledby` element, or by the
 	// `aria-label` attribute.
-	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error)
+	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) Locator
 	// Allows locating input elements by the placeholder text.
-	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error)
+	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) Locator
 	// Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
 	// [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
 	// [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
-	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error)
+	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) Locator
 	// Locate element by the test id.
-	GetByTestId(testId interface{}) (Locator, error)
+	GetByTestId(testId interface{}) Locator
 	// Allows locating elements that contain given text.
 	// See also Locator.filter() that allows to match by another criteria, like an accessible role, and then
 	// filter by the text content.
-	GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error)
+	GetByText(text interface{}, options ...LocatorGetByTextOptions) Locator
 	// Allows locating elements by their title attribute.
-	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) (Locator, error)
+	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) Locator
 	// Highlight the corresponding element(s) on the screen. Useful for debugging, don't commit the code that uses
 	// Locator.highlight().
 	Highlight() error
@@ -1268,15 +1271,17 @@ type Locator interface {
 	// Returns whether the element is [visible](../actionability.md#visible).
 	IsVisible(options ...FrameIsVisibleOptions) (bool, error)
 	// Returns locator to the last matching element.
-	Last() (Locator, error)
+	Last() Locator
 	// The method finds an element matching the specified selector in the locator's subtree. It also accepts filter
 	// options, similar to Locator.filter() method.
 	// [Learn more about locators](../locators.md).
-	Locator(selector string, options ...LocatorLocatorOptions) (Locator, error)
+	Locator(selector string, options ...LocatorLocatorOptions) Locator
 	// Returns locator to the n-th matching element. It's zero based, `nth(0)` selects the first element.
-	Nth(index int) (Locator, error)
+	Nth(index int) Locator
+	// Creates a locator that matches either of the two locators.
+	Or(locator Locator) Locator
 	// A page this locator belongs to.
-	Page() Page
+	Page() (Page, error)
 	// Focuses the matching element and presses a combination of the keys.
 	Press(key string, options ...PagePressOptions) error
 	// Take a screenshot of the element matching the locator.
@@ -1338,6 +1343,8 @@ type LocatorAssertions interface {
 	// Makes the assertion check for the opposite condition. For example, this code tests that the Locator doesn't contain
 	// text `"error"`:
 	Not() LocatorAssertions
+	// Ensures that `Locator` points to an [attached](../actionability.md#attached) DOM node.
+	ToBeAttached(options ...LocatorAssertionsToBeAttachedOptions) error
 	// Ensures the `Locator` points to a checked input.
 	ToBeChecked(options ...LocatorAssertionsToBeCheckedOptions) error
 	// Ensures the `Locator` points to a disabled element. Element is disabled if it has "disabled" attribute or is
@@ -1357,6 +1364,9 @@ type LocatorAssertions interface {
 	// Ensures that `Locator` either does not resolve to any DOM node, or resolves to a
 	// [non-visible](../actionability.md#visible) one.
 	ToBeHidden(options ...LocatorAssertionsToBeHiddenOptions) error
+	// Ensures the `Locator` points to an element that intersects viewport, according to the
+	// [intersection observer API](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API).
+	ToBeInViewport(options ...LocatorAssertionsToBeInViewportOptions) error
 	// Ensures that `Locator` points to an [attached](../actionability.md#attached) and
 	// [visible](../actionability.md#visible) DOM node.
 	ToBeVisible(options ...LocatorAssertionsToBeVisibleOptions) error
@@ -1386,6 +1396,8 @@ type LocatorAssertions interface {
 	// Ensures the `Locator` points to multi-select/combobox (i.e. a `select` with the `multiple` attribute) and the
 	// specified values are selected.
 	ToHaveValues(values []interface{}, options ...LocatorAssertionsToHaveValuesOptions) error
+	// The opposite of LocatorAssertions.toBeAttached().
+	NotToBeAttached(options ...LocatorAssertionsToBeAttachedOptions) error
 	// The opposite of LocatorAssertions.toBeChecked().
 	NotToBeChecked(options ...LocatorAssertionsToBeCheckedOptions) error
 	// The opposite of LocatorAssertions.toBeDisabled().
@@ -1400,6 +1412,8 @@ type LocatorAssertions interface {
 	NotToBeFocused(options ...LocatorAssertionsToBeFocusedOptions) error
 	// The opposite of LocatorAssertions.toBeHidden().
 	NotToBeHidden(options ...LocatorAssertionsToBeHiddenOptions) error
+	// The opposite of LocatorAssertions.toBeInViewport().
+	NotToBeInViewport(options ...LocatorAssertionsToBeInViewportOptions) error
 	// The opposite of LocatorAssertions.toBeVisible().
 	NotToBeVisible(options ...LocatorAssertionsToBeVisibleOptions) error
 	// The opposite of LocatorAssertions.toContainText().
@@ -1633,24 +1647,24 @@ type Page interface {
 	// Returns element attribute value.
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
 	// Allows locating elements by their alt text.
-	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) (Locator, error)
+	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) Locator
 	// Allows locating input elements by the text of the associated `<label>` or `aria-labelledby` element, or by the
 	// `aria-label` attribute.
-	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) (Locator, error)
+	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) Locator
 	// Allows locating input elements by the placeholder text.
-	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) (Locator, error)
+	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) Locator
 	// Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
 	// [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
 	// [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
-	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) (Locator, error)
+	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) Locator
 	// Locate element by the test id.
-	GetByTestId(testId interface{}) (Locator, error)
+	GetByTestId(testId interface{}) Locator
 	// Allows locating elements that contain given text.
 	// See also Locator.filter() that allows to match by another criteria, like an accessible role, and then
 	// filter by the text content.
-	GetByText(text interface{}, options ...LocatorGetByTextOptions) (Locator, error)
+	GetByText(text interface{}, options ...LocatorGetByTextOptions) Locator
 	// Allows locating elements by their title attribute.
-	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) (Locator, error)
+	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) Locator
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of
 	// the last redirect. If can not go back, returns `null`.
 	// Navigate to the previous page in history.
@@ -1709,7 +1723,7 @@ type Page interface {
 	// to the element immediately before performing an action, so a series of actions on the same locator can in fact be
 	// performed on different DOM elements. That would happen if the DOM structure between those actions has changed.
 	// [Learn more about locators](../locators.md).
-	Locator(selector string, options ...PageLocatorOptions) (Locator, error)
+	Locator(selector string, options ...PageLocatorOptions) Locator
 	// The page's main frame. Page is guaranteed to have a main frame which persists during navigations.
 	MainFrame() Frame
 	// Returns the opener for popup pages and `null` for others. If the opener has been closed already the returns `null`.

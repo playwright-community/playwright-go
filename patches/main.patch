@@ -1133,10 +1133,10 @@ index 26544135a..64fa24035 100644
  Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with
 diff --git a/utils/doclint/generateGoApi.js b/utils/doclint/generateGoApi.js
 new file mode 100644
-index 000000000..58257a741
+index 000000000..40595c428
 --- /dev/null
 +++ b/utils/doclint/generateGoApi.js
-@@ -0,0 +1,821 @@
+@@ -0,0 +1,822 @@
 +/**
 + * Copyright (c) Microsoft Corporation.
 + *
@@ -1260,6 +1260,7 @@ index 000000000..58257a741
 +    'BrowserTypeGeolocation',
 +    'Cookie',
 +    'ElementHandleBoundingBoxResult',
++    'FrameLocatorLocatorOptions',
 +    'Geolocation',
 +    'HttpCredentials',
 +    'LocatorBoundingBoxResult',

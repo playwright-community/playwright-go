@@ -41,7 +41,7 @@ func main() {
 
 	// Helper function to get the amount of todos on the page
 	assertCountOfTodos := func(shouldBeCount int) {
-		count, err := page.EvalOnSelectorAll("ul.todo-list > li", "el => el.length")
+		count, err := page.Locator("ul.todo-list > li").Count()
 		assertErrorToNilf("could not determine todo list count: %w", err)
 		assertEqual(shouldBeCount, count)
 	}

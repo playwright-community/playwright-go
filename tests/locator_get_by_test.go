@@ -12,23 +12,16 @@ func TestGetByTestId(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	require.NoError(t, page.SetContent(`<div><div data-testid='Hello'>Hello world</div></div>`))
-	locator, err := page.GetByTestId("Hello")
-	require.NoError(t, err)
-	text, err := locator.TextContent()
+
+	text, err := page.GetByTestId("Hello").TextContent()
 	require.NoError(t, err)
 	require.Equal(t, "Hello world", text)
 
-	locator, err = page.MainFrame().GetByTestId("Hello")
-	require.NoError(t, err)
-	text, err = locator.TextContent()
+	text, err = page.MainFrame().GetByTestId("Hello").TextContent()
 	require.NoError(t, err)
 	require.Equal(t, "Hello world", text)
 
-	locator, err = page.Locator("div")
-	require.NoError(t, err)
-	locator, err = locator.GetByTestId("Hello")
-	require.NoError(t, err)
-	text, err = locator.TextContent()
+	text, err = page.Locator("div").GetByTestId("Hello").TextContent()
 	require.NoError(t, err)
 	require.Equal(t, "Hello world", text)
 }
@@ -37,41 +30,34 @@ func TestGetByTestIdEscapeId(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	require.NoError(t, page.SetContent(`<div><div data-testid='He"llo'>Hello world</div></div>`))
-	locator, err := page.GetByTestId("He\"llo")
-	require.NoError(t, err)
-	text, err := locator.TextContent()
+
+	text, err := page.GetByTestId("He\"llo").TextContent()
 	require.NoError(t, err)
 	require.Equal(t, "Hello world", text)
+	count, err := page.GetByTestId(regexp.MustCompile(`[Hh]e.llo`)).Count()
+	require.NoError(t, err)
+	require.Equal(t, 1, count)
 }
 
 func TestGetByText(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	require.NoError(t, page.SetContent(`<div><div>yo</div><div>ya</div><div>\nye  </div></div>`))
-	locator, err := page.GetByText("yo")
-	require.NoError(t, err)
-	require.NoError(t, expect.Locator(locator).ToHaveCount(1))
-	locator, err = page.Locator("div")
-	require.NoError(t, err)
-	locator, err = locator.GetByText("yo")
-	require.NoError(t, err)
-	require.NoError(t, expect.Locator(locator).ToHaveCount(1))
+	require.NoError(t, expect.Locator(page.GetByText("yo")).ToHaveCount(1))
+	require.NoError(t, expect.Locator(page.Locator("div").GetByText("yo")).ToHaveCount(1))
 }
 
 func TestGetByLabel(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	require.NoError(t, page.SetContent(`<div><label for=target>Name</label><input id=target type=text></div>`))
-	locator, err := page.GetByLabel("Name")
-	require.NoError(t, err)
-	require.NoError(t, expect.Locator(locator).ToHaveCount(1))
-	locator, err = page.Locator("div")
-	require.NoError(t, err)
-	locator, err = locator.GetByLabel("Name")
-	require.NoError(t, err)
-	require.NoError(t, expect.Locator(locator).ToHaveCount(1))
 
-	ret, err := locator.Evaluate("e => e.nodeName", nil)
+	require.NoError(t, expect.Locator(page.GetByLabel("Name")).ToHaveCount(1))
+	require.NoError(t, expect.Locator(page.GetByLabel(regexp.MustCompile(`N?me`))).ToHaveCount(1))
+	locator := page.Locator("div")
+	require.NoError(t, expect.Locator(locator.GetByLabel("Name")).ToHaveCount(1))
+
+	ret, err := locator.GetByLabel("Name").Evaluate("e => e.nodeName", nil)
 	require.NoError(t, err)
 	require.Equal(t, "INPUT", ret)
 }
@@ -84,15 +70,11 @@ func TestGetByPlaceholder(t *testing.T) {
     <input placeholder="Hello">
     <input placeholder="Hello World">
   </div>`))
-	locator, err := page.GetByPlaceholder("hello")
-	require.NoError(t, err)
-	require.NoError(t, expect.Locator(locator).ToHaveCount(2))
-	locator, err = page.Locator("div")
-	require.NoError(t, err)
-	locator, err = locator.GetByPlaceholder("Hello", playwright.LocatorGetByPlaceholderOptions{
+
+	require.NoError(t, expect.Locator(page.GetByPlaceholder("hello")).ToHaveCount(2))
+	locator := page.Locator("div").GetByPlaceholder("Hello", playwright.LocatorGetByPlaceholderOptions{
 		Exact: playwright.Bool(true),
 	})
-	require.NoError(t, err)
 	require.NoError(t, expect.Locator(locator).ToHaveCount(1))
 }
 
@@ -104,9 +86,8 @@ func TestGetByAltText(t *testing.T) {
     <input alt="Hello">
     <input alt="Hello World">
   </div>`))
-	locator, err := page.GetByAltText("hello")
-	require.NoError(t, err)
-	require.NoError(t, expect.Locator(locator).ToHaveCount(2))
+	require.NoError(t, expect.Locator(page.GetByAltText("hello")).ToHaveCount(2))
+	require.NoError(t, expect.Locator(page.GetByAltText(regexp.MustCompile(`Hello.+d`))).ToHaveCount(1))
 }
 
 func TestGetByTitle(t *testing.T) {
@@ -117,9 +98,7 @@ func TestGetByTitle(t *testing.T) {
     <input title="Hello">
     <input title="Hello World">
   </div>`))
-	locator, err := page.GetByTitle("hello")
-	require.NoError(t, err)
-	require.NoError(t, expect.Locator(locator).ToHaveCount(2))
+	require.NoError(t, expect.Locator(page.GetByTitle("hello")).ToHaveCount(2))
 }
 
 func TestGetByRole(t *testing.T) {
@@ -130,36 +109,26 @@ func TestGetByRole(t *testing.T) {
 	<button>Hel"lo</button>
 	<div role="dialog">I am a dialog</div>
 	`))
-	locator, err := page.GetByRole("button", playwright.LocatorGetByRoleOptions{
+
+	count, err := page.GetByRole("button", playwright.LocatorGetByRoleOptions{
 		Name: "hello",
-	})
-	require.NoError(t, err)
-	count, err := locator.Count()
+	}).Count()
 	require.NoError(t, err)
 	require.Equal(t, 1, count)
 
-	locator, err = page.GetByRole("button", playwright.LocatorGetByRoleOptions{
+	count, err = page.GetByRole("button", playwright.LocatorGetByRoleOptions{
 		Name: "Hel\"lo",
-	})
-	require.NoError(t, err)
-	require.NoError(t, err)
-	count, err = locator.Count()
+	}).Count()
 	require.NoError(t, err)
 	require.Equal(t, 1, count)
 
-	locator, err = page.GetByRole("button", playwright.LocatorGetByRoleOptions{
+	count, err = page.GetByRole("button", playwright.LocatorGetByRoleOptions{
 		Name: regexp.MustCompile(`(?i)he`),
-	})
-	require.NoError(t, err)
-	require.NoError(t, err)
-	count, err = locator.Count()
+	}).Count()
 	require.NoError(t, err)
 	require.Equal(t, 2, count)
 
-	locator, err = page.GetByRole("dialog")
-	require.NoError(t, err)
-	require.NoError(t, err)
-	count, err = locator.Count()
+	count, err = page.GetByRole("dialog").Count()
 	require.NoError(t, err)
 	require.Equal(t, 1, count)
 }
