@@ -18,6 +18,23 @@ func newLocatorAssertions(locator Locator, isNot bool, defaultTimeout *float64) 
 	}
 }
 
+func (la *locatorAssertionsImpl) ToBeAttached(options ...LocatorAssertionsToBeAttachedOptions) error {
+	var expression = "to.be.attached"
+	var timeout *float64
+	if len(options) == 1 {
+		if options[0].Attached != nil && !*options[0].Attached {
+			expression = "to.be.detached"
+		}
+		timeout = options[0].Timeout
+	}
+	return la.expect(
+		expression,
+		frameExpectOptions{Timeout: timeout},
+		nil,
+		"Locator expected to be attached",
+	)
+}
+
 func (la *locatorAssertionsImpl) ToBeChecked(options ...LocatorAssertionsToBeCheckedOptions) error {
 	var expression = "to.be.checked"
 	var timeout *float64
@@ -110,6 +127,25 @@ func (la *locatorAssertionsImpl) ToBeHidden(options ...LocatorAssertionsToBeHidd
 		frameExpectOptions{Timeout: timeout},
 		nil,
 		"Locator expected to be hidden",
+	)
+}
+
+func (la *locatorAssertionsImpl) ToBeInViewport(options ...LocatorAssertionsToBeInViewportOptions) error {
+	var (
+		ratio   *float64
+		timeout *float64
+	)
+	if len(options) == 1 {
+		ratio = options[0].Ratio
+		timeout = options[0].Timeout
+	}
+	return la.expect(
+		"to.be.in.viewport",
+		frameExpectOptions{
+			ExpectedNumber: ratio,
+			Timeout:        timeout},
+		nil,
+		"Locator expected to be in viewport",
 	)
 }
 
@@ -222,7 +258,7 @@ func (la *locatorAssertionsImpl) ToHaveCount(count int, options ...LocatorAssert
 	}
 	return la.expect(
 		"to.have.count",
-		frameExpectOptions{ExpectedNumber: &count, Timeout: timeout},
+		frameExpectOptions{ExpectedNumber: Float(float64(count)), Timeout: timeout},
 		count,
 		"Locator expected to have count",
 	)
@@ -345,6 +381,10 @@ func (la *locatorAssertionsImpl) ToHaveValues(values []interface{}, options ...L
 	)
 }
 
+func (la *locatorAssertionsImpl) NotToBeAttached(options ...LocatorAssertionsToBeAttachedOptions) error {
+	return la.Not().ToBeAttached(options...)
+}
+
 func (la *locatorAssertionsImpl) NotToBeChecked(options ...LocatorAssertionsToBeCheckedOptions) error {
 	return la.Not().ToBeChecked(options...)
 }
@@ -371,6 +411,10 @@ func (la *locatorAssertionsImpl) NotToBeFocused(options ...LocatorAssertionsToBe
 
 func (la *locatorAssertionsImpl) NotToBeHidden(options ...LocatorAssertionsToBeHiddenOptions) error {
 	return la.Not().ToBeHidden(options...)
+}
+
+func (la *locatorAssertionsImpl) NotToBeInViewport(options ...LocatorAssertionsToBeInViewportOptions) error {
+	return la.Not().ToBeInViewport(options...)
 }
 
 func (la *locatorAssertionsImpl) NotToBeVisible(options ...LocatorAssertionsToBeVisibleOptions) error {

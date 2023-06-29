@@ -326,3 +326,15 @@ func TestPageEventShouldHaveURL(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, server.EMPTY_PAGE, newPage.URL())
 }
+
+func TestConsoleEventShouldWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	message, err := context.ExpectConsoleMessage(func() error {
+		_, err := page.Evaluate(`() => console.log("hello")`)
+		return err
+	})
+	require.NoError(t, err)
+	require.Equal(t, "hello", message.Text())
+	require.Equal(t, page, message.Page())
+}

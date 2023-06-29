@@ -41,3 +41,23 @@ func TestDialogAcceptWithText(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, result, "hey foobar")
 }
+
+func TestDialogShouldWorkInPopup(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	var d playwright.Dialog
+	context.On("dialog", func(dialog playwright.Dialog) {
+		d = dialog
+		require.NoError(t, dialog.Accept("hello"))
+	})
+
+	popup, err := page.ExpectPopup(func() error {
+		ret, err := page.Evaluate("() => window.open('').prompt('hey?')")
+		require.NoError(t, err)
+		require.Equal(t, "hello", ret)
+		return nil
+	})
+	require.NoError(t, err)
+	require.Equal(t, "hey?", d.Message())
+	require.Equal(t, d.Page(), popup)
+}

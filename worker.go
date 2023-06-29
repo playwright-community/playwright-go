@@ -14,8 +14,6 @@ func (w *workerImpl) Evaluate(expression string, options ...interface{}) (interf
 	var arg interface{}
 	if len(options) == 1 {
 		arg = options[0]
-	} else if len(options) == 2 {
-		arg = options[0]
 	}
 	result, err := w.channel.Send("evaluateExpression", map[string]interface{}{
 		"expression": expression,
@@ -30,8 +28,6 @@ func (w *workerImpl) Evaluate(expression string, options ...interface{}) (interf
 func (w *workerImpl) EvaluateHandle(expression string, options ...interface{}) (JSHandle, error) {
 	var arg interface{}
 	if len(options) == 1 {
-		arg = options[0]
-	} else if len(options) == 2 {
 		arg = options[0]
 	}
 	result, err := w.channel.Send("evaluateExpressionHandle", map[string]interface{}{

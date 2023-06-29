@@ -23,7 +23,7 @@ func (s *streamImpl) SaveAs(path string) error {
 	defer file.Close()
 	writer := bufio.NewWriter(file)
 	for {
-		binary, err := s.channel.Send("read")
+		binary, err := s.channel.Send("read", map[string]interface{}{"size": 1024 * 1024})
 		if err != nil {
 			return err
 		}

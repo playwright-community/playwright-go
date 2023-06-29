@@ -244,6 +244,35 @@ func newRouteHandlerEntry(matcher *urlMatcher, handler routeHandler, times ...in
 	}
 }
 
+func prepareInterceptionPatterns(handlers []*routeHandlerEntry) []map[string]interface{} {
+	patterns := []map[string]interface{}{}
+	all := false
+	for _, h := range handlers {
+		switch h.matcher.urlOrPredicate.(type) {
+		case *regexp.Regexp:
+			pattern, flags := convertRegexp(h.matcher.urlOrPredicate.(*regexp.Regexp))
+			patterns = append(patterns, map[string]interface{}{
+				"regexSource": pattern,
+				"regexFlags":  flags,
+			})
+		case string:
+			patterns = append(patterns, map[string]interface{}{
+				"glob": h.matcher.urlOrPredicate.(string),
+			})
+		default:
+			all = true
+		}
+	}
+	if all {
+		return []map[string]interface{}{
+			{
+				"glob": "**/*",
+			},
+		}
+	}
+	return patterns
+}
+
 type safeStringSet struct {
 	sync.Mutex
 	v []string
@@ -292,18 +321,32 @@ func newSafeStringSet(v []string) *safeStringSet {
 const defaultTimeout = 30 * 1000
 
 type timeoutSettings struct {
-	parent            *timeoutSettings
-	timeout           float64
-	navigationTimeout float64
+	sync.RWMutex
+	parent                   *timeoutSettings
+	defaultTimeout           *float64
+	defaultNavigationTimeout *float64
 }
 
-func (t *timeoutSettings) SetTimeout(timeout float64) {
-	t.timeout = timeout
+func (t *timeoutSettings) SetDefaultTimeout(timeout *float64) {
+	t.Lock()
+	defer t.Unlock()
+	t.defaultTimeout = timeout
 }
 
-func (t *timeoutSettings) Timeout() float64 {
-	if t.timeout != 0 {
-		return t.timeout
+func (t *timeoutSettings) DefaultTimeout() *float64 {
+	t.RLock()
+	defer t.RUnlock()
+	return t.defaultTimeout
+}
+
+func (t *timeoutSettings) Timeout(timeout ...float64) float64 {
+	t.RLock()
+	defer t.RUnlock()
+	if len(timeout) == 1 {
+		return timeout[0]
+	}
+	if t.defaultTimeout != nil {
+		return *t.defaultTimeout
 	}
 	if t.parent != nil {
 		return t.parent.Timeout()
@@ -311,13 +354,23 @@ func (t *timeoutSettings) Timeout() float64 {
 	return defaultTimeout
 }
 
-func (t *timeoutSettings) SetNavigationTimeout(navigationTimeout float64) {
-	t.navigationTimeout = navigationTimeout
+func (t *timeoutSettings) DefaultNavigationTimeout() *float64 {
+	t.RLock()
+	defer t.RUnlock()
+	return t.defaultNavigationTimeout
+}
+
+func (t *timeoutSettings) SetDefaultNavigationTimeout(navigationTimeout *float64) {
+	t.Lock()
+	defer t.Unlock()
+	t.defaultNavigationTimeout = navigationTimeout
 }
 
 func (t *timeoutSettings) NavigationTimeout() float64 {
-	if t.navigationTimeout != 0 {
-		return t.navigationTimeout
+	t.RLock()
+	defer t.RUnlock()
+	if t.defaultNavigationTimeout != nil {
+		return *t.defaultNavigationTimeout
 	}
 	if t.parent != nil {
 		return t.parent.NavigationTimeout()
@@ -327,9 +380,9 @@ func (t *timeoutSettings) NavigationTimeout() float64 {
 
 func newTimeoutSettings(parent *timeoutSettings) *timeoutSettings {
 	return &timeoutSettings{
-		parent:            parent,
-		timeout:           defaultTimeout,
-		navigationTimeout: defaultTimeout,
+		parent:                   parent,
+		defaultTimeout:           nil,
+		defaultNavigationTimeout: nil,
 	}
 }
 
@@ -390,7 +443,7 @@ func convertSelectOptionSet(values SelectOptionValues) map[string]interface{} {
 	return out
 }
 
-func unroute(channel *channel, inRoutes []*routeHandlerEntry, url interface{}, handlers ...routeHandler) ([]*routeHandlerEntry, error) {
+func unroute(inRoutes []*routeHandlerEntry, url interface{}, handlers ...routeHandler) ([]*routeHandlerEntry, error) {
 	var handler routeHandler
 	if len(handlers) == 1 {
 		handler = handlers[0]
@@ -407,14 +460,6 @@ func unroute(channel *channel, inRoutes []*routeHandlerEntry, url interface{}, h
 		}
 	}
 
-	if len(routes) == 0 {
-		_, err := channel.Send("setNetworkInterceptionEnabled", map[string]interface{}{
-			"enabled": false,
-		})
-		if err != nil {
-			return nil, err
-		}
-	}
 	return routes, nil
 }
 

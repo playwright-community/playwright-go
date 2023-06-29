@@ -1,5 +1,7 @@
 package playwright
 
+import "strings"
+
 // Error represents a Playwright error
 type Error struct {
 	Name    string
@@ -36,4 +38,16 @@ func parseError(err errorPayload) error {
 		Message: err.Message,
 		Stack:   err.Stack,
 	}
+}
+
+const (
+	errMsgBrowserClosed          = "Browser has been closed"
+	errMsgBrowserOrContextClosed = "Target page, context or browser has been closed"
+)
+
+func isSafeCloseError(err error) bool {
+	if err == nil {
+		return false
+	}
+	return strings.HasSuffix(err.Error(), errMsgBrowserClosed) || strings.HasSuffix(err.Error(), errMsgBrowserOrContextClosed)
 }

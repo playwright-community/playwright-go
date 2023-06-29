@@ -20,7 +20,8 @@ const IGNORE_CLASSES = [
   "RequestOptions",
   "WebSocketFrame",
   "FormData",
-  "SnapshotAssertions"
+  "SnapshotAssertions",
+  "GenericAssertions"
 ]
 const shouldIgnoreClass = ({ name }) =>
   !IGNORE_CLASSES.includes(name) &&

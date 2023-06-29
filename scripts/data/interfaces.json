@@ -201,6 +201,10 @@
 			"urls ...string",
 			"([]*Cookie, error)"
 		],
+		"ExpectConsoleMessage": [
+			"cb func() error, options ...BrowserContextExpectConsoleMessageOptions",
+			"ConsoleMessage, error"
+		],
 		"ExpectEvent": [
 			"event string, cb func() error, options ...BrowserContextWaitForEventOptions",
 			"(interface{}, error)"
@@ -347,6 +351,10 @@
 			null,
 			"ConsoleMessageLocation"
 		],
+		"Page": [
+			null,
+			"Page"
+		],
 		"String": [
 			null,
 			"string"
@@ -376,6 +384,10 @@
 		"Message": [
 			null,
 			"string"
+		],
+		"Page": [
+			null,
+			"Page"
 		],
 		"Type": [
 			null,
@@ -576,7 +588,7 @@
 	"EventEmitter": {
 		"Emit": [
 			"name string, payload ...interface{}",
-			null
+			"bool"
 		],
 		"ListenerCount": [
 			"name string",
@@ -688,31 +700,31 @@
 		],
 		"GetByAltText": [
 			"text interface{}, options ...LocatorGetByAltTextOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByLabel": [
 			"text interface{}, options ...LocatorGetByLabelOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByPlaceholder": [
 			"text interface{}, options ...LocatorGetByPlaceholderOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByRole": [
 			"role AriaRole, options ...LocatorGetByRoleOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByTestId": [
 			"testId interface{}",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByText": [
 			"text interface{}, options ...LocatorGetByTextOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByTitle": [
 			"title interface{}, options ...LocatorGetByTitleOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"Goto": [
 			"url string, options ...PageGotoOptions",
@@ -760,7 +772,7 @@
 		],
 		"Locator": [
 			"selector string, options ...FrameLocatorOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"Name": [
 			null,
@@ -873,36 +885,36 @@
 			"FrameLocator"
 		],
 		"Locator": [
-			"selector string, options ...LocatorLocatorOptions",
-			"(Locator, error)"
+			"selector string, options ...FrameLocatorOptions",
+			"Locator"
 		],
-				"GetByAltText": [
+		"GetByAltText": [
 			"text interface{}, options ...LocatorGetByAltTextOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByLabel": [
 			"text interface{}, options ...LocatorGetByLabelOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByPlaceholder": [
 			"text interface{}, options ...LocatorGetByPlaceholderOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByRole": [
 			"role AriaRole, options ...LocatorGetByRoleOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByTestId": [
 			"testId interface{}",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByText": [
 			"text interface{}, options ...LocatorGetByTextOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByTitle": [
 			"title interface{}, options ...LocatorGetByTitleOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"Nth": [
 			"index int",
@@ -978,6 +990,10 @@
 			null,
 			"[]string, error"
 		],
+		"And": [
+			"locator Locator",
+			"Locator"
+		],
 		"Blur": [
 			"options ...LocatorBlurOptions",
 			"error"
@@ -1022,6 +1038,10 @@
 			null,
 			"[]ElementHandle, error"
 		],
+		"Err": [
+			null,
+			"error"
+		],
 		"Evaluate": [
 			"expression string, arg interface{}, options ...LocatorEvaluateOptions",
 			"interface{}, error"
@@ -1040,11 +1060,11 @@
 		],
 		"Filter": [
 			"options ...LocatorLocatorOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"First": [
 			null,
-			"Locator, error"
+			"Locator"
 		],
 		"Focus": [
 			"options ...FrameFocusOptions",
@@ -1058,33 +1078,33 @@
 			"name string, options ...PageGetAttributeOptions",
 			"string, error"
 		],
-				"GetByAltText": [
+		"GetByAltText": [
 			"text interface{}, options ...LocatorGetByAltTextOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByLabel": [
 			"text interface{}, options ...LocatorGetByLabelOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByPlaceholder": [
 			"text interface{}, options ...LocatorGetByPlaceholderOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByRole": [
 			"role AriaRole, options ...LocatorGetByRoleOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByTestId": [
 			"testId interface{}",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByText": [
 			"text interface{}, options ...LocatorGetByTextOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByTitle": [
 			"title interface{}, options ...LocatorGetByTitleOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"Highlight": [
 			null,
@@ -1132,19 +1152,23 @@
 		],
 		"Last": [
 			null,
-			"Locator, error"
+			"Locator"
 		],
 		"Locator": [
 			"selector string, options ...LocatorLocatorOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"Nth": [
 			"index int",
-			"Locator, error"
+			"Locator"
+		],
+		"Or": [
+			"locator Locator",
+			"Locator"
 		],
 		"Page": [
 			null,
-			"Page"
+			"Page, error"
 		],
 		"Press": [
 			"key string, options ...PagePressOptions",
@@ -1200,6 +1224,10 @@
 			null,
 			"LocatorAssertions"
 		],
+		"ToBeAttached": [
+			"options ...LocatorAssertionsToBeAttachedOptions",
+			"error"
+		],
 		"ToBeChecked": [
 			"options ...LocatorAssertionsToBeCheckedOptions",
 			"error"
@@ -1226,6 +1254,10 @@
 		],
 		"ToBeHidden": [
 			"options ...LocatorAssertionsToBeHiddenOptions",
+			"error"
+		],
+		"ToBeInViewport": [
+			"options ...LocatorAssertionsToBeInViewportOptions",
 			"error"
 		],
 		"ToBeVisible": [
@@ -1272,6 +1304,10 @@
 			"values []interface{}, options ...LocatorAssertionsToHaveValuesOptions",
 			"error"
 		],
+		"NotToBeAttached": [
+			"options ...LocatorAssertionsToBeAttachedOptions",
+			"error"
+		],
 		"NotToBeChecked": [
 			"options ...LocatorAssertionsToBeCheckedOptions",
 			"error"
@@ -1298,6 +1334,10 @@
 		],
 		"NotToBeHidden": [
 			"options ...LocatorAssertionsToBeHiddenOptions",
+			"error"
+		],
+		"NotToBeInViewport": [
+			"options ...LocatorAssertionsToBeInViewportOptions",
 			"error"
 		],
 		"NotToBeVisible": [
@@ -1539,33 +1579,33 @@
 			"selector string, name string, options ...PageGetAttributeOptions",
 			"(string, error)"
 		],
-				"GetByAltText": [
+		"GetByAltText": [
 			"text interface{}, options ...LocatorGetByAltTextOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByLabel": [
 			"text interface{}, options ...LocatorGetByLabelOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByPlaceholder": [
 			"text interface{}, options ...LocatorGetByPlaceholderOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByRole": [
 			"role AriaRole, options ...LocatorGetByRoleOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByTestId": [
 			"testId interface{}",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByText": [
 			"text interface{}, options ...LocatorGetByTextOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GetByTitle": [
 			"title interface{}, options ...LocatorGetByTitleOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"GoBack": [
 			"options ...PageGoBackOptions",
@@ -1621,7 +1661,7 @@
 		],
 		"Locator": [
 			"selector string, options ...PageLocatorOptions",
-			"Locator, error"
+			"Locator"
 		],
 		"MainFrame": [
 			null,
@@ -1921,7 +1961,7 @@
 		],
 		"Finished": [
 			null,
-			null
+			"error"
 		],
 		"Frame": [
 			null,
