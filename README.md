@@ -22,15 +22,15 @@ Headless execution is supported for all the browsers on all platforms.
 ## Installation
 
 ```txt
-go get github.com/playwright-community/playwright-go
+go get -u github.com/playwright-community/playwright-go
 ```
 
 Install the browsers and OS dependencies:
 
 ```bash
-go run github.com/playwright-community/playwright-go/cmd/playwright install --with-deps
+go run github.com/playwright-community/playwright-go/cmd/playwright@latest install --with-deps
 # Or
-go install github.com/playwright-community/playwright-go/cmd/playwright
+go install github.com/playwright-community/playwright-go/cmd/playwright@latest
 playwright install --with-deps
 ```
 
