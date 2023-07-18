@@ -6,6 +6,7 @@ import (
 	"math"
 	"reflect"
 	"runtime/debug"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -100,6 +101,10 @@ func parseValue(result interface{}, refs map[float64]interface{}) interface{} {
 			return int(v.(float64))
 		}
 		return v.(float64)
+	}
+	if v, ok := vMap["bi"]; ok {
+		n, _ := strconv.Atoi(v.(string))
+		return n
 	}
 
 	if v, ok := vMap["ref"]; ok {

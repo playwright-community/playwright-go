@@ -139,6 +139,12 @@ func TestPageEvaluate(t *testing.T) {
 	val, err := page.Evaluate(`() => 123`)
 	require.NoError(t, err)
 	require.Equal(t, val, 123)
+	val, err = page.Evaluate(`() => 42n`)
+	require.NoError(t, err)
+	require.Equal(t, val, 42)
+	val, err = page.Evaluate(`a => a`, 17)
+	require.NoError(t, err)
+	require.Equal(t, val, 17)
 }
 
 func TestPageEvalOnSelectorAll(t *testing.T) {
