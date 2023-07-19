@@ -12,7 +12,7 @@ index 164de27b2..a19100289 100644
    - `cookies` <[Array]<[Object]>>
      - `name` <[string]>
 diff --git a/docs/src/api/class-apirequestcontext.md b/docs/src/api/class-apirequestcontext.md
-index 4a5debdb1..61b673ed5 100644
+index 8d6715d94..c4201b5b7 100644
 --- a/docs/src/api/class-apirequestcontext.md
 +++ b/docs/src/api/class-apirequestcontext.md
 @@ -153,18 +153,27 @@ context cookies from the response. The method will automatically follow redirect
@@ -80,7 +80,7 @@ index 4a5debdb1..61b673ed5 100644
  ### option: APIRequestContext.fetch.timeout = %%-js-python-csharp-fetch-option-timeout-%%
  * since: v1.16
  
-@@ -405,18 +423,27 @@ await request.GetAsync("https://example.com/api/getText", new() { Params = param
+@@ -405,18 +423,27 @@ await request.GetAsync("https://example.com/api/getText", new() { Params = query
  ### option: APIRequestContext.get.data = %%-js-python-csharp-fetch-option-data-%%
  * since: v1.26
  
@@ -247,7 +247,7 @@ index 6fce864d0..237865884 100644
  
  Makes the assertion check for the opposite condition. For example, this code tests that the response status is not successful:
 diff --git a/docs/src/api/class-browser.md b/docs/src/api/class-browser.md
-index 88e1c8ae1..13db7741d 100644
+index b25da29e1..5a20c2f78 100644
 --- a/docs/src/api/class-browser.md
 +++ b/docs/src/api/class-browser.md
 @@ -287,7 +287,7 @@ testing frameworks should explicitly create [`method: Browser.newContext`] follo
@@ -288,7 +288,7 @@ index 88e1c8ae1..13db7741d 100644
  
  :::note
 diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
-index b2c5c0ca8..093a93ff5 100644
+index 543f31352..b07dd6191 100644
 --- a/docs/src/api/class-browsercontext.md
 +++ b/docs/src/api/class-browsercontext.md
 @@ -319,6 +319,7 @@ await context.AddCookiesAsync(new[] { cookie1, cookie2 });
@@ -393,10 +393,10 @@ index b2c5c0ca8..093a93ff5 100644
  - returns: <[any]>
  
 diff --git a/docs/src/api/class-frame.md b/docs/src/api/class-frame.md
-index 097c6cc0f..0188fbb6b 100644
+index c05e9e3fa..98b919f0d 100644
 --- a/docs/src/api/class-frame.md
 +++ b/docs/src/api/class-frame.md
-@@ -1969,7 +1969,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
+@@ -1968,7 +1968,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
  
  Optional argument to pass to [`param: expression`].
  
@@ -405,7 +405,7 @@ index 097c6cc0f..0188fbb6b 100644
  * since: v1.8
  
  ### option: Frame.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
-@@ -2017,6 +2017,11 @@ await frame.WaitForLoadStateAsync(); // Defaults to LoadState.Load
+@@ -2016,6 +2016,11 @@ await frame.WaitForLoadStateAsync(); // Defaults to LoadState.Load
  ```
  
  ### param: Frame.waitForLoadState.state = %%-wait-for-load-state-state-%%
@@ -418,7 +418,7 @@ index 097c6cc0f..0188fbb6b 100644
  
  ### option: Frame.waitForLoadState.timeout = %%-navigation-timeout-%%
 diff --git a/docs/src/api/class-locatorassertions.md b/docs/src/api/class-locatorassertions.md
-index f4185774f..fbaf44b8a 100644
+index 837f7696c..663ec469e 100644
 --- a/docs/src/api/class-locatorassertions.md
 +++ b/docs/src/api/class-locatorassertions.md
 @@ -69,7 +69,7 @@ public class ExampleTests : PageTest
@@ -431,10 +431,10 @@ index f4185774f..fbaf44b8a 100644
  
  Makes the assertion check for the opposite condition. For example, this code tests that the Locator doesn't contain text `"error"`:
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index 833a9c04a..764d8fe0f 100644
+index e9635de2a..c01533ce8 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
-@@ -640,14 +640,14 @@ Optional argument to pass to [`param: script`] (only supported when passing a fu
+@@ -642,14 +642,14 @@ Optional argument to pass to [`param: script`] (only supported when passing a fu
  
  ### param: Page.addInitScript.path
  * since: v1.8
@@ -451,7 +451,7 @@ index 833a9c04a..764d8fe0f 100644
  - `script` ?<[string]>
  
  Script to be evaluated in all pages in the browser context. Optional.
-@@ -1259,11 +1259,11 @@ Passing `null` disables CSS media emulation.
+@@ -1261,11 +1261,11 @@ Passing `null` disables CSS media emulation.
  
  ### option: Page.emulateMedia.media
  * since: v1.9
@@ -467,7 +467,7 @@ index 833a9c04a..764d8fe0f 100644
  
  ### option: Page.emulateMedia.colorScheme
  * since: v1.9
-@@ -1275,11 +1275,11 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+@@ -1277,11 +1277,11 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
  
  ### option: Page.emulateMedia.colorScheme
  * since: v1.9
@@ -482,7 +482,7 @@ index 833a9c04a..764d8fe0f 100644
  
  ### option: Page.emulateMedia.reducedMotion
  * since: v1.12
-@@ -1290,10 +1290,10 @@ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce
+@@ -1292,10 +1292,10 @@ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce
  
  ### option: Page.emulateMedia.reducedMotion
  * since: v1.12
@@ -496,7 +496,7 @@ index 833a9c04a..764d8fe0f 100644
  
  ### option: Page.emulateMedia.forcedColors
  * since: v1.15
-@@ -1304,8 +1304,8 @@ Emulates `'forced-colors'` media feature, supported values are `'active'` and `'
+@@ -1306,8 +1306,8 @@ Emulates `'forced-colors'` media feature, supported values are `'active'` and `'
  
  ### option: Page.emulateMedia.forcedColors
  * since: v1.15
@@ -507,7 +507,7 @@ index 833a9c04a..764d8fe0f 100644
  
  ## async method: Page.evalOnSelector
  * since: v1.9
-@@ -2924,7 +2924,7 @@ Paper width, accepts values labeled with units.
+@@ -2926,7 +2926,7 @@ Paper width, accepts values labeled with units.
  
  ### option: Page.pdf.width
  * since: v1.8
@@ -516,7 +516,7 @@ index 833a9c04a..764d8fe0f 100644
  - `width` <[string]>
  
  Paper width, accepts values labeled with units.
-@@ -2938,7 +2938,7 @@ Paper height, accepts values labeled with units.
+@@ -2940,7 +2940,7 @@ Paper height, accepts values labeled with units.
  
  ### option: Page.pdf.height
  * since: v1.8
@@ -525,7 +525,7 @@ index 833a9c04a..764d8fe0f 100644
  - `height` <[string]>
  
  Paper height, accepts values labeled with units.
-@@ -2956,7 +2956,7 @@ Paper margins, defaults to none.
+@@ -2958,7 +2958,7 @@ Paper margins, defaults to none.
  
  ### option: Page.pdf.margin
  * since: v1.8
@@ -534,7 +534,7 @@ index 833a9c04a..764d8fe0f 100644
  - `margin` <[Object]>
    - `top` ?<[string]> Top margin, accepts values labeled with units. Defaults to `0`.
    - `right` ?<[string]> Right margin, accepts values labeled with units. Defaults to `0`.
-@@ -3302,6 +3302,13 @@ it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/We
+@@ -3304,6 +3304,13 @@ it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/We
  
  handler function to route the request.
  
@@ -548,7 +548,7 @@ index 833a9c04a..764d8fe0f 100644
  ### param: Page.route.handler
  * since: v1.8
  * langs: csharp, java
-@@ -3889,6 +3896,13 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
+@@ -3891,6 +3898,13 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
  
  Optional handler function to route the request.
  
@@ -562,7 +562,7 @@ index 833a9c04a..764d8fe0f 100644
  ### param: Page.unroute.handler
  * since: v1.8
  * langs: csharp, java
-@@ -3927,7 +3941,8 @@ Performs action and waits for the Page to close.
+@@ -3929,7 +3943,8 @@ Performs action and waits for the Page to close.
  
  ## async method: Page.waitForConsoleMessage
  * since: v1.9
@@ -572,7 +572,7 @@ index 833a9c04a..764d8fe0f 100644
    - alias-python: expect_console_message
    - alias-csharp: RunAndWaitForConsoleMessage
  - returns: <[ConsoleMessage]>
-@@ -3958,7 +3973,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
+@@ -3960,7 +3975,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
  
  ## async method: Page.waitForDownload
  * since: v1.9
@@ -582,7 +582,7 @@ index 833a9c04a..764d8fe0f 100644
    - alias-python: expect_download
    - alias-csharp: RunAndWaitForDownload
  - returns: <[Download]>
-@@ -3989,7 +4005,8 @@ Receives the [Download] object and resolves to truthy value when the waiting sho
+@@ -3991,7 +4007,8 @@ Receives the [Download] object and resolves to truthy value when the waiting sho
  
  ## async method: Page.waitForEvent
  * since: v1.8
@@ -592,7 +592,7 @@ index 833a9c04a..764d8fe0f 100644
    - alias-python: expect_event
  - returns: <[any]>
  
-@@ -4042,7 +4059,8 @@ Either a predicate that receives an event or an options object. Optional.
+@@ -4044,7 +4061,8 @@ Either a predicate that receives an event or an options object. Optional.
  
  ## async method: Page.waitForFileChooser
  * since: v1.9
@@ -602,7 +602,7 @@ index 833a9c04a..764d8fe0f 100644
    - alias-python: expect_file_chooser
    - alias-csharp: RunAndWaitForFileChooser
  - returns: <[FileChooser]>
-@@ -4200,7 +4218,7 @@ await page.WaitForFunctionAsync("selector => !!document.querySelector(selector)"
+@@ -4202,7 +4220,7 @@ await page.WaitForFunctionAsync("selector => !!document.querySelector(selector)"
  
  Optional argument to pass to [`param: expression`].
  
@@ -611,7 +611,7 @@ index 833a9c04a..764d8fe0f 100644
  * since: v1.8
  
  ### option: Page.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
-@@ -4293,6 +4311,11 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
+@@ -4295,6 +4313,11 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
  ```
  
  ### param: Page.waitForLoadState.state = %%-wait-for-load-state-state-%%
@@ -623,7 +623,7 @@ index 833a9c04a..764d8fe0f 100644
  * since: v1.8
  
  ### option: Page.waitForLoadState.timeout = %%-navigation-timeout-%%
-@@ -4389,7 +4412,8 @@ a navigation.
+@@ -4391,7 +4414,8 @@ a navigation.
  
  ## async method: Page.waitForPopup
  * since: v1.9
@@ -633,7 +633,7 @@ index 833a9c04a..764d8fe0f 100644
    - alias-python: expect_popup
    - alias-csharp: RunAndWaitForPopup
  - returns: <[Page]>
-@@ -4526,7 +4550,8 @@ changed by using the [`method: Page.setDefaultTimeout`] method.
+@@ -4528,7 +4552,8 @@ changed by using the [`method: Page.setDefaultTimeout`] method.
  
  ## async method: Page.waitForRequestFinished
  * since: v1.12
@@ -643,7 +643,7 @@ index 833a9c04a..764d8fe0f 100644
    - alias-python: expect_request_finished
    - alias-csharp: RunAndWaitForRequestFinished
  - returns: <[Request]>
-@@ -4918,7 +4943,8 @@ await page.WaitForURLAsync("**/target.html");
+@@ -4920,7 +4945,8 @@ await page.WaitForURLAsync("**/target.html");
  
  ## async method: Page.waitForWebSocket
  * since: v1.9
@@ -653,7 +653,7 @@ index 833a9c04a..764d8fe0f 100644
    - alias-python: expect_websocket
    - alias-csharp: RunAndWaitForWebSocket
  - returns: <[WebSocket]>
-@@ -4949,7 +4975,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
+@@ -4951,7 +4977,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
  
  ## async method: Page.waitForWorker
  * since: v1.9
@@ -663,7 +663,7 @@ index 833a9c04a..764d8fe0f 100644
    - alias-python: expect_worker
    - alias-csharp: RunAndWaitForWorker
  - returns: <[Worker]>
-@@ -4991,7 +5018,8 @@ This does not contain ServiceWorkers
+@@ -4993,7 +5020,8 @@ This does not contain ServiceWorkers
  
  ## async method: Page.waitForEvent2
  * since: v1.8
@@ -687,7 +687,7 @@ index 9bea84e38..a5c3885d9 100644
  
  Makes the assertion check for the opposite condition. For example, this code tests that the page URL doesn't contain `"error"`:
 diff --git a/docs/src/api/class-playwrightassertions.md b/docs/src/api/class-playwrightassertions.md
-index c8549cc96..126fc854a 100644
+index bb5bb305a..781b78818 100644
 --- a/docs/src/api/class-playwrightassertions.md
 +++ b/docs/src/api/class-playwrightassertions.md
 @@ -81,6 +81,7 @@ By default, the timeout for assertions is set to 5 seconds.
@@ -715,7 +715,7 @@ index c8549cc96..126fc854a 100644
  
  Creates a [PageAssertions] object for the given [Page].
 diff --git a/docs/src/api/class-route.md b/docs/src/api/class-route.md
-index 43e9d718f..a27b35fcd 100644
+index afbf07124..282188cfd 100644
 --- a/docs/src/api/class-route.md
 +++ b/docs/src/api/class-route.md
 @@ -125,7 +125,7 @@ If set changes the post data of request.
@@ -777,7 +777,7 @@ index 27ad6cdad..4720fd080 100644
  
  Script that evaluates to a selector engine instance. The script is evaluated in the page context.
 diff --git a/docs/src/api/class-tracing.md b/docs/src/api/class-tracing.md
-index 9f96e4179..6ae50c398 100644
+index 144a331a5..ed4dee220 100644
 --- a/docs/src/api/class-tracing.md
 +++ b/docs/src/api/class-tracing.md
 @@ -138,7 +138,7 @@ If this option is true tracing will
@@ -814,7 +814,7 @@ index 3b3308b88..d13181835 100644
  - returns: <[any]>
  
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index 26544135a..64fa24035 100644
+index d1c55f3e2..ce87f1fa6 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
 @@ -8,7 +8,7 @@ When to consider operation succeeded, defaults to `load`. Events can be either:

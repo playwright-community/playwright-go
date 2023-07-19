@@ -2,6 +2,7 @@ package playwright_test
 
 import (
 	"fmt"
+	"math/big"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -139,6 +140,12 @@ func TestPageEvaluate(t *testing.T) {
 	val, err := page.Evaluate(`() => 123`)
 	require.NoError(t, err)
 	require.Equal(t, val, 123)
+	val, err = page.Evaluate(`() => 42n`)
+	require.NoError(t, err)
+	require.Equal(t, val, big.NewInt(42))
+	val, err = page.Evaluate(`a => a`, big.NewInt(17))
+	require.NoError(t, err)
+	require.Equal(t, val, big.NewInt(17))
 }
 
 func TestPageEvalOnSelectorAll(t *testing.T) {

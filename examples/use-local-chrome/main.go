@@ -36,16 +36,12 @@ func main() {
 	if _, err = page.Goto("https://news.ycombinator.com"); err != nil {
 		log.Fatalf("could not goto: %v", err)
 	}
-	entries, err := page.QuerySelectorAll(".athing")
+	entries, err := page.Locator(".athing").All()
 	if err != nil {
 		log.Fatalf("could not get entries: %v", err)
 	}
 	for i, entry := range entries {
-		titleElement, err := entry.QuerySelector("td.title > span > a")
-		if err != nil {
-			log.Fatalf("could not get title element: %v", err)
-		}
-		title, err := titleElement.TextContent()
+		title, err := entry.Locator("td.title > span > a").TextContent()
 		if err != nil {
 			log.Fatalf("could not get text content: %v", err)
 		}
