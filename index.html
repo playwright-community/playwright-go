@@ -55,7 +55,7 @@
 <p><a href="https://pkg.go.dev/github.com/playwright-community/playwright-go"><img src="https://pkg.go.dev/badge/github.com/playwright-community/playwright-go" alt="PkgGoDev" /></a>
 <a href="http://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License" /></a>
 <a href="https://goreportcard.com/report/github.com/playwright-community/playwright-go"><img src="https://goreportcard.com/badge/github.com/playwright-community/playwright-go" alt="Go Report Card" /></a> <img src="https://github.com/playwright-community/playwright-go/workflows/Go/badge.svg" alt="Build Status" />
-<a href="https://aka.ms/playwright-slack"><img src="https://img.shields.io/badge/join-slack-infomational" alt="Join Slack" /></a> <a href="https://coveralls.io/github/playwright-community/playwright-go?branch=main"><img src="https://coveralls.io/repos/github/playwright-community/playwright-go/badge.svg?branch=main" alt="Coverage Status" /></a> <!-- GEN:chromium-version-badge --><a href="https://www.chromium.org/Home"><img src="https://img.shields.io/badge/chromium-115.0.5790.24-blue.svg?logo=google-chrome" alt="Chromium version" /></a><!-- GEN:stop --> <!-- GEN:firefox-version-badge --><a href="https://www.mozilla.org/en-US/firefox/new/"><img src="https://img.shields.io/badge/firefox-113.0-blue.svg?logo=mozilla-firefox" alt="Firefox version" /></a><!-- GEN:stop --> <!-- GEN:webkit-version-badge --><a href="https://webkit.org/"><img src="https://img.shields.io/badge/webkit-16.4-blue.svg?logo=safari" alt="WebKit version" /></a><!-- GEN:stop --></p>
+<a href="https://aka.ms/playwright-slack"><img src="https://img.shields.io/badge/join-slack-infomational" alt="Join Slack" /></a> <a href="https://coveralls.io/github/playwright-community/playwright-go?branch=main"><img src="https://coveralls.io/repos/github/playwright-community/playwright-go/badge.svg?branch=main" alt="Coverage Status" /></a> <!-- GEN:chromium-version-badge --><a href="https://www.chromium.org/Home"><img src="https://img.shields.io/badge/chromium-115.0.5790.75-blue.svg?logo=google-chrome" alt="Chromium version" /></a><!-- GEN:stop --> <!-- GEN:firefox-version-badge --><a href="https://www.mozilla.org/en-US/firefox/new/"><img src="https://img.shields.io/badge/firefox-115.0-blue.svg?logo=mozilla-firefox" alt="Firefox version" /></a><!-- GEN:stop --> <!-- GEN:webkit-version-badge --><a href="https://webkit.org/"><img src="https://img.shields.io/badge/webkit-17.0-blue.svg?logo=safari" alt="WebKit version" /></a><!-- GEN:stop --></p>
 
 <table>
   <tbody>
@@ -79,19 +79,19 @@
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: left">Chromium <!-- GEN:chromium-version -->115.0.5790.24<!-- GEN:stop --></td>
+      <td style="text-align: left">Chromium <!-- GEN:chromium-version -->115.0.5790.75<!-- GEN:stop --></td>
       <td style="text-align: center">✅</td>
       <td style="text-align: center">✅</td>
       <td style="text-align: center">✅</td>
     </tr>
     <tr>
-      <td style="text-align: left">WebKit <!-- GEN:webkit-version -->16.4<!-- GEN:stop --></td>
+      <td style="text-align: left">WebKit <!-- GEN:webkit-version -->17.0<!-- GEN:stop --></td>
       <td style="text-align: center">✅</td>
       <td style="text-align: center">✅</td>
       <td style="text-align: center">✅</td>
     </tr>
     <tr>
-      <td style="text-align: left">Firefox <!-- GEN:firefox-version -->113.0<!-- GEN:stop --></td>
+      <td style="text-align: left">Firefox <!-- GEN:firefox-version -->115.0<!-- GEN:stop --></td>
       <td style="text-align: center">✅</td>
       <td style="text-align: center">✅</td>
       <td style="text-align: center">✅</td>
@@ -103,14 +103,14 @@
 
 <h2 id="installation">Installation</h2>
 
-<pre><code class="language-txt">go get github.com/playwright-community/playwright-go
+<pre><code class="language-txt">go get -u github.com/playwright-community/playwright-go
 </code></pre>
 
 <p>Install the browsers and OS dependencies:</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>go run github.com/playwright-community/playwright-go/cmd/playwright <span class="nb">install</span> <span class="nt">--with-deps</span>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>go run github.com/playwright-community/playwright-go/cmd/playwright@latest <span class="nb">install</span> <span class="nt">--with-deps</span>
 <span class="c"># Or</span>
-go <span class="nb">install </span>github.com/playwright-community/playwright-go/cmd/playwright
+go <span class="nb">install </span>github.com/playwright-community/playwright-go/cmd/playwright@latest
 playwright <span class="nb">install</span> <span class="nt">--with-deps</span>
 </code></pre></div></div>
 
@@ -163,16 +163,12 @@ playwright <span class="nb">install</span> <span class="nt">--with-deps</span>
 	<span class="k">if</span> <span class="n">_</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">Goto</span><span class="p">(</span><span class="s">"https://news.ycombinator.com"</span><span class="p">);</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
 		<span class="n">log</span><span class="o">.</span><span class="n">Fatalf</span><span class="p">(</span><span class="s">"could not goto: %v"</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
 	<span class="p">}</span>
-	<span class="n">entries</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">page</span><span class="o">.</span><span class="n">QuerySelectorAll</span><span class="p">(</span><span class="s">".athing"</span><span class="p">)</span>
+	<span class="n">entries</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">page</span><span class="o">.</span><span class="n">Locator</span><span class="p">(</span><span class="s">".athing"</span><span class="p">)</span><span class="o">.</span><span class="n">All</span><span class="p">()</span>
 	<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
 		<span class="n">log</span><span class="o">.</span><span class="n">Fatalf</span><span class="p">(</span><span class="s">"could not get entries: %v"</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
 	<span class="p">}</span>
 	<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">entry</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">entries</span> <span class="p">{</span>
-		<span class="n">titleElement</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">entry</span><span class="o">.</span><span class="n">QuerySelector</span><span class="p">(</span><span class="s">"td.title &gt; span &gt; a"</span><span class="p">)</span>
-		<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
-			<span class="n">log</span><span class="o">.</span><span class="n">Fatalf</span><span class="p">(</span><span class="s">"could not get title element: %v"</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
-		<span class="p">}</span>
-		<span class="n">title</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">titleElement</span><span class="o">.</span><span class="n">TextContent</span><span class="p">()</span>
+		<span class="n">title</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">entry</span><span class="o">.</span><span class="n">Locator</span><span class="p">(</span><span class="s">"td.title &gt; span &gt; a"</span><span class="p">)</span><span class="o">.</span><span class="n">TextContent</span><span class="p">()</span>
 		<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
 			<span class="n">log</span><span class="o">.</span><span class="n">Fatalf</span><span class="p">(</span><span class="s">"could not get text content: %v"</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
 		<span class="p">}</span>

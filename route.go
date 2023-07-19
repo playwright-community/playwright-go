@@ -182,17 +182,19 @@ func (r *routeImpl) Fallback(options ...RouteFallbackOptions) error {
 
 func (r *routeImpl) Fetch(options ...RouteFetchOptions) (APIResponse, error) {
 	request := r.Request().Frame().Page().Context().Request().(*apiRequestContextImpl)
-	opt := APIRequestContextFetchOptions{}
+	opt := &APIRequestContextFetchOptions{}
 	url := ""
-	if len(options) > 0 {
-		opt.Headers = options[0].Headers
-		opt.Method = options[0].Method
+	if len(options) == 1 {
+		err := assignStructFields(opt, options[0], true)
+		if err != nil {
+			return nil, err
+		}
 		opt.Data = options[0].PostData
 		if options[0].URL != nil {
 			url = *options[0].URL
 		}
 	}
-	return request.innerFetch(url, r.Request(), opt)
+	return request.innerFetch(url, r.Request(), *opt)
 }
 
 func (r *routeImpl) Continue(options ...RouteContinueOptions) error {

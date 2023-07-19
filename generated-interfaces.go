@@ -681,6 +681,7 @@ type Frame interface {
 	// 1. Ensure that the element is now checked or unchecked. If not, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
+	// Deprecated: Use locator-based Locator.setChecked() instead. Read more about [locators](../locators.md).
 	SetChecked(selector string, checked bool, options ...FrameSetCheckedOptions) error
 	// Returns the added tag when the script's onload fires or when the script content was injected into frame.
 	// Adds a `<script>` tag into the page with the desired url or content.
@@ -701,6 +702,7 @@ type Frame interface {
 	// 1. Ensure that the element is now checked. If not, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
+	// Deprecated: Use locator-based Locator.check() instead. Read more about [locators](../locators.md).
 	Check(selector string, options ...FrameCheckOptions) error
 	ChildFrames() []Frame
 	// This method clicks an element matching `selector` by performing the following steps:
@@ -712,6 +714,7 @@ type Frame interface {
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
+	// Deprecated: Use locator-based Locator.click() instead. Read more about [locators](../locators.md).
 	Click(selector string, options ...PageClickOptions) error
 	// Gets the full HTML contents of the frame, including the doctype.
 	Content() (string, error)
@@ -726,10 +729,12 @@ type Frame interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
 	// **NOTE** `frame.dblclick()` dispatches two `click` events and a single `dblclick` event.
+	// Deprecated: Use locator-based Locator.dblclick() instead. Read more about [locators](../locators.md).
 	Dblclick(selector string, options ...FrameDblclickOptions) error
 	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
 	// `click` is dispatched. This is equivalent to calling
 	// [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
+	// Deprecated: Use locator-based Locator.dispatchEvent() instead. Read more about [locators](../locators.md).
 	DispatchEvent(selector, typ string, eventInit interface{}, options ...PageDispatchEventOptions) error
 	// Returns the return value of `expression`.
 	// If the function passed to the Frame.evaluate() returns a [Promise], then Frame.evaluate() would
@@ -749,12 +754,14 @@ type Frame interface {
 	// `expression`. If no elements match the selector, the method throws an error.
 	// If `expression` returns a [Promise], then Frame.evalOnSelector() would wait for the promise to resolve
 	// and return its value.
+	// Deprecated: This method does not wait for the element to pass the actionability↵checks and therefore can lead to the flaky tests. Use Locator.evaluate(), other `Locator` helper methods or web-first assertions instead.
 	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
 	// Returns the return value of `expression`.
 	// The method finds all elements matching the specified selector within the frame and passes an array of matched
 	// elements as a first argument to `expression`.
 	// If `expression` returns a [Promise], then Frame.evalOnSelectorAll() would wait for the promise to resolve
 	// and return its value.
+	// Deprecated: In most cases, Locator.evaluateAll(),↵other `Locator` helper methods and web-first assertions do a better job.
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
 	// This method waits for an element matching `selector`, waits for [actionability](../actionability.md) checks,
 	// focuses the element, fills it and triggers an `input` event after filling. Note that you can pass an empty string
@@ -764,9 +771,11 @@ type Frame interface {
 	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be filled
 	// instead.
 	// To send fine-grained keyboard events, use Frame.type().
+	// Deprecated: Use locator-based Locator.fill() instead. Read more about [locators](../locators.md).
 	Fill(selector string, value string, options ...FrameFillOptions) error
 	// This method fetches an element with `selector` and focuses it. If there's no element matching `selector`, the
 	// method waits until a matching element appears in the DOM.
+	// Deprecated: Use locator-based Locator.focus() instead. Read more about [locators](../locators.md).
 	Focus(selector string, options ...FrameFocusOptions) error
 	// Returns the `frame` or `iframe` element handle which corresponds to this frame.
 	// This is an inverse of ElementHandle.contentFrame(). Note that returned handle actually belongs to the
@@ -777,6 +786,7 @@ type Frame interface {
 	// in that iframe.
 	FrameLocator(selector string) FrameLocator
 	// Returns element attribute value.
+	// Deprecated: Use locator-based Locator.getAttribute() instead. Read more about [locators](../locators.md).
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
 	// Allows locating elements by their alt text.
 	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) Locator
@@ -788,12 +798,27 @@ type Frame interface {
 	// Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
 	// [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
 	// [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	// **Details**
+	// Role selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback
+	// about the ARIA guidelines.
+	// Many html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)
+	// that is recognized by the role selector. You can find all the
+	// [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**
+	// duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
 	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) Locator
 	// Locate element by the test id.
+	// **Details**
+	// By default, the `data-testid` attribute is used as a test id. Use Selectors.setTestIdAttribute() to
+	// configure a different test id attribute if necessary.
 	GetByTestId(testId interface{}) Locator
 	// Allows locating elements that contain given text.
 	// See also Locator.filter() that allows to match by another criteria, like an accessible role, and then
 	// filter by the text content.
+	// **Details**
+	// Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple spaces into
+	// one, turns line breaks into spaces and ignores leading and trailing whitespace.
+	// Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
+	// example, locating by text `"Log in"` matches `<input type=button value="Log in">`.
 	GetByText(text interface{}, options ...LocatorGetByTextOptions) Locator
 	// Allows locating elements by their title attribute.
 	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) Locator
@@ -822,26 +847,34 @@ type Frame interface {
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
+	// Deprecated: Use locator-based Locator.hover() instead. Read more about [locators](../locators.md).
 	Hover(selector string, options ...PageHoverOptions) error
 	// Returns `element.innerHTML`.
+	// Deprecated: Use locator-based Locator.innerHTML() instead. Read more about [locators](../locators.md).
 	InnerHTML(selector string, options ...PageInnerHTMLOptions) (string, error)
 	// Returns `element.innerText`.
+	// Deprecated: Use locator-based Locator.innerText() instead. Read more about [locators](../locators.md).
 	InnerText(selector string, options ...PageInnerTextOptions) (string, error)
 	// Returns `true` if the frame has been detached, or `false` otherwise.
 	IsDetached() bool
 	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
+	// Deprecated: Use locator-based Locator.isChecked() instead. Read more about [locators](../locators.md).
 	IsChecked(selector string, options ...FrameIsCheckedOptions) (bool, error)
 	// Returns whether the element is disabled, the opposite of [enabled](../actionability.md#enabled).
+	// Deprecated: Use locator-based Locator.isDisabled() instead. Read more about [locators](../locators.md).
 	IsDisabled(selector string, options ...FrameIsDisabledOptions) (bool, error)
 	// Returns whether the element is [editable](../actionability.md#editable).
+	// Deprecated: Use locator-based Locator.isEditable() instead. Read more about [locators](../locators.md).
 	IsEditable(selector string, options ...FrameIsEditableOptions) (bool, error)
 	// Returns whether the element is [enabled](../actionability.md#enabled).
 	IsEnabled(selector string, options ...FrameIsEnabledOptions) (bool, error)
 	// Returns whether the element is hidden, the opposite of [visible](../actionability.md#visible).  `selector` that
 	// does not match any elements is considered hidden.
+	// Deprecated: Use locator-based Locator.isHidden() instead. Read more about [locators](../locators.md).
 	IsHidden(selector string, options ...FrameIsHiddenOptions) (bool, error)
 	// Returns whether the element is [visible](../actionability.md#visible). `selector` that does not match any elements
 	// is considered not visible.
+	// Deprecated: Use locator-based Locator.isVisible() instead. Read more about [locators](../locators.md).
 	IsVisible(selector string, options ...FrameIsVisibleOptions) (bool, error)
 	// The method returns an element locator that can be used to perform actions on this page / frame. Locator is resolved
 	// to the element immediately before performing an action, so a series of actions on the same locator can in fact be
@@ -871,16 +904,19 @@ type Frame interface {
 	// texts.
 	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
+	// Deprecated: Use locator-based Locator.press() instead. Read more about [locators](../locators.md).
 	Press(selector, key string, options ...PagePressOptions) error
 	// Returns the ElementHandle pointing to the frame element.
 	// **NOTE** The use of `ElementHandle` is discouraged, use `Locator` objects and web-first assertions instead.
 	// The method finds an element matching the specified selector within the frame. If no elements match the selector,
 	// returns `null`.
+	// Deprecated: Use locator-based Frame.locator() instead. Read more about [locators](../locators.md).
 	QuerySelector(selector string) (ElementHandle, error)
 	// Returns the ElementHandles pointing to the frame elements.
 	// **NOTE** The use of `ElementHandle` is discouraged, use `Locator` objects instead.
 	// The method finds all elements matching the specified selector within the frame. If no elements match the selector,
 	// returns empty array.
+	// Deprecated: Use locator-based Frame.locator() instead. Read more about [locators](../locators.md).
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
 	SetContent(content string, options ...PageSetContentOptions) error
 	// This method waits for an element matching `selector`, waits for [actionability](../actionability.md) checks, waits
@@ -891,6 +927,7 @@ type Frame interface {
 	// instead.
 	// Returns the array of option values that have been successfully selected.
 	// Triggers a `change` and `input` event once all the provided options have been selected.
+	// Deprecated: Use locator-based Locator.selectOption() instead. Read more about [locators](../locators.md).
 	SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error)
 	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then
 	// they are resolved relative to the current working directory. For empty array, clears the selected files.
@@ -898,6 +935,7 @@ type Frame interface {
 	// [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside
 	// the `<label>` element that has an associated
 	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), targets the control instead.
+	// Deprecated: Use locator-based Locator.setInputFiles() instead. Read more about [locators](../locators.md).
 	SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error
 	// This method taps an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
@@ -909,14 +947,17 @@ type Frame interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
 	// **NOTE** `frame.tap()` requires that the `hasTouch` option of the browser context be set to true.
+	// Deprecated: Use locator-based Locator.tap() instead. Read more about [locators](../locators.md).
 	Tap(selector string, options ...FrameTapOptions) error
 	// Returns `element.textContent`.
+	// Deprecated: Use locator-based Locator.textContent() instead. Read more about [locators](../locators.md).
 	TextContent(selector string, options ...FrameTextContentOptions) (string, error)
 	// Returns the page title.
 	Title() (string, error)
 	// Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text. `frame.type` can be used
 	// to send fine-grained keyboard events. To fill values in form fields, use Frame.fill().
 	// To press a special key, like `Control` or `ArrowDown`, use Keyboard.press().
+	// Deprecated: Use locator-based Locator.type() instead. Read more about [locators](../locators.md).
 	Type(selector, text string, options ...PageTypeOptions) error
 	// Returns frame's url.
 	URL() string
@@ -932,6 +973,7 @@ type Frame interface {
 	// 1. Ensure that the element is now unchecked. If not, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
+	// Deprecated: Use locator-based Locator.uncheck() instead. Read more about [locators](../locators.md).
 	Uncheck(selector string, options ...FrameUncheckOptions) error
 	WaitForEvent(event string, options ...PageWaitForEventOptions) (interface{}, error)
 	// Returns when the `expression` returns a truthy value, returns that value.
@@ -944,6 +986,7 @@ type Frame interface {
 	// Waits for the frame navigation and returns the main resource response. In case of multiple redirects, the
 	// navigation will resolve with the response of the last redirect. In case of navigation to a different anchor or
 	// navigation due to History API usage, the navigation will resolve with `null`.
+	// Deprecated: This method is inherently racy, please use Frame.waitForURL() instead.
 	WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error)
 	// Waits for the frame to navigate to the given URL.
 	WaitForURL(url string, options ...FrameWaitForURLOptions) error
@@ -954,15 +997,18 @@ type Frame interface {
 	// Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If
 	// at the moment of calling the method `selector` already satisfies the condition, the method will return immediately.
 	// If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
+	// Deprecated: Use web assertions that assert visibility or a locator-based Locator.waitFor() instead.↵Read more about [locators](../locators.md).
 	WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandle, error)
 	// Waits for the given `timeout` in milliseconds.
 	// Note that `frame.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going
 	// to be flaky. Use signals such as network events, selectors becoming visible and others instead.
+	// Deprecated: Never wait for timeout in production. Tests that wait for time are↵inherently flaky. Use `Locator` actions and web assertions that wait automatically.
 	WaitForTimeout(timeout float64)
 	// Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element.
 	// Throws for non-input elements. However, if the element is inside the `<label>` element that has an associated
 	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), returns the value of the
 	// control.
+	// Deprecated: Use locator-based Locator.inputValue() instead. Read more about [locators](../locators.md).
 	InputValue(selector string, options ...FrameInputValueOptions) (string, error)
 	DragAndDrop(source, target string, options ...FrameDragAndDropOptions) error
 }
@@ -998,12 +1044,27 @@ type FrameLocator interface {
 	// Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
 	// [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
 	// [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	// **Details**
+	// Role selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback
+	// about the ARIA guidelines.
+	// Many html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)
+	// that is recognized by the role selector. You can find all the
+	// [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**
+	// duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
 	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) Locator
 	// Locate element by the test id.
+	// **Details**
+	// By default, the `data-testid` attribute is used as a test id. Use Selectors.setTestIdAttribute() to
+	// configure a different test id attribute if necessary.
 	GetByTestId(testId interface{}) Locator
 	// Allows locating elements that contain given text.
 	// See also Locator.filter() that allows to match by another criteria, like an accessible role, and then
 	// filter by the text content.
+	// **Details**
+	// Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple spaces into
+	// one, turns line breaks into spaces and ignores leading and trailing whitespace.
+	// Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
+	// example, locating by text `"Log in"` matches `<input type=button value="Log in">`.
 	GetByText(text interface{}, options ...LocatorGetByTextOptions) Locator
 	// Allows locating elements by their title attribute.
 	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) Locator
@@ -1177,6 +1238,21 @@ type Locator interface {
 	// **NOTE** `element.dblclick()` dispatches two `click` events and a single `dblclick` event.
 	Dblclick(options ...FrameDblclickOptions) error
 	// Programmatically dispatch an event on the matching element.
+	// **Details**
+	// The snippet above dispatches the `click` event on the element. Regardless of the visibility state of the element,
+	// `click` is dispatched. This is equivalent to calling
+	// [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
+	// Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit`
+	// properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
+	// Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
+	// - [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)
+	// - [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent)
+	// - [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent)
+	// - [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent)
+	// - [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent)
+	// - [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)
+	// - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
+	// You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 	DispatchEvent(typ string, eventInit interface{}, options ...PageDispatchEventOptions) error
 	// Drag the source element towards the target element and drop it.
 	// **Details**
@@ -1185,8 +1261,10 @@ type Locator interface {
 	DragTo(target Locator, options ...FrameDragAndDropOptions) error
 	// Resolves given locator to the first matching DOM element. If there are no matching elements, waits for one. If
 	// multiple elements match the locator, throws.
+	// Deprecated: Always prefer using `Locator`s and web assertions over `ElementHandle`s because latter are inherently racy.
 	ElementHandle(options ...LocatorElementHandleOptions) (ElementHandle, error)
 	// Resolves given locator to all matching DOM elements. If there are no matching elements, returns an empty list.
+	// Deprecated: Always prefer using `Locator`s and web assertions over `ElementHandle`s because latter are inherently racy.
 	ElementHandles() ([]ElementHandle, error)
 	Err() error
 	// Execute JavaScript code in the page, taking the matching element as an argument.
@@ -1215,6 +1293,14 @@ type Locator interface {
 	// See Page.evaluateHandle() for more details.
 	EvaluateHandle(expression string, arg interface{}, options ...LocatorEvaluateHandleOptions) (interface{}, error)
 	// Set a value to the input field.
+	// **Details**
+	// This method waits for [actionability](../actionability.md) checks, focuses the element, fills it and triggers an
+	// `input` event after filling. Note that you can pass an empty string to clear the input field.
+	// If the target element is not an `<input>`, `<textarea>` or `[contenteditable]` element, this method throws an
+	// error. However, if the element is inside the `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be filled
+	// instead.
+	// To send fine-grained keyboard events, use Locator.type().
 	Fill(value string, options ...FrameFillOptions) error
 	// This method narrows existing locator according to the options, for example filters by text. It can be chained to
 	// filter multiple times.
@@ -1238,12 +1324,27 @@ type Locator interface {
 	// Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
 	// [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
 	// [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	// **Details**
+	// Role selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback
+	// about the ARIA guidelines.
+	// Many html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)
+	// that is recognized by the role selector. You can find all the
+	// [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**
+	// duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
 	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) Locator
 	// Locate element by the test id.
+	// **Details**
+	// By default, the `data-testid` attribute is used as a test id. Use Selectors.setTestIdAttribute() to
+	// configure a different test id attribute if necessary.
 	GetByTestId(testId interface{}) Locator
 	// Allows locating elements that contain given text.
 	// See also Locator.filter() that allows to match by another criteria, like an accessible role, and then
 	// filter by the text content.
+	// **Details**
+	// Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple spaces into
+	// one, turns line breaks into spaces and ignores leading and trailing whitespace.
+	// Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
+	// example, locating by text `"Log in"` matches `<input type=button value="Log in">`.
 	GetByText(text interface{}, options ...LocatorGetByTextOptions) Locator
 	// Allows locating elements by their title attribute.
 	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) Locator
@@ -1251,12 +1352,26 @@ type Locator interface {
 	// Locator.highlight().
 	Highlight() error
 	// Hover over the matching element.
+	// **Details**
+	// This method hovers over the element by performing the following steps:
+	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
+	// 1. Scroll the element into view if needed.
+	// 1. Use Page.mouse() to hover over the center of the element, or the specified `position`.
+	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+	// If the element is detached from the DOM at any moment during the action, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
+	// Passing zero timeout disables this.
 	Hover(options ...PageHoverOptions) error
 	// Returns the [`element.innerHTML`](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML).
 	InnerHTML(options ...PageInnerHTMLOptions) (string, error)
 	// Returns the [`element.innerText`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/innerText).
 	InnerText(options ...PageInnerTextOptions) (string, error)
 	// Returns the value for the matching `<input>` or `<textarea>` or `<select>` element.
+	// **Details**
+	// Throws elements that are not an input, textarea or a select. However, if the element is inside the `<label>`
+	// element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), returns the value of the
+	// control.
 	InputValue(options ...FrameInputValueOptions) (string, error)
 	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
 	IsChecked(options ...FrameIsCheckedOptions) (bool, error)
@@ -1283,8 +1398,30 @@ type Locator interface {
 	// A page this locator belongs to.
 	Page() (Page, error)
 	// Focuses the matching element and presses a combination of the keys.
+	// **Details**
+	// Focuses the element, and then uses Keyboard.down() and Keyboard.up().
+	// `key` can specify the intended
+	// [keyboardEvent.key](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key) value or a single character
+	// to generate the text for. A superset of the `key` values can be found
+	// [here](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values). Examples of the keys are:
+	// `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`,
+	// `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`,
+	// etc.
+	// Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
+	// Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
+	// If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
+	// texts.
+	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
+	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	Press(key string, options ...PagePressOptions) error
 	// Take a screenshot of the element matching the locator.
+	// **Details**
+	// This method captures a screenshot of the page, clipped to the size and position of a particular element matching
+	// the locator. If the element is covered by other elements, it will not be actually visible on the screenshot. If the
+	// element is a scrollable container, only the currently scrolled content will be visible on the screenshot.
+	// This method waits for the [actionability](../actionability.md) checks, then scrolls element into view before taking
+	// a screenshot. If the element is detached from DOM, the method throws an error.
+	// Returns the buffer with the captured screenshot.
 	Screenshot(options ...LocatorScreenshotOptions) ([]byte, error)
 	// This method waits for [actionability](../actionability.md) checks, then tries to scroll element into view, unless
 	// it is completely visible as defined by
@@ -1308,8 +1445,27 @@ type Locator interface {
 	// the control instead.
 	SelectText(options ...LocatorSelectTextOptions) error
 	// Set the state of a checkbox or a radio element.
+	// **Details**
+	// This method checks or unchecks an element by performing the following steps:
+	// 1. Ensure that matched element is a checkbox or a radio input. If not, this method throws.
+	// 1. If the element already has the right checked state, this method returns immediately.
+	// 1. Wait for [actionability](../actionability.md) checks on the matched element, unless `force` option is set. If
+	// the element is detached during the checks, the whole action is retried.
+	// 1. Scroll the element into view if needed.
+	// 1. Use Page.mouse() to click in the center of the element.
+	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+	// 1. Ensure that the element is now checked or unchecked. If not, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
+	// Passing zero timeout disables this.
 	SetChecked(checked bool, options ...FrameSetCheckedOptions) error
 	// Upload file or multiple files into `<input type=file>`.
+	// **Details**
+	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then
+	// they are resolved relative to the current working directory. For empty array, clears the selected files.
+	// This method expects `Locator` to point to an
+	// [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside
+	// the `<label>` element that has an associated
+	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), targets the control instead.
 	SetInputFiles(files []InputFile, options ...FrameSetInputFilesOptions) error
 	// Perform a tap gesture on the element matching the locator.
 	// **Details**
@@ -1330,6 +1486,18 @@ type Locator interface {
 	// To press a special key, like `Control` or `ArrowDown`, use Locator.press().
 	Type(text string, options ...PageTypeOptions) error
 	// Ensure that checkbox or radio element is unchecked.
+	// **Details**
+	// This method unchecks the element by performing the following steps:
+	// 1. Ensure that element is a checkbox or a radio input. If not, this method throws. If the element is already
+	// unchecked, this method returns immediately.
+	// 1. Wait for [actionability](../actionability.md) checks on the element, unless `force` option is set.
+	// 1. Scroll the element into view if needed.
+	// 1. Use Page.mouse() to click in the center of the element.
+	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+	// 1. Ensure that the element is now unchecked. If not, this method throws.
+	// If the element is detached from the DOM at any moment during the action, this method throws.
+	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
+	// Passing zero timeout disables this.
 	Uncheck(options ...FrameUncheckOptions) error
 	// Returns when element specified by locator satisfies the `state` option.
 	// If target element already satisfies the condition, the method returns immediately. Otherwise, waits for up to
@@ -1481,6 +1649,7 @@ type Page interface {
 	// 1. Ensure that the element is now checked or unchecked. If not, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
+	// Deprecated: Use locator-based Locator.setChecked() instead. Read more about [locators](../locators.md).
 	SetChecked(selector string, checked bool, options ...FrameSetCheckedOptions) error
 	Mouse() Mouse
 	Keyboard() Keyboard
@@ -1512,6 +1681,7 @@ type Page interface {
 	// 1. Ensure that the element is now checked. If not, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
+	// Deprecated: Use locator-based Locator.check() instead. Read more about [locators](../locators.md).
 	Check(selector string, options ...FrameCheckOptions) error
 	// This method clicks an element matching `selector` by performing the following steps:
 	// 1. Find an element matching `selector`. If there is none, wait until a matching element is attached to the DOM.
@@ -1522,6 +1692,7 @@ type Page interface {
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
+	// Deprecated: Use locator-based Locator.click() instead. Read more about [locators](../locators.md).
 	Click(selector string, options ...PageClickOptions) error
 	// If `runBeforeUnload` is `false`, does not run any unload handlers and waits for the page to be closed. If
 	// `runBeforeUnload` is `true` the method will run unload handlers, but will **not** wait for the page to close.
@@ -1544,10 +1715,12 @@ type Page interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
 	// **NOTE** `page.dblclick()` dispatches two `click` events and a single `dblclick` event.
+	// Deprecated: Use locator-based Locator.dblclick() instead. Read more about [locators](../locators.md).
 	Dblclick(expression string, options ...FrameDblclickOptions) error
 	// The snippet below dispatches the `click` event on the element. Regardless of the visibility state of the element,
 	// `click` is dispatched. This is equivalent to calling
 	// [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
+	// Deprecated: Use locator-based Locator.dispatchEvent() instead. Read more about [locators](../locators.md).
 	DispatchEvent(selector string, typ string, options ...PageDispatchEventOptions) error
 	// The method adds a function called `name` on the `window` object of every frame in this page. When called, the
 	// function executes `callback` and returns a [Promise] which resolves to the return value of `callback`. If the
@@ -1583,11 +1756,13 @@ type Page interface {
 	// `expression`. If no elements match the selector, the method throws an error. Returns the value of `expression`.
 	// If `expression` returns a [Promise], then Page.evalOnSelector() would wait for the promise to resolve and
 	// return its value.
+	// Deprecated: This method does not wait for the element to pass actionability↵checks and therefore can lead to the flaky tests. Use Locator.evaluate(),↵other `Locator` helper methods or web-first assertions instead.
 	EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error)
 	// The method finds all elements matching the specified selector within the page and passes an array of matched
 	// elements as a first argument to `expression`. Returns the result of `expression` invocation.
 	// If `expression` returns a [Promise], then Page.evalOnSelectorAll() would wait for the promise to resolve
 	// and return its value.
+	// Deprecated: In most cases, Locator.evaluateAll(),↵other `Locator` helper methods and web-first assertions do a better job.
 	EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error)
 	// Performs action and waits for a `ConsoleMessage` to be logged by in the page. If predicate is provided, it passes
 	// `ConsoleMessage` value into the `predicate` function and waits for `predicate(message)` to return a truthy value.
@@ -1633,9 +1808,11 @@ type Page interface {
 	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be filled
 	// instead.
 	// To send fine-grained keyboard events, use Page.type().
+	// Deprecated: Use locator-based Locator.fill() instead. Read more about [locators](../locators.md).
 	Fill(selector, text string, options ...FrameFillOptions) error
 	// This method fetches an element with `selector` and focuses it. If there's no element matching `selector`, the
 	// method waits until a matching element appears in the DOM.
+	// Deprecated: Use locator-based Locator.focus() instead. Read more about [locators](../locators.md).
 	Focus(expression string, options ...FrameFocusOptions) error
 	// Returns frame matching the specified criteria. Either `name` or `url` must be specified.
 	Frame(options PageFrameOptions) Frame
@@ -1645,6 +1822,7 @@ type Page interface {
 	// in that iframe.
 	FrameLocator(selector string) FrameLocator
 	// Returns element attribute value.
+	// Deprecated: Use locator-based Locator.getAttribute() instead. Read more about [locators](../locators.md).
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
 	// Allows locating elements by their alt text.
 	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) Locator
@@ -1656,12 +1834,27 @@ type Page interface {
 	// Allows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),
 	// [ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and
 	// [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+	// **Details**
+	// Role selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback
+	// about the ARIA guidelines.
+	// Many html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)
+	// that is recognized by the role selector. You can find all the
+	// [supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**
+	// duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
 	GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) Locator
 	// Locate element by the test id.
+	// **Details**
+	// By default, the `data-testid` attribute is used as a test id. Use Selectors.setTestIdAttribute() to
+	// configure a different test id attribute if necessary.
 	GetByTestId(testId interface{}) Locator
 	// Allows locating elements that contain given text.
 	// See also Locator.filter() that allows to match by another criteria, like an accessible role, and then
 	// filter by the text content.
+	// **Details**
+	// Matching by text always normalizes whitespace, even with exact match. For example, it turns multiple spaces into
+	// one, turns line breaks into spaces and ignores leading and trailing whitespace.
+	// Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
+	// example, locating by text `"Log in"` matches `<input type=button value="Log in">`.
 	GetByText(text interface{}, options ...LocatorGetByTextOptions) Locator
 	// Allows locating elements by their title attribute.
 	GetByTitle(title interface{}, options ...LocatorGetByTitleOptions) Locator
@@ -1698,26 +1891,35 @@ type Page interface {
 	// 1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
+	// Deprecated: Use locator-based Locator.hover() instead. Read more about [locators](../locators.md).
 	Hover(selector string, options ...PageHoverOptions) error
 	// Returns `element.innerHTML`.
+	// Deprecated: Use locator-based Locator.innerHTML() instead. Read more about [locators](../locators.md).
 	InnerHTML(selector string, options ...PageInnerHTMLOptions) (string, error)
 	// Returns `element.innerText`.
+	// Deprecated: Use locator-based Locator.innerText() instead. Read more about [locators](../locators.md).
 	InnerText(selector string, options ...PageInnerTextOptions) (string, error)
 	// Indicates that the page has been closed.
 	IsClosed() bool
 	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
+	// Deprecated: Use locator-based Locator.isChecked() instead. Read more about [locators](../locators.md).
 	IsChecked(selector string, options ...FrameIsCheckedOptions) (bool, error)
 	// Returns whether the element is disabled, the opposite of [enabled](../actionability.md#enabled).
+	// Deprecated: Use locator-based Locator.isDisabled() instead. Read more about [locators](../locators.md).
 	IsDisabled(selector string, options ...FrameIsDisabledOptions) (bool, error)
 	// Returns whether the element is [editable](../actionability.md#editable).
+	// Deprecated: Use locator-based Locator.isEditable() instead. Read more about [locators](../locators.md).
 	IsEditable(selector string, options ...FrameIsEditableOptions) (bool, error)
 	// Returns whether the element is [enabled](../actionability.md#enabled).
+	// Deprecated: Use locator-based Locator.isEnabled() instead. Read more about [locators](../locators.md).
 	IsEnabled(selector string, options ...FrameIsEnabledOptions) (bool, error)
 	// Returns whether the element is hidden, the opposite of [visible](../actionability.md#visible).  `selector` that
 	// does not match any elements is considered hidden.
+	// Deprecated: Use locator-based Locator.isHidden() instead. Read more about [locators](../locators.md).
 	IsHidden(selector string, options ...FrameIsHiddenOptions) (bool, error)
 	// Returns whether the element is [visible](../actionability.md#visible). `selector` that does not match any elements
 	// is considered not visible.
+	// Deprecated: Use locator-based Locator.isVisible() instead. Read more about [locators](../locators.md).
 	IsVisible(selector string, options ...FrameIsVisibleOptions) (bool, error)
 	// The method returns an element locator that can be used to perform actions on this page / frame. Locator is resolved
 	// to the element immediately before performing an action, so a series of actions on the same locator can in fact be
@@ -1750,12 +1952,15 @@ type Page interface {
 	// texts.
 	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
+	// Deprecated: Use locator-based Locator.press() instead. Read more about [locators](../locators.md).
 	Press(selector, key string, options ...PagePressOptions) error
 	// The method finds an element matching the specified selector within the page. If no elements match the selector, the
 	// return value resolves to `null`. To wait for an element on the page, use Locator.waitFor().
+	// Deprecated: Use locator-based Page.locator() instead. Read more about [locators](../locators.md).
 	QuerySelector(selector string) (ElementHandle, error)
 	// The method finds all elements matching the specified selector within the page. If no elements match the selector,
 	// the return value resolves to `[]`.
+	// Deprecated: Use locator-based Page.locator() instead. Read more about [locators](../locators.md).
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
 	// This method reloads the current page, in the same way as if the user had triggered a browser refresh. Returns the
 	// main resource response. In case of multiple redirects, the navigation will resolve with the response of the last
@@ -1789,6 +1994,7 @@ type Page interface {
 	// instead.
 	// Returns the array of option values that have been successfully selected.
 	// Triggers a `change` and `input` event once all the provided options have been selected.
+	// Deprecated: Use locator-based Locator.selectOption() instead. Read more about [locators](../locators.md).
 	SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error)
 	SetContent(content string, options ...PageSetContentOptions) error
 	// This setting will change the default maximum navigation time for the following methods and related shortcuts:
@@ -1814,6 +2020,7 @@ type Page interface {
 	// [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside
 	// the `<label>` element that has an associated
 	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), targets the control instead.
+	// Deprecated: Use locator-based Locator.setInputFiles() instead. Read more about [locators](../locators.md).
 	SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error
 	// In the case of multiple pages in a single browser, each page can have its own viewport size. However,
 	// Browser.newContext() allows to set viewport size (and more) for all pages in the context at once.
@@ -1832,14 +2039,17 @@ type Page interface {
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
 	// **NOTE** Page.tap() the method will throw if `hasTouch` option of the browser context is false.
+	// Deprecated: Use locator-based Locator.tap() instead. Read more about [locators](../locators.md).
 	Tap(selector string, options ...FrameTapOptions) error
 	// Returns `element.textContent`.
+	// Deprecated: Use locator-based Locator.textContent() instead. Read more about [locators](../locators.md).
 	TextContent(selector string, options ...FrameTextContentOptions) (string, error)
 	// Returns the page's title.
 	Title() (string, error)
 	// Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text. `page.type` can be used to
 	// send fine-grained keyboard events. To fill values in form fields, use Page.fill().
 	// To press a special key, like `Control` or `ArrowDown`, use Keyboard.press().
+	// Deprecated: Use locator-based Locator.type() instead. Read more about [locators](../locators.md).
 	Type(selector, text string, options ...PageTypeOptions) error
 	URL() string
 	// This method unchecks an element matching `selector` by performing the following steps:
@@ -1854,6 +2064,7 @@ type Page interface {
 	// 1. Ensure that the element is now unchecked. If not, this method throws.
 	// When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
 	// Passing zero timeout disables this.
+	// Deprecated: Use locator-based Locator.uncheck() instead. Read more about [locators](../locators.md).
 	Uncheck(selector string, options ...FrameUncheckOptions) error
 	// Removes a route created with Page.route(). When `handler` is not specified, removes all routes for the
 	// `url`.
@@ -1876,6 +2087,7 @@ type Page interface {
 	// Waits for the main frame navigation and returns the main resource response. In case of multiple redirects, the
 	// navigation will resolve with the response of the last redirect. In case of navigation to a different anchor or
 	// navigation due to History API usage, the navigation will resolve with `null`.
+	// Deprecated: This method is inherently racy, please use Page.waitForURL() instead.
 	WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error)
 	// Waits for the matching request and returns it. See [waiting for event](../events.md#waiting-for-event) for more
 	// details about events.
@@ -1890,10 +2102,12 @@ type Page interface {
 	// Wait for the `selector` to satisfy `state` option (either appear/disappear from dom, or become visible/hidden). If
 	// at the moment of calling the method `selector` already satisfies the condition, the method will return immediately.
 	// If the selector doesn't satisfy the condition for the `timeout` milliseconds, the function will throw.
+	// Deprecated: Use web assertions that assert visibility or a locator-based Locator.waitFor() instead.↵Read more about [locators](../locators.md).
 	WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandle, error)
 	// Waits for the given `timeout` in milliseconds.
 	// Note that `page.waitForTimeout()` should only be used for debugging. Tests using the timer in production are going
 	// to be flaky. Use signals such as network events, selectors becoming visible and others instead.
+	// Deprecated: Never wait for timeout in production. Tests that wait for time are↵inherently flaky. Use `Locator` actions and web assertions that wait automatically.
 	WaitForTimeout(timeout float64)
 	// This method returns all of the dedicated
 	// [WebWorkers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) associated with the page.
@@ -1913,6 +2127,7 @@ type Page interface {
 	// Throws for non-input elements. However, if the element is inside the `<label>` element that has an associated
 	// [control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), returns the value of the
 	// control.
+	// Deprecated: Use locator-based Locator.inputValue() instead. Read more about [locators](../locators.md).
 	InputValue(selector string, options ...FrameInputValueOptions) (string, error)
 	// Waits for the main frame to navigate to the given URL.
 	WaitForURL(url string, options ...FrameWaitForURLOptions) error
@@ -2068,6 +2283,10 @@ type Route interface {
 	// Aborts the route's request.
 	Abort(errorCode ...string) error
 	// Continues route's request with optional overrides.
+	// **Details**
+	// Note that any overrides such as `url` or `headers` only apply to the request being routed. If this request results
+	// in a redirect, overrides will not be applied to the new redirected request. If you want to propagate a header
+	// through redirects, use the combination of Route.fetch() and Route.fulfill() instead.
 	Continue(options ...RouteContinueOptions) error
 	// When several routes match the given pattern, they run in the order opposite to their registration. That way the
 	// last registered route can always override all the previous ones. In the example below, request will be handled by
@@ -2076,6 +2295,10 @@ type Route interface {
 	Fallback(options ...RouteFallbackOptions) error
 	// Performs the request and fetches result without fulfilling it, so that the response could be modified and then
 	// fulfilled.
+	// **Details**
+	// Note that `headers` option will apply to the fetched request as well as any redirects initiated by it. If you want
+	// to only apply `headers` to the original request, but not to redirects, look into Route.continue()
+	// instead.
 	Fetch(options ...RouteFetchOptions) (APIResponse, error)
 	// Fulfills route's request with given response.
 	Fulfill(options RouteFulfillOptions) error

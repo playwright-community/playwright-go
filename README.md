@@ -5,7 +5,7 @@
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/playwright-community/playwright-go)](https://pkg.go.dev/github.com/playwright-community/playwright-go)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 [![Go Report Card](https://goreportcard.com/badge/github.com/playwright-community/playwright-go)](https://goreportcard.com/report/github.com/playwright-community/playwright-go) ![Build Status](https://github.com/playwright-community/playwright-go/workflows/Go/badge.svg)
-[![Join Slack](https://img.shields.io/badge/join-slack-infomational)](https://aka.ms/playwright-slack) [![Coverage Status](https://coveralls.io/repos/github/playwright-community/playwright-go/badge.svg?branch=main)](https://coveralls.io/github/playwright-community/playwright-go?branch=main) <!-- GEN:chromium-version-badge -->[![Chromium version](https://img.shields.io/badge/chromium-115.0.5790.24-blue.svg?logo=google-chrome)](https://www.chromium.org/Home)<!-- GEN:stop --> <!-- GEN:firefox-version-badge -->[![Firefox version](https://img.shields.io/badge/firefox-113.0-blue.svg?logo=mozilla-firefox)](https://www.mozilla.org/en-US/firefox/new/)<!-- GEN:stop --> <!-- GEN:webkit-version-badge -->[![WebKit version](https://img.shields.io/badge/webkit-16.4-blue.svg?logo=safari)](https://webkit.org/)<!-- GEN:stop -->
+[![Join Slack](https://img.shields.io/badge/join-slack-infomational)](https://aka.ms/playwright-slack) [![Coverage Status](https://coveralls.io/repos/github/playwright-community/playwright-go/badge.svg?branch=main)](https://coveralls.io/github/playwright-community/playwright-go?branch=main) <!-- GEN:chromium-version-badge -->[![Chromium version](https://img.shields.io/badge/chromium-115.0.5790.75-blue.svg?logo=google-chrome)](https://www.chromium.org/Home)<!-- GEN:stop --> <!-- GEN:firefox-version-badge -->[![Firefox version](https://img.shields.io/badge/firefox-115.0-blue.svg?logo=mozilla-firefox)](https://www.mozilla.org/en-US/firefox/new/)<!-- GEN:stop --> <!-- GEN:webkit-version-badge -->[![WebKit version](https://img.shields.io/badge/webkit-17.0-blue.svg?logo=safari)](https://webkit.org/)<!-- GEN:stop -->
 
 [API reference](https://playwright.dev/docs/api/class-playwright) | [Example recipes](https://github.com/playwright-community/playwright-go/tree/main/examples)
 
@@ -13,24 +13,24 @@ Playwright is a Go library to automate [Chromium](https://www.chromium.org/Home)
 
 |          | Linux | macOS | Windows |
 |   :---   | :---: | :---: | :---:   |
-| Chromium <!-- GEN:chromium-version -->115.0.5790.24<!-- GEN:stop --> | ✅ | ✅ | ✅ |
-| WebKit <!-- GEN:webkit-version -->16.4<!-- GEN:stop --> | ✅ | ✅ | ✅ |
-| Firefox <!-- GEN:firefox-version -->113.0<!-- GEN:stop --> | ✅ | ✅ | ✅ |
+| Chromium <!-- GEN:chromium-version -->115.0.5790.75<!-- GEN:stop --> | ✅ | ✅ | ✅ |
+| WebKit <!-- GEN:webkit-version -->17.0<!-- GEN:stop --> | ✅ | ✅ | ✅ |
+| Firefox <!-- GEN:firefox-version -->115.0<!-- GEN:stop --> | ✅ | ✅ | ✅ |
 
 Headless execution is supported for all the browsers on all platforms.
 
 ## Installation
 
 ```txt
-go get github.com/playwright-community/playwright-go
+go get -u github.com/playwright-community/playwright-go
 ```
 
 Install the browsers and OS dependencies:
 
 ```bash
-go run github.com/playwright-community/playwright-go/cmd/playwright install --with-deps
+go run github.com/playwright-community/playwright-go/cmd/playwright@latest install --with-deps
 # Or
-go install github.com/playwright-community/playwright-go/cmd/playwright
+go install github.com/playwright-community/playwright-go/cmd/playwright@latest
 playwright install --with-deps
 ```
 
@@ -83,16 +83,12 @@ func main() {
 	if _, err = page.Goto("https://news.ycombinator.com"); err != nil {
 		log.Fatalf("could not goto: %v", err)
 	}
-	entries, err := page.QuerySelectorAll(".athing")
+	entries, err := page.Locator(".athing").All()
 	if err != nil {
 		log.Fatalf("could not get entries: %v", err)
 	}
 	for i, entry := range entries {
-		titleElement, err := entry.QuerySelector("td.title > span > a")
-		if err != nil {
-			log.Fatalf("could not get title element: %v", err)
-		}
-		title, err := titleElement.TextContent()
+		title, err := entry.Locator("td.title > span > a").TextContent()
 		if err != nil {
 			log.Fatalf("could not get text content: %v", err)
 		}

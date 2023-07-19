@@ -17,6 +17,7 @@ BROWSER=chromium HEADLESS=1 go test -v --race ./...
 ### Roll
 
 1. Find out to which upstream version you want to roll, and change the value of `playwrightCliVersion` in the **run.go** to the new version.
+1. Download current version of Playwright driver `go run scripts/install-browsers/main.go`
 1. Apply patch `bash scripts/apply-patch.sh`
 1. Fix merge conflicts if any, otherwise ignore this step. Once you are happy you can commit the changes `cd playwright; git commit -am "apply patch" && cd ..`
 1. Regenerate a new patch `bash scripts/update-patch.sh`
