@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"math/big"
 	"reflect"
 	"runtime/debug"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -103,7 +103,8 @@ func parseValue(result interface{}, refs map[float64]interface{}) interface{} {
 		return v.(float64)
 	}
 	if v, ok := vMap["bi"]; ok {
-		n, _ := strconv.Atoi(v.(string))
+		n := new(big.Int)
+		n.SetString(v.(string), 0)
 		return n
 	}
 
@@ -183,6 +184,11 @@ func serializeValue(value interface{}, handles *[]*channel, depth int) interface
 	if value == nil {
 		return map[string]interface{}{
 			"v": "undefined",
+		}
+	}
+	if n, ok := value.(*big.Int); ok {
+		return map[string]interface{}{
+			"bi": n.String(),
 		}
 	}
 	refV := reflect.ValueOf(value)
