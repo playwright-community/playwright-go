@@ -74,7 +74,11 @@ type PageFrameOptions struct {
 func (p *pageImpl) Frame(options PageFrameOptions) Frame {
 	var matcher *urlMatcher
 	if options.URL != nil {
-		matcher = newURLMatcher(options.URL, p.browserContext.options.BaseURL)
+		var baseURL *string
+		if p.browserContext.options != nil {
+			baseURL = p.browserContext.options.BaseURL
+		}
+		matcher = newURLMatcher(options.URL, baseURL)
 	}
 
 	for _, f := range p.frames {
@@ -375,7 +379,11 @@ func (p *pageImpl) waiterForRequest(url interface{}, options ...PageWaitForReque
 	}
 	var matcher *urlMatcher
 	if url != nil {
-		matcher = newURLMatcher(url, p.browserContext.options.BaseURL)
+		var baseURL *string
+		if p.browserContext.options != nil {
+			baseURL = p.browserContext.options.BaseURL
+		}
+		matcher = newURLMatcher(url, baseURL)
 	}
 	predicate := func(req *requestImpl) bool {
 		if matcher != nil {
@@ -406,7 +414,11 @@ func (p *pageImpl) waiterForResponse(url interface{}, options ...PageWaitForResp
 	}
 	var matcher *urlMatcher
 	if url != nil {
-		matcher = newURLMatcher(url, p.browserContext.options.BaseURL)
+		var baseURL *string
+		if p.browserContext.options != nil {
+			baseURL = p.browserContext.options.BaseURL
+		}
+		matcher = newURLMatcher(url, baseURL)
 	}
 	predicate := func(req *responseImpl) bool {
 		if matcher != nil {
@@ -437,7 +449,11 @@ func (p *pageImpl) ExpectNavigation(cb func() error, options ...PageWaitForNavig
 	deadline := time.Now().Add(time.Duration(*option.Timeout) * time.Millisecond)
 	var matcher *urlMatcher
 	if option.URL != nil {
-		matcher = newURLMatcher(option.URL, p.browserContext.options.BaseURL)
+		var baseURL *string
+		if p.browserContext.options != nil {
+			baseURL = p.browserContext.options.BaseURL
+		}
+		matcher = newURLMatcher(option.URL, baseURL)
 	}
 	predicate := func(events ...interface{}) bool {
 		ev := events[0].(map[string]interface{})
@@ -598,7 +614,11 @@ func (p *pageImpl) ExpectWorker(cb func() error, options ...PageExpectWorkerOpti
 func (p *pageImpl) Route(url interface{}, handler routeHandler, times ...int) error {
 	p.Lock()
 	defer p.Unlock()
-	p.routes = append(p.routes, newRouteHandlerEntry(newURLMatcher(url, p.browserContext.options.BaseURL), handler, times...))
+	var baseURL *string
+	if p.browserContext.options != nil {
+		baseURL = p.browserContext.options.BaseURL
+	}
+	p.routes = append(p.routes, newRouteHandlerEntry(newURLMatcher(url, baseURL), handler, times...))
 	return p.updateInterceptionPatterns()
 }
 
