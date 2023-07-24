@@ -540,6 +540,9 @@ func (b *browserContextImpl) onServiceWorker(worker *workerImpl) {
 }
 
 func (b *browserContextImpl) setOptions(options *BrowserNewContextOptions, tracesDir *string) {
+	if options == nil {
+		options = &BrowserNewContextOptions{}
+	}
 	b.options = options
 	if b.options != nil && b.options.RecordHarPath != nil {
 		b.harRecorders[""] = harRecordingMetadata{
