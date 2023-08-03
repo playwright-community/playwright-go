@@ -461,9 +461,7 @@ func (b *browserContextImpl) onClose() {
 }
 
 func (b *browserContextImpl) onPage(page *pageImpl) {
-	b.Lock()
 	b.pages = append(b.pages, page)
-	b.Unlock()
 	b.Emit("page", page)
 	opener, _ := page.Opener()
 	if opener != nil && !opener.IsClosed() {
