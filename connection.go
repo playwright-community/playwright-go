@@ -81,12 +81,12 @@ func (c *connection) cleanup() {
 func (c *connection) Dispatch(msg *message) {
 	method := msg.Method
 	if msg.ID != 0 {
-		cb, ok := c.callbacks.LoadAndDelete(msg.ID)
-		if ok && msg.Error != nil {
+		cb, _ := c.callbacks.Load(msg.ID)
+		if msg.Error != nil {
 			cb.(chan callback) <- callback{
 				Error: parseError(msg.Error.Error),
 			}
-		} else if ok {
+		} else {
 			cb.(chan callback) <- callback{
 				Data: c.replaceGuidsWithChannels(msg.Result),
 			}
@@ -244,28 +244,8 @@ func (c *connection) sendMessageToServer(guid string, method string, params inte
 	if c.tracingCount.Load() > 0 && len(stack) > 0 && guid != "localUtils" {
 		c.LocalUtils().AddStackToTracingNoReply(id, stack)
 	}
-
-	var result callback
-	timeout := getTimeoutFromParams(params)
-	if timeout != nil { // if event has a timeout, wait result for timeout (and extra 500ms)
-		select {
-		case result = <-cb.(chan callback):
-		case <-time.After(time.Duration(*timeout+500) * time.Millisecond):
-			result = callback{
-				Error: &Error{
-					Name:    "Timeout",
-					Message: fmt.Sprintf("Timeout of %vms exceeded, and method %s no result received", *timeout, method),
-					Stack:   fmt.Sprintf("%v", stack),
-				},
-			}
-		}
-	} else {
-		result = <-cb.(chan callback)
-	}
-	cb, ok = c.callbacks.LoadAndDelete(id)
-	if ok {
-		close(cb.(chan callback))
-	}
+	result := <-cb.(chan callback)
+	c.callbacks.Delete(id)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -358,16 +338,4 @@ func fromNullableChannel(v interface{}) interface{} {
 		return nil
 	}
 	return fromChannel(v)
-}
-
-func getTimeoutFromParams(params interface{}) *float64 {
-	v, ok := params.(map[string]interface{})
-	if !ok {
-		return nil
-	}
-	timeout, ok := v["timeout"].(*float64)
-	if !ok {
-		return nil
-	}
-	return timeout
 }
