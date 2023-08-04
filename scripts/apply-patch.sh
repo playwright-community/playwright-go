@@ -15,6 +15,7 @@ pushd playwright
 git checkout HEAD --detach
 
 if git show-ref -q --heads "$BRANCH_NAME_BUILD"; then
+  git fetch --tags
   git checkout "$PW_VERSION"
   git branch -D "$BRANCH_NAME_BUILD"
 fi
