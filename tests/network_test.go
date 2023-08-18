@@ -73,7 +73,7 @@ func TestRequestShouldFireForNavigationRequests(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	requests := make(chan playwright.Request, 1)
-	page.On("request", func(request playwright.Request) {
+	page.OnRequest(func(request playwright.Request) {
 		requests <- request
 	})
 	response, err := page.Goto(server.EMPTY_PAGE)

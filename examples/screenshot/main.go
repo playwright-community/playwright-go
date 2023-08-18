@@ -22,7 +22,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not create page: %v", err)
 	}
-	if _, err = page.Goto("http://whatsmyuseragent.org/", playwright.PageGotoOptions{
+	if _, err = page.Goto("https://playwright.dev/", playwright.PageGotoOptions{
 		// networkidle is DISCOURAGED
 		WaitUntil: playwright.WaitUntilStateDomcontentloaded,
 	}); err != nil {

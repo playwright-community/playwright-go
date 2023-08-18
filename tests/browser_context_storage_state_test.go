@@ -32,18 +32,18 @@ func TestBrowserContextStorageStateShouldCaptureLocalStorage(t *testing.T) {
 	require.NoError(t, err)
 	origins := state.Origins
 	require.Equal(t, 2, len(origins))
-	require.Equal(t, origins[0], playwright.OriginsState{
+	require.Equal(t, origins[0], playwright.Origin{
 		Origin: "https://www.example.com",
-		LocalStorage: []playwright.LocalStorageEntry{
+		LocalStorage: []playwright.NameValue{
 			{
 				Name:  "name1",
 				Value: "value1",
 			},
 		},
 	})
-	require.Equal(t, origins[1], playwright.OriginsState{
+	require.Equal(t, origins[1], playwright.Origin{
 		Origin: "https://www.domain.com",
-		LocalStorage: []playwright.LocalStorageEntry{
+		LocalStorage: []playwright.NameValue{
 			{
 				Name:  "name2",
 				Value: "value2",
@@ -58,9 +58,9 @@ func TestBrowserContextStorageStateSetLocalStorage(t *testing.T) {
 	context, err := browser.NewContext(
 		playwright.BrowserNewContextOptions{
 			StorageState: &playwright.OptionalStorageState{
-				Origins: []playwright.OriginsState{{
+				Origins: []playwright.Origin{{
 					Origin: "https://www.example.com",
-					LocalStorage: []playwright.LocalStorageEntry{
+					LocalStorage: []playwright.NameValue{
 						{
 							Name:  "name1",
 							Value: "value1",

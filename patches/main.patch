@@ -247,10 +247,73 @@ index 6fce864d0..237865884 100644
  
  Makes the assertion check for the opposite condition. For example, this code tests that the response status is not successful:
 diff --git a/docs/src/api/class-browser.md b/docs/src/api/class-browser.md
-index b25da29e1..5a20c2f78 100644
+index b25da29e1..6ee45498c 100644
 --- a/docs/src/api/class-browser.md
 +++ b/docs/src/api/class-browser.md
-@@ -287,7 +287,7 @@ testing frameworks should explicitly create [`method: Browser.newContext`] follo
+@@ -155,7 +155,7 @@ Indicates that the browser is connected.
+ 
+ ## async method: Browser.newBrowserCDPSession
+ * since: v1.11
+-* langs: js, python, csharp
++* langs: js, python, csharp, go
+ - returns: <[CDPSession]>
+ 
+ :::note
+@@ -251,8 +251,25 @@ await browser.CloseAsync();
+ ### option: Browser.newContext.proxy = %%-context-option-proxy-%%
+ * since: v1.8
+ 
+-### option: Browser.newContext.storageState = %%-js-python-context-option-storage-state-%%
++### option: Browser.newContext.storageState
+ * since: v1.8
++* langs: js, python, go
++- `storageState` <[path]|[Object]>
++  - `cookies` <[Array]<[Object]>> Cookies to set for context
++    - `name` <[string]>
++    - `value` <[string]>
++    - `url` ?<[string]> either url or domain / path are required. Optional.
++    - `domain` ?<[string]> either url or domain / path are required Optional.
++    - `path` ?<[string]> either url or domain / path are required Optional.
++    - `expires` ?<[float]> Unix time in seconds. Optional.
++    - `httpOnly` ?<[boolean]> Optional.
++    - `secure` ?<[boolean]> Optional.
++    - `sameSite` ?<[SameSiteAttribute]<"Strict"|"Lax"|"None">> Optional.
++  - `origins` <[Array]<[Object]>> localStorage to set for context
++    - `origin` <[string]>
++    - `localStorage` <[Array]<[Object]>>
++      - `name` <[string]>
++      - `value` <[string]>
+ 
+ ### option: Browser.newContext.storageState = %%-csharp-java-context-option-storage-state-%%
+ * since: v1.8
+@@ -276,8 +293,25 @@ testing frameworks should explicitly create [`method: Browser.newContext`] follo
+ ### option: Browser.newPage.proxy = %%-context-option-proxy-%%
+ * since: v1.8
+ 
+-### option: Browser.newPage.storageState = %%-js-python-context-option-storage-state-%%
++### option: Browser.newPage.storageState
+ * since: v1.8
++* langs: js, python, go
++- `storageState` <[path]|[Object]>
++  - `cookies` <[Array]<[Object]>> Cookies to set for context
++    - `name` <[string]>
++    - `value` <[string]>
++    - `url` ?<[string]> either url or domain / path are required. Optional.
++    - `domain` ?<[string]> either url or domain / path are required Optional.
++    - `path` ?<[string]> either url or domain / path are required Optional.
++    - `expires` ?<[float]> Unix time in seconds. Optional.
++    - `httpOnly` ?<[boolean]> Optional.
++    - `secure` ?<[boolean]> Optional.
++    - `sameSite` ?<[SameSiteAttribute]<"Strict"|"Lax"|"None">> Optional.
++  - `origins` <[Array]<[Object]>> localStorage to set for context
++    - `origin` <[string]>
++    - `localStorage` <[Array]<[Object]>>
++      - `name` <[string]>
++      - `value` <[string]>
+ 
+ ### option: Browser.newPage.storageState = %%-csharp-java-context-option-storage-state-%%
+ * since: v1.8
+@@ -287,7 +321,7 @@ testing frameworks should explicitly create [`method: Browser.newContext`] follo
  
  ## async method: Browser.startTracing
  * since: v1.11
@@ -259,7 +322,7 @@ index b25da29e1..5a20c2f78 100644
  
  :::note
  This API controls [Chromium Tracing](https://www.chromium.org/developers/how-tos/trace-event-profiling-tool) which is a low-level chromium-specific debugging tool. API to control [Playwright Tracing](../trace-viewer) could be found [here](./class-tracing).
-@@ -325,10 +325,18 @@ browser.stop_tracing()
+@@ -325,10 +359,18 @@ browser.stop_tracing()
  
  ### param: Browser.startTracing.page
  * since: v1.11
@@ -278,7 +341,7 @@ index b25da29e1..5a20c2f78 100644
  ### option: Browser.startTracing.path
  * since: v1.11
  - `path` <[path]>
-@@ -349,7 +357,7 @@ specify custom categories to use instead of default.
+@@ -349,7 +391,7 @@ specify custom categories to use instead of default.
  
  ## async method: Browser.stopTracing
  * since: v1.11
@@ -288,39 +351,37 @@ index b25da29e1..5a20c2f78 100644
  
  :::note
 diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
-index 543f31352..b07dd6191 100644
+index 543f31352..f89ba4977 100644
 --- a/docs/src/api/class-browsercontext.md
 +++ b/docs/src/api/class-browsercontext.md
-@@ -319,6 +319,7 @@ await context.AddCookiesAsync(new[] { cookie1, cookie2 });
+@@ -387,7 +387,7 @@ The order of evaluation of multiple scripts installed via [`method: BrowserConte
  
- ### param: BrowserContext.addCookies.cookies
+ ### param: BrowserContext.addInitScript.script
  * since: v1.8
-+* langs: go
- - `cookies` <[Array]<[Object]>>
-   - `name` <[string]>
-   - `value` <[string]>
-@@ -402,6 +403,20 @@ Script to be evaluated in all pages in the browser context.
+-* langs: js
++* langs: js, go
+ - `script` <[function]|[string]|[Object]>
+   - `path` ?<[path]> Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the
+     current working directory. Optional.
+@@ -425,7 +425,7 @@ Script to be evaluated in all pages in the browser context. Optional.
  
- Script to be evaluated in all pages in the browser context.
+ ## method: BrowserContext.backgroundPages
+ * since: v1.11
+-* langs: js, python
++* langs: js, python, go
+ - returns: <[Array]<[Page]>>
  
-+### param: BrowserContext.addInitScript.script
-+* since: v1.8
-+* langs: go
-+- `script` <[string]>
-+
-+Optional Script source to be evaluated in all pages in the browser context.
-+
-+### param: BrowserContext.addInitScript.path
-+* since: v1.8
-+* langs: go
-+- `path` <[string]>
-+
-+Optional Script path to be evaluated in all pages in the browser context.
-+
- ### param: BrowserContext.addInitScript.arg
- * since: v1.8
- * langs: js
-@@ -1177,7 +1192,7 @@ handler function to route the request.
+ :::note
+@@ -968,7 +968,7 @@ The [origin] to grant permissions to, e.g. "https://example.com".
+ 
+ ## async method: BrowserContext.newCDPSession
+ * since: v1.11
+-* langs: js, python, csharp
++* langs: js, python, csharp, go
+ - returns: <[CDPSession]>
+ 
+ :::note
+@@ -1177,7 +1177,7 @@ handler function to route the request.
  
  ### param: BrowserContext.route.handler
  * since: v1.8
@@ -329,21 +390,30 @@ index 543f31352..b07dd6191 100644
  - `handler` <[function]\([Route]\)>
  
  handler function to route the request.
-@@ -1414,6 +1429,13 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
+@@ -1235,7 +1235,7 @@ Optional setting to control resource content management. If `attach` is specifie
+ 
+ ## method: BrowserContext.serviceWorkers
+ * since: v1.11
+-* langs: js, python
++* langs: js, python, go
+ - returns: <[Array]<[Worker]>>
+ 
+ :::note
+@@ -1414,6 +1414,13 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
  
  Optional handler function used to register a routing with [`method: BrowserContext.route`].
  
 +### param: BrowserContext.unroute.handler
 +* since: v1.8
 +* langs: go
-+- `handler` <[function]\([Route]\)>
++- `handler` ?<[function]\([Route]\)>
 +
 +Optional handler function used to register a routing with [`method: BrowserContext.route`].
 +
  ### param: BrowserContext.unroute.handler
  * since: v1.8
  * langs: csharp, java
-@@ -1455,7 +1477,8 @@ Condition to wait for.
+@@ -1455,7 +1462,8 @@ Condition to wait for.
  
  ## async method: BrowserContext.waitForConsoleMessage
  * since: v1.34
@@ -353,7 +423,7 @@ index 543f31352..b07dd6191 100644
    - alias-python: expect_console_message
    - alias-csharp: RunAndWaitForConsoleMessage
  - returns: <[ConsoleMessage]>
-@@ -1486,7 +1509,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
+@@ -1486,7 +1494,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
  
  ## async method: BrowserContext.waitForEvent
  * since: v1.8
@@ -363,7 +433,7 @@ index 543f31352..b07dd6191 100644
    - alias-python: expect_event
  - returns: <[any]>
  
-@@ -1552,7 +1576,8 @@ Either a predicate that receives an event or an options object. Optional.
+@@ -1552,7 +1561,8 @@ Either a predicate that receives an event or an options object. Optional.
  
  ## async method: BrowserContext.waitForPage
  * since: v1.9
@@ -373,7 +443,7 @@ index 543f31352..b07dd6191 100644
    - alias-python: expect_page
    - alias-csharp: RunAndWaitForPage
  - returns: <[Page]>
-@@ -1571,7 +1596,7 @@ Will throw an error if the context closes before new [Page] is created.
+@@ -1571,7 +1581,7 @@ Will throw an error if the context closes before new [Page] is created.
  
  ### option: BrowserContext.waitForPage.predicate
  * since: v1.9
@@ -382,7 +452,7 @@ index 543f31352..b07dd6191 100644
  - `predicate` <[function]\([Page]\):[boolean]>
  
  Receives the [Page] object and resolves to truthy value when the waiting should resolve.
-@@ -1584,7 +1609,8 @@ Receives the [Page] object and resolves to truthy value when the waiting should
+@@ -1584,7 +1594,8 @@ Receives the [Page] object and resolves to truthy value when the waiting should
  
  ## async method: BrowserContext.waitForEvent2
  * since: v1.8
@@ -392,8 +462,74 @@ index 543f31352..b07dd6191 100644
    - alias-python: wait_for_event
  - returns: <[any]>
  
+diff --git a/docs/src/api/class-cdpsession.md b/docs/src/api/class-cdpsession.md
+index e36c8ae60..5bc20e5d1 100644
+--- a/docs/src/api/class-cdpsession.md
++++ b/docs/src/api/class-cdpsession.md
+@@ -1,6 +1,6 @@
+ # class: CDPSession
+ * since: v1.8
+-* langs: js, python, csharp
++* langs: js, python, csharp, go
+ * extends: [EventEmitter]
+ 
+ The `CDPSession` instances are used to talk raw Chrome Devtools Protocol:
+@@ -63,7 +63,7 @@ send messages.
+ 
+ ## async method: CDPSession.send
+ * since: v1.8
+-* langs: js, python, csharp
++* langs: js, python, csharp, go
+ - returns: <[Object]>
+ 
+ ## async method: CDPSession.send
+@@ -73,7 +73,7 @@ send messages.
+ 
+ ### param: CDPSession.send.method
+ * since: v1.8
+-* langs: js, python, csharp
++* langs: js, python, csharp, go
+ - `method` <[string]>
+ 
+ Protocol method name.
+@@ -87,7 +87,7 @@ Optional method parameters.
+ 
+ ### param: CDPSession.send.params
+ * since: v1.30
+-* langs: csharp
++* langs: csharp, go
+   - alias-csharp: args
+ - `params` ?<[Map<string, Object>]>
+ 
+diff --git a/docs/src/api/class-consolemessage.md b/docs/src/api/class-consolemessage.md
+index 06776c8e7..36624d703 100644
+--- a/docs/src/api/class-consolemessage.md
++++ b/docs/src/api/class-consolemessage.md
+@@ -112,7 +112,7 @@ List of arguments passed to a `console` function call. See also [`event: Page.co
+ 
+ ## method: ConsoleMessage.location
+ * since: v1.8
+-* langs: js, python
++* langs: js, python, go
+ - returns: <[Object]>
+   - `url` <[string]> URL of the resource.
+   - `lineNumber` <[int]> 0-based line number in the resource.
+@@ -137,6 +137,13 @@ The page that produced this console message, if any.
+ 
+ The text of the console message.
+ 
++## method: ConsoleMessage.string
++* since: v1.8
++* langs: go
++- returns: <[string]>
++
++The text of the console message.
++
+ ## method: ConsoleMessage.type
+ * since: v1.8
+ - returns: <[string]>
 diff --git a/docs/src/api/class-frame.md b/docs/src/api/class-frame.md
-index c05e9e3fa..98b919f0d 100644
+index c05e9e3fa..2260c8d13 100644
 --- a/docs/src/api/class-frame.md
 +++ b/docs/src/api/class-frame.md
 @@ -1968,7 +1968,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
@@ -417,8 +553,16 @@ index c05e9e3fa..98b919f0d 100644
  * since: v1.8
  
  ### option: Frame.waitForLoadState.timeout = %%-navigation-timeout-%%
+@@ -2028,6 +2033,7 @@ await frame.WaitForLoadStateAsync(); // Defaults to LoadState.Load
+ * since: v1.8
+ * deprecated: This method is inherently racy, please use [`method: Frame.waitForURL`] instead.
+ * langs:
++  * alias-go: ExpectNavigation
+   * alias-python: expect_navigation
+   * alias-csharp: RunAndWaitForNavigation
+ - returns: <[null]|[Response]>
 diff --git a/docs/src/api/class-locatorassertions.md b/docs/src/api/class-locatorassertions.md
-index 837f7696c..663ec469e 100644
+index 837f7696c..545492878 100644
 --- a/docs/src/api/class-locatorassertions.md
 +++ b/docs/src/api/class-locatorassertions.md
 @@ -69,7 +69,7 @@ public class ExampleTests : PageTest
@@ -430,27 +574,55 @@ index 837f7696c..663ec469e 100644
  - returns: <[LocatorAssertions]>
  
  Makes the assertion check for the opposite condition. For example, this code tests that the Locator doesn't contain text `"error"`:
-diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index e9635de2a..c01533ce8 100644
---- a/docs/src/api/class-page.md
-+++ b/docs/src/api/class-page.md
-@@ -642,14 +642,14 @@ Optional argument to pass to [`param: script`] (only supported when passing a fu
+@@ -1009,7 +1009,7 @@ Expected substring or RegExp or a list of those.
  
- ### param: Page.addInitScript.path
- * since: v1.8
+ ### param: LocatorAssertions.toContainText.expected
+ * since: v1.18
 -* langs: python
 +* langs: python, go
- - `path` ?<[path]>
+ - `expected` <[string]|[RegExp]|[Array]<[string]>|[Array]<[RegExp]>|[Array]<[string]|[RegExp]>>
  
- Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working directory. Optional.
+ Expected substring or RegExp or a list of those.
+@@ -1180,7 +1180,7 @@ Expected class or RegExp or a list of those.
+ 
+ ### param: LocatorAssertions.toHaveClass.expected
+ * since: v1.18
+-* langs: python
++* langs: python, go
+ - `expected` <[string]|[RegExp]|[Array]<[string]>|[Array]<[RegExp]>|[Array]<[string]|[RegExp]>>
+ 
+ Expected class or RegExp or a list of those.
+@@ -1649,7 +1649,7 @@ Expected string or RegExp or a list of those.
+ 
+ ### param: LocatorAssertions.toHaveText.expected
+ * since: v1.18
+-* langs: python
++* langs: python, go
+ - `expected` <[string]|[RegExp]|[Array]<[string]>|[Array]<[RegExp]>|[Array]<[string]|[RegExp]>>
+ 
+ Expected string or RegExp or a list of those.
+@@ -1786,7 +1786,7 @@ await Expect(locator).ToHaveValuesAsync(new Regex[] { new Regex("R"), new Regex(
+ 
+ ### param: LocatorAssertions.toHaveValues.values
+ * since: v1.23
+-* langs: js
++* langs: js, go
+ - `values` <[Array]<[string]|[RegExp]>>
+ 
+ Expected options currently selected.
+diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
+index e9635de2a..5fd01a033 100644
+--- a/docs/src/api/class-page.md
++++ b/docs/src/api/class-page.md
+@@ -618,7 +618,7 @@ The order of evaluation of multiple scripts installed via [`method: BrowserConte
  
  ### param: Page.addInitScript.script
  * since: v1.8
--* langs: python
-+* langs: python, go
- - `script` ?<[string]>
- 
- Script to be evaluated in all pages in the browser context. Optional.
+-* langs: js
++* langs: js, go
+ - `script` <[function]|[string]|[Object]>
+   - `path` ?<[path]> Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the
+     current working directory. Optional.
 @@ -1261,11 +1261,11 @@ Passing `null` disables CSS media emulation.
  
  ### option: Page.emulateMedia.media
@@ -507,6 +679,23 @@ index e9635de2a..c01533ce8 100644
  
  ## async method: Page.evalOnSelector
  * since: v1.9
+@@ -2196,14 +2196,14 @@ Frame name specified in the `iframe`'s `name` attribute.
+ 
+ ### option: Page.frame.name
+ * since: v1.8
+-* langs: python
++* langs: python, go
+ - `name` ?<[string]>
+ 
+ Frame name specified in the `iframe`'s `name` attribute. Optional.
+ 
+ ### option: Page.frame.url
+ * since: v1.8
+-* langs: python
++* langs: python, go
+ - `url` ?<[string]|[RegExp]|[function]\([URL]\):[boolean]>
+ 
+ A glob pattern, regex pattern or predicate receiving frame's `url` as a [URL] object. Optional.
 @@ -2926,7 +2926,7 @@ Paper width, accepts values labeled with units.
  
  ### option: Page.pdf.width
@@ -548,6 +737,21 @@ index e9635de2a..c01533ce8 100644
  ### param: Page.route.handler
  * since: v1.8
  * langs: csharp, java
+@@ -3680,12 +3687,12 @@ await page.GotoAsync("https://www.microsoft.com");
+ 
+ ### param: Page.setViewportSize.width
+ * since: v1.10
+-* langs: csharp, java
++* langs: csharp, java, go
+ - `width` <[int]> page width in pixels.
+ 
+ ### param: Page.setViewportSize.height
+ * since: v1.10
+-* langs: csharp, java
++* langs: csharp, java, go
+ - `height` <[int]> page height in pixels.
+ 
+ ## async method: Page.tap
 @@ -3891,6 +3898,13 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
  
  Optional handler function to route the request.
@@ -623,7 +827,15 @@ index e9635de2a..c01533ce8 100644
  * since: v1.8
  
  ### option: Page.waitForLoadState.timeout = %%-navigation-timeout-%%
-@@ -4391,7 +4414,8 @@ a navigation.
+@@ -4307,6 +4330,7 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
+ * since: v1.8
+ * deprecated: This method is inherently racy, please use [`method: Page.waitForURL`] instead.
+ * langs:
++  * alias-go: ExpectNavigation
+   * alias-python: expect_navigation
+   * alias-csharp: RunAndWaitForNavigation
+ - returns: <[null]|[Response]>
+@@ -4391,7 +4415,8 @@ a navigation.
  
  ## async method: Page.waitForPopup
  * since: v1.9
@@ -633,7 +845,15 @@ index e9635de2a..c01533ce8 100644
    - alias-python: expect_popup
    - alias-csharp: RunAndWaitForPopup
  - returns: <[Page]>
-@@ -4528,7 +4552,8 @@ changed by using the [`method: Page.setDefaultTimeout`] method.
+@@ -4423,6 +4448,7 @@ Receives the [Page] object and resolves to truthy value when the waiting should
+ ## async method: Page.waitForRequest
+ * since: v1.8
+ * langs:
++  * alias-go: ExpectRequest
+   * alias-python: expect_request
+   * alias-csharp: RunAndWaitForRequest
+ - returns: <[Request]>
+@@ -4528,7 +4554,8 @@ changed by using the [`method: Page.setDefaultTimeout`] method.
  
  ## async method: Page.waitForRequestFinished
  * since: v1.12
@@ -643,7 +863,15 @@ index e9635de2a..c01533ce8 100644
    - alias-python: expect_request_finished
    - alias-csharp: RunAndWaitForRequestFinished
  - returns: <[Request]>
-@@ -4920,7 +4945,8 @@ await page.WaitForURLAsync("**/target.html");
+@@ -4560,6 +4587,7 @@ Receives the [Request] object and resolves to truthy value when the waiting shou
+ ## async method: Page.waitForResponse
+ * since: v1.8
+ * langs:
++  * alias-go: ExpectResponse
+   * alias-python: expect_response
+   * alias-csharp: RunAndWaitForResponse
+ - returns: <[Response]>
+@@ -4920,7 +4948,8 @@ await page.WaitForURLAsync("**/target.html");
  
  ## async method: Page.waitForWebSocket
  * since: v1.9
@@ -653,7 +881,7 @@ index e9635de2a..c01533ce8 100644
    - alias-python: expect_websocket
    - alias-csharp: RunAndWaitForWebSocket
  - returns: <[WebSocket]>
-@@ -4951,7 +4977,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
+@@ -4951,7 +4980,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
  
  ## async method: Page.waitForWorker
  * since: v1.9
@@ -663,7 +891,7 @@ index e9635de2a..c01533ce8 100644
    - alias-python: expect_worker
    - alias-csharp: RunAndWaitForWorker
  - returns: <[Worker]>
-@@ -4993,7 +5020,8 @@ This does not contain ServiceWorkers
+@@ -4993,7 +5023,8 @@ This does not contain ServiceWorkers
  
  ## async method: Page.waitForEvent2
  * since: v1.8
@@ -687,9 +915,16 @@ index 9bea84e38..a5c3885d9 100644
  
  Makes the assertion check for the opposite condition. For example, this code tests that the page URL doesn't contain `"error"`:
 diff --git a/docs/src/api/class-playwrightassertions.md b/docs/src/api/class-playwrightassertions.md
-index bb5bb305a..781b78818 100644
+index bb5bb305a..064d4567e 100644
 --- a/docs/src/api/class-playwrightassertions.md
 +++ b/docs/src/api/class-playwrightassertions.md
+@@ -1,5 +1,5 @@
+ # class: PlaywrightAssertions
+-* langs: js, java, csharp
++* langs: js, java, csharp, go
+ * since: v1.17
+ 
+ Playwright gives you Web-First Assertions with convenience methods for creating assertions that will wait and retry until the expected condition is met.
 @@ -81,6 +81,7 @@ By default, the timeout for assertions is set to 5 seconds.
    - alias-python: expect
    - alias-js: expect
@@ -714,6 +949,70 @@ index bb5bb305a..781b78818 100644
  - returns: <[PageAssertions]>
  
  Creates a [PageAssertions] object for the given [Page].
+diff --git a/docs/src/api/class-request.md b/docs/src/api/class-request.md
+index 15b566bd0..581bb3cc4 100644
+--- a/docs/src/api/class-request.md
++++ b/docs/src/api/class-request.md
+@@ -91,6 +91,13 @@ Headers with multiple entries, such as `Set-Cookie`, appear in the array multipl
+ 
+ Returns the value of the header matching the name. The name is case insensitive.
+ 
++## async method: Request.headerValue
++* since: v1.15
++* langs: go
++- returns: <[string]>
++
++Returns the value of the header matching the name. The name is case insensitive.
++
+ ### param: Request.headerValue.name
+ * since: v1.15
+ - `name` <[string]>
+@@ -123,7 +130,7 @@ Request's post body in a binary form, if any.
+ 
+ ## method: Request.postDataJSON
+ * since: v1.8
+-* langs: js, python
++* langs: js, python, go
+ - returns: <[null]|[Serializable]>
+ 
+ Returns parsed request's body for `form-urlencoded` and JSON as a fallback if any.
+diff --git a/docs/src/api/class-response.md b/docs/src/api/class-response.md
+index 13ff68b85..761ac8bc8 100644
+--- a/docs/src/api/class-response.md
++++ b/docs/src/api/class-response.md
+@@ -23,7 +23,7 @@ Waits for this response to finish, returns always `null`.
+ 
+ ## async method: Response.finished
+ * since: v1.8
+-* langs: js
++* langs: js, go
+ - returns: <[null]|[Error]>
+ 
+ ## method: Response.frame
+@@ -62,6 +62,14 @@ Headers with multiple entries, such as `Set-Cookie`, appear in the array multipl
+ Returns the value of the header matching the name. The name is case insensitive. If multiple headers have
+ the same name (except `set-cookie`), they are returned as a list separated by `, `. For `set-cookie`, the `\n` separator is used. If no headers are found, `null` is returned.
+ 
++## async method: Response.headerValue
++* since: v1.15
++* langs: go
++- returns: <[string]>
++
++Returns the value of the header matching the name. The name is case insensitive. If multiple headers have
++the same name (except `set-cookie`), they are returned as a list separated by `, `. For `set-cookie`, the `\n` separator is used. If no headers are found, "" is returned.
++
+ ### param: Response.headerValue.name
+ * since: v1.15
+ - `name` <[string]>
+@@ -82,7 +90,7 @@ Name of the header.
+ 
+ ## async method: Response.json
+ * since: v1.8
+-* langs: js, python
++* langs: js, python, go
+ - returns: <[Serializable]>
+ 
+ Returns the JSON representation of response body.
 diff --git a/docs/src/api/class-route.md b/docs/src/api/class-route.md
 index afbf07124..282188cfd 100644
 --- a/docs/src/api/class-route.md
@@ -755,27 +1054,18 @@ index afbf07124..282188cfd 100644
  
  Response body.
 diff --git a/docs/src/api/class-selectors.md b/docs/src/api/class-selectors.md
-index 27ad6cdad..4720fd080 100644
+index 27ad6cdad..8eabb43a5 100644
 --- a/docs/src/api/class-selectors.md
 +++ b/docs/src/api/class-selectors.md
-@@ -211,7 +211,7 @@ Raw script content.
+@@ -187,7 +187,7 @@ contain `[a-zA-Z0-9_]` characters.
  
- ### option: Selectors.register.script
+ ### param: Selectors.register.script
  * since: v1.8
--* langs: csharp
-+* langs: csharp, go
- - `script` <[string]>
- 
- Script that evaluates to a selector engine instance. The script is evaluated in the page context.
-@@ -225,7 +225,7 @@ Path to the JavaScript file. If `path` is a relative path, then it is resolved r
- 
- ### option: Selectors.register.path
- * since: v1.8
--* langs: csharp
-+* langs: csharp, go
- - `path` <[path]>
- 
- Script that evaluates to a selector engine instance. The script is evaluated in the page context.
+-* langs: js
++* langs: js, go
+ - `script` <[function]|[string]|[Object]>
+   - `path` ?<[path]> Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the
+     current working directory. Optional.
 diff --git a/docs/src/api/class-tracing.md b/docs/src/api/class-tracing.md
 index 144a331a5..ed4dee220 100644
 --- a/docs/src/api/class-tracing.md
@@ -790,10 +1080,38 @@ index 144a331a5..ed4dee220 100644
  
  Whether to include source files for trace actions.
 diff --git a/docs/src/api/class-websocket.md b/docs/src/api/class-websocket.md
-index 3b3308b88..d13181835 100644
+index 3b3308b88..e21ea93ef 100644
 --- a/docs/src/api/class-websocket.md
 +++ b/docs/src/api/class-websocket.md
-@@ -63,7 +63,8 @@ Contains the URL of the WebSocket.
+@@ -16,6 +16,13 @@ Fired when the websocket closes.
+ 
+ Fired when the websocket receives a frame.
+ 
++## event: WebSocket.frameReceived
++* since: v1.9
++* langs: go
++- argument: <[Buffer]> frame payload
++
++Fired when the websocket receives a frame.
++
+ ## event: WebSocket.frameReceived
+ * since: v1.9
+ * langs: python
+@@ -33,6 +40,13 @@ Fired when the websocket receives a frame.
+ 
+ Fired when the websocket sends a frame.
+ 
++## event: WebSocket.frameSent
++* since: v1.9
++* langs: go
++- argument: <[Buffer]> frame payload
++
++Fired when the websocket sends a frame.
++
+ ## event: WebSocket.frameSent
+ * since: v1.9
+ * langs: python
+@@ -63,7 +77,8 @@ Contains the URL of the WebSocket.
  
  ## async method: WebSocket.waitForEvent
  * since: v1.8
@@ -803,7 +1121,7 @@ index 3b3308b88..d13181835 100644
    - alias-python: expect_event
  - returns: <[any]>
  
-@@ -140,7 +141,8 @@ Receives the [WebSocketFrame] object and resolves to truthy value when the waiti
+@@ -140,7 +155,8 @@ Receives the [WebSocketFrame] object and resolves to truthy value when the waiti
  
  ## async method: WebSocket.waitForEvent2
  * since: v1.8
@@ -814,7 +1132,7 @@ index 3b3308b88..d13181835 100644
  - returns: <[any]>
  
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index d1c55f3e2..ce87f1fa6 100644
+index d1c55f3e2..d62c3ccd6 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
 @@ -8,7 +8,7 @@ When to consider operation succeeded, defaults to `load`. Events can be either:
@@ -1096,6 +1414,24 @@ index d1c55f3e2..ce87f1fa6 100644
  - `recordVideo` <[Object]>
    - `dir` <[path]> Path to the directory to put videos into.
    - `size` ?<[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
+@@ -736,7 +761,7 @@ Whether to allow sites to register Service workers. Defaults to `'allow'`.
+ 
+ 
+ ## select-options-values
+-* langs: java, js, csharp
++* langs: java, js, csharp, go
+ - `values` <[null]|[string]|[ElementHandle]|[Array]<[string]>|[Object]|[Array]<[ElementHandle]>|[Array]<[Object]>>
+   - `value` ?<[string]> Matches by `option.value`. Optional.
+   - `label` ?<[string]> Matches by `option.label`. Optional.
+@@ -754,7 +779,7 @@ the parameter is a string without wildcard characters, the method will wait for
+ equal to the string.
+ 
+ ## wait-for-event-event
+-* langs: js, python, java
++* langs: js, python, java, go
+ - `event` <[string]>
+ 
+ Event name, same one typically passed into `*.on(event)`.
 @@ -812,7 +837,7 @@ only the first option matching one of the passed options is selected. Optional.
  Receives the event data and resolves to truthy value when the waiting should resolve.
  
@@ -1133,10 +1469,10 @@ index d1c55f3e2..ce87f1fa6 100644
  Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with
 diff --git a/utils/doclint/generateGoApi.js b/utils/doclint/generateGoApi.js
 new file mode 100644
-index 000000000..40595c428
+index 000000000..b64c00b65
 --- /dev/null
 +++ b/utils/doclint/generateGoApi.js
-@@ -0,0 +1,822 @@
+@@ -0,0 +1,834 @@
 +/**
 + * Copyright (c) Microsoft Corporation.
 + *
@@ -1157,287 +1493,254 @@ index 000000000..40595c428
 +
 +const path = require('path');
 +const Documentation = require('./documentation');
-+const XmlDoc = require('./dotnetXmlDocumentation')
 +const PROJECT_DIR = path.join(__dirname, '..', '..');
 +const fs = require('fs');
 +const { parseApi } = require('./api_parser');
 +const { Type } = require('./documentation');
 +const { EOL } = require('os');
 +
-+
 +const maxDocumentationColumnWidth = 80;
++Error.stackTraceLimit = 100;
 +
 +/** @type {Map<string, Documentation.Type>} */
-+const additionalTypes = new Map(); // this will hold types that we discover, because of .NET specifics, like results
++const additionalTypes = new Map(); // this will hold types that use structs
 +/** @type {Map<string, string>} */
 +const documentedResults = new Map(); // will hold documentation for new types
 +/** @type {Map<string, string[]>} */
 +const enumTypes = new Map();
 +
-+let documentation;
-+/** @type {Map<string, string>} */
-+let classNameMap;
-+/** @type {Map<string, string>} */
-+let shortNameMap = new Map();
 +
-+{
-+  const typesDir = process.argv[2] || path.join(__dirname, 'generate_types', 'go');
-+  if (!fs.existsSync(typesDir))
-+    fs.mkdirSync(typesDir, { recursive: true });
++const typesDir = process.argv[2] || path.join(__dirname, 'generate_types', 'go');
++if (!fs.existsSync(typesDir))
++  fs.mkdirSync(typesDir, { recursive: true });
 +
-+  const structsFile = path.join(typesDir, "generated-structs.go");
-+  const enumsFile = path.join(typesDir, "generated-enums.go");
++const interfacesFile = path.join(typesDir, "generated-interfaces.go");
++const structsFile = path.join(typesDir, "generated-structs.go");
++const enumsFile = path.join(typesDir, "generated-enums.go");
 +
-+  for (const file of [structsFile, enumsFile])
-+    fs.writeFileSync(file, "package playwright\n")
++for (const file of [interfacesFile, structsFile, enumsFile])
++  fs.writeFileSync(file, "package playwright\n")
 +
-+  documentation = parseApi(path.join(PROJECT_DIR, 'docs', 'src', 'api'));
-+  documentation.filterForLanguage('go');
-+  documentation.setLinkRenderer(item => {
-+    if (item.clazz)
-+      return translateMemberName("interface", item.clazz.name, null);
-+    else if (item.option || item.param)
-+      return `\`${item.option || item.param}\``
-+    else if (item.member)
-+      return `${translateMemberName("interface", item.member.clazz.name, null)}.${translateMemberName(item.member.kind, item.member.name, item.member)}()`;
-+  });
-+  // we have some "predefined" types, like the mixed state enum, that we can map in advance
-+  enumTypes.set("MixedState", ["On", "Off", "Mixed"]);
++const documentation = parseApi(path.join(PROJECT_DIR, 'docs', 'src', 'api'));
++documentation.filterForLanguage('go');
++documentation.filterOutExperimental();
 +
-+  // map the name to a C# friendly one (we prepend an I to denote an interface)
-+  classNameMap = new Map(documentation.classesArray.map(x => [x.name, translateMemberName('interface', x.name, null)]));
-+
-+  // map some types that we know of
-+  classNameMap.set('Error', 'Exception');
-+  classNameMap.set('TimeoutError', 'TimeoutException');
-+  classNameMap.set('EvaluationArgument', 'interface{}');
-+  classNameMap.set('boolean', '*bool');
-+  classNameMap.set('Serializable', 'T');
-+  classNameMap.set('any', 'interface{}');
-+  classNameMap.set('Buffer', '[]byte'); // TODO(mxschmitt): use bytes.Buffer
-+  classNameMap.set('path', '*string');
-+  classNameMap.set('URL', 'string');
-+  classNameMap.set('RegExp', 'Regex');
-+
-+  // map some types that keep the name short
-+  shortNameMap.set('HttpCredentials', 'HttpCredentials')
-+  shortNameMap.set('Proxy', 'Proxy')
-+  shortNameMap.set('APIRequestContextStorageState', 'StorageState')
-+  shortNameMap.set('BrowserContextStorageState', 'StorageState')
-+  shortNameMap.set('APIRequestNewContextOptionsStorageState', 'StorageState')
-+  shortNameMap.set('APIRequestNewContextStorageState', 'StorageState')
-+  shortNameMap.set('BrowserNewContextOptionsStorageState', 'OptionalStorageState')
-+  shortNameMap.set('BrowserNewPageOptionsStorageState', 'OptionalStorageState')
-+  shortNameMap.set('OptionalStorageStateOrigins', 'OriginsState')
-+  shortNameMap.set('RecordVideo', 'RecordVideo')
-+  shortNameMap.set('Screen', 'ScreenSize')
-+  shortNameMap.set('Viewport', 'ViewportSize')
-+  shortNameMap.set('PageViewportSizeResult', 'ViewportSize')
-+  shortNameMap.set('BrowserNewContextOptionsGeolocation', 'Geolocation')
-+  shortNameMap.set('BrowserNewPageOptionsGeolocation', 'Geolocation')
-+  shortNameMap.set('BrowserTypeLaunchPersistentContextOptionsGeolocation', 'Geolocation')
-+  shortNameMap.set('OptionalStorageStateCookies', 'OptionalCookie')
-+  shortNameMap.set('BrowserContextAddCookiesOptionsCookies', 'OptionalCookie')
-+  shortNameMap.set('BrowserContextCookies', 'Cookie')
-+  shortNameMap.set('Position', 'Position')
-+  shortNameMap.set('SourcePosition', 'Position')
-+  shortNameMap.set('TargetPosition', 'Position')
-+  shortNameMap.set('Margin', 'Margin')
-+  shortNameMap.set('HeadersArray', 'NameValue')
-+  shortNameMap.set('PageScreenshotOptionsClip', 'Rect')
-+
-+  // this are types that we don't explicility render even if we get the specs
-+  const ignoredTypes = [
-+    'TimeoutException',
-+    'APIRequestStorageState',
-+    'APIRequestContextStorageStateResult',
-+    'APIResponseHeadersArrayResult',
-+    'BrowserGeolocation',
-+    'BrowserStorageState',
-+    'BrowserContextGeolocation',
-+    'BrowserContextStorageStateResult',
-+    'BrowserContextCookiesResult',
-+    'BrowserTypeGeolocation',
-+    'Cookie',
-+    'ElementHandleBoundingBoxResult',
-+    'FrameLocatorLocatorOptions',
-+    'Geolocation',
-+    'HttpCredentials',
-+    'LocatorBoundingBoxResult',
-+    'NameValue',
-+    'OriginsState',
-+    'PageClip',
-+    'PageViewportSizeResult',
-+    'Rect',
-+    'RequestHeadersArrayResult',
-+    'ResponseHeadersArrayResult',
-+    'StorageState',
-+    'ViewportSize'
-+  ];
-+
-+  /**
-+   * @param {string} file
-+   * @param {string[]} data
-+   */
-+  let appendFile = (file, data) => {
-+    let content = data.join(`${EOL}\t`);
-+    fs.appendFileSync(file, content);
++documentation.setLinkRenderer(item => {
++  if (item.clazz)
++    return `[${toTitleCase(item.clazz.name)}]`;
++  else if (item.option || item.param)
++    return `“${item.option || item.param}”`
++  else if (item.member) {
++    return `[${toTitleCase(item.member.clazz ? item.member.clazz.name : '')}.${toMemberName(item.member)}]`;
 +  }
++  else
++    throw new Error('Unknown link format.');
++});
++documentation.generateSourceCodeComments();
 +
-+  for (const element of documentation.classesArray) {
-+    const name = classNameMap.get(element.name);
-+    if (ignoredTypes.includes(name))
-+      continue;
++// we have some "predefined" types, like the mixed state enum, that we can map in advance
++enumTypes.set("MixedState", ["On", "Off", "Mixed"]);
 +
-+    const out = [];
-+    console.log(`Generating ${name}`);
++// map the name to a golang friendly one
++const classNameMap = new Map(documentation.classesArray.map(x => [x.name, toTitleCase(x.name)]));
 +
-+    if (element.spec)
-+      out.push(...XmlDoc.renderXmlDoc(element.spec, maxDocumentationColumnWidth));
-+    else {
-+      let ownDocumentation = documentedResults.get(name);
-+      if (ownDocumentation) {
-+        out.push(`// ${ownDocumentation}`);
-+      }
-+    }
++// map some types that we know of
++classNameMap.set('EvaluationArgument', 'interface{}');
++classNameMap.set('any', 'interface{}');
++classNameMap.set('Buffer', '[]byte'); // TODO(mxschmitt): use bytes.Buffer
++classNameMap.set('RegExp', 'Regex');
 +
-+    if (element.extends === 'IEventEmitter')
-+      element.extends = null;
++// method that don't return error
++const methodNoErrArray = [
++  'APIResponse',
++  'Args',
++  'AsElement',
++  'BackgroundPages',
++  'Browser',
++  'BrowserType',
++  'ChildFrames',
++  'Context',
++  'Contexts',
++  'DefaultValue',
++  'Element',
++  'ExecutablePath',
++  'Frame',
++  'Frames',
++  'FromServiceWorker',
++  'Headers',
++  'IsClosed',
++  'IsConnected',
++  'IsDetached',
++  'IsMultiple',
++  'IsNavigationRequest',
++  'Keyboard',
++  'Location',
++  'Locator',
++  'MainFrame',
++  'Message',
++  'Method',
++  'Mouse',
++  'Name',
++  'Not',
++  'Ok',
++  'Page',
++  'Pages',
++  'ParentFrame',
++  'RedirectedFrom',
++  'RedirectedTo',
++  'Request',
++  'ResourceType',
++  'ServiceWorkers',
++  'SetDefaultNavigationTimeout',
++  'SetDefaultTimeout',
++  'SetTestIdAttribute',
++  'Status',
++  'StatusText',
++  'String',
++  'SuggestedFilename',
++  'Timing',
++  'Touchscreen',
++  'Tracing',
++  'URL',
++  'Version',
++  'Video',
++  'ViewportSize',
++  'WaitForTimeout',
++  'Workers',
++];
++const methodNoErr = new Set(methodNoErrArray);
 +
-+    out.push(`type ${name} interface {`);
-+    if (element.extends)
-+      out.push(element.extends)
++// this are types that we don't explicility render even if we get the specs
++const ignoredTypes = [
++  'Playwright',
++  'TimeoutError',
++  'Error',
++];
 +
-+    for (const member of element.membersArray) {
-+      renderMember(member, element, out);
-+    }
++/**
++ * @param {string} file
++ * @param {string[]} data
++ */
++let appendFile = (file, data) => {
++  let content = data.join(`${EOL}\t`);
++  fs.appendFileSync(file, content);
++}
 +
++// generate the interfaces
++for (const element of documentation.classesArray) {
++  const name = classNameMap.get(element.name);
++  if (name && ignoredTypes.includes(name))
++    continue;
++
++  /** @type {string[]} */
++  const out = [];
++  console.log(`Generating ${name}`);
++
++  if (element.comment)
++    out.push(...transformComment(element));
++
++  out.push(`type ${name} interface {`);
++  if (element.extends)
++    out.push(element.extends)
++
++  for (const member of element.membersArray) {
++    renderInterface(member, element, out);
 +    // we want to separate the items with a space and this is nicer, than holding
 +    // an index in each iterator down the line
 +    const lastLine = out.pop();
 +    if (lastLine !== '')
-+      out.push(lastLine);
++      out.push(lastLine ? `${lastLine}\n` : '');
++  }
++  if (name && ['Download', 'JSHandle'].includes(name))
++    out.push('String() string\n');
++  if (name === 'Locator')
++    out.push('Err() error\n');
 +
-+    out.push('}');
++  out.push('}\n\n');
++
++  appendFile(interfacesFile, out);
++}
++
++additionalTypes.forEach((type, name) => {
++  if (!type.properties?.length) {
++    console.log(type);
++    throw new Error(`Not sure what to do in this case.`);
++  }
++  if (ignoredTypes.includes(name) || !type.properties?.length)
++    return
++  const out = []
++  let ownDocumentation = documentedResults.get(name);
++  if (ownDocumentation)
++    out.push(`// ${ownDocumentation}`)
++  out.push(`type ${name} struct {`)
++
++  for (const member of type.properties) {
++    let fakeType = new Type(name, null);
++    renderMember(member, fakeType, out, name.endsWith('Options'));
 +  }
 +
-+  additionalTypes.forEach((type, name) => {
-+    if (name.startsWith("Android") || name.startsWith("Electron") || ignoredTypes.includes(name) || !type.properties?.length)
-+      return
-+    const out = []
-+    let ownDocumentation = documentedResults.get(name);
-+    if (ownDocumentation)
-+      out.push(`// ${ownDocumentation}`)
-+    out.push(`type ${name} struct {`)
-+    // TODO: consider how this could be merged with the `translateType` check
-+    if (type.union
-+      && type.union[0].name === 'null'
-+      && type.union.length == 2) {
-+      type = type.union[1];
-+    }
++  out.push("}\n")
++  appendFile(structsFile, out);
++});
 +
-+    if (type.name === 'Array') {
-+      throw new Error('Array at this stage is unexpected.');
-+    } else if (type.properties) {
-+      for (const member of type.properties) {
-+        let fakeType = new Type(name, null);
-+        renderMember(member, fakeType, out);
-+      }
-+    } else if (type.union) {
-+      console.log("enum", type)
-+    } else {
-+      console.log(type);
-+      throw new Error(`Not sure what to do in this case.`);
-+    }
-+    out.push("}\n")
-+    appendFile(structsFile, out);
-+  });
-+
-+  enumTypes.forEach((values, name) => {
-+    const out = []
-+    const fcall = `get${name}`
-+    out.push(`func ${fcall}(in string) *${name} {
++enumTypes.forEach((values, name) => {
++  const out = []
++  const fcall = `get${name}`
++  out.push(`func ${fcall}(in string) *${name} {
 +      v := ${name}(in)
 +      return &v
 +    }
 +    `)
 +
-+    out.push(`type ${name} string`)
-+    out.push(" var (")
-+    values.forEach((v, i) => {
-+      // strip out the quotes
-+      v = v.replace(/[\"]/g, ``)
-+      let escapedEnumValue = v.replace(/[-]/g, ' ')
-+        .split(' ')
-+        .map(word => word[0].toUpperCase() + word.substring(1)).join('');
++  out.push(`type ${name} string`)
++  out.push(" var (")
++  values.forEach((v, i) => {
++    // strip out the quotes
++    v = v.replace(/[\"]/g, ``)
++    let escapedEnumValue = v.replace(/[-]/g, ' ')
++      .split(' ')
++      .map(word => word[0].toUpperCase() + word.substring(1)).join('');
 +
-+      if (i === 0)
-+        out.push(`${name}${escapedEnumValue} *${name} = ${fcall}("${v}")`)
-+      else
-+        out.push(`${name}${escapedEnumValue} = ${fcall}("${v}")`)
-+    });
-+    out.push(")\n")
-+
-+    appendFile(enumsFile, out);
++    if (i === 0)
++      out.push(`${name}${escapedEnumValue} *${name} = ${fcall}("${v}")`)
++    else
++      out.push(`${name}${escapedEnumValue} = ${fcall}("${v}")`)
 +  });
++  out.push(")\n")
++
++  appendFile(enumsFile, out);
++});
++
++/**
++ * @param {string} name
++ */
++function toArgumentName(name) {
++  return name;
 +}
 +
 +/**
-+ * @param {string} memberKind
-+ * @param {string} name
-+ * @param {Documentation.Member} member
-+ */
-+function translateMemberName(memberKind, name, member = null) {
-+  if (!name) return name;
-+
-+  // we strip it for special chars, like @ because we might get called back with it in some special cases
-+  // like, when generating classes inside methods for params
-+  name = name.replace(/[@-]/g, '');
-+
-+  if (memberKind === 'argument') {
-+    if (['params', 'event'].includes(name)) { // just in case we want to add others
-+      return `@${name}`;
-+    } else {
-+      return name;
-+    }
-+  }
-+
-+  // check if there's an alias in the docs, in which case
-+  // we return that, otherwise, we apply our dotnet magic to it
-+  if (member) {
-+    if (member.alias !== name) {
-+      return member.alias;
-+    }
-+  }
-+
++* @param {Documentation.Member} member
++*/
++function toMemberName(member) {
++  let assumedName = toTitleCase(member.alias || member.name);
++  if (member.kind === 'event')
++    return `On${assumedName}`;
 +  // we sanitize some common abbreviations to ensure consistency
-+  name = name.replace(/(HTTP[S]?)/g, (m, g) => {
-+    return g[0].toUpperCase() + g.substring(1).toLowerCase();
++  if (member.kind !== 'method')
++    assumedName = assumedName.replace(/(HTTP[S]?)/g, (m, g) => {
++      return g[0].toUpperCase() + g.substring(1).toLowerCase();
++    });
++  assumedName = assumedName.replace(/(json|url)/gi, (m, g) => {
++    return g.toUpperCase();
 +  });
-+
-+  if (name === "url")
-+    return "URL"
-+
-+  let assumedName = name.charAt(0).toUpperCase() + name.substring(1);
-+
-+  switch (memberKind) {
-+    case "interface":
-+      // apply name mapping if the map exists
-+      let mappedName = classNameMap ? classNameMap.get(assumedName) : null;
-+      if (mappedName)
-+        return mappedName;
-+      return `${assumedName}`;
-+    case "method":
-+      if (member)
-+        return `${assumedName}`;
-+      return assumedName;
-+    case "event":
-+      return `${assumedName}`;
-+    case "enum":
-+      return `${assumedName}`;
-+    default:
-+      return `${assumedName}`;
++  if (assumedName.toLowerCase() === "pdf")
++    return "PDF"
++  if (member.kind === 'interface') {
++    // apply name mapping if the map exists
++    let mappedName = classNameMap.get(assumedName);
++    return mappedName ? `${mappedName}` : `${assumedName}`;
 +  }
++  return `${assumedName}`;
 +}
 +
 +/**
@@ -1445,61 +1748,33 @@ index 000000000..40595c428
 + * @param {Documentation.Member} member
 + * @param {Documentation.Class|Documentation.Type} parent
 + * @param {string[]} out
++ * @param {boolean} isOptional
 + */
-+function renderMember(member, parent, out) {
-+  let output = line => {
++function renderMember(member, parent, out, isOptional = false) {
++  let output = (/** @type {string | string[]} */ line) => {
 +    if (typeof (line) === 'string')
 +      out.push(`\t${line}`);
 +    else
 +      out.push(...line.map(x => `\t${x}`));
 +  }
 +
-+  let name = translateMemberName(member.kind, member.name, member);
-+  if (member.kind === 'method') {
-+    renderMethod(member, parent, output, name);
-+  } else {
-+    let type = translateType(member.type, parent, t => generateNameDefault(member, name, t, parent));
-+    if (member.kind === 'event') {
-+      if (!member.type)
-+        throw new Error(`No Event Type for ${name} in ${parent.name}`);
-+      if (member.spec)
-+        output(XmlDoc.renderXmlDoc(member.spec, maxDocumentationColumnWidth));
-+    } else if (member.kind === 'property') {
-+      if (member.spec) {
-+        const text = member.spec
-+        if (text.length > 0) {
-+          text.forEach(line => {
-+            let words = line.text ? line.text.replace(/↵/g, ' ').split(' ') : '';
-+            let lines = [];
-+            let lineText = "";
-+            for (let i = 0; i < words.length; i++) {
-+              lineText += ' ' + words[i];
-+              if (lineText.length >= maxDocumentationColumnWidth) {
-+                lines.push(lineText);
-+                lineText = '';
-+              }
-+            }
-+            lines.push(lineText);
-+            lines.filter(line => !["", " "].includes(line)).forEach(line => output(`//${line}`));
-+          }
-+          )
-+        }
-+      }
-+      let propertyOrigin = member.name;
-+      if (member.type.expression === '[string]|[float]')
-+        propertyOrigin = `${member.name}String`;
-+      if (parent && member && member.name === 'children') {  // this is a special hack for Accessibility
-+        console.warn(`children property found in ${parent.name}, assuming array.`);
-+        type = `[]${parent.name}`;
-+      }
-+      if (parent.name.endsWith("Result")) {
-+        type = type.replace("*", "")
-+      }
-+      output(`${name} ${type} \`json:"${propertyOrigin}"\``);
-+    } else {
-+      throw new Error(`Problem rendering a member: ${type} - ${name} (${member.kind})`);
-+    }
++  const name = toMemberName(member);
++  if (member.kind === 'method' || member.kind === 'event') {
++    return;
 +  }
++
++  let type = translateType(member.type, parent, t => generateNameDefault(member, name, t, parent), !member.required || isOptional, false, true);
++
++  if ((additionalTypes.has(type) || enumTypes.has(type)) && !classNameMap.has(type)) {
++    type = `${type}`.replace(/^\*?/, '*');
++  }
++
++  if (member.kind === 'property') {
++    output(transformComment(member));
++    output(`${name} ${type} \`json:"${member.name}"\``);
++    return;
++  }
++  throw new Error(`Problem rendering a member: ${type} - ${name} (${member.kind})`);
 +}
 +
 +/**
@@ -1517,25 +1792,69 @@ index 000000000..40595c428
 +    return 'interface{}';
 +
 +  // we'd get this call for enums, primarily
-+  let enumName = generateEnumNameIfApplicable(member, name, t, parent);
++  let enumName = generateEnumNameIfApplicable(t);
 +  if (!enumName && member) {
 +    if (member.kind === 'method' || member.kind === 'property') {
-+      // this should be easy to name... let's call it the same as the argument (eternal optimist)
-+      let memberName = `${translateMemberName(``, name, null)}`;
-+      let probableName = `${parent.name}${memberName}`;
-+      let shortName = shortNameMap.get(`${probableName}`) ? shortNameMap.get(`${probableName}`) : shortNameMap.get(`${memberName}`);
-+      probableName = shortName ? shortName : probableName
-+      let probableType = additionalTypes.get(probableName);
-+      if (probableType) {
-+        // compare it with what?
-+        if (probableType.expression != t.expression) {
-+          throw new Error(`Non-matching types with the same name. Panic.`);
-+        }
-+      } else {
-+        additionalTypes.set(probableName, t);
-+      }
++      const names = [
++        parent.alias || parent.name,
++        toTitleCase(member.alias || member.name),
++        toTitleCase(name),
++      ];
++      if (names[2] === names[1])
++        names.pop(); // get rid of duplicates, cheaply
++      let attemptedName = names.pop();
 +
-+      return probableName;
++      while (true) {
++        // crude attempt at removing plurality
++        if (attemptedName.endsWith('s')
++          && !['properties', 'httpcredentials', 'sizes'].includes(attemptedName.toLowerCase()))
++          attemptedName = attemptedName.substring(0, attemptedName.length - 1);
++
++        // For some of these we don't want to generate generic types.
++        // For some others we simply did not have the code that was deduping the names.
++        if (attemptedName === 'Cookie') {
++          const optionalMembers = t?.properties.filter(m => !m.required)
++          if (optionalMembers.length > 1)
++            attemptedName = 'OptionalCookie';
++        }
++        if (attemptedName === 'BoundingBox' || attemptedName === 'Clip')
++          attemptedName = `Rect`;
++        if (attemptedName === 'SourcePosition' || attemptedName === 'TargetPosition')
++          attemptedName = `Position`;
++        if (attemptedName === 'Location')
++          attemptedName = 'ConsoleMessageLocation';
++        if (attemptedName === 'Viewport')
++          attemptedName = 'Size';
++        if (attemptedName === 'Sizes')
++          attemptedName = 'RequestSizesResult';
++        if (attemptedName === 'Screen' || attemptedName === 'ViewportSize')
++          attemptedName = 'Size';
++        if (attemptedName === 'SecurityDetail')
++          attemptedName = 'ResponseSecurityDetailsResult';
++        if (attemptedName === 'ServerAddr')
++          attemptedName = 'ResponseServerAddrResult';
++        if (attemptedName === 'Timing')
++          attemptedName = 'RequestTiming';
++        if (attemptedName === 'HeadersArray' || attemptedName == 'LocalStorage')
++          attemptedName = 'NameValue';
++
++        const probableType = additionalTypes.get(attemptedName);
++        if ((probableType && typesDiffer(t, probableType))
++          || (['Value'].includes(attemptedName))) {
++          if (!names.length)
++            throw new Error(`Ran out of possible names: ${attemptedName}`);
++          if (attemptedName === 'StorageState') {
++            attemptedName = `Optional${attemptedName}`;
++          } else {
++            attemptedName = `${names.pop()}${attemptedName}`;
++          }
++          continue;
++        } else {
++          registerType(additionalTypes, attemptedName, t);
++        }
++        break;
++      }
++      return attemptedName;
 +    }
 +
 +    if (member.kind === 'event') {
@@ -1546,7 +1865,11 @@ index 000000000..40595c428
 +  return enumName || t.name;
 +}
 +
-+function generateEnumNameIfApplicable(member, name, type, parent) {
++/**
++ * @param {Documentation.Type} type
++ * @returns
++ */
++function generateEnumNameIfApplicable(type) {
 +  if (!type.union)
 +    return null;
 +
@@ -1555,21 +1878,15 @@ index 000000000..40595c428
 +    && !(type.union[0].name === 'null' && potentialValues.length === type.union.length - 1))
 +    return null; // this isn't an enum, so we don't care, we let the caller generate the name
 +
-+  if (type && type.name)
-+    return type.name;
-+
-+  // our enum naming policy leaves a few bits to be desired, but it'll do for now
-+  // however, with the recent changes, this almost never gets called anymore
-+  return translateMemberName('enum', name, type);
++  return type.name;
 +}
 +
 +/**
-+ *
-+ * @param {string} v
++ * @param {string} name
 + * @returns {string}
 + */
-+function makeFirstCharUpperCase(v) {
-+  return v[0].toUpperCase() + v.slice(1)
++function toTitleCase(name) {
++  return name.charAt(0).toUpperCase() + name.substring(1);
 +}
 +
 +/**
@@ -1577,194 +1894,132 @@ index 000000000..40595c428
 + * makes sense to put it separate from the other logic.
 + * @param {Documentation.Member} member
 + * @param {Documentation.Class|Documentation.Type} parent
-+ * @param {Function} output
++ * @param {string[]} out
 + */
-+function renderMethod(member, parent, output, name) {
-+  const typeResolve = (type) => translateType(type, parent, (t) => {
-+    let newName = `${parent.name}${translateMemberName(member.kind, member.name, null)}Result`;
-+    documentedResults.set(newName, `Result of calling <see cref="${translateMemberName("interface", parent.name)}.${translateMemberName(member.kind, member.name, member)}" />.`);
-+    return newName;
-+  });
-+
-+  /** @type {Map<string, string[]>} */
-+  const paramDocs = new Map();
-+  /**
-+   * @param {string} paramName
-+   * @param {string[]} docs
-+   */
-+  const addParamsDoc = (paramName, docs) => {
-+    if (paramName.startsWith('@'))
-+      paramName = paramName.substring(1);
-+    if (paramDocs.get(paramName))
-+      throw new Error(`Parameter ${paramName} already exists in the docs.`);
-+    paramDocs.set(paramName, docs);
-+  };
-+
-+  /** @type {string} */
-+  let type = null;
-+  // need to check the original one
-+  if (member.type.name === 'Object' || member.type.name === 'Array') {
-+    let innerType = member.type;
-+    let isArray = false;
-+    if (innerType.name === 'Array') {
-+      // we want to influence the name, but also change the object type
-+      innerType = member.type.templates[0];
-+      isArray = true;
-+    }
-+
-+    if (innerType.expression === '[Object]<[string], [string]>') {
-+      // do nothing, because this is handled down the road
-+    } else if (!isArray && !innerType.properties) {
-+      type = `dynamic`;
-+    } else {
-+      type = classNameMap.get(innerType.name);
-+      if (!type) {
-+        type = typeResolve(innerType);
-+      }
-+
-+      if (isArray)
-+        type = `IReadOnlyCollection<${type}>`;
-+    }
++function renderInterface(member, parent, out) {
++  let output = (/** @type {string | string[]} */ line) => {
++    if (typeof (line) === 'string')
++      out.push(`\t${line}`);
++    else
++      out.push(...line.map(x => `\t${x}`));
 +  }
++  const name = toMemberName(member);
 +
-+  type = type || typeResolve(member.type);
-+
-+  const optionsStructName = `${parent.name}${makeFirstCharUpperCase(member.alias)}Options`
-+  let optionsStructMembers = member.argsArray.find(a => a.name === "options")?.type.properties || []
-+  if (!optionsStructMembers.length)
-+    optionsStructMembers = member.argsArray.filter(a => (!a.required || a.langs.only?.includes("go")))
-+
-+  if (optionsStructMembers.length > 0) {
-+    let fakeType = new Type("Object", optionsStructMembers);
-+    additionalTypes.set(optionsStructName, fakeType)
-+  }
-+  // TODO: this is something that will probably go into the docs
-+  // translate simple getters into read-only properties, and simple
-+  // set-only methods to settable properties
-+  if (member.args.size == 0
-+    && type !== 'void'
-+    && !name.startsWith('Get')) {
-+    if (!member.async) {
-+      if (member.spec)
-+        output(XmlDoc.renderXmlDoc(member.spec, maxDocumentationColumnWidth));
-+      output(`${type} ${name} { get; }`);
-+      return;
-+    }
-+    name = `Get${name}`;
-+  } else if (member.args.size == 1
-+    && type === 'void'
-+    && name.startsWith('Set')
-+    && !member.async) {
-+    name = name.substring(3); // remove the 'Set'
-+    if (member.spec)
-+      output(XmlDoc.renderXmlDoc(member.spec, maxDocumentationColumnWidth));
-+    output(`${translateType(member.argsArray[0].type, parent)} ${name} { set; }`);
++  if (member.kind === 'event') {
++    const payloadType = translateType(member.type, parent, t => generateNameDefault(member, name, t, parent), false, true, false)
++    output(transformComment(member));
++    output(`${name}(fn func(${payloadType}))`);
 +    return;
 +  }
 +
-+  // HACK: special case for generics handling!
-+  if (type === 'T') {
-+    name = `${name}<T>`;
-+  }
++  // render returns
++  let returns = [];
++  let resultType = translateType(member.type, parent, t => generateNameDefault(member, name, t, parent), false, true)
 +
-+  // adjust the return type for async methods
-+  // if (member.async) {
-+  //   if (type === 'void')
-+  //     type = `Task`;
-+  //   else
-+  //     type = `Task<${type}>`;
-+  // }
++  if (additionalTypes.has(resultType))
++    resultType = `${resultType}`.replace(/^\*?/, '*');
++  // HACK: special cases for returns
++  if (resultType !== 'void' && name !== 'Failure') // [Download|Request].Failure() error
++    returns.push(resultType);
++  // return error, and exclude some methods that don't
++  if (!resultType.endsWith('Locator') && !methodNoErr.has(name))
++    returns.push('error');
++  if (['ConsoleMessage', 'Dialog'].includes(parent.name) && (name === 'Type' || name === 'Text'))
++    returns.pop();
++  if (parent.name === 'APIResponse' && name === 'HeadersArray')
++    returns.pop();
++  if (parent.name === 'Locator' && (name === 'Page' || name === 'All')) // Locator.Page() (Page, error)
++    returns.push('error');
 +
 +  // render args
 +  let args = [];
 +  /**
-+   *
 +   * @param {string} innerArgType
 +   * @param {string} innerArgName
 +   * @param {Documentation.Member} argument
 +   */
 +  const pushArg = (innerArgType, innerArgName, argument) => {
-+    let isNullable = ['int', 'bool', 'decimal', 'float'].includes(innerArgType);
-+    const requiredPrefix = argument.required ? "" : isNullable ? "?" : "";
-+    const requiredSuffix = argument.required ? "" : " = default";
-+    args.push(`${innerArgType}${requiredPrefix} ${innerArgName}${requiredSuffix}`);
++    if (argument.comment)
++      documentedResults.set(innerArgName, argument.comment)
++    args.push(`${innerArgName === 'type' ? 'typ' : innerArgName} ${innerArgType}`);
 +  };
 +
-+  let parseArg = (/** @type {Documentation.Member} */ arg) => {
++  /**
++   * @param {Documentation.Member} arg
++   */
++  let processArg = (arg) => {
 +    if (arg.name === "options") {
-+      arg.type.properties.forEach(prop => {
-+        parseArg(prop);
-+      });
 +      return;
 +    }
 +
-+    if (arg.type.expression === '[string]|[path]') {
-+      let argName = translateMemberName('argument', arg.name, null);
-+      pushArg("string", argName, arg);
-+      pushArg("string", `${argName}Path`, arg);
-+      if (arg.spec) {
-+        addParamsDoc(argName, XmlDoc.renderTextOnly(arg.spec, maxDocumentationColumnWidth));
-+        addParamsDoc(`${argName}Path`, [`Instead of specifying <paramref name="${argName}"/>, gives the file name to load from.`]);
-+      }
++    const argName = toArgumentName(arg.alias || arg.name);
++
++    // HACK: special cases for arguments
++    if (argName === 'callback' && arg.enclosingMethod?.name === 'exposeBinding') {
++      pushArg('BindingCallFunction', 'binding', arg);
 +      return;
-+    } else if (arg.type.expression === '[boolean]|[Array]<[string]>') {
-+      // HACK: this hurts my brain too
-+      // we split this into two args, one boolean, with the logical name
-+      let argName = translateMemberName('argument', arg.name, null);
-+      let leftArgType = translateType(arg.type.union[0], parent, (t) => { throw new Error('Not supported'); });
-+      let rightArgType = translateType(arg.type.union[1], parent, (t) => { throw new Error('Not supported'); });
-+
-+      pushArg(leftArgType, argName, arg);
-+      pushArg(rightArgType, `${argName}Values`, arg);
-+
-+      addParamsDoc(argName, XmlDoc.renderTextOnly(arg.spec, maxDocumentationColumnWidth));
-+      addParamsDoc(`${argName}Values`, [`The values to take into account when <paramref name="${argName}"/> is <code>true</code>.`]);
-+
++    }
++    if (argName === 'callback' && arg.enclosingMethod?.name === 'exposeFunction') {
++      pushArg('ExposedFunction', 'binding', arg);
 +      return;
 +    }
 +
-+    const argName = translateMemberName('argument', arg.alias || arg.name, null);
-+    const argType = translateType(arg.type, parent, (t) => generateNameDefault(member, argName, t, parent));
++    let argType = translateType(arg.type, parent, (t) => generateNameDefault(member, argName, t, parent), !arg.required);
 +
 +    if (argType === null && arg.type.union) {
-+      // we might have to split this into multiple arguments
-+      let translatedArguments = arg.type.union.map(t => translateType(t, parent, (x) => generateNameDefault(member, argName, x, parent)));
-+      if (translatedArguments.includes(null))
-+        throw new Error('Unexpected null in translated argument types. Aborting.');
-+
-+      let argDocumentation = XmlDoc.renderTextOnly(arg.spec, maxDocumentationColumnWidth);
-+      for (const newArg of translatedArguments) {
-+        const sanitizedArgName = newArg.match(/(?<=^[\s"']*)(\w+)/g, '')?.[0] || newArg;
-+        const newArgName = `${argName}${sanitizedArgName[0].toUpperCase() + sanitizedArgName.substring(1)}`;
-+        pushArg(newArg, newArgName, arg);
-+        addParamsDoc(newArgName, argDocumentation);
-+      }
-+      return;
++      argType = 'interface{}'
 +    }
 +
-+    addParamsDoc(argName, XmlDoc.renderTextOnly(arg.spec, maxDocumentationColumnWidth));
-+
-+    if (argName === 'timeout' && argType === 'decimal') {
-+      args.push(`int timeout = 0`); // a special argument, we ignore our convention
-+      return;
-+    }
++    if (argType === 'func(Route)')
++      argType = 'routeHandler';
 +
 +    pushArg(argType, argName, arg);
 +  };
 +
-+  member.args.forEach(parseArg);
 +
-+  output(XmlDoc.renderXmlDoc(member.spec, maxDocumentationColumnWidth));
-+  paramDocs.forEach((val, ind) => {
-+    if (val && val.length === 1)
-+      output(`/// <param name="${ind}">${val}</param>`);
-+    else {
-+      output(`/// <param name="${ind}">`);
-+      output(val.map(l => `/// ${l}`));
-+      output(`/// </param>`);
++  member.argsArray.forEach(processArg);
++
++  if (name === 'SelectOption')
++    args.push(args.pop().replace(/ interface\{\}/, ' SelectOptionValues'));
++  if (name.match(/Expect[A-Z]\w+/))
++    args.push(`cb func() error`);
++
++  const optionsStructName = `${parent.name}${toTitleCase(member.alias)}Options`
++  let optionsStructMembers = member.argsArray.find(a => a.name === "options")?.type?.properties || []
++
++  if (optionsStructMembers.length > 0) {
++    // special cases for options that have only one member
++    if (optionsStructMembers.length === 1 && ['path', 'handle', 'times'].includes(optionsStructMembers[0].name)) {
++      let tmpType = optionsStructMembers[0];
++      tmpType.required = false;
++      processArg(tmpType);
++      args.push(args.pop()?.replace(/ +\*?([^\*]?\[\])?(?!map)/, ' ...'))
++    } else {
++      let fakeType = new Type("Object", optionsStructMembers);
++      registerType(additionalTypes, optionsStructName, fakeType)
++      if (['AddScriptTag', 'AddStyleTag'].includes(name))
++        args.push(`options ${optionsStructName}`);
++      else
++        args.push(`options ...${optionsStructName}`);
 +    }
-+  });
-+  output(`${name}(${args.join(', ')}) ${type}`);
++  } else {
++    const argsArray = member.argsArray.filter(a => a.name !== "options")
++    if (argsArray.length > 0 && !argsArray[argsArray.length - 1].required) {
++      const arg = args.pop()
++      if (arg?.startsWith('map') || arg?.startsWith('['))
++        args.push(arg)
++      else
++        args.push(arg?.replace(/ +\*?([^\*]?\[\])?(?!map)/, ' ...'))
++    }
++  }
++
++  output(transformComment(member));
++  if (parent.name === 'Touchscreen' && name === 'Tap')
++    output(`${name}(x int, y int) error`);
++  else if (['JSON', 'PostDataJSON'].includes(name) && args.length === 0 && resultType === 'interface{}')
++    output(`${name}(v interface{}) error`);
++  else
++    output(`${name}(${args.join(', ')}) ${returns.length <= 1 ? returns.join() : '(' + returns.join(', ') + ')'}`);
 +}
 +
 +/**
@@ -1774,55 +2029,144 @@ index 000000000..40595c428
 + *  @returns {string}
 + */
 +
++
++/**
++ *
++ * @param {Map<string, Documentation.Type>} types
++ * @param {string} typeName
++ * @param {Documentation.Type} type
++ */
++function registerType(types, typeName, type) {
++  if (['object', 'string', 'int'].includes(typeName))
++    return;
++  if (ignoredTypes.includes(typeName))
++    return;
++
++  let potentialType = types.get(typeName);
++  if (potentialType) {
++    // console.log(`Type ${typeName} already exists, so skipping...`);
++    return;
++  }
++
++  types.set(typeName, type);
++}
++
++/**
++ * @param {Documentation.Class | Documentation.Member} member
++ */
++function transformComment(member) {
++  const links = [];
++  const extractLinks = (text) => {
++    let index = 0;
++    return text.replace(/(\[[^\]]+\])\((\S+)\)/gm, (m, g1, g2) => {
++      links.push(`${g1}: ${g2}`);
++      return `${g1}`;
++    })
++  }
++
++  let comment = member.comment.replace(/\[`method: ([^\]]*)`\]/g, "\[$1\]")
++    .replace(/\`'([^'\`\s]+)'\`/gm, "\`$1\`")
++    .replace(/^- /gm, " - ")  // for unorderd list
++    .replace(/(\[\w+\.)([a-z])/g, (m, g1, g2) => g1 + g2.toUpperCase())
++    .replace(/- extends: .*\n+/, "")
++
++  // render order list
++  let index = 0;
++  comment = comment.replace(/^(\d\.) /gm, (m) => {
++    index++
++    return ` ${index}. `
++  })
++
++  comment = extractLinks(comment);
++
++  let lines = comment.split("\n")
++  let inExample = false
++  let inUsage = false
++  let lastWasBlank = true
++  const out = []
++  for (const line of lines) {
++    if (!line.trim()) {
++      lastWasBlank = true
++      continue
++    }
++    if (line.trim() === "**Usage**") {
++      inUsage = true
++    }
++    if (line.trim() === "**Details**") {
++      inUsage = false
++      out.push(`//\n// # Details\n//`)
++      continue
++    }
++    if (["js", "js browser", "py", "python sync", "python async", "java", "csharp", "python"].includes(line.trim().substr(3)) && line.trim().startsWith("```"))
++      inExample = true
++    if (!inExample && !inUsage) {
++      if (lastWasBlank)
++        lastWasBlank = false
++      out.push(`// ${line}`)
++    }
++    if (line.trim() === "```")
++      inExample = false
++  }
++  if (member.deprecated || member.discouraged) {
++    out.push(`// `)
++    out.push(extractLinks(`// Deprecated: ${member.deprecated ? member.deprecated : member.discouraged}`.replace(/↵/gm, ' ')))
++  }
++  // render external links
++  if (links.length > 0) {
++    out.push(`// `);
++    links.forEach((line) => {
++      out.push(`// ${line.replace(/\.\.(\/\S+)(\.md)/, `https://playwright.dev/docs$1`)}`)
++    });
++  }
++
++  return out
++}
++
 +/**
 + *  @param {Documentation.Type} type
 + *  @param {Documentation.Class|Documentation.Type} parent
 + *  @param {generateNameCallback} generateNameCallback
++ *  @param {boolean=} optional
++ *  @param {boolean=} isReturnType
 +*/
-+function translateType(type, parent, generateNameCallback = t => t.name) {
-+  if (type.name === "int")
-+    return "*int"
-+  if (type.name === "string")
-+    return "*string"
-+  if (type.name === "float")
-+    return "*float64"
++function translateType(type, parent, generateNameCallback = t => t.name, optional = false, isReturnType = false) {
++  if (['bool', 'int', 'string', 'float64', 'boolean', 'float'].includes(type.name)) {
++    let name = type.name === 'boolean' ? 'bool' : type.name === 'float' ? 'float64' : type.name;
++    return `${optional && !isReturnType ? '*' : ''}${name}`;
++  }
 +  if (type.name === "Serializable")
-+    return "interface{}"
++    return "interface{}";
 +  if (type.name === "Logger")
-+    return "interface{}"
++    return "interface{}";
++  if (type.name === 'URL' || type.name === 'path')
++    return `${optional && !isReturnType ? '*' : ''}string`;
 +  // a few special cases we can fix automatically
 +  if (type.expression === '[null]|[Error]')
 +    return 'void';
 +  else if (type.expression === '[boolean]|"mixed"')
 +    return 'MixedState';
++  else if (type.expression === '[string]|[Request]')
++    return 'interface{}';
++  else if (type.expression === '[path]|[Array]<[path]>|[Object]|[Array]<[Object]>')
++    return '[]InputFile';
 +
 +  let isNullableEnum = false;
 +  if (type.union) {
 +    if (type.union[0].name === 'null') {
-+      // for dotnet, this is a nullable type
-+      // if the other side is a primitive type
++      // nullable, or optional
 +      if (type.union.length > 2) {
 +        if (type.union.filter(x => x.name.startsWith('"')).length == type.union.length - 1)
-+          isNullableEnum = true;
++          isNullableEnum = true; // seems never appear
 +        else
 +          return `interface{}`
-+        // throw new Error(`Union (${parent.name}) with null is too long.`);
 +      } else {
-+        const innerTypeName = translateType(type.union[1], parent, generateNameCallback);
-+        // if type is primitive, or an enum, then it's nullable
-+        if (innerTypeName === 'bool'
-+          || innerTypeName === 'int') {
-+          return `${innerTypeName}?`;
-+        }
-+
-+        // if it's not a value type, it'll be nullable by default, so we can ignore it
-+        return `${innerTypeName}`;
++        return translateType(type.union[1], parent, generateNameCallback, true, isReturnType);
 +      }
 +    }
 +
-+    if (type.union.filter(u => u.name.startsWith(`"`)).length == type.union.length
-+      || isNullableEnum) {
-+      // this is an enum
++    // if enum
++    if (isNullableEnum ||
++      type.union.filter(u => u.name.startsWith(`"`)).length == type.union.length) {
 +      let enumName = generateNameCallback(type);
 +      if (!enumName)
 +        throw new Error(`This was supposed to be an enum, but it failed generating a name, ${type.name} ${parent ? parent.name : ""}.`);
@@ -1842,8 +2186,8 @@ index 000000000..40595c428
 +        enumTypes.set(enumName, enumValues);
 +      }
 +      if (isNullableEnum)
-+        return `*${enumName}?`;
-+      return `*${enumName}`;
++        return `*${enumName}`;
++      return `${enumName}`;
 +    }
 +
 +    if (type.expression === '[string]|[Buffer]')
@@ -1857,56 +2201,60 @@ index 000000000..40595c428
 +    else if (type.union[0].name === 'path')
 +      // we don't support path, but we know it's usually an object on the other end, and we expect
 +      // the dotnet folks to use [NameOfTheObject].LoadFromPath(); method which we can provide separately
-+      return translateType(type.union[1], parent, generateNameCallback);
++      return translateType(type.union[1], parent, generateNameCallback, false, isReturnType);
++    else if (type.expression === '[function]|[string]|[Object]')
++      // HACK: for script path or content
++      return translateType(type.union[2], parent, generateNameCallback, false, isReturnType);
 +    else if (type.expression === '[float]|"raf"')
 +      return `interface{}`; // hardcoded because there's no other way to denote this
 +    else if (type.expression === '[string]|[RegExp]')
 +      return "interface{}"
 +    if (type.expression === "[string]|[RegExp]|[function]([URL]):[boolean]")
 +      return "interface{}"
-+    return null;
++    // other unions
++    return "interface{}";
 +  }
 +
-+  const removePointer = i => i.replace(/^\*(.*)/g, "$1")
++  const removePointer = i => i ? i.replace(/^\*(.*)/g, "$1") : i
 +  if (type.name === 'Array') {
 +    if (type.templates.length != 1)
 +      throw new Error(`Array (${type.name} from ${parent.name}) has more than 1 dimension. Panic.`);
-+
-+    let innerType = translateType(type.templates[0], parent, generateNameCallback);
++    let innerType = translateType(type.templates[0], parent, generateNameCallback, false, isReturnType);
 +    return `[]${removePointer(innerType)}`;
 +  }
 +
 +  if (type.name === 'Object') {
 +    // take care of some common cases
-+    // TODO: this can be genericized
 +    if (type.templates && type.templates.length == 2) {
 +      // get the inner types of both templates, and if they're strings, it's a keyvaluepair string, string,
-+      let keyType = translateType(type.templates[0], parent, generateNameCallback);
-+      let valueType = translateType(type.templates[1], parent, generateNameCallback);
++      let keyType = translateType(type.templates[0], parent, generateNameCallback, false, isReturnType);
++      let valueType = translateType(type.templates[1], parent, generateNameCallback, false, isReturnType);
 +      return `map[${removePointer(keyType)}]${removePointer(valueType)}`;
 +    }
 +
-+    if ((type.name === 'Object')
-+      && !type.properties
-+      && !type.union) {
++    if (!type.properties && !type.union) {
 +      return 'interface{}';
 +    }
++
 +    // this is an additional type that we need to generate
 +    let objectName = generateNameCallback(type);
 +    if (objectName === 'Object') {
 +      throw new Error('Object unexpected');
 +    } else if (type.name === 'Object') {
-+      registerAdditionalType(objectName, type);
++      const existType = additionalTypes.get(objectName)
++      if (existType && typesDiffer(type, existType))
++        objectName = `${objectName}Result`;
++      registerType(additionalTypes, objectName, type);
 +    }
-+    return `*${objectName}`;
++    return `${optional ? '*' : ''}${objectName}`;
 +  }
 +
 +  if (type.name === 'Map') {
 +    if (type.templates && type.templates.length == 2) {
 +      // we map to a dictionary
-+      let keyType = translateType(type.templates[0], parent, generateNameCallback);
-+      let valueType = translateType(type.templates[1], parent, generateNameCallback);
-+      return `Dictionary<${keyType}, ${valueType}>`;
++      let keyType = translateType(type.templates[0], parent, generateNameCallback, false, isReturnType);
++      let valueType = translateType(type.templates[1], parent, generateNameCallback, false, isReturnType);
++      return `map[${removePointer(keyType)}]${valueType}`;
 +    } else {
 +      throw 'Map has invalid number of templates.';
 +    }
@@ -1929,7 +2277,7 @@ index 000000000..40595c428
 +      // this is an Action
 +      return `func(${argsList})`;
 +    } else {
-+      let returnType = removePointer(translateType(type.returnType, parent, generateNameCallback));
++      let returnType = removePointer(translateType(type.returnType, parent, generateNameCallback, false, true));
 +      if (returnType == null)
 +        throw new Error('Unexpected null as return type.');
 +      return `func(${argsList}) ${returnType}`;
@@ -1943,19 +2291,20 @@ index 000000000..40595c428
 +}
 +
 +/**
-+ *
-+ * @param {string} typeName
-+ * @param {Documentation.Type} type
++ *  @param {Documentation.Type} left
++ *  @param {Documentation.Type} right
++ * @return {boolean}
 + */
-+function registerAdditionalType(typeName, type) {
-+  if (['object', 'string', 'int'].includes(typeName))
-+    return;
 +
-+  let potentialType = additionalTypes.get(typeName);
-+  if (potentialType) {
-+    console.log(`Type ${typeName} already exists, so skipping...`);
-+    return;
++function typesDiffer(left, right) {
++  if (left.name !== right.name)
++    return true;
++  const replacer = (k, v) => k === 'spec' || k === 'comment' ? undefined : v
++  if (JSON.stringify(right.properties, replacer) !== JSON.stringify(left.properties, replacer)) {
++    // console.log(JSON.stringify(left.properties) + '\n')
++    // console.log(JSON.stringify(right.properties) + '\n')
++    return true;
 +  }
-+
-+  additionalTypes.set(typeName, type);
-+}
++  return false;
++};
+\ No newline at end of file

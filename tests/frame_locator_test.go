@@ -85,7 +85,7 @@ func TestFrameLocatorFirst(t *testing.T) {
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 
-	innerText, err := page.Locator("body").FrameLocator("iframe").First().Locator("button").InnerText()
+	innerText, err := page.Locator("body").FrameLocator("iframe").First().GetByRole("button").InnerText()
 	require.NoError(t, err)
 	require.Equal(t, "Hello from iframe-1.html", innerText)
 }
@@ -121,7 +121,7 @@ func TestFrameLocatorLocator(t *testing.T) {
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 
-	innerText, err := page.Locator("body").FrameLocator("#frame1").Locator("span").InnerText()
+	innerText, err := page.Locator("body").FrameLocator("#frame1").Locator("span").First().InnerText()
 	require.NoError(t, err)
 	require.Equal(t, "1", innerText)
 }
@@ -134,7 +134,7 @@ func TestFrameLocatorFrameLocator(t *testing.T) {
 	require.NoError(t, err)
 
 	frame1 := page.Locator("body").FrameLocator("#frame1")
-	innerText, err := frame1.FrameLocator("#frame2").Locator("button").InnerText()
+	innerText, err := frame1.FrameLocator("#frame2").GetByRole("button").InnerText()
 	require.NoError(t, err)
 	require.Equal(t, "Hello nested iframe", innerText)
 }

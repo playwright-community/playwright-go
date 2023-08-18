@@ -10,7 +10,7 @@ import (
 func TestDialog(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	page.On("dialog", func(dialog playwright.Dialog) {
+	page.OnDialog(func(dialog playwright.Dialog) {
 		require.Equal(t, "alert", dialog.Type())
 		require.Equal(t, "", dialog.DefaultValue())
 		require.Equal(t, "yo", dialog.Message())
@@ -23,7 +23,7 @@ func TestDialog(t *testing.T) {
 func TestDialogDismiss(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	page.On("dialog", func(dialog playwright.Dialog) {
+	page.OnDialog(func(dialog playwright.Dialog) {
 		require.NoError(t, dialog.Dismiss())
 	})
 	result, err := page.Evaluate("prompt('question?')")
@@ -34,7 +34,7 @@ func TestDialogDismiss(t *testing.T) {
 func TestDialogAcceptWithText(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	page.On("dialog", func(dialog playwright.Dialog) {
+	page.OnDialog(func(dialog playwright.Dialog) {
 		require.NoError(t, dialog.Accept("hey foobar"))
 	})
 	result, err := page.Evaluate("prompt('question?')")
@@ -46,7 +46,7 @@ func TestDialogShouldWorkInPopup(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	var d playwright.Dialog
-	context.On("dialog", func(dialog playwright.Dialog) {
+	context.OnDialog(func(dialog playwright.Dialog) {
 		d = dialog
 		require.NoError(t, dialog.Accept("hello"))
 	})

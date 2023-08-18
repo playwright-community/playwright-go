@@ -14,10 +14,10 @@ func TestVideoShouldWork(t *testing.T) {
 	recordVideoDir := t.TempDir()
 	BeforeEach(t, playwright.BrowserNewContextOptions{
 		RecordVideo: &playwright.RecordVideo{
-			Dir: playwright.String(recordVideoDir),
-			Size: &playwright.RecordVideoSize{
-				Width:  playwright.Int(500),
-				Height: playwright.Int(400),
+			Dir: recordVideoDir,
+			Size: &playwright.Size{
+				Width:  500,
+				Height: 400,
 			},
 		},
 	})
@@ -28,6 +28,7 @@ func TestVideoShouldWork(t *testing.T) {
 	require.NoError(t, err)
 	_, err = page.Reload()
 	require.NoError(t, err)
+	//nolint:staticcheck
 	page.WaitForTimeout(500) // make sure video has some data
 	require.NoError(t, context.Close())
 
@@ -54,10 +55,10 @@ func TestVideo(t *testing.T) {
 		recordVideoDir := t.TempDir()
 		BeforeEach(t, playwright.BrowserNewContextOptions{
 			RecordVideo: &playwright.RecordVideo{
-				Dir: playwright.String(recordVideoDir),
-				Size: &playwright.RecordVideoSize{
-					Width:  playwright.Int(500),
-					Height: playwright.Int(400),
+				Dir: recordVideoDir,
+				Size: &playwright.Size{
+					Width:  500,
+					Height: 400,
 				},
 			},
 		})
@@ -69,6 +70,7 @@ func TestVideo(t *testing.T) {
 		path, err := video.Path()
 		require.NoError(t, err)
 		require.Contains(t, path, recordVideoDir)
+		//nolint:staticcheck
 		page.WaitForTimeout(500)
 		require.NoError(t, page.Context().Close())
 	})
@@ -77,16 +79,17 @@ func TestVideo(t *testing.T) {
 		recordVideoDir := t.TempDir()
 		BeforeEach(t, playwright.BrowserNewContextOptions{
 			RecordVideo: &playwright.RecordVideo{
-				Dir: playwright.String(recordVideoDir),
-				Size: &playwright.RecordVideoSize{
-					Width:  playwright.Int(500),
-					Height: playwright.Int(400),
+				Dir: recordVideoDir,
+				Size: &playwright.Size{
+					Width:  500,
+					Height: 400,
 				},
 			},
 		})
 		defer AfterEach(t)
 		_, err := page.Goto(server.PREFIX + "/grid.html")
 		require.NoError(t, err)
+		//nolint:staticcheck
 		page.WaitForTimeout(500)
 		require.NoError(t, page.Close())
 		video := page.Video()
@@ -101,10 +104,10 @@ func TestVideo(t *testing.T) {
 		recordVideoDir := t.TempDir()
 		BeforeEach(t, playwright.BrowserNewContextOptions{
 			RecordVideo: &playwright.RecordVideo{
-				Dir: playwright.String(recordVideoDir),
-				Size: &playwright.RecordVideoSize{
-					Width:  playwright.Int(500),
-					Height: playwright.Int(400),
+				Dir: recordVideoDir,
+				Size: &playwright.Size{
+					Width:  500,
+					Height: 400,
 				},
 			},
 		})
@@ -113,6 +116,7 @@ func TestVideo(t *testing.T) {
 		require.NoError(t, err)
 		video := page.Video()
 		require.NotNil(t, video)
+		//nolint:staticcheck
 		page.WaitForTimeout(500)
 		require.NoError(t, page.Close())
 		require.NoError(t, video.Delete())
@@ -150,7 +154,7 @@ func TestVideo(t *testing.T) {
 		context, err := bt.LaunchPersistentContext(tmpDir, playwright.BrowserTypeLaunchPersistentContextOptions{
 			Headless: playwright.Bool(os.Getenv("HEADFUL") == ""),
 			RecordVideo: &playwright.RecordVideo{
-				Dir: playwright.String(tmpDir),
+				Dir: tmpDir,
 			},
 		})
 		require.NoError(t, err)
@@ -162,6 +166,7 @@ func TestVideo(t *testing.T) {
 		path, err := video.Path()
 		require.NoError(t, err)
 		require.Contains(t, path, tmpDir)
+		//nolint:staticcheck
 		page.WaitForTimeout(500)
 		require.NoError(t, context.Close())
 		require.FileExists(t, path)
@@ -179,7 +184,7 @@ func TestVideo(t *testing.T) {
 		require.NotNil(t, browser)
 		browser_context, err := browser.NewContext(playwright.BrowserNewContextOptions{
 			RecordVideo: &playwright.RecordVideo{
-				Dir: playwright.String(tmpDir),
+				Dir: tmpDir,
 			},
 		})
 		require.NoError(t, err)
@@ -187,6 +192,7 @@ func TestVideo(t *testing.T) {
 		require.NoError(t, err)
 		_, err = page.Goto(server.PREFIX + "/grid.html")
 		require.NoError(t, err)
+		//nolint:staticcheck
 		page.WaitForTimeout(500)
 		video := page.Video()
 		_, err = video.Path()

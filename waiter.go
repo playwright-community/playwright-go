@@ -141,8 +141,10 @@ func (w *waiter) RunAndWait(cb func() error) (interface{}, error) {
 	if w.waitFunc == nil {
 		return nil, fmt.Errorf("waiter: call WaitForEvent first")
 	}
-	if err := cb(); err != nil {
-		w.errChan <- err
+	if cb != nil {
+		if err := cb(); err != nil {
+			w.errChan <- err
+		}
 	}
 	return w.waitFunc()
 }

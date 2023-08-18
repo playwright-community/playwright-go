@@ -50,15 +50,15 @@ func main() {
 	assertCountOfTodos(0)
 
 	// Adding a todo entry (click in the input, enter the todo title and press the Enter key)
-	assertErrorToNilf("could not click: %v", page.Click("input.new-todo"))
-	assertErrorToNilf("could not type: %v", page.Type("input.new-todo", todoName))
-	assertErrorToNilf("could not press: %v", page.Press("input.new-todo", "Enter"))
+	assertErrorToNilf("could not click: %v", page.Locator("input.new-todo").Click())
+	assertErrorToNilf("could not type: %v", page.Locator("input.new-todo").Type(todoName))
+	assertErrorToNilf("could not press: %v", page.Locator("input.new-todo").Press("Enter"))
 
 	// After adding 1 there should be 1 entry in the list
 	assertCountOfTodos(1)
 
 	// Here we get the text in the first todo item to see if it"s the same which the user has entered
-	textContentOfFirstTodoEntry, err := page.EvalOnSelector("ul.todo-list > li:nth-child(1) label", "el => el.textContent")
+	textContentOfFirstTodoEntry, err := page.Locator("ul.todo-list > li:nth-child(1) label").Evaluate("el => el.textContent", nil)
 	assertErrorToNilf("could not get first todo entry: %w", err)
 	assertEqual(todoName, textContentOfFirstTodoEntry)
 
@@ -68,18 +68,20 @@ func main() {
 	assertCountOfTodos(1)
 
 	// Set the entry to completed
-	assertErrorToNilf("could not click: %v", page.Click("input.toggle"))
+	assertErrorToNilf("could not click: %v", page.Locator("input.toggle").Click())
 
 	// Filter for active entries. There should be 0, because we have completed the entry already
-	assertErrorToNilf("could not click: %v", page.Click("text=Active"))
+	assertErrorToNilf("could not click: %v", page.Locator("text=Active").Click())
 	assertCountOfTodos(0)
 
 	// If we filter now for completed entries, there should be 1
-	assertErrorToNilf("could not click: %v", page.Click("text=Completed"))
+	assertErrorToNilf("could not click: %v", page.GetByRole("link", playwright.PageGetByRoleOptions{
+		Name: "Completed",
+	}).Click())
 	assertCountOfTodos(1)
 
 	// Clear the list of completed entries, then it should be again 0
-	assertErrorToNilf("could not click: %v", page.Click("text=Clear completed"))
+	assertErrorToNilf("could not click: %v", page.Locator("text=Clear completed").Click())
 	assertCountOfTodos(0)
 
 	assertErrorToNilf("could not close browser: %w", browser.Close())

@@ -28,8 +28,11 @@ type InputFile struct {
 	Buffer   []byte `json:"buffer"`
 }
 
-func (f *fileChooserImpl) SetFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error {
-	return f.elementHandle.SetInputFiles(files, options...)
+func (f *fileChooserImpl) SetFiles(files []InputFile, options ...FileChooserSetFilesOptions) error {
+	if len(options) == 1 {
+		return f.elementHandle.SetInputFiles(files, ElementHandleSetInputFilesOptions(options[0]))
+	}
+	return f.elementHandle.SetInputFiles(files)
 }
 
 func newFileChooser(page Page, elementHandle ElementHandle, isMultiple bool) *fileChooserImpl {

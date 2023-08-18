@@ -47,7 +47,7 @@ func (v *videoImpl) artifactReady(artifact *artifactImpl) {
 	v.artifactChan <- artifact
 }
 
-func (v *videoImpl) pageClosed() {
+func (v *videoImpl) pageClosed(p Page) {
 	v.closeOnce.Do(func() {
 		if v.artifactChan != nil {
 			close(v.artifactChan)
@@ -58,11 +58,11 @@ func (v *videoImpl) pageClosed() {
 func (v *videoImpl) getArtifact() {
 	// prevent channel block if no video will be produced
 	if v.page.browserContext.options == nil {
-		v.pageClosed()
+		v.pageClosed(v.page)
 	} else {
 		option := v.page.browserContext.options
-		if option == nil || option.RecordVideo == nil || option.RecordVideo.Dir == nil { // no recordVideo option
-			v.pageClosed()
+		if option == nil || option.RecordVideo == nil { // no recordVideo option
+			v.pageClosed(v.page)
 		}
 	}
 	artifact := <-v.artifactChan
@@ -78,9 +78,9 @@ func newVideo(page *pageImpl) *videoImpl {
 	}
 	video.artifactChan = make(chan *artifactImpl, 1)
 	if page.IsClosed() {
-		video.pageClosed()
+		video.pageClosed(page)
 	} else {
-		page.On("close", video.pageClosed)
+		page.OnClose(video.pageClosed)
 	}
 	return video
 }

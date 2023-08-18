@@ -41,7 +41,7 @@ func main() {
 	if _, err = page.Goto("https://www.openstreetmap.org"); err != nil {
 		log.Fatalf("could not goto: %v", err)
 	}
-	if err = page.Click("a[data-bs-original-title='Show My Location']"); err != nil {
+	if err = page.Locator("a[data-bs-original-title='Show My Location']").Click(); err != nil {
 		log.Fatalf("could not click on location: %v", err)
 	}
 	if _, err = page.Screenshot(playwright.PageScreenshotOptions{

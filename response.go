@@ -91,7 +91,7 @@ func (r *responseImpl) AllHeaders() (map[string]string, error) {
 	}
 	return headers.Headers(), nil
 }
-func (r *responseImpl) HeadersArray() (HeadersArray, error) {
+func (r *responseImpl) HeadersArray() ([]NameValue, error) {
 	headers, err := r.ActualHeaders()
 	if err != nil {
 		return nil, err
@@ -148,7 +148,7 @@ func newResponse(parent *channelOwner, objectType string, guid string, initializ
 	resp.createChannelOwner(resp, parent, objectType, guid, initializer)
 	timing := resp.initializer["timing"].(map[string]interface{})
 	resp.request = fromChannel(resp.initializer["request"]).(*requestImpl)
-	resp.request.timing = &ResourceTiming{
+	resp.request.timing = &RequestTiming{
 		StartTime:             timing["startTime"].(float64),
 		DomainLookupStart:     timing["domainLookupStart"].(float64),
 		DomainLookupEnd:       timing["domainLookupEnd"].(float64),

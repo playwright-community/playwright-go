@@ -5,13 +5,6 @@ type consoleMessageImpl struct {
 	page Page
 }
 
-// ConsoleMessageLocation represents where a console message was logged in the browser
-type ConsoleMessageLocation struct {
-	URL          string `json:"url"`
-	LineNumber   int    `json:"lineNumber"`
-	ColumnNumber int    `json:"columnNumber"`
-}
-
 func (c *consoleMessageImpl) Type() string {
 	return c.initializer["type"].(string)
 }
@@ -33,10 +26,10 @@ func (c *consoleMessageImpl) Args() []JSHandle {
 	return out
 }
 
-func (c *consoleMessageImpl) Location() ConsoleMessageLocation {
-	locations := ConsoleMessageLocation{}
-	remapMapToStruct(c.initializer["location"], &locations)
-	return locations
+func (c *consoleMessageImpl) Location() *ConsoleMessageLocation {
+	location := &ConsoleMessageLocation{}
+	remapMapToStruct(c.initializer["location"], location)
+	return location
 }
 
 func (c *consoleMessageImpl) Page() Page {

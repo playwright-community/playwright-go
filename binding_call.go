@@ -4,6 +4,10 @@ import (
 	"log"
 )
 
+type BindingCall interface {
+	Call(f BindingCallFunction)
+}
+
 type bindingCallImpl struct {
 	channelOwner
 }

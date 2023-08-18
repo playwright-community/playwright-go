@@ -1,6 +1,9 @@
 package playwright
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type artifactImpl struct {
 	channelOwner
@@ -33,12 +36,12 @@ func (a *artifactImpl) SaveAs(path string) error {
 	return stream.SaveAs(path)
 }
 
-func (d *artifactImpl) Failure() (string, error) {
+func (d *artifactImpl) Failure() error {
 	failure, err := d.channel.Send("failure")
 	if failure == nil {
-		return "", err
+		return err
 	}
-	return failure.(string), err
+	return fmt.Errorf("%v", failure)
 }
 
 func (d *artifactImpl) Delete() error {

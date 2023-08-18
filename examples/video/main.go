@@ -19,9 +19,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not launch Chromium: %v", err)
 	}
-	page, err := browser.NewPage(playwright.BrowserNewContextOptions{
+	page, err := browser.NewPage(playwright.BrowserNewPageOptions{
 		RecordVideo: &playwright.RecordVideo{
-			Dir: playwright.String("videos/"),
+			Dir: "videos/",
 		},
 	})
 	if err != nil {
@@ -34,7 +34,7 @@ func main() {
 		}
 		fmt.Printf("Visited %s\n", url)
 	}
-	gotoPage("http://whatsmyuseragent.org")
+	gotoPage("https://playwright.dev")
 	gotoPage("https://github.com")
 	gotoPage("https://microsoft.com")
 	if err := page.Close(); err != nil {

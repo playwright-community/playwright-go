@@ -199,7 +199,7 @@ func TestShouldFilterByGlob(t *testing.T) {
 	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		BaseURL:            &server.PREFIX,
 		RecordHarPath:      playwright.String(harPath),
-		RecordHarUrlFilter: "/*.css",
+		RecordHarURLFilter: "/*.css",
 	})
 	require.NoError(t, err)
 	page2, err := context2.NewPage()
@@ -222,7 +222,7 @@ func TestShouldFilterByRegexp(t *testing.T) {
 	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		BaseURL:            &server.PREFIX,
 		RecordHarPath:      playwright.String(harPath),
-		RecordHarUrlFilter: regexp.MustCompile("(?i)HAR.X?HTML"),
+		RecordHarURLFilter: regexp.MustCompile("(?i)HAR.X?HTML"),
 		IgnoreHttpsErrors:  playwright.Bool(true),
 	})
 	require.NoError(t, err)
