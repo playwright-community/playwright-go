@@ -89,7 +89,12 @@ func (r *requestImpl) Response() (Response, error) {
 }
 
 func (r *requestImpl) Frame() Frame {
-	return fromChannel(r.initializer["frame"]).(*frameImpl)
+	channel, ok := r.initializer["frame"]
+	if !ok {
+		// Service Worker requests do not have an associated frame.
+		return nil
+	}
+	return fromChannel(channel).(*frameImpl)
 }
 
 func (r *requestImpl) IsNavigationRequest() bool {
@@ -161,6 +166,14 @@ func (r *requestImpl) ActualHeaders() (*rawHeaders, error) {
 		r.allHeaders = newRawHeaders(headers)
 	}
 	return r.allHeaders, nil
+}
+
+func (r *requestImpl) ServiceWorker() Worker {
+	channel, ok := r.initializer["serviceWorker"]
+	if !ok {
+		return nil
+	}
+	return fromChannel(channel).(*workerImpl)
 }
 
 func (r *requestImpl) Sizes() (*RequestSizesResult, error) {

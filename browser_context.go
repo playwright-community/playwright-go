@@ -671,7 +671,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 			page.(*pageImpl).Emit("requestfinished", request)
 		}
 		if response != nil {
-			response.(*responseImpl).finished <- true
+			close(response.(*responseImpl).finished)
 		}
 	})
 	bt.channel.On("response", func(ev map[string]interface{}) {

@@ -212,3 +212,56 @@ func TestShouldReportIfRequestWasFromServiceWorker(t *testing.T) {
 		require.NotZero(t, len(context.ServiceWorkers()))
 	}
 }
+
+func TestNetworkEventsRequest(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	requests := []playwright.Request{}
+	page.OnRequest(func(request playwright.Request) {
+		requests = append(requests, request)
+	})
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.Len(t, requests, 1)
+	request := requests[0]
+	require.Equal(t, "GET", request.Method())
+	require.Equal(t, server.EMPTY_PAGE, request.URL())
+	require.Equal(t, page.MainFrame(), request.Frame())
+	_, err = request.Response()
+	require.NoError(t, err)
+}
+
+func TestNetworkEventsResponse(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	responses := []playwright.Response{}
+	page.OnResponse(func(response playwright.Response) {
+		responses = append(responses, response)
+	})
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.Len(t, responses, 1)
+	response := responses[0]
+	require.Equal(t, 200, response.Status())
+	require.Equal(t, "OK", response.StatusText())
+	require.Equal(t, page.MainFrame(), response.Frame())
+}
+
+func TestNetworkEventsShouldFireEventsInProperOrder(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	events := []string{}
+	page.OnRequest(func(request playwright.Request) {
+		events = append(events, "request")
+	})
+	page.OnResponse(func(response playwright.Response) {
+		events = append(events, "response")
+	})
+	page.OnRequestFinished(func(r playwright.Request) {
+		events = append(events, "requestfinished")
+	})
+	response, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, response.Finished())
+	require.Equal(t, []string{"request", "response", "requestfinished"}, events)
+}
