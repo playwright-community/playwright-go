@@ -221,8 +221,9 @@ func TestWebSocketShouldRejectWaitForEventOnCloseAndError(t *testing.T) {
 	})
 	require.NoError(t, err)
 	// event may have been generated before interception
-	_, err = ws.WaitForEvent("framereceived")
-	require.NoError(t, err)
+	_, _ = ws.WaitForEvent("framereceived", playwright.WebSocketWaitForEventOptions{
+		Timeout: playwright.Float(1000),
+	})
 	_, err = ws.ExpectEvent("framesent", func() error {
 		_, err := page.Evaluate(`window.ws.close()`)
 		return err
