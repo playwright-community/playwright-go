@@ -26,6 +26,8 @@ type APIRequestContext interface {
 	// response. The method will populate request cookies from the context and update context cookies from the response.
 	// The method will automatically follow redirects.
 	//
+	//  url: Target URL.
+	//
 	// [DELETE]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/DELETE
 	Delete(url string, options ...APIRequestContextDeleteOptions) (APIResponse, error)
 
@@ -37,11 +39,15 @@ type APIRequestContext interface {
 	// Sends HTTP(S) request and returns its response. The method will populate request cookies from the context and
 	// update context cookies from the response. The method will automatically follow redirects. JSON objects can be
 	// passed directly to the request.
+	//
+	//  urlOrRequest: Target URL or Request to get all parameters from.
 	Fetch(urlOrRequest interface{}, options ...APIRequestContextFetchOptions) (APIResponse, error)
 
 	// Sends HTTP(S) [GET] request and returns its
 	// response. The method will populate request cookies from the context and update context cookies from the response.
 	// The method will automatically follow redirects.
+	//
+	//  url: Target URL.
 	//
 	// [GET]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET
 	Get(url string, options ...APIRequestContextGetOptions) (APIResponse, error)
@@ -50,12 +56,16 @@ type APIRequestContext interface {
 	// response. The method will populate request cookies from the context and update context cookies from the response.
 	// The method will automatically follow redirects.
 	//
+	//  url: Target URL.
+	//
 	// [HEAD]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD
 	Head(url string, options ...APIRequestContextHeadOptions) (APIResponse, error)
 
 	// Sends HTTP(S) [PATCH] request and returns its
 	// response. The method will populate request cookies from the context and update context cookies from the response.
 	// The method will automatically follow redirects.
+	//
+	//  url: Target URL.
 	//
 	// [PATCH]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PATCH
 	Patch(url string, options ...APIRequestContextPatchOptions) (APIResponse, error)
@@ -64,12 +74,16 @@ type APIRequestContext interface {
 	// response. The method will populate request cookies from the context and update context cookies from the response.
 	// The method will automatically follow redirects.
 	//
+	//  url: Target URL.
+	//
 	// [POST]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
 	Post(url string, options ...APIRequestContextPostOptions) (APIResponse, error)
 
 	// Sends HTTP(S) [PUT] request and returns its
 	// response. The method will populate request cookies from the context and update context cookies from the response.
 	// The method will automatically follow redirects.
+	//
+	//  url: Target URL.
 	//
 	// [PUT]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT
 	Put(url string, options ...APIRequestContextPutOptions) (APIResponse, error)
@@ -254,6 +268,10 @@ type BrowserContext interface {
 
 	// Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies
 	// can be obtained via [BrowserContext.Cookies].
+	//
+	//  cookies: Adds cookies to the browser context.
+	//
+	//    For the cookie to apply to all subdomains as well, prefix domain with a dot, like this: ".example.com".
 	AddCookies(cookies []OptionalCookie) error
 
 	// Adds a script which would be evaluated in one of the following scenarios:
@@ -262,6 +280,8 @@ type BrowserContext interface {
 	//   evaluated in the context of the newly attached frame.
 	// The script is evaluated after the document was created but before any of its scripts were run. This is useful to
 	// amend the JavaScript environment, e.g. to seed `Math.random`.
+	//
+	//  script: Script to be evaluated in all pages in the browser context.
 	AddInitScript(script Script) error
 
 	// **NOTE** Background pages are only supported on Chromium-based browsers.
@@ -291,20 +311,46 @@ type BrowserContext interface {
 	// The first argument of the “callback” function contains information about the caller: `{ browserContext:
 	// BrowserContext, page: Page, frame: Frame }`.
 	// See [Page.ExposeBinding] for page-only version.
+	//
+	// 1. name: Name of the function on the window object.
+	// 2. binding: Callback function that will be called in the Playwright's context.
 	ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error
 
 	// The method adds a function called “name” on the `window` object of every frame in every page in the context. When
 	// called, the function executes “callback” and returns a [Promise] which resolves to the return value of “callback”.
 	// If the “callback” returns a [Promise], it will be awaited.
 	// See [Page.ExposeFunction] for page-only version.
+	//
+	// 1. name: Name of the function on the window object.
+	// 2. binding: Callback function that will be called in the Playwright's context.
 	ExposeFunction(name string, binding ExposedFunction) error
 
 	// Grants specified permissions to the browser context. Only grants corresponding permissions to the given origin if
 	// specified.
+	//
+	//  permissions: A permission or an array of permissions to grant. Permissions can be one of the following values:
+	//    - `'geolocation'`
+	//    - `'midi'`
+	//    - `'midi-sysex'` (system-exclusive midi)
+	//    - `'notifications'`
+	//    - `'camera'`
+	//    - `'microphone'`
+	//    - `'background-sync'`
+	//    - `'ambient-light-sensor'`
+	//    - `'accelerometer'`
+	//    - `'gyroscope'`
+	//    - `'magnetometer'`
+	//    - `'accessibility-events'`
+	//    - `'clipboard-read'`
+	//    - `'clipboard-write'`
+	//    - `'payment-handler'`
 	GrantPermissions(permissions []string, options ...BrowserContextGrantPermissionsOptions) error
 
 	// **NOTE** CDP sessions are only supported on Chromium-based browsers.
 	// Returns the newly created session.
+	//
+	//  page: Target to create new session for. For backwards-compatibility, this parameter is named `page`, but it can be a
+	//    `Page` or `Frame` type.
 	NewCDPSession(page interface{}) (CDPSession, error)
 
 	// Creates a new page in the browser context.
@@ -322,6 +368,11 @@ type BrowserContext interface {
 	// [this] issue. We recommend disabling Service Workers when
 	// using request interception by setting “Browser.newContext.serviceWorkers” to `block`.
 	//
+	// 1. url: A glob pattern, regex pattern or predicate receiving [URL] to match while routing. When a “baseURL” via the context
+	//    options was provided and the passed URL is a path, it gets merged via the
+	//    [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
+	// 2. handler: handler function to route the request.
+	//
 	// [this]: https://github.com/microsoft/playwright/issues/1090
 	Route(url interface{}, handler routeHandler, times ...int) error
 
@@ -330,6 +381,9 @@ type BrowserContext interface {
 	// Playwright will not serve requests intercepted by Service Worker from the HAR file. See
 	// [this] issue. We recommend disabling Service Workers when
 	// using request interception by setting “Browser.newContext.serviceWorkers” to `block`.
+	//
+	//  har: Path to a [HAR](http://www.softwareishard.com/blog/har-12-spec) file with prerecorded network data. If `path` is a
+	//    relative path, then it is resolved relative to the current working directory.
 	//
 	// [Replaying from HAR]: https://playwright.dev/docs/network#replaying-from-har
 	// [this]: https://github.com/microsoft/playwright/issues/1090
@@ -348,22 +402,30 @@ type BrowserContext interface {
 	//  - [Page.ExpectNavigation]
 	// **NOTE** [Page.SetDefaultNavigationTimeout] and [Page.SetDefaultTimeout] take priority over
 	// [BrowserContext.SetDefaultNavigationTimeout].
+	//
+	//  timeout: Maximum navigation time in milliseconds
 	SetDefaultNavigationTimeout(timeout float64)
 
 	// This setting will change the default maximum time for all the methods accepting “timeout” option.
 	// **NOTE** [Page.SetDefaultNavigationTimeout], [Page.SetDefaultTimeout] and
 	// [BrowserContext.SetDefaultNavigationTimeout] take priority over [BrowserContext.SetDefaultTimeout].
+	//
+	//  timeout: Maximum time in milliseconds
 	SetDefaultTimeout(timeout float64)
 
 	// The extra HTTP headers will be sent with every request initiated by any page in the context. These headers are
 	// merged with page-specific extra HTTP headers set with [Page.SetExtraHTTPHeaders]. If page overrides a particular
 	// header, page-specific header value will be used instead of the browser context header value.
 	// **NOTE** [BrowserContext.SetExtraHTTPHeaders] does not guarantee the order of headers in the outgoing requests.
+	//
+	//  headers: An object containing additional HTTP headers to be sent with every request. All header values must be strings.
 	SetExtraHTTPHeaders(headers map[string]string) error
 
 	// Sets the context's geolocation. Passing `null` or `undefined` emulates position unavailable.
 	SetGeolocation(geolocation *Geolocation) error
 
+	//
+	//  offline: Whether to emulate network being offline for the browser context.
 	SetOffline(offline bool) error
 
 	// Returns storage state for this browser context, contains current cookies and local storage snapshot.
@@ -373,6 +435,9 @@ type BrowserContext interface {
 
 	// Removes a route created with [BrowserContext.Route]. When “handler” is not specified, removes all routes for the
 	// “url”.
+	//
+	// 1. url: A glob pattern, regex pattern or predicate receiving [URL] used to register a routing with [BrowserContext.Route].
+	// 2. handler: Optional handler function used to register a routing with [BrowserContext.Route].
 	Unroute(url interface{}, handler ...routeHandler) error
 
 	// Performs action and waits for a [ConsoleMessage] to be logged by in the pages in the context. If predicate is
@@ -383,6 +448,8 @@ type BrowserContext interface {
 
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the context closes before the event is fired. Returns the event data value.
+	//
+	//  event: Event name, same one would pass into `browserContext.on(event)`.
 	ExpectEvent(event string, cb func() error, options ...BrowserContextExpectEventOptions) (interface{}, error)
 
 	// Performs action and waits for a new [Page] to be created in the context. If predicate is provided, it passes [Page]
@@ -394,6 +461,8 @@ type BrowserContext interface {
 	// Waits for given `event` to fire. If predicate is provided, it passes event's value into the `predicate` function
 	// and waits for `predicate(event)` to return a truthy value. Will throw an error if the browser context is closed
 	// before the `event` is fired.
+	//
+	//  event: Event name, same one typically passed into `*.on(event)`.
 	WaitForEvent(event string, options ...BrowserContextWaitForEventOptions) (interface{}, error)
 }
 
@@ -403,11 +472,16 @@ type BrowserType interface {
 	// This method attaches Playwright to an existing browser instance. When connecting to another browser launched via
 	// `BrowserType.launchServer` in Node.js, the major and minor version needs to match the client version (1.2.3 → is
 	// compatible with 1.2.x).
+	//
+	//  wsEndpoint: A browser websocket endpoint to connect to.
 	Connect(wsEndpoint string, options ...BrowserTypeConnectOptions) (Browser, error)
 
 	// This method attaches Playwright to an existing browser instance using the Chrome DevTools Protocol.
 	// The default browser context is accessible via [Browser.Contexts].
 	// **NOTE** Connecting over the Chrome DevTools Protocol is only supported for Chromium-based browsers.
+	//
+	//  endpointURL: A CDP websocket endpoint or http url to connect to. For example `http://localhost:9222/` or
+	//    `ws://127.0.0.1:9222/devtools/browser/387adf4c-243f-4051-a181-46798f4a46f4`.
 	ConnectOverCDP(endpointURL string, options ...BrowserTypeConnectOverCDPOptions) (Browser, error)
 
 	// A path where Playwright expects to find a bundled browser executable.
@@ -424,6 +498,12 @@ type BrowserType interface {
 	// Returns the persistent browser context instance.
 	// Launches browser that uses persistent storage located at “userDataDir” and returns the only context. Closing this
 	// context will automatically close the browser.
+	//
+	//  userDataDir: Path to a User Data Directory, which stores browser session data like cookies and local storage. More details for
+	//    [Chromium](https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md#introduction) and
+	//    [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile). Note that Chromium's
+	//    user data directory is the **parent** directory of the "Profile Path" seen at `chrome://version`. Pass an empty
+	//    string to use a temporary directory instead.
 	LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (BrowserContext, error)
 
 	// Returns browser name. For example: `chromium`, `webkit` or `firefox`.
@@ -446,6 +526,9 @@ type CDPSession interface {
 	// used to send messages.
 	Detach() error
 
+	//
+	// 1. method: Protocol method name.
+	// 2. params: Optional method parameters.
 	Send(method string, params map[string]interface{}) (interface{}, error)
 }
 
@@ -524,6 +607,8 @@ type Download interface {
 
 	// Copy the download to a user-specified path. It is safe to call this method while the download is still in progress.
 	// Will wait for the download to finish if necessary.
+	//
+	//  path: Path where the download should be copied.
 	SaveAs(path string) error
 
 	// Returns suggested filename for this download. It is typically computed by the browser from the
@@ -618,6 +703,9 @@ type ElementHandle interface {
 	// `click` is dispatched. This is equivalent to calling
 	// [element.Click()].
 	//
+	// 1. typ: DOM event type: `"click"`, `"dragstart"`, etc.
+	// 2. eventInit: Optional event-specific initialization properties.
+	//
 	// [element.Click()]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click
 	// [DragEvent]: https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent
 	// [FocusEvent]: https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent
@@ -633,6 +721,11 @@ type ElementHandle interface {
 	// first argument to “expression”. If no elements match the selector, the method throws an error.
 	// If “expression” returns a [Promise], then [ElementHandle.EvalOnSelector] would wait for the promise to resolve and
 	// return its value.
+	//
+	// 1. selector: A selector to query for.
+	// 2. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 3. arg: Optional argument to pass to “expression”.
 	EvalOnSelector(selector string, expression string, arg ...interface{}) (interface{}, error)
 
 	// Returns the return value of “expression”.
@@ -640,6 +733,11 @@ type ElementHandle interface {
 	// of matched elements as a first argument to “expression”.
 	// If “expression” returns a [Promise], then [ElementHandle.EvalOnSelectorAll] would wait for the promise to resolve
 	// and return its value.
+	//
+	// 1. selector: A selector to query for.
+	// 2. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 3. arg: Optional argument to pass to “expression”.
 	EvalOnSelectorAll(selector string, expression string, arg ...interface{}) (interface{}, error)
 
 	// This method waits for [actionability] checks, focuses the element, fills it and triggers an
@@ -649,6 +747,8 @@ type ElementHandle interface {
 	// [control], the control will be filled
 	// instead.
 	// To send fine-grained keyboard events, use [ElementHandle.Type].
+	//
+	//  value: Value to set for the `<input>`, `<textarea>` or `[contenteditable]` element.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
@@ -660,6 +760,8 @@ type ElementHandle interface {
 	Focus() error
 
 	// Returns element attribute value.
+	//
+	//  name: Attribute name to get the value for.
 	GetAttribute(name string) (string, error)
 
 	// This method hovers over the element by performing the following steps:
@@ -734,16 +836,22 @@ type ElementHandle interface {
 	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	//
+	//  key: Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
+	//
 	// [keyboardEvent.Key]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
 	// [here]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
 	Press(key string, options ...ElementHandlePressOptions) error
 
 	// The method finds an element matching the specified selector in the `ElementHandle`'s subtree. If no elements match
 	// the selector, returns `null`.
+	//
+	//  selector: A selector to query for.
 	QuerySelector(selector string) (ElementHandle, error)
 
 	// The method finds all elements matching the specified selector in the `ElementHandle`s subtree. If no elements match
 	// the selector, returns empty array.
+	//
+	//  selector: A selector to query for.
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
 
 	// This method captures a screenshot of the page, clipped to the size and position of this particular element. If the
@@ -802,6 +910,8 @@ type ElementHandle interface {
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
 	//
+	//  checked: Whether to check or uncheck the checkbox.
+	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	SetChecked(checked bool, options ...ElementHandleSetCheckedOptions) error
 
@@ -835,6 +945,8 @@ type ElementHandle interface {
 	// Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the
 	// text.
 	// To press a special key, like `Control` or `ArrowDown`, use [ElementHandle.Press].
+	//
+	//  text: A text to type into a focused element.
 	Type(text string, options ...ElementHandleTypeOptions) error
 
 	// This method checks the element by performing the following steps:
@@ -866,6 +978,8 @@ type ElementHandle interface {
 	//  - `"editable"` Wait until the element is [editable].
 	// If the element does not satisfy the condition for the “timeout” milliseconds, this method will throw.
 	//
+	//  state: A state to wait for, see below for more details.
+	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [visible]: https://playwright.dev/docs/actionability#visible
 	// [not visible]: https://playwright.dev/docs/actionability#visible
@@ -883,6 +997,8 @@ type ElementHandle interface {
 	// or become visible/hidden). If at the moment of calling the method “selector” already satisfies the condition, the
 	// method will return immediately. If the selector doesn't satisfy the condition for the “timeout” milliseconds, the
 	// function will throw.
+	//
+	//  selector: A selector to query for.
 	WaitForSelector(selector string, options ...ElementHandleWaitForSelectorOptions) (ElementHandle, error)
 }
 
@@ -936,6 +1052,9 @@ type Frame interface {
 	//
 	// Deprecated: Use locator-based [Locator.Check] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [locators]: https://playwright.dev/docs/locators
 	Check(selector string, options ...FrameCheckOptions) error
@@ -953,6 +1072,9 @@ type Frame interface {
 	// Passing zero timeout disables this.
 	//
 	// Deprecated: Use locator-based [Locator.Click] instead. Read more about [locators].
+	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [locators]: https://playwright.dev/docs/locators
@@ -975,6 +1097,9 @@ type Frame interface {
 	//
 	// Deprecated: Use locator-based [Locator.Dblclick] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [locators]: https://playwright.dev/docs/locators
 	Dblclick(selector string, options ...FrameDblclickOptions) error
@@ -984,6 +1109,11 @@ type Frame interface {
 	// [element.Click()].
 	//
 	// Deprecated: Use locator-based [Locator.DispatchEvent] instead. Read more about [locators].
+	//
+	// 1. selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	// 2. typ: DOM event type: `"click"`, `"dragstart"`, etc.
+	// 3. eventInit: Optional event-specific initialization properties.
 	//
 	// [element.Click()]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click
 	// [DragEvent]: https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent
@@ -996,6 +1126,11 @@ type Frame interface {
 	// [locators]: https://playwright.dev/docs/locators
 	DispatchEvent(selector string, typ string, eventInit interface{}, options ...FrameDispatchEventOptions) error
 
+	//
+	// 1. source: A selector to search for an element to drag. If there are multiple elements satisfying the selector, the first will
+	//    be used.
+	// 2. target: A selector to search for an element to drop onto. If there are multiple elements satisfying the selector, the first
+	//    will be used.
 	DragAndDrop(source string, target string, options ...FrameDragAndDropOptions) error
 
 	// Returns the return value of “expression”.
@@ -1005,6 +1140,11 @@ type Frame interface {
 	// its value.
 	//
 	// Deprecated: This method does not wait for the element to pass the actionability checks and therefore can lead to the flaky tests. Use [Locator.Evaluate], other [Locator] helper methods or web-first assertions instead.
+	//
+	// 1. selector: A selector to query for.
+	// 2. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 3. arg: Optional argument to pass to “expression”.
 	EvalOnSelector(selector string, expression string, arg interface{}, options ...FrameEvalOnSelectorOptions) (interface{}, error)
 
 	// Returns the return value of “expression”.
@@ -1014,6 +1154,11 @@ type Frame interface {
 	// return its value.
 	//
 	// Deprecated: In most cases, [Locator.EvaluateAll], other [Locator] helper methods and web-first assertions do a better job.
+	//
+	// 1. selector: A selector to query for.
+	// 2. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 3. arg: Optional argument to pass to “expression”.
 	EvalOnSelectorAll(selector string, expression string, arg ...interface{}) (interface{}, error)
 
 	// Returns the return value of “expression”.
@@ -1022,6 +1167,10 @@ type Frame interface {
 	// If the function passed to the [Frame.Evaluate] returns a non-[Serializable] value, then [Frame.Evaluate] returns
 	// `undefined`. Playwright also supports transferring some additional values that are not serializable by `JSON`:
 	// `-0`, `NaN`, `Infinity`, `-Infinity`.
+	//
+	// 1. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 2. arg: Optional argument to pass to “expression”.
 	Evaluate(expression string, arg ...interface{}) (interface{}, error)
 
 	// Returns the return value of “expression” as a [JSHandle].
@@ -1029,6 +1178,10 @@ type Frame interface {
 	// [JSHandle].
 	// If the function, passed to the [Frame.EvaluateHandle], returns a [Promise], then [Frame.EvaluateHandle] would wait
 	// for the promise to resolve and return its value.
+	//
+	// 1. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 2. arg: Optional argument to pass to “expression”.
 	EvaluateHandle(expression string, arg ...interface{}) (JSHandle, error)
 
 	// This method waits for an element matching “selector”, waits for [actionability] checks,
@@ -1042,6 +1195,10 @@ type Frame interface {
 	//
 	// Deprecated: Use locator-based [Locator.Fill] instead. Read more about [locators].
 	//
+	// 1. selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	// 2. value: Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
+	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
 	// [locators]: https://playwright.dev/docs/locators
@@ -1051,6 +1208,9 @@ type Frame interface {
 	// method waits until a matching element appears in the DOM.
 	//
 	// Deprecated: Use locator-based [Locator.Focus] instead. Read more about [locators].
+	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
 	//
 	// [locators]: https://playwright.dev/docs/locators
 	Focus(selector string, options ...FrameFocusOptions) error
@@ -1062,23 +1222,35 @@ type Frame interface {
 
 	// When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements
 	// in that iframe.
+	//
+	//  selector: A selector to use when resolving DOM element.
 	FrameLocator(selector string) FrameLocator
 
 	// Returns element attribute value.
 	//
 	// Deprecated: Use locator-based [Locator.GetAttribute] instead. Read more about [locators].
 	//
+	// 1. selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	// 2. name: Attribute name to get the value for.
+	//
 	// [locators]: https://playwright.dev/docs/locators
 	GetAttribute(selector string, name string, options ...FrameGetAttributeOptions) (string, error)
 
 	// Allows locating elements by their alt text.
+	//
+	//  text: Text to locate the element for.
 	GetByAltText(text interface{}, options ...FrameGetByAltTextOptions) Locator
 
 	// Allows locating input elements by the text of the associated `<label>` or `aria-labelledby` element, or by the
 	// `aria-label` attribute.
+	//
+	//  text: Text to locate the element for.
 	GetByLabel(text interface{}, options ...FrameGetByLabelOptions) Locator
 
 	// Allows locating input elements by the placeholder text.
+	//
+	//  text: Text to locate the element for.
 	GetByPlaceholder(text interface{}, options ...FrameGetByPlaceholderOptions) Locator
 
 	// Allows locating elements by their [ARIA role],
@@ -1094,6 +1266,8 @@ type Frame interface {
 	// [supported roles here]. ARIA guidelines **do not recommend**
 	// duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
 	//
+	//  role: Required aria role.
+	//
 	// [ARIA role]: https://www.w3.org/TR/wai-aria-1.2/#roles
 	// [ARIA attributes]: https://www.w3.org/TR/wai-aria-1.2/#aria-attributes
 	// [accessible name]: https://w3c.github.io/accname/#dfn-accessible-name
@@ -1107,6 +1281,8 @@ type Frame interface {
 	//
 	// By default, the `data-testid` attribute is used as a test id. Use [Selectors.SetTestIdAttribute] to configure a
 	// different test id attribute if necessary.
+	//
+	//  testId: Id to locate the element by.
 	GetByTestId(testId interface{}) Locator
 
 	// Allows locating elements that contain given text.
@@ -1119,9 +1295,13 @@ type Frame interface {
 	// one, turns line breaks into spaces and ignores leading and trailing whitespace.
 	// Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
 	// example, locating by text `"Log in"` matches `<input type=button value="Log in">`.
+	//
+	//  text: Text to locate the element for.
 	GetByText(text interface{}, options ...FrameGetByTextOptions) Locator
 
 	// Allows locating elements by their title attribute.
+	//
+	//  text: Text to locate the element for.
 	GetByTitle(text interface{}, options ...FrameGetByTitleOptions) Locator
 
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of
@@ -1140,6 +1320,8 @@ type Frame interface {
 	// **NOTE** Headless mode doesn't support navigation to a PDF document. See the
 	// [upstream issue].
 	//
+	//  url: URL to navigate frame to. The url should include scheme, e.g. `https://`.
+	//
 	// [upstream issue]: https://bugs.chromium.org/p/chromium/issues/detail?id=761295
 	Goto(url string, options ...FrameGotoOptions) (Response, error)
 
@@ -1155,6 +1337,9 @@ type Frame interface {
 	//
 	// Deprecated: Use locator-based [Locator.Hover] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [locators]: https://playwright.dev/docs/locators
 	Hover(selector string, options ...FrameHoverOptions) error
@@ -1163,12 +1348,18 @@ type Frame interface {
 	//
 	// Deprecated: Use locator-based [Locator.InnerHTML] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [locators]: https://playwright.dev/docs/locators
 	InnerHTML(selector string, options ...FrameInnerHTMLOptions) (string, error)
 
 	// Returns `element.innerText`.
 	//
 	// Deprecated: Use locator-based [Locator.InnerText] instead. Read more about [locators].
+	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
 	//
 	// [locators]: https://playwright.dev/docs/locators
 	InnerText(selector string, options ...FrameInnerTextOptions) (string, error)
@@ -1180,6 +1371,9 @@ type Frame interface {
 	//
 	// Deprecated: Use locator-based [Locator.InputValue] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
 	// [locators]: https://playwright.dev/docs/locators
 	InputValue(selector string, options ...FrameInputValueOptions) (string, error)
@@ -1187,6 +1381,9 @@ type Frame interface {
 	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
 	//
 	// Deprecated: Use locator-based [Locator.IsChecked] instead. Read more about [locators].
+	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
 	//
 	// [locators]: https://playwright.dev/docs/locators
 	IsChecked(selector string, options ...FrameIsCheckedOptions) (bool, error)
@@ -1198,6 +1395,9 @@ type Frame interface {
 	//
 	// Deprecated: Use locator-based [Locator.IsDisabled] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [enabled]: https://playwright.dev/docs/actionability#enabled
 	// [locators]: https://playwright.dev/docs/locators
 	IsDisabled(selector string, options ...FrameIsDisabledOptions) (bool, error)
@@ -1206,11 +1406,17 @@ type Frame interface {
 	//
 	// Deprecated: Use locator-based [Locator.IsEditable] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [editable]: https://playwright.dev/docs/actionability#editable
 	// [locators]: https://playwright.dev/docs/locators
 	IsEditable(selector string, options ...FrameIsEditableOptions) (bool, error)
 
 	// Returns whether the element is [enabled].
+	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
 	//
 	// [enabled]: https://playwright.dev/docs/actionability#enabled
 	IsEnabled(selector string, options ...FrameIsEnabledOptions) (bool, error)
@@ -1219,6 +1425,9 @@ type Frame interface {
 	// does not match any elements is considered hidden.
 	//
 	// Deprecated: Use locator-based [Locator.IsHidden] instead. Read more about [locators].
+	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
 	//
 	// [visible]: https://playwright.dev/docs/actionability#visible
 	// [locators]: https://playwright.dev/docs/locators
@@ -1229,6 +1438,9 @@ type Frame interface {
 	//
 	// Deprecated: Use locator-based [Locator.IsVisible] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [visible]: https://playwright.dev/docs/actionability#visible
 	// [locators]: https://playwright.dev/docs/locators
 	IsVisible(selector string, options ...FrameIsVisibleOptions) (bool, error)
@@ -1238,6 +1450,8 @@ type Frame interface {
 	// performed on different DOM elements. That would happen if the DOM structure between those actions has changed.
 	// [Learn more about locators].
 	// [Learn more about locators].
+	//
+	//  selector: A selector to use when resolving DOM element.
 	//
 	// [Learn more about locators]: https://playwright.dev/docs/locators
 	// [Learn more about locators]: https://playwright.dev/docs/locators
@@ -1271,6 +1485,10 @@ type Frame interface {
 	//
 	// Deprecated: Use locator-based [Locator.Press] instead. Read more about [locators].
 	//
+	// 1. selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	// 2. key: Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
+	//
 	// [keyboardEvent.Key]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
 	// [here]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
 	// [locators]: https://playwright.dev/docs/locators
@@ -1283,6 +1501,8 @@ type Frame interface {
 	//
 	// Deprecated: Use locator-based [Frame.Locator] instead. Read more about [locators].
 	//
+	//  selector: A selector to query for.
+	//
 	// [locators]: https://playwright.dev/docs/locators
 	QuerySelector(selector string, options ...FrameQuerySelectorOptions) (ElementHandle, error)
 
@@ -1292,6 +1512,8 @@ type Frame interface {
 	// returns empty array.
 	//
 	// Deprecated: Use locator-based [Frame.Locator] instead. Read more about [locators].
+	//
+	//  selector: A selector to query for.
 	//
 	// [locators]: https://playwright.dev/docs/locators
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
@@ -1306,6 +1528,8 @@ type Frame interface {
 	// Triggers a `change` and `input` event once all the provided options have been selected.
 	//
 	// Deprecated: Use locator-based [Locator.SelectOption] instead. Read more about [locators].
+	//
+	//  selector: A selector to query for.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
@@ -1327,10 +1551,16 @@ type Frame interface {
 	//
 	// Deprecated: Use locator-based [Locator.SetChecked] instead. Read more about [locators].
 	//
+	// 1. selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	// 2. checked: Whether to check or uncheck the checkbox.
+	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [locators]: https://playwright.dev/docs/locators
 	SetChecked(selector string, checked bool, options ...FrameSetCheckedOptions) error
 
+	//
+	//  html: HTML markup to assign to the page.
 	SetContent(html string, options ...FrameSetContentOptions) error
 
 	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then
@@ -1341,6 +1571,9 @@ type Frame interface {
 	// [control], targets the control instead.
 	//
 	// Deprecated: Use locator-based [Locator.SetInputFiles] instead. Read more about [locators].
+	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
 	//
 	// [input element]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
@@ -1360,6 +1593,9 @@ type Frame interface {
 	//
 	// Deprecated: Use locator-based [Locator.Tap] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [locators]: https://playwright.dev/docs/locators
 	Tap(selector string, options ...FrameTapOptions) error
@@ -1367,6 +1603,9 @@ type Frame interface {
 	// Returns `element.textContent`.
 	//
 	// Deprecated: Use locator-based [Locator.TextContent] instead. Read more about [locators].
+	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
 	//
 	// [locators]: https://playwright.dev/docs/locators
 	TextContent(selector string, options ...FrameTextContentOptions) (string, error)
@@ -1379,6 +1618,10 @@ type Frame interface {
 	// To press a special key, like `Control` or `ArrowDown`, use [Keyboard.Press].
 	//
 	// Deprecated: Use locator-based [Locator.Type] instead. Read more about [locators].
+	//
+	// 1. selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	// 2. text: A text to type into a focused element.
 	//
 	// [locators]: https://playwright.dev/docs/locators
 	Type(selector string, text string, options ...FrameTypeOptions) error
@@ -1398,6 +1641,9 @@ type Frame interface {
 	//
 	// Deprecated: Use locator-based [Locator.Uncheck] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [locators]: https://playwright.dev/docs/locators
 	Uncheck(selector string, options ...FrameUncheckOptions) error
@@ -1406,6 +1652,10 @@ type Frame interface {
 	URL() string
 
 	// Returns when the “expression” returns a truthy value, returns that value.
+	//
+	// 1. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 2. arg: Optional argument to pass to “expression”.
 	WaitForFunction(expression string, arg interface{}, options ...FrameWaitForFunctionOptions) (JSHandle, error)
 
 	// Waits for the required load state to be reached.
@@ -1433,6 +1683,8 @@ type Frame interface {
 	//
 	// Deprecated: Use web assertions that assert visibility or a locator-based [Locator.WaitFor] instead. Read more about [locators].
 	//
+	//  selector: A selector to query for.
+	//
 	// [locators]: https://playwright.dev/docs/locators
 	WaitForSelector(selector string, options ...FrameWaitForSelectorOptions) (ElementHandle, error)
 
@@ -1441,9 +1693,15 @@ type Frame interface {
 	// to be flaky. Use signals such as network events, selectors becoming visible and others instead.
 	//
 	// Deprecated: Never wait for timeout in production. Tests that wait for time are inherently flaky. Use [Locator] actions and web assertions that wait automatically.
+	//
+	//  timeout: A timeout to wait for
 	WaitForTimeout(timeout float64)
 
 	// Waits for the frame to navigate to the given URL.
+	//
+	//  url: A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation. Note that if
+	//    the parameter is a string without wildcard characters, the method will wait for navigation to URL that is exactly
+	//    equal to the string.
 	WaitForURL(url interface{}, options ...FrameWaitForURLOptions) error
 }
 
@@ -1464,16 +1722,24 @@ type FrameLocator interface {
 
 	// When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements
 	// in that iframe.
+	//
+	//  selector: A selector to use when resolving DOM element.
 	FrameLocator(selector string) FrameLocator
 
 	// Allows locating elements by their alt text.
+	//
+	//  text: Text to locate the element for.
 	GetByAltText(text interface{}, options ...FrameLocatorGetByAltTextOptions) Locator
 
 	// Allows locating input elements by the text of the associated `<label>` or `aria-labelledby` element, or by the
 	// `aria-label` attribute.
+	//
+	//  text: Text to locate the element for.
 	GetByLabel(text interface{}, options ...FrameLocatorGetByLabelOptions) Locator
 
 	// Allows locating input elements by the placeholder text.
+	//
+	//  text: Text to locate the element for.
 	GetByPlaceholder(text interface{}, options ...FrameLocatorGetByPlaceholderOptions) Locator
 
 	// Allows locating elements by their [ARIA role],
@@ -1489,6 +1755,8 @@ type FrameLocator interface {
 	// [supported roles here]. ARIA guidelines **do not recommend**
 	// duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
 	//
+	//  role: Required aria role.
+	//
 	// [ARIA role]: https://www.w3.org/TR/wai-aria-1.2/#roles
 	// [ARIA attributes]: https://www.w3.org/TR/wai-aria-1.2/#aria-attributes
 	// [accessible name]: https://w3c.github.io/accname/#dfn-accessible-name
@@ -1502,6 +1770,8 @@ type FrameLocator interface {
 	//
 	// By default, the `data-testid` attribute is used as a test id. Use [Selectors.SetTestIdAttribute] to configure a
 	// different test id attribute if necessary.
+	//
+	//  testId: Id to locate the element by.
 	GetByTestId(testId interface{}) Locator
 
 	// Allows locating elements that contain given text.
@@ -1514,9 +1784,13 @@ type FrameLocator interface {
 	// one, turns line breaks into spaces and ignores leading and trailing whitespace.
 	// Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
 	// example, locating by text `"Log in"` matches `<input type=button value="Log in">`.
+	//
+	//  text: Text to locate the element for.
 	GetByText(text interface{}, options ...FrameLocatorGetByTextOptions) Locator
 
 	// Allows locating elements by their title attribute.
+	//
+	//  text: Text to locate the element for.
 	GetByTitle(text interface{}, options ...FrameLocatorGetByTitleOptions) Locator
 
 	// Returns locator to the last matching frame.
@@ -1525,6 +1799,8 @@ type FrameLocator interface {
 	// The method finds an element matching the specified selector in the locator's subtree. It also accepts filter
 	// options, similar to [Locator.Filter] method.
 	// [Learn more about locators].
+	//
+	//  selectorOrLocator: A selector or locator to use when resolving DOM element.
 	//
 	// [Learn more about locators]: https://playwright.dev/docs/locators
 	Locator(selectorOrLocator interface{}, options ...FrameLocatorLocatorOptions) Locator
@@ -1550,6 +1826,10 @@ type JSHandle interface {
 	// This method passes this handle as the first argument to “expression”.
 	// If “expression” returns a [Promise], then `handle.evaluate` would wait for the promise to resolve and return its
 	// value.
+	//
+	// 1. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 2. arg: Optional argument to pass to “expression”.
 	Evaluate(expression string, arg ...interface{}) (interface{}, error)
 
 	// Returns the return value of “expression” as a [JSHandle].
@@ -1559,12 +1839,18 @@ type JSHandle interface {
 	// If the function passed to the `jsHandle.evaluateHandle` returns a [Promise], then `jsHandle.evaluateHandle` would
 	// wait for the promise to resolve and return its value.
 	// See [Page.EvaluateHandle] for more details.
+	//
+	// 1. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 2. arg: Optional argument to pass to “expression”.
 	EvaluateHandle(expression string, arg ...interface{}) (JSHandle, error)
 
 	// The method returns a map with **own property names** as keys and JSHandle instances for the property values.
 	GetProperties() (map[string]JSHandle, error)
 
 	// Fetches a single property from the referenced object.
+	//
+	//  propertyName: property to get
 	GetProperty(propertyName string) (JSHandle, error)
 
 	// Returns a JSON representation of the object. If the object has a `toJSON` function, it **will not be called**.
@@ -1602,12 +1888,16 @@ type Keyboard interface {
 	// use [Keyboard.Up].
 	// **NOTE** Modifier keys DO influence `keyboard.down`. Holding down `Shift` will type the text in upper case.
 	//
+	//  key: Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
+	//
 	// [keyboardEvent.Key]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
 	// [here]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
 	// [repeat]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/repeat
 	Down(key string) error
 
 	// Dispatches only `input` event, does not emit the `keydown`, `keyup` or `keypress` events.
+	//
+	//  text: Sets input to the specified text value.
 	InsertText(text string) error
 
 	// “key” can specify the intended
@@ -1624,15 +1914,21 @@ type Keyboard interface {
 	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	//
+	//  key: Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
+	//
 	// [keyboardEvent.Key]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
 	// [here]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
 	Press(key string, options ...KeyboardPressOptions) error
 
 	// Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
 	// To press a special key, like `Control` or `ArrowDown`, use [Keyboard.Press].
+	//
+	//  text: A text to type into a focused element.
 	Type(text string, options ...KeyboardTypeOptions) error
 
 	// Dispatches a `keyup` event.
+	//
+	//  key: Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
 	Up(key string) error
 }
 
@@ -1656,6 +1952,8 @@ type Locator interface {
 	AllTextContents() ([]string, error)
 
 	// Creates a locator that matches both this locator and the argument locator.
+	//
+	//  locator: Additional locator to match.
 	And(locator Locator) Locator
 
 	// Calls [blur] on the element.
@@ -1771,6 +2069,9 @@ type Locator interface {
 	//  - [Event]
 	// You can also specify [JSHandle] as the property value if you want live objects to be passed into the event:
 	//
+	// 1. typ: DOM event type: `"click"`, `"dragstart"`, etc.
+	// 2. eventInit: Optional event-specific initialization properties.
+	//
 	// [element.Click()]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click
 	// [DragEvent]: https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent
 	// [FocusEvent]: https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent
@@ -1787,6 +2088,8 @@ type Locator interface {
 	//
 	// This method drags the locator to another target locator or target position. It will first move to the source
 	// element, perform a `mousedown`, then move to the target element or position and perform a `mouseup`.
+	//
+	//  target: Locator of the element to drag to.
 	DragTo(target Locator, options ...LocatorDragToOptions) error
 
 	// Resolves given locator to the first matching DOM element. If there are no matching elements, waits for one. If
@@ -1808,6 +2111,10 @@ type Locator interface {
 	// second argument.
 	// If “expression” returns a [Promise], this method will wait for the promise to resolve and return its value.
 	// If “expression” throws or rejects, this method throws.
+	//
+	// 1. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 2. arg: Optional argument to pass to “expression”.
 	Evaluate(expression string, arg interface{}, options ...LocatorEvaluateOptions) (interface{}, error)
 
 	// Execute JavaScript code in the page, taking all matching elements as an argument.
@@ -1818,6 +2125,10 @@ type Locator interface {
 	// “arg” as a second argument.
 	// If “expression” returns a [Promise], this method will wait for the promise to resolve and return its value.
 	// If “expression” throws or rejects, this method throws.
+	//
+	// 1. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 2. arg: Optional argument to pass to “expression”.
 	EvaluateAll(expression string, arg ...interface{}) (interface{}, error)
 
 	// Execute JavaScript code in the page, taking the matching element as an argument, and return a [JSHandle] with the
@@ -1832,6 +2143,10 @@ type Locator interface {
 	// If “expression” returns a [Promise], this method will wait for the promise to resolve and return its value.
 	// If “expression” throws or rejects, this method throws.
 	// See [Page.EvaluateHandle] for more details.
+	//
+	// 1. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 2. arg: Optional argument to pass to “expression”.
 	EvaluateHandle(expression string, arg interface{}, options ...LocatorEvaluateHandleOptions) (JSHandle, error)
 
 	// Set a value to the input field.
@@ -1845,6 +2160,8 @@ type Locator interface {
 	// [control], the control will be filled
 	// instead.
 	// To send fine-grained keyboard events, use [Locator.Type].
+	//
+	//  value: Value to set for the `<input>`, `<textarea>` or `[contenteditable]` element.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
@@ -1864,19 +2181,29 @@ type Locator interface {
 
 	// When working with iframes, you can create a frame locator that will enter the iframe and allow locating elements in
 	// that iframe:
+	//
+	//  selector: A selector to use when resolving DOM element.
 	FrameLocator(selector string) FrameLocator
 
 	// Returns the matching element's attribute value.
+	//
+	//  name: Attribute name to get the value for.
 	GetAttribute(name string, options ...LocatorGetAttributeOptions) (string, error)
 
 	// Allows locating elements by their alt text.
+	//
+	//  text: Text to locate the element for.
 	GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) Locator
 
 	// Allows locating input elements by the text of the associated `<label>` or `aria-labelledby` element, or by the
 	// `aria-label` attribute.
+	//
+	//  text: Text to locate the element for.
 	GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) Locator
 
 	// Allows locating input elements by the placeholder text.
+	//
+	//  text: Text to locate the element for.
 	GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) Locator
 
 	// Allows locating elements by their [ARIA role],
@@ -1892,6 +2219,8 @@ type Locator interface {
 	// [supported roles here]. ARIA guidelines **do not recommend**
 	// duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
 	//
+	//  role: Required aria role.
+	//
 	// [ARIA role]: https://www.w3.org/TR/wai-aria-1.2/#roles
 	// [ARIA attributes]: https://www.w3.org/TR/wai-aria-1.2/#aria-attributes
 	// [accessible name]: https://w3c.github.io/accname/#dfn-accessible-name
@@ -1905,6 +2234,8 @@ type Locator interface {
 	//
 	// By default, the `data-testid` attribute is used as a test id. Use [Selectors.SetTestIdAttribute] to configure a
 	// different test id attribute if necessary.
+	//
+	//  testId: Id to locate the element by.
 	GetByTestId(testId interface{}) Locator
 
 	// Allows locating elements that contain given text.
@@ -1917,9 +2248,13 @@ type Locator interface {
 	// one, turns line breaks into spaces and ignores leading and trailing whitespace.
 	// Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
 	// example, locating by text `"Log in"` matches `<input type=button value="Log in">`.
+	//
+	//  text: Text to locate the element for.
 	GetByText(text interface{}, options ...LocatorGetByTextOptions) Locator
 
 	// Allows locating elements by their title attribute.
+	//
+	//  text: Text to locate the element for.
 	GetByTitle(text interface{}, options ...LocatorGetByTitleOptions) Locator
 
 	// Highlight the corresponding element(s) on the screen. Useful for debugging, don't commit the code that uses
@@ -1999,6 +2334,8 @@ type Locator interface {
 	// options, similar to [Locator.Filter] method.
 	// [Learn more about locators].
 	//
+	//  selectorOrLocator: A selector or locator to use when resolving DOM element.
+	//
 	// [Learn more about locators]: https://playwright.dev/docs/locators
 	Locator(selectorOrLocator interface{}, options ...LocatorLocatorOptions) Locator
 
@@ -2006,6 +2343,8 @@ type Locator interface {
 	Nth(index int) Locator
 
 	// Creates a locator that matches either of the two locators.
+	//
+	//  locator: Alternative locator to match.
 	Or(locator Locator) Locator
 
 	// A page this locator belongs to.
@@ -2029,6 +2368,8 @@ type Locator interface {
 	// texts.
 	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
 	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
+	//
+	//  key: Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
 	//
 	// [keyboardEvent.Key]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
 	// [here]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
@@ -2099,6 +2440,8 @@ type Locator interface {
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
 	//
+	//  checked: Whether to check or uncheck the checkbox.
+	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	SetChecked(checked bool, options ...LocatorSetCheckedOptions) error
 
@@ -2142,6 +2485,8 @@ type Locator interface {
 	// Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the
 	// text.
 	// To press a special key, like `Control` or `ArrowDown`, use [Locator.Press].
+	//
+	//  text: A text to type into a focused element.
 	Type(text string, options ...LocatorTypeOptions) error
 
 	// Ensure that checkbox or radio element is unchecked.
@@ -2228,38 +2573,61 @@ type LocatorAssertions interface {
 
 	// Ensures the [Locator] points to an element that contains the given text. You can use regular expressions for the
 	// value as well.
+	//
+	//  expected: Expected substring or RegExp or a list of those.
 	ToContainText(expected interface{}, options ...LocatorAssertionsToContainTextOptions) error
 
 	// Ensures the [Locator] points to an element with given attribute.
+	//
+	// 1. name: Attribute name.
+	// 2. value: Expected attribute value.
 	ToHaveAttribute(name string, value interface{}, options ...LocatorAssertionsToHaveAttributeOptions) error
 
 	// Ensures the [Locator] points to an element with given CSS classes. This needs to be a full match or using a relaxed
 	// regular expression.
+	//
+	//  expected: Expected class or RegExp or a list of those.
 	ToHaveClass(expected interface{}, options ...LocatorAssertionsToHaveClassOptions) error
 
 	// Ensures the [Locator] resolves to an exact number of DOM nodes.
+	//
+	//  count: Expected count.
 	ToHaveCount(count int, options ...LocatorAssertionsToHaveCountOptions) error
 
 	// Ensures the [Locator] resolves to an element with the given computed CSS style.
+	//
+	// 1. name: CSS property name.
+	// 2. value: CSS property value.
 	ToHaveCSS(name string, value interface{}, options ...LocatorAssertionsToHaveCSSOptions) error
 
 	// Ensures the [Locator] points to an element with the given DOM Node ID.
+	//
+	//  id: Element id.
 	ToHaveId(id interface{}, options ...LocatorAssertionsToHaveIdOptions) error
 
 	// Ensures the [Locator] points to an element with given JavaScript property. Note that this property can be of a
 	// primitive type as well as a plain serializable JavaScript object.
+	//
+	// 1. name: Property name.
+	// 2. value: Property value.
 	ToHaveJSProperty(name string, value interface{}, options ...LocatorAssertionsToHaveJSPropertyOptions) error
 
 	// Ensures the [Locator] points to an element with the given text. You can use regular expressions for the value as
 	// well.
+	//
+	//  expected: Expected string or RegExp or a list of those.
 	ToHaveText(expected interface{}, options ...LocatorAssertionsToHaveTextOptions) error
 
 	// Ensures the [Locator] points to an element with the given input value. You can use regular expressions for the
 	// value as well.
+	//
+	//  value: Expected value.
 	ToHaveValue(value interface{}, options ...LocatorAssertionsToHaveValueOptions) error
 
 	// Ensures the [Locator] points to multi-select/combobox (i.e. a `select` with the `multiple` attribute) and the
 	// specified values are selected.
+	//
+	//  values: Expected options currently selected.
 	ToHaveValues(values []interface{}, options ...LocatorAssertionsToHaveValuesOptions) error
 }
 
@@ -2284,6 +2652,9 @@ type Mouse interface {
 	// Dispatches a `wheel` event.
 	// **NOTE** Wheel events may cause scrolling if they are not handled, and this method does not wait for the scrolling
 	// to finish before returning.
+	//
+	// 1. deltaX: Pixels to scroll horizontally.
+	// 2. deltaY: Pixels to scroll vertically.
 	Wheel(deltaX float64, deltaY float64) error
 }
 
@@ -2396,6 +2767,8 @@ type Page interface {
 	//   newly attached frame.
 	// The script is evaluated after the document was created but before any of its scripts were run. This is useful to
 	// amend the JavaScript environment, e.g. to seed `Math.random`.
+	//
+	//  script: Script to be evaluated in the page.
 	AddInitScript(script Script) error
 
 	// Adds a `<script>` tag into the page with the desired url or content. Returns the added tag when the script's onload
@@ -2424,6 +2797,9 @@ type Page interface {
 	//
 	// Deprecated: Use locator-based [Locator.Check] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [locators]: https://playwright.dev/docs/locators
 	Check(selector string, options ...PageCheckOptions) error
@@ -2439,6 +2815,9 @@ type Page interface {
 	// Passing zero timeout disables this.
 	//
 	// Deprecated: Use locator-based [Locator.Click] instead. Read more about [locators].
+	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [locators]: https://playwright.dev/docs/locators
@@ -2471,6 +2850,9 @@ type Page interface {
 	//
 	// Deprecated: Use locator-based [Locator.Dblclick] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [locators]: https://playwright.dev/docs/locators
 	Dblclick(selector string, options ...PageDblclickOptions) error
@@ -2480,6 +2862,11 @@ type Page interface {
 	// [element.Click()].
 	//
 	// Deprecated: Use locator-based [Locator.DispatchEvent] instead. Read more about [locators].
+	//
+	// 1. selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	// 2. typ: DOM event type: `"click"`, `"dragstart"`, etc.
+	// 3. eventInit: Optional event-specific initialization properties.
 	//
 	// [element.Click()]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click
 	// [DragEvent]: https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent
@@ -2494,6 +2881,11 @@ type Page interface {
 
 	// This method drags the source element to the target element. It will first move to the source element, perform a
 	// `mousedown`, then move to the target element and perform a `mouseup`.
+	//
+	// 1. source: A selector to search for an element to drag. If there are multiple elements satisfying the selector, the first will
+	//    be used.
+	// 2. target: A selector to search for an element to drop onto. If there are multiple elements satisfying the selector, the first
+	//    will be used.
 	DragAndDrop(source string, target string, options ...PageDragAndDropOptions) error
 
 	// This method changes the `CSS media type` through the `media` argument, and/or the `prefers-colors-scheme` media
@@ -2506,6 +2898,11 @@ type Page interface {
 	// its value.
 	//
 	// Deprecated: This method does not wait for the element to pass actionability checks and therefore can lead to the flaky tests. Use [Locator.Evaluate], other [Locator] helper methods or web-first assertions instead.
+	//
+	// 1. selector: A selector to query for.
+	// 2. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 3. arg: Optional argument to pass to “expression”.
 	EvalOnSelector(selector string, expression string, arg interface{}, options ...PageEvalOnSelectorOptions) (interface{}, error)
 
 	// The method finds all elements matching the specified selector within the page and passes an array of matched
@@ -2514,6 +2911,11 @@ type Page interface {
 	// its value.
 	//
 	// Deprecated: In most cases, [Locator.EvaluateAll], other [Locator] helper methods and web-first assertions do a better job.
+	//
+	// 1. selector: A selector to query for.
+	// 2. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 3. arg: Optional argument to pass to “expression”.
 	EvalOnSelectorAll(selector string, expression string, arg ...interface{}) (interface{}, error)
 
 	// Returns the value of the “expression” invocation.
@@ -2522,6 +2924,10 @@ type Page interface {
 	// If the function passed to the [Page.Evaluate] returns a non-[Serializable] value, then [Page.Evaluate] resolves to
 	// `undefined`. Playwright also supports transferring some additional values that are not serializable by `JSON`:
 	// `-0`, `NaN`, `Infinity`, `-Infinity`.
+	//
+	// 1. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 2. arg: Optional argument to pass to “expression”.
 	Evaluate(expression string, arg ...interface{}) (interface{}, error)
 
 	// Returns the value of the “expression” invocation as a [JSHandle].
@@ -2529,6 +2935,10 @@ type Page interface {
 	// [JSHandle].
 	// If the function passed to the [Page.EvaluateHandle] returns a [Promise], then [Page.EvaluateHandle] would wait for
 	// the promise to resolve and return its value.
+	//
+	// 1. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 2. arg: Optional argument to pass to “expression”.
 	EvaluateHandle(expression string, arg ...interface{}) (JSHandle, error)
 
 	// The method adds a function called “name” on the `window` object of every frame in this page. When called, the
@@ -2538,6 +2948,9 @@ type Page interface {
 	// BrowserContext, page: Page, frame: Frame }`.
 	// See [BrowserContext.ExposeBinding] for the context-wide version.
 	// **NOTE** Functions installed via [Page.ExposeBinding] survive navigations.
+	//
+	// 1. name: Name of the function on the window object.
+	// 2. binding: Callback function that will be called in the Playwright's context.
 	ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error
 
 	// The method adds a function called “name” on the `window` object of every frame in the page. When called, the
@@ -2545,6 +2958,9 @@ type Page interface {
 	// If the “callback” returns a [Promise], it will be awaited.
 	// See [BrowserContext.ExposeFunction] for context-wide exposed function.
 	// **NOTE** Functions installed via [Page.ExposeFunction] survive navigations.
+	//
+	// 1. name: Name of the function on the window object
+	// 2. binding: Callback function which will be called in Playwright's context.
 	ExposeFunction(name string, binding ExposedFunction) error
 
 	// This method waits for an element matching “selector”, waits for [actionability] checks,
@@ -2558,6 +2974,10 @@ type Page interface {
 	//
 	// Deprecated: Use locator-based [Locator.Fill] instead. Read more about [locators].
 	//
+	// 1. selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	// 2. value: Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
+	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
 	// [locators]: https://playwright.dev/docs/locators
@@ -2568,6 +2988,9 @@ type Page interface {
 	//
 	// Deprecated: Use locator-based [Locator.Focus] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [locators]: https://playwright.dev/docs/locators
 	Focus(selector string, options ...PageFocusOptions) error
 
@@ -2576,6 +2999,8 @@ type Page interface {
 
 	// When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements
 	// in that iframe.
+	//
+	//  selector: A selector to use when resolving DOM element.
 	FrameLocator(selector string) FrameLocator
 
 	// An array of all frames attached to the page.
@@ -2585,17 +3010,27 @@ type Page interface {
 	//
 	// Deprecated: Use locator-based [Locator.GetAttribute] instead. Read more about [locators].
 	//
+	// 1. selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	// 2. name: Attribute name to get the value for.
+	//
 	// [locators]: https://playwright.dev/docs/locators
 	GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error)
 
 	// Allows locating elements by their alt text.
+	//
+	//  text: Text to locate the element for.
 	GetByAltText(text interface{}, options ...PageGetByAltTextOptions) Locator
 
 	// Allows locating input elements by the text of the associated `<label>` or `aria-labelledby` element, or by the
 	// `aria-label` attribute.
+	//
+	//  text: Text to locate the element for.
 	GetByLabel(text interface{}, options ...PageGetByLabelOptions) Locator
 
 	// Allows locating input elements by the placeholder text.
+	//
+	//  text: Text to locate the element for.
 	GetByPlaceholder(text interface{}, options ...PageGetByPlaceholderOptions) Locator
 
 	// Allows locating elements by their [ARIA role],
@@ -2611,6 +3046,8 @@ type Page interface {
 	// [supported roles here]. ARIA guidelines **do not recommend**
 	// duplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values.
 	//
+	//  role: Required aria role.
+	//
 	// [ARIA role]: https://www.w3.org/TR/wai-aria-1.2/#roles
 	// [ARIA attributes]: https://www.w3.org/TR/wai-aria-1.2/#aria-attributes
 	// [accessible name]: https://w3c.github.io/accname/#dfn-accessible-name
@@ -2624,6 +3061,8 @@ type Page interface {
 	//
 	// By default, the `data-testid` attribute is used as a test id. Use [Selectors.SetTestIdAttribute] to configure a
 	// different test id attribute if necessary.
+	//
+	//  testId: Id to locate the element by.
 	GetByTestId(testId interface{}) Locator
 
 	// Allows locating elements that contain given text.
@@ -2636,9 +3075,13 @@ type Page interface {
 	// one, turns line breaks into spaces and ignores leading and trailing whitespace.
 	// Input elements of the type `button` and `submit` are matched by their `value` instead of the text content. For
 	// example, locating by text `"Log in"` matches `<input type=button value="Log in">`.
+	//
+	//  text: Text to locate the element for.
 	GetByText(text interface{}, options ...PageGetByTextOptions) Locator
 
 	// Allows locating elements by their title attribute.
+	//
+	//  text: Text to locate the element for.
 	GetByTitle(text interface{}, options ...PageGetByTitleOptions) Locator
 
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of
@@ -2667,6 +3110,10 @@ type Page interface {
 	// **NOTE** Headless mode doesn't support navigation to a PDF document. See the
 	// [upstream issue].
 	//
+	//  url: URL to navigate page to. The url should include scheme, e.g. `https://`. When a “baseURL” via the context options
+	//    was provided and the passed URL is a path, it gets merged via the
+	//    [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
+	//
 	// [upstream issue]: https://bugs.chromium.org/p/chromium/issues/detail?id=761295
 	Goto(url string, options ...PageGotoOptions) (Response, error)
 
@@ -2682,6 +3129,9 @@ type Page interface {
 	//
 	// Deprecated: Use locator-based [Locator.Hover] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [locators]: https://playwright.dev/docs/locators
 	Hover(selector string, options ...PageHoverOptions) error
@@ -2690,12 +3140,18 @@ type Page interface {
 	//
 	// Deprecated: Use locator-based [Locator.InnerHTML] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [locators]: https://playwright.dev/docs/locators
 	InnerHTML(selector string, options ...PageInnerHTMLOptions) (string, error)
 
 	// Returns `element.innerText`.
 	//
 	// Deprecated: Use locator-based [Locator.InnerText] instead. Read more about [locators].
+	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
 	//
 	// [locators]: https://playwright.dev/docs/locators
 	InnerText(selector string, options ...PageInnerTextOptions) (string, error)
@@ -2707,6 +3163,9 @@ type Page interface {
 	//
 	// Deprecated: Use locator-based [Locator.InputValue] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
 	// [locators]: https://playwright.dev/docs/locators
 	InputValue(selector string, options ...PageInputValueOptions) (string, error)
@@ -2714,6 +3173,9 @@ type Page interface {
 	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
 	//
 	// Deprecated: Use locator-based [Locator.IsChecked] instead. Read more about [locators].
+	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
 	//
 	// [locators]: https://playwright.dev/docs/locators
 	IsChecked(selector string, options ...PageIsCheckedOptions) (bool, error)
@@ -2725,6 +3187,9 @@ type Page interface {
 	//
 	// Deprecated: Use locator-based [Locator.IsDisabled] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [enabled]: https://playwright.dev/docs/actionability#enabled
 	// [locators]: https://playwright.dev/docs/locators
 	IsDisabled(selector string, options ...PageIsDisabledOptions) (bool, error)
@@ -2733,6 +3198,9 @@ type Page interface {
 	//
 	// Deprecated: Use locator-based [Locator.IsEditable] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [editable]: https://playwright.dev/docs/actionability#editable
 	// [locators]: https://playwright.dev/docs/locators
 	IsEditable(selector string, options ...PageIsEditableOptions) (bool, error)
@@ -2740,6 +3208,9 @@ type Page interface {
 	// Returns whether the element is [enabled].
 	//
 	// Deprecated: Use locator-based [Locator.IsEnabled] instead. Read more about [locators].
+	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
 	//
 	// [enabled]: https://playwright.dev/docs/actionability#enabled
 	// [locators]: https://playwright.dev/docs/locators
@@ -2750,6 +3221,9 @@ type Page interface {
 	//
 	// Deprecated: Use locator-based [Locator.IsHidden] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [visible]: https://playwright.dev/docs/actionability#visible
 	// [locators]: https://playwright.dev/docs/locators
 	IsHidden(selector string, options ...PageIsHiddenOptions) (bool, error)
@@ -2758,6 +3232,9 @@ type Page interface {
 	// is considered not visible.
 	//
 	// Deprecated: Use locator-based [Locator.IsVisible] instead. Read more about [locators].
+	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
 	//
 	// [visible]: https://playwright.dev/docs/actionability#visible
 	// [locators]: https://playwright.dev/docs/locators
@@ -2769,6 +3246,8 @@ type Page interface {
 	// to the element immediately before performing an action, so a series of actions on the same locator can in fact be
 	// performed on different DOM elements. That would happen if the DOM structure between those actions has changed.
 	// [Learn more about locators].
+	//
+	//  selector: A selector to use when resolving DOM element.
 	//
 	// [Learn more about locators]: https://playwright.dev/docs/locators
 	Locator(selector string, options ...PageLocatorOptions) Locator
@@ -2817,6 +3296,10 @@ type Page interface {
 	//
 	// Deprecated: Use locator-based [Locator.Press] instead. Read more about [locators].
 	//
+	// 1. selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	// 2. key: Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
+	//
 	// [keyboardEvent.Key]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
 	// [here]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
 	// [locators]: https://playwright.dev/docs/locators
@@ -2827,6 +3310,8 @@ type Page interface {
 	//
 	// Deprecated: Use locator-based [Page.Locator] instead. Read more about [locators].
 	//
+	//  selector: A selector to query for.
+	//
 	// [locators]: https://playwright.dev/docs/locators
 	QuerySelector(selector string, options ...PageQuerySelectorOptions) (ElementHandle, error)
 
@@ -2834,6 +3319,8 @@ type Page interface {
 	// the return value resolves to `[]`.
 	//
 	// Deprecated: Use locator-based [Page.Locator] instead. Read more about [locators].
+	//
+	//  selector: A selector to query for.
 	//
 	// [locators]: https://playwright.dev/docs/locators
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
@@ -2855,6 +3342,11 @@ type Page interface {
 	// [this] issue. We recommend disabling Service Workers when
 	// using request interception by setting “Browser.newContext.serviceWorkers” to `block`.
 	//
+	// 1. url: A glob pattern, regex pattern or predicate receiving [URL] to match while routing. When a “baseURL” via the context
+	//    options was provided and the passed URL is a path, it gets merged via the
+	//    [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
+	// 2. handler: handler function to route the request.
+	//
 	// [this]: https://github.com/microsoft/playwright/issues/1090
 	Route(url interface{}, handler routeHandler, times ...int) error
 
@@ -2863,6 +3355,9 @@ type Page interface {
 	// Playwright will not serve requests intercepted by Service Worker from the HAR file. See
 	// [this] issue. We recommend disabling Service Workers when
 	// using request interception by setting “Browser.newContext.serviceWorkers” to `block`.
+	//
+	//  har: Path to a [HAR](http://www.softwareishard.com/blog/har-12-spec) file with prerecorded network data. If `path` is a
+	//    relative path, then it is resolved relative to the current working directory.
 	//
 	// [Replaying from HAR]: https://playwright.dev/docs/network#replaying-from-har
 	// [this]: https://github.com/microsoft/playwright/issues/1090
@@ -2881,6 +3376,9 @@ type Page interface {
 	// Triggers a `change` and `input` event once all the provided options have been selected.
 	//
 	// Deprecated: Use locator-based [Locator.SelectOption] instead. Read more about [locators].
+	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
@@ -2902,10 +3400,16 @@ type Page interface {
 	//
 	// Deprecated: Use locator-based [Locator.SetChecked] instead. Read more about [locators].
 	//
+	// 1. selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	// 2. checked: Whether to check or uncheck the checkbox.
+	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [locators]: https://playwright.dev/docs/locators
 	SetChecked(selector string, checked bool, options ...PageSetCheckedOptions) error
 
+	//
+	//  html: HTML markup to assign to the page.
 	SetContent(html string, options ...PageSetContentOptions) error
 
 	// This setting will change the default maximum navigation time for the following methods and related shortcuts:
@@ -2918,14 +3422,20 @@ type Page interface {
 	//  - [Page.WaitForURL]
 	// **NOTE** [Page.SetDefaultNavigationTimeout] takes priority over [Page.SetDefaultTimeout],
 	// [BrowserContext.SetDefaultTimeout] and [BrowserContext.SetDefaultNavigationTimeout].
+	//
+	//  timeout: Maximum navigation time in milliseconds
 	SetDefaultNavigationTimeout(timeout float64)
 
 	// This setting will change the default maximum time for all the methods accepting “timeout” option.
 	// **NOTE** [Page.SetDefaultNavigationTimeout] takes priority over [Page.SetDefaultTimeout].
+	//
+	//  timeout: Maximum time in milliseconds
 	SetDefaultTimeout(timeout float64)
 
 	// The extra HTTP headers will be sent with every request the page initiates.
 	// **NOTE** [Page.SetExtraHTTPHeaders] does not guarantee the order of headers in the outgoing requests.
+	//
+	//  headers: An object containing additional HTTP headers to be sent with every request. All header values must be strings.
 	SetExtraHTTPHeaders(headers map[string]string) error
 
 	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then
@@ -2936,6 +3446,9 @@ type Page interface {
 	// [control], targets the control instead.
 	//
 	// Deprecated: Use locator-based [Locator.SetInputFiles] instead. Read more about [locators].
+	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
 	//
 	// [input element]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
@@ -2962,6 +3475,9 @@ type Page interface {
 	//
 	// Deprecated: Use locator-based [Locator.Tap] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [locators]: https://playwright.dev/docs/locators
 	Tap(selector string, options ...PageTapOptions) error
@@ -2969,6 +3485,9 @@ type Page interface {
 	// Returns `element.textContent`.
 	//
 	// Deprecated: Use locator-based [Locator.TextContent] instead. Read more about [locators].
+	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
 	//
 	// [locators]: https://playwright.dev/docs/locators
 	TextContent(selector string, options ...PageTextContentOptions) (string, error)
@@ -2983,6 +3502,10 @@ type Page interface {
 	// To press a special key, like `Control` or `ArrowDown`, use [Keyboard.Press].
 	//
 	// Deprecated: Use locator-based [Locator.Type] instead. Read more about [locators].
+	//
+	// 1. selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	// 2. text: A text to type into a focused element.
 	//
 	// [locators]: https://playwright.dev/docs/locators
 	Type(selector string, text string, options ...PageTypeOptions) error
@@ -3002,11 +3525,17 @@ type Page interface {
 	//
 	// Deprecated: Use locator-based [Locator.Uncheck] instead. Read more about [locators].
 	//
+	//  selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
+	//    used.
+	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [locators]: https://playwright.dev/docs/locators
 	Uncheck(selector string, options ...PageUncheckOptions) error
 
 	// Removes a route created with [Page.Route]. When “handler” is not specified, removes all routes for the “url”.
+	//
+	// 1. url: A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
+	// 2. handler: Optional handler function to route the request.
 	Unroute(url interface{}, handler ...routeHandler) error
 
 	URL() string
@@ -3028,6 +3557,8 @@ type Page interface {
 
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the page is closed before the event is fired. Returns the event data value.
+	//
+	//  event: Event name, same one typically passed into `*.on(event)`.
 	ExpectEvent(event string, cb func() error, options ...PageExpectEventOptions) (interface{}, error)
 
 	// Performs action and waits for a new [FileChooser] to be created. If predicate is provided, it passes [FileChooser]
@@ -3036,6 +3567,10 @@ type Page interface {
 	ExpectFileChooser(cb func() error, options ...PageExpectFileChooserOptions) (FileChooser, error)
 
 	// Returns when the “expression” returns a truthy value. It resolves to a JSHandle of the truthy value.
+	//
+	// 1. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 2. arg: Optional argument to pass to “expression”.
 	WaitForFunction(expression string, arg interface{}, options ...PageWaitForFunctionOptions) (JSHandle, error)
 
 	// Returns when the required load state has been reached.
@@ -3061,6 +3596,10 @@ type Page interface {
 	// Waits for the matching request and returns it. See [waiting for event] for more
 	// details about events.
 	//
+	//  urlOrPredicate: Request URL string, regex or predicate receiving [Request] object. When a “baseURL” via the context options was
+	//    provided and the passed URL is a path, it gets merged via the
+	//    [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
+	//
 	// [waiting for event]: https://playwright.dev/docs/events#waiting-for-event
 	ExpectRequest(urlOrPredicate interface{}, cb func() error, options ...PageExpectRequestOptions) (Request, error)
 
@@ -3071,6 +3610,10 @@ type Page interface {
 
 	// Returns the matched response. See [waiting for event] for more details about
 	// events.
+	//
+	//  urlOrPredicate: Request URL string, regex or predicate receiving [Response] object. When a “baseURL” via the context options was
+	//    provided and the passed URL is a path, it gets merged via the
+	//    [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
 	//
 	// [waiting for event]: https://playwright.dev/docs/events#waiting-for-event
 	ExpectResponse(urlOrPredicate interface{}, cb func() error, options ...PageExpectResponseOptions) (Response, error)
@@ -3085,6 +3628,8 @@ type Page interface {
 	//
 	// Deprecated: Use web assertions that assert visibility or a locator-based [Locator.WaitFor] instead. Read more about [locators].
 	//
+	//  selector: A selector to query for.
+	//
 	// [locators]: https://playwright.dev/docs/locators
 	WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandle, error)
 
@@ -3093,9 +3638,15 @@ type Page interface {
 	// to be flaky. Use signals such as network events, selectors becoming visible and others instead.
 	//
 	// Deprecated: Never wait for timeout in production. Tests that wait for time are inherently flaky. Use [Locator] actions and web assertions that wait automatically.
+	//
+	//  timeout: A timeout to wait for
 	WaitForTimeout(timeout float64)
 
 	// Waits for the main frame to navigate to the given URL.
+	//
+	//  url: A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation. Note that if
+	//    the parameter is a string without wildcard characters, the method will wait for navigation to URL that is exactly
+	//    equal to the string.
 	WaitForURL(url interface{}, options ...PageWaitForURLOptions) error
 
 	// Performs action and waits for a new [WebSocket]. If predicate is provided, it passes [WebSocket] value into the
@@ -3119,6 +3670,8 @@ type Page interface {
 	// Waits for given `event` to fire. If predicate is provided, it passes event's value into the `predicate` function
 	// and waits for `predicate(event)` to return a truthy value. Will throw an error if the page is closed before the
 	// `event` is fired.
+	//
+	//  event: Event name, same one typically passed into `*.on(event)`.
 	WaitForEvent(event string, options ...PageWaitForEventOptions) (interface{}, error)
 }
 
@@ -3130,9 +3683,13 @@ type PageAssertions interface {
 	Not() PageAssertions
 
 	// Ensures the page has the given title.
+	//
+	//  titleOrRegExp: Expected title or RegExp.
 	ToHaveTitle(titleOrRegExp interface{}, options ...PageAssertionsToHaveTitleOptions) error
 
 	// Ensures the page is navigated to the given URL.
+	//
+	//  urlOrRegExp: Expected URL string or RegExp.
 	ToHaveURL(urlOrRegExp interface{}, options ...PageAssertionsToHaveURLOptions) error
 }
 
@@ -3145,12 +3702,18 @@ type PageAssertions interface {
 // By default, the timeout for assertions is set to 5 seconds.
 type PlaywrightAssertions interface {
 	// Creates a [APIResponseAssertions] object for the given [APIResponse].
+	//
+	//  response: [APIResponse] object to use for assertions.
 	APIResponse(response APIResponse) APIResponseAssertions
 
 	// Creates a [LocatorAssertions] object for the given [Locator].
+	//
+	//  locator: [Locator] object to use for assertions.
 	Locator(locator Locator) LocatorAssertions
 
 	// Creates a [PageAssertions] object for the given [Page].
+	//
+	//  page: [Page] object to use for assertions.
 	Page(page Page) PageAssertions
 }
 
@@ -3184,6 +3747,8 @@ type Request interface {
 	HeadersArray() ([]NameValue, error)
 
 	// Returns the value of the header matching the name. The name is case insensitive.
+	//
+	//  name: Name of the header.
 	HeaderValue(name string) (string, error)
 
 	// Whether this request is driving frame's navigation.
@@ -3266,9 +3831,13 @@ type Response interface {
 	// Returns the value of the header matching the name. The name is case insensitive. If multiple headers have the same
 	// name (except `set-cookie`), they are returned as a list separated by `, `. For `set-cookie`, the `\n` separator is
 	// used. If no headers are found, `null` is returned.
+	//
+	//  name: Name of the header.
 	HeaderValue(name string) (string, error)
 
 	// Returns all values of the headers matching the name, for example `set-cookie`. The name is case insensitive.
+	//
+	//  name: Name of the header.
 	HeaderValues(name string) ([]string, error)
 
 	// Returns the JSON representation of response body.
@@ -3346,9 +3915,15 @@ type Route interface {
 // [extensibility]: https://playwright.dev/docs/extensibility
 type Selectors interface {
 	// Selectors must be registered before creating the page.
+	//
+	// 1. name: Name that is used in selectors as a prefix, e.g. `{name: 'foo'}` enables `foo=myselectorbody` selectors. May only
+	//    contain `[a-zA-Z0-9_]` characters.
+	// 2. script: Script that evaluates to a selector engine instance. The script is evaluated in the page context.
 	Register(name string, script Script, options ...SelectorsRegisterOptions) error
 
 	// Defines custom attribute name to be used in [Page.GetByTestId]. `data-testid` is used by default.
+	//
+	//  attributeName: Test id attribute name.
 	SetTestIdAttribute(attributeName string)
 }
 
@@ -3391,6 +3966,8 @@ type Video interface {
 
 	// Saves the video to a user-specified path. It is safe to call this method while the video is still in progress, or
 	// after the page has closed. This method waits until the page is closed and the video is fully saved.
+	//
+	//  path: Path where the video should be saved.
 	SaveAs(path string) error
 }
 
@@ -3416,12 +3993,16 @@ type WebSocket interface {
 
 	// Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
 	// value. Will throw an error if the webSocket is closed before the event is fired. Returns the event data value.
+	//
+	//  event: Event name, same one would pass into `webSocket.on(event)`.
 	ExpectEvent(event string, cb func() error, options ...WebSocketExpectEventOptions) (interface{}, error)
 
 	// **NOTE** In most cases, you should use [WebSocket.ExpectEvent].
 	// Waits for given `event` to fire. If predicate is provided, it passes event's value into the `predicate` function
 	// and waits for `predicate(event)` to return a truthy value. Will throw an error if the socket is closed before the
 	// `event` is fired.
+	//
+	//  event: Event name, same one typically passed into `*.on(event)`.
 	WaitForEvent(event string, options ...WebSocketWaitForEventOptions) (interface{}, error)
 }
 
@@ -3443,6 +4024,10 @@ type Worker interface {
 	// If the function passed to the [Worker.Evaluate] returns a non-[Serializable] value, then [Worker.Evaluate] returns
 	// `undefined`. Playwright also supports transferring some additional values that are not serializable by `JSON`:
 	// `-0`, `NaN`, `Infinity`, `-Infinity`.
+	//
+	// 1. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 2. arg: Optional argument to pass to “expression”.
 	Evaluate(expression string, arg ...interface{}) (interface{}, error)
 
 	// Returns the return value of “expression” as a [JSHandle].
@@ -3450,6 +4035,10 @@ type Worker interface {
 	// [JSHandle].
 	// If the function passed to the [Worker.EvaluateHandle] returns a [Promise], then [Worker.EvaluateHandle] would wait
 	// for the promise to resolve and return its value.
+	//
+	// 1. expression: JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+	//    function is automatically invoked.
+	// 2. arg: Optional argument to pass to “expression”.
 	EvaluateHandle(expression string, arg ...interface{}) (JSHandle, error)
 
 	URL() string

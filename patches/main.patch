@@ -1469,10 +1469,10 @@ index d1c55f3e2..d62c3ccd6 100644
  Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with
 diff --git a/utils/doclint/generateGoApi.js b/utils/doclint/generateGoApi.js
 new file mode 100644
-index 000000000..b64c00b65
+index 000000000..19b6b51ea
 --- /dev/null
 +++ b/utils/doclint/generateGoApi.js
-@@ -0,0 +1,834 @@
+@@ -0,0 +1,849 @@
 +/**
 + * Copyright (c) Microsoft Corporation.
 + *
@@ -1715,7 +1715,7 @@ index 000000000..b64c00b65
 + * @param {string} name
 + */
 +function toArgumentName(name) {
-+  return name;
++  return `${ name === 'type' ? 'typ' : name}`;
 +}
 +
 +/**
@@ -1933,6 +1933,7 @@ index 000000000..b64c00b65
 +
 +  // render args
 +  let args = [];
++  const argDocs = new Map();
 +  /**
 +   * @param {string} innerArgType
 +   * @param {string} innerArgName
@@ -1940,8 +1941,8 @@ index 000000000..b64c00b65
 +   */
 +  const pushArg = (innerArgType, innerArgName, argument) => {
 +    if (argument.comment)
-+      documentedResults.set(innerArgName, argument.comment)
-+    args.push(`${innerArgName === 'type' ? 'typ' : innerArgName} ${innerArgType}`);
++      argDocs.set(`${innerArgName} ${innerArgType}`, `${innerArgName}: ${argument.comment.trimEnd().replace(/\n/g, '\n//    ')}`);
++    args.push(`${innerArgName} ${innerArgType}`);
 +  };
 +
 +  /**
@@ -2013,7 +2014,13 @@ index 000000000..b64c00b65
 +    }
 +  }
 +
-+  output(transformComment(member));
++  let paramsComments = args.reduce((a, c) => {
++    if (argDocs.has(c.replace(' ...', ' ')))
++      a.push(argDocs.get(c.replace(' ...', ' ')));
++    return a;
++  }, [])
++
++  output(transformComment(member, paramsComments));
 +  if (parent.name === 'Touchscreen' && name === 'Tap')
 +    output(`${name}(x int, y int) error`);
 +  else if (['JSON', 'PostDataJSON'].includes(name) && args.length === 0 && resultType === 'interface{}')
@@ -2053,8 +2060,9 @@ index 000000000..b64c00b65
 +
 +/**
 + * @param {Documentation.Class | Documentation.Member} member
++ * @param {string[]} paramComments
 + */
-+function transformComment(member) {
++function transformComment(member, paramComments = []) {
 +  const links = [];
 +  const extractLinks = (text) => {
 +    let index = 0;
@@ -2110,6 +2118,13 @@ index 000000000..b64c00b65
 +  if (member.deprecated || member.discouraged) {
 +    out.push(`// `)
 +    out.push(extractLinks(`// Deprecated: ${member.deprecated ? member.deprecated : member.discouraged}`.replace(/↵/gm, ' ')))
++  }
++  if (paramComments.length > 0) {
++    out.push(`// `);
++    const singleParam = paramComments.length === 1;
++    paramComments.forEach((line, i) => {
++      out.push(`// ${singleParam ? "" : `${i + 1}.`} ${line}`)
++    });
 +  }
 +  // render external links
 +  if (links.length > 0) {
