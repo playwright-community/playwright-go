@@ -1,6 +1,7 @@
 package playwright
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"reflect"
@@ -37,6 +38,7 @@ type connection struct {
 	isRemote     bool
 	localUtils   *localUtilsImpl
 	tracingCount atomic.Int32
+	abort        chan struct{}
 }
 
 func (c *connection) Start() *Playwright {
@@ -65,17 +67,18 @@ func (c *connection) cleanup() {
 	if c.afterClose != nil {
 		c.afterClose()
 	}
-	c.callbacks.Range(func(key, value any) bool {
-		value.(*protocolCallback).SetError("Connection closed")
-		return true
-	})
+	select {
+	case <-c.abort:
+	default:
+		close(c.abort)
+	}
 }
 
 func (c *connection) Dispatch(msg *message) {
 	method := msg.Method
 	if msg.ID != 0 {
 		cb, _ := c.callbacks.LoadAndDelete(msg.ID)
-		if cb.(*protocolCallback).NoReply {
+		if cb.(*protocolCallback).noReply {
 			return
 		}
 		if msg.Error != nil {
@@ -232,7 +235,7 @@ func (c *connection) sendMessageToServer(guid string, method string, params inte
 		"params":   c.replaceChannelsWithGuids(params),
 		"metadata": metadata,
 	}
-	cb, _ := c.callbacks.LoadOrStore(id, newProtocolCallback(noReply))
+	cb, _ := c.callbacks.LoadOrStore(id, newProtocolCallback(noReply, c.abort))
 	if err := c.onmessage(message); err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
@@ -309,6 +312,7 @@ func serializeCallLocation(caller stack.Call) map[string]interface{} {
 
 func newConnection(onClose func() error, localUtils ...*localUtilsImpl) *connection {
 	connection := &connection{
+		abort:    make(chan struct{}, 1),
 		objects:  make(map[string]*channelOwner),
 		onClose:  onClose,
 		isRemote: false,
@@ -333,45 +337,42 @@ func fromNullableChannel(v interface{}) interface{} {
 
 type protocolCallback struct {
 	Callback chan result
-	NoReply  bool
-}
-
-func (pc *protocolCallback) SetError(msg string) {
-	if pc.NoReply {
-		return
-	}
-	select {
-	case pc.Callback <- result{
-		Error: &Error{
-			Name:    "Error",
-			Message: msg,
-		}}:
-	default:
-	}
+	noReply  bool
+	abort    <-chan struct{}
 }
 
 func (pc *protocolCallback) SetResult(r result) {
-	if pc.NoReply {
+	if pc.noReply {
 		return
 	}
-	pc.Callback <- r
+	select {
+	case <-pc.abort:
+		return
+	case pc.Callback <- r:
+	}
 }
 
 func (pc *protocolCallback) GetResult() (interface{}, error) {
-	if pc.NoReply {
+	if pc.noReply {
 		return nil, nil
 	}
-	result := <-pc.Callback
-	return result.Data, result.Error
+	select {
+	case result := <-pc.Callback:
+		return result.Data, result.Error
+	case <-pc.abort:
+		return nil, errors.New("Connection closed")
+	}
 }
 
-func newProtocolCallback(noReply bool) *protocolCallback {
+func newProtocolCallback(noReply bool, abort <-chan struct{}) *protocolCallback {
 	if noReply {
 		return &protocolCallback{
-			NoReply: true,
+			noReply: true,
+			abort:   abort,
 		}
 	}
 	return &protocolCallback{
 		Callback: make(chan result),
+		abort:    abort,
 	}
 }
