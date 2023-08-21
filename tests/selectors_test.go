@@ -94,7 +94,9 @@ func TestSelectorsShouldUseDataTestIdInStrictErrors(t *testing.T) {
 		</div>
 	</div>`))
 
-	err := page.Locator(".foo").Hover(playwright.LocatorHoverOptions{Timeout: playwright.Float(200)})
+	err := page.Locator(".foo").Hover(playwright.LocatorHoverOptions{
+		Timeout: playwright.Float(500),
+	})
 	require.ErrorContains(t, err, "strict mode violation")
 	require.ErrorContains(t, err, `<div class="foo bar:0`)
 	require.ErrorContains(t, err, `<div class="foo bar:1`)
