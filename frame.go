@@ -66,6 +66,9 @@ func (f *frameImpl) SetContent(content string, options ...FrameSetContentOptions
 
 func (f *frameImpl) Content() (string, error) {
 	content, err := f.channel.Send("content")
+	if content == nil {
+		return "", err
+	}
 	return content.(string), err
 }
 
@@ -393,20 +396,20 @@ func (f *frameImpl) InnerText(selector string, options ...FrameInnerTextOptions)
 	innerText, err := f.channel.Send("innerText", map[string]interface{}{
 		"selector": selector,
 	}, options)
-	if err != nil {
+	if innerText == nil {
 		return "", err
 	}
-	return innerText.(string), nil
+	return innerText.(string), err
 }
 
 func (f *frameImpl) InnerHTML(selector string, options ...FrameInnerHTMLOptions) (string, error) {
 	innerHTML, err := f.channel.Send("innerHTML", map[string]interface{}{
 		"selector": selector,
 	}, options)
-	if err != nil {
+	if innerHTML == nil {
 		return "", err
 	}
-	return innerHTML.(string), nil
+	return innerHTML.(string), err
 }
 
 func (f *frameImpl) GetAttribute(selector string, name string, options ...FrameGetAttributeOptions) (string, error) {
@@ -414,13 +417,10 @@ func (f *frameImpl) GetAttribute(selector string, name string, options ...FrameG
 		"selector": selector,
 		"name":     name,
 	}, options)
-	if err != nil {
+	if attribute == nil {
 		return "", err
 	}
-	if attribute == nil {
-		return "", nil
-	}
-	return attribute.(string), nil
+	return attribute.(string), err
 }
 
 func (f *frameImpl) Hover(selector string, options ...FrameHoverOptions) error {
@@ -495,7 +495,7 @@ func (f *frameImpl) WaitForFunction(expression string, arg interface{}, options 
 
 func (f *frameImpl) Title() (string, error) {
 	title, err := f.channel.Send("title")
-	if err != nil {
+	if title == nil {
 		return "", err
 	}
 	return title.(string), err
@@ -547,10 +547,10 @@ func (f *frameImpl) TextContent(selector string, options ...FrameTextContentOpti
 	textContent, err := f.channel.Send("textContent", map[string]interface{}{
 		"selector": selector,
 	}, options)
-	if err != nil {
+	if textContent == nil {
 		return "", err
 	}
-	return textContent.(string), nil
+	return textContent.(string), err
 }
 
 func (f *frameImpl) Tap(selector string, options ...FrameTapOptions) error {
@@ -637,7 +637,6 @@ func (f *frameImpl) IsVisible(selector string, options ...FrameIsVisibleOptions)
 }
 
 func (f *frameImpl) InputValue(selector string, options ...FrameInputValueOptions) (string, error) {
-
 	value, err := f.channel.Send("inputValue", map[string]interface{}{
 		"selector": selector,
 	}, options)
