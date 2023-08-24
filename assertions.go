@@ -7,15 +7,19 @@ import (
 	"strings"
 )
 
+const assertionsDefaultTimeout = 5000 // 5s
+
 type playwrightAssertionsImpl struct {
 	defaultTimeout *float64
 }
 
+// NewPlaywrightAssertions creates a new instance of PlaywrightAssertions
+//   - timeout: default value is 5000 (ms)
 func NewPlaywrightAssertions(timeout ...float64) PlaywrightAssertions {
 	if len(timeout) > 0 {
 		return &playwrightAssertionsImpl{Float(timeout[0])}
 	}
-	return &playwrightAssertionsImpl{Float(5000)}
+	return &playwrightAssertionsImpl{Float(assertionsDefaultTimeout)}
 }
 
 func (pa *playwrightAssertionsImpl) APIResponse(response APIResponse) APIResponseAssertions {

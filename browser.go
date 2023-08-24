@@ -122,7 +122,7 @@ func (b *browserImpl) Close() error {
 	b.Unlock()
 	_, err := b.channel.Send("close")
 	if err != nil && !isSafeCloseError(err) {
-		return fmt.Errorf("could not send message: %w", err)
+		return fmt.Errorf("close browser failed: %w", err)
 	}
 	if b.shouldCloseConnectionOnClose {
 		return b.connection.Stop()

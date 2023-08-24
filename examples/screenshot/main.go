@@ -23,7 +23,6 @@ func main() {
 		log.Fatalf("could not create page: %v", err)
 	}
 	if _, err = page.Goto("https://playwright.dev/", playwright.PageGotoOptions{
-		// networkidle is DISCOURAGED
 		WaitUntil: playwright.WaitUntilStateDomcontentloaded,
 	}); err != nil {
 		log.Fatalf("could not goto: %v", err)
