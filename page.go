@@ -23,7 +23,7 @@ type pageImpl struct {
 	workers         []Worker
 	mainFrame       Frame
 	routes          []*routeHandlerEntry
-	viewportSize    ViewportSize
+	viewportSize    *Size
 	ownedContext    BrowserContext
 	bindings        map[string]BindingCallFunction
 }
@@ -44,11 +44,17 @@ func (p *pageImpl) Close(options ...PageCloseOptions) error {
 }
 
 func (p *pageImpl) InnerText(selector string, options ...PageInnerTextOptions) (string, error) {
-	return p.mainFrame.InnerText(selector, options...)
+	if len(options) == 1 {
+		return p.mainFrame.InnerText(selector, FrameInnerTextOptions(options[0]))
+	}
+	return p.mainFrame.InnerText(selector)
 }
 
 func (p *pageImpl) InnerHTML(selector string, options ...PageInnerHTMLOptions) (string, error) {
-	return p.mainFrame.InnerHTML(selector, options...)
+	if len(options) == 1 {
+		return p.mainFrame.InnerHTML(selector, FrameInnerHTMLOptions(options[0]))
+	}
+	return p.mainFrame.InnerHTML(selector)
 }
 
 func (p *pageImpl) Opener() (Page, error) {
@@ -65,24 +71,22 @@ func (p *pageImpl) MainFrame() Frame {
 	return p.mainFrame
 }
 
-// PageFrameOptions is the option struct for Page.Frame()
-type PageFrameOptions struct {
-	Name *string
-	URL  interface{}
-}
-
-func (p *pageImpl) Frame(options PageFrameOptions) Frame {
+func (p *pageImpl) Frame(options ...PageFrameOptions) Frame {
+	option := PageFrameOptions{}
+	if len(options) == 1 {
+		option = options[0]
+	}
 	var matcher *urlMatcher
-	if options.URL != nil {
-		matcher = newURLMatcher(options.URL, p.browserContext.options.BaseURL)
+	if option.URL != nil {
+		matcher = newURLMatcher(option.URL, p.browserContext.options.BaseURL)
 	}
 
 	for _, f := range p.frames {
-		if options.Name != nil && f.Name() == *options.Name {
+		if option.Name != nil && f.Name() == *option.Name {
 			return f
 		}
 
-		if options.URL != nil && matcher != nil && matcher.Matches(f.URL()) {
+		if option.URL != nil && matcher != nil && matcher.Matches(f.URL()) {
 			return f
 		}
 	}
@@ -108,7 +112,10 @@ func (p *pageImpl) SetDefaultTimeout(timeout float64) {
 	})
 }
 
-func (p *pageImpl) QuerySelector(selector string) (ElementHandle, error) {
+func (p *pageImpl) QuerySelector(selector string, options ...PageQuerySelectorOptions) (ElementHandle, error) {
+	if len(options) == 1 {
+		return p.mainFrame.QuerySelector(selector, FrameQuerySelectorOptions(options[0]))
+	}
 	return p.mainFrame.QuerySelector(selector)
 }
 
@@ -117,35 +124,44 @@ func (p *pageImpl) QuerySelectorAll(selector string) ([]ElementHandle, error) {
 }
 
 func (p *pageImpl) WaitForSelector(selector string, options ...PageWaitForSelectorOptions) (ElementHandle, error) {
-	return p.mainFrame.WaitForSelector(selector, options...)
+	if len(options) == 1 {
+		return p.mainFrame.WaitForSelector(selector, FrameWaitForSelectorOptions(options[0]))
+	}
+	return p.mainFrame.WaitForSelector(selector)
 }
 
-func (p *pageImpl) DispatchEvent(selector string, typ string, options ...PageDispatchEventOptions) error {
-	return p.mainFrame.DispatchEvent(selector, typ, nil, options...)
+func (p *pageImpl) DispatchEvent(selector string, typ string, eventInit interface{}, options ...PageDispatchEventOptions) error {
+	if len(options) == 1 {
+		return p.mainFrame.DispatchEvent(selector, typ, eventInit, FrameDispatchEventOptions(options[0]))
+	}
+	return p.mainFrame.DispatchEvent(selector, typ, eventInit)
 }
 
-func (p *pageImpl) Evaluate(expression string, options ...interface{}) (interface{}, error) {
-	return p.mainFrame.Evaluate(expression, options...)
+func (p *pageImpl) Evaluate(expression string, arg ...interface{}) (interface{}, error) {
+	return p.mainFrame.Evaluate(expression, arg...)
 }
 
-func (p *pageImpl) EvaluateHandle(expression string, options ...interface{}) (JSHandle, error) {
-	return p.mainFrame.EvaluateHandle(expression, options...)
+func (p *pageImpl) EvaluateHandle(expression string, arg ...interface{}) (JSHandle, error) {
+	return p.mainFrame.EvaluateHandle(expression, arg...)
 }
 
-func (p *pageImpl) EvalOnSelector(selector string, expression string, options ...interface{}) (interface{}, error) {
-	return p.mainFrame.EvalOnSelector(selector, expression, options...)
+func (p *pageImpl) EvalOnSelector(selector string, expression string, arg interface{}, options ...PageEvalOnSelectorOptions) (interface{}, error) {
+	if len(options) == 1 {
+		return p.mainFrame.EvalOnSelector(selector, expression, arg, FrameEvalOnSelectorOptions(options[0]))
+	}
+	return p.mainFrame.EvalOnSelector(selector, expression, arg)
 }
 
-func (p *pageImpl) EvalOnSelectorAll(selector string, expression string, options ...interface{}) (interface{}, error) {
-	return p.mainFrame.EvalOnSelectorAll(selector, expression, options...)
+func (p *pageImpl) EvalOnSelectorAll(selector string, expression string, arg ...interface{}) (interface{}, error) {
+	return p.mainFrame.EvalOnSelectorAll(selector, expression, arg...)
 }
 
 func (p *pageImpl) AddScriptTag(options PageAddScriptTagOptions) (ElementHandle, error) {
-	return p.mainFrame.AddScriptTag(options)
+	return p.mainFrame.AddScriptTag(FrameAddScriptTagOptions(options))
 }
 
 func (p *pageImpl) AddStyleTag(options PageAddStyleTagOptions) (ElementHandle, error) {
-	return p.mainFrame.AddStyleTag(options)
+	return p.mainFrame.AddStyleTag(FrameAddStyleTagOptions(options))
 }
 
 func (p *pageImpl) SetExtraHTTPHeaders(headers map[string]string) error {
@@ -176,12 +192,18 @@ func (p *pageImpl) Content() (string, error) {
 	return p.mainFrame.Content()
 }
 
-func (p *pageImpl) SetContent(content string, options ...PageSetContentOptions) error {
-	return p.mainFrame.SetContent(content, options...)
+func (p *pageImpl) SetContent(html string, options ...PageSetContentOptions) error {
+	if len(options) == 1 {
+		return p.mainFrame.SetContent(html, FrameSetContentOptions(options[0]))
+	}
+	return p.mainFrame.SetContent(html)
 }
 
 func (p *pageImpl) Goto(url string, options ...PageGotoOptions) (Response, error) {
-	return p.mainFrame.Goto(url, options...)
+	if len(options) == 1 {
+		return p.mainFrame.Goto(url, FrameGotoOptions(options[0]))
+	}
+	return p.mainFrame.Goto(url)
 }
 
 func (p *pageImpl) Reload(options ...PageReloadOptions) (Response, error) {
@@ -197,7 +219,10 @@ func (p *pageImpl) Reload(options ...PageReloadOptions) (Response, error) {
 }
 
 func (p *pageImpl) WaitForLoadState(options ...PageWaitForLoadStateOptions) error {
-	return p.mainFrame.WaitForLoadState(options...)
+	if len(options) == 1 {
+		return p.mainFrame.WaitForLoadState(FrameWaitForLoadStateOptions(options[0]))
+	}
+	return p.mainFrame.WaitForLoadState()
 }
 
 func (p *pageImpl) GoBack(options ...PageGoBackOptions) (Response, error) {
@@ -234,12 +259,6 @@ func (p *pageImpl) EmulateMedia(options ...PageEmulateMediaOptions) error {
 	return err
 }
 
-// ViewportSize represents the viewport size
-type ViewportSize struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
-}
-
 func (p *pageImpl) SetViewportSize(width, height int) error {
 	_, err := p.channel.Send("setViewportSize", map[string]interface{}{
 		"viewportSize": map[string]interface{}{
@@ -255,7 +274,7 @@ func (p *pageImpl) SetViewportSize(width, height int) error {
 	return nil
 }
 
-func (p *pageImpl) ViewportSize() ViewportSize {
+func (p *pageImpl) ViewportSize() *Size {
 	return p.viewportSize
 }
 
@@ -265,15 +284,24 @@ func (p *pageImpl) BringToFront() error {
 }
 
 func (p *pageImpl) Type(selector, text string, options ...PageTypeOptions) error {
-	return p.mainFrame.Type(selector, text, options...)
+	if len(options) == 1 {
+		return p.mainFrame.Type(selector, text, FrameTypeOptions(options[0]))
+	}
+	return p.mainFrame.Type(selector, text)
 }
 
-func (p *pageImpl) Fill(selector, text string, options ...FrameFillOptions) error {
-	return p.mainFrame.Fill(selector, text, options...)
+func (p *pageImpl) Fill(selector, text string, options ...PageFillOptions) error {
+	if len(options) == 1 {
+		return p.mainFrame.Fill(selector, text, FrameFillOptions(options[0]))
+	}
+	return p.mainFrame.Fill(selector, text)
 }
 
 func (p *pageImpl) Press(selector, key string, options ...PagePressOptions) error {
-	return p.mainFrame.Press(selector, key, options...)
+	if len(options) == 1 {
+		return p.mainFrame.Press(selector, key, FramePressOptions(options[0]))
+	}
+	return p.mainFrame.Press(selector, key)
 }
 
 func (p *pageImpl) Title() (string, error) {
@@ -331,7 +359,10 @@ func (p *pageImpl) PDF(options ...PagePdfOptions) ([]byte, error) {
 }
 
 func (p *pageImpl) Click(selector string, options ...PageClickOptions) error {
-	return p.mainFrame.Click(selector, options...)
+	if len(options) == 1 {
+		return p.mainFrame.Click(selector, FrameClickOptions(options[0]))
+	}
+	return p.mainFrame.Click(selector)
 }
 
 func (p *pageImpl) WaitForEvent(event string, options ...PageWaitForEventOptions) (interface{}, error) {
@@ -353,20 +384,8 @@ func (p *pageImpl) waiterForEvent(event string, options ...PageWaitForEventOptio
 	return waiter.WaitForEvent(p, event, predicate)
 }
 
-func (p *pageImpl) WaitForNavigation(options ...PageWaitForNavigationOptions) (Response, error) {
-	return p.mainFrame.WaitForNavigation(options...)
-}
-
-func (p *pageImpl) WaitForRequest(url interface{}, options ...PageWaitForRequestOptions) (Request, error) {
-	req, err := p.waiterForRequest(url, options...).Wait()
-	if req == nil {
-		return nil, err
-	}
-	return req.(*requestImpl), nil
-}
-
-func (p *pageImpl) waiterForRequest(url interface{}, options ...PageWaitForRequestOptions) *waiter {
-	option := PageWaitForRequestOptions{}
+func (p *pageImpl) waiterForRequest(url interface{}, options ...PageExpectRequestOptions) *waiter {
+	option := PageExpectRequestOptions{}
 	if len(options) == 1 {
 		option = options[0]
 	}
@@ -388,16 +407,8 @@ func (p *pageImpl) waiterForRequest(url interface{}, options ...PageWaitForReque
 	return waiter.WaitForEvent(p, "request", predicate)
 }
 
-func (p *pageImpl) WaitForResponse(url interface{}, options ...PageWaitForResponseOptions) (Response, error) {
-	res, err := p.waiterForResponse(url, options...).Wait()
-	if res == nil {
-		return nil, err
-	}
-	return res.(*responseImpl), nil
-}
-
-func (p *pageImpl) waiterForResponse(url interface{}, options ...PageWaitForResponseOptions) *waiter {
-	option := PageWaitForResponseOptions{}
+func (p *pageImpl) waiterForResponse(url interface{}, options ...PageExpectResponseOptions) *waiter {
+	option := PageExpectResponseOptions{}
 	if len(options) == 1 {
 		option = options[0]
 	}
@@ -419,12 +430,15 @@ func (p *pageImpl) waiterForResponse(url interface{}, options ...PageWaitForResp
 	return waiter.WaitForEvent(p, "response", predicate)
 }
 
-func (p *pageImpl) ExpectEvent(event string, cb func() error, options ...PageWaitForEventOptions) (interface{}, error) {
-	return p.waiterForEvent(event, options...).RunAndWait(cb)
+func (p *pageImpl) ExpectEvent(event string, cb func() error, options ...PageExpectEventOptions) (interface{}, error) {
+	if len(options) == 1 {
+		return p.waiterForEvent(event, PageWaitForEventOptions(options[0])).RunAndWait(cb)
+	}
+	return p.waiterForEvent(event).RunAndWait(cb)
 }
 
-func (p *pageImpl) ExpectNavigation(cb func() error, options ...PageWaitForNavigationOptions) (Response, error) {
-	option := PageWaitForNavigationOptions{}
+func (p *pageImpl) ExpectNavigation(cb func() error, options ...PageExpectNavigationOptions) (Response, error) {
+	option := PageExpectNavigationOptions{}
 	if len(options) == 1 {
 		option = options[0]
 	}
@@ -482,14 +496,6 @@ func (p *pageImpl) ExpectConsoleMessage(cb func() error, options ...PageExpectCo
 	return ret.(*consoleMessageImpl), err
 }
 
-func (p *pageImpl) ExpectedDialog(cb func() error) (Dialog, error) {
-	ret, err := newWaiter().WaitForEvent(p, "dialog", nil).RunAndWait(cb)
-	if ret == nil {
-		return nil, err
-	}
-	return ret.(*dialogImpl), err
-}
-
 func (p *pageImpl) ExpectDownload(cb func() error, options ...PageExpectDownloadOptions) (Download, error) {
 	option := PageWaitForEventOptions{}
 	if len(options) == 1 {
@@ -516,17 +522,6 @@ func (p *pageImpl) ExpectFileChooser(cb func() error, options ...PageExpectFileC
 	return ret.(*fileChooserImpl), err
 }
 
-func (p *pageImpl) ExpectLoadState(cb func() error, options ...PageWaitForLoadStateOptions) error {
-	option := PageWaitForLoadStateOptions{}
-	if len(options) == 1 {
-		option = options[0]
-	}
-	if option.State == nil {
-		option.State = LoadStateLoad
-	}
-	return p.mainFrame.(*frameImpl).waitForLoadStateImpl(string(*option.State), option.Timeout, cb)
-}
-
 func (p *pageImpl) ExpectPopup(cb func() error, options ...PageExpectPopupOptions) (Page, error) {
 	option := PageWaitForEventOptions{}
 	if len(options) == 1 {
@@ -540,7 +535,7 @@ func (p *pageImpl) ExpectPopup(cb func() error, options ...PageExpectPopupOption
 	return ret.(*pageImpl), err
 }
 
-func (p *pageImpl) ExpectResponse(url interface{}, cb func() error, options ...PageWaitForResponseOptions) (Response, error) {
+func (p *pageImpl) ExpectResponse(url interface{}, cb func() error, options ...PageExpectResponseOptions) (Response, error) {
 	ret, err := p.waiterForResponse(url, options...).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
@@ -548,7 +543,7 @@ func (p *pageImpl) ExpectResponse(url interface{}, cb func() error, options ...P
 	return ret.(*responseImpl), err
 }
 
-func (p *pageImpl) ExpectRequest(url interface{}, cb func() error, options ...PageWaitForRequestOptions) (Request, error) {
+func (p *pageImpl) ExpectRequest(url interface{}, cb func() error, options ...PageExpectRequestOptions) (Request, error) {
 	ret, err := p.waiterForRequest(url, options...).RunAndWait(cb)
 	if ret == nil {
 		return nil, err
@@ -603,24 +598,30 @@ func (p *pageImpl) Route(url interface{}, handler routeHandler, times ...int) er
 }
 
 func (p *pageImpl) GetAttribute(selector string, name string, options ...PageGetAttributeOptions) (string, error) {
-	return p.mainFrame.GetAttribute(selector, name, options...)
+	if len(options) == 1 {
+		return p.mainFrame.GetAttribute(selector, name, FrameGetAttributeOptions(options[0]))
+	}
+	return p.mainFrame.GetAttribute(selector, name)
 }
 
 func (p *pageImpl) Hover(selector string, options ...PageHoverOptions) error {
-	return p.mainFrame.Hover(selector, options...)
+	if len(options) == 1 {
+		return p.mainFrame.Hover(selector, FrameHoverOptions(options[0]))
+	}
+	return p.mainFrame.Hover(selector)
 }
 
 func (p *pageImpl) IsClosed() bool {
 	return p.isClosed
 }
 
-func (p *pageImpl) AddInitScript(options PageAddInitScriptOptions) error {
+func (p *pageImpl) AddInitScript(script Script) error {
 	var source string
-	if options.Script != nil {
-		source = *options.Script
+	if script.Content != nil {
+		source = *script.Content
 	}
-	if options.Path != nil {
-		content, err := os.ReadFile(*options.Path)
+	if script.Path != nil {
+		content, err := os.ReadFile(*script.Path)
 		if err != nil {
 			return err
 		}
@@ -663,7 +664,7 @@ func (p *pageImpl) Touchscreen() Touchscreen {
 }
 
 func newPage(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *pageImpl {
-	viewportSize := &ViewportSize{}
+	viewportSize := &Size{}
 	if _, ok := initializer["viewportSize"].(map[string]interface{}); ok {
 		viewportSize.Height = int(initializer["viewportSize"].(map[string]interface{})["height"].(float64))
 		viewportSize.Width = int(initializer["viewportSize"].(map[string]interface{})["width"].(float64))
@@ -672,7 +673,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		workers:      make([]Worker, 0),
 		routes:       make([]*routeHandlerEntry, 0),
 		bindings:     make(map[string]BindingCallFunction),
-		viewportSize: *viewportSize,
+		viewportSize: viewportSize,
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.browserContext = fromChannel(parent.channel).(*browserContextImpl)
@@ -689,10 +690,10 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 	})
 	bt.channel.On("close", bt.onClose)
 	bt.channel.On("crash", func() {
-		bt.Emit("crash")
+		bt.Emit("crash", bt)
 	})
 	bt.channel.On("domcontentloaded", func() {
-		bt.Emit("domcontentloaded")
+		bt.Emit("domcontentloaded", bt)
 	})
 	bt.channel.On("fileChooser", func(ev map[string]interface{}) {
 		bt.Emit("filechooser", newFileChooser(bt, fromChannel(ev["element"]).(*elementHandleImpl), ev["isMultiple"].(bool)))
@@ -705,7 +706,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 	})
 	bt.channel.On(
 		"load", func(ev map[string]interface{}) {
-			bt.Emit("load")
+			bt.Emit("load", bt)
 		},
 	)
 	bt.channel.On(
@@ -716,7 +717,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		},
 	)
 	bt.channel.On("popup", func(ev map[string]interface{}) {
-		bt.Emit("popup", fromChannel(ev["page"]))
+		bt.Emit("popup", fromChannel(ev["page"]).(*pageImpl))
 	})
 	bt.channel.On("route", func(ev map[string]interface{}) {
 		bt.onRoute(fromChannel(ev["route"]).(*routeImpl))
@@ -739,13 +740,13 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		bt.onWorker(fromChannel(ev["worker"]).(*workerImpl))
 	})
 	bt.closedOrCrashed = make(chan bool, 1)
-	bt.On("close", func() {
+	bt.OnClose(func(Page) {
 		select {
 		case bt.closedOrCrashed <- true:
 		default:
 		}
 	})
-	bt.On("crash", func() {
+	bt.OnCrash(func(Page) {
 		select {
 		case bt.closedOrCrashed <- true:
 		default:
@@ -859,39 +860,60 @@ func (p *pageImpl) onClose() {
 		p.browserContext.backgroundPages = newBackgoundPages
 		p.browserContext.Unlock()
 	}
-	p.Emit("close")
+	p.Emit("close", p)
 }
 
-func (p *pageImpl) SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error {
-	return p.mainFrame.SetInputFiles(selector, files, options...)
+func (p *pageImpl) SetInputFiles(selector string, files []InputFile, options ...PageSetInputFilesOptions) error {
+	if len(options) == 1 {
+		return p.mainFrame.SetInputFiles(selector, files, FrameSetInputFilesOptions(options[0]))
+	}
+	return p.mainFrame.SetInputFiles(selector, files)
 }
 
-func (p *pageImpl) Check(selector string, options ...FrameCheckOptions) error {
-	return p.mainFrame.Check(selector, options...)
+func (p *pageImpl) Check(selector string, options ...PageCheckOptions) error {
+	if len(options) == 1 {
+		return p.mainFrame.Check(selector, FrameCheckOptions(options[0]))
+	}
+	return p.mainFrame.Check(selector)
 }
 
-func (p *pageImpl) Uncheck(selector string, options ...FrameUncheckOptions) error {
-	return p.mainFrame.Uncheck(selector, options...)
+func (p *pageImpl) Uncheck(selector string, options ...PageUncheckOptions) error {
+	if len(options) == 1 {
+		return p.mainFrame.Uncheck(selector, FrameUncheckOptions(options[0]))
+	}
+	return p.mainFrame.Uncheck(selector)
 }
 
 func (p *pageImpl) WaitForTimeout(timeout float64) {
 	p.mainFrame.WaitForTimeout(timeout)
 }
 
-func (p *pageImpl) WaitForFunction(expression string, arg interface{}, options ...FrameWaitForFunctionOptions) (JSHandle, error) {
-	return p.mainFrame.WaitForFunction(expression, arg, options...)
+func (p *pageImpl) WaitForFunction(expression string, arg interface{}, options ...PageWaitForFunctionOptions) (JSHandle, error) {
+	if len(options) == 1 {
+		return p.mainFrame.WaitForFunction(expression, arg, FrameWaitForFunctionOptions(options[0]))
+	}
+	return p.mainFrame.WaitForFunction(expression, arg)
 }
 
-func (p *pageImpl) Dblclick(expression string, options ...FrameDblclickOptions) error {
-	return p.mainFrame.Dblclick(expression, options...)
+func (p *pageImpl) Dblclick(expression string, options ...PageDblclickOptions) error {
+	if len(options) == 1 {
+		return p.mainFrame.Dblclick(expression, FrameDblclickOptions(options[0]))
+	}
+	return p.mainFrame.Dblclick(expression)
 }
 
-func (p *pageImpl) Focus(expression string, options ...FrameFocusOptions) error {
-	return p.mainFrame.Focus(expression, options...)
+func (p *pageImpl) Focus(expression string, options ...PageFocusOptions) error {
+	if len(options) == 1 {
+		return p.mainFrame.Focus(expression, FrameFocusOptions(options[0]))
+	}
+	return p.mainFrame.Focus(expression)
 }
 
-func (p *pageImpl) TextContent(selector string, options ...FrameTextContentOptions) (string, error) {
-	return p.mainFrame.TextContent(selector, options...)
+func (p *pageImpl) TextContent(selector string, options ...PageTextContentOptions) (string, error) {
+	if len(options) == 1 {
+		return p.mainFrame.TextContent(selector, FrameTextContentOptions(options[0]))
+	}
+	return p.mainFrame.TextContent(selector)
 }
 
 func (p *pageImpl) Video() Video {
@@ -904,8 +926,11 @@ func (p *pageImpl) Video() Video {
 	return p.video
 }
 
-func (p *pageImpl) Tap(selector string, options ...FrameTapOptions) error {
-	return p.mainFrame.Tap(selector, options...)
+func (p *pageImpl) Tap(selector string, options ...PageTapOptions) error {
+	if len(options) == 1 {
+		return p.mainFrame.Tap(selector, FrameTapOptions(options[0]))
+	}
+	return p.mainFrame.Tap(selector)
 }
 
 func (p *pageImpl) ExposeFunction(name string, binding ExposedFunction) error {
@@ -932,36 +957,60 @@ func (p *pageImpl) ExposeBinding(name string, binding BindingCallFunction, handl
 	return err
 }
 
-func (p *pageImpl) SelectOption(selector string, values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error) {
-	return p.mainFrame.SelectOption(selector, values, options...)
+func (p *pageImpl) SelectOption(selector string, values SelectOptionValues, options ...PageSelectOptionOptions) ([]string, error) {
+	if len(options) == 1 {
+		return p.mainFrame.SelectOption(selector, values, FrameSelectOptionOptions(options[0]))
+	}
+	return p.mainFrame.SelectOption(selector, values)
 }
 
-func (p *pageImpl) IsChecked(selector string, options ...FrameIsCheckedOptions) (bool, error) {
-	return p.mainFrame.IsChecked(selector, options...)
+func (p *pageImpl) IsChecked(selector string, options ...PageIsCheckedOptions) (bool, error) {
+	if len(options) == 1 {
+		return p.mainFrame.IsChecked(selector, FrameIsCheckedOptions(options[0]))
+	}
+	return p.mainFrame.IsChecked(selector)
 }
 
-func (p *pageImpl) IsDisabled(selector string, options ...FrameIsDisabledOptions) (bool, error) {
-	return p.mainFrame.IsDisabled(selector, options...)
+func (p *pageImpl) IsDisabled(selector string, options ...PageIsDisabledOptions) (bool, error) {
+	if len(options) == 1 {
+		return p.mainFrame.IsDisabled(selector, FrameIsDisabledOptions(options[0]))
+	}
+	return p.mainFrame.IsDisabled(selector)
 }
 
-func (p *pageImpl) IsEditable(selector string, options ...FrameIsEditableOptions) (bool, error) {
-	return p.mainFrame.IsEditable(selector, options...)
+func (p *pageImpl) IsEditable(selector string, options ...PageIsEditableOptions) (bool, error) {
+	if len(options) == 1 {
+		return p.mainFrame.IsEditable(selector, FrameIsEditableOptions(options[0]))
+	}
+	return p.mainFrame.IsEditable(selector)
 }
 
-func (p *pageImpl) IsEnabled(selector string, options ...FrameIsEnabledOptions) (bool, error) {
-	return p.mainFrame.IsEnabled(selector, options...)
+func (p *pageImpl) IsEnabled(selector string, options ...PageIsEnabledOptions) (bool, error) {
+	if len(options) == 1 {
+		return p.mainFrame.IsEnabled(selector, FrameIsEnabledOptions(options[0]))
+	}
+	return p.mainFrame.IsEnabled(selector)
 }
 
-func (p *pageImpl) IsHidden(selector string, options ...FrameIsHiddenOptions) (bool, error) {
-	return p.mainFrame.IsHidden(selector, options...)
+func (p *pageImpl) IsHidden(selector string, options ...PageIsHiddenOptions) (bool, error) {
+	if len(options) == 1 {
+		return p.mainFrame.IsHidden(selector, FrameIsHiddenOptions(options[0]))
+	}
+	return p.mainFrame.IsHidden(selector)
 }
 
-func (p *pageImpl) IsVisible(selector string, options ...FrameIsVisibleOptions) (bool, error) {
-	return p.mainFrame.IsVisible(selector, options...)
+func (p *pageImpl) IsVisible(selector string, options ...PageIsVisibleOptions) (bool, error) {
+	if len(options) == 1 {
+		return p.mainFrame.IsVisible(selector, FrameIsVisibleOptions(options[0]))
+	}
+	return p.mainFrame.IsVisible(selector)
 }
 
-func (p *pageImpl) DragAndDrop(source, target string, options ...FrameDragAndDropOptions) error {
-	return p.mainFrame.DragAndDrop(source, target, options...)
+func (p *pageImpl) DragAndDrop(source, target string, options ...PageDragAndDropOptions) error {
+	if len(options) == 1 {
+		return p.mainFrame.DragAndDrop(source, target, FrameDragAndDropOptions(options[0]))
+	}
+	return p.mainFrame.DragAndDrop(source, target)
 }
 
 func (p *pageImpl) Pause() (err error) {
@@ -982,16 +1031,25 @@ func (p *pageImpl) Pause() (err error) {
 	return
 }
 
-func (p *pageImpl) InputValue(selector string, options ...FrameInputValueOptions) (string, error) {
-	return p.mainFrame.InputValue(selector, options...)
+func (p *pageImpl) InputValue(selector string, options ...PageInputValueOptions) (string, error) {
+	if len(options) == 1 {
+		return p.mainFrame.InputValue(selector, FrameInputValueOptions(options[0]))
+	}
+	return p.mainFrame.InputValue(selector)
 }
 
-func (p *pageImpl) WaitForURL(url string, options ...FrameWaitForURLOptions) error {
-	return p.mainFrame.WaitForURL(url, options...)
+func (p *pageImpl) WaitForURL(url interface{}, options ...PageWaitForURLOptions) error {
+	if len(options) == 1 {
+		return p.mainFrame.WaitForURL(url, FrameWaitForURLOptions(options[0]))
+	}
+	return p.mainFrame.WaitForURL(url)
 }
 
-func (p *pageImpl) SetChecked(selector string, checked bool, options ...FrameSetCheckedOptions) error {
-	return p.mainFrame.SetChecked(selector, checked, options...)
+func (p *pageImpl) SetChecked(selector string, checked bool, options ...PageSetCheckedOptions) error {
+	if len(options) == 1 {
+		return p.mainFrame.SetChecked(selector, checked, FrameSetCheckedOptions(options[0]))
+	}
+	return p.mainFrame.SetChecked(selector, checked)
 }
 
 func (p *pageImpl) Locator(selector string, options ...PageLocatorOptions) Locator {
@@ -1002,7 +1060,7 @@ func (p *pageImpl) Locator(selector string, options ...PageLocatorOptions) Locat
 	return p.mainFrame.Locator(selector, option)
 }
 
-func (p *pageImpl) GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) Locator {
+func (p *pageImpl) GetByAltText(text interface{}, options ...PageGetByAltTextOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -1012,7 +1070,7 @@ func (p *pageImpl) GetByAltText(text interface{}, options ...LocatorGetByAltText
 	return p.Locator(getByAltTextSelector(text, exact))
 }
 
-func (p *pageImpl) GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) Locator {
+func (p *pageImpl) GetByLabel(text interface{}, options ...PageGetByLabelOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -1022,7 +1080,7 @@ func (p *pageImpl) GetByLabel(text interface{}, options ...LocatorGetByLabelOpti
 	return p.Locator(getByLabelSelector(text, exact))
 }
 
-func (p *pageImpl) GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) Locator {
+func (p *pageImpl) GetByPlaceholder(text interface{}, options ...PageGetByPlaceholderOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -1032,15 +1090,18 @@ func (p *pageImpl) GetByPlaceholder(text interface{}, options ...LocatorGetByPla
 	return p.Locator(getByPlaceholderSelector(text, exact))
 }
 
-func (p *pageImpl) GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) Locator {
-	return p.Locator(getByRoleSelector(role, options...))
+func (p *pageImpl) GetByRole(role AriaRole, options ...PageGetByRoleOptions) Locator {
+	if len(options) == 1 {
+		return p.Locator(getByRoleSelector(role, LocatorGetByRoleOptions(options[0])))
+	}
+	return p.Locator(getByRoleSelector(role))
 }
 
 func (p *pageImpl) GetByTestId(testId interface{}) Locator {
 	return p.Locator(getByTestIdSelector(getTestIdAttributeName(), testId))
 }
 
-func (p *pageImpl) GetByText(text interface{}, options ...LocatorGetByTextOptions) Locator {
+func (p *pageImpl) GetByText(text interface{}, options ...PageGetByTextOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -1050,7 +1111,7 @@ func (p *pageImpl) GetByText(text interface{}, options ...LocatorGetByTextOption
 	return p.Locator(getByTextSelector(text, exact))
 }
 
-func (p *pageImpl) GetByTitle(text interface{}, options ...LocatorGetByTitleOptions) Locator {
+func (p *pageImpl) GetByTitle(text interface{}, options ...PageGetByTitleOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -1062,4 +1123,80 @@ func (p *pageImpl) GetByTitle(text interface{}, options ...LocatorGetByTitleOpti
 
 func (p *pageImpl) FrameLocator(selector string) FrameLocator {
 	return p.mainFrame.FrameLocator(selector)
+}
+
+func (p *pageImpl) OnClose(fn func(Page)) {
+	p.On("close", fn)
+}
+
+func (p *pageImpl) OnConsole(fn func(ConsoleMessage)) {
+	p.On("console", fn)
+}
+
+func (p *pageImpl) OnCrash(fn func(Page)) {
+	p.On("crash", fn)
+}
+
+func (p *pageImpl) OnDialog(fn func(Dialog)) {
+	p.On("dialog", fn)
+}
+
+func (p *pageImpl) OnDOMContentLoaded(fn func(Page)) {
+	p.On("domcontentloaded", fn)
+}
+
+func (p *pageImpl) OnDownload(fn func(Download)) {
+	p.On("download", fn)
+}
+
+func (p *pageImpl) OnFileChooser(fn func(FileChooser)) {
+	p.On("filechooser", fn)
+}
+
+func (p *pageImpl) OnFrameAttached(fn func(Frame)) {
+	p.On("frameattached", fn)
+}
+
+func (p *pageImpl) OnFrameDetached(fn func(Frame)) {
+	p.On("framedetached", fn)
+}
+
+func (p *pageImpl) OnFrameNavigated(fn func(Frame)) {
+	p.On("framenavigated", fn)
+}
+
+func (p *pageImpl) OnLoad(fn func(Page)) {
+	p.On("load", fn)
+}
+
+func (p *pageImpl) OnPageError(fn func(Error)) {
+	p.On("pageerror", fn)
+}
+
+func (p *pageImpl) OnPopup(fn func(Page)) {
+	p.On("popup", fn)
+}
+
+func (p *pageImpl) OnRequest(fn func(Request)) {
+	p.On("request", fn)
+}
+
+func (p *pageImpl) OnRequestFailed(fn func(Request)) {
+	p.On("requestfailed", fn)
+}
+
+func (p *pageImpl) OnRequestFinished(fn func(Request)) {
+	p.On("requestfinished", fn)
+}
+
+func (p *pageImpl) OnResponse(fn func(Response)) {
+	p.On("response", fn)
+}
+
+func (p *pageImpl) OnWebSocket(fn func(WebSocket)) {
+	p.On("websocket", fn)
+}
+
+func (p *pageImpl) OnWorker(fn func(Worker)) {
+	p.On("worker", fn)
 }

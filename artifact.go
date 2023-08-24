@@ -1,6 +1,9 @@
 package playwright
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type artifactImpl struct {
 	channelOwner
@@ -15,6 +18,9 @@ func (a *artifactImpl) PathAfterFinished() (string, error) {
 		return "", errors.New("Path is not available when connecting remotely. Use SaveAs() to save a local copy")
 	}
 	path, err := a.channel.Send("pathAfterFinished")
+	if path == nil {
+		return "", err
+	}
 	return path.(string), err
 }
 
@@ -33,12 +39,12 @@ func (a *artifactImpl) SaveAs(path string) error {
 	return stream.SaveAs(path)
 }
 
-func (d *artifactImpl) Failure() (string, error) {
+func (d *artifactImpl) Failure() error {
 	failure, err := d.channel.Send("failure")
 	if failure == nil {
-		return "", err
+		return err
 	}
-	return failure.(string), err
+	return fmt.Errorf("%v", failure)
 }
 
 func (d *artifactImpl) Delete() error {

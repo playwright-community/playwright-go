@@ -130,7 +130,7 @@ func (l *locatorImpl) BoundingBox(options ...LocatorBoundingBoxOptions) (*Rect, 
 	if l.err != nil {
 		return nil, l.err
 	}
-	var option PageWaitForSelectorOptions
+	var option FrameWaitForSelectorOptions
 	if len(options) == 1 {
 		option.Timeout = options[0].Timeout
 	}
@@ -146,19 +146,27 @@ func (l *locatorImpl) BoundingBox(options ...LocatorBoundingBoxOptions) (*Rect, 
 	return result.(*Rect), nil
 }
 
-func (l *locatorImpl) Check(options ...FrameCheckOptions) error {
+func (l *locatorImpl) Check(options ...LocatorCheckOptions) error {
 	if l.err != nil {
 		return l.err
 	}
-	return l.frame.Check(l.selector, options...)
+	opt := FrameCheckOptions{
+		Strict: Bool(true),
+	}
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return err
+		}
+	}
+	return l.frame.Check(l.selector, opt)
 }
 
 func (l *locatorImpl) Clear(options ...LocatorClearOptions) error {
 	if l.err != nil {
 		return l.err
 	}
-	if len(options) > 0 {
-		return l.Fill("", FrameFillOptions{
+	if len(options) == 1 {
+		return l.Fill("", LocatorFillOptions{
 			Force:       options[0].Force,
 			NoWaitAfter: options[0].NoWaitAfter,
 			Timeout:     options[0].Timeout,
@@ -168,11 +176,19 @@ func (l *locatorImpl) Clear(options ...LocatorClearOptions) error {
 	}
 }
 
-func (l *locatorImpl) Click(options ...PageClickOptions) error {
+func (l *locatorImpl) Click(options ...LocatorClickOptions) error {
 	if l.err != nil {
 		return l.err
 	}
-	return l.frame.Click(l.selector, options...)
+	opt := FrameClickOptions{
+		Strict: Bool(true),
+	}
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return err
+		}
+	}
+	return l.frame.Click(l.selector, opt)
 }
 
 func (l *locatorImpl) Count() (int, error) {
@@ -182,40 +198,63 @@ func (l *locatorImpl) Count() (int, error) {
 	return l.frame.queryCount(l.selector)
 }
 
-func (l *locatorImpl) Dblclick(options ...FrameDblclickOptions) error {
+func (l *locatorImpl) Dblclick(options ...LocatorDblclickOptions) error {
 	if l.err != nil {
 		return l.err
 	}
-	return l.frame.Dblclick(l.selector, options...)
-}
-
-func (l *locatorImpl) DispatchEvent(typ string, eventInit interface{}, options ...PageDispatchEventOptions) error {
-	if l.err != nil {
-		return l.err
-	}
-	return l.frame.DispatchEvent(l.selector, typ, eventInit, options...)
-}
-
-func (l *locatorImpl) DragTo(target Locator, options ...FrameDragAndDropOptions) error {
-	if l.err != nil {
-		return l.err
+	opt := FrameDblclickOptions{
+		Strict: Bool(true),
 	}
 	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return err
+		}
 	}
-	return l.frame.DragAndDrop(l.selector, target.(*locatorImpl).selector, options...)
+	return l.frame.Dblclick(l.selector, opt)
+}
+
+func (l *locatorImpl) DispatchEvent(typ string, eventInit interface{}, options ...LocatorDispatchEventOptions) error {
+	if l.err != nil {
+		return l.err
+	}
+	opt := FrameDispatchEventOptions{
+		Strict: Bool(true),
+	}
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return err
+		}
+	}
+	return l.frame.DispatchEvent(l.selector, typ, eventInit, opt)
+}
+
+func (l *locatorImpl) DragTo(target Locator, options ...LocatorDragToOptions) error {
+	if l.err != nil {
+		return l.err
+	}
+	opt := FrameDragAndDropOptions{
+		Strict: Bool(true),
+	}
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return err
+		}
+	}
+	return l.frame.DragAndDrop(l.selector, target.(*locatorImpl).selector, opt)
 }
 
 func (l *locatorImpl) ElementHandle(options ...LocatorElementHandleOptions) (ElementHandle, error) {
 	if l.err != nil {
 		return nil, l.err
 	}
-	option := PageWaitForSelectorOptions{
+	option := FrameWaitForSelectorOptions{
 		State:  WaitForSelectorStateAttached,
 		Strict: Bool(true),
 	}
 	if len(options) == 1 {
-		option.Timeout = options[0].Timeout
+		if err := assignStructFields(&option, options[0], false); err != nil {
+			return nil, err
+		}
 	}
 	return l.frame.WaitForSelector(l.selector, option)
 }
@@ -231,7 +270,7 @@ func (l *locatorImpl) Evaluate(expression string, arg interface{}, options ...Lo
 	if l.err != nil {
 		return nil, l.err
 	}
-	var option PageWaitForSelectorOptions
+	var option FrameWaitForSelectorOptions
 	if len(options) == 1 {
 		option.Timeout = options[0].Timeout
 	}
@@ -248,60 +287,82 @@ func (l *locatorImpl) EvaluateAll(expression string, options ...interface{}) (in
 	return l.frame.EvalOnSelectorAll(l.selector, expression, options...)
 }
 
-func (l *locatorImpl) EvaluateHandle(expression string, arg interface{}, options ...LocatorEvaluateHandleOptions) (interface{}, error) {
+func (l *locatorImpl) EvaluateHandle(expression string, arg interface{}, options ...LocatorEvaluateHandleOptions) (JSHandle, error) {
 	if l.err != nil {
 		return nil, l.err
 	}
-	var option PageWaitForSelectorOptions
+	var option FrameWaitForSelectorOptions
 	if len(options) == 1 {
 		option.Timeout = options[0].Timeout
 	}
 
-	return l.withElement(func(handle ElementHandle) (interface{}, error) {
+	h, err := l.withElement(func(handle ElementHandle) (interface{}, error) {
 		return handle.EvaluateHandle(expression, arg)
 	}, option)
+	if err != nil {
+		return nil, err
+	}
+	return h.(JSHandle), nil
 }
 
-func (l *locatorImpl) Fill(value string, options ...FrameFillOptions) error {
+func (l *locatorImpl) Fill(value string, options ...LocatorFillOptions) error {
 	if l.err != nil {
 		return l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameFillOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.Fill(l.selector, value, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return err
+		}
+	}
+	return l.frame.Fill(l.selector, value, opt)
 }
 
-func (l *locatorImpl) Filter(options ...LocatorLocatorOptions) Locator {
-	return newLocator(l.frame, l.selector, options...)
+func (l *locatorImpl) Filter(options ...LocatorFilterOptions) Locator {
+	if len(options) == 1 {
+		return newLocator(l.frame, l.selector, LocatorLocatorOptions(options[0]))
+	}
+	return newLocator(l.frame, l.selector)
 }
 
 func (l *locatorImpl) First() Locator {
 	return newLocator(l.frame, l.selector+" >> nth=0")
 }
 
-func (l *locatorImpl) Focus(options ...FrameFocusOptions) error {
+func (l *locatorImpl) Focus(options ...LocatorFocusOptions) error {
 	if l.err != nil {
 		return l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameFocusOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.Focus(l.selector, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return err
+		}
+	}
+	return l.frame.Focus(l.selector, opt)
 }
 
 func (l *locatorImpl) FrameLocator(selector string) FrameLocator {
 	return newFrameLocator(l.frame, l.selector+" >> "+selector)
 }
 
-func (l *locatorImpl) GetAttribute(name string, options ...PageGetAttributeOptions) (string, error) {
+func (l *locatorImpl) GetAttribute(name string, options ...LocatorGetAttributeOptions) (string, error) {
 	if l.err != nil {
 		return "", l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameGetAttributeOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.GetAttribute(l.selector, name, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return "", err
+		}
+	}
+	return l.frame.GetAttribute(l.selector, name, opt)
 }
 
 func (l *locatorImpl) GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) Locator {
@@ -369,112 +430,178 @@ func (l *locatorImpl) Highlight() error {
 	return l.frame.highlight(l.selector)
 }
 
-func (l *locatorImpl) Hover(options ...PageHoverOptions) error {
+func (l *locatorImpl) Hover(options ...LocatorHoverOptions) error {
 	if l.err != nil {
 		return l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameHoverOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.Hover(l.selector, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return err
+		}
+	}
+	return l.frame.Hover(l.selector, opt)
 }
 
-func (l *locatorImpl) InnerHTML(options ...PageInnerHTMLOptions) (string, error) {
+func (l *locatorImpl) InnerHTML(options ...LocatorInnerHTMLOptions) (string, error) {
 	if l.err != nil {
 		return "", l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameInnerHTMLOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.InnerHTML(l.selector, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return "", err
+		}
+	}
+	return l.frame.InnerHTML(l.selector, opt)
 }
 
-func (l *locatorImpl) InnerText(options ...PageInnerTextOptions) (string, error) {
+func (l *locatorImpl) InnerText(options ...LocatorInnerTextOptions) (string, error) {
 	if l.err != nil {
 		return "", l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameInnerTextOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.InnerText(l.selector, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return "", err
+		}
+	}
+	return l.frame.InnerText(l.selector, opt)
 }
 
-func (l *locatorImpl) InputValue(options ...FrameInputValueOptions) (string, error) {
+func (l *locatorImpl) InputValue(options ...LocatorInputValueOptions) (string, error) {
 	if l.err != nil {
 		return "", l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameInputValueOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.InputValue(l.selector, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return "", err
+		}
+	}
+	return l.frame.InputValue(l.selector, opt)
 }
 
-func (l *locatorImpl) IsChecked(options ...FrameIsCheckedOptions) (bool, error) {
+func (l *locatorImpl) IsChecked(options ...LocatorIsCheckedOptions) (bool, error) {
 	if l.err != nil {
 		return false, l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameIsCheckedOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.IsChecked(l.selector, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return false, err
+		}
+	}
+	return l.frame.IsChecked(l.selector, opt)
 }
 
-func (l *locatorImpl) IsDisabled(options ...FrameIsDisabledOptions) (bool, error) {
+func (l *locatorImpl) IsDisabled(options ...LocatorIsDisabledOptions) (bool, error) {
 	if l.err != nil {
 		return false, l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameIsDisabledOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.IsDisabled(l.selector, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return false, err
+		}
+	}
+	return l.frame.IsDisabled(l.selector, opt)
 }
 
-func (l *locatorImpl) IsEditable(options ...FrameIsEditableOptions) (bool, error) {
+func (l *locatorImpl) IsEditable(options ...LocatorIsEditableOptions) (bool, error) {
 	if l.err != nil {
 		return false, l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameIsEditableOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.IsEditable(l.selector, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return false, err
+		}
+	}
+	return l.frame.IsEditable(l.selector, opt)
 }
 
-func (l *locatorImpl) IsEnabled(options ...FrameIsEnabledOptions) (bool, error) {
+func (l *locatorImpl) IsEnabled(options ...LocatorIsEnabledOptions) (bool, error) {
 	if l.err != nil {
 		return false, l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameIsEnabledOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.IsEnabled(l.selector, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return false, err
+		}
+	}
+	return l.frame.IsEnabled(l.selector, opt)
 }
 
-func (l *locatorImpl) IsHidden(options ...FrameIsHiddenOptions) (bool, error) {
+func (l *locatorImpl) IsHidden(options ...LocatorIsHiddenOptions) (bool, error) {
 	if l.err != nil {
 		return false, l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameIsHiddenOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.IsHidden(l.selector, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return false, err
+		}
+	}
+	return l.frame.IsHidden(l.selector, opt)
 }
 
-func (l *locatorImpl) IsVisible(options ...FrameIsVisibleOptions) (bool, error) {
+func (l *locatorImpl) IsVisible(options ...LocatorIsVisibleOptions) (bool, error) {
 	if l.err != nil {
 		return false, l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameIsVisibleOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.IsVisible(l.selector, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return false, err
+		}
+	}
+	return l.frame.IsVisible(l.selector, opt)
 }
 
 func (l *locatorImpl) Last() Locator {
 	return newLocator(l.frame, l.selector+" >> nth=-1")
 }
 
-func (l *locatorImpl) Locator(selector string, options ...LocatorLocatorOptions) Locator {
-	return newLocator(l.frame, l.selector+" >> "+selector, options...)
+func (l *locatorImpl) Locator(selectorOrLocator interface{}, options ...LocatorLocatorOptions) Locator {
+	selector, ok := selectorOrLocator.(string)
+	if ok {
+		return newLocator(l.frame, l.selector+" >> "+selector, options...)
+	}
+	locator, ok := selectorOrLocator.(*locatorImpl)
+	if ok {
+		if l.frame != locator.frame {
+			l.err = multierror.Join(l.err, ErrLocatorNotSameFrame)
+			return l
+		}
+		return newLocator(l.frame,
+			l.selector+" >> "+locator.selector,
+			options...,
+		)
+	}
+	l.err = multierror.Join(l.err, fmt.Errorf("invalid locator parameter: %v", selectorOrLocator))
+	return l
 }
 
 func (l *locatorImpl) Nth(index int) Locator {
@@ -488,21 +615,26 @@ func (l *locatorImpl) Page() (Page, error) {
 	return l.frame.Page(), nil
 }
 
-func (l *locatorImpl) Press(key string, options ...PagePressOptions) error {
+func (l *locatorImpl) Press(key string, options ...LocatorPressOptions) error {
 	if l.err != nil {
 		return l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FramePressOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.Press(l.selector, key, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return err
+		}
+	}
+	return l.frame.Press(l.selector, key, opt)
 }
 
 func (l *locatorImpl) Screenshot(options ...LocatorScreenshotOptions) ([]byte, error) {
 	if l.err != nil {
 		return nil, l.err
 	}
-	var option PageWaitForSelectorOptions
+	var option FrameWaitForSelectorOptions
 	if len(options) == 1 {
 		option.Timeout = options[0].Timeout
 	}
@@ -526,7 +658,7 @@ func (l *locatorImpl) ScrollIntoViewIfNeeded(options ...LocatorScrollIntoViewIfN
 	if l.err != nil {
 		return l.err
 	}
-	var option PageWaitForSelectorOptions
+	var option FrameWaitForSelectorOptions
 	if len(options) == 1 {
 		option.Timeout = options[0].Timeout
 	}
@@ -542,21 +674,26 @@ func (l *locatorImpl) ScrollIntoViewIfNeeded(options ...LocatorScrollIntoViewIfN
 	return err
 }
 
-func (l *locatorImpl) SelectOption(values SelectOptionValues, options ...FrameSelectOptionOptions) ([]string, error) {
+func (l *locatorImpl) SelectOption(values SelectOptionValues, options ...LocatorSelectOptionOptions) ([]string, error) {
 	if l.err != nil {
 		return nil, l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameSelectOptionOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.SelectOption(l.selector, values, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return nil, err
+		}
+	}
+	return l.frame.SelectOption(l.selector, values, opt)
 }
 
 func (l *locatorImpl) SelectText(options ...LocatorSelectTextOptions) error {
 	if l.err != nil {
 		return l.err
 	}
-	var option PageWaitForSelectorOptions
+	var option FrameWaitForSelectorOptions
 	if len(options) == 1 {
 		option.Timeout = options[0].Timeout
 	}
@@ -572,80 +709,115 @@ func (l *locatorImpl) SelectText(options ...LocatorSelectTextOptions) error {
 	return err
 }
 
-func (l *locatorImpl) SetChecked(checked bool, options ...FrameSetCheckedOptions) error {
+func (l *locatorImpl) SetChecked(checked bool, options ...LocatorSetCheckedOptions) error {
 	if l.err != nil {
 		return l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameSetCheckedOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.SetChecked(l.selector, checked, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return err
+		}
+	}
+	return l.frame.SetChecked(l.selector, checked, opt)
 }
 
-func (l *locatorImpl) SetInputFiles(files []InputFile, options ...FrameSetInputFilesOptions) error {
+func (l *locatorImpl) SetInputFiles(files []InputFile, options ...LocatorSetInputFilesOptions) error {
 	if l.err != nil {
 		return l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameSetInputFilesOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.SetInputFiles(l.selector, files, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return err
+		}
+	}
+	return l.frame.SetInputFiles(l.selector, files, opt)
 }
 
-func (l *locatorImpl) Tap(options ...FrameTapOptions) error {
+func (l *locatorImpl) Tap(options ...LocatorTapOptions) error {
 	if l.err != nil {
 		return l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameTapOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.Tap(l.selector, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return err
+		}
+	}
+	return l.frame.Tap(l.selector, opt)
 }
 
-func (l *locatorImpl) TextContent(options ...FrameTextContentOptions) (string, error) {
+func (l *locatorImpl) TextContent(options ...LocatorTextContentOptions) (string, error) {
 	if l.err != nil {
 		return "", l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameTextContentOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.TextContent(l.selector, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return "", err
+		}
+	}
+	return l.frame.TextContent(l.selector, opt)
 }
 
-func (l *locatorImpl) Type(text string, options ...PageTypeOptions) error {
+func (l *locatorImpl) Type(text string, options ...LocatorTypeOptions) error {
 	if l.err != nil {
 		return l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameTypeOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.Type(l.selector, text, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return err
+		}
+	}
+	return l.frame.Type(l.selector, text, opt)
 }
 
-func (l *locatorImpl) Uncheck(options ...FrameUncheckOptions) error {
+func (l *locatorImpl) Uncheck(options ...LocatorUncheckOptions) error {
 	if l.err != nil {
 		return l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameUncheckOptions{
+		Strict: Bool(true),
 	}
-	return l.frame.Uncheck(l.selector, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return err
+		}
+	}
+	return l.frame.Uncheck(l.selector, opt)
 }
 
-func (l *locatorImpl) WaitFor(options ...PageWaitForSelectorOptions) error {
+func (l *locatorImpl) WaitFor(options ...LocatorWaitForOptions) error {
 	if l.err != nil {
 		return l.err
 	}
-	if len(options) == 1 {
-		options[0].Strict = Bool(true)
+	opt := FrameWaitForSelectorOptions{
+		Strict: Bool(true),
 	}
-	_, err := l.frame.WaitForSelector(l.selector, options...)
+	if len(options) == 1 {
+		if err := assignStructFields(&opt, options[0], false); err != nil {
+			return err
+		}
+	}
+	_, err := l.frame.WaitForSelector(l.selector, opt)
 	return err
 }
 
 func (l *locatorImpl) withElement(
 	callback func(handle ElementHandle) (interface{}, error),
-	options ...PageWaitForSelectorOptions,
+	options ...FrameWaitForSelectorOptions,
 ) (interface{}, error) {
 	if l.err != nil {
 		return nil, l.err

@@ -1,6 +1,7 @@
 package playwright
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"reflect"
@@ -19,7 +20,7 @@ var (
 	apiNameTransform     = regexp.MustCompile(`(?U)\(\*(.+)(Impl)?\)`)
 )
 
-type callback struct {
+type result struct {
 	Data  interface{}
 	Error error
 }
@@ -37,6 +38,7 @@ type connection struct {
 	isRemote     bool
 	localUtils   *localUtilsImpl
 	tracingCount atomic.Int32
+	abort        chan struct{}
 }
 
 func (c *connection) Start() *Playwright {
@@ -65,31 +67,28 @@ func (c *connection) cleanup() {
 	if c.afterClose != nil {
 		c.afterClose()
 	}
-	c.callbacks.Range(func(key, value any) bool {
-		select {
-		case value.(chan callback) <- callback{
-			Error: &Error{
-				Name:    "Error",
-				Message: "Connection closed",
-			}}:
-		default:
-		}
-		return true
-	})
+	select {
+	case <-c.abort:
+	default:
+		close(c.abort)
+	}
 }
 
 func (c *connection) Dispatch(msg *message) {
 	method := msg.Method
 	if msg.ID != 0 {
-		cb, _ := c.callbacks.Load(msg.ID)
+		cb, _ := c.callbacks.LoadAndDelete(msg.ID)
+		if cb.(*protocolCallback).noReply {
+			return
+		}
 		if msg.Error != nil {
-			cb.(chan callback) <- callback{
+			cb.(*protocolCallback).SetResult(result{
 				Error: parseError(msg.Error.Error),
-			}
+			})
 		} else {
-			cb.(chan callback) <- callback{
+			cb.(*protocolCallback).SetResult(result{
 				Data: c.replaceGuidsWithChannels(msg.Result),
-			}
+			})
 		}
 		return
 	}
@@ -214,7 +213,7 @@ func (c *connection) replaceGuidsWithChannels(payload interface{}) interface{} {
 	return payload
 }
 
-func (c *connection) sendMessageToServer(guid string, method string, params interface{}) (interface{}, error) {
+func (c *connection) sendMessageToServer(guid string, method string, params interface{}, noReply bool) (*protocolCallback, error) {
 	c.lastIDLock.Lock()
 	c.lastID++
 	id := c.lastID
@@ -236,7 +235,7 @@ func (c *connection) sendMessageToServer(guid string, method string, params inte
 		"params":   c.replaceChannelsWithGuids(params),
 		"metadata": metadata,
 	}
-	cb, _ := c.callbacks.LoadOrStore(id, make(chan callback))
+	cb, _ := c.callbacks.LoadOrStore(id, newProtocolCallback(noReply, c.abort))
 	if err := c.onmessage(message); err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
@@ -244,12 +243,7 @@ func (c *connection) sendMessageToServer(guid string, method string, params inte
 	if c.tracingCount.Load() > 0 && len(stack) > 0 && guid != "localUtils" {
 		c.LocalUtils().AddStackToTracingNoReply(id, stack)
 	}
-	result := <-cb.(chan callback)
-	c.callbacks.Delete(id)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-	return result.Data, nil
+	return cb.(*protocolCallback), nil
 }
 
 func (c *connection) setInTracing(isTracing bool) {
@@ -318,6 +312,7 @@ func serializeCallLocation(caller stack.Call) map[string]interface{} {
 
 func newConnection(onClose func() error, localUtils ...*localUtilsImpl) *connection {
 	connection := &connection{
+		abort:    make(chan struct{}, 1),
 		objects:  make(map[string]*channelOwner),
 		onClose:  onClose,
 		isRemote: false,
@@ -338,4 +333,46 @@ func fromNullableChannel(v interface{}) interface{} {
 		return nil
 	}
 	return fromChannel(v)
+}
+
+type protocolCallback struct {
+	Callback chan result
+	noReply  bool
+	abort    <-chan struct{}
+}
+
+func (pc *protocolCallback) SetResult(r result) {
+	if pc.noReply {
+		return
+	}
+	select {
+	case <-pc.abort:
+		return
+	case pc.Callback <- r:
+	}
+}
+
+func (pc *protocolCallback) GetResult() (interface{}, error) {
+	if pc.noReply {
+		return nil, nil
+	}
+	select {
+	case result := <-pc.Callback:
+		return result.Data, result.Error
+	case <-pc.abort:
+		return nil, errors.New("Connection closed")
+	}
+}
+
+func newProtocolCallback(noReply bool, abort <-chan struct{}) *protocolCallback {
+	if noReply {
+		return &protocolCallback{
+			noReply: true,
+			abort:   abort,
+		}
+	}
+	return &protocolCallback{
+		Callback: make(chan result),
+		abort:    abort,
+	}
 }

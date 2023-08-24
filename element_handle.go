@@ -42,37 +42,34 @@ func (e *elementHandleImpl) GetAttribute(name string) (string, error) {
 	attribute, err := e.channel.Send("getAttribute", map[string]interface{}{
 		"name": name,
 	})
-	if err != nil {
+	if attribute == nil {
 		return "", err
 	}
-	if attribute == nil {
-		return "", nil
-	}
-	return attribute.(string), nil
+	return attribute.(string), err
 }
 
 func (e *elementHandleImpl) TextContent() (string, error) {
 	textContent, err := e.channel.Send("textContent")
-	if err != nil {
+	if textContent == nil {
 		return "", err
 	}
-	return textContent.(string), nil
+	return textContent.(string), err
 }
 
 func (e *elementHandleImpl) InnerText() (string, error) {
 	innerText, err := e.channel.Send("innerText")
-	if err != nil {
+	if innerText == nil {
 		return "", err
 	}
-	return innerText.(string), nil
+	return innerText.(string), err
 }
 
 func (e *elementHandleImpl) InnerHTML() (string, error) {
 	innerHTML, err := e.channel.Send("innerHTML")
-	if err != nil {
+	if innerHTML == nil {
 		return "", err
 	}
-	return innerHTML.(string), nil
+	return innerHTML.(string), err
 }
 
 func (e *elementHandleImpl) DispatchEvent(typ string, initObjects ...interface{}) error {
@@ -174,14 +171,6 @@ func (e *elementHandleImpl) SetInputFiles(files []InputFile, options ...ElementH
 		"files": normalizeFilePayloads(files),
 	}, options)
 	return err
-}
-
-// Rect is the return structure for ElementHandle.BoundingBox()
-type Rect struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
-	X      int `json:"x"`
-	Y      int `json:"y"`
 }
 
 func (e *elementHandleImpl) BoundingBox() (*Rect, error) {
@@ -319,7 +308,7 @@ func (e *elementHandleImpl) IsVisible() (bool, error) {
 	return visible.(bool), nil
 }
 
-func (e *elementHandleImpl) WaitForElementState(state string, options ...ElementHandleWaitForElementStateOptions) error {
+func (e *elementHandleImpl) WaitForElementState(state ElementState, options ...ElementHandleWaitForElementStateOptions) error {
 	_, err := e.channel.Send("waitForElementState", map[string]interface{}{
 		"state": state,
 	}, options)
@@ -346,6 +335,9 @@ func (e *elementHandleImpl) WaitForSelector(selector string, options ...ElementH
 
 func (e *elementHandleImpl) InputValue(options ...ElementHandleInputValueOptions) (string, error) {
 	result, err := e.channel.Send("inputValue", options)
+	if result == nil {
+		return "", err
+	}
 	return result.(string), err
 }
 

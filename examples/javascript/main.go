@@ -32,7 +32,7 @@ func main() {
 		log.Fatalf("could not acquire JSHandle: %v\n", err)
 	}
 	// mw.config.values.wgPageName is the name of the current page
-	pageName, err := handle.(playwright.JSHandle).GetProperty("wgPageName")
+	pageName, err := handle.GetProperty("wgPageName")
 	if err != nil {
 		log.Fatalf("could not get Wikipedia page name: %v\n", err)
 	}

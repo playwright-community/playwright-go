@@ -24,7 +24,7 @@ func newWebsocket(parent *channelOwner, objectType string, guid string, initiali
 		ws.Lock()
 		ws.isClosed = true
 		ws.Unlock()
-		ws.Emit("close")
+		ws.Emit("close", ws)
 	})
 	ws.channel.On(
 		"frameSent",
@@ -39,9 +39,9 @@ func newWebsocket(parent *channelOwner, objectType string, guid string, initiali
 		},
 	)
 	ws.channel.On(
-		"error",
+		"socketError",
 		func(params map[string]interface{}) {
-			ws.Emit("error", params["error"])
+			ws.Emit("socketerror", params["error"])
 		},
 	)
 	return ws
@@ -73,15 +73,20 @@ func (ws *webSocketImpl) onFrameReceived(opcode float64, data string) {
 	}
 }
 
-func (ws *webSocketImpl) ExpectEvent(event string, cb func() error, options ...WebSocketWaitForEventOptions) (interface{}, error) {
+func (ws *webSocketImpl) ExpectEvent(event string, cb func() error, options ...WebSocketExpectEventOptions) (interface{}, error) {
 	return ws.expectEvent(event, cb, options...)
 }
 
 func (ws *webSocketImpl) WaitForEvent(event string, options ...WebSocketWaitForEventOptions) (interface{}, error) {
-	return ws.expectEvent(event, nil, options...)
+	if len(options) == 1 {
+		option := WebSocketExpectEventOptions(options[0])
+		return ws.expectEvent(event, nil, option)
+	} else {
+		return ws.expectEvent(event, nil)
+	}
 }
 
-func (ws *webSocketImpl) expectEvent(event string, cb func() error, options ...WebSocketWaitForEventOptions) (interface{}, error) {
+func (ws *webSocketImpl) expectEvent(event string, cb func() error, options ...WebSocketExpectEventOptions) (interface{}, error) {
 	var predicate interface{} = nil
 	var timeout = ws.page.timeoutSettings.Timeout()
 	if len(options) == 1 {
@@ -96,9 +101,10 @@ func (ws *webSocketImpl) expectEvent(event string, cb func() error, options ...W
 	if event != "close" {
 		waiter.RejectOnEvent(ws, "close", errors.New("websocket closed"))
 	}
-	if event != "error" {
-		waiter.RejectOnEvent(ws, "error", errors.New("websocket error"))
+	if event != "socketerror" {
+		waiter.RejectOnEvent(ws, "socketerror", errors.New("websocket error"))
 	}
+	waiter.RejectOnEvent(ws.page, "close", errors.New("page closed"))
 	if cb == nil {
 		return waiter.WaitForEvent(ws, event, predicate).Wait()
 	} else {
@@ -110,4 +116,20 @@ func (ws *webSocketImpl) IsClosed() bool {
 	ws.RLock()
 	defer ws.RUnlock()
 	return ws.isClosed
+}
+
+func (ws *webSocketImpl) OnClose(fn func(WebSocket)) {
+	ws.On("close", fn)
+}
+
+func (ws *webSocketImpl) OnFrameReceived(fn func(payload []byte)) {
+	ws.On("framereceived", fn)
+}
+
+func (ws *webSocketImpl) OnFrameSent(fn func(payload []byte)) {
+	ws.On("framesent", fn)
+}
+
+func (ws *webSocketImpl) OnSocketError(fn func(string)) {
+	ws.On("socketerror", fn)
 }

@@ -13,6 +13,7 @@ func TestFileChooser(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Goto(server.PREFIX + "/input/fileupload.html")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	input, err := page.QuerySelector("input")
 	require.NoError(t, err)
 	file, err := os.ReadFile(Asset("file-to-upload.txt"))
@@ -45,14 +46,14 @@ func TestFileChooserShouldEmitEvent(t *testing.T) {
 	require.NoError(t, page.SetContent("<input type=file>"))
 
 	fileChooser, err := page.ExpectFileChooser(func() error {
-		return page.Click("input")
+		return page.Locator("input").Click()
 	})
 	require.NoError(t, err)
 	require.False(t, fileChooser.IsMultiple())
 	require.Equal(t, page, fileChooser.Page())
 	elementHTML, err := fileChooser.Element().InnerHTML()
 	require.NoError(t, err)
-
+	//nolint:staticcheck
 	inputElement, err := page.QuerySelector("input")
 	require.NoError(t, err)
 	inputElementHTML, err := inputElement.InnerHTML()

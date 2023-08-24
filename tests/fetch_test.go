@@ -232,7 +232,7 @@ func TestStorageStateShouldRoundTripThroughFile(t *testing.T) {
 				Expires:  -1,
 			},
 		},
-		Origins: []playwright.OriginsState{},
+		Origins: []playwright.Origin{},
 	}
 	request, err := pw.Request.NewContext(playwright.APIRequestNewContextOptions{
 		StorageState: storageState,

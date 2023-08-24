@@ -4,9 +4,9 @@ import "strings"
 
 // Error represents a Playwright error
 type Error struct {
-	Name    string
-	Message string
-	Stack   string
+	Name    string `json:"name"`
+	Message string `json:"message"`
+	Stack   string `json:"stack"`
 }
 
 func (e *Error) Error() string {

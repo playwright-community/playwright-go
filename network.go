@@ -4,13 +4,8 @@ import (
 	"strings"
 )
 
-type NameValue struct {
-	Name  string
-	Value string
-}
-type HeadersArray []NameValue
 type rawHeaders struct {
-	headersArray HeadersArray
+	headersArray []NameValue
 	headersMap   map[string][]string
 }
 
@@ -25,6 +20,7 @@ func (r *rawHeaders) Get(name string) string {
 	}
 	return strings.Join(values, sep)
 }
+
 func (r *rawHeaders) GetAll(name string) []string {
 	name = strings.ToLower(name)
 	if _, ok := r.headersMap[name]; !ok {
@@ -32,6 +28,7 @@ func (r *rawHeaders) GetAll(name string) []string {
 	}
 	return r.headersMap[name]
 }
+
 func (r *rawHeaders) Headers() map[string]string {
 	out := make(map[string]string)
 	for key := range r.headersMap {
@@ -40,9 +37,10 @@ func (r *rawHeaders) Headers() map[string]string {
 	return out
 }
 
-func (r *rawHeaders) HeadersArray() HeadersArray {
+func (r *rawHeaders) HeadersArray() []NameValue {
 	return r.headersArray
 }
+
 func newRawHeaders(headers interface{}) *rawHeaders {
 	r := &rawHeaders{}
 	r.headersArray = make([]NameValue, 0)

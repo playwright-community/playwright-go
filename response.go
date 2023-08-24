@@ -11,7 +11,7 @@ type responseImpl struct {
 	request            *requestImpl
 	provisionalHeaders *rawHeaders
 	rawHeaders         *rawHeaders
-	finished           chan bool
+	finished           chan error
 }
 
 func (r *responseImpl) FromServiceWorker() bool {
@@ -39,17 +39,19 @@ func (r *responseImpl) Headers() map[string]string {
 }
 
 func (r *responseImpl) Finished() error {
-	page, ok := r.Request().Frame().Page().(*pageImpl)
-	if ok {
+	var page Page
+	if frame := r.request.Frame(); frame != nil {
+		page = frame.Page()
+	}
+	if page != nil {
 		select {
-		case <-page.closedOrCrashed:
+		case <-page.(*pageImpl).closedOrCrashed:
 			return errors.New("Target closed")
-		case <-r.finished:
-			return nil
+		case err := <-r.finished:
+			return err
 		}
 	}
-	<-r.finished
-	return nil
+	return <-r.finished
 }
 
 func (r *responseImpl) Body() ([]byte, error) {
@@ -91,7 +93,7 @@ func (r *responseImpl) AllHeaders() (map[string]string, error) {
 	}
 	return headers.Headers(), nil
 }
-func (r *responseImpl) HeadersArray() (HeadersArray, error) {
+func (r *responseImpl) HeadersArray() ([]NameValue, error) {
 	headers, err := r.ActualHeaders()
 	if err != nil {
 		return nil, err
@@ -148,7 +150,7 @@ func newResponse(parent *channelOwner, objectType string, guid string, initializ
 	resp.createChannelOwner(resp, parent, objectType, guid, initializer)
 	timing := resp.initializer["timing"].(map[string]interface{})
 	resp.request = fromChannel(resp.initializer["request"]).(*requestImpl)
-	resp.request.timing = &ResourceTiming{
+	resp.request.timing = &RequestTiming{
 		StartTime:             timing["startTime"].(float64),
 		DomainLookupStart:     timing["domainLookupStart"].(float64),
 		DomainLookupEnd:       timing["domainLookupEnd"].(float64),
@@ -159,6 +161,6 @@ func newResponse(parent *channelOwner, objectType string, guid string, initializ
 		ResponseStart:         timing["responseStart"].(float64),
 	}
 	resp.provisionalHeaders = newRawHeaders(resp.initializer["headers"])
-	resp.finished = make(chan bool, 1)
+	resp.finished = make(chan error, 1)
 	return resp
 }

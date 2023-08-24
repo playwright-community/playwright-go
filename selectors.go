@@ -21,26 +21,26 @@ type selectorsImpl struct {
 	registrations []map[string]interface{}
 }
 
-func (s *selectorsImpl) Register(name string, option SelectorsRegisterOptions) error {
-	if option.Script == nil && option.Path == nil {
+func (s *selectorsImpl) Register(name string, script Script, options ...SelectorsRegisterOptions) error {
+	if script.Path == nil && script.Content == nil {
 		return errors.New("Either source or path should be specified")
 	}
-	script := ""
-	if option.Path != nil {
-		content, err := os.ReadFile(*option.Path)
+	source := ""
+	if script.Path != nil {
+		content, err := os.ReadFile(*script.Path)
 		if err != nil {
 			return err
 		}
-		script = string(content)
+		source = string(content)
 	} else {
-		script = *option.Script
+		source = *script.Content
 	}
 	params := map[string]interface{}{
 		"name":   name,
-		"source": script,
+		"source": source,
 	}
-	if option.ContentScript != nil && *option.ContentScript {
-		params["contentScript"] = true
+	if len(options) == 1 && options[0].ContentScript != nil {
+		params["contentScript"] = *options[0].ContentScript
 	}
 	var err error
 	s.channels.Range(func(key, value any) bool {

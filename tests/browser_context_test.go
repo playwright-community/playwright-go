@@ -154,11 +154,12 @@ func TestBrowserContextAddCookies(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.NoError(t, context.AddCookies(playwright.OptionalCookie{
-		URL:   playwright.String(server.EMPTY_PAGE),
-		Name:  playwright.String("password"),
-		Value: playwright.String("123456"),
-	}))
+	require.NoError(t, context.AddCookies([]playwright.OptionalCookie{
+		{
+			Name:  "password",
+			Value: "123456",
+			URL:   playwright.String(server.EMPTY_PAGE),
+		}}))
 	cookie, err := page.Evaluate("() => document.cookie")
 	require.NoError(t, err)
 	require.Equal(t, "password=123456", cookie)
@@ -169,7 +170,7 @@ func TestBrowserContextAddCookies(t *testing.T) {
 	if isChromium {
 		sameSite = playwright.SameSiteAttributeLax
 	}
-	require.Equal(t, []*playwright.Cookie{
+	require.Equal(t, []playwright.Cookie{
 		{
 			Name:    "password",
 			Value:   "123456",
@@ -194,8 +195,8 @@ func TestBrowserContextAddCookies(t *testing.T) {
 func TestBrowserContextAddInitScript(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	require.NoError(t, context.AddInitScript(playwright.BrowserContextAddInitScriptOptions{
-		Script: playwright.String(`window['injected'] = 123;`),
+	require.NoError(t, context.AddInitScript(playwright.Script{
+		Content: playwright.String(`window['injected'] = 123;`),
 	}))
 	_, err := page.Goto(server.PREFIX + "/tamperable.html")
 	require.NoError(t, err)
@@ -207,7 +208,7 @@ func TestBrowserContextAddInitScript(t *testing.T) {
 func TestBrowserContextAddInitScriptWithPath(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	require.NoError(t, context.AddInitScript(playwright.BrowserContextAddInitScriptOptions{
+	require.NoError(t, context.AddInitScript(playwright.Script{
 		Path: playwright.String(Asset("injectedfile.js")),
 	}))
 	_, err := page.Goto(server.PREFIX + "/tamperable.html")
@@ -319,6 +320,9 @@ func TestBrowserContextShouldReturnBackgroundPage(t *testing.T) {
 func TestPageEventShouldHaveURL(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
+	context.OnPage(func(p playwright.Page) {
+		require.Equal(t, server.EMPTY_PAGE, p.URL())
+	})
 	newPage, err := context.ExpectPage(func() error {
 		_, err := page.Evaluate("url => window.open(url)", server.EMPTY_PAGE)
 		return err
@@ -330,6 +334,9 @@ func TestPageEventShouldHaveURL(t *testing.T) {
 func TestConsoleEventShouldWork(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
+	context.OnConsole(func(message playwright.ConsoleMessage) {
+		require.Equal(t, "hello", message.Text())
+	})
 	message, err := context.ExpectConsoleMessage(func() error {
 		_, err := page.Evaluate(`() => console.log("hello")`)
 		return err

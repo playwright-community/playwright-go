@@ -133,10 +133,10 @@ func TestBrowserTypeConnectShouldEmitDisconnectedEvent(t *testing.T) {
 	browser2, err := browserType.Connect(remoteServer.url)
 	require.NoError(t, err)
 	require.NotNil(t, browser2)
-	browser1.On("disconnected", func() {
+	browser1.OnDisconnected(func(playwright.Browser) {
 		disconnected1.Append(true)
 	})
-	browser2.On("disconnected", func() {
+	browser2.OnDisconnected(func(playwright.Browser) {
 		disconnected2.Append(true)
 	})
 	page, err := browser2.NewPage()
@@ -189,7 +189,7 @@ func TestBrowserTypeConnectArtifactPath(t *testing.T) {
 	recordVideoDir := t.TempDir()
 	browserContext, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		RecordVideo: &playwright.RecordVideo{
-			Dir: &recordVideoDir,
+			Dir: recordVideoDir,
 		},
 	})
 	require.NoError(t, err)

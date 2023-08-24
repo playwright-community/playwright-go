@@ -34,7 +34,7 @@ func main() {
 	assertErrorToNilf("could not goto: %w", err)
 	assertErrorToNilf("could not set content: %w", page.SetContent(`<a href="/download" download>download</a>`))
 	download, err := page.ExpectDownload(func() error {
-		return page.Click("text=download")
+		return page.Locator("text=download").Click()
 	})
 	assertErrorToNilf("could not download: %w", err)
 	fmt.Println(download.SuggestedFilename())

@@ -6,6 +6,14 @@ import (
 	"sync"
 )
 
+type EventEmitter interface {
+	Emit(name string, payload ...interface{}) bool
+	ListenerCount(name string) int
+	On(name string, handler interface{})
+	Once(name string, handler interface{})
+	RemoveListener(name string, handler interface{})
+}
+
 type (
 	eventRegister struct {
 		once []interface{}

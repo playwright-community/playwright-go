@@ -3,25 +3,8 @@ package playwright
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 )
-
-// RequestFailure represents a request failure
-type RequestFailure struct {
-	ErrorText string
-}
-
-// ResourceTiming represents the resource timing
-type ResourceTiming struct {
-	StartTime             float64
-	DomainLookupStart     float64
-	DomainLookupEnd       float64
-	ConnectStart          float64
-	SecureConnectionStart float64
-	ConnectEnd            float64
-	RequestStart          float64
-	ResponseStart         float64
-	ResponseEnd           float64
-}
 
 type serializedFallbackOverrides struct {
 	URL            *string
@@ -32,7 +15,7 @@ type serializedFallbackOverrides struct {
 
 type requestImpl struct {
 	channelOwner
-	timing             *ResourceTiming
+	timing             *RequestTiming
 	provisionalHeaders *rawHeaders
 	allHeaders         *rawHeaders
 	redirectedFrom     Request
@@ -106,7 +89,12 @@ func (r *requestImpl) Response() (Response, error) {
 }
 
 func (r *requestImpl) Frame() Frame {
-	return fromChannel(r.initializer["frame"]).(*frameImpl)
+	channel, ok := r.initializer["frame"]
+	if !ok {
+		// Service Worker requests do not have an associated frame.
+		return nil
+	}
+	return fromChannel(channel).(*frameImpl)
 }
 
 func (r *requestImpl) IsNavigationRequest() bool {
@@ -121,16 +109,14 @@ func (r *requestImpl) RedirectedTo() Request {
 	return r.redirectedTo
 }
 
-func (r *requestImpl) Failure() *RequestFailure {
+func (r *requestImpl) Failure() error {
 	if r.failureText == "" {
 		return nil
 	}
-	return &RequestFailure{
-		ErrorText: r.failureText,
-	}
+	return fmt.Errorf("%v", r.failureText)
 }
 
-func (r *requestImpl) Timing() *ResourceTiming {
+func (r *requestImpl) Timing() *RequestTiming {
 	return r.timing
 }
 func (r *requestImpl) AllHeaders() (map[string]string, error) {
@@ -140,7 +126,7 @@ func (r *requestImpl) AllHeaders() (map[string]string, error) {
 	}
 	return headers.Headers(), nil
 }
-func (r *requestImpl) HeadersArray() (HeadersArray, error) {
+func (r *requestImpl) HeadersArray() ([]NameValue, error) {
 	headers, err := r.ActualHeaders()
 	if err != nil {
 		return nil, err
@@ -180,6 +166,14 @@ func (r *requestImpl) ActualHeaders() (*rawHeaders, error) {
 		r.allHeaders = newRawHeaders(headers)
 	}
 	return r.allHeaders, nil
+}
+
+func (r *requestImpl) ServiceWorker() Worker {
+	channel, ok := r.initializer["serviceWorker"]
+	if !ok {
+		return nil
+	}
+	return fromChannel(channel).(*workerImpl)
 }
 
 func (r *requestImpl) Sizes() (*RequestSizesResult, error) {
@@ -231,7 +225,7 @@ func newRequest(parent *channelOwner, objectType string, guid string, initialize
 	if req.redirectedFrom != nil {
 		req.redirectedFrom.(*requestImpl).redirectedTo = req
 	}
-	req.timing = &ResourceTiming{
+	req.timing = &RequestTiming{
 		StartTime:             0,
 		DomainLookupStart:     -1,
 		DomainLookupEnd:       -1,

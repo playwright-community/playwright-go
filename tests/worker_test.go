@@ -39,11 +39,13 @@ func TestWorkerShouldEmitCreatedAndDestroyedEvents(t *testing.T) {
 	require.NoError(t, err)
 	workerThisObj, err := worker.EvaluateHandle(`() => this`)
 	require.NoError(t, err)
-	_, err = worker.ExpectEvent("close", func() error {
-		_, err := page.Evaluate("workerObj => workerObj.terminate()", workerObj)
-		return err
+	eventFired := make(chan bool, 1)
+	worker.OnClose(func(w playwright.Worker) {
+		eventFired <- true
 	})
+	_, err = page.Evaluate("workerObj => workerObj.terminate()", workerObj)
 	require.NoError(t, err)
+	require.True(t, <-eventFired)
 	_, err = workerThisObj.GetProperty("self")
 	require.Error(t, err)
 }
@@ -123,7 +125,8 @@ func TestWorkerShouldClearUponCrossProcessNavigation(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, len(page.Workers()), 1)
 	destroyed := false
-	worker.On("close", func() {
+	_ = worker
+	worker.OnClose(func(w playwright.Worker) {
 		destroyed = true
 	})
 	_, err = page.Goto(server.CROSS_PROCESS_PREFIX + "/empty.html")

@@ -56,13 +56,13 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 	if option.RecordHarPath != nil {
 		overrides["recordHar"] = prepareRecordHarOptions(recordHarInputOptions{
 			Path:        *options[0].RecordHarPath,
-			URL:         options[0].RecordHarUrlFilter,
+			URL:         options[0].RecordHarURLFilter,
 			Mode:        options[0].RecordHarMode,
 			Content:     options[0].RecordHarContent,
 			OmitContent: options[0].RecordHarOmitContent,
 		})
 		options[0].RecordHarPath = nil
-		options[0].RecordHarUrlFilter = nil
+		options[0].RecordHarURLFilter = nil
 		options[0].RecordHarMode = nil
 		options[0].RecordHarContent = nil
 		options[0].RecordHarOmitContent = nil
@@ -77,8 +77,12 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 	return context, nil
 }
 
-func (b *browserImpl) NewPage(options ...BrowserNewContextOptions) (Page, error) {
-	context, err := b.NewContext(options...)
+func (b *browserImpl) NewPage(options ...BrowserNewPageOptions) (Page, error) {
+	opts := make([]BrowserNewContextOptions, 0)
+	if len(options) == 1 {
+		opts = append(opts, BrowserNewContextOptions(options[0]))
+	}
+	context, err := b.NewContext(opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -160,9 +164,15 @@ func (b *browserImpl) onClose() {
 	b.isClosedOrClosing = true
 	if b.isConnected {
 		b.isConnected = false
-		b.Emit("disconnected")
+		b.Unlock()
+		b.Emit("disconnected", b)
+		return
 	}
 	b.Unlock()
+}
+
+func (b *browserImpl) OnDisconnected(fn func(Browser)) {
+	b.On("disconnected", fn)
 }
 
 func newBrowser(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserImpl {

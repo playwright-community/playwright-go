@@ -17,7 +17,7 @@ func TestPageAssertionsToHaveTitle(t *testing.T) {
 
 	require.NoError(t, expect.Page(page).ToHaveTitle("new title"))
 	require.NoError(t, expect.Page(page).ToHaveTitle(regexp.MustCompile("(?i)new title")))
-	require.NoError(t, expect.Page(page).NotToHaveTitle("not the current title", playwright.PageAssertionsToHaveTitleOptions{
+	require.NoError(t, expect.Page(page).Not().ToHaveTitle("not the current title", playwright.PageAssertionsToHaveTitleOptions{
 		Timeout: playwright.Float(750),
 	}))
 
@@ -40,13 +40,13 @@ func TestPageAssertionsToHaveURL(t *testing.T) {
 	require.NoError(t, expect.Page(page).ToHaveURL(regexp.MustCompile(`.*/empty\.html`), playwright.PageAssertionsToHaveURLOptions{
 		Timeout: playwright.Float(750),
 	}))
-	require.NoError(t, expect.Page(page).NotToHaveURL("https://playwright.dev"))
+	require.NoError(t, expect.Page(page).Not().ToHaveURL("https://playwright.dev"))
 }
 
 func TestPageAssertionsToHaveURLWithBaseURL(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	page, err := browser.NewPage(playwright.BrowserNewContextOptions{
+	page, err := browser.NewPage(playwright.BrowserNewPageOptions{
 		BaseURL: &server.PREFIX,
 	})
 	require.NoError(t, err)

@@ -59,13 +59,13 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 		if options[0].RecordHarPath != nil {
 			overrides["recordHar"] = prepareRecordHarOptions(recordHarInputOptions{
 				Path:        *options[0].RecordHarPath,
-				URL:         options[0].RecordHarUrlFilter,
+				URL:         options[0].RecordHarURLFilter,
 				Mode:        options[0].RecordHarMode,
 				Content:     options[0].RecordHarContent,
 				OmitContent: options[0].RecordHarOmitContent,
 			})
 			options[0].RecordHarPath = nil
-			options[0].RecordHarUrlFilter = nil
+			options[0].RecordHarURLFilter = nil
 			options[0].RecordHarMode = nil
 			options[0].RecordHarContent = nil
 			options[0].RecordHarOmitContent = nil
@@ -79,9 +79,9 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 	b.didCreateContext(context, option, tracesDir)
 	return context, nil
 }
-func (b *browserTypeImpl) Connect(url string, options ...BrowserTypeConnectOptions) (Browser, error) {
+func (b *browserTypeImpl) Connect(wsEndpoint string, options ...BrowserTypeConnectOptions) (Browser, error) {
 	overrides := map[string]interface{}{
-		"wsEndpoint": url,
+		"wsEndpoint": wsEndpoint,
 	}
 	localUtils := b.connection.LocalUtils()
 	pipe, err := localUtils.channel.SendReturnAsDict("connect", overrides, options)

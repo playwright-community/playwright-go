@@ -1,6 +1,11 @@
 package playwright
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/playwright-community/playwright-go/internal/multierror"
+)
 
 type frameLocatorImpl struct {
 	frame         *frameImpl
@@ -19,7 +24,7 @@ func (fl *frameLocatorImpl) FrameLocator(selector string) FrameLocator {
 	return newFrameLocator(fl.frame, fl.frameSelector+" >> internal:control=enter-frame >> "+selector)
 }
 
-func (fl *frameLocatorImpl) GetByAltText(text interface{}, options ...LocatorGetByAltTextOptions) Locator {
+func (fl *frameLocatorImpl) GetByAltText(text interface{}, options ...FrameLocatorGetByAltTextOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -29,7 +34,7 @@ func (fl *frameLocatorImpl) GetByAltText(text interface{}, options ...LocatorGet
 	return fl.Locator(getByAltTextSelector(text, exact))
 }
 
-func (fl *frameLocatorImpl) GetByLabel(text interface{}, options ...LocatorGetByLabelOptions) Locator {
+func (fl *frameLocatorImpl) GetByLabel(text interface{}, options ...FrameLocatorGetByLabelOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -39,7 +44,7 @@ func (fl *frameLocatorImpl) GetByLabel(text interface{}, options ...LocatorGetBy
 	return fl.Locator(getByLabelSelector(text, exact))
 }
 
-func (fl *frameLocatorImpl) GetByPlaceholder(text interface{}, options ...LocatorGetByPlaceholderOptions) Locator {
+func (fl *frameLocatorImpl) GetByPlaceholder(text interface{}, options ...FrameLocatorGetByPlaceholderOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -49,15 +54,18 @@ func (fl *frameLocatorImpl) GetByPlaceholder(text interface{}, options ...Locato
 	return fl.Locator(getByPlaceholderSelector(text, exact))
 }
 
-func (fl *frameLocatorImpl) GetByRole(role AriaRole, options ...LocatorGetByRoleOptions) Locator {
-	return fl.Locator(getByRoleSelector(role, options...))
+func (fl *frameLocatorImpl) GetByRole(role AriaRole, options ...FrameLocatorGetByRoleOptions) Locator {
+	if len(options) == 1 {
+		return fl.Locator(getByRoleSelector(role, LocatorGetByRoleOptions(options[0])))
+	}
+	return fl.Locator(getByRoleSelector(role))
 }
 
 func (fl *frameLocatorImpl) GetByTestId(testId interface{}) Locator {
 	return fl.Locator(getByTestIdSelector(getTestIdAttributeName(), testId))
 }
 
-func (fl *frameLocatorImpl) GetByText(text interface{}, options ...LocatorGetByTextOptions) Locator {
+func (fl *frameLocatorImpl) GetByText(text interface{}, options ...FrameLocatorGetByTextOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -67,7 +75,7 @@ func (fl *frameLocatorImpl) GetByText(text interface{}, options ...LocatorGetByT
 	return fl.Locator(getByTextSelector(text, exact))
 }
 
-func (fl *frameLocatorImpl) GetByTitle(text interface{}, options ...LocatorGetByTitleOptions) Locator {
+func (fl *frameLocatorImpl) GetByTitle(text interface{}, options ...FrameLocatorGetByTitleOptions) Locator {
 	exact := false
 	if len(options) == 1 {
 		if *options[0].Exact {
@@ -81,12 +89,32 @@ func (fl *frameLocatorImpl) Last() FrameLocator {
 	return newFrameLocator(fl.frame, fl.frameSelector+" >> nth=-1")
 }
 
-func (fl *frameLocatorImpl) Locator(selector string, options ...FrameLocatorOptions) Locator {
+func (fl *frameLocatorImpl) Locator(selectorOrLocator interface{}, options ...FrameLocatorLocatorOptions) Locator {
 	var option LocatorLocatorOptions
 	if len(options) == 1 {
 		option = LocatorLocatorOptions(options[0])
 	}
-	return newLocator(fl.frame, fl.frameSelector+" >> internal:control=enter-frame >> "+selector, option)
+
+	selector, ok := selectorOrLocator.(string)
+	if ok {
+		return newLocator(fl.frame, fl.frameSelector+" >> internal:control=enter-frame >> "+selector, option)
+	}
+	locator, ok := selectorOrLocator.(*locatorImpl)
+	if ok {
+		if fl.frame != locator.frame {
+			locator.err = multierror.Join(locator.err, ErrLocatorNotSameFrame)
+			return locator
+		}
+		return newLocator(locator.frame,
+			fmt.Sprintf("%s >> internal:control=enter-frame >> %s", fl.frameSelector, locator.selector),
+			option,
+		)
+	}
+	return &locatorImpl{
+		frame:    fl.frame,
+		selector: fl.frameSelector,
+		err:      fmt.Errorf("invalid locator parameter: %v", selectorOrLocator),
+	}
 }
 
 func (fl *frameLocatorImpl) Nth(index int) FrameLocator {

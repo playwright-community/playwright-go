@@ -87,6 +87,7 @@ func TestGetByAltText(t *testing.T) {
     <input alt="Hello World">
   </div>`))
 	require.NoError(t, expect.Locator(page.GetByAltText("hello")).ToHaveCount(2))
+	require.NoError(t, expect.Locator(page.Locator("div").GetByAltText("hello")).ToHaveCount(2))
 	require.NoError(t, expect.Locator(page.GetByAltText(regexp.MustCompile(`Hello.+d`))).ToHaveCount(1))
 }
 
@@ -99,36 +100,41 @@ func TestGetByTitle(t *testing.T) {
     <input title="Hello World">
   </div>`))
 	require.NoError(t, expect.Locator(page.GetByTitle("hello")).ToHaveCount(2))
+	require.NoError(t, expect.Locator(page.Locator("div").GetByTitle("hello")).ToHaveCount(2))
 }
 
 func TestGetByRole(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	require.NoError(t, page.SetContent(`
+	require.NoError(t, page.SetContent(`<div>
 	<button>Hello</button>
 	<button>Hel"lo</button>
-	<div role="dialog">I am a dialog</div>
+	<div role="dialog">I am a dialog</div></div>
 	`))
 
-	count, err := page.GetByRole("button", playwright.LocatorGetByRoleOptions{
+	count, err := page.GetByRole("button", playwright.PageGetByRoleOptions{
 		Name: "hello",
 	}).Count()
 	require.NoError(t, err)
 	require.Equal(t, 1, count)
 
-	count, err = page.GetByRole("button", playwright.LocatorGetByRoleOptions{
+	count, err = page.GetByRole("button", playwright.PageGetByRoleOptions{
 		Name: "Hel\"lo",
 	}).Count()
 	require.NoError(t, err)
 	require.Equal(t, 1, count)
 
-	count, err = page.GetByRole("button", playwright.LocatorGetByRoleOptions{
+	count, err = page.GetByRole("button", playwright.PageGetByRoleOptions{
 		Name: regexp.MustCompile(`(?i)he`),
 	}).Count()
 	require.NoError(t, err)
 	require.Equal(t, 2, count)
 
 	count, err = page.GetByRole("dialog").Count()
+	require.NoError(t, err)
+	require.Equal(t, 1, count)
+
+	count, err = page.Locator("div").GetByRole("dialog").Count()
 	require.NoError(t, err)
 	require.Equal(t, 1, count)
 }

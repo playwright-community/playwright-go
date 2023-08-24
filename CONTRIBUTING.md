@@ -29,8 +29,8 @@ To adapt to the new version of Playwright's protocol and feature updates, you ma
 1. `cd playwright`
 1. Revert the patch`git reset HEAD~1`
 1. Modify the files under `docs/src/api`, etc. as needed. Available references:
-    - Protocol `packages/protocol/src/protocol.yml`, prior to v1.27.0 are available in `packages/playwright-core/src/protocol/protocol.yml`
+    - Protocol `packages/protocol/src/protocol.yml`
     - [Playwright python](https://github.com/microsoft/playwright-python)
 1. Commit the changes `git commit -am "apply patch"`
 1. Regenerate a new patch `bash scripts/update-patch.sh`
-1. Generate go code `go generate ./...`. If you updated `scripts/data/interfaces.json`, do this step again.
+1. Generate go code `go generate ./...`.

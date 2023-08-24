@@ -43,7 +43,7 @@ func TestConsoleShouldEmitSameLogTwice(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	messages := make(chan string, 2)
-	page.On("console", func(message playwright.ConsoleMessage) {
+	page.OnConsole(func(message playwright.ConsoleMessage) {
 		messages <- message.Text()
 	})
 	_, err := page.Evaluate(`() => { for (let i = 0; i < 2; ++i ) console.log("hello"); } `)
@@ -57,7 +57,7 @@ func TestConsoleShouldUseTextForStr(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	messages := make(chan playwright.ConsoleMessage, 1)
-	page.On("console", func(message playwright.ConsoleMessage) {
+	page.OnConsole(func(message playwright.ConsoleMessage) {
 		messages <- message
 	})
 	_, err := page.Evaluate(`() => console.log("Hello world")`)
@@ -70,7 +70,7 @@ func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	messagesChan := make(chan playwright.ConsoleMessage, 6)
-	page.On("console", func(message playwright.ConsoleMessage) {
+	page.OnConsole(func(message playwright.ConsoleMessage) {
 		messagesChan <- message
 	})
 	// All console events will be reported before 'page.evaluate' is finished.
@@ -149,7 +149,7 @@ func TestConsoleShouldHaveLocationForConsoleAPICalls(t *testing.T) {
 	messageEvent, err := page.ExpectEvent("console", func() error {
 		_, err := page.Goto(server.PREFIX + "/consolelog.html")
 		return err
-	}, playwright.PageWaitForEventOptions{
+	}, playwright.PageExpectEventOptions{
 		Predicate: func(m playwright.ConsoleMessage) bool {
 			return strings.HasPrefix(m.Text(), "here:")
 		},

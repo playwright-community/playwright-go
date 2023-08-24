@@ -87,7 +87,7 @@ func TestLocatorInputValue(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Goto(server.PREFIX + "/dom.html")
 	require.NoError(t, err)
-	require.NoError(t, page.Fill("#input", "input value"))
+	require.NoError(t, page.Locator("#input").Fill("input value"))
 
 	result, err := page.Locator("#input").InputValue()
 	require.NoError(t, err)
@@ -481,7 +481,7 @@ func TestLocatorsDragToShouldWork(t *testing.T) {
 	_, err := page.Goto(fmt.Sprintf("%s/drag-n-drop.html", server.PREFIX))
 	require.NoError(t, err)
 	require.NoError(t, page.Locator("#source").DragTo(page.Locator("#target")))
-	ret, err := page.EvalOnSelector("#target", "target => target.contains(document.querySelector('#source'))")
+	ret, err := page.Locator("#target").Evaluate("target => target.contains(document.querySelector('#source'))", nil)
 	require.NoError(t, err)
 	require.True(t, ret.(bool))
 }
@@ -501,6 +501,7 @@ func TestLocatorsShouldUploadFile(t *testing.T) {
 			Buffer:   file,
 		},
 	}))
+	//nolint:staticcheck
 	elm, err := input.ElementHandle()
 	require.NoError(t, err)
 	ret, err := page.Evaluate(`e => e.files[0].name`, elm)
@@ -512,6 +513,7 @@ func TestLocatorsShouldQueryExistingElements(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	require.NoError(t, page.SetContent(`<html><body><div>A</div><br/><div>B</div></body></html>`))
+	//nolint:staticcheck
 	elements, err := page.Locator("html").Locator("div").ElementHandles()
 	require.NoError(t, err)
 	require.Equal(t, 2, len(elements))
@@ -538,7 +540,7 @@ func TestShouldSupportLocatorFilter(t *testing.T) {
 	defer AfterEach(t)
 	err := page.SetContent(`<section><div><span>hello</span></div><div><span>world</span></div></section>`)
 	require.NoError(t, err)
-	locator := page.Locator("div").Filter(playwright.LocatorLocatorOptions{
+	locator := page.Locator("div").Filter(playwright.LocatorFilterOptions{
 		HasText: "hello",
 	})
 
@@ -574,4 +576,21 @@ func TestShouldSupportLocatorOr(t *testing.T) {
 	require.NoError(t, expect.Locator(page.Locator("article").Or(page.Locator("span"))).ToHaveText("world"))
 	require.NoError(t, expect.Locator(page.Locator("div").Or(page.Locator("article"))).ToHaveText("hello"))
 	require.NoError(t, expect.Locator(page.Locator("span").Or(page.Locator("article"))).ToHaveText("world"))
+}
+
+func TestLocatorAndFrameLocatorShouldAcceptLocator(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.SetContent(`
+		<div><input value=outer></div>
+    <iframe srcdoc="<div><input value=inner></div>"></iframe>
+	`))
+	input := page.Locator("input")
+	require.NoError(t, expect.Locator(input).ToHaveValue("outer"))
+	require.NoError(t, expect.Locator(page.Locator("div").Locator(input)).ToHaveValue("outer"))
+	require.NoError(t, expect.Locator(page.FrameLocator("iframe").Locator(input)).ToHaveValue("inner"))
+	require.NoError(t, expect.Locator(page.FrameLocator("iframe").Locator("div").Locator(input)).ToHaveValue("inner"))
+
+	div := page.Locator("div")
+	require.NoError(t, expect.Locator(page.FrameLocator("iframe").Locator(div).Locator("input")).ToHaveValue("inner"))
 }
