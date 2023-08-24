@@ -23,10 +23,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not create page: %v", err)
 	}
-	page.On("request", func(request playwright.Request) {
+	page.OnRequest(func(request playwright.Request) {
 		fmt.Printf(">> %s %s\n", request.Method(), request.URL())
 	})
-	page.On("response", func(response playwright.Response) {
+	page.OnResponse(func(response playwright.Response) {
 		fmt.Printf("<< %v %s\n", response.Status(), response.URL())
 	})
 	if _, err = page.Goto("http://todomvc.com/examples/react/", playwright.PageGotoOptions{

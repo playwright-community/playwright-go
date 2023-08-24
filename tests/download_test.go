@@ -26,15 +26,13 @@ func TestDownloadBasic(t *testing.T) {
 	))
 
 	download, err := page.ExpectDownload(func() error {
-		return page.Click("a")
+		return page.Locator("a").Click()
 	})
 	require.NoError(t, err)
 	require.Equal(t, download.URL(), fmt.Sprintf("%s/downloadWithFilename", server.PREFIX))
 	require.Equal(t, download.SuggestedFilename(), "file.txt")
 	require.Equal(t, download.String(), "file.txt")
-	failure, err := download.Failure()
-	require.NoError(t, err)
-	require.Equal(t, failure, "")
+	require.NoError(t, download.Failure())
 
 	file, err := download.Path()
 	require.NoError(t, err)
@@ -68,11 +66,9 @@ func TestDownloadCancel(t *testing.T) {
 		fmt.Sprintf(`<a href="%s/downloadWithDelay">download</a>`, server.PREFIX),
 	))
 	download, err := page.ExpectDownload(func() error {
-		return page.Click("a")
+		return page.Locator("a").Click()
 	})
 	require.NoError(t, err)
 	require.NoError(t, download.Cancel())
-	failure, err := download.Failure()
-	require.NoError(t, err)
-	require.Equal(t, "canceled", failure)
+	require.Error(t, download.Failure(), "canceled")
 }

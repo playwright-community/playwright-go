@@ -28,8 +28,7 @@ func (d *downloadImpl) Delete() error {
 	return err
 }
 
-func (d *downloadImpl) Failure() (string, error) {
-
+func (d *downloadImpl) Failure() error {
 	return d.artifact.Failure()
 }
 

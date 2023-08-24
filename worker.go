@@ -66,20 +66,8 @@ func (w *workerImpl) onClose() {
 	w.Emit("close", w)
 }
 
-func (w *workerImpl) WaitForEvent(event string, predicates ...interface{}) (interface{}, error) {
-	var predicate interface{} = nil
-	if len(predicates) == 1 {
-		predicate = predicates[0]
-	}
-	return newWaiter().WaitForEvent(w, event, predicate).Wait()
-}
-
-func (w *workerImpl) ExpectEvent(event string, cb func() error, predicates ...interface{}) (interface{}, error) {
-	var predicate interface{} = nil
-	if len(predicates) == 1 {
-		predicate = predicates[0]
-	}
-	return newWaiter().WaitForEvent(w, event, predicate).RunAndWait(cb)
+func (w *workerImpl) OnClose(fn func(Worker)) {
+	w.On("close", fn)
 }
 
 func newWorker(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *workerImpl {

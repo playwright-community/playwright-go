@@ -223,7 +223,7 @@ func TestRouteAbort(t *testing.T) {
 	_, err = page.Goto(server.EMPTY_PAGE)
 	require.Error(t, err)
 	request := <-failedRequests
-	require.True(t, len(request.Failure().ErrorText) > 5)
+	require.True(t, len(request.Failure().Error()) > 5)
 }
 
 func TestRequestPostData(t *testing.T) {
@@ -294,7 +294,7 @@ func TestResponseSecurityDetails(t *testing.T) {
 	}
 	tlsServer := newTestServer(true)
 	defer tlsServer.testServer.Close()
-	page2, err := browser.NewPage(playwright.BrowserNewContextOptions{
+	page2, err := browser.NewPage(playwright.BrowserNewPageOptions{
 		IgnoreHttpsErrors: playwright.Bool(true),
 	})
 	require.NoError(t, err)
@@ -304,6 +304,23 @@ func TestResponseSecurityDetails(t *testing.T) {
 	securityDetails, err := response.SecurityDetails()
 	require.NoError(t, err)
 
-	require.Equal(t, "TLS 1.3", securityDetails.Protocol)
+	require.Equal(t, "TLS 1.3", *securityDetails.Protocol)
 	require.NoError(t, page2.Close())
+}
+
+func TestRequestTimingShouldWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	result, err := page.ExpectEvent("requestfinished", func() error {
+		_, err := page.Goto(server.EMPTY_PAGE)
+		return err
+	})
+	require.NoError(t, err)
+	request, ok := result.(playwright.Request)
+	require.True(t, ok)
+	timing := request.Timing()
+	require.GreaterOrEqual(t, timing.RequestStart, timing.ConnectEnd)
+	require.GreaterOrEqual(t, timing.ResponseStart, timing.RequestStart)
+	require.GreaterOrEqual(t, timing.ResponseEnd, timing.ResponseStart)
+	require.Less(t, timing.ResponseEnd, 10000.0)
 }

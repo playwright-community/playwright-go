@@ -54,14 +54,12 @@ func (ws *webSocketServer) handler(w http.ResponseWriter, r *http.Request) {
 				log.Println("could not write ws message:", err)
 				return
 			}
-			break
 		}
 		if bytes.Equal(message, []byte("echo-text")) {
 			if err := c.WriteMessage(mt, []byte("text")); err != nil {
 				log.Println("could not write ws message:", err)
 				return
 			}
-			break
 		}
 	}
 }
@@ -109,14 +107,17 @@ func TestWebSocketShouldEmitCloseEvents(t *testing.T) {
 	defer wsServer.Stop()
 	ws, err := page.ExpectWebSocket(func() error {
 		_, err := page.Evaluate(`port => {
-            const ws = new WebSocket('ws://localhost:' + port + '/ws');
-            ws.addEventListener('message', data => { ws.close() });
+					const ws = new WebSocket('ws://localhost:' + port + '/ws');
+					ws.addEventListener('message', data => { ws.close() });
         }`, wsServer.PORT)
 		return err
 	}, playwright.PageExpectWebSocketOptions{
 		Timeout: playwright.Float(1000),
 	})
 	require.NoError(t, err)
+	ws.OnClose(func(w playwright.WebSocket) {
+		require.Equal(t, w.URL(), fmt.Sprintf("ws://localhost:%d/ws", wsServer.PORT))
+	})
 	require.Equal(t, ws.URL(), fmt.Sprintf("ws://localhost:%d/ws", wsServer.PORT))
 	if !ws.IsClosed() {
 		_, err = ws.WaitForEvent("close")
@@ -134,26 +135,30 @@ func TestWebSocketShouldEmitFrameEvents(t *testing.T) {
 	sent := [][]byte{}
 	received := [][]byte{}
 
-	page.Once("websocket", func(ws playwright.WebSocket) {
-		ws.On("framesent", func(payload []byte) {
+	page.OnWebSocket(func(ws playwright.WebSocket) {
+		ws.OnFrameSent(func(payload []byte) {
 			sent = append(sent, payload)
 		})
-		ws.On("framereceived", func(payload []byte) {
+		ws.OnFrameReceived(func(payload []byte) {
 			received = append(received, payload)
 		})
 	})
 	ws, err := page.ExpectWebSocket(func() error {
 		_, err := page.Evaluate(`port => {
+						let count = 0;
             const ws = new WebSocket('ws://localhost:' + port + '/ws');
             ws.addEventListener('open', () => {
                 ws.send('echo-text');
             });
+						ws.addEventListener('message', data => { count++; if (count >= 2) { ws.close() } });
         }`, wsServer.PORT)
 		return err
 	})
 	require.NoError(t, err)
 	if !ws.IsClosed() {
-		_, err = ws.WaitForEvent("close")
+		_, err = ws.WaitForEvent("close", playwright.WebSocketWaitForEventOptions{
+			Timeout: playwright.Float(1000),
+		})
 		require.NoError(t, err)
 	}
 
@@ -171,15 +176,16 @@ func TestWebSocketShouldEmitBinaryFrameEvents(t *testing.T) {
 	received := [][]byte{}
 
 	page.Once("websocket", func(ws playwright.WebSocket) {
-		ws.On("framesent", func(payload []byte) {
+		ws.OnFrameSent(func(payload []byte) {
 			sent = append(sent, payload)
 		})
-		ws.On("framereceived", func(payload []byte) {
+		ws.OnFrameReceived(func(payload []byte) {
 			received = append(received, payload)
 		})
 	})
 	ws, err := page.ExpectWebSocket(func() error {
 		_, err := page.Evaluate(`port => {
+						let count = 0;
             const ws = new WebSocket('ws://localhost:' + port + '/ws');
             ws.addEventListener('open', () => {
                 const binary = new Uint8Array(5);
@@ -188,6 +194,7 @@ func TestWebSocketShouldEmitBinaryFrameEvents(t *testing.T) {
                 ws.send(binary);
                 ws.send('echo-bin');
             });
+						ws.addEventListener('message', data => { count++; if (count >= 2) { ws.close() } });
         }`, wsServer.PORT)
 		return err
 	})
@@ -214,16 +221,40 @@ func TestWebSocketShouldRejectWaitForEventOnCloseAndError(t *testing.T) {
 	})
 	require.NoError(t, err)
 	// event may have been generated before interception
-	// _, err = ws.WaitForEvent("framereceived")
-	// require.NoError(t, err)
+	_, _ = ws.WaitForEvent("framereceived", playwright.WebSocketWaitForEventOptions{
+		Timeout: playwright.Float(1000),
+	})
 	_, err = ws.ExpectEvent("framesent", func() error {
 		_, err := page.Evaluate(`window.ws.close()`)
 		return err
-	}, playwright.WebSocketWaitForEventOptions{
+	}, playwright.WebSocketExpectEventOptions{
 		Timeout: playwright.Float(1000),
 		Predicate: func(ev interface{}) bool {
 			return true
 		},
 	})
 	require.ErrorContains(t, err, "websocket closed")
+}
+
+func TestWebSocketShouldEmitErrorEvent(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	wsServer := newWebsocketServer()
+	defer wsServer.Stop()
+	chanMsg := make(chan string, 1)
+	page.OnWebSocket(func(ws playwright.WebSocket) {
+		ws.OnSocketError(func(err string) {
+			chanMsg <- err
+		})
+	})
+	_, err := page.Evaluate(`port => {
+			ws = new WebSocket('ws://localhost:' + port + '/bogus-ws');
+		}`, wsServer.PORT)
+	require.NoError(t, err)
+	msg := <-chanMsg
+	if isFirefox {
+		require.Equal(t, msg, "CLOSE_ABNORMAL")
+	} else {
+		require.Contains(t, msg, ": 404")
+	}
 }

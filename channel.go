@@ -1,7 +1,6 @@
 package playwright
 
 import (
-	"fmt"
 	"log"
 	"reflect"
 )
@@ -27,9 +26,13 @@ func (c *channel) SendReturnAsDict(method string, options ...interface{}) (inter
 
 func (c *channel) innerSend(method string, returnAsDict bool, options ...interface{}) (interface{}, error) {
 	params := transformOptions(options...)
-	result, err := c.connection.sendMessageToServer(c.guid, method, params)
+	callback, err := c.connection.sendMessageToServer(c.guid, method, params, false)
 	if err != nil {
-		return nil, fmt.Errorf("could not send message to server: %w", err)
+		return nil, err
+	}
+	result, err := callback.GetResult()
+	if err != nil {
+		return nil, err
 	}
 	if result == nil {
 		return nil, nil
@@ -52,10 +55,10 @@ func (c *channel) innerSend(method string, returnAsDict bool, options ...interfa
 func (c *channel) SendNoReply(method string, options ...interface{}) {
 	params := transformOptions(options...)
 	_, err := c.connection.WrapAPICall(func() (interface{}, error) {
-		return c.connection.sendMessageToServer(c.guid, method, params)
+		return c.connection.sendMessageToServer(c.guid, method, params, true)
 	}, false)
 	if err != nil {
-		log.Printf("could not send message to server from noreply: %v", err)
+		log.Printf("SendNoReply failed: %v", err)
 	}
 }
 

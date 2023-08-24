@@ -54,10 +54,6 @@ func (ar *apiResponseAssertionsImpl) ToBeOK() error {
 	return errors.New(message)
 }
 
-func (ar *apiResponseAssertionsImpl) NotToBeOK() error {
-	return ar.Not().ToBeOK()
-}
-
 func isTexualMimeType(mimeType string) bool {
 	re := regexp.MustCompile(`^(text\/.*?|application\/(json|(x-)?javascript|xml.*?|ecmascript|graphql|x-www-form-urlencoded)|image\/svg(\+xml)?|application\/.*?(\+json|\+xml))(;\s*charset=.*)?$`)
 	return re.MatchString(mimeType)

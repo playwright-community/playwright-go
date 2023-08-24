@@ -14,6 +14,7 @@ func TestFrameWaitForNavigationShouldWork(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
+	//nolint:staticcheck
 	response, err := page.ExpectNavigation(func() error {
 		_, err := page.Evaluate("url => window.location.href = url", server.PREFIX+"/grid.html")
 		return err
@@ -27,10 +28,11 @@ func TestFrameWaitForNavigationShouldRespectTimeout(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	timeout := 500.0
+	//nolint:staticcheck
 	_, err := page.ExpectNavigation(func() error {
 		_, err := page.Evaluate("url => window.location.href = url", server.EMPTY_PAGE)
 		return err
-	}, playwright.PageWaitForNavigationOptions{
+	}, playwright.PageExpectNavigationOptions{
 		URL:     "**/frame.html",
 		Timeout: playwright.Float(timeout),
 	})
@@ -46,7 +48,7 @@ func TestFrameWaitForURLShouldWork(t *testing.T) {
 	require.NoError(t, page.SetContent(`<a href="grid.html">foobar</a>`))
 	go func() {
 		time.Sleep(2 * time.Second)
-		require.NoError(t, page.Click("a"))
+		require.NoError(t, page.Locator("a").Click())
 	}()
 
 	err = page.MainFrame().WaitForURL(server.PREFIX + "/grid.html")
@@ -60,8 +62,9 @@ func TestFrameWaitForNavigationAnchorLinks(t *testing.T) {
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<a href="#foobar">foobar</a>`))
+	//nolint:staticcheck
 	response, err := page.ExpectNavigation(func() error {
-		return page.Click("a")
+		return page.Locator("a").Click()
 	})
 	require.NoError(t, err)
 	require.Nil(t, response)
@@ -73,12 +76,14 @@ func TestFrameInnerHTML(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Goto(server.PREFIX + "/dom.html")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	handle, err := page.QuerySelector("#outer")
 	require.NoError(t, err)
 	innerHTML, err := handle.InnerHTML()
 	require.NoError(t, err)
 	require.Equal(t, `<div id="inner">Text,
 more text</div>`, innerHTML)
+	//nolint:staticcheck
 	innerHTML, err = page.InnerHTML("#outer")
 	require.NoError(t, err)
 	require.Equal(t, `<div id="inner">Text,
@@ -91,7 +96,7 @@ func TestFrameSetInputFiles(t *testing.T) {
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<input type=file>"))
-
+	//nolint:staticcheck
 	require.NoError(t, page.SetInputFiles("input", []playwright.InputFile{
 		{
 			Name:     "file-to-upload.txt",
@@ -99,7 +104,7 @@ func TestFrameSetInputFiles(t *testing.T) {
 			Buffer:   []byte("123"),
 		},
 	}))
-	fileName, err := page.EvalOnSelector("input", "e => e.files[0].name")
+	fileName, err := page.Locator("input").Evaluate("e => e.files[0].name", nil)
 	require.NoError(t, err)
 	require.Equal(t, "file-to-upload.txt", fileName)
 }

@@ -45,11 +45,3 @@ func IntSlice(v ...int) *[]int {
 	o = append(o, v...)
 	return &o
 }
-
-// HttpCredentials is a credential for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication).
-// If no origin is specified, the username and password are sent to any servers upon unauthorized responses.
-type HttpCredentials struct {
-	Username string  `json:"username"`
-	Password string  `json:"password"`
-	Origin   *string `json:"origin"`
-}

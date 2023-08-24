@@ -20,13 +20,13 @@ func TestLocatorAssertionsToBeChecked(t *testing.T) {
 	locator := page.Locator("#checkbox1")
 	require.NoError(t, locator.Err())
 	require.NoError(t, expect.Locator(locator).ToBeChecked())
-	require.Error(t, expect.Locator(locator).NotToBeChecked())
+	require.Error(t, expect.Locator(locator).Not().ToBeChecked())
 	require.Error(t, expect.Locator(locator).ToBeChecked(playwright.LocatorAssertionsToBeCheckedOptions{
 		Checked: playwright.Bool(false),
 	}))
 
 	require.Error(t, expect.Locator(page.Locator("#checkbox2")).ToBeChecked())
-	require.NoError(t, expect.Locator(page.Locator("#checkbox2")).NotToBeChecked())
+	require.NoError(t, expect.Locator(page.Locator("#checkbox2")).Not().ToBeChecked())
 }
 
 func TestLocatorAssertionsToBeDisabled(t *testing.T) {
@@ -40,13 +40,13 @@ func TestLocatorAssertionsToBeDisabled(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NoError(t, expect.Locator(page.Locator(":text(\"button1\")")).ToBeDisabled())
-	require.Error(t, expect.Locator(page.Locator(":text(\"button1\")")).NotToBeDisabled())
+	require.Error(t, expect.Locator(page.Locator(":text(\"button1\")")).Not().ToBeDisabled())
 
 	require.Error(t, expect.Locator(page.Locator(":text(\"button2\")")).ToBeDisabled())
-	require.NoError(t, expect.Locator(page.Locator(":text(\"button2\")")).NotToBeDisabled())
+	require.NoError(t, expect.Locator(page.Locator(":text(\"button2\")")).Not().ToBeDisabled())
 
 	require.Error(t, expect.Locator(page.Locator("div")).ToBeDisabled())
-	require.NoError(t, expect.Locator(page.Locator("div")).NotToBeDisabled())
+	require.NoError(t, expect.Locator(page.Locator("div")).Not().ToBeDisabled())
 }
 
 func TestLocatorAssertionsToBeEditable(t *testing.T) {
@@ -60,13 +60,13 @@ func TestLocatorAssertionsToBeEditable(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NoError(t, expect.Locator(page.Locator("#input1")).ToBeEditable())
-	require.Error(t, expect.Locator(page.Locator("#input1")).NotToBeEditable())
+	require.Error(t, expect.Locator(page.Locator("#input1")).Not().ToBeEditable())
 
 	require.Error(t, expect.Locator(page.Locator("#input2")).ToBeEditable())
-	require.NoError(t, expect.Locator(page.Locator("#input2")).NotToBeEditable())
+	require.NoError(t, expect.Locator(page.Locator("#input2")).Not().ToBeEditable())
 
 	require.NoError(t, expect.Locator(page.Locator("textarea")).ToBeEditable())
-	require.Error(t, expect.Locator(page.Locator("textarea")).NotToBeEditable())
+	require.Error(t, expect.Locator(page.Locator("textarea")).Not().ToBeEditable())
 }
 
 func TestLocatorAssertionsToBeEmpty(t *testing.T) {
@@ -81,16 +81,16 @@ func TestLocatorAssertionsToBeEmpty(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NoError(t, expect.Locator(page.Locator("#textarea1")).ToBeEmpty())
-	require.Error(t, expect.Locator(page.Locator("#textarea1")).NotToBeEmpty())
+	require.Error(t, expect.Locator(page.Locator("#textarea1")).Not().ToBeEmpty())
 
 	require.Error(t, expect.Locator(page.Locator("#textarea2")).ToBeEmpty())
-	require.NoError(t, expect.Locator(page.Locator("#textarea2")).NotToBeEmpty())
+	require.NoError(t, expect.Locator(page.Locator("#textarea2")).Not().ToBeEmpty())
 
 	require.NoError(t, expect.Locator(page.Locator("#div1")).ToBeEmpty())
-	require.Error(t, expect.Locator(page.Locator("#div1")).NotToBeEmpty())
+	require.Error(t, expect.Locator(page.Locator("#div1")).Not().ToBeEmpty())
 
 	require.Error(t, expect.Locator(page.Locator("#div2")).ToBeEmpty())
-	require.NoError(t, expect.Locator(page.Locator("#div2")).NotToBeEmpty())
+	require.NoError(t, expect.Locator(page.Locator("#div2")).Not().ToBeEmpty())
 }
 
 func TestLocatorAssertionsToBeEnabled(t *testing.T) {
@@ -104,13 +104,13 @@ func TestLocatorAssertionsToBeEnabled(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NoError(t, expect.Locator(page.Locator(`:text("button1")`)).ToBeEnabled())
-	require.Error(t, expect.Locator(page.Locator(`:text("button1")`)).NotToBeEnabled())
+	require.Error(t, expect.Locator(page.Locator(`:text("button1")`)).Not().ToBeEnabled())
 
 	require.Error(t, expect.Locator(page.Locator(`:text("button2")`)).ToBeEnabled())
-	require.NoError(t, expect.Locator(page.Locator(`:text("button2")`)).NotToBeEnabled())
+	require.NoError(t, expect.Locator(page.Locator(`:text("button2")`)).Not().ToBeEnabled())
 
 	require.NoError(t, expect.Locator(page.Locator("div")).ToBeEnabled())
-	require.Error(t, expect.Locator(page.Locator("div")).NotToBeEnabled())
+	require.Error(t, expect.Locator(page.Locator("div")).Not().ToBeEnabled())
 }
 
 func TestLocatorAssertionsToBeFocused(t *testing.T) {
@@ -125,11 +125,11 @@ func TestLocatorAssertionsToBeFocused(t *testing.T) {
 	locator := page.Locator("#input1")
 	require.NoError(t, locator.Focus())
 	require.NoError(t, expect.Locator(locator).ToBeFocused())
-	require.Error(t, expect.Locator(locator).NotToBeFocused())
+	require.Error(t, expect.Locator(locator).Not().ToBeFocused())
 
 	locator2 := page.Locator("#input2")
 	require.Error(t, expect.Locator(locator2).ToBeFocused())
-	require.NoError(t, expect.Locator(locator2).NotToBeFocused())
+	require.NoError(t, expect.Locator(locator2).Not().ToBeFocused())
 }
 
 func TestLocatorAssertionsToBeHidden(t *testing.T) {
@@ -149,11 +149,11 @@ func TestLocatorAssertionsToBeHidden(t *testing.T) {
 
 	locator := page.Locator("summary")
 	require.Error(t, expect.Locator(locator).ToBeHidden())
-	require.NoError(t, expect.Locator(locator).NotToBeHidden())
+	require.NoError(t, expect.Locator(locator).Not().ToBeHidden())
 
 	locator2 := page.Locator("ul")
 	require.NoError(t, expect.Locator(locator2).ToBeHidden())
-	require.Error(t, expect.Locator(locator2).NotToBeHidden())
+	require.Error(t, expect.Locator(locator2).Not().ToBeHidden())
 }
 
 func TestLocatorAssertionsToBeVisible(t *testing.T) {
@@ -173,12 +173,12 @@ func TestLocatorAssertionsToBeVisible(t *testing.T) {
 
 	locator := page.Locator("summary")
 	require.NoError(t, expect.Locator(locator).ToBeVisible())
-	require.Error(t, expect.Locator(locator).NotToBeVisible())
+	require.Error(t, expect.Locator(locator).Not().ToBeVisible())
 
 	locator2 := page.Locator("ul")
 	require.NoError(t, err)
 	require.Error(t, expect.Locator(locator2).ToBeVisible())
-	require.NoError(t, expect.Locator(locator2).NotToBeVisible())
+	require.NoError(t, expect.Locator(locator2).Not().ToBeVisible())
 }
 
 func TestLocatorAssertionsToContainText(t *testing.T) {
@@ -190,14 +190,14 @@ func TestLocatorAssertionsToContainText(t *testing.T) {
 	locator := page.Locator("div")
 
 	require.NoError(t, expect.Locator(locator).ToContainText("foo"))
-	require.NoError(t, expect.Locator(locator).NotToContainText("foo", playwright.LocatorAssertionsToContainTextOptions{
+	require.NoError(t, expect.Locator(locator).Not().ToContainText("foo", playwright.LocatorAssertionsToContainTextOptions{
 		UseInnerText: playwright.Bool(true),
 	}))
 	require.NoError(t, expect.Locator(locator).ToContainText([]string{"test"}))
 	require.NoError(t, expect.Locator(locator).ToContainText(regexp.MustCompile(`test\d+`)))
 	require.NoError(t, expect.Locator(locator).ToContainText([]*regexp.Regexp{regexp.MustCompile("test")}))
 	require.Error(t, expect.Locator(locator).ToContainText("invalid"))
-	require.Error(t, expect.Locator(locator).NotToContainText("test"))
+	require.Error(t, expect.Locator(locator).Not().ToContainText("test"))
 }
 
 func TestLocatorAssertionsToHaveAttribute(t *testing.T) {
@@ -212,14 +212,14 @@ func TestLocatorAssertionsToHaveAttribute(t *testing.T) {
 	input1 := page.Locator("#input1")
 	require.NoError(t, expect.Locator(input1).ToHaveAttribute("type", "text"))
 	require.NoError(t, expect.Locator(input1).ToHaveAttribute("type", regexp.MustCompile("text")))
-	require.Error(t, expect.Locator(input1).NotToHaveAttribute("type", "text"))
-	require.Error(t, expect.Locator(input1).NotToHaveAttribute("type", regexp.MustCompile("text")))
+	require.Error(t, expect.Locator(input1).Not().ToHaveAttribute("type", "text"))
+	require.Error(t, expect.Locator(input1).Not().ToHaveAttribute("type", regexp.MustCompile("text")))
 
 	input2 := page.Locator("#input2")
 	require.Error(t, expect.Locator(input2).ToHaveAttribute("type", "text"))
 	require.Error(t, expect.Locator(input2).ToHaveAttribute("type", regexp.MustCompile("text")))
-	require.NoError(t, expect.Locator(input2).NotToHaveAttribute("type", "text"))
-	require.NoError(t, expect.Locator(input2).NotToHaveAttribute("type", regexp.MustCompile("text")))
+	require.NoError(t, expect.Locator(input2).Not().ToHaveAttribute("type", "text"))
+	require.NoError(t, expect.Locator(input2).Not().ToHaveAttribute("type", regexp.MustCompile("text")))
 }
 
 func TestLocatorAssertionsToHaveClass(t *testing.T) {
@@ -237,7 +237,7 @@ func TestLocatorAssertionsToHaveClass(t *testing.T) {
 	require.NoError(t, expect.Locator(locator).ToHaveClass([]string{"test1"}))
 	require.NoError(t, expect.Locator(locator).ToHaveClass(regexp.MustCompile("test.{1}")))
 	require.NoError(t, expect.Locator(locator).ToHaveClass([]*regexp.Regexp{regexp.MustCompile(`test\d+`)}))
-	require.Error(t, expect.Locator(locator).NotToHaveClass("test1"))
+	require.Error(t, expect.Locator(locator).Not().ToHaveClass("test1"))
 
 	locator2 := page.Locator(".test2")
 	require.NoError(t, locator2.Err())
@@ -245,7 +245,7 @@ func TestLocatorAssertionsToHaveClass(t *testing.T) {
 	require.Error(t, expect.Locator(locator2).ToHaveClass([]string{"test1"}))
 	require.Error(t, expect.Locator(locator2).ToHaveClass(regexp.MustCompile(`test\d{2}`)))
 	require.Error(t, expect.Locator(locator2).ToHaveClass([]*regexp.Regexp{regexp.MustCompile(`test123`)}))
-	require.NoError(t, expect.Locator(locator2).NotToHaveClass("test1"))
+	require.NoError(t, expect.Locator(locator2).Not().ToHaveClass("test1"))
 }
 
 func TestLocatorAssertionsToHaveCount(t *testing.T) {
@@ -260,7 +260,7 @@ func TestLocatorAssertionsToHaveCount(t *testing.T) {
 	locator := page.Locator("button")
 	require.NoError(t, locator.Err())
 	require.NoError(t, expect.Locator(locator).ToHaveCount(2))
-	require.Error(t, expect.Locator(locator).NotToHaveCount(2))
+	require.Error(t, expect.Locator(locator).Not().ToHaveCount(2))
 }
 
 func TestLocatorAssertionsToHaveCSS(t *testing.T) {
@@ -275,11 +275,11 @@ func TestLocatorAssertionsToHaveCSS(t *testing.T) {
 	button1 := page.Locator("#button1")
 	require.NoError(t, err)
 	require.NoError(t, expect.Locator(button1).ToHaveCSS("display", "flex"))
-	require.Error(t, expect.Locator(button1).NotToHaveCSS("display", "flex"))
+	require.Error(t, expect.Locator(button1).Not().ToHaveCSS("display", "flex"))
 
 	button2 := page.Locator("#button2")
 	require.Error(t, expect.Locator(button2).ToHaveCSS("display", "flex"))
-	require.NoError(t, expect.Locator(button2).NotToHaveCSS("display", "flex"))
+	require.NoError(t, expect.Locator(button2).Not().ToHaveCSS("display", "flex"))
 }
 
 func TestLocatorAssertionsToHaveId(t *testing.T) {
@@ -293,11 +293,11 @@ func TestLocatorAssertionsToHaveId(t *testing.T) {
 
 	button := page.Locator("button")
 	require.NoError(t, expect.Locator(button).ToHaveId("button1"))
-	require.Error(t, expect.Locator(button).NotToHaveId("button1"))
+	require.Error(t, expect.Locator(button).Not().ToHaveId("button1"))
 
 	div := page.Locator("div")
 	require.Error(t, expect.Locator(div).ToHaveId("button1"))
-	require.NoError(t, expect.Locator(div).NotToHaveId("button1"))
+	require.NoError(t, expect.Locator(div).Not().ToHaveId("button1"))
 }
 
 func TestLocatorAssertionsToHaveJSProperty(t *testing.T) {
@@ -306,12 +306,13 @@ func TestLocatorAssertionsToHaveJSProperty(t *testing.T) {
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<div></div>"))
-	_, err = page.EvalOnSelector("div", "e => e.foo = true")
+	//nolint:staticcheck
+	_, err = page.EvalOnSelector("div", "e => e.foo = true", nil)
 	require.NoError(t, err)
 
 	locator := page.Locator("div")
 	require.NoError(t, expect.Locator(locator).ToHaveJSProperty("foo", true))
-	require.Error(t, expect.Locator(locator).NotToHaveJSProperty("foo", true))
+	require.Error(t, expect.Locator(locator).Not().ToHaveJSProperty("foo", true))
 }
 
 func TestLocatorAssertionsToHaveText(t *testing.T) {
@@ -331,7 +332,7 @@ func TestLocatorAssertionsToHaveText(t *testing.T) {
 	require.NoError(t, expect.Locator(locator).ToHaveText(regexp.MustCompile("foo.*")))
 	require.NoError(t, expect.Locator(locator).ToHaveText([]*regexp.Regexp{regexp.MustCompile("foo.*")}))
 	require.Error(t, expect.Locator(locator).ToHaveText("invalid"))
-	require.Error(t, expect.Locator(locator).NotToHaveText("footest"))
+	require.Error(t, expect.Locator(locator).Not().ToHaveText("footest"))
 }
 
 func TestLocatorAssertionsToHaveValue(t *testing.T) {
@@ -344,7 +345,7 @@ func TestLocatorAssertionsToHaveValue(t *testing.T) {
 	require.NoError(t, expect.Locator(locator).ToHaveValue("test"))
 	require.NoError(t, expect.Locator(locator).ToHaveValue(regexp.MustCompile("te.*")))
 	require.Error(t, expect.Locator(locator).ToHaveValue("invalid"))
-	require.Error(t, expect.Locator(locator).NotToHaveValue("test"))
+	require.Error(t, expect.Locator(locator).Not().ToHaveValue("test"))
 }
 
 func TestLocatorAssertionsToHaveValues(t *testing.T) {
@@ -363,7 +364,7 @@ func TestLocatorAssertionsToHaveValues(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NoError(t, expect.Locator(locator).ToHaveValues([]interface{}{"R", "G"}))
-	require.NoError(t, expect.Locator(locator).NotToHaveValues([]interface{}{"G", "B"}))
+	require.NoError(t, expect.Locator(locator).Not().ToHaveValues([]interface{}{"G", "B"}))
 }
 
 func TestToBeInViewportShouldRespectRatioOption(t *testing.T) {
@@ -385,13 +386,13 @@ func TestToBeInViewportShouldRespectRatioOption(t *testing.T) {
 		Ratio: playwright.Float(0.25),
 	}))
 	// In this test, element's ratio is 0.25.
-	require.NoError(t, expect.Locator(locator).NotToBeInViewport(playwright.LocatorAssertionsToBeInViewportOptions{
+	require.NoError(t, expect.Locator(locator).Not().ToBeInViewport(playwright.LocatorAssertionsToBeInViewportOptions{
 		Ratio: playwright.Float(0.26),
 	}))
-	require.NoError(t, expect.Locator(locator).NotToBeInViewport(playwright.LocatorAssertionsToBeInViewportOptions{
+	require.NoError(t, expect.Locator(locator).Not().ToBeInViewport(playwright.LocatorAssertionsToBeInViewportOptions{
 		Ratio: playwright.Float(0.3),
 	}))
-	require.NoError(t, expect.Locator(locator).NotToBeInViewport(playwright.LocatorAssertionsToBeInViewportOptions{
+	require.NoError(t, expect.Locator(locator).Not().ToBeInViewport(playwright.LocatorAssertionsToBeInViewportOptions{
 		Ratio: playwright.Float(0.7),
 	}))
 	require.NoError(t, expect.Locator(locator).Not().ToBeInViewport(playwright.LocatorAssertionsToBeInViewportOptions{
@@ -409,5 +410,5 @@ func TestLocatorShouldBeAttachedWithHiddenElement(t *testing.T) {
 	require.NoError(t, expect.Locator(locator).Not().ToBeAttached(playwright.LocatorAssertionsToBeAttachedOptions{
 		Attached: playwright.Bool(false),
 	}))
-	require.NoError(t, expect.Locator(page.Locator("input")).NotToBeAttached())
+	require.NoError(t, expect.Locator(page.Locator("input")).Not().ToBeAttached())
 }

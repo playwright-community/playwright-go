@@ -10,11 +10,6 @@ type tracingImpl struct {
 	tracesDir      string
 }
 
-type tracingStopChunkResult struct {
-	Artifact interface{}              `json:"artifact"`
-	Entries  []map[string]interface{} `json:"entries"`
-}
-
 func (t *tracingImpl) Start(options ...TracingStartOptions) error {
 	chunkOption := TracingStartChunkOptions{}
 	if len(options) == 1 {
@@ -53,23 +48,23 @@ func (t *tracingImpl) StartChunk(options ...TracingStartChunkOptions) error {
 	return t.startCollectingStacks(name)
 }
 
-func (t *tracingImpl) StopChunk(options ...TracingStopChunkOptions) error {
-	path := ""
-	if len(options) == 1 && options[0].Path != nil {
-		path = *options[0].Path
+func (t *tracingImpl) StopChunk(path ...string) error {
+	filePath := ""
+	if len(path) == 1 {
+		filePath = path[0]
 	}
-	if err := t.doStopChunk(path); err != nil {
+	if err := t.doStopChunk(filePath); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (t *tracingImpl) Stop(options ...TracingStopOptions) error {
-	path := ""
-	if len(options) == 1 && options[0].Path != nil {
-		path = *options[0].Path
+func (t *tracingImpl) Stop(path ...string) error {
+	filePath := ""
+	if len(path) == 1 {
+		filePath = path[0]
 	}
-	err := t.doStopChunk(path)
+	err := t.doStopChunk(filePath)
 	if err != nil {
 		return err
 	}
@@ -121,16 +116,19 @@ func (t *tracingImpl) doStopChunk(filePath string) (err error) {
 	if err != nil {
 		return err
 	}
-	artifactChannel := result.(tracingStopChunkResult).Artifact
+	artifactChannel, ok := result.(map[string]interface{})["artifact"]
+	if !ok {
+		return fmt.Errorf("could not convert result to map: %v", result)
+	}
+	// Save trace to the final local file.
+	artifact := fromNullableChannel(artifactChannel).(*artifactImpl)
 	// The artifact may be missing if the browser closed while stopping tracing.
-	if artifactChannel == nil {
+	if artifact == nil {
 		if t.stacksId != "" {
 			return t.connection.LocalUtils().TraceDiscarded(t.stacksId)
 		}
 		return
 	}
-	// Save trace to the final local file.
-	artifact := fromNullableChannel(artifactChannel).(*artifactImpl)
 	if err := artifact.SaveAs(filePath); err != nil {
 		return err
 	}

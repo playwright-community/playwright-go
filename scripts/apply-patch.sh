@@ -6,6 +6,7 @@ BRANCH_NAME_BUILD="playwright-build"
 SCRIPTS_DIR="$(dirname "$0")"
 
 echo "Applying patches..."
+echo "==================="
 
 pushd "$SCRIPTS_DIR/.."
 PW_VERSION="$(grep -oE "playwrightCliVersion.+\"[0-9\.]+" ./run.go | sed 's/playwrightCliVersion = "/v/g')"

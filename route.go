@@ -91,63 +91,67 @@ func (r *routeImpl) raceWithPageClose(f func() error) error {
 	}
 }
 
-func (r *routeImpl) Fulfill(options RouteFulfillOptions) error {
+func (r *routeImpl) Fulfill(options ...RouteFulfillOptions) error {
 	err := r.checkNotHandled()
 	if err != nil {
 		return err
+	}
+	option := RouteFulfillOptions{}
+	if len(options) == 1 {
+		option = options[0]
 	}
 	overrides := map[string]interface{}{
 		"status": 200,
 	}
 	headers := make(map[string]string)
 
-	if options.Response != nil {
-		overrides["status"] = options.Response.Status()
-		headers = options.Response.Headers()
-		response, ok := options.Response.(*apiResponseImpl)
-		if options.Body == nil && options.Path == nil && ok && response.request.connection == r.connection {
+	if option.Response != nil {
+		overrides["status"] = option.Response.Status()
+		headers = option.Response.Headers()
+		response, ok := option.Response.(*apiResponseImpl)
+		if option.Body == nil && option.Path == nil && ok && response.request.connection == r.connection {
 			overrides["fetchResponseUid"] = response.fetchUid()
 		} else {
-			options.Body, _ = options.Response.Body()
+			option.Body, _ = option.Response.Body()
 		}
-		options.Response = nil
+		option.Response = nil
 	}
-	if options.Status != nil {
-		overrides["status"] = *options.Status
-		options.Status = nil
+	if option.Status != nil {
+		overrides["status"] = *option.Status
+		option.Status = nil
 	}
 
 	length := 0
 	isBase64 := false
 	var fileContentType string
-	if _, ok := options.Body.(string); ok {
+	if _, ok := option.Body.(string); ok {
 		isBase64 = false
-	} else if body, ok := options.Body.([]byte); ok {
-		options.Body = base64.StdEncoding.EncodeToString(body)
+	} else if body, ok := option.Body.([]byte); ok {
+		option.Body = base64.StdEncoding.EncodeToString(body)
 		length = len(body)
 		isBase64 = true
-	} else if options.Path != nil {
-		content, err := os.ReadFile(*options.Path)
+	} else if option.Path != nil {
+		content, err := os.ReadFile(*option.Path)
 		if err != nil {
 			return err
 		}
 		fileContentType = http.DetectContentType(content)
-		options.Body = base64.StdEncoding.EncodeToString(content)
+		option.Body = base64.StdEncoding.EncodeToString(content)
 		isBase64 = true
 		length = len(content)
 	}
 
-	if options.Headers != nil {
+	if option.Headers != nil {
 		headers = make(map[string]string)
-		for key, val := range options.Headers {
+		for key, val := range option.Headers {
 			headers[strings.ToLower(key)] = val
 		}
-		options.Headers = nil
+		option.Headers = nil
 	}
-	if options.ContentType != nil {
-		headers["content-type"] = *options.ContentType
-		options.ContentType = nil
-	} else if options.Path != nil {
+	if option.ContentType != nil {
+		headers["content-type"] = *option.ContentType
+		option.ContentType = nil
+	} else if option.Path != nil {
 		headers["content-type"] = fileContentType
 	}
 	if _, ok := headers["content-length"]; !ok && length > 0 {
@@ -157,9 +161,9 @@ func (r *routeImpl) Fulfill(options RouteFulfillOptions) error {
 	overrides["isBase64"] = isBase64
 	overrides["requestUrl"] = r.Request().(*requestImpl).initializer["url"]
 
-	options.Path = nil
+	option.Path = nil
 	err = r.raceWithPageClose(func() error {
-		_, err := r.channel.Send("fulfill", options, overrides)
+		_, err := r.channel.Send("fulfill", option, overrides)
 		return err
 	})
 	r.reportHandled(true)

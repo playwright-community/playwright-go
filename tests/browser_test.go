@@ -63,7 +63,7 @@ func TestBrowserNewPageWithExtraHTTPHeaders(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	require.Equal(t, 1, len(browser.Contexts()))
-	page, err := browser.NewPage(playwright.BrowserNewContextOptions{
+	page, err := browser.NewPage(playwright.BrowserNewPageOptions{
 		ExtraHttpHeaders: map[string]string{
 			"extra-http": "42",
 		},
@@ -117,10 +117,11 @@ func TestBrowserClose(t *testing.T) {
 	browser, err := browserType.Launch()
 	require.NoError(t, err)
 	onCloseWasCalled := make(chan bool, 1)
-	onClose := func() {
+	onClose := func(b playwright.Browser) {
+		require.False(t, b.IsConnected())
 		onCloseWasCalled <- true
 	}
-	browser.On("disconnected", onClose)
+	browser.OnDisconnected(onClose)
 	require.True(t, browser.IsConnected())
 	require.NoError(t, browser.Close())
 	<-onCloseWasCalled

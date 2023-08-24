@@ -13,7 +13,7 @@ func TestAssertionsResponseIsOKPass(t *testing.T) {
 	response, err := page.Request().Get(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, expect.APIResponse(response).ToBeOK())
-	require.Error(t, expect.APIResponse(response).NotToBeOK())
+	require.Error(t, expect.APIResponse(response).Not().ToBeOK())
 }
 
 func TestAssertionsShouldPrintResponseWithTextContentTypeIfToBeOKFails(t *testing.T) {
@@ -46,7 +46,7 @@ func TestAssertionsShouldPrintResponseWithTextContentTypeIfToBeOKFails(t *testin
 
 	response, err = page.Request().Get(server.PREFIX + "/no-content-type")
 	require.NoError(t, err)
-	require.NoError(t, expect.APIResponse(response).NotToBeOK())
+	require.NoError(t, expect.APIResponse(response).Not().ToBeOK())
 	err = expect.APIResponse(response).ToBeOK()
 	require.ErrorContains(t, err, "→ GET "+server.PREFIX+"/no-content-type")
 	require.ErrorContains(t, err, "← 404 Not Found")

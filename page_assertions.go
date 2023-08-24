@@ -57,14 +57,6 @@ func (pa *pageAssertionsImpl) ToHaveURL(urlOrRegExp interface{}, options ...Page
 	)
 }
 
-func (pa *pageAssertionsImpl) NotToHaveTitle(titleOrRegExp interface{}, options ...PageAssertionsToHaveTitleOptions) error {
-	return pa.Not().ToHaveTitle(titleOrRegExp, options...)
-}
-
-func (pa *pageAssertionsImpl) NotToHaveURL(urlOrRegExp interface{}, options ...PageAssertionsToHaveURLOptions) error {
-	return pa.Not().ToHaveURL(urlOrRegExp, options...)
-}
-
 func (pa *pageAssertionsImpl) Not() PageAssertions {
 	return newPageAssertions(pa.actualPage, true, pa.defaultTimeout)
 }

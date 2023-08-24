@@ -1,3 +1,4 @@
+//nolint:staticcheck
 package playwright_test
 
 import (
@@ -155,10 +156,10 @@ func TestElementBoundingBox(t *testing.T) {
 	require.NoError(t, err)
 	box, err := element_handle.BoundingBox()
 	require.NoError(t, err)
-	require.Equal(t, 100, box.X)
-	require.Equal(t, 50, box.Y)
-	require.Equal(t, 50, box.Width)
-	require.Equal(t, 50, box.Height)
+	require.Equal(t, 100.0, box.X)
+	require.Equal(t, 50.0, box.Y)
+	require.Equal(t, 50.0, box.Width)
+	require.Equal(t, 50.0, box.Height)
 }
 
 func TestElementHandleTap(t *testing.T) {
@@ -167,14 +168,14 @@ func TestElementHandleTap(t *testing.T) {
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<input id='checkbox' type='checkbox'></input>"))
-	value, err := page.EvalOnSelector("input", "el => el.checked")
+	value, err := page.EvalOnSelector("input", "el => el.checked", nil)
 	require.NoError(t, err)
 	require.Equal(t, false, value)
 
 	elemHandle, err := page.QuerySelector("#checkbox")
 	require.NoError(t, err)
 	require.NoError(t, elemHandle.Tap())
-	value, err = page.EvalOnSelector("input", "el => el.checked")
+	value, err = page.EvalOnSelector("input", "el => el.checked", nil)
 	require.NoError(t, err)
 	require.Equal(t, true, value)
 }
@@ -329,8 +330,12 @@ func TestElementHandleSelectOptionOverElementHandle(t *testing.T) {
 		Elements: &[]playwright.ElementHandle{pythonOption},
 	})
 	require.NoError(t, err)
+	selected2, err := page.Locator("#lang").SelectOption(
+		playwright.SelectOptionValues{Values: playwright.StringSlice("python")})
+	require.NoError(t, err)
 	require.Equal(t, 1, len(selected))
 	require.Equal(t, "python", selected[0])
+	require.Equal(t, selected2, selected)
 }
 
 func TestElementHandleIsVisibleAndIsHiddenShouldWork(t *testing.T) {
@@ -362,10 +367,10 @@ func TestElementHandleIsVisibleAndIsHiddenShouldWork(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, isHidden)
 
-	isVisible, err = page.IsVisible("span")
+	isVisible, err = page.Locator("span").IsVisible()
 	require.NoError(t, err)
 	require.False(t, isVisible)
-	isHidden, err = page.IsHidden("span")
+	isHidden, err = page.Locator("span").IsHidden()
 	require.NoError(t, err)
 	require.True(t, isHidden)
 }
@@ -403,10 +408,10 @@ func TestElementHandleIsEnabledAndIsDisabledshouldWork(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, isDisabled)
 
-	isEnabled, err = page.IsEnabled(":text('button1')")
+	isEnabled, err = page.Locator(":text('button1')").IsEnabled()
 	require.NoError(t, err)
 	require.False(t, isEnabled)
-	isDisabled, err = page.IsDisabled(":text('button1')")
+	isDisabled, err = page.Locator(":text('button1')").IsDisabled()
 	require.NoError(t, err)
 	require.True(t, isDisabled)
 
@@ -419,10 +424,10 @@ func TestElementHandleIsEnabledAndIsDisabledshouldWork(t *testing.T) {
 	require.NoError(t, err)
 	require.False(t, isDisabled)
 
-	isEnabled, err = page.IsEnabled(":text('button2')")
+	isEnabled, err = page.Locator(":text('button2')").IsEnabled()
 	require.NoError(t, err)
 	require.True(t, isEnabled)
-	isDisabled, err = page.IsDisabled(":text('button2')")
+	isDisabled, err = page.Locator(":text('button2')").IsDisabled()
 	require.NoError(t, err)
 	require.False(t, isDisabled)
 }
@@ -433,7 +438,7 @@ func TestElementHandleIsEditableShouldWork(t *testing.T) {
 	require.NoError(t, page.SetContent(`
 		<input id=input1 disabled><textarea></textarea><input id=input2>
 	`))
-	_, err := page.EvalOnSelector("textarea", "t => t.readOnly = true")
+	_, err := page.Locator("textarea").Evaluate("t => t.readOnly = true", nil)
 	require.NoError(t, err)
 	input1, err := page.QuerySelector("#input1")
 	require.NoError(t, err)
@@ -449,7 +454,7 @@ func TestElementHandleIsEditableShouldWork(t *testing.T) {
 	isEditable, err = input2.IsEditable()
 	require.NoError(t, err)
 	require.True(t, isEditable)
-	isEditable, err = page.IsEditable("#input2")
+	isEditable, err = page.Locator("#input2").IsEditable()
 	require.NoError(t, err)
 	require.True(t, isEditable)
 
@@ -458,7 +463,7 @@ func TestElementHandleIsEditableShouldWork(t *testing.T) {
 	isEditable, err = textarea.IsEditable()
 	require.NoError(t, err)
 	require.False(t, isEditable)
-	isEditable, err = page.IsEditable("textarea")
+	isEditable, err = page.Locator("textarea").IsEditable()
 	require.NoError(t, err)
 	require.False(t, isEditable)
 }
@@ -483,11 +488,11 @@ func TestElementHandleIsCheckedShouldWork(t *testing.T) {
 	isChecked, err = handle.IsChecked()
 	require.NoError(t, err)
 	require.False(t, isChecked)
-	isChecked, err = page.IsChecked("input")
+	isChecked, err = page.Locator("input").IsChecked()
 	require.NoError(t, err)
 	require.False(t, isChecked)
 
-	_, err = page.IsChecked("div")
+	_, err = page.Locator("div").IsChecked()
 	require.Contains(t, err.Error(), "Not a checkbox or radio button")
 }
 

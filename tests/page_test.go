@@ -9,7 +9,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	"testing"
 	"time"
 
@@ -103,6 +102,7 @@ func TestPageQuerySelector(t *testing.T) {
 			</div>
 		</span>
 	</div>`))
+	//nolint:staticcheck
 	one, err := page.QuerySelector("div#one")
 	require.NoError(t, err)
 	two, err := one.QuerySelector("span#two")
@@ -124,6 +124,7 @@ func TestPageQuerySelectorAll(t *testing.T) {
 	<div class="foo">1</div>
 	<div class="foo">2</div>
 	`))
+	//nolint:staticcheck
 	elements, err := page.QuerySelectorAll("div.foo")
 	require.NoError(t, err)
 	require.Equal(t, 3, len(elements))
@@ -157,6 +158,7 @@ func TestPageEvalOnSelectorAll(t *testing.T) {
 		<div class="foo">3</div>
 	`)
 	require.NoError(t, err)
+	//nolint:staticcheck
 	val, err := page.EvalOnSelectorAll(".foo", `(elements) => elements.map(el => el.textContent)`)
 	require.NoError(t, err)
 	require.Equal(t, val, []interface{}([]interface{}{"1", "2", "3"}))
@@ -169,7 +171,8 @@ func TestPageEvalOnSelector(t *testing.T) {
 		<div class="foo">bar</div>
 	`)
 	require.NoError(t, err)
-	val, err := page.EvalOnSelector(".foo", `(element) => element.textContent`)
+	//nolint:staticcheck
+	val, err := page.EvalOnSelector(".foo", `(element) => element.textContent`, nil)
 	require.NoError(t, err)
 	require.Equal(t, val, "bar")
 }
@@ -252,20 +255,6 @@ func TestPageExpectRequestFinished(t *testing.T) {
 	require.Equal(t, "GET", request.Method())
 }
 
-func TestPageExpectResponse(t *testing.T) {
-	BeforeEach(t)
-	defer AfterEach(t)
-	response, err := page.ExpectResponse("**/*", func() error {
-		_, err := page.Goto(server.EMPTY_PAGE)
-		return err
-	})
-	require.NoError(t, err)
-	require.Equal(t, server.EMPTY_PAGE, response.URL())
-	require.True(t, response.Ok())
-	require.Equal(t, 200, response.Status())
-	require.Equal(t, "OK", response.StatusText())
-}
-
 func TestPageExpectPopup(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
@@ -297,7 +286,7 @@ func TestPageExpectFileChooser(t *testing.T) {
 	t.Run("should work for single file pick", func(t *testing.T) {
 		require.NoError(t, page.SetContent(`<input type=file>`))
 		fc, err := page.ExpectFileChooser(func() error {
-			return page.Click("input")
+			return page.Locator("input").Click()
 		}, playwright.PageExpectFileChooserOptions{
 			Timeout: playwright.Float(1000),
 		})
@@ -308,7 +297,7 @@ func TestPageExpectFileChooser(t *testing.T) {
 	t.Run("should work for multiple", func(t *testing.T) {
 		require.NoError(t, page.SetContent(`<input multiple type=file>`))
 		_, err := page.ExpectFileChooser(func() error {
-			return page.Click("input")
+			return page.Locator("input").Click()
 		}, playwright.PageExpectFileChooserOptions{
 			Predicate: func(fc playwright.FileChooser) bool {
 				return fc.IsMultiple()
@@ -373,12 +362,13 @@ func TestPageWaitForSelector(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	require.NoError(t, page.SetContent(`<h1>myElement</h1>`))
+	//nolint:staticcheck
 	element, err := page.WaitForSelector("text=myElement")
 	require.NoError(t, err)
 	textContent, err := element.TextContent()
 	require.NoError(t, err)
 	require.Equal(t, "myElement", textContent)
-
+	//nolint:staticcheck
 	_, err = page.WaitForSelector("h1")
 	require.NoError(t, err)
 }
@@ -388,7 +378,8 @@ func TestPageDispatchEvent(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Goto(server.PREFIX + "/input/button.html")
 	require.NoError(t, err)
-	require.NoError(t, page.DispatchEvent("button", "click"))
+	//nolint:staticcheck
+	require.NoError(t, page.DispatchEvent("button", "click", nil))
 	clicked, err := page.Evaluate("() => result")
 	require.NoError(t, err)
 	require.Equal(t, "Clicked", clicked)
@@ -524,8 +515,8 @@ func TestPlaywrightDevices(t *testing.T) {
 func TestPageAddInitScript(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	require.NoError(t, page.AddInitScript(playwright.PageAddInitScriptOptions{
-		Script: playwright.String(`window['injected'] = 123;`),
+	require.NoError(t, page.AddInitScript(playwright.Script{
+		Content: playwright.String(`window['injected'] = 123;`),
 	}))
 	_, err := page.Goto(server.PREFIX + "/tamperable.html")
 	require.NoError(t, err)
@@ -539,7 +530,7 @@ func TestPageExpectSelectorTimeout(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	err = page.Click("foobar", playwright.PageClickOptions{
+	err = page.Locator("foobar").Click(playwright.LocatorClickOptions{
 		Timeout: playwright.Float(500),
 	})
 	require.ErrorIs(t, err, playwright.TimeoutError)
@@ -551,9 +542,9 @@ func TestPageType(t *testing.T) {
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<input type='text' />"))
-
+	//nolint:staticcheck
 	require.NoError(t, page.Type("input", "hello"))
-	value, err := page.EvalOnSelector("input", "el => el.value")
+	value, err := page.Locator("input").Evaluate("el => el.value", nil)
 	require.NoError(t, err)
 	require.Equal(t, "hello", value)
 }
@@ -564,9 +555,9 @@ func TestPagePress(t *testing.T) {
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<input type='text' />"))
-
+	//nolint:staticcheck
 	require.NoError(t, page.Press("input", "h"))
-	value, err := page.EvalOnSelector("input", "el => el.value")
+	value, err := page.Locator("input").Evaluate("el => el.value", nil)
 	require.NoError(t, err)
 	require.Equal(t, "h", value)
 }
@@ -577,9 +568,9 @@ func TestPageCheck(t *testing.T) {
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<input id='checkbox' type='checkbox'></input>"))
-
+	//nolint:staticcheck
 	require.NoError(t, page.Check("input"))
-	value, err := page.EvalOnSelector("input", "el => el.checked")
+	value, err := page.Locator("input").Evaluate("el => el.checked", nil)
 	require.NoError(t, err)
 	require.Equal(t, true, value)
 }
@@ -590,9 +581,9 @@ func TestPageUncheck(t *testing.T) {
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<input id='checkbox' type='checkbox' checked></input>"))
-
+	//nolint:staticcheck
 	require.NoError(t, page.Uncheck("input"))
-	value, err := page.EvalOnSelector("input", "el => el.checked")
+	value, err := page.Locator("input").Evaluate("el => el.checked", nil)
 	require.NoError(t, err)
 	require.Equal(t, false, value)
 }
@@ -601,6 +592,7 @@ func TestPageWaitForTimeout(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	before := time.Now()
+	//nolint:staticcheck
 	page.WaitForTimeout(1000)
 	after := time.Now()
 	duration := after.Sub(before)
@@ -623,6 +615,7 @@ func TestPageDblclick(t *testing.T) {
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<button ondblclick="window.clicked=true"/>`))
+	//nolint:staticcheck
 	require.NoError(t, page.Dblclick("button"))
 	result, err := page.Evaluate("window.clicked")
 	require.NoError(t, err)
@@ -635,6 +628,7 @@ func TestPageFocus(t *testing.T) {
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<button onfocus="window.clicked=true"/>`))
+	//nolint:staticcheck
 	require.NoError(t, page.Focus("button"))
 	result, err := page.Evaluate("window.clicked")
 	require.NoError(t, err)
@@ -646,6 +640,7 @@ func TestPageTextContent(t *testing.T) {
 	defer AfterEach(t)
 	_, err := page.Goto(server.PREFIX + "/dom.html")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	content, err := page.TextContent("#inner")
 	require.NoError(t, err)
 	require.Equal(t, "Text,\nmore text", content)
@@ -654,7 +649,7 @@ func TestPageTextContent(t *testing.T) {
 func TestPageAddInitScriptWithPath(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	require.NoError(t, page.AddInitScript(playwright.PageAddInitScriptOptions{
+	require.NoError(t, page.AddInitScript(playwright.Script{
 		Path: playwright.String(Asset("injectedfile.js")),
 	}))
 	_, err := page.Goto(server.PREFIX + "/tamperable.html")
@@ -668,16 +663,16 @@ func TestPageSupportNetworkEvents(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	eventsChan := make(chan string, 6)
-	page.On("request", func(request playwright.Request) {
+	page.OnRequest(func(request playwright.Request) {
 		eventsChan <- fmt.Sprintf("%s %s", request.Method(), request.URL())
 	})
-	page.On("response", func(response playwright.Response) {
+	page.OnResponse(func(response playwright.Response) {
 		eventsChan <- fmt.Sprintf("%d %s", response.Status(), response.URL())
 	})
-	page.On("requestfinished", func(request playwright.Request) {
+	page.OnRequestFinished(func(request playwright.Request) {
 		eventsChan <- fmt.Sprintf("DONE %s", request.URL())
 	})
-	page.On("requestfailed", func(request playwright.Request) {
+	page.OnRequestFailed(func(request playwright.Request) {
 		eventsChan <- fmt.Sprintf("FAIL %s", request.URL())
 	})
 	server.SetRedirect("/foo.html", "/empty.html")
@@ -778,12 +773,12 @@ func TestPageTap(t *testing.T) {
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<input id='checkbox' type='checkbox'></input>"))
-	value, err := page.EvalOnSelector("input", "el => el.checked")
+	value, err := page.Locator("input").Evaluate("el => el.checked", nil)
 	require.NoError(t, err)
 	require.Equal(t, false, value)
-
+	//nolint:staticcheck
 	require.NoError(t, page.Tap("input"))
-	value, err = page.EvalOnSelector("input", "el => el.checked")
+	value, err = page.Locator("input").Evaluate("el => el.checked", nil)
 	require.NoError(t, err)
 	require.Equal(t, true, value)
 }
@@ -830,6 +825,7 @@ func TestPageSelectOption(t *testing.T) {
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<select id='lang'><option value='go'>go</option><option value='python'>python</option></select>"))
+	//nolint:staticcheck
 	selected, err := page.SelectOption("#lang", playwright.SelectOptionValues{
 		Values: playwright.StringSlice("python"),
 	})
@@ -883,7 +879,7 @@ func TestPageDragAndDrop(t *testing.T) {
 	_, err := page.Goto(server.PREFIX + "/drag-n-drop.html")
 	require.NoError(t, err)
 	require.NoError(t, page.DragAndDrop("#source", "#target"))
-	value, err := page.EvalOnSelector("#target", "target => target.contains(document.querySelector('#source'))")
+	value, err := page.Locator("#target").Evaluate("target => target.contains(document.querySelector('#source'))", nil)
 	require.NoError(t, err)
 	require.Equal(t, true, value)
 }
@@ -893,11 +889,13 @@ func TestPageInputValue(t *testing.T) {
 	require.NoError(t, page.SetContent(`
 		<input></input>
 	`))
-	require.NoError(t, page.Fill("input", "hello"))
+	require.NoError(t, page.Locator("input").Fill("hello"))
+	//nolint:staticcheck
 	value, err := page.InputValue("input")
 	require.NoError(t, err)
 	require.Equal(t, "hello", value)
-	require.NoError(t, page.Fill("input", ""))
+	require.NoError(t, page.Locator("input").Fill(""))
+	//nolint:staticcheck
 	value, err = page.InputValue("input")
 	require.NoError(t, err)
 	require.Equal(t, "", value)
@@ -962,10 +960,12 @@ func TestPageSetChecked(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	require.NoError(t, page.SetContent(`<input id='checkbox' type='checkbox'></input>`))
+	//nolint:staticcheck
 	require.NoError(t, page.SetChecked("input", true))
 	isChecked, err := page.Evaluate("checkbox.checked")
 	require.NoError(t, err)
 	require.True(t, isChecked.(bool))
+	//nolint:staticcheck
 	require.NoError(t, page.SetChecked("input", false))
 	isChecked, err = page.Evaluate("checkbox.checked")
 	require.NoError(t, err)
@@ -980,7 +980,7 @@ func TestPageExpectRequestTimeout(t *testing.T) {
 		request, err := page.ExpectRequest("**/one-style.html", func() error {
 			_, err := page.Goto(server.EMPTY_PAGE)
 			return err
-		}, playwright.PageWaitForRequestOptions{Timeout: playwright.Float(1000)})
+		}, playwright.PageExpectRequestOptions{Timeout: playwright.Float(1000)})
 
 		require.Nil(t, request)
 		require.EqualError(t, err, "Timeout 1000.00ms exceeded.")
@@ -1002,31 +1002,40 @@ func TestPageExpectRequestTimeout(t *testing.T) {
 	})
 }
 
-func TestPageWaitForResponse(t *testing.T) {
+func TestPageExpectResponse(t *testing.T) {
+	t.Run("should work with predicate", func(t *testing.T) {
+		BeforeEach(t)
+		defer AfterEach(t)
+		predicate := regexp.MustCompile(`(?i).*/one-style.html`)
+		response, err := page.ExpectResponse(predicate, func() error {
+			_, err := page.Goto(server.PREFIX + "/one-style.html")
+			return err
+		}, playwright.PageExpectResponseOptions{Timeout: playwright.Float(3 * 1000)})
+		require.NoError(t, err)
+		require.Equal(t, fmt.Sprintf("%s/one-style.html", server.PREFIX), response.URL())
+	})
+
 	t.Run("should work", func(t *testing.T) {
 		BeforeEach(t)
 		defer AfterEach(t)
-
-		var wg sync.WaitGroup
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			response, err := page.WaitForResponse("**/one-style.html", playwright.PageWaitForResponseOptions{Timeout: playwright.Float(3 * 1000)})
-			require.NoError(t, err)
-			require.Equal(t, fmt.Sprintf("%s/one-style.html", server.PREFIX), response.URL())
-		}()
-
-		_, err := page.Goto(server.PREFIX + "/one-style.html")
+		response, err := page.ExpectResponse("**/*", func() error {
+			_, err := page.Goto(server.EMPTY_PAGE)
+			return err
+		})
 		require.NoError(t, err)
-		wg.Wait()
+		require.Equal(t, server.EMPTY_PAGE, response.URL())
+		require.True(t, response.Ok())
+		require.Equal(t, 200, response.Status())
+		require.Equal(t, "OK", response.StatusText())
 	})
 
 	t.Run("should respect timeout", func(t *testing.T) {
 		BeforeEach(t)
 		defer AfterEach(t)
-		_, err := page.Goto(server.EMPTY_PAGE)
-		require.NoError(t, err)
-		response, err := page.WaitForResponse("**/one-style.html", playwright.PageWaitForResponseOptions{Timeout: playwright.Float(1000)})
+		response, err := page.ExpectResponse("**/one-style.html", func() error {
+			_, err := page.Goto(server.EMPTY_PAGE)
+			return err
+		}, playwright.PageExpectResponseOptions{Timeout: playwright.Float(1000)})
 
 		require.Nil(t, response)
 		require.EqualError(t, err, "Timeout 1000.00ms exceeded.")
@@ -1040,7 +1049,7 @@ func TestPageWaitForResponse(t *testing.T) {
 		defer page.SetDefaultTimeout(30 * 1000) // reset
 
 		require.NoError(t, err)
-		response, err := page.WaitForResponse("**/one-style.html")
+		response, err := page.ExpectResponse("**/one-style.html", nil)
 
 		require.Nil(t, response)
 		require.EqualError(t, err, "Timeout 500.00ms exceeded.")
@@ -1064,7 +1073,7 @@ func TestPageWaitForURL(t *testing.T) {
 		defer AfterEach(t)
 		_, err := page.Goto(server.EMPTY_PAGE)
 		require.NoError(t, err)
-		require.Error(t, page.WaitForURL("**/grid.html", playwright.FrameWaitForURLOptions{
+		require.Error(t, page.WaitForURL("**/grid.html", playwright.PageWaitForURLOptions{
 			Timeout: playwright.Float(1000),
 		}), "Timeout 1000.00ms exceeded.")
 	})
@@ -1091,7 +1100,7 @@ func TestCloseShouldRunBeforunloadIfAskedFor(t *testing.T) {
 
 	dialogInfo, err := page.ExpectEvent("dialog", func() error {
 		// We have to interact with a page so that 'beforeunload' handlers fire.
-		require.NoError(t, page.Click("body"))
+		require.NoError(t, page.Locator("body").Click())
 		return page.Close(playwright.PageCloseOptions{
 			RunBeforeUnload: playwright.Bool(true),
 		})
