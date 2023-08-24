@@ -36,6 +36,21 @@ jobs:
       with:
         go-version: ^1.19.9
       id: go
+    - name: Cache drivers
+      uses: actions/cache@v3
+      with:
+        # In order:
+        # * Driver for linux
+        # * Driver for macOS
+        # * Driver for windows
+        path: |
+          ~/.cache/ms-playwright-go
+          ~/.cache/ms-playwright
+          ~/Library/Caches/ms-playwright-go
+          ~/Library/Caches/ms-playwright
+          ~\AppData\Local\ms-playwright-go
+          ~\AppData\Local\ms-playwright
+        key: ${{ runner.os }}-go-${{ matrix.browser }}-${{ hashFiles('**/package.json') }}
     - run: |
         go install ./...
         playwright install --with-deps ${{ matrix.browser }}
