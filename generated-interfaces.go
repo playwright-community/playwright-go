@@ -385,7 +385,7 @@ type BrowserContext interface {
 	//  har: Path to a [HAR](http://www.softwareishard.com/blog/har-12-spec) file with prerecorded network data. If `path` is a
 	//    relative path, then it is resolved relative to the current working directory.
 	//
-	// [Replaying from HAR]: https://playwright.dev/docs/network#replaying-from-har
+	// [Replaying from HAR]: https://playwright.dev/docs/mock#replaying-from-har
 	// [this]: https://github.com/microsoft/playwright/issues/1090
 	RouteFromHAR(har string, options ...BrowserContextRouteFromHAROptions) error
 
@@ -1559,8 +1559,12 @@ type Frame interface {
 	// [locators]: https://playwright.dev/docs/locators
 	SetChecked(selector string, checked bool, options ...FrameSetCheckedOptions) error
 
+	// This method internally calls [document.Write()],
+	// inheriting all its specific characteristics and behaviors.
 	//
 	//  html: HTML markup to assign to the page.
+	//
+	// [document.Write()]: https://developer.mozilla.org/en-US/docs/Web/API/Document/write
 	SetContent(html string, options ...FrameSetContentOptions) error
 
 	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then
@@ -1933,12 +1937,13 @@ type Keyboard interface {
 }
 
 // Locators are the central piece of Playwright's auto-waiting and retry-ability. In a nutshell, locators represent a
-// way to find element(s) on the page at any moment. Locator can be created with the [Page.Locator] method.
+// way to find element(s) on the page at any moment. A locator can be created with the [Page.Locator] method.
 // [Learn more about locators].
 //
 // [Learn more about locators]: https://playwright.dev/docs/locators
 type Locator interface {
-	// When locator points to a list of elements, returns array of locators, pointing to respective elements.
+	// When the locator points to a list of elements, this returns an array of locators, pointing to their respective
+	// elements.
 	// **NOTE** [Locator.All] does not wait for elements to match the locator, and instead immediately returns whatever is
 	// present in the page.  When the list of elements changes dynamically, [Locator.All] will produce unpredictable and
 	// flaky results.  When the list of elements is stable, but loaded dynamically, wait for the full list to finish
@@ -2482,6 +2487,8 @@ type Locator interface {
 	// [`node.textContent`]: https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent
 	TextContent(options ...LocatorTextContentOptions) (string, error)
 
+	// **NOTE** In most cases, you should use [Locator.Fill] instead. You only need to type characters if there is special
+	// keyboard handling on the page.
 	// Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the
 	// text.
 	// To press a special key, like `Control` or `ArrowDown`, use [Locator.Press].
@@ -3359,7 +3366,7 @@ type Page interface {
 	//  har: Path to a [HAR](http://www.softwareishard.com/blog/har-12-spec) file with prerecorded network data. If `path` is a
 	//    relative path, then it is resolved relative to the current working directory.
 	//
-	// [Replaying from HAR]: https://playwright.dev/docs/network#replaying-from-har
+	// [Replaying from HAR]: https://playwright.dev/docs/mock#replaying-from-har
 	// [this]: https://github.com/microsoft/playwright/issues/1090
 	RouteFromHAR(har string, options ...PageRouteFromHAROptions) error
 
@@ -3408,8 +3415,12 @@ type Page interface {
 	// [locators]: https://playwright.dev/docs/locators
 	SetChecked(selector string, checked bool, options ...PageSetCheckedOptions) error
 
+	// This method internally calls [document.Write()],
+	// inheriting all its specific characteristics and behaviors.
 	//
 	//  html: HTML markup to assign to the page.
+	//
+	// [document.Write()]: https://developer.mozilla.org/en-US/docs/Web/API/Document/write
 	SetContent(html string, options ...PageSetContentOptions) error
 
 	// This setting will change the default maximum navigation time for the following methods and related shortcuts:
