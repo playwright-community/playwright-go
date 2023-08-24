@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type apiRequestImpl struct {
@@ -397,7 +398,7 @@ func countNonNil(args ...interface{}) int {
 func isJsonContentType(headers []map[string]string) bool {
 	if len(headers) > 0 {
 		for _, v := range headers {
-			if v["name"] == "Content-Type" {
+			if strings.ToLower(v["name"]) == "content-type" {
 				if v["value"] == "application/json" {
 					return true
 				}

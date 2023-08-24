@@ -281,7 +281,7 @@ func TestShouldJsonStringifyBodyWhenContentTypeIsApplicationJson(t *testing.T) {
 		Headers: map[string]string{
 			"content-type": "application/json",
 		},
-		Data: serializationData,
+		Data: string(stringifiedValue),
 	})
 	require.NoError(t, err)
 	body, err := response.Body()
