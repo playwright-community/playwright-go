@@ -2,6 +2,7 @@ package playwright_test
 
 import (
 	"fmt"
+	"net/http"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -344,4 +345,108 @@ func TestConsoleEventShouldWork(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "hello", message.Text())
 	require.Equal(t, page, message.Page())
+}
+
+func TestBrowserContextEventsRequest(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	var requests []playwright.Request
+	context.OnRequest(func(request playwright.Request) {
+		requests = append(requests, request)
+	})
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent(`<a target=_blank rel=noopener href="/one-style.html">yo</a>`))
+
+	ret, err := context.ExpectEvent("page", func() error {
+		return page.Locator("a").Click()
+	})
+	require.NoError(t, err)
+	page1 := ret.(playwright.Page)
+	require.NoError(t, page1.WaitForLoadState())
+	require.Len(t, requests, 3)
+	require.Equal(t, server.EMPTY_PAGE, requests[0].URL())
+	require.Equal(t, server.PREFIX+"/one-style.html", requests[1].URL())
+	require.Equal(t, server.PREFIX+"/one-style.css", requests[2].URL())
+}
+
+func TestBrowserContextEventsResponse(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	var responses []playwright.Response
+	context.OnResponse(func(response playwright.Response) {
+		responses = append(responses, response)
+	})
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent(`<a target=_blank rel=noopener href="/one-style.html">yo</a>`))
+
+	ret, err := context.ExpectEvent("page", func() error {
+		return page.Locator("a").Click()
+	})
+	require.NoError(t, err)
+	page1 := ret.(playwright.Page)
+	require.NoError(t, page1.WaitForLoadState())
+	require.Len(t, responses, 3)
+	require.Equal(t, server.EMPTY_PAGE, responses[0].URL())
+	require.Equal(t, server.PREFIX+"/one-style.html", responses[1].URL())
+	require.Equal(t, server.PREFIX+"/one-style.css", responses[2].URL())
+}
+
+func TestBrowserContextEventsRequestFailed(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	server.SetRoute("/one-style.css", func(w http.ResponseWriter, r *http.Request) {
+		hw, ok := w.(http.Hijacker)
+		if ok {
+			conn, _, err := hw.Hijack()
+			if err == nil {
+				conn.Close()
+			}
+		}
+	})
+	var failedRequests []playwright.Request
+	context.OnRequestFailed(func(request playwright.Request) {
+		failedRequests = append(failedRequests, request)
+	})
+	_, err := page.Goto(server.PREFIX + "/one-style.css")
+	require.Error(t, err)
+	require.Len(t, failedRequests, 1)
+	require.Equal(t, server.PREFIX+"/one-style.css", failedRequests[0].URL())
+}
+
+func TestBrowerContextEventsShouldFireInProperOrder(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	var events []string
+	context.OnRequest(func(request playwright.Request) {
+		events = append(events, "request")
+	})
+	context.OnResponse(func(response playwright.Response) {
+		events = append(events, "response")
+	})
+	context.OnRequestFinished(func(request playwright.Request) {
+		events = append(events, "requestfinished")
+	})
+	_, err := context.ExpectEvent("requestfinished", func() error {
+		_, err := page.Goto(server.EMPTY_PAGE)
+		return err
+	})
+	require.NoError(t, err)
+	require.Equal(t, []string{"request", "response", "requestfinished"}, events)
+}
+
+func TestBrowserContextShouldFireCloseEvent(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	browser, err := browserType.Launch()
+	require.NoError(t, err)
+	context, err := browser.NewContext()
+	require.NoError(t, err)
+	closed := false
+	context.OnClose(func(bc playwright.BrowserContext) {
+		closed = true
+	})
+	require.NoError(t, browser.Close())
+	require.True(t, closed)
 }

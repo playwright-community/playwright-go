@@ -29,6 +29,7 @@ func TestDownloadBasic(t *testing.T) {
 		return page.Locator("a").Click()
 	})
 	require.NoError(t, err)
+	require.Equal(t, page, download.Page())
 	require.Equal(t, download.URL(), fmt.Sprintf("%s/downloadWithFilename", server.PREFIX))
 	require.Equal(t, download.SuggestedFilename(), "file.txt")
 	require.Equal(t, download.String(), "file.txt")
