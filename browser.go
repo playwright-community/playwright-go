@@ -158,7 +158,7 @@ func (b *browserImpl) StopTracing() ([]byte, error) {
 		return nil, err
 	}
 	artifact := fromChannel(channel).(*artifactImpl)
-	binary, err := artifact.ReadInfoBuffer()
+	binary, err := artifact.ReadIntoBuffer()
 	if err != nil {
 		return nil, err
 	}

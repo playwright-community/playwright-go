@@ -57,7 +57,7 @@ func (a *artifactImpl) Cancel() error {
 	return err
 }
 
-func (a *artifactImpl) ReadInfoBuffer() ([]byte, error) {
+func (a *artifactImpl) ReadIntoBuffer() ([]byte, error) {
 	streamChannel, err := a.channel.Send("stream")
 	if err != nil {
 		return nil, err
