@@ -50,7 +50,7 @@ jobs:
           ~/Library/Caches/ms-playwright
           ~\AppData\Local\ms-playwright-go
           ~\AppData\Local\ms-playwright
-        key: ${{ runner.os }}-go-${{ matrix.browser }}-${{ hashFiles('**/package.json') }}
+        key: ${{ runner.os }}-go-${{ matrix.browser }}-${{ hashFiles('**/run.go') }}
     - run: |
         go install ./...
         playwright install --with-deps ${{ matrix.browser }}
