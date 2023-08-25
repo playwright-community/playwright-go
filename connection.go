@@ -132,31 +132,11 @@ func (c *connection) createRemoteObject(parent *channelOwner, objectType string,
 }
 
 func (c *connection) WrapAPICall(cb func() (interface{}, error), isInternal bool) (interface{}, error) {
-	call := func() (interface{}, error) {
-		result := reflect.ValueOf(cb).Call(nil)
-		// accept 0 to 2 return values
-		switch len(result) {
-		case 2:
-			val := result[0].Interface()
-			err, ok := result[1].Interface().(error)
-			if ok && err != nil {
-				return val, err
-			}
-			return val, nil
-		case 1:
-			return result[0].Interface(), nil
-		default:
-			return nil, nil
-		}
+	if _, ok := c.apiZone.Load("apiZone"); ok {
+		return cb()
 	}
-	if _, ok := c.apiZone.Load("apiZone"); !ok {
-		return call()
-	}
-	defer func() {
-		c.apiZone.Delete("apiZone")
-	}()
 	c.apiZone.Store("apiZone", serializeCallStack(isInternal))
-	return call()
+	return cb()
 }
 
 func (c *connection) replaceChannelsWithGuids(payload interface{}) interface{} {
@@ -222,10 +202,12 @@ func (c *connection) sendMessageToServer(guid string, method string, params inte
 		metadata = make(map[string]interface{}, 0)
 		stack    = make([]map[string]interface{}, 0)
 	)
-	apiZone, ok := c.apiZone.Load("apiZone")
+	apiZone, ok := c.apiZone.LoadAndDelete("apiZone")
 	if ok {
-		metadata = apiZone.(*parsedStackTrace).metadata
-		stack = apiZone.(*parsedStackTrace).frames
+		for k, v := range apiZone.(parsedStackTrace).metadata {
+			metadata[k] = v
+		}
+		stack = append(stack, apiZone.(parsedStackTrace).frames...)
 	}
 	metadata["wallTime"] = time.Now().Nanosecond()
 	message := map[string]interface{}{
@@ -259,7 +241,7 @@ type parsedStackTrace struct {
 	metadata map[string]interface{}
 }
 
-func serializeCallStack(isInternal bool) *parsedStackTrace {
+func serializeCallStack(isInternal bool) parsedStackTrace {
 	st := stack.Trace().TrimRuntime()
 
 	lastInternalIndex := 0
@@ -296,7 +278,7 @@ func serializeCallStack(isInternal bool) *parsedStackTrace {
 	}
 	metadata["apiName"] = apiName
 	metadata["isInternal"] = isInternal
-	return &parsedStackTrace{
+	return parsedStackTrace{
 		metadata: metadata,
 		frames:   callStack,
 	}

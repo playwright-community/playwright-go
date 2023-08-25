@@ -1,10 +1,10 @@
 package playwright
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 type browserImpl struct {
@@ -14,6 +14,7 @@ type browserImpl struct {
 	shouldCloseConnectionOnClose bool
 	contexts                     []BrowserContext
 	browserType                  BrowserType
+	chromiumTracingPath          *string
 }
 
 func (b *browserImpl) BrowserType() BrowserType {
@@ -121,7 +122,7 @@ func (b *browserImpl) Close() error {
 	b.Unlock()
 	_, err := b.channel.Send("close")
 	if err != nil && !isSafeCloseError(err) {
-		return fmt.Errorf("could not send message: %w", err)
+		return fmt.Errorf("close browser failed: %w", err)
 	}
 	if b.shouldCloseConnectionOnClose {
 		return b.connection.Stop()
@@ -143,18 +144,37 @@ func (b *browserImpl) StartTracing(options ...BrowserStartTracingOptions) error 
 		overrides["page"] = option.Page.(*pageImpl).channel
 		option.Page = nil
 	}
+	if option.Path != nil {
+		b.chromiumTracingPath = option.Path
+		option.Path = nil
+	}
 	_, err := b.channel.Send("startTracing", option, overrides)
 	return err
 }
 
 func (b *browserImpl) StopTracing() ([]byte, error) {
-	data, err := b.channel.Send("stopTracing")
+	channel, err := b.channel.Send("stopTracing")
 	if err != nil {
 		return nil, err
 	}
-	binary, err := base64.StdEncoding.DecodeString(data.(string))
+	artifact := fromChannel(channel).(*artifactImpl)
+	binary, err := artifact.ReadIntoBuffer()
 	if err != nil {
-		return nil, fmt.Errorf("could not decode base64 :%w", err)
+		return nil, err
+	}
+	err = artifact.Delete()
+	if err != nil {
+		return binary, err
+	}
+	if b.chromiumTracingPath != nil {
+		err := os.MkdirAll(filepath.Dir(*b.chromiumTracingPath), 0777)
+		if err != nil {
+			return binary, err
+		}
+		err = os.WriteFile(*b.chromiumTracingPath, binary, 0644)
+		if err != nil {
+			return binary, err
+		}
 	}
 	return binary, nil
 }

@@ -596,7 +596,7 @@ func (l *locatorImpl) Locator(selectorOrLocator interface{}, options ...LocatorL
 			return l
 		}
 		return newLocator(l.frame,
-			l.selector+" >> "+locator.selector,
+			l.selector+" >> internal:chain="+escapeText(locator.selector),
 			options...,
 		)
 	}

@@ -528,11 +528,11 @@ func (f *frameImpl) Focus(selector string, options ...FrameFocusOptions) error {
 }
 
 func (f *frameImpl) FrameElement() (ElementHandle, error) {
-	elementHandle, err := f.channel.Send("frameElement")
+	channel, err := f.channel.Send("frameElement")
 	if err != nil {
 		return nil, err
 	}
-	return elementHandle.(*elementHandleImpl), nil
+	return fromChannel(channel).(*elementHandleImpl), nil
 }
 
 func (f *frameImpl) IsDetached() bool {

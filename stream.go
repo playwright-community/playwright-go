@@ -42,6 +42,25 @@ func (s *streamImpl) SaveAs(path string) error {
 	return nil
 }
 
+func (s *streamImpl) ReadAll() ([]byte, error) {
+	var data []byte
+	for {
+		binary, err := s.channel.Send("read", map[string]interface{}{"size": 1024 * 1024})
+		if err != nil {
+			return nil, err
+		}
+		bytes, err := base64.StdEncoding.DecodeString(binary.(string))
+		if err != nil {
+			return nil, err
+		}
+		if len(bytes) == 0 {
+			break
+		}
+		data = append(data, bytes...)
+	}
+	return data, nil
+}
+
 func newStream(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *streamImpl {
 	stream := &streamImpl{}
 	stream.createChannelOwner(stream, parent, objectType, guid, initializer)

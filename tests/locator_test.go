@@ -594,3 +594,36 @@ func TestLocatorAndFrameLocatorShouldAcceptLocator(t *testing.T) {
 	div := page.Locator("div")
 	require.NoError(t, expect.Locator(page.FrameLocator("iframe").Locator(div).Locator("input")).ToHaveValue("inner"))
 }
+
+func TestLocatorShouldSupportLocatorWithAndOr(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.SetContent(`
+		<div>one <span>two</span> <button>three</button> </div>
+		<span>four</span>
+		<button>five</button>
+	`))
+
+	require.NoError(t, expect.Locator(page.Locator("div").Locator(page.Locator("button"))).ToHaveText([]string{"three"}))
+	require.NoError(t, expect.Locator(page.Locator("div").Locator(page.Locator("button").Or(page.Locator("span")))).
+		ToHaveText([]string{"two", "three"}))
+	require.NoError(t, expect.Locator(page.Locator("button").Or(page.Locator("span"))).
+		ToHaveText([]string{"two", "three", "four", "five"}))
+
+	require.NoError(t, expect.Locator(page.Locator("div").Locator(
+		page.Locator("button").And(page.GetByRole("button")),
+	)).ToHaveText([]string{"three"}))
+	require.NoError(t, expect.Locator(page.Locator("button").And(page.GetByRole("button"))).
+		ToHaveText([]string{"three", "five"}))
+}
+
+func TestLocatorHighlightShoudWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.PREFIX + "/grid.html")
+	require.NoError(t, err)
+	require.NoError(t, page.Locator(".box").Nth(3).Highlight())
+	yes, err := page.Locator("x-pw-glass").IsVisible()
+	require.NoError(t, err)
+	require.True(t, yes)
+}
