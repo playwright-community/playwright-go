@@ -450,3 +450,48 @@ func TestBrowserContextShouldFireCloseEvent(t *testing.T) {
 	require.NoError(t, browser.Close())
 	require.True(t, closed)
 }
+
+func TestDialogEventShouldWorkInImmdiatelyClosedPopup(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	if isFirefox {
+		t.Skip("flaky on firefox")
+	}
+	var popup playwright.Page
+	page.OnPopup(func(p playwright.Page) {
+		popup = p
+	})
+	msg, err := page.Context().ExpectConsoleMessage(func() error {
+		_, err := page.Evaluate(`() => {
+			const win = window.open();
+			win.console.log('hello');
+			win.close();
+		}`)
+		return err
+	})
+	require.NoError(t, err)
+	require.Equal(t, "hello", msg.Text())
+	require.Equal(t, popup, msg.Page())
+}
+
+func TestBrowserContextCloseShouldAbortWaitForEvent(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := context.ExpectPage(func() error {
+		return context.Close()
+	})
+	require.ErrorContains(t, err, "context closed")
+}
+
+func TestBrowserContextCloseShouldBeCallableTwice(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	closed := false
+	context.OnClose(func(bc playwright.BrowserContext) {
+		closed = true
+	})
+	require.NoError(t, context.Close())
+	require.True(t, closed)
+	require.NoError(t, context.Close())
+	require.NoError(t, context.Close())
+}

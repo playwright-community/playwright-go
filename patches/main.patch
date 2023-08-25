@@ -1425,10 +1425,10 @@ index 81fa010ae..c2ef3259d 100644
  Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with
 diff --git a/utils/doclint/generateGoApi.js b/utils/doclint/generateGoApi.js
 new file mode 100644
-index 000000000..19b6b51ea
+index 000000000..3e90a1c8d
 --- /dev/null
 +++ b/utils/doclint/generateGoApi.js
-@@ -0,0 +1,849 @@
+@@ -0,0 +1,851 @@
 +/**
 + * Copyright (c) Microsoft Corporation.
 + *
@@ -2114,6 +2114,8 @@ index 000000000..19b6b51ea
 +  // a few special cases we can fix automatically
 +  if (type.expression === '[null]|[Error]')
 +    return 'void';
++  else if (type.expression === '[Error]')
++    return '*Error';
 +  else if (type.expression === '[boolean]|"mixed"')
 +    return 'MixedState';
 +  else if (type.expression === '[string]|[Request]')

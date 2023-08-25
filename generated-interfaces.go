@@ -2729,7 +2729,7 @@ type Page interface {
 	OnLoad(fn func(Page))
 
 	// Emitted when an uncaught exception happens within the page.
-	OnPageError(fn func(Error))
+	OnPageError(fn func(*Error))
 
 	// Emitted when the page opens a new tab or window. This event is emitted in addition to the [BrowserContext.OnPage],
 	// but only for popups relevant to this page.
