@@ -275,7 +275,7 @@ func serializeArgument(arg interface{}) interface{} {
 func serializeError(err error) map[string]interface{} {
 	stack := strings.Split(string(debug.Stack()), "\n")
 	return map[string]interface{}{
-		"error": &errorPayload{
+		"error": &Error{
 			Name:    "Playwright for Go Error",
 			Message: err.Error(),
 			Stack:   strings.Join(stack[:len(stack)-5], "\n"),

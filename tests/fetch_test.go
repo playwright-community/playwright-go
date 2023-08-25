@@ -36,14 +36,30 @@ func TestFetchShouldWork(t *testing.T) {
 		}
 	}
 
-	response, err := request.Fetch(url)
+	response, err := request.Fetch(url, playwright.APIRequestContextFetchOptions{
+		Timeout: playwright.Float(500),
+	})
 	check("GET", response)
-	response, err = request.Head(url)
+	response, err = request.Head(url, playwright.APIRequestContextHeadOptions{
+		Timeout: playwright.Float(500),
+	})
 	check("HEAD", response)
-	response, err = request.Post(url)
+	response, err = request.Post(url, playwright.APIRequestContextPostOptions{
+		Timeout: playwright.Float(500),
+	})
+	check("PATCH", response)
+	response, err = request.Patch(url, playwright.APIRequestContextPatchOptions{
+		Timeout: playwright.Float(500),
+	})
 	check("POST", response)
-	response, err = request.Put(url)
+	response, err = request.Put(url, playwright.APIRequestContextPutOptions{
+		Timeout: playwright.Float(500),
+	})
 	check("PUT", response)
+	response, err = request.Delete(url, playwright.APIRequestContextDeleteOptions{
+		Timeout: playwright.Float(500),
+	})
+	check("DELETE", response)
 }
 
 func TestShouldDisposeGlobalRequest(t *testing.T) {
@@ -281,7 +297,7 @@ func TestShouldJsonStringifyBodyWhenContentTypeIsApplicationJson(t *testing.T) {
 		Headers: map[string]string{
 			"content-type": "application/json",
 		},
-		Data: serializationData,
+		Data: string(stringifiedValue),
 	})
 	require.NoError(t, err)
 	body, err := response.Body()
@@ -388,6 +404,26 @@ func TestShouldSerializeNullValuesInJson(t *testing.T) {
 	require.NoError(t, request.Dispose())
 }
 
+func TestShouldSupportApplicationXWwwFormUrlencoded(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	server.SetRoute("/empty.html", func(w http.ResponseWriter, r *http.Request) {
+		_, err := io.ReadAll(r.Body)
+		require.NoError(t, err)
+		require.Equal(t, "POST", r.Method)
+		require.Contains(t, r.Header.Get("content-type"), "x-www-form-urlencoded")
+		w.WriteHeader(200)
+	})
+
+	_, err := context.Request().Post(server.EMPTY_PAGE, playwright.APIRequestContextPostOptions{
+		Form: map[string]interface{}{
+			"firstName": "John",
+			"lastName":  "Doe",
+		},
+	})
+	require.NoError(t, err)
+}
+
 func TestShouldSupportMultipartFormData(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
@@ -403,10 +439,10 @@ func TestShouldSupportMultipartFormData(t *testing.T) {
 		Multipart: map[string]interface{}{
 			"firstName": "John",
 			"lastName":  "Doe",
-			"file": map[string]interface{}{
-				"name":     "f.js",
-				"mimeType": "text/javascript",
-				"buffer":   []byte("var x = 10;\r\n;console.log(x);"),
+			"file": playwright.InputFile{
+				Name:     "f.js",
+				MimeType: "text/javascript",
+				Buffer:   []byte("var x = 10;\r\n;console.log(x);"),
 			},
 		},
 	})

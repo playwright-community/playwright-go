@@ -711,7 +711,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 	)
 	bt.channel.On(
 		"pageError", func(ev map[string]interface{}) {
-			err := errorPayload{}
+			err := Error{}
 			remapMapToStruct(ev["error"].(map[string]interface{})["error"], &err)
 			bt.Emit("pageerror", parseError(err))
 		},
@@ -1169,7 +1169,7 @@ func (p *pageImpl) OnLoad(fn func(Page)) {
 	p.On("load", fn)
 }
 
-func (p *pageImpl) OnPageError(fn func(Error)) {
+func (p *pageImpl) OnPageError(fn func(*Error)) {
 	p.On("pageerror", fn)
 }
 

@@ -46,12 +46,6 @@ func (t *pipeTransport) Start() error {
 	}
 }
 
-type errorPayload struct {
-	Name    string `json:"name"`
-	Message string `json:"message"`
-	Stack   string `json:"stack"`
-}
-
 type message struct {
 	ID     int                    `json:"id"`
 	GUID   string                 `json:"guid"`
@@ -59,7 +53,7 @@ type message struct {
 	Params map[string]interface{} `json:"params,omitempty"`
 	Result interface{}            `json:"result,omitempty"`
 	Error  *struct {
-		Error errorPayload `json:"error"`
+		Error Error `json:"error"`
 	} `json:"error,omitempty"`
 }
 

@@ -40,6 +40,19 @@ func TestPageSetContent(t *testing.T) {
 	require.Equal(t, content, "<html><head></head><body><h1>foo</h1></body></html>")
 }
 
+func TestPageSetContentShouldRespectDefaultNavigationTimeout(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	page.SetDefaultNavigationTimeout(5)
+	imgPath := "/img/png"
+	// stall for image
+	require.NoError(t, page.Route(imgPath, func(r playwright.Route) {}))
+
+	err := page.SetContent(fmt.Sprintf(`<img src="%s"></img>`, server.PREFIX+imgPath))
+	require.ErrorIs(t, err, playwright.TimeoutError)
+	require.ErrorContains(t, err, "Timeout 5ms exceeded.")
+}
+
 func TestPageScreenshot(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
@@ -1054,6 +1067,20 @@ func TestPageExpectResponse(t *testing.T) {
 		require.Nil(t, response)
 		require.EqualError(t, err, "Timeout 500.00ms exceeded.")
 	})
+
+	t.Run("should use context default timeout", func(t *testing.T) {
+		BeforeEach(t)
+		defer AfterEach(t)
+		_, err := page.Goto(server.EMPTY_PAGE)
+		context.SetDefaultTimeout(1000)
+		defer context.SetDefaultTimeout(30 * 1000) // reset
+
+		require.NoError(t, err)
+		response, err := page.ExpectResponse("**/one-style.html", nil)
+
+		require.Nil(t, response)
+		require.EqualError(t, err, "Timeout 1000.00ms exceeded.")
+	})
 }
 
 func TestPageWaitForURL(t *testing.T) {
@@ -1120,4 +1147,17 @@ func TestCloseShouldRunBeforunloadIfAskedFor(t *testing.T) {
 		return nil
 	})
 	require.Error(t, err)
+}
+
+func TestPageGotoShouldFailWhenExceedingBrowserContextNavigationTimeout(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	// Hang for request to the empty.html
+	server.SetRoute("/empty.html", func(w http.ResponseWriter, r *http.Request) {})
+	context.SetDefaultNavigationTimeout(5)
+	defer context.SetDefaultNavigationTimeout(30 * 1000) // reset
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.ErrorIs(t, err, playwright.TimeoutError)
+	require.ErrorContains(t, err, "Timeout 5ms exceeded.")
+	require.ErrorContains(t, err, "/empty.html")
 }

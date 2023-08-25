@@ -3,6 +3,7 @@ package playwright_test
 import (
 	"archive/zip"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -261,7 +262,7 @@ type testUtils struct {
 }
 
 func (t *testUtils) AttachFrame(page playwright.Page, frameId string, url string) (playwright.Frame, error) {
-	_, err := page.EvaluateHandle(`async ({ frame_id, url }) => {
+	handle, err := page.EvaluateHandle(`async ({ frame_id, url }) => {
 		const frame = document.createElement('iframe');
 		frame.src = url;
 		frame.id = frame_id;
@@ -275,7 +276,16 @@ func (t *testUtils) AttachFrame(page playwright.Page, frameId string, url string
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	elem := handle.AsElement()
+	if elem == nil {
+		return nil, errors.New("frame not found")
+	}
+	return elem.ContentFrame()
+}
+
+func (t *testUtils) DetachFrame(page playwright.Page, frameId string) error {
+	_, err := page.Evaluate(`frame_id => document.getElementById(frame_id).remove()`, frameId)
+	return err
 }
 
 func (tu *testUtils) VerifyViewport(t *testing.T, page playwright.Page, width, height int) {

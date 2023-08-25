@@ -99,18 +99,21 @@ func TestWorkerShouldEvaluate(t *testing.T) {
 func TestWorkershouldReportErrors(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	pageError, err := page.ExpectEvent("pageerror", func() error {
-		_, err := page.Evaluate("() => new Worker(URL.createObjectURL(new Blob([`\n" +
-			"  setTimeout(() => {\n" +
-			"    // Do a console.log just to check that we do not confuse it with an error.\n" +
-			"    console.log('hey');\n" +
-			"    throw new Error('this is my error');\n" +
-			"  })\n" +
-			"`], {type: 'application/javascript'})))")
-		return err
+	errChan := make(chan error, 1)
+	page.OnPageError(func(err *playwright.Error) {
+		errChan <- err
 	})
+
+	_, err := page.Evaluate("() => new Worker(URL.createObjectURL(new Blob([`\n" +
+		"  setTimeout(() => {\n" +
+		"    // Do a console.log just to check that we do not confuse it with an error.\n" +
+		"    console.log('hey');\n" +
+		"    throw new Error('this is my error');\n" +
+		"  })\n" +
+		"`], {type: 'application/javascript'})))")
 	require.NoError(t, err)
-	require.Contains(t, pageError.(*playwright.Error).Error(), "this is my error")
+	pageError := <-errChan
+	require.Contains(t, pageError.Error(), "this is my error")
 }
 
 func TestWorkerShouldClearUponCrossProcessNavigation(t *testing.T) {

@@ -32,7 +32,7 @@ var TimeoutError = &Error{
 	Name: "TimeoutError",
 }
 
-func parseError(err errorPayload) error {
+func parseError(err Error) error {
 	return &Error{
 		Name:    err.Name,
 		Message: err.Message,

@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	playwrightCliVersion = "1.36.2"
+	playwrightCliVersion = "1.37.1"
 	baseURL              = "https://playwright.azureedge.net/builds/driver"
 )
 

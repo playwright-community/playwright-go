@@ -331,7 +331,7 @@ type BrowserNewContextOptions struct {
 	// so you don't actually need to set it manually. Defaults to `false` and is not supported in Firefox. Learn more
 	// about [mobile emulation].
 	//
-	// [mobile emulation]: https://playwright.dev/docs/emulation#isMobile
+	// [mobile emulation]: https://playwright.dev/docs/emulation#ismobile
 	IsMobile *bool `json:"isMobile"`
 	// Whether or not to enable JavaScript in the context. Defaults to `true`. Learn more about
 	// [disabling JavaScript].
@@ -462,7 +462,7 @@ type BrowserNewPageOptions struct {
 	// so you don't actually need to set it manually. Defaults to `false` and is not supported in Firefox. Learn more
 	// about [mobile emulation].
 	//
-	// [mobile emulation]: https://playwright.dev/docs/emulation#isMobile
+	// [mobile emulation]: https://playwright.dev/docs/emulation#ismobile
 	IsMobile *bool `json:"isMobile"`
 	// Whether or not to enable JavaScript in the context. Defaults to `true`. Learn more about
 	// [disabling JavaScript].
@@ -652,6 +652,18 @@ type BrowserContextWaitForEventOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type BrowserTypeConnectOptions struct {
+	// This option exposes network available on the connecting client to the browser being connected to. Consists of a
+	// list of rules separated by comma.
+	// Available rules:
+	//  1. Hostname pattern, for example: `example.com`, `*.org:99`, `x.*.y.com`, `*foo.org`.
+	//  2. IP literal, for example: `127.0.0.1`, `0.0.0.0:99`, `[::1]`, `[0:0::1]:99`.
+	//  3. `<loopback>` that matches local loopback interfaces: `localhost`, `*.localhost`, `127.0.0.1`, `[::1]`.
+	// Some common examples:
+	//  4. `"*"` to expose all network.
+	//  5. `"<loopback>"` to expose localhost network.
+	//  6. `"*.test.internal-domain,*.staging.internal-domain,<loopback>"` to expose test/staging deployments and
+	//    localhost.
+	ExposeNetwork *string `json:"exposeNetwork"`
 	// Additional HTTP headers to be sent with web socket connect request. Optional.
 	Headers map[string]string `json:"headers"`
 	// Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going
@@ -826,7 +838,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// so you don't actually need to set it manually. Defaults to `false` and is not supported in Firefox. Learn more
 	// about [mobile emulation].
 	//
-	// [mobile emulation]: https://playwright.dev/docs/emulation#isMobile
+	// [mobile emulation]: https://playwright.dev/docs/emulation#ismobile
 	IsMobile *bool `json:"isMobile"`
 	// Whether or not to enable JavaScript in the context. Defaults to `true`. Learn more about
 	// [disabling JavaScript].
