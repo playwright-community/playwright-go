@@ -460,7 +460,10 @@ func (p *pageImpl) ExpectNavigation(cb func() error, options ...PageExpectNaviga
 		}
 		return matcher == nil || matcher.Matches(ev["url"].(string))
 	}
-	waiter := p.mainFrame.(*frameImpl).setNavigationWaiter(option.Timeout)
+	waiter, err := p.mainFrame.(*frameImpl).setNavigationWaiter(option.Timeout)
+	if err != nil {
+		return nil, err
+	}
 
 	eventData, err := waiter.WaitForEvent(p.mainFrame.(*frameImpl), "navigated", predicate).RunAndWait(cb)
 	if err != nil || eventData == nil {
@@ -709,13 +712,6 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 			bt.Emit("load", bt)
 		},
 	)
-	bt.channel.On(
-		"pageError", func(ev map[string]interface{}) {
-			err := Error{}
-			remapMapToStruct(ev["error"].(map[string]interface{})["error"], &err)
-			bt.Emit("pageerror", parseError(err))
-		},
-	)
 	bt.channel.On("popup", func(ev map[string]interface{}) {
 		bt.Emit("popup", fromChannel(ev["page"]).(*pageImpl))
 	})
@@ -797,6 +793,7 @@ func (p *pageImpl) onRoute(route *routeImpl) {
 	go func() {
 		p.Lock()
 		defer p.Unlock()
+		route.context = p.browserContext
 		routes := make([]*routeHandlerEntry, len(p.routes))
 		copy(routes, p.routes)
 

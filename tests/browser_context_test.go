@@ -495,3 +495,17 @@ func TestBrowserContextCloseShouldBeCallableTwice(t *testing.T) {
 	require.NoError(t, context.Close())
 	require.NoError(t, context.Close())
 }
+
+func TestPageErrorEventShouldWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	ret, err := page.Context().ExpectEvent("weberror", func() error {
+		return page.SetContent(`<script>throw new Error("boom")</script>`)
+	})
+	require.NoError(t, err)
+	require.NotNil(t, ret)
+	weberror, ok := ret.(playwright.WebError)
+	require.True(t, ok)
+	require.Equal(t, page, weberror.Page())
+	require.Contains(t, weberror.Error().(*playwright.Error).Stack, "boom")
+}

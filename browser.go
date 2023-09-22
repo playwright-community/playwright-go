@@ -33,6 +33,14 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 	if len(options) == 1 {
 		option = options[0]
 	}
+	if option.AcceptDownloads != nil {
+		if *option.AcceptDownloads {
+			overrides["acceptDownloads"] = "accept"
+		} else {
+			overrides["acceptDownloads"] = "deny"
+		}
+		options[0].AcceptDownloads = nil
+	}
 	if option.ExtraHttpHeaders != nil {
 		overrides["extraHTTPHeaders"] = serializeMapToNameAndValue(options[0].ExtraHttpHeaders)
 		options[0].ExtraHttpHeaders = nil

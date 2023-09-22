@@ -630,6 +630,17 @@ func (l *locatorImpl) Press(key string, options ...LocatorPressOptions) error {
 	return l.frame.Press(l.selector, key, opt)
 }
 
+func (l *locatorImpl) PressSequentially(text string, options ...LocatorPressSequentiallyOptions) error {
+	if l.err != nil {
+		return l.err
+	}
+	var option LocatorTypeOptions
+	if len(options) == 1 {
+		option = LocatorTypeOptions(options[0])
+	}
+	return l.Type(text, option)
+}
+
 func (l *locatorImpl) Screenshot(options ...LocatorScreenshotOptions) ([]byte, error) {
 	if l.err != nil {
 		return nil, l.err
