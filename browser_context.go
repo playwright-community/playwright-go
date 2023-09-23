@@ -439,7 +439,7 @@ func (b *browserContextImpl) onClose() {
 	b.Emit("close", b)
 }
 
-func (b *browserContextImpl) onPage(page *pageImpl) {
+func (b *browserContextImpl) onPage(page Page) {
 	b.Lock()
 	b.pages = append(b.pages, page)
 	b.Unlock()
@@ -587,6 +587,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 	bt := &browserContextImpl{
 		timeoutSettings: newTimeoutSettings(nil),
 		pages:           make([]Page, 0),
+		backgroundPages: make([]Page, 0),
 		routes:          make([]*routeHandlerEntry, 0),
 		bindings:        make(map[string]BindingCallFunction),
 		harRecorders:    make(map[string]harRecordingMetadata),

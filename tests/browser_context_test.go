@@ -298,7 +298,9 @@ func TestBrowserContextShouldReturnBackgroundPage(t *testing.T) {
 	if len(context.BackgroundPages()) == 1 {
 		page = context.BackgroundPages()[0]
 	} else {
-		ret, err := context.WaitForEvent("backgroundPage")
+		ret, err := context.WaitForEvent("backgroundPage", playwright.BrowserContextWaitForEventOptions{
+			Timeout: playwright.Float(1000),
+		})
 		if err != nil {
 			// probably missing event
 			if len(context.BackgroundPages()) == 1 {
@@ -311,8 +313,16 @@ func TestBrowserContextShouldReturnBackgroundPage(t *testing.T) {
 		}
 	}
 	require.NotNil(t, page)
-	require.NotContains(t, context.Pages(), page)
-	require.Contains(t, context.BackgroundPages(), page)
+	contains := func(pages []playwright.Page, page playwright.Page) bool {
+		for _, p := range pages {
+			if p == page {
+				return true
+			}
+		}
+		return false
+	}
+	require.False(t, contains(context.Pages(), page))
+	require.True(t, contains(context.BackgroundPages(), page))
 	context.Close()
 	require.Len(t, context.BackgroundPages(), 0)
 	require.Len(t, context.Pages(), 0)

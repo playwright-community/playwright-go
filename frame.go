@@ -275,11 +275,10 @@ func (f *frameImpl) onLoadState(ev map[string]interface{}) {
 		add := ev["add"].(string)
 		f.loadStates.Add(add)
 		f.Emit("loadstate", add)
-		if f.parentFrame == nil && add == "load" && f.page != nil {
-			f.page.Emit("load", f.page)
-		}
-		if f.parentFrame == nil && add == "domcontentloaded" && f.page != nil {
-			f.page.Emit("domcontentloaded", f.page)
+		if f.parentFrame == nil && f.page != nil {
+			if add == "load" || add == "domcontentloaded" {
+				f.Page().Emit(add, f.page)
+			}
 		}
 	} else if ev["remove"] != nil {
 		remove := ev["remove"].(string)
