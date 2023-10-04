@@ -251,10 +251,12 @@ func serializeCallStack(isInternal bool) parsedStackTrace {
 		}
 	}
 	apiName := ""
-	if !isInternal {
-		apiName = fmt.Sprintf("%n", st[lastInternalIndex])
+	if len(st) > 0 {
+		if !isInternal {
+			apiName = fmt.Sprintf("%n", st[lastInternalIndex])
+		}
+		st = st.TrimBelow(st[lastInternalIndex])
 	}
-	st = st.TrimBelow(st[lastInternalIndex])
 
 	callStack := make([]map[string]interface{}, 0)
 	for i, s := range st {
