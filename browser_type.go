@@ -44,6 +44,14 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 		if err != nil {
 			return nil, fmt.Errorf("can not convert options: %w", err)
 		}
+		if options[0].AcceptDownloads != nil {
+			if *options[0].AcceptDownloads {
+				overrides["acceptDownloads"] = "accept"
+			} else {
+				overrides["acceptDownloads"] = "deny"
+			}
+			options[0].AcceptDownloads = nil
+		}
 		if options[0].ExtraHttpHeaders != nil {
 			overrides["extraHTTPHeaders"] = serializeMapToNameAndValue(options[0].ExtraHttpHeaders)
 			options[0].ExtraHttpHeaders = nil

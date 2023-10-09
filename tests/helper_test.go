@@ -305,6 +305,12 @@ func (tu *testUtils) AssertEval(t *testing.T, page playwright.Page, script strin
 	require.Equal(t, expected, result)
 }
 
+func (tu *testUtils) AssertResult(t *testing.T, fn func() (interface{}, error), expected interface{}) {
+	result, err := fn()
+	require.NoError(t, err)
+	require.Equal(t, expected, result)
+}
+
 func getBrowserName() string {
 	browserName, hasEnv := os.LookupEnv("BROWSER")
 	if hasEnv {

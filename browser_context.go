@@ -439,7 +439,7 @@ func (b *browserContextImpl) onClose() {
 	b.Emit("close", b)
 }
 
-func (b *browserContextImpl) onPage(page *pageImpl) {
+func (b *browserContextImpl) onPage(page Page) {
 	b.Lock()
 	b.pages = append(b.pages, page)
 	b.Unlock()
@@ -454,6 +454,7 @@ func (b *browserContextImpl) onRoute(route *routeImpl) {
 	go func() {
 		b.Lock()
 		defer b.Unlock()
+		route.context = b
 		routes := make([]*routeHandlerEntry, len(b.routes))
 		copy(routes, b.routes)
 
@@ -578,10 +579,15 @@ func (b *browserContextImpl) OnResponse(fn func(Response)) {
 	b.On("response", fn)
 }
 
+func (b *browserContextImpl) OnWebError(fn func(WebError)) {
+	b.On("weberror", fn)
+}
+
 func newBrowserContext(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserContextImpl {
 	bt := &browserContextImpl{
 		timeoutSettings: newTimeoutSettings(nil),
 		pages:           make([]Page, 0),
+		backgroundPages: make([]Page, 0),
 		routes:          make([]*routeHandlerEntry, 0),
 		bindings:        make(map[string]BindingCallFunction),
 		harRecorders:    make(map[string]harRecordingMetadata),
@@ -639,6 +645,19 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 			}
 		}()
 	})
+	bt.channel.On(
+		"pageError", func(ev map[string]interface{}) {
+			err := &Error{}
+			remapMapToStruct(ev["error"].(map[string]interface{})["error"], err)
+			page := fromNullableChannel(ev["page"])
+			if page != nil {
+				bt.Emit("weberror", newWebError(page.(*pageImpl), err))
+				page.(*pageImpl).Emit("pageerror", err)
+			} else {
+				bt.Emit("weberror", newWebError(nil, err))
+			}
+		},
+	)
 	bt.channel.On("request", func(ev map[string]interface{}) {
 		request := fromChannel(ev["request"]).(*requestImpl)
 		page := fromNullableChannel(ev["page"])

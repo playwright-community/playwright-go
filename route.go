@@ -13,6 +13,7 @@ import (
 type routeImpl struct {
 	channelOwner
 	handling *chan bool
+	context  *browserContextImpl
 }
 
 func (r *routeImpl) startHandling() chan bool {
@@ -74,18 +75,14 @@ func (r *routeImpl) Abort(errorCode ...string) error {
 }
 
 func (r *routeImpl) raceWithPageClose(f func() error) error {
-	page, ok := r.Request().Frame().Page().(*pageImpl)
-	if !ok || page == nil {
-		return f()
-	}
 	errChan := make(chan error, 1)
 	go func() {
 		errChan <- f()
 	}()
 
 	select {
-	case <-page.closedOrCrashed:
-		return errors.New("Page is closed or crashed")
+	case <-r.Request().(*requestImpl).targetClosed():
+		return errors.New("Target closed")
 	case err := <-errChan:
 		return err
 	}
@@ -185,7 +182,6 @@ func (r *routeImpl) Fallback(options ...RouteFallbackOptions) error {
 }
 
 func (r *routeImpl) Fetch(options ...RouteFetchOptions) (APIResponse, error) {
-	request := r.Request().Frame().Page().Context().Request().(*apiRequestContextImpl)
 	opt := &APIRequestContextFetchOptions{}
 	url := ""
 	if len(options) == 1 {
@@ -198,7 +194,13 @@ func (r *routeImpl) Fetch(options ...RouteFetchOptions) (APIResponse, error) {
 			url = *options[0].URL
 		}
 	}
-	return request.innerFetch(url, r.Request(), *opt)
+	ret, err := r.connection.WrapAPICall(func() (interface{}, error) {
+		return r.context.request.innerFetch(url, r.Request(), *opt)
+	}, false)
+	if ret == nil {
+		return nil, err
+	}
+	return ret.(APIResponse), err
 }
 
 func (r *routeImpl) Continue(options ...RouteContinueOptions) error {

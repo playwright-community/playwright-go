@@ -94,7 +94,14 @@ func (r *requestImpl) Frame() Frame {
 		// Service Worker requests do not have an associated frame.
 		return nil
 	}
-	return fromChannel(channel).(*frameImpl)
+	frame := fromChannel(channel).(*frameImpl)
+	if frame.page == nil {
+		// Frame for this navigation request is not available, because the request
+		// was issued before the frame is created. You can check whether the request
+		// is a navigation request by calling IsNavigationRequest() method.
+		return nil
+	}
+	return frame
 }
 
 func (r *requestImpl) IsNavigationRequest() bool {
@@ -206,6 +213,18 @@ func (r *requestImpl) applyFallbackOverrides(options RouteFallbackOptions) {
 			r.fallbackOverrides.PostDataBuffer = v
 		}
 	}
+}
+
+func (r *requestImpl) targetClosed() <-chan bool {
+	channel := fromNullableChannel(r.initializer["frame"])
+	if channel == nil {
+		return make(<-chan bool, 1)
+	}
+	frame, ok := channel.(*frameImpl)
+	if !ok || frame.page == nil {
+		return make(<-chan bool, 1)
+	}
+	return frame.page.closedOrCrashed
 }
 
 func (r *requestImpl) setResponseEndTiming(t float64) {

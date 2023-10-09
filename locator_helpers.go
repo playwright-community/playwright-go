@@ -19,25 +19,34 @@ func convertRegexp(reg *regexp.Regexp) (pattern, flags string) {
 	return
 }
 
-func escapeForAttributeSelector(value string, exact bool) string {
-	suffix := "i"
-	if exact {
-		suffix = "s"
+func escapeForAttributeSelector(text interface{}, exact bool) string {
+	switch text := text.(type) {
+	case *regexp.Regexp:
+		return escapeRegexForSelector(text)
+	default:
+		suffix := "i"
+		if exact {
+			suffix = "s"
+		}
+		return fmt.Sprintf(`"%s"%s`, strings.Replace(strings.Replace(text.(string), `\`, `\\`, -1), `"`, `\"`, -1), suffix)
 	}
-	return fmt.Sprintf(`"%s"%s`, strings.Replace(strings.Replace(value, `\`, `\\`, -1), `"`, `\"`, -1), suffix)
 }
 
 func escapeForTextSelector(text interface{}, exact bool) string {
 	switch text := text.(type) {
 	case *regexp.Regexp:
-		pattern, flag := convertRegexp(text)
-		return fmt.Sprintf(`/%s/%s`, pattern, flag)
+		return escapeRegexForSelector(text)
 	default:
 		if exact {
 			return fmt.Sprintf(`%ss`, escapeText(text.(string)))
 		}
 		return fmt.Sprintf(`%si`, escapeText(text.(string)))
 	}
+}
+
+func escapeRegexForSelector(re *regexp.Regexp) string {
+	pattern, flag := convertRegexp(re)
+	return fmt.Sprintf(`/%s/%s`, strings.ReplaceAll(pattern, `>>`, `\>\>`), flag)
 }
 
 func escapeText(s string) string {
@@ -53,13 +62,7 @@ func getByAltTextSelector(text interface{}, exact bool) string {
 }
 
 func getByAttributeTextSelector(attrName string, text interface{}, exact bool) string {
-	switch text := text.(type) {
-	case *regexp.Regexp:
-		pattern, flag := convertRegexp(text)
-		return fmt.Sprintf(`internal:attr=[%s=/%s/%s]`, attrName, pattern, flag)
-	default:
-		return fmt.Sprintf(`internal:attr=[%s=%s]`, attrName, escapeForAttributeSelector(text.(string), exact))
-	}
+	return fmt.Sprintf(`internal:attr=[%s=%s]`, attrName, escapeForAttributeSelector(text, exact))
 }
 
 func getByLabelSelector(text interface{}, exact bool) string {
@@ -74,38 +77,32 @@ func getByRoleSelector(role AriaRole, options ...LocatorGetByRoleOptions) string
 	props := make(map[string]string)
 	if len(options) == 1 {
 		if options[0].Checked != nil {
-			props["checked"] = fmt.Sprintf("%v", options[0].Checked)
+			props["checked"] = fmt.Sprintf("%t", *options[0].Checked)
 		}
 		if options[0].Disabled != nil {
-			props["disabled"] = fmt.Sprintf("%v", options[0].Disabled)
+			props["disabled"] = fmt.Sprintf("%t", *options[0].Disabled)
 		}
 		if options[0].Selected != nil {
-			props["selected"] = fmt.Sprintf("%v", options[0].Selected)
+			props["selected"] = fmt.Sprintf("%t", *options[0].Selected)
 		}
 		if options[0].Expanded != nil {
-			props["expanded"] = fmt.Sprintf("%v", options[0].Expanded)
+			props["expanded"] = fmt.Sprintf("%t", *options[0].Expanded)
 		}
 		if options[0].IncludeHidden != nil {
-			props["includeHidden"] = fmt.Sprintf("%v", options[0].IncludeHidden)
+			props["include-hidden"] = fmt.Sprintf("%t", *options[0].IncludeHidden)
 		}
 		if options[0].Level != nil {
-			props["level"] = fmt.Sprintf("%d", options[0].Level)
+			props["level"] = fmt.Sprintf("%d", *options[0].Level)
 		}
 		if options[0].Name != nil {
 			exact := false
 			if options[0].Exact != nil {
 				exact = *options[0].Exact
 			}
-			switch options[0].Name.(type) {
-			case string:
-				props["name"] = escapeForAttributeSelector(options[0].Name.(string), exact)
-			case *regexp.Regexp:
-				pattern, flag := convertRegexp(options[0].Name.(*regexp.Regexp))
-				props["name"] = fmt.Sprintf(`/%s/%s`, pattern, flag)
-			}
+			props["name"] = escapeForAttributeSelector(options[0].Name, exact)
 		}
 		if options[0].Pressed != nil {
-			props["pressed"] = fmt.Sprintf("%v", options[0].Pressed)
+			props["pressed"] = fmt.Sprintf("%t", *options[0].Pressed)
 		}
 	}
 	propsStr := ""
@@ -120,13 +117,7 @@ func getByTextSelector(text interface{}, exact bool) string {
 }
 
 func getByTestIdSelector(testIdAttributeName string, testId interface{}) string {
-	switch testId := testId.(type) {
-	case *regexp.Regexp:
-		pattern, flag := convertRegexp(testId)
-		return fmt.Sprintf(`internal:testid=[%s=/%s/%s]`, testIdAttributeName, pattern, flag)
-	default:
-		return fmt.Sprintf(`internal:testid=[%s=%s]`, testIdAttributeName, escapeForAttributeSelector(testId.(string), true))
-	}
+	return fmt.Sprintf(`internal:testid=[%s=%s]`, testIdAttributeName, escapeForAttributeSelector(testId, true))
 }
 
 func getByTitleSelector(text interface{}, exact bool) string {

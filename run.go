@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	playwrightCliVersion = "1.37.1"
+	playwrightCliVersion = "1.38.1"
 	baseURL              = "https://playwright.azureedge.net/builds/driver"
 )
 
@@ -80,7 +80,8 @@ func (d *PlaywrightDriver) isUpToDateDriver() (bool, error) {
 	return false, nil
 }
 
-func (d *PlaywrightDriver) install() error {
+// Install downloads the driver and the browsers depending on [RunOptions].
+func (d *PlaywrightDriver) Install() error {
 	if err := d.DownloadDriver(); err != nil {
 		return fmt.Errorf("could not install driver: %w", err)
 	}
@@ -98,6 +99,28 @@ func (d *PlaywrightDriver) install() error {
 	}
 	return nil
 }
+
+// Uninstall removes the driver and the browsers.
+func (d *PlaywrightDriver) Uninstall() error {
+	if d.options.Verbose {
+		log.Println("Removing browsers...")
+	}
+	if err := d.uninstallBrowsers(d.DriverBinaryLocation); err != nil {
+		return fmt.Errorf("could not uninstall browsers: %w", err)
+	}
+	if d.options.Verbose {
+		log.Println("Removing driver...")
+	}
+	if err := os.RemoveAll(d.DriverDirectory); err != nil {
+		return fmt.Errorf("could not remove driver directory: %w", err)
+	}
+	if d.options.Verbose {
+		log.Println("Uninstall driver successfully")
+	}
+	return nil
+}
+
+// DownloadDriver downloads the driver only
 func (d *PlaywrightDriver) DownloadDriver() error {
 	up2Date, err := d.isUpToDateDriver()
 	if err != nil {
@@ -107,7 +130,9 @@ func (d *PlaywrightDriver) DownloadDriver() error {
 		return nil
 	}
 
-	log.Printf("Downloading driver to %s", d.DriverDirectory)
+	if d.options.Verbose {
+		log.Printf("Downloading driver to %s", d.DriverDirectory)
+	}
 	driverURL := d.getDriverURL()
 	resp, err := http.Get(driverURL)
 	if err != nil {
@@ -160,7 +185,9 @@ func (d *PlaywrightDriver) DownloadDriver() error {
 		}
 	}
 
-	log.Println("Downloaded driver successfully")
+	if d.options.Verbose {
+		log.Println("Downloaded driver successfully")
+	}
 	return nil
 }
 
@@ -212,10 +239,14 @@ func (d *PlaywrightDriver) installBrowsers(driverPath string) error {
 	cmd := exec.Command(driverPath, additionalArgs...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("could not install browsers: %w", err)
-	}
-	return nil
+	return cmd.Run()
+}
+
+func (d *PlaywrightDriver) uninstallBrowsers(driverPath string) error {
+	cmd := exec.Command(driverPath, "uninstall")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
 
 // RunOptions are custom options to run the driver
@@ -234,7 +265,7 @@ func Install(options ...*RunOptions) error {
 	if err != nil {
 		return fmt.Errorf("could not get driver instance: %w", err)
 	}
-	if err := driver.install(); err != nil {
+	if err := driver.Install(); err != nil {
 		return fmt.Errorf("could not install driver: %w", err)
 	}
 	return nil

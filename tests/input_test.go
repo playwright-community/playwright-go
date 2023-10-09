@@ -162,6 +162,7 @@ func TestElementHandleType(t *testing.T) {
 	//nolint:staticcheck
 	inputElement, err := page.QuerySelector("input")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	require.NoError(t, inputElement.Type("abc123"))
 	result, err := page.Evaluate("window.clicked")
 	require.NoError(t, err)
