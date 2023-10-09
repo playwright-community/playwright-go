@@ -39,19 +39,12 @@ func (r *responseImpl) Headers() map[string]string {
 }
 
 func (r *responseImpl) Finished() error {
-	var page Page
-	if frame := r.request.Frame(); frame != nil {
-		page = frame.Page()
+	select {
+	case <-r.request.targetClosed():
+		return errors.New("Target closed")
+	case err := <-r.finished:
+		return err
 	}
-	if page != nil {
-		select {
-		case <-page.(*pageImpl).closedOrCrashed:
-			return errors.New("Target closed")
-		case err := <-r.finished:
-			return err
-		}
-	}
-	return <-r.finished
 }
 
 func (r *responseImpl) Body() ([]byte, error) {

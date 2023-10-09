@@ -627,3 +627,26 @@ func TestLocatorHighlightShoudWork(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, yes)
 }
+
+func TestLocatorShouldType(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.SetContent(`<input type='text' />`))
+	//nolint:staticcheck
+	require.NoError(t, page.Locator("input").Type("hello"))
+	utils.AssertResult(t, func() (interface{}, error) {
+		//nolint:staticcheck
+		return page.EvalOnSelector("input", "e => e.value", nil)
+	}, "hello")
+}
+
+func TestLocatorShouldPressSequentially(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.NoError(t, page.SetContent(`<input type='text' />`))
+	require.NoError(t, page.Locator("input").PressSequentially("hello"))
+	utils.AssertResult(t, func() (interface{}, error) {
+		//nolint:staticcheck
+		return page.EvalOnSelector("input", "e => e.value", nil)
+	}, "hello")
+}

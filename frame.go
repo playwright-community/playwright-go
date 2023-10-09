@@ -1,6 +1,7 @@
 package playwright
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"sync"
@@ -138,7 +139,10 @@ func (f *frameImpl) waitForLoadStateImpl(state string, timeout *float64, cb func
 	if f.loadStates.Has(state) {
 		return nil
 	}
-	waiter := f.setNavigationWaiter(timeout)
+	waiter, err := f.setNavigationWaiter(timeout)
+	if err != nil {
+		return err
+	}
 	waiter.WaitForEvent(f, "loadstate", func(payload interface{}) bool {
 		gotState := payload.(string)
 		return gotState == state
@@ -153,6 +157,9 @@ func (f *frameImpl) waitForLoadStateImpl(state string, timeout *float64, cb func
 }
 
 func (f *frameImpl) WaitForURL(url interface{}, options ...FrameWaitForURLOptions) error {
+	if f.page == nil {
+		return errors.New("frame is detached")
+	}
 	matcher := newURLMatcher(url, f.page.browserContext.options.BaseURL)
 	if matcher.Matches(f.URL()) {
 		state := "load"
@@ -179,6 +186,9 @@ func (f *frameImpl) WaitForURL(url interface{}, options ...FrameWaitForURLOption
 }
 
 func (f *frameImpl) ExpectNavigation(cb func() error, options ...FrameExpectNavigationOptions) (Response, error) {
+	if f.page == nil {
+		return nil, errors.New("frame is detached")
+	}
 	option := FrameExpectNavigationOptions{}
 	if len(options) == 1 {
 		option = options[0]
@@ -201,7 +211,10 @@ func (f *frameImpl) ExpectNavigation(cb func() error, options ...FrameExpectNavi
 		}
 		return matcher == nil || matcher.Matches(ev["url"].(string))
 	}
-	waiter := f.setNavigationWaiter(option.Timeout)
+	waiter, err := f.setNavigationWaiter(option.Timeout)
+	if err != nil {
+		return nil, err
+	}
 
 	eventData, err := waiter.WaitForEvent(f, "navigated", predicate).RunAndWait(cb)
 	if err != nil || eventData == nil {
@@ -223,7 +236,10 @@ func (f *frameImpl) ExpectNavigation(cb func() error, options ...FrameExpectNavi
 	return nil, nil
 }
 
-func (f *frameImpl) setNavigationWaiter(timeout *float64) *waiter {
+func (f *frameImpl) setNavigationWaiter(timeout *float64) (*waiter, error) {
+	if f.page == nil {
+		return nil, errors.New("page does not exist")
+	}
 	waiter := newWaiter()
 	if timeout != nil {
 		waiter.WithTimeout(*timeout)
@@ -239,7 +255,7 @@ func (f *frameImpl) setNavigationWaiter(timeout *float64) *waiter {
 		}
 		return false
 	})
-	return waiter
+	return waiter, nil
 }
 
 func (f *frameImpl) onFrameNavigated(ev map[string]interface{}) {
@@ -248,7 +264,8 @@ func (f *frameImpl) onFrameNavigated(ev map[string]interface{}) {
 	f.name = ev["name"].(string)
 	f.Unlock()
 	f.Emit("navigated", ev)
-	if f.page != nil {
+	_, ok := ev["error"]
+	if !ok && f.page != nil {
 		f.page.Emit("framenavigated", f)
 	}
 }
@@ -258,6 +275,11 @@ func (f *frameImpl) onLoadState(ev map[string]interface{}) {
 		add := ev["add"].(string)
 		f.loadStates.Add(add)
 		f.Emit("loadstate", add)
+		if f.parentFrame == nil && f.page != nil {
+			if add == "load" || add == "domcontentloaded" {
+				f.Page().Emit(add, f.page)
+			}
+		}
 	} else if ev["remove"] != nil {
 		remove := ev["remove"].(string)
 		f.loadStates.Remove(remove)

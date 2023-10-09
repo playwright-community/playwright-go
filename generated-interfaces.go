@@ -245,6 +245,10 @@ type BrowserContext interface {
 	// most cases).
 	OnPage(fn func(Page))
 
+	// Emitted when exception is unhandled in any of the pages in this context. To listen for errors from a particular
+	// page, use [Page.OnPageError] instead.
+	OnWebError(fn func(WebError))
+
 	// Emitted when a request is issued from any pages created through this context. The [request] object is read-only. To
 	// only listen for requests from a particular page, use [Page.OnRequest].
 	// In order to intercept and mutate requests, see [BrowserContext.Route] or [Page.Route].
@@ -585,7 +589,7 @@ type Dialog interface {
 
 // [Download] objects are dispatched by page via the [Page.OnDownload] event.
 // All the downloaded files belonging to the browser context are deleted when the browser context is closed.
-// Download event is emitted once the download starts. Download path becomes available once download completes:
+// Download event is emitted once the download starts. Download path becomes available once download completes.
 type Download interface {
 	// Cancels a download. Will not fail if the download is already finished or canceled. Upon successful cancellations,
 	// `download.failure()` would resolve to `canceled`.
@@ -746,7 +750,7 @@ type ElementHandle interface {
 	// error. However, if the element is inside the `<label>` element that has an associated
 	// [control], the control will be filled
 	// instead.
-	// To send fine-grained keyboard events, use [ElementHandle.Type].
+	// To send fine-grained keyboard events, use [Locator.PressSequentially].
 	//
 	//  value: Value to set for the `<input>`, `<textarea>` or `[contenteditable]` element.
 	//
@@ -945,6 +949,8 @@ type ElementHandle interface {
 	// Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the
 	// text.
 	// To press a special key, like `Control` or `ArrowDown`, use [ElementHandle.Press].
+	//
+	// Deprecated: In most cases, you should use [Locator.Fill] instead. You only need to press keys one by one if there is special keyboard handling on the page - in this case use [Locator.PressSequentially].
 	//
 	//  text: A text to type into a focused element.
 	Type(text string, options ...ElementHandleTypeOptions) error
@@ -1191,7 +1197,7 @@ type Frame interface {
 	// error. However, if the element is inside the `<label>` element that has an associated
 	// [control], the control will be filled
 	// instead.
-	// To send fine-grained keyboard events, use [Frame.Type].
+	// To send fine-grained keyboard events, use [Locator.PressSequentially].
 	//
 	// Deprecated: Use locator-based [Locator.Fill] instead. Read more about [locators].
 	//
@@ -1621,13 +1627,11 @@ type Frame interface {
 	// to send fine-grained keyboard events. To fill values in form fields, use [Frame.Fill].
 	// To press a special key, like `Control` or `ArrowDown`, use [Keyboard.Press].
 	//
-	// Deprecated: Use locator-based [Locator.Type] instead. Read more about [locators].
+	// Deprecated: In most cases, you should use [Locator.Fill] instead. You only need to press keys one by one if there is special keyboard handling on the page - in this case use [Locator.PressSequentially].
 	//
 	// 1. selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
 	//    used.
 	// 2. text: A text to type into a focused element.
-	//
-	// [locators]: https://playwright.dev/docs/locators
 	Type(selector string, text string, options ...FrameTypeOptions) error
 
 	// This method checks an element matching “selector” by performing the following steps:
@@ -1904,6 +1908,7 @@ type Keyboard interface {
 	//  text: Sets input to the specified text value.
 	InsertText(text string) error
 
+	// **NOTE** In most cases, you should use [Locator.Press] instead.
 	// “key” can specify the intended
 	// [keyboardEvent.Key] value or a single character
 	// to generate the text for. A superset of the “key” values can be found
@@ -1924,6 +1929,8 @@ type Keyboard interface {
 	// [here]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
 	Press(key string, options ...KeyboardPressOptions) error
 
+	// **NOTE** In most cases, you should use [Locator.Fill] instead. You only need to press keys one by one if there is
+	// special keyboard handling on the page - in this case use [Locator.PressSequentially].
 	// Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
 	// To press a special key, like `Control` or `ArrowDown`, use [Keyboard.Press].
 	//
@@ -2164,7 +2171,7 @@ type Locator interface {
 	// error. However, if the element is inside the `<label>` element that has an associated
 	// [control], the control will be filled
 	// instead.
-	// To send fine-grained keyboard events, use [Locator.Type].
+	// To send fine-grained keyboard events, use [Locator.PressSequentially].
 	//
 	//  value: Value to set for the `<input>`, `<textarea>` or `[contenteditable]` element.
 	//
@@ -2380,6 +2387,15 @@ type Locator interface {
 	// [here]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
 	Press(key string, options ...LocatorPressOptions) error
 
+	// **NOTE** In most cases, you should use [Locator.Fill] instead. You only need to press keys one by one if there is
+	// special keyboard handling on the page.
+	// Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the
+	// text.
+	// To press a special key, like `Control` or `ArrowDown`, use [Locator.Press].
+	//
+	//  text: String of characters to sequentially press into a focused element.
+	PressSequentially(text string, options ...LocatorPressSequentiallyOptions) error
+
 	// Take a screenshot of the element matching the locator.
 	//
 	// # Details
@@ -2487,11 +2503,11 @@ type Locator interface {
 	// [`node.textContent`]: https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent
 	TextContent(options ...LocatorTextContentOptions) (string, error)
 
-	// **NOTE** In most cases, you should use [Locator.Fill] instead. You only need to type characters if there is special
-	// keyboard handling on the page.
 	// Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the
 	// text.
 	// To press a special key, like `Control` or `ArrowDown`, use [Locator.Press].
+	//
+	// Deprecated: In most cases, you should use [Locator.Fill] instead. You only need to press keys one by one if there is special keyboard handling on the page - in this case use [Locator.PressSequentially].
 	//
 	//  text: A text to type into a focused element.
 	Type(text string, options ...LocatorTypeOptions) error
@@ -2977,7 +2993,7 @@ type Page interface {
 	// error. However, if the element is inside the `<label>` element that has an associated
 	// [control], the control will be filled
 	// instead.
-	// To send fine-grained keyboard events, use [Page.Type].
+	// To send fine-grained keyboard events, use [Locator.PressSequentially].
 	//
 	// Deprecated: Use locator-based [Locator.Fill] instead. Read more about [locators].
 	//
@@ -3512,13 +3528,11 @@ type Page interface {
 	// send fine-grained keyboard events. To fill values in form fields, use [Page.Fill].
 	// To press a special key, like `Control` or `ArrowDown`, use [Keyboard.Press].
 	//
-	// Deprecated: Use locator-based [Locator.Type] instead. Read more about [locators].
+	// Deprecated: In most cases, you should use [Locator.Fill] instead. You only need to press keys one by one if there is special keyboard handling on the page - in this case use [Locator.PressSequentially].
 	//
 	// 1. selector: A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
 	//    used.
 	// 2. text: A text to type into a focused element.
-	//
-	// [locators]: https://playwright.dev/docs/locators
 	Type(selector string, text string, options ...PageTypeOptions) error
 
 	// This method unchecks an element matching “selector” by performing the following steps:
@@ -3746,6 +3760,14 @@ type Request interface {
 	Failure() error
 
 	// Returns the [Frame] that initiated this request.
+	//
+	// # Details
+	//
+	// Note that in some cases the frame is not available, and this method will throw.
+	//  - When request originates in the Service Worker. You can use `request.serviceWorker()` to check that.
+	//  - When navigation request is issued before the corresponding frame is created. You can use
+	//   [Request.IsNavigationRequest] to check that.
+	// Here is an example that handles all the cases:
 	Frame() Frame
 
 	// An object with the request HTTP headers. The header names are lower-cased. Note that this method does not return
@@ -3763,6 +3785,8 @@ type Request interface {
 	HeaderValue(name string) (string, error)
 
 	// Whether this request is driving frame's navigation.
+	// Some navigation requests are issued before the corresponding frame is created, and therefore do not have
+	// [Request.Frame] available.
 	IsNavigationRequest() bool
 
 	// Request's method (GET, POST, etc.)
@@ -3980,6 +4004,16 @@ type Video interface {
 	//
 	//  path: Path where the video should be saved.
 	SaveAs(path string) error
+}
+
+// [WebError] class represents an unhandled exeception thrown in the page. It is dispatched via the
+// [BrowserContext.OnWebError] event.
+type WebError interface {
+	// The page that produced this unhandled exception, if any.
+	Page() Page
+
+	// Unhandled error that was thrown.
+	Error() error
 }
 
 // The [WebSocket] class represents websocket connections in the page.

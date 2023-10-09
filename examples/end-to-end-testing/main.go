@@ -51,7 +51,7 @@ func main() {
 
 	// Adding a todo entry (click in the input, enter the todo title and press the Enter key)
 	assertErrorToNilf("could not click: %v", page.Locator("input.new-todo").Click())
-	assertErrorToNilf("could not type: %v", page.Locator("input.new-todo").Type(todoName))
+	assertErrorToNilf("could not type: %v", page.Locator("input.new-todo").Fill(todoName))
 	assertErrorToNilf("could not press: %v", page.Locator("input.new-todo").Press("Enter"))
 
 	// After adding 1 there should be 1 entry in the list

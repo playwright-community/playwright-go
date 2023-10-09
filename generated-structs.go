@@ -1083,6 +1083,9 @@ type ElementHandleScreenshotOptions struct {
 	// When set to `"hide"`, screenshot will hide text caret. When set to `"initial"`, text caret behavior will not be
 	// changed.  Defaults to `"hide"`.
 	Caret *ScreenshotCaret `json:"caret"`
+	// Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
+	// box `#FF00FF` (customized by “maskColor”) that completely covers its bounding box.
+	Mask []Locator `json:"mask"`
 	// Specify the color of the overlay box for masked elements, in
 	// [CSS color format]. Default color is pink `#FF00FF`.
 	//
@@ -2331,6 +2334,17 @@ type LocatorPressOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+type LocatorPressSequentiallyOptions struct {
+	// Time to wait between key presses in milliseconds. Defaults to 0.
+	Delay *float64 `json:"delay"`
+	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
+	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
+	// navigating to inaccessible pages. Defaults to `false`.
+	NoWaitAfter *bool `json:"noWaitAfter"`
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
+	Timeout *float64 `json:"timeout"`
+}
 type LocatorScreenshotOptions struct {
 	// When set to `"disabled"`, stops CSS animations, CSS transitions and Web Animations. Animations get different
 	// treatment depending on their duration:
@@ -2341,6 +2355,9 @@ type LocatorScreenshotOptions struct {
 	// When set to `"hide"`, screenshot will hide text caret. When set to `"initial"`, text caret behavior will not be
 	// changed.  Defaults to `"hide"`.
 	Caret *ScreenshotCaret `json:"caret"`
+	// Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
+	// box `#FF00FF` (customized by “maskColor”) that completely covers its bounding box.
+	Mask []Locator `json:"mask"`
 	// Specify the color of the overlay box for masked elements, in
 	// [CSS color format]. Default color is pink `#FF00FF`.
 	//
@@ -3172,6 +3189,9 @@ type PageScreenshotOptions struct {
 	// When true, takes a screenshot of the full scrollable page, instead of the currently visible viewport. Defaults to
 	// `false`.
 	FullPage *bool `json:"fullPage"`
+	// Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
+	// box `#FF00FF` (customized by “maskColor”) that completely covers its bounding box.
+	Mask []Locator `json:"mask"`
 	// Specify the color of the overlay box for masked elements, in
 	// [CSS color format]. Default color is pink `#FF00FF`.
 	//

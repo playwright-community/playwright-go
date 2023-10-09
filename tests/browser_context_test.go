@@ -298,7 +298,9 @@ func TestBrowserContextShouldReturnBackgroundPage(t *testing.T) {
 	if len(context.BackgroundPages()) == 1 {
 		page = context.BackgroundPages()[0]
 	} else {
-		ret, err := context.WaitForEvent("backgroundPage")
+		ret, err := context.WaitForEvent("backgroundPage", playwright.BrowserContextWaitForEventOptions{
+			Timeout: playwright.Float(1000),
+		})
 		if err != nil {
 			// probably missing event
 			if len(context.BackgroundPages()) == 1 {
@@ -311,8 +313,16 @@ func TestBrowserContextShouldReturnBackgroundPage(t *testing.T) {
 		}
 	}
 	require.NotNil(t, page)
-	require.NotContains(t, context.Pages(), page)
-	require.Contains(t, context.BackgroundPages(), page)
+	contains := func(pages []playwright.Page, page playwright.Page) bool {
+		for _, p := range pages {
+			if p == page {
+				return true
+			}
+		}
+		return false
+	}
+	require.False(t, contains(context.Pages(), page))
+	require.True(t, contains(context.BackgroundPages(), page))
 	context.Close()
 	require.Len(t, context.BackgroundPages(), 0)
 	require.Len(t, context.Pages(), 0)
@@ -494,4 +504,18 @@ func TestBrowserContextCloseShouldBeCallableTwice(t *testing.T) {
 	require.True(t, closed)
 	require.NoError(t, context.Close())
 	require.NoError(t, context.Close())
+}
+
+func TestPageErrorEventShouldWork(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	ret, err := page.Context().ExpectEvent("weberror", func() error {
+		return page.SetContent(`<script>throw new Error("boom")</script>`)
+	})
+	require.NoError(t, err)
+	require.NotNil(t, ret)
+	weberror, ok := ret.(playwright.WebError)
+	require.True(t, ok)
+	require.Equal(t, page, weberror.Page())
+	require.Contains(t, weberror.Error().(*playwright.Error).Stack, "boom")
 }
