@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"syscall"
 )
 
 const (
@@ -70,6 +71,9 @@ func (d *PlaywrightDriver) isUpToDateDriver() (bool, error) {
 		return false, nil
 	}
 	cmd := exec.Command(d.DriverBinaryLocation, "--version")
+	if d.options != nil {
+		cmd.SysProcAttr = d.options.SysProcAttr
+	}
 	output, err := cmd.Output()
 	if err != nil {
 		return false, fmt.Errorf("could not run driver: %w", err)
@@ -193,6 +197,9 @@ func (d *PlaywrightDriver) DownloadDriver() error {
 
 func (d *PlaywrightDriver) run() (*connection, error) {
 	cmd := exec.Command(d.DriverBinaryLocation, "run-driver")
+	if d.options != nil {
+		cmd.SysProcAttr = d.options.SysProcAttr
+	}
 	cmd.Stderr = os.Stderr
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -237,6 +244,9 @@ func (d *PlaywrightDriver) installBrowsers(driverPath string) error {
 		additionalArgs = append(additionalArgs, d.options.Browsers...)
 	}
 	cmd := exec.Command(driverPath, additionalArgs...)
+	if d.options != nil {
+		cmd.SysProcAttr = d.options.SysProcAttr
+	}
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
@@ -244,6 +254,9 @@ func (d *PlaywrightDriver) installBrowsers(driverPath string) error {
 
 func (d *PlaywrightDriver) uninstallBrowsers(driverPath string) error {
 	cmd := exec.Command(driverPath, "uninstall")
+	if d.options != nil {
+		cmd.SysProcAttr = d.options.SysProcAttr
+	}
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
@@ -255,6 +268,7 @@ type RunOptions struct {
 	SkipInstallBrowsers bool
 	Browsers            []string
 	Verbose             bool
+	SysProcAttr         *syscall.SysProcAttr
 }
 
 // Install does download the driver and the browsers. If not called manually
