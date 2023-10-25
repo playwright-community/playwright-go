@@ -318,10 +318,29 @@ func (p *pageImpl) Request() APIRequestContext {
 
 func (p *pageImpl) Screenshot(options ...PageScreenshotOptions) ([]byte, error) {
 	var path *string
-	if len(options) > 0 {
+	overrides := map[string]interface{}{}
+	if len(options) == 1 {
 		path = options[0].Path
+		options[0].Path = nil
+		if options[0].Mask != nil {
+			masks := make([]map[string]interface{}, 0)
+			for _, m := range options[0].Mask {
+				if m.Err() != nil { // ErrLocatorNotSameFrame
+					return nil, m.Err()
+				}
+				l, ok := m.(*locatorImpl)
+				if ok {
+					masks = append(masks, map[string]interface{}{
+						"selector": l.selector,
+						"frame":    l.frame.channel,
+					})
+				}
+			}
+			overrides["mask"] = masks
+			options[0].Mask = nil
+		}
 	}
-	data, err := p.channel.Send("screenshot", options)
+	data, err := p.channel.Send("screenshot", options, overrides)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message :%w", err)
 	}
