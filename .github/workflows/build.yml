@@ -108,6 +108,6 @@ jobs:
       run: |
         for dir in examples/*; do
           echo "::group::go run $dir/main.go"
-          xvfb-run go run $dir/main.go
+          xvfb-run -a go run $dir/main.go
           echo "::endgroup::"
         done
