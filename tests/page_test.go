@@ -77,6 +77,36 @@ func TestPageScreenshot(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestPageScreenshotWithMask(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+
+	require.NoError(t, page.SetContent("<h1>foobar</h1><p>sensitive</p>"))
+	tmpfile, err := os.MkdirTemp("", "screenshot")
+	require.NoError(t, err)
+	screenshotPath := filepath.Join(tmpfile, "image.png")
+	screenshot1, err := page.Screenshot()
+	require.NoError(t, err)
+	require.True(t, filetype.IsImage(screenshot1))
+	require.Greater(t, len(screenshot1), 50)
+
+	sensElem := page.Locator("p")
+
+	screenshot2, err := page.Screenshot(playwright.PageScreenshotOptions{
+		Path: playwright.String(screenshotPath),
+		Mask: []playwright.Locator{
+			sensElem,
+		},
+	})
+	require.NoError(t, err)
+	require.True(t, filetype.IsImage(screenshot2))
+	require.Greater(t, len(screenshot2), 50)
+	require.NotEqual(t, screenshot1, screenshot2)
+
+	_, err = os.Stat(screenshotPath)
+	require.NoError(t, err)
+}
+
 func TestPagePDF(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
