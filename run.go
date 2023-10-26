@@ -70,6 +70,7 @@ func (d *PlaywrightDriver) isUpToDateDriver() (bool, error) {
 		return false, nil
 	}
 	cmd := exec.Command(d.DriverBinaryLocation, "--version")
+	cmd.SysProcAttr = defaultSysProcAttr
 	output, err := cmd.Output()
 	if err != nil {
 		return false, fmt.Errorf("could not run driver: %w", err)
@@ -193,6 +194,7 @@ func (d *PlaywrightDriver) DownloadDriver() error {
 
 func (d *PlaywrightDriver) run() (*connection, error) {
 	cmd := exec.Command(d.DriverBinaryLocation, "run-driver")
+	cmd.SysProcAttr = defaultSysProcAttr
 	cmd.Stderr = os.Stderr
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -237,6 +239,7 @@ func (d *PlaywrightDriver) installBrowsers(driverPath string) error {
 		additionalArgs = append(additionalArgs, d.options.Browsers...)
 	}
 	cmd := exec.Command(driverPath, additionalArgs...)
+	cmd.SysProcAttr = defaultSysProcAttr
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
@@ -244,6 +247,7 @@ func (d *PlaywrightDriver) installBrowsers(driverPath string) error {
 
 func (d *PlaywrightDriver) uninstallBrowsers(driverPath string) error {
 	cmd := exec.Command(driverPath, "uninstall")
+	cmd.SysProcAttr = defaultSysProcAttr
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
