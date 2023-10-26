@@ -8,6 +8,7 @@ import (
 
 type localUtilsImpl struct {
 	channelOwner
+	Devices map[string]*DeviceDescriptor
 }
 
 type (
@@ -147,7 +148,16 @@ func (l *localUtilsImpl) AddStackToTracingNoReply(id int, stack []map[string]int
 }
 
 func newLocalUtils(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *localUtilsImpl {
-	l := &localUtilsImpl{}
+	l := &localUtilsImpl{
+		Devices: make(map[string]*DeviceDescriptor),
+	}
 	l.createChannelOwner(l, parent, objectType, guid, initializer)
+	for _, dd := range initializer["deviceDescriptors"].([]interface{}) {
+		entry := dd.(map[string]interface{})
+		l.Devices[entry["name"].(string)] = &DeviceDescriptor{
+			Viewport: &Size{},
+		}
+		remapMapToStruct(entry["descriptor"], l.Devices[entry["name"].(string)])
+	}
 	return l
 }

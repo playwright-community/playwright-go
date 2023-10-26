@@ -9,7 +9,8 @@ type channel struct {
 	eventEmitter
 	guid       string
 	connection *connection
-	object     interface{}
+	owner      *channelOwner // to avoid type conversion
+	object     interface{}   // retain type info (for fromChannel needed)
 }
 
 func (c *channel) Send(method string, options ...interface{}) (interface{}, error) {
@@ -26,7 +27,7 @@ func (c *channel) SendReturnAsDict(method string, options ...interface{}) (inter
 
 func (c *channel) innerSend(method string, returnAsDict bool, options ...interface{}) (interface{}, error) {
 	params := transformOptions(options...)
-	callback, err := c.connection.sendMessageToServer(c.guid, method, params, false)
+	callback, err := c.connection.sendMessageToServer(c.owner, method, params, false)
 	if err != nil {
 		return nil, err
 	}
@@ -55,17 +56,19 @@ func (c *channel) innerSend(method string, returnAsDict bool, options ...interfa
 func (c *channel) SendNoReply(method string, options ...interface{}) {
 	params := transformOptions(options...)
 	_, err := c.connection.WrapAPICall(func() (interface{}, error) {
-		return c.connection.sendMessageToServer(c.guid, method, params, true)
+		return c.connection.sendMessageToServer(c.owner, method, params, true)
 	}, false)
 	if err != nil {
 		log.Printf("SendNoReply failed: %v", err)
 	}
 }
 
-func newChannel(connection *connection, guid string) *channel {
+func newChannel(owner *channelOwner, object interface{}) *channel {
 	channel := &channel{
-		connection: connection,
-		guid:       guid,
+		connection: owner.connection,
+		guid:       owner.guid,
+		owner:      owner,
+		object:     object,
 	}
 	channel.initEventEmitter()
 	return channel

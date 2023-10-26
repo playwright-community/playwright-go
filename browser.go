@@ -133,7 +133,7 @@ func (b *browserImpl) Close() error {
 		return fmt.Errorf("close browser failed: %w", err)
 	}
 	if b.shouldCloseConnectionOnClose {
-		return b.connection.Stop()
+		return b.connection.Stop(errMsgBrowserClosed)
 	}
 	return nil
 }

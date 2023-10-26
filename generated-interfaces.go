@@ -1958,9 +1958,17 @@ type Locator interface {
 	All() ([]Locator, error)
 
 	// Returns an array of `node.innerText` values for all matching nodes.
+	// **NOTE** If you need to assert text on the page, prefer [LocatorAssertions.ToHaveText] with “useInnerText” option
+	// to avoid flakiness. See [assertions guide] for more details.
+	//
+	// [assertions guide]: https://playwright.dev/docs/test-assertions
 	AllInnerTexts() ([]string, error)
 
 	// Returns an array of `node.textContent` values for all matching nodes.
+	// **NOTE** If you need to assert text on the page, prefer [LocatorAssertions.ToHaveText] to avoid flakiness. See
+	// [assertions guide] for more details.
+	//
+	// [assertions guide]: https://playwright.dev/docs/test-assertions
 	AllTextContents() ([]string, error)
 
 	// Creates a locator that matches both this locator and the argument locator.
@@ -2042,6 +2050,10 @@ type Locator interface {
 	Click(options ...LocatorClickOptions) error
 
 	// Returns the number of elements matching the locator.
+	// **NOTE** If you need to assert the number of elements on the page, prefer [LocatorAssertions.ToHaveCount] to avoid
+	// flakiness. See [assertions guide] for more details.
+	//
+	// [assertions guide]: https://playwright.dev/docs/test-assertions
 	Count() (int, error)
 
 	// Double-click an element.
@@ -2198,8 +2210,12 @@ type Locator interface {
 	FrameLocator(selector string) FrameLocator
 
 	// Returns the matching element's attribute value.
+	// **NOTE** If you need to assert an element's attribute, prefer [LocatorAssertions.ToHaveAttribute] to avoid
+	// flakiness. See [assertions guide] for more details.
 	//
 	//  name: Attribute name to get the value for.
+	//
+	// [assertions guide]: https://playwright.dev/docs/test-assertions
 	GetAttribute(name string, options ...LocatorGetAttributeOptions) (string, error)
 
 	// Allows locating elements by their alt text.
@@ -2295,11 +2311,16 @@ type Locator interface {
 	InnerHTML(options ...LocatorInnerHTMLOptions) (string, error)
 
 	// Returns the [`element.innerText`].
+	// **NOTE** If you need to assert text on the page, prefer [LocatorAssertions.ToHaveText] with “useInnerText” option
+	// to avoid flakiness. See [assertions guide] for more details.
 	//
 	// [`element.innerText`]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/innerText
+	// [assertions guide]: https://playwright.dev/docs/test-assertions
 	InnerText(options ...LocatorInnerTextOptions) (string, error)
 
 	// Returns the value for the matching `<input>` or `<textarea>` or `<select>` element.
+	// **NOTE** If you need to assert input value, prefer [LocatorAssertions.ToHaveValue] to avoid flakiness. See
+	// [assertions guide] for more details.
 	//
 	// # Details
 	//
@@ -2308,35 +2329,55 @@ type Locator interface {
 	// [control], returns the value of the
 	// control.
 	//
+	// [assertions guide]: https://playwright.dev/docs/test-assertions
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
 	InputValue(options ...LocatorInputValueOptions) (string, error)
 
 	// Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
+	// **NOTE** If you need to assert that checkbox is checked, prefer [LocatorAssertions.ToBeChecked] to avoid flakiness.
+	// See [assertions guide] for more details.
+	//
+	// [assertions guide]: https://playwright.dev/docs/test-assertions
 	IsChecked(options ...LocatorIsCheckedOptions) (bool, error)
 
 	// Returns whether the element is disabled, the opposite of [enabled].
+	// **NOTE** If you need to assert that an element is disabled, prefer [LocatorAssertions.ToBeDisabled] to avoid
+	// flakiness. See [assertions guide] for more details.
 	//
 	// [enabled]: https://playwright.dev/docs/actionability#enabled
+	// [assertions guide]: https://playwright.dev/docs/test-assertions
 	IsDisabled(options ...LocatorIsDisabledOptions) (bool, error)
 
 	// Returns whether the element is [editable].
+	// **NOTE** If you need to assert that an element is editable, prefer [LocatorAssertions.ToBeEditable] to avoid
+	// flakiness. See [assertions guide] for more details.
 	//
 	// [editable]: https://playwright.dev/docs/actionability#editable
+	// [assertions guide]: https://playwright.dev/docs/test-assertions
 	IsEditable(options ...LocatorIsEditableOptions) (bool, error)
 
 	// Returns whether the element is [enabled].
+	// **NOTE** If you need to assert that an element is enabled, prefer [LocatorAssertions.ToBeEnabled] to avoid
+	// flakiness. See [assertions guide] for more details.
 	//
 	// [enabled]: https://playwright.dev/docs/actionability#enabled
+	// [assertions guide]: https://playwright.dev/docs/test-assertions
 	IsEnabled(options ...LocatorIsEnabledOptions) (bool, error)
 
 	// Returns whether the element is hidden, the opposite of [visible].
+	// **NOTE** If you need to assert that element is hidden, prefer [LocatorAssertions.ToBeHidden] to avoid flakiness.
+	// See [assertions guide] for more details.
 	//
 	// [visible]: https://playwright.dev/docs/actionability#visible
+	// [assertions guide]: https://playwright.dev/docs/test-assertions
 	IsHidden(options ...LocatorIsHiddenOptions) (bool, error)
 
 	// Returns whether the element is [visible].
+	// **NOTE** If you need to assert that element is visible, prefer [LocatorAssertions.ToBeVisible] to avoid flakiness.
+	// See [assertions guide] for more details.
 	//
 	// [visible]: https://playwright.dev/docs/actionability#visible
+	// [assertions guide]: https://playwright.dev/docs/test-assertions
 	IsVisible(options ...LocatorIsVisibleOptions) (bool, error)
 
 	// Returns locator to the last matching element.
@@ -2499,8 +2540,11 @@ type Locator interface {
 	Tap(options ...LocatorTapOptions) error
 
 	// Returns the [`node.textContent`].
+	// **NOTE** If you need to assert text on the page, prefer [LocatorAssertions.ToHaveText] to avoid flakiness. See
+	// [assertions guide] for more details.
 	//
 	// [`node.textContent`]: https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent
+	// [assertions guide]: https://playwright.dev/docs/test-assertions
 	TextContent(options ...LocatorTextContentOptions) (string, error)
 
 	// Focuses the element, and then sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the
@@ -2589,6 +2633,7 @@ type LocatorAssertions interface {
 
 	// Ensures that [Locator] points to an [attached] and
 	// [visible] DOM node.
+	// To check that at least one element from the list is visible, use [Locator.First].
 	//
 	// [attached]: https://playwright.dev/docs/actionability#attached
 	// [visible]: https://playwright.dev/docs/actionability#visible
@@ -4006,7 +4051,7 @@ type Video interface {
 	SaveAs(path string) error
 }
 
-// [WebError] class represents an unhandled exeception thrown in the page. It is dispatched via the
+// [WebError] class represents an unhandled exception thrown in the page. It is dispatched via the
 // [BrowserContext.OnWebError] event.
 type WebError interface {
 	// The page that produced this unhandled exception, if any.

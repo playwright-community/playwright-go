@@ -209,7 +209,7 @@ func (la *locatorAssertionsImpl) ToHaveAttribute(name string, value interface{},
 	}
 	expectedText := toExpectedTextValues([]interface{}{value}, false, false, nil)
 	return la.expect(
-		"to.have.attribute",
+		"to.have.attribute.value",
 		frameExpectOptions{
 			ExpressionArg: name,
 			ExpectedText:  expectedText,

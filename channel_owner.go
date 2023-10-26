@@ -15,18 +15,22 @@ type channelOwner struct {
 	connection                 *connection
 	initializer                map[string]interface{}
 	parent                     *channelOwner
+	wasCollected               bool
 }
 
-func (c *channelOwner) dispose() {
+func (c *channelOwner) dispose(reason ...string) {
 	// Clean up from parent and connection.
 	if c.parent != nil {
 		delete(c.parent.objects, c.guid)
 	}
 	delete(c.connection.objects, c.guid)
+	if len(reason) > 0 {
+		c.wasCollected = reason[0] == "gc"
+	}
 
 	// Dispose all children.
 	for _, object := range c.objects {
-		object.dispose()
+		object.dispose(reason...)
 	}
 	c.objects = make(map[string]*channelOwner)
 }
@@ -76,6 +80,7 @@ func (c *channelOwner) RemoveListener(name string, handler interface{}) {
 func (c *channelOwner) createChannelOwner(self interface{}, parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) {
 	c.objectType = objectType
 	c.guid = guid
+	c.wasCollected = false
 	c.parent = parent
 	c.objects = make(map[string]*channelOwner)
 	c.initializer = initializer
@@ -86,8 +91,7 @@ func (c *channelOwner) createChannelOwner(self interface{}, parent *channelOwner
 	if c.connection != nil {
 		c.connection.objects[guid] = c
 	}
-	c.channel = newChannel(c.connection, guid)
-	c.channel.object = self
+	c.channel = newChannel(c, self)
 	c.eventToSubscriptionMapping = map[string]string{}
 	c.initEventEmitter()
 }

@@ -247,7 +247,7 @@ index 6fce864d0..237865884 100644
  
  Makes the assertion check for the opposite condition. For example, this code tests that the response status is not successful:
 diff --git a/docs/src/api/class-browser.md b/docs/src/api/class-browser.md
-index ee6d29b00..c60c92fb8 100644
+index c52804dbe..0fc8d0f5f 100644
 --- a/docs/src/api/class-browser.md
 +++ b/docs/src/api/class-browser.md
 @@ -250,8 +250,25 @@ await browser.CloseAsync();
@@ -342,7 +342,7 @@ index ee6d29b00..c60c92fb8 100644
  
  :::note
 diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
-index ad5f7e7af..9b34b1e5e 100644
+index c135382d7..1f65b191e 100644
 --- a/docs/src/api/class-browsercontext.md
 +++ b/docs/src/api/class-browsercontext.md
 @@ -394,7 +394,7 @@ The order of evaluation of multiple scripts installed via [`method: BrowserConte
@@ -485,7 +485,7 @@ index 06776c8e7..36624d703 100644
  * since: v1.8
  - returns: <[string]>
 diff --git a/docs/src/api/class-frame.md b/docs/src/api/class-frame.md
-index c607b4adc..3e76ea588 100644
+index 5ea3d8e6e..57ab66235 100644
 --- a/docs/src/api/class-frame.md
 +++ b/docs/src/api/class-frame.md
 @@ -1947,7 +1947,7 @@ await page.MainFrame.WaitForFunctionAsync("selector => !!document.querySelector(
@@ -518,7 +518,7 @@ index c607b4adc..3e76ea588 100644
    * alias-csharp: RunAndWaitForNavigation
  - returns: <[null]|[Response]>
 diff --git a/docs/src/api/class-locatorassertions.md b/docs/src/api/class-locatorassertions.md
-index 4b79cd121..81a3ff7e1 100644
+index 43c99a4a5..3265929e8 100644
 --- a/docs/src/api/class-locatorassertions.md
 +++ b/docs/src/api/class-locatorassertions.md
 @@ -69,7 +69,7 @@ public class ExampleTests : PageTest
@@ -530,7 +530,7 @@ index 4b79cd121..81a3ff7e1 100644
  - returns: <[LocatorAssertions]>
  
  Makes the assertion check for the opposite condition. For example, this code tests that the Locator doesn't contain text `"error"`:
-@@ -1009,7 +1009,7 @@ Expected substring or RegExp or a list of those.
+@@ -1066,7 +1066,7 @@ Expected substring or RegExp or a list of those.
  
  ### param: LocatorAssertions.toContainText.expected
  * since: v1.18
@@ -539,7 +539,7 @@ index 4b79cd121..81a3ff7e1 100644
  - `expected` <[string]|[RegExp]|[Array]<[string]>|[Array]<[RegExp]>|[Array]<[string]|[RegExp]>>
  
  Expected substring or RegExp or a list of those.
-@@ -1180,7 +1180,7 @@ Expected class or RegExp or a list of those.
+@@ -1260,7 +1260,7 @@ Expected class or RegExp or a list of those.
  
  ### param: LocatorAssertions.toHaveClass.expected
  * since: v1.18
@@ -548,7 +548,7 @@ index 4b79cd121..81a3ff7e1 100644
  - `expected` <[string]|[RegExp]|[Array]<[string]>|[Array]<[RegExp]>|[Array]<[string]|[RegExp]>>
  
  Expected class or RegExp or a list of those.
-@@ -1649,7 +1649,7 @@ Expected string or RegExp or a list of those.
+@@ -1729,7 +1729,7 @@ Expected string or RegExp or a list of those.
  
  ### param: LocatorAssertions.toHaveText.expected
  * since: v1.18
@@ -557,7 +557,7 @@ index 4b79cd121..81a3ff7e1 100644
  - `expected` <[string]|[RegExp]|[Array]<[string]>|[Array]<[RegExp]>|[Array]<[string]|[RegExp]>>
  
  Expected string or RegExp or a list of those.
-@@ -1786,7 +1786,7 @@ await Expect(locator).ToHaveValuesAsync(new Regex[] { new Regex("R"), new Regex(
+@@ -1866,7 +1866,7 @@ await Expect(locator).ToHaveValuesAsync(new Regex[] { new Regex("R"), new Regex(
  
  ### param: LocatorAssertions.toHaveValues.values
  * since: v1.23
@@ -567,7 +567,7 @@ index 4b79cd121..81a3ff7e1 100644
  
  Expected options currently selected.
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index 7c0e532d1..b5f8a33e3 100644
+index 2515820ab..2f0823616 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
 @@ -618,7 +618,7 @@ The order of evaluation of multiple scripts installed via [`method: BrowserConte
@@ -1010,7 +1010,7 @@ index afbf07124..282188cfd 100644
  
  Response body.
 diff --git a/docs/src/api/class-selectors.md b/docs/src/api/class-selectors.md
-index 27ad6cdad..8eabb43a5 100644
+index 4c3011430..4ced2d60d 100644
 --- a/docs/src/api/class-selectors.md
 +++ b/docs/src/api/class-selectors.md
 @@ -187,7 +187,7 @@ contain `[a-zA-Z0-9_]` characters.

@@ -25,7 +25,7 @@ func (t *tracingImpl) Start(options ...TracingStartOptions) error {
 		}
 		return t.channel.Send("tracingStartChunk", options)
 	}
-	result, err := t.connection.WrapAPICall(innerStart, false)
+	result, err := t.connection.WrapAPICall(innerStart, true)
 	if err != nil {
 		return err
 	}
@@ -53,10 +53,10 @@ func (t *tracingImpl) StopChunk(path ...string) error {
 	if len(path) == 1 {
 		filePath = path[0]
 	}
-	if err := t.doStopChunk(filePath); err != nil {
-		return err
-	}
-	return nil
+	_, err := t.connection.WrapAPICall(func() (interface{}, error) {
+		return nil, t.doStopChunk(filePath)
+	}, true)
+	return err
 }
 
 func (t *tracingImpl) Stop(path ...string) error {
@@ -64,11 +64,12 @@ func (t *tracingImpl) Stop(path ...string) error {
 	if len(path) == 1 {
 		filePath = path[0]
 	}
-	err := t.doStopChunk(filePath)
-	if err != nil {
-		return err
-	}
-	_, err = t.channel.Send("tracingStop")
+	_, err := t.connection.WrapAPICall(func() (interface{}, error) {
+		if err := t.doStopChunk(filePath); err != nil {
+			return nil, err
+		}
+		return t.channel.Send("tracingStop")
+	}, true)
 	return err
 }
 
