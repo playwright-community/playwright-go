@@ -22,8 +22,6 @@ func createObjectFactory(parent *channelOwner, objectType string, guid string, i
 		return newBrowserContext(parent, objectType, guid, initializer)
 	case "CDPSession":
 		return newCDPSession(parent, objectType, guid, initializer)
-	case "ConsoleMessage":
-		return newConsoleMessage(parent, objectType, guid, initializer)
 	case "Dialog":
 		return newDialog(parent, objectType, guid, initializer)
 	case "Electron":

@@ -7,6 +7,7 @@ package playwright
 type DeviceDescriptor struct {
 	UserAgent          string  `json:"userAgent"`
 	Viewport           *Size   `json:"viewport"`
+	Screen             *Size   `json:"screen"`
 	DeviceScaleFactor  float64 `json:"deviceScaleFactor"`
 	IsMobile           bool    `json:"isMobile"`
 	HasTouch           bool    `json:"hasTouch"`
@@ -16,7 +17,6 @@ type DeviceDescriptor struct {
 // Playwright represents a Playwright instance
 type Playwright struct {
 	channelOwner
-	utils     *localUtilsImpl
 	Selectors Selectors
 	Chromium  BrowserType
 	Firefox   BrowserType
@@ -55,14 +55,9 @@ func newPlaywright(parent *channelOwner, objectType string, guid string, initial
 	pw.connection.afterClose = func() {
 		pw.Selectors.(*selectorsImpl).removeChannel(selectorsOwner)
 	}
-	for _, dd := range initializer["deviceDescriptors"].([]interface{}) {
-		entry := dd.(map[string]interface{})
-		pw.Devices[entry["name"].(string)] = &DeviceDescriptor{
-			Viewport: &Size{},
-		}
-		remapMapToStruct(entry["descriptor"], pw.Devices[entry["name"].(string)])
+	if pw.connection.localUtils != nil {
+		pw.Devices = pw.connection.localUtils.Devices
 	}
-	pw.utils = fromChannel(initializer["utils"]).(*localUtilsImpl)
 	return pw
 }
 

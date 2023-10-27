@@ -615,8 +615,8 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 	bt.channel.On("serviceWorker", func(params map[string]interface{}) {
 		bt.onServiceWorker(fromChannel(params["worker"]).(*workerImpl))
 	})
-	bt.channel.On("console", func(params map[string]interface{}) {
-		message := fromChannel(params["message"]).(*consoleMessageImpl)
+	bt.channel.On("console", func(ev map[string]interface{}) {
+		message := newConsoleMessage(ev)
 		bt.Emit("console", message)
 		if message.page != nil {
 			message.page.Emit("console", message)

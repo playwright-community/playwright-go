@@ -39,6 +39,7 @@ type connection struct {
 	localUtils   *localUtilsImpl
 	tracingCount atomic.Int32
 	abort        chan struct{}
+	closedError  atomic.Value
 }
 
 func (c *connection) Start() *Playwright {
@@ -54,16 +55,21 @@ func (c *connection) Start() *Playwright {
 	return <-playwright
 }
 
-func (c *connection) Stop() error {
+func (c *connection) Stop(errMsg ...string) error {
 	err := c.onClose()
 	if err != nil {
 		return err
 	}
-	c.cleanup()
+	c.cleanup(errMsg...)
 	return nil
 }
 
-func (c *connection) cleanup() {
+func (c *connection) cleanup(errMsg ...string) {
+	if len(errMsg) == 0 {
+		c.closedError.Store(errors.New("connection closed"))
+	} else {
+		c.closedError.Store(errors.New(errMsg[0]))
+	}
 	if c.afterClose != nil {
 		c.afterClose()
 	}
@@ -75,6 +81,9 @@ func (c *connection) cleanup() {
 }
 
 func (c *connection) Dispatch(msg *message) {
+	if c.closedError.Load() != nil {
+		return
+	}
 	method := msg.Method
 	if msg.ID != 0 {
 		cb, _ := c.callbacks.LoadAndDelete(msg.ID)
@@ -111,7 +120,12 @@ func (c *connection) Dispatch(msg *message) {
 		return
 	}
 	if method == "__dispose__" {
-		object.dispose()
+		reason, ok := msg.Params["reason"]
+		if ok {
+			object.dispose(reason.(string))
+		} else {
+			object.dispose()
+		}
 		return
 	}
 	if object.objectType == "JsonPipe" {
@@ -193,11 +207,19 @@ func (c *connection) replaceGuidsWithChannels(payload interface{}) interface{} {
 	return payload
 }
 
-func (c *connection) sendMessageToServer(guid string, method string, params interface{}, noReply bool) (*protocolCallback, error) {
+func (c *connection) sendMessageToServer(object *channelOwner, method string, params interface{}, noReply bool) (*protocolCallback, error) {
+	if e := c.closedError.Load(); e != nil {
+		return nil, e.(error)
+	}
+	if object.wasCollected {
+		return nil, errors.New("The object has been collected to prevent unbounded heap growth.")
+	}
+
 	c.lastIDLock.Lock()
 	c.lastID++
 	id := c.lastID
 	c.lastIDLock.Unlock()
+	cb, _ := c.callbacks.LoadOrStore(id, newProtocolCallback(noReply, c.abort))
 	var (
 		metadata = make(map[string]interface{}, 0)
 		stack    = make([]map[string]interface{}, 0)
@@ -212,19 +234,19 @@ func (c *connection) sendMessageToServer(guid string, method string, params inte
 	metadata["wallTime"] = time.Now().Nanosecond()
 	message := map[string]interface{}{
 		"id":       id,
-		"guid":     guid,
+		"guid":     object.guid,
 		"method":   method,
 		"params":   c.replaceChannelsWithGuids(params),
 		"metadata": metadata,
 	}
-	cb, _ := c.callbacks.LoadOrStore(id, newProtocolCallback(noReply, c.abort))
+	if c.tracingCount.Load() > 0 && len(stack) > 0 && object.guid != "localUtils" {
+		c.LocalUtils().AddStackToTracingNoReply(id, stack)
+	}
+
 	if err := c.onmessage(message); err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
 
-	if c.tracingCount.Load() > 0 && len(stack) > 0 && guid != "localUtils" {
-		c.LocalUtils().AddStackToTracingNoReply(id, stack)
-	}
 	return cb.(*protocolCallback), nil
 }
 
@@ -243,6 +265,9 @@ type parsedStackTrace struct {
 
 func serializeCallStack(isInternal bool) parsedStackTrace {
 	st := stack.Trace().TrimRuntime()
+	if len(st) == 0 { // https://github.com/go-stack/stack/issues/27
+		st = stack.Trace()
+	}
 
 	lastInternalIndex := 0
 	for i, s := range st {
