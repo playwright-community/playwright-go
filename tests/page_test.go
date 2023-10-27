@@ -1191,3 +1191,19 @@ func TestPageGotoShouldFailWhenExceedingBrowserContextNavigationTimeout(t *testi
 	require.ErrorContains(t, err, "Timeout 5ms exceeded.")
 	require.ErrorContains(t, err, "/empty.html")
 }
+
+func TestShouldCollectStaleHandles(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	page.OnRequest(func(r playwright.Request) {})
+	response, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	for i := 0; i < 1000; i++ {
+		_, _ = page.Evaluate(`async () => {
+			const response = await fetch('/');
+			await response.text();
+	}`)
+	}
+	_, err = response.AllHeaders()
+	require.ErrorContains(t, err, "The object has been collected to prevent unbounded heap growth.")
+}
