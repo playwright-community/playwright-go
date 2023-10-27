@@ -39,7 +39,7 @@ type connection struct {
 	localUtils   *localUtilsImpl
 	tracingCount atomic.Int32
 	abort        chan struct{}
-	closedError  error
+	closedError  atomic.Value
 }
 
 func (c *connection) Start() *Playwright {
@@ -66,9 +66,9 @@ func (c *connection) Stop(errMsg ...string) error {
 
 func (c *connection) cleanup(errMsg ...string) {
 	if len(errMsg) == 0 {
-		c.closedError = errors.New("connection closed")
+		c.closedError.Store(errors.New("connection closed"))
 	} else {
-		c.closedError = errors.New(errMsg[0])
+		c.closedError.Store(errors.New(errMsg[0]))
 	}
 	if c.afterClose != nil {
 		c.afterClose()
@@ -81,7 +81,7 @@ func (c *connection) cleanup(errMsg ...string) {
 }
 
 func (c *connection) Dispatch(msg *message) {
-	if c.closedError != nil {
+	if c.closedError.Load() != nil {
 		return
 	}
 	method := msg.Method
@@ -208,8 +208,8 @@ func (c *connection) replaceGuidsWithChannels(payload interface{}) interface{} {
 }
 
 func (c *connection) sendMessageToServer(object *channelOwner, method string, params interface{}, noReply bool) (*protocolCallback, error) {
-	if c.closedError != nil {
-		return nil, c.closedError
+	if e := c.closedError.Load(); e != nil {
+		return nil, e.(error)
 	}
 	if object.wasCollected {
 		return nil, errors.New("The object has been collected to prevent unbounded heap growth.")
