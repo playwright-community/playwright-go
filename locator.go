@@ -30,7 +30,7 @@ func newLocator(frame *frameImpl, selector string, options ...LocatorLocatorOpti
 		selector += fmt.Sprintf(` >> internal:has-text=%s`, escapeForTextSelector(option.HasText, false))
 	}
 	if option.HasNotText != nil {
-		selector += fmt.Sprintf(` >> internal:has-not-text=%s`, escapeForTextSelector(option.HasText, false))
+		selector += fmt.Sprintf(` >> internal:has-not-text=%s`, escapeForTextSelector(option.HasNotText, false))
 	}
 	if option.Has != nil {
 		has := option.Has.(*locatorImpl)
