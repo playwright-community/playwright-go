@@ -17,7 +17,7 @@ import (
 
 const (
 	playwrightCliVersion = "1.39.0"
-	baseURL              = "https://playwright.azureedge.net/builds/driver"
+	playwrightCDN        = "https://playwright.azureedge.net"
 )
 
 type PlaywrightDriver struct {
@@ -327,6 +327,11 @@ func (d *PlaywrightDriver) getDriverURL() string {
 		} else {
 			platform = "linux"
 		}
+	}
+
+	baseURL := fmt.Sprintf("%s/builds/driver", playwrightCDN)
+	if hostEnv := os.Getenv("PLAYWRIGHT_DOWNLOAD_HOST"); hostEnv != "" {
+		baseURL = fmt.Sprintf("%s/builds/driver", hostEnv)
 	}
 
 	if d.isReleaseVersion() {
