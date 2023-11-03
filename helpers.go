@@ -62,7 +62,7 @@ func transformStructIntoMapIfNeeded(inStruct interface{}) map[string]interface{}
 		for i := 0; i < v.NumField(); i++ {
 			fi := typ.Field(i)
 			// Skip the values when the field is a pointer (like *string) and nil.
-			if !skipFieldSerialization(v.Field(i)) {
+			if fi.IsExported() && !skipFieldSerialization(v.Field(i)) {
 				// We use the JSON struct fields for getting the original names
 				// out of the field.
 				tagv := fi.Tag.Get("json")
@@ -97,10 +97,14 @@ func transformOptions(options ...interface{}) map[string]interface{} {
 		base = make(map[string]interface{})
 		option = options[0]
 	} else if len(options) == 2 {
-		// Case 3: two values are given. The first one needs to be a map and the
-		// second one can be a struct or map. It will be then get merged into the first
+		// Case 3: two values are given. The first one needs to be transformed
+		// to a map, the sencond one will be then get merged into the first
 		// base map.
-		base = transformStructIntoMapIfNeeded(options[0])
+		if reflect.ValueOf(options[0]).Kind() != reflect.Map {
+			base = transformOptions(options[0])
+		} else {
+			base = transformStructIntoMapIfNeeded(options[0])
+		}
 		option = options[1]
 	}
 	v := reflect.ValueOf(option)

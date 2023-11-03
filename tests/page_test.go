@@ -97,6 +97,7 @@ func TestPageScreenshotWithMask(t *testing.T) {
 		Mask: []playwright.Locator{
 			sensElem,
 		},
+		MaskColor: playwright.String("red"),
 	})
 	require.NoError(t, err)
 	require.True(t, filetype.IsImage(screenshot2))
