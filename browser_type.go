@@ -23,7 +23,7 @@ func (b *browserTypeImpl) Launch(options ...BrowserTypeLaunchOptions) (Browser, 
 		overrides["env"] = serializeMapToNameAndValue(options[0].Env)
 		options[0].Env = nil
 	}
-	channel, err := b.channel.Send("launch", overrides, options)
+	channel, err := b.channel.Send("launch", options, overrides)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
@@ -79,7 +79,7 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 			options[0].RecordHarOmitContent = nil
 		}
 	}
-	channel, err := b.channel.Send("launchPersistentContext", overrides, options)
+	channel, err := b.channel.Send("launchPersistentContext", options, overrides)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
@@ -92,7 +92,7 @@ func (b *browserTypeImpl) Connect(wsEndpoint string, options ...BrowserTypeConne
 		"wsEndpoint": wsEndpoint,
 	}
 	localUtils := b.connection.LocalUtils()
-	pipe, err := localUtils.channel.SendReturnAsDict("connect", overrides, options)
+	pipe, err := localUtils.channel.SendReturnAsDict("connect", options, overrides)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +138,7 @@ func (b *browserTypeImpl) ConnectOverCDP(endpointURL string, options ...BrowserT
 			options[0].Headers = nil
 		}
 	}
-	response, err := b.channel.SendReturnAsDict("connectOverCDP", overrides, options)
+	response, err := b.channel.SendReturnAsDict("connectOverCDP", options, overrides)
 	if err != nil {
 		return nil, err
 	}

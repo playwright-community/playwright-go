@@ -76,7 +76,7 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 		options[0].RecordHarContent = nil
 		options[0].RecordHarOmitContent = nil
 	}
-	channel, err := b.channel.Send("newContext", overrides, options)
+	channel, err := b.channel.Send("newContext", options, overrides)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}

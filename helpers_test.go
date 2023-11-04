@@ -10,9 +10,10 @@ type testOptionsJSONSerialization struct {
 	StringPointer  *string `json:"stringPointer"`
 	NormalString   string  `json:"normalString"`
 	WithoutJSONTag string
-	WithJSONTag    string  `json:"withJSONTag"`
-	SkipNilPtrs    *string `json:"skipNilPtrs"`
-	SkipMe         *int    `json:"skipMe"`
+	WithJSONTag    string   `json:"withJSONTag"`
+	OverrideMe     []string `json:"overrideMe"`
+	SkipNilPtrs    *string  `json:"skipNilPtrs"`
+	SkipMe         *int     `json:"skipMe"`
 }
 
 func TestTransformOptions(t *testing.T) {
@@ -22,17 +23,18 @@ func TestTransformOptions(t *testing.T) {
 		NormalString:   "2",
 		WithoutJSONTag: "3",
 		WithJSONTag:    "4",
+		OverrideMe:     []string{"5"},
 	}
 	var nilStrPtr *string
 	testCases := []struct {
-		name           string
-		baseMap        map[string]interface{}
-		optionalStruct interface{}
-		expected       interface{}
+		name         string
+		firstOption  interface{}
+		secondOption interface{}
+		expected     interface{}
 	}{
 		{
 			name: "No options supplied",
-			baseMap: map[string]interface{}{
+			firstOption: map[string]interface{}{
 				"1234": nilStrPtr,
 				"foo":  "bar",
 			},
@@ -42,44 +44,60 @@ func TestTransformOptions(t *testing.T) {
 		},
 		{
 			name: "Options are nil",
-			baseMap: map[string]interface{}{
+			firstOption: map[string]interface{}{
 				"foo": "bar",
 			},
-			optionalStruct: nil,
+			secondOption: nil,
 			expected: map[string]interface{}{
 				"foo": "bar",
 			},
 		},
 		{
 			name: "JSON serialization works",
-			baseMap: map[string]interface{}{
-				"foo": "bar",
+			firstOption: map[string]interface{}{
+				"foo":           "bar",
+				"stringPointer": 1,
 			},
-			optionalStruct: structVar,
+			secondOption: structVar,
 			expected: map[string]interface{}{
 				"foo":            "bar",
 				"stringPointer":  String("1"),
 				"normalString":   "2",
 				"WithoutJSONTag": "3",
 				"withJSONTag":    "4",
+				"overrideMe":     []interface{}{"5"},
 			},
 		},
 		{
 			name: "Second overwrites the first one",
-			baseMap: map[string]interface{}{
+			firstOption: map[string]interface{}{
 				"foo": "1",
 			},
-			optionalStruct: map[string]interface{}{
+			secondOption: map[string]interface{}{
 				"foo": "2",
 			},
 			expected: map[string]interface{}{
 				"foo": "2",
 			},
 		},
+		{
+			name:        "Second overwrites the first one's value in different type",
+			firstOption: structVar,
+			secondOption: map[string]interface{}{
+				"overrideMe": "5",
+			},
+			expected: map[string]interface{}{
+				"stringPointer":  String("1"),
+				"normalString":   "2",
+				"WithoutJSONTag": "3",
+				"withJSONTag":    "4",
+				"overrideMe":     "5",
+			},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			require.Equal(t, tc.expected, transformOptions(tc.baseMap, tc.optionalStruct))
+			require.Equal(t, tc.expected, transformOptions(tc.firstOption, tc.secondOption))
 		})
 	}
 }

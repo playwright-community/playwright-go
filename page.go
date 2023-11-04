@@ -337,7 +337,6 @@ func (p *pageImpl) Screenshot(options ...PageScreenshotOptions) ([]byte, error) 
 				}
 			}
 			overrides["mask"] = masks
-			options[0].Mask = nil
 		}
 	}
 	data, err := p.channel.Send("screenshot", options, overrides)
@@ -358,7 +357,7 @@ func (p *pageImpl) Screenshot(options ...PageScreenshotOptions) ([]byte, error) 
 
 func (p *pageImpl) PDF(options ...PagePdfOptions) ([]byte, error) {
 	var path *string
-	if len(options) > 0 {
+	if len(options) == 1 {
 		path = options[0].Path
 	}
 	data, err := p.channel.Send("pdf", options)
