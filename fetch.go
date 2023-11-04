@@ -35,7 +35,7 @@ func (r *apiRequestImpl) NewContext(options ...APIRequestNewContextOptions) (API
 		}
 	}
 
-	channel, err := r.channel.Send("newRequest", overrides, options)
+	channel, err := r.channel.Send("newRequest", options, overrides)
 	if err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
@@ -178,7 +178,7 @@ func (r *apiRequestContextImpl) innerFetch(url string, request Request, options 
 		}
 	}
 
-	response, err := r.channel.Send("fetch", overrides, options)
+	response, err := r.channel.Send("fetch", options, overrides)
 	if err != nil {
 		return nil, err
 	}
