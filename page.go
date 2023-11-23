@@ -12,7 +12,7 @@ import (
 type pageImpl struct {
 	channelOwner
 	isClosed        bool
-	closedOrCrashed chan bool
+	closedOrCrashed chan error
 	video           *videoImpl
 	mouse           *mouseImpl
 	keyboard        *keyboardImpl
@@ -26,6 +26,7 @@ type pageImpl struct {
 	viewportSize    *Size
 	ownedContext    BrowserContext
 	bindings        map[string]BindingCallFunction
+	closeReason     *string
 }
 
 func (p *pageImpl) Context() BrowserContext {
@@ -397,7 +398,7 @@ func (p *pageImpl) waiterForEvent(event string, options ...PageWaitForEventOptio
 		predicate = options[0].Predicate
 	}
 	waiter := newWaiter().WithTimeout(timeout)
-	waiter.RejectOnEvent(p, "close", errors.New("page closed"))
+	waiter.RejectOnEvent(p, "close", p.closeErrorWithReason())
 	waiter.RejectOnEvent(p, "crash", errors.New("page crashed"))
 	return waiter.WaitForEvent(p, event, predicate)
 }
@@ -753,16 +754,16 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 	bt.channel.On("worker", func(ev map[string]interface{}) {
 		bt.onWorker(fromChannel(ev["worker"]).(*workerImpl))
 	})
-	bt.closedOrCrashed = make(chan bool, 1)
+	bt.closedOrCrashed = make(chan error, 1)
 	bt.OnClose(func(Page) {
 		select {
-		case bt.closedOrCrashed <- true:
+		case bt.closedOrCrashed <- bt.closeErrorWithReason():
 		default:
 		}
 	})
 	bt.OnCrash(func(Page) {
 		select {
-		case bt.closedOrCrashed <- true:
+		case bt.closedOrCrashed <- ErrTargetClosed:
 		default:
 		}
 	})
@@ -777,6 +778,13 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 	})
 
 	return bt
+}
+
+func (p *pageImpl) closeErrorWithReason() error {
+	if p.closeReason != nil {
+		return targetClosedError(p.closeReason)
+	}
+	return targetClosedError(p.browserContext.effectiveCloseReason())
 }
 
 func (p *pageImpl) onBinding(binding *bindingCallImpl) {
@@ -1041,8 +1049,8 @@ func (p *pageImpl) Pause() (err error) {
 	if err != nil {
 		return err
 	}
-	p.browserContext.SetDefaultNavigationTimeout(*defaultNavigationTimout)
-	p.browserContext.SetDefaultTimeout(*defaultTimeout)
+	p.browserContext.setDefaultNavigationTimeoutImpl(defaultNavigationTimout)
+	p.browserContext.setDefaultTimeoutImpl(defaultTimeout)
 	return
 }
 

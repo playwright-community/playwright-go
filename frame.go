@@ -78,7 +78,7 @@ func (f *frameImpl) Goto(url string, options ...FrameGotoOptions) (Response, err
 		"url": url,
 	}, options)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Frame.Goto %s: %w", url, err)
 	}
 	channelOwner := fromNullableChannel(channel)
 	if channelOwner == nil {
@@ -246,7 +246,7 @@ func (f *frameImpl) setNavigationWaiter(timeout *float64) (*waiter, error) {
 	} else {
 		waiter.WithTimeout(f.page.timeoutSettings.NavigationTimeout())
 	}
-	waiter.RejectOnEvent(f.page, "close", fmt.Errorf("Navigation failed because page was closed!"))
+	waiter.RejectOnEvent(f.page, "close", f.page.closeErrorWithReason())
 	waiter.RejectOnEvent(f.page, "crash", fmt.Errorf("Navigation failed because page crashed!"))
 	waiter.RejectOnEvent(f.page, "framedetached", fmt.Errorf("Navigating frame was detached!"), func(payload interface{}) bool {
 		frame, ok := payload.(*frameImpl)
@@ -455,7 +455,7 @@ func (f *frameImpl) Hover(selector string, options ...FrameHoverOptions) error {
 func (f *frameImpl) SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error {
 	_, err := f.channel.Send("setInputFiles", map[string]interface{}{
 		"selector": selector,
-		"files":    normalizeFilePayloads(files),
+		"payloads": normalizeFilePayloads(files),
 	}, options)
 	return err
 }

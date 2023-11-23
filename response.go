@@ -3,7 +3,6 @@ package playwright
 import (
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 )
 
 type responseImpl struct {
@@ -40,8 +39,8 @@ func (r *responseImpl) Headers() map[string]string {
 
 func (r *responseImpl) Finished() error {
 	select {
-	case <-r.request.targetClosed():
-		return errors.New("Target closed")
+	case err := <-r.request.targetClosed():
+		return err
 	case err := <-r.finished:
 		return err
 	}

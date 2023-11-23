@@ -490,7 +490,7 @@ func TestBrowserContextCloseShouldAbortWaitForEvent(t *testing.T) {
 	_, err := context.ExpectPage(func() error {
 		return context.Close()
 	})
-	require.ErrorContains(t, err, "context closed")
+	require.ErrorIs(t, err, playwright.ErrTargetClosed)
 }
 
 func TestBrowserContextCloseShouldBeCallableTwice(t *testing.T) {

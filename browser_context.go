@@ -25,10 +25,15 @@ type browserContextImpl struct {
 	request           *apiRequestContextImpl
 	harRecorders      map[string]harRecordingMetadata
 	closed            chan struct{}
+	closeReason       *string
 }
 
 func (b *browserContextImpl) SetDefaultNavigationTimeout(timeout float64) {
-	b.timeoutSettings.SetDefaultNavigationTimeout(&timeout)
+	b.setDefaultNavigationTimeoutImpl(&timeout)
+}
+
+func (b *browserContextImpl) setDefaultNavigationTimeoutImpl(timeout *float64) {
+	b.timeoutSettings.SetDefaultNavigationTimeout(timeout)
 	b.channel.SendNoReply("setDefaultNavigationTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
 	})
@@ -36,6 +41,13 @@ func (b *browserContextImpl) SetDefaultNavigationTimeout(timeout float64) {
 
 func (b *browserContextImpl) SetDefaultTimeout(timeout float64) {
 	b.timeoutSettings.SetDefaultTimeout(&timeout)
+	b.channel.SendNoReply("setDefaultTimeoutNoReply", map[string]interface{}{
+		"timeout": timeout,
+	})
+}
+
+func (b *browserContextImpl) setDefaultTimeoutImpl(timeout *float64) {
+	b.timeoutSettings.SetDefaultTimeout(timeout)
 	b.channel.SendNoReply("setDefaultTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
 	})
@@ -260,7 +272,7 @@ func (b *browserContextImpl) waiterForEvent(event string, options ...BrowserCont
 		predicate = options[0].Predicate
 	}
 	waiter := newWaiter().WithTimeout(timeout)
-	waiter.RejectOnEvent(b, "close", errors.New("context closed"))
+	waiter.RejectOnEvent(b, "close", ErrTargetClosed)
 	return waiter.WaitForEvent(b, event, predicate)
 }
 
@@ -305,9 +317,12 @@ func (b *browserContextImpl) ExpectPage(cb func() error, options ...BrowserConte
 	return ret.(Page), nil
 }
 
-func (b *browserContextImpl) Close() error {
+func (b *browserContextImpl) Close(options ...BrowserContextCloseOptions) error {
 	if b.isClosedOrClosing {
 		return nil
+	}
+	if len(options) == 1 {
+		b.closeReason = options[0].Reason
 	}
 	b.Lock()
 	b.isClosedOrClosing = true
@@ -351,7 +366,9 @@ func (b *browserContextImpl) Close() error {
 		return err
 	}
 
-	_, err = b.channel.Send("close")
+	_, err = b.channel.Send("close", map[string]interface{}{
+		"reason": b.closeReason,
+	})
 	<-b.closed
 	return err
 }
@@ -581,6 +598,18 @@ func (b *browserContextImpl) OnResponse(fn func(Response)) {
 
 func (b *browserContextImpl) OnWebError(fn func(WebError)) {
 	b.On("weberror", fn)
+}
+
+func (b *browserContextImpl) effectiveCloseReason() *string {
+	b.Lock()
+	defer b.Unlock()
+	if b.closeReason != nil {
+		return b.closeReason
+	}
+	if b.browser != nil {
+		return b.browser.closeReason
+	}
+	return nil
 }
 
 func newBrowserContext(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *browserContextImpl {

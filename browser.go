@@ -15,6 +15,7 @@ type browserImpl struct {
 	contexts                     []BrowserContext
 	browserType                  BrowserType
 	chromiumTracingPath          *string
+	closeReason                  *string
 }
 
 func (b *browserImpl) BrowserType() BrowserType {
@@ -121,19 +122,29 @@ func (b *browserImpl) Contexts() []BrowserContext {
 	return b.contexts
 }
 
-func (b *browserImpl) Close() error {
-	if b.isClosedOrClosing {
-		return nil
+func (b *browserImpl) Close(options ...BrowserCloseOptions) (err error) {
+	if len(options) == 1 {
+		b.closeReason = options[0].Reason
 	}
-	b.Lock()
-	b.isClosedOrClosing = true
-	b.Unlock()
-	_, err := b.channel.Send("close")
-	if err != nil && !isSafeCloseError(err) {
-		return fmt.Errorf("close browser failed: %w", err)
-	}
+	// if b.isClosedOrClosing {
+	// 	return nil
+	// }
+	// b.Lock()
+	// b.isClosedOrClosing = true
+	// b.Unlock()
+	// _, err := b.channel.Send("close")
+
 	if b.shouldCloseConnectionOnClose {
-		return b.connection.Stop(errMsgBrowserClosed)
+		err = b.connection.Stop()
+	} else if b.closeReason != nil {
+		_, err = b.channel.Send("close", map[string]interface{}{
+			"reason": b.closeReason,
+		})
+	} else {
+		_, err = b.channel.Send("close")
+	}
+	if err != nil && !isTargetClosedError(err) {
+		return fmt.Errorf("close browser failed: %w", err)
 	}
 	return nil
 }

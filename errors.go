@@ -1,6 +1,10 @@
 package playwright
 
-import "strings"
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
 
 // Error represents a Playwright error
 type Error struct {
@@ -27,23 +31,44 @@ func (e *Error) Is(target error) bool {
 	return e.Message == err.Message
 }
 
+var (
+	ErrPlaywright             = errors.New("playwright")
+	ErrTargetClosed           = errors.New("target closed")
+	ErrBrowserClosed          = errors.New("Browser has been closed")
+	ErrBrowserOrContextClosed = errors.New("Target page, context or browser has been closed")
+)
+
 // TimeoutError represents a Playwright TimeoutError
 var TimeoutError = &Error{
 	Name: "TimeoutError",
 }
 
 func parseError(err Error) error {
-	return &Error{
+	return fmt.Errorf("%w: %w", ErrPlaywright, &Error{
 		Name:    err.Name,
 		Message: err.Message,
 		Stack:   err.Stack,
-	}
+	})
 }
 
 const (
 	errMsgBrowserClosed          = "Browser has been closed"
 	errMsgBrowserOrContextClosed = "Target page, context or browser has been closed"
 )
+
+func isTargetClosedError(err error) bool {
+	if err == nil {
+		return false
+	}
+	return errors.Is(err, ErrTargetClosed) || errors.Is(err, ErrBrowserClosed) || errors.Is(err, ErrBrowserOrContextClosed)
+}
+
+func targetClosedError(reason *string) error {
+	if reason == nil {
+		return ErrTargetClosed
+	}
+	return fmt.Errorf("%w: %s", ErrTargetClosed, *reason)
+}
 
 func isSafeCloseError(err error) bool {
 	if err == nil {

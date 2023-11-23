@@ -168,7 +168,7 @@ func (e *elementHandleImpl) ScrollIntoViewIfNeeded(options ...ElementHandleScrol
 
 func (e *elementHandleImpl) SetInputFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error {
 	_, err := e.channel.Send("setInputFiles", map[string]interface{}{
-		"files": normalizeFilePayloads(files),
+		"payloads": normalizeFilePayloads(files),
 	}, options)
 	return err
 }
