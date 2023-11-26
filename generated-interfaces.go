@@ -931,7 +931,7 @@ type ElementHandle interface {
 	//
 	// [input element]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
-	SetInputFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error
+	SetInputFiles(files interface{}, options ...ElementHandleSetInputFilesOptions) error
 
 	// This method taps the element by performing the following steps:
 	//  1. Wait for [actionability] checks on the element, unless “force” option is set.
@@ -1024,7 +1024,7 @@ type FileChooser interface {
 
 	// Sets the value of the file input this chooser is associated with. If some of the `filePaths` are relative paths,
 	// then they are resolved relative to the current working directory. For empty array, clears the selected files.
-	SetFiles(files []InputFile, options ...FileChooserSetFilesOptions) error
+	SetFiles(files interface{}, options ...FileChooserSetFilesOptions) error
 }
 
 // At every point of time, page exposes its current frame tree via the [Page.MainFrame] and [Frame.ChildFrames]
@@ -1594,7 +1594,7 @@ type Frame interface {
 	// [input element]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
 	// [locators]: https://playwright.dev/docs/locators
-	SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error
+	SetInputFiles(selector string, files interface{}, options ...FrameSetInputFilesOptions) error
 
 	// This method taps an element matching “selector” by performing the following steps:
 	//  1. Find an element matching “selector”. If there is none, wait until a matching element is attached to the DOM.
@@ -2532,7 +2532,7 @@ type Locator interface {
 	//
 	// [input element]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
-	SetInputFiles(files []InputFile, options ...LocatorSetInputFilesOptions) error
+	SetInputFiles(files interface{}, options ...LocatorSetInputFilesOptions) error
 
 	// Perform a tap gesture on the element matching the locator.
 	//
@@ -3550,7 +3550,7 @@ type Page interface {
 	// [input element]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
 	// [locators]: https://playwright.dev/docs/locators
-	SetInputFiles(selector string, files []InputFile, options ...PageSetInputFilesOptions) error
+	SetInputFiles(selector string, files interface{}, options ...PageSetInputFilesOptions) error
 
 	// In the case of multiple pages in a single browser, each page can have its own viewport size. However,
 	// [Browser.NewContext] allows to set viewport size (and more) for all pages in the context at once.

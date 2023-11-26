@@ -1417,7 +1417,7 @@ index 293b415c4..1188b7f2d 100644
  Firefox user preferences. Learn more about the Firefox user preferences at
 diff --git a/utils/doclint/generateGoApi.js b/utils/doclint/generateGoApi.js
 new file mode 100644
-index 000000000..b16989445
+index 000000000..3b623a56b
 --- /dev/null
 +++ b/utils/doclint/generateGoApi.js
 @@ -0,0 +1,851 @@
@@ -2113,7 +2113,7 @@ index 000000000..b16989445
 +  else if (type.expression === '[string]|[Request]')
 +    return 'interface{}';
 +  else if (type.expression === '[path]|[Array]<[path]>|[Object]|[Array]<[Object]>')
-+    return '[]InputFile';
++    return 'interface{}';
 +
 +  let isNullableEnum = false;
 +  if (type.union) {

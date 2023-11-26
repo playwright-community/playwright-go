@@ -886,7 +886,7 @@ func (p *pageImpl) onClose() {
 	p.Emit("close", p)
 }
 
-func (p *pageImpl) SetInputFiles(selector string, files []InputFile, options ...PageSetInputFilesOptions) error {
+func (p *pageImpl) SetInputFiles(selector string, files interface{}, options ...PageSetInputFilesOptions) error {
 	if len(options) == 1 {
 		return p.mainFrame.SetInputFiles(selector, files, FrameSetInputFilesOptions(options[0]))
 	}

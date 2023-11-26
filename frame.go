@@ -452,11 +452,13 @@ func (f *frameImpl) Hover(selector string, options ...FrameHoverOptions) error {
 	return err
 }
 
-func (f *frameImpl) SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error {
-	_, err := f.channel.Send("setInputFiles", map[string]interface{}{
-		"selector": selector,
-		"payloads": normalizeFilePayloads(files),
-	}, options)
+func (f *frameImpl) SetInputFiles(selector string, files interface{}, options ...FrameSetInputFilesOptions) error {
+	params, err := convertInputFiles(files, f.page.browserContext)
+	if err != nil {
+		return err
+	}
+	params.Selector = &selector
+	_, err = f.channel.Send("setInputFiles", params, options)
 	return err
 }
 
