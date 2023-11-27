@@ -18,7 +18,7 @@ func (a *artifactImpl) PathAfterFinished() (string, error) {
 		return "", errors.New("Path is not available when connecting remotely. Use SaveAs() to save a local copy")
 	}
 	path, err := a.channel.Send("pathAfterFinished")
-	if path == nil {
+	if path == nil { // < v1.40.0
 		return "", err
 	}
 	return path.(string), err
@@ -63,7 +63,7 @@ func (a *artifactImpl) ReadIntoBuffer() ([]byte, error) {
 		return nil, err
 	}
 	stream := fromNullableChannel(streamChannel)
-	if stream == nil {
+	if stream == nil { // < v1.40.0
 		return nil, nil
 	}
 	return stream.(*streamImpl).ReadAll()
