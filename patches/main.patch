@@ -518,7 +518,7 @@ index 336ba55bd..42888ce06 100644
    * alias-csharp: RunAndWaitForNavigation
  - returns: <[null]|[Response]>
 diff --git a/docs/src/api/class-locatorassertions.md b/docs/src/api/class-locatorassertions.md
-index 20e7c3f0f..14a90fcea 100644
+index cf78c6ce9..441cdddf8 100644
 --- a/docs/src/api/class-locatorassertions.md
 +++ b/docs/src/api/class-locatorassertions.md
 @@ -69,7 +69,7 @@ public class ExampleTests : PageTest
@@ -530,7 +530,7 @@ index 20e7c3f0f..14a90fcea 100644
  - returns: <[LocatorAssertions]>
  
  Makes the assertion check for the opposite condition. For example, this code tests that the Locator doesn't contain text `"error"`:
-@@ -1071,7 +1071,7 @@ Expected substring or RegExp or a list of those.
+@@ -1077,7 +1077,7 @@ Expected substring or RegExp or a list of those.
  
  ### param: LocatorAssertions.toContainText.expected
  * since: v1.18
@@ -539,7 +539,7 @@ index 20e7c3f0f..14a90fcea 100644
  - `expected` <[string]|[RegExp]|[Array]<[string]>|[Array]<[RegExp]>|[Array]<[string]|[RegExp]>>
  
  Expected substring or RegExp or a list of those.
-@@ -1271,7 +1271,7 @@ Expected class or RegExp or a list of those.
+@@ -1277,7 +1277,7 @@ Expected class or RegExp or a list of those.
  
  ### param: LocatorAssertions.toHaveClass.expected
  * since: v1.18
@@ -548,7 +548,7 @@ index 20e7c3f0f..14a90fcea 100644
  - `expected` <[string]|[RegExp]|[Array]<[string]>|[Array]<[RegExp]>|[Array]<[string]|[RegExp]>>
  
  Expected class or RegExp or a list of those.
-@@ -1745,7 +1745,7 @@ Expected string or RegExp or a list of those.
+@@ -1751,7 +1751,7 @@ Expected string or RegExp or a list of those.
  
  ### param: LocatorAssertions.toHaveText.expected
  * since: v1.18
@@ -557,7 +557,7 @@ index 20e7c3f0f..14a90fcea 100644
  - `expected` <[string]|[RegExp]|[Array]<[string]>|[Array]<[RegExp]>|[Array]<[string]|[RegExp]>>
  
  Expected string or RegExp or a list of those.
-@@ -1882,7 +1882,7 @@ await Expect(locator).ToHaveValuesAsync(new Regex[] { new Regex("R"), new Regex(
+@@ -1888,7 +1888,7 @@ await Expect(locator).ToHaveValuesAsync(new Regex[] { new Regex("R"), new Regex(
  
  ### param: LocatorAssertions.toHaveValues.values
  * since: v1.23
