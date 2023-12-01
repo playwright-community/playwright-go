@@ -10,7 +10,6 @@ import (
 type browserImpl struct {
 	channelOwner
 	isConnected                  bool
-	isClosedOrClosing            bool
 	shouldCloseConnectionOnClose bool
 	contexts                     []BrowserContext
 	browserType                  BrowserType
@@ -126,13 +125,6 @@ func (b *browserImpl) Close(options ...BrowserCloseOptions) (err error) {
 	if len(options) == 1 {
 		b.closeReason = options[0].Reason
 	}
-	// if b.isClosedOrClosing {
-	// 	return nil
-	// }
-	// b.Lock()
-	// b.isClosedOrClosing = true
-	// b.Unlock()
-	// _, err := b.channel.Send("close")
 
 	if b.shouldCloseConnectionOnClose {
 		err = b.connection.Stop()
@@ -200,7 +192,6 @@ func (b *browserImpl) StopTracing() ([]byte, error) {
 
 func (b *browserImpl) onClose() {
 	b.Lock()
-	b.isClosedOrClosing = true
 	if b.isConnected {
 		b.isConnected = false
 		b.Unlock()
