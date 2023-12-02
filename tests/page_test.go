@@ -1,6 +1,7 @@
 package playwright_test
 
 import (
+	"errors"
 	"fmt"
 	"math/big"
 	"net/http"
@@ -49,7 +50,7 @@ func TestPageSetContentShouldRespectDefaultNavigationTimeout(t *testing.T) {
 	require.NoError(t, page.Route(imgPath, func(r playwright.Route) {}))
 
 	err := page.SetContent(fmt.Sprintf(`<img src="%s"></img>`, server.PREFIX+imgPath))
-	require.ErrorIs(t, err, playwright.TimeoutError)
+	require.ErrorIs(t, err, playwright.ErrTimeout)
 	require.ErrorContains(t, err, "Timeout 5ms exceeded.")
 }
 
@@ -577,7 +578,7 @@ func TestPageExpectSelectorTimeout(t *testing.T) {
 	err = page.Locator("foobar").Click(playwright.LocatorClickOptions{
 		Timeout: playwright.Float(500),
 	})
-	require.ErrorIs(t, err, playwright.TimeoutError)
+	require.ErrorIs(t, err, playwright.ErrTimeout)
 }
 
 func TestPageType(t *testing.T) {
@@ -831,12 +832,13 @@ func TestPagePageError(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	url := server.PREFIX + "/error.html"
-	errInterface, err := page.ExpectEvent("pageerror", func() error {
+	errAny, err := page.ExpectEvent("pageerror", func() error {
 		_, err := page.Goto(url)
 		return err
 	})
 	require.NoError(t, err)
-	pageError := errInterface.(*playwright.Error)
+	pageError := &playwright.Error{}
+	require.True(t, errors.As(errAny.(error), &pageError))
 	require.Equal(t, "Fancy error!", pageError.Message)
 	require.Equal(t, "Error", pageError.Name)
 
@@ -1027,7 +1029,7 @@ func TestPageExpectRequestTimeout(t *testing.T) {
 		}, playwright.PageExpectRequestOptions{Timeout: playwright.Float(1000)})
 
 		require.Nil(t, request)
-		require.EqualError(t, err, "Timeout 1000.00ms exceeded.")
+		require.ErrorContains(t, err, "Timeout 1000.00ms exceeded.")
 	})
 
 	t.Run("should use default timeout", func(t *testing.T) {
@@ -1042,7 +1044,7 @@ func TestPageExpectRequestTimeout(t *testing.T) {
 		})
 
 		require.Nil(t, request)
-		require.EqualError(t, err, "Timeout 500.00ms exceeded.")
+		require.ErrorContains(t, err, "Timeout 500.00ms exceeded.")
 	})
 }
 
@@ -1082,7 +1084,7 @@ func TestPageExpectResponse(t *testing.T) {
 		}, playwright.PageExpectResponseOptions{Timeout: playwright.Float(1000)})
 
 		require.Nil(t, response)
-		require.EqualError(t, err, "Timeout 1000.00ms exceeded.")
+		require.ErrorContains(t, err, "Timeout 1000.00ms exceeded.")
 	})
 
 	t.Run("should use default timeout", func(t *testing.T) {
@@ -1096,7 +1098,7 @@ func TestPageExpectResponse(t *testing.T) {
 		response, err := page.ExpectResponse("**/one-style.html", nil)
 
 		require.Nil(t, response)
-		require.EqualError(t, err, "Timeout 500.00ms exceeded.")
+		require.ErrorContains(t, err, "Timeout 500.00ms exceeded.")
 	})
 
 	t.Run("should use context default timeout", func(t *testing.T) {
@@ -1110,7 +1112,7 @@ func TestPageExpectResponse(t *testing.T) {
 		response, err := page.ExpectResponse("**/one-style.html", nil)
 
 		require.Nil(t, response)
-		require.EqualError(t, err, "Timeout 1000.00ms exceeded.")
+		require.ErrorContains(t, err, "Timeout 1000.00ms exceeded.")
 	})
 }
 
@@ -1131,7 +1133,7 @@ func TestPageWaitForURL(t *testing.T) {
 		defer AfterEach(t)
 		_, err := page.Goto(server.EMPTY_PAGE)
 		require.NoError(t, err)
-		require.Error(t, page.WaitForURL("**/grid.html", playwright.PageWaitForURLOptions{
+		require.ErrorContains(t, page.WaitForURL("**/grid.html", playwright.PageWaitForURLOptions{
 			Timeout: playwright.Float(1000),
 		}), "Timeout 1000.00ms exceeded.")
 	})
@@ -1188,7 +1190,7 @@ func TestPageGotoShouldFailWhenExceedingBrowserContextNavigationTimeout(t *testi
 	context.SetDefaultNavigationTimeout(5)
 	defer context.SetDefaultNavigationTimeout(30 * 1000) // reset
 	_, err := page.Goto(server.EMPTY_PAGE)
-	require.ErrorIs(t, err, playwright.TimeoutError)
+	require.ErrorIs(t, err, playwright.ErrTimeout)
 	require.ErrorContains(t, err, "Timeout 5ms exceeded.")
 	require.ErrorContains(t, err, "/empty.html")
 }

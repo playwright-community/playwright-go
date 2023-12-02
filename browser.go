@@ -2,6 +2,7 @@ package playwright
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -135,7 +136,7 @@ func (b *browserImpl) Close(options ...BrowserCloseOptions) (err error) {
 	} else {
 		_, err = b.channel.Send("close")
 	}
-	if err != nil && !isTargetClosedError(err) {
+	if err != nil && !errors.Is(err, ErrTargetClosed) {
 		return fmt.Errorf("close browser failed: %w", err)
 	}
 	return nil

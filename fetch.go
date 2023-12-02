@@ -306,7 +306,7 @@ func (r *apiResponseImpl) Body() ([]byte, error) {
 		},
 	})
 	if err != nil {
-		if isSafeCloseError(err) {
+		if errors.Is(err, ErrTargetClosed) {
 			return nil, errors.New("response has been disposed")
 		}
 		return nil, err

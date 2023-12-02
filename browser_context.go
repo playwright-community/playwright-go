@@ -676,8 +676,9 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 	})
 	bt.channel.On(
 		"pageError", func(ev map[string]interface{}) {
-			err := &Error{}
-			remapMapToStruct(ev["error"].(map[string]interface{})["error"], err)
+			pwErr := &Error{}
+			remapMapToStruct(ev["error"].(map[string]interface{})["error"], pwErr)
+			err := parseError(*pwErr)
 			page := fromNullableChannel(ev["page"])
 			if page != nil {
 				bt.Emit("weberror", newWebError(page.(*pageImpl), err))

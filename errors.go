@@ -3,7 +3,17 @@ package playwright
 import (
 	"errors"
 	"fmt"
-	"strings"
+)
+
+var (
+	// ErrPlaywright wraps all Playwright errors.
+	//   - Use errors.Is to check if the error is a Playwright error.
+	//   - Use errors.As to cast an error to [Error] if you want to access "Stack".
+	ErrPlaywright = errors.New("playwright")
+	// ErrTargetClosed usually wraps a reason.
+	ErrTargetClosed = errors.New("target closed")
+	// ErrTimeout wraps timeout errors. It can be either Playwright TimeoutError or client timeout.
+	ErrTimeout = errors.New("timeout")
 )
 
 // Error represents a Playwright error
@@ -31,36 +41,11 @@ func (e *Error) Is(target error) bool {
 	return e.Message == err.Message
 }
 
-var (
-	ErrPlaywright             = errors.New("playwright")
-	ErrTargetClosed           = errors.New("target closed")
-	ErrBrowserClosed          = errors.New("Browser has been closed")
-	ErrBrowserOrContextClosed = errors.New("Target page, context or browser has been closed")
-)
-
-// TimeoutError represents a Playwright TimeoutError
-var TimeoutError = &Error{
-	Name: "TimeoutError",
-}
-
 func parseError(err Error) error {
-	return fmt.Errorf("%w: %w", ErrPlaywright, &Error{
-		Name:    err.Name,
-		Message: err.Message,
-		Stack:   err.Stack,
-	})
-}
-
-const (
-	errMsgBrowserClosed          = "Browser has been closed"
-	errMsgBrowserOrContextClosed = "Target page, context or browser has been closed"
-)
-
-func isTargetClosedError(err error) bool {
-	if err == nil {
-		return false
+	if err.Name == "TimeoutError" {
+		return fmt.Errorf("%w: %w: %w", ErrPlaywright, ErrTimeout, &err)
 	}
-	return errors.Is(err, ErrTargetClosed) || errors.Is(err, ErrBrowserClosed) || errors.Is(err, ErrBrowserOrContextClosed)
+	return fmt.Errorf("%w: %w", ErrPlaywright, &err)
 }
 
 func targetClosedError(reason *string) error {
@@ -68,11 +53,4 @@ func targetClosedError(reason *string) error {
 		return ErrTargetClosed
 	}
 	return fmt.Errorf("%w: %s", ErrTargetClosed, *reason)
-}
-
-func isSafeCloseError(err error) bool {
-	if err == nil {
-		return false
-	}
-	return strings.HasSuffix(err.Error(), errMsgBrowserClosed) || strings.HasSuffix(err.Error(), errMsgBrowserOrContextClosed)
 }

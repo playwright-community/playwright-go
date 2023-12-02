@@ -38,7 +38,7 @@ func (p *pageImpl) Close(options ...PageCloseOptions) error {
 	if err == nil && p.ownedContext != nil {
 		err = p.ownedContext.Close()
 	}
-	if isSafeCloseError(err) || (len(options) == 1 && options[0].RunBeforeUnload != nil && *(options[0].RunBeforeUnload)) {
+	if errors.Is(err, ErrTargetClosed) || (len(options) == 1 && options[0].RunBeforeUnload != nil && *(options[0].RunBeforeUnload)) {
 		return nil
 	}
 	return err
@@ -1042,8 +1042,7 @@ func (p *pageImpl) Pause() (err error) {
 	p.browserContext.SetDefaultNavigationTimeout(0)
 	p.browserContext.SetDefaultTimeout(0)
 	select {
-	case <-p.closedOrCrashed:
-		err = fmt.Errorf(errMsgBrowserOrContextClosed)
+	case err = <-p.closedOrCrashed:
 	case err = <-p.browserContext.pause():
 	}
 	if err != nil {
@@ -1192,7 +1191,7 @@ func (p *pageImpl) OnLoad(fn func(Page)) {
 	p.On("load", fn)
 }
 
-func (p *pageImpl) OnPageError(fn func(*Error)) {
+func (p *pageImpl) OnPageError(fn func(error)) {
 	p.On("pageerror", fn)
 }
 
