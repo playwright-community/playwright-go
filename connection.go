@@ -3,7 +3,6 @@ package playwright
 import (
 	"errors"
 	"fmt"
-	"log"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -42,17 +41,8 @@ type connection struct {
 	closedError  atomic.Value
 }
 
-func (c *connection) Start() *Playwright {
-	playwright := make(chan *Playwright, 1)
-	go func() {
-		pw, err := c.rootObject.initialize()
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
-		playwright <- pw
-	}()
-	return <-playwright
+func (c *connection) Start() (*Playwright, error) {
+	return c.rootObject.initialize()
 }
 
 func (c *connection) Stop() error {

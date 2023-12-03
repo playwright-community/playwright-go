@@ -120,7 +120,10 @@ func (b *browserTypeImpl) Connect(wsEndpoint string, options ...BrowserTypeConne
 		return nil
 	}
 	jsonPipe.On("message", connection.Dispatch)
-	playwright := connection.Start()
+	playwright, err := connection.Start()
+	if err != nil {
+		return nil, err
+	}
 	playwright.setSelectors(b.playwright.Selectors)
 	browser = fromChannel(playwright.initializer["preLaunchedBrowser"]).(*browserImpl)
 	browser.shouldCloseConnectionOnClose = true
