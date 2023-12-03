@@ -32,8 +32,8 @@ type APIRequestContext interface {
 	Delete(url string, options ...APIRequestContextDeleteOptions) (APIResponse, error)
 
 	// All responses returned by [APIRequestContext.Get] and similar methods are stored in the memory, so that you can
-	// later call [APIResponse.Body]. This method discards all stored responses, and makes [APIResponse.Body] throw
-	// "Response disposed" error.
+	// later call [APIResponse.Body].This method discards all its resources, calling any method on disposed
+	// [APIRequestContext] will throw an exception.
 	Dispose() error
 
 	// Sends HTTP(S) request and returns its response. The method will populate request cookies from the context and
@@ -158,7 +158,7 @@ type Browser interface {
 	// **NOTE** This is similar to force quitting the browser. Therefore, you should call [BrowserContext.Close] on any
 	// [BrowserContext]'s you explicitly created earlier with [Browser.NewContext] **before** calling [Browser.Close].
 	// The [Browser] object itself is considered to be disposed and cannot be used anymore.
-	Close() error
+	Close(options ...BrowserCloseOptions) error
 
 	// Returns an array of all open browser contexts. In a newly created browser, this will return zero browser contexts.
 	Contexts() []BrowserContext
@@ -303,7 +303,7 @@ type BrowserContext interface {
 
 	// Closes the browser context. All the pages that belong to the browser context will be closed.
 	// **NOTE** The default browser context cannot be closed.
-	Close() error
+	Close(options ...BrowserContextCloseOptions) error
 
 	// If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those
 	// URLs are returned.
@@ -604,8 +604,8 @@ type Download interface {
 	// Get the page that the download belongs to.
 	Page() Page
 
-	// Returns path to the downloaded file in case of successful download. The method will wait for the download to finish
-	// if necessary. The method throws when connected remotely.
+	// Returns path to the downloaded file for a successful download, or throws for a failed/canceled download. The method
+	// will wait for the download to finish if necessary. The method throws when connected remotely.
 	// Note that the download's file name is a random GUID, use [Download.SuggestedFilename] to get suggested file name.
 	Path() (string, error)
 
@@ -711,13 +711,16 @@ type ElementHandle interface {
 	// 2. eventInit: Optional event-specific initialization properties.
 	//
 	// [element.Click()]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click
+	// [DeviceMotionEvent]: https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/DeviceMotionEvent
+	// [DeviceOrientationEvent]: https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/DeviceOrientationEvent
 	// [DragEvent]: https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent
+	// [Event]: https://developer.mozilla.org/en-US/docs/Web/API/Event/Event
 	// [FocusEvent]: https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent
 	// [KeyboardEvent]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent
 	// [MouseEvent]: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent
 	// [PointerEvent]: https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent
 	// [TouchEvent]: https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent
-	// [Event]: https://developer.mozilla.org/en-US/docs/Web/API/Event/Event
+	// [WheelEvent]: https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/WheelEvent
 	DispatchEvent(typ string, eventInit ...interface{}) error
 
 	// Returns the return value of “expression”.
@@ -928,7 +931,7 @@ type ElementHandle interface {
 	//
 	// [input element]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
-	SetInputFiles(files []InputFile, options ...ElementHandleSetInputFilesOptions) error
+	SetInputFiles(files interface{}, options ...ElementHandleSetInputFilesOptions) error
 
 	// This method taps the element by performing the following steps:
 	//  1. Wait for [actionability] checks on the element, unless “force” option is set.
@@ -1021,7 +1024,7 @@ type FileChooser interface {
 
 	// Sets the value of the file input this chooser is associated with. If some of the `filePaths` are relative paths,
 	// then they are resolved relative to the current working directory. For empty array, clears the selected files.
-	SetFiles(files []InputFile, options ...FileChooserSetFilesOptions) error
+	SetFiles(files interface{}, options ...FileChooserSetFilesOptions) error
 }
 
 // At every point of time, page exposes its current frame tree via the [Page.MainFrame] and [Frame.ChildFrames]
@@ -1122,13 +1125,16 @@ type Frame interface {
 	// 3. eventInit: Optional event-specific initialization properties.
 	//
 	// [element.Click()]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click
+	// [DeviceMotionEvent]: https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/DeviceMotionEvent
+	// [DeviceOrientationEvent]: https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/DeviceOrientationEvent
 	// [DragEvent]: https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent
+	// [Event]: https://developer.mozilla.org/en-US/docs/Web/API/Event/Event
 	// [FocusEvent]: https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent
 	// [KeyboardEvent]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent
 	// [MouseEvent]: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent
 	// [PointerEvent]: https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent
 	// [TouchEvent]: https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent
-	// [Event]: https://developer.mozilla.org/en-US/docs/Web/API/Event/Event
+	// [WheelEvent]: https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/WheelEvent
 	// [locators]: https://playwright.dev/docs/locators
 	DispatchEvent(selector string, typ string, eventInit interface{}, options ...FrameDispatchEventOptions) error
 
@@ -1588,7 +1594,7 @@ type Frame interface {
 	// [input element]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
 	// [locators]: https://playwright.dev/docs/locators
-	SetInputFiles(selector string, files []InputFile, options ...FrameSetInputFilesOptions) error
+	SetInputFiles(selector string, files interface{}, options ...FrameSetInputFilesOptions) error
 
 	// This method taps an element matching “selector” by performing the following steps:
 	//  1. Find an element matching “selector”. If there is none, wait until a matching element is attached to the DOM.
@@ -2084,26 +2090,32 @@ type Locator interface {
 	// Under the hood, it creates an instance of an event based on the given “type”, initializes it with “eventInit”
 	// properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 	// Since “eventInit” is event-specific, please refer to the events documentation for the lists of initial properties:
+	//  - [DeviceMotionEvent]
+	//  - [DeviceOrientationEvent]
 	//  - [DragEvent]
+	//  - [Event]
 	//  - [FocusEvent]
 	//  - [KeyboardEvent]
 	//  - [MouseEvent]
 	//  - [PointerEvent]
 	//  - [TouchEvent]
-	//  - [Event]
+	//  - [WheelEvent]
 	// You can also specify [JSHandle] as the property value if you want live objects to be passed into the event:
 	//
 	// 1. typ: DOM event type: `"click"`, `"dragstart"`, etc.
 	// 2. eventInit: Optional event-specific initialization properties.
 	//
 	// [element.Click()]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click
+	// [DeviceMotionEvent]: https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/DeviceMotionEvent
+	// [DeviceOrientationEvent]: https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/DeviceOrientationEvent
 	// [DragEvent]: https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent
+	// [Event]: https://developer.mozilla.org/en-US/docs/Web/API/Event/Event
 	// [FocusEvent]: https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent
 	// [KeyboardEvent]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent
 	// [MouseEvent]: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent
 	// [PointerEvent]: https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent
 	// [TouchEvent]: https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent
-	// [Event]: https://developer.mozilla.org/en-US/docs/Web/API/Event/Event
+	// [WheelEvent]: https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/WheelEvent
 	DispatchEvent(typ string, eventInit interface{}, options ...LocatorDispatchEventOptions) error
 
 	// Drag the source element towards the target element and drop it.
@@ -2520,7 +2532,7 @@ type Locator interface {
 	//
 	// [input element]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
-	SetInputFiles(files []InputFile, options ...LocatorSetInputFilesOptions) error
+	SetInputFiles(files interface{}, options ...LocatorSetInputFilesOptions) error
 
 	// Perform a tap gesture on the element matching the locator.
 	//
@@ -2642,6 +2654,11 @@ type LocatorAssertions interface {
 	// Ensures the [Locator] points to an element that contains the given text. You can use regular expressions for the
 	// value as well.
 	//
+	// # Details
+	//
+	// When `expected` parameter is a string, Playwright will normalize whitespaces and line breaks both in the actual
+	// text and in the expected string before matching. When regular expression is used, the actual text is matched as is.
+	//
 	//  expected: Expected substring or RegExp or a list of those.
 	ToContainText(expected interface{}, options ...LocatorAssertionsToContainTextOptions) error
 
@@ -2682,6 +2699,11 @@ type LocatorAssertions interface {
 
 	// Ensures the [Locator] points to an element with the given text. You can use regular expressions for the value as
 	// well.
+	//
+	// # Details
+	//
+	// When `expected` parameter is a string, Playwright will normalize whitespaces and line breaks both in the actual
+	// text and in the expected string before matching. When regular expression is used, the actual text is matched as is.
 	//
 	//  expected: Expected string or RegExp or a list of those.
 	ToHaveText(expected interface{}, options ...LocatorAssertionsToHaveTextOptions) error
@@ -2790,7 +2812,7 @@ type Page interface {
 	OnLoad(fn func(Page))
 
 	// Emitted when an uncaught exception happens within the page.
-	OnPageError(fn func(*Error))
+	OnPageError(fn func(error))
 
 	// Emitted when the page opens a new tab or window. This event is emitted in addition to the [BrowserContext.OnPage],
 	// but only for popups relevant to this page.
@@ -2937,13 +2959,16 @@ type Page interface {
 	// 3. eventInit: Optional event-specific initialization properties.
 	//
 	// [element.Click()]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click
+	// [DeviceMotionEvent]: https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/DeviceMotionEvent
+	// [DeviceOrientationEvent]: https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/DeviceOrientationEvent
 	// [DragEvent]: https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent
+	// [Event]: https://developer.mozilla.org/en-US/docs/Web/API/Event/Event
 	// [FocusEvent]: https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent
 	// [KeyboardEvent]: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent
 	// [MouseEvent]: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent
 	// [PointerEvent]: https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent
 	// [TouchEvent]: https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent
-	// [Event]: https://developer.mozilla.org/en-US/docs/Web/API/Event/Event
+	// [WheelEvent]: https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/WheelEvent
 	// [locators]: https://playwright.dev/docs/locators
 	DispatchEvent(selector string, typ string, eventInit interface{}, options ...PageDispatchEventOptions) error
 
@@ -3525,7 +3550,7 @@ type Page interface {
 	// [input element]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
 	// [locators]: https://playwright.dev/docs/locators
-	SetInputFiles(selector string, files []InputFile, options ...PageSetInputFilesOptions) error
+	SetInputFiles(selector string, files interface{}, options ...PageSetInputFilesOptions) error
 
 	// In the case of multiple pages in a single browser, each page can have its own viewport size. However,
 	// [Browser.NewContext] allows to set viewport size (and more) for all pages in the context at once.

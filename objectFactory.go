@@ -65,7 +65,7 @@ func createObjectFactory(parent *channelOwner, objectType string, guid string, i
 	case "Worker":
 		return newWorker(parent, objectType, guid, initializer)
 	case "WritableStream":
-		return nil
+		return newWritableStream(parent, objectType, guid, initializer)
 	default:
 		panic(objectType)
 	}

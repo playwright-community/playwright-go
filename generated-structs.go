@@ -284,6 +284,10 @@ type NameValue struct {
 	// Value of the header.
 	Value string `json:"value"`
 }
+type BrowserCloseOptions struct {
+	// The reason to be reported to the operations interrupted by the browser closure.
+	Reason *string `json:"reason"`
+}
 type BrowserNewContextOptions struct {
 	// Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
 	AcceptDownloads *bool `json:"acceptDownloads"`
@@ -581,6 +585,10 @@ type Script struct {
 	// Raw script content. Optional.
 	Content *string `json:"content"`
 }
+type BrowserContextCloseOptions struct {
+	// The reason to be reported to the operations interrupted by the context closure.
+	Reason *string `json:"reason"`
+}
 type Cookie struct {
 	Name   string `json:"name"`
 	Value  string `json:"value"`
@@ -798,6 +806,11 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	ExecutablePath *string `json:"executablePath"`
 	// An object containing additional HTTP headers to be sent with every request. Defaults to none.
 	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
+	// Firefox user preferences. Learn more about the Firefox user preferences at
+	// [`about:config`].
+	//
+	// [`about:config`]: https://support.mozilla.org/en-US/kb/about-config-editor-firefox
+	FirefoxUserPrefs map[string]interface{} `json:"firefoxUserPrefs"`
 	// Emulates `forced-colors` media feature, supported values are `active`, `none`. See [Page.EmulateMedia] for
 	// more details. Passing `no-override` resets emulation to system defaults. Defaults to `none`.
 	ForcedColors *ForcedColors `json:"forcedColors"`
@@ -2572,6 +2585,9 @@ type LocatorAssertionsToContainTextOptions struct {
 	UseInnerText *bool `json:"useInnerText"`
 }
 type LocatorAssertionsToHaveAttributeOptions struct {
+	// Whether to perform case-insensitive match. “ignoreCase” option takes precedence over the corresponding regular
+	// expression flag if specified.
+	IgnoreCase *bool `json:"ignoreCase"`
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2723,6 +2739,8 @@ type PageClickOptions struct {
 	Trial *bool `json:"trial"`
 }
 type PageCloseOptions struct {
+	// The reason to be reported to the operations interrupted by the page closure.
+	Reason *string `json:"reason"`
 	// Defaults to `false`. Whether to run the
 	// [before unload] page handlers.
 	//

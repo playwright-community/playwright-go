@@ -83,10 +83,7 @@ func (w *waiter) WaitForEvent(emitter EventEmitter, event string, predicate inte
 		go func() {
 			select {
 			case <-time.After(time.Duration(timeout) * time.Millisecond):
-				err := &Error{
-					Name:    "TimeoutError",
-					Message: fmt.Sprintf("Timeout %.2fms exceeded.", timeout),
-				}
+				err := fmt.Errorf("%w:Timeout %.2fms exceeded.", ErrTimeout, timeout)
 				w.reject(err)
 				return
 			case <-ctx.Done():

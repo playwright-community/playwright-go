@@ -100,7 +100,7 @@ func TestWorkershouldReportErrors(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	errChan := make(chan error, 1)
-	page.OnPageError(func(err *playwright.Error) {
+	page.OnPageError(func(err error) {
 		errChan <- err
 	})
 
@@ -113,7 +113,7 @@ func TestWorkershouldReportErrors(t *testing.T) {
 		"`], {type: 'application/javascript'})))")
 	require.NoError(t, err)
 	pageError := <-errChan
-	require.Contains(t, pageError.Error(), "this is my error")
+	require.ErrorContains(t, pageError, "this is my error")
 }
 
 func TestWorkerShouldClearUponCrossProcessNavigation(t *testing.T) {

@@ -109,7 +109,7 @@ func (b *browserTypeImpl) Connect(wsEndpoint string, options ...BrowserTypeConne
 			context.(*browserContextImpl).onClose()
 		}
 		browser.onClose()
-		connection.cleanup(errMsgBrowserClosed)
+		connection.cleanup()
 	}
 	jsonPipe.On("closed", pipeClosed)
 	connection.onmessage = func(message map[string]interface{}) error {
