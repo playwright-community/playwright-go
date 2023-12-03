@@ -222,6 +222,18 @@ func TestLocatorAssertionsToHaveAttribute(t *testing.T) {
 	require.NoError(t, expect.Locator(input2).Not().ToHaveAttribute("type", regexp.MustCompile("text")))
 }
 
+func TestLocatorAssertionsToHaveAttributeIgnoreCase(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	err := page.SetContent(`<div id=NoDe>Text content</div>`)
+	require.NoError(t, err)
+	locator := page.Locator("#NoDe")
+	require.NoError(t, expect.Locator(locator).ToHaveAttribute("id", "node", playwright.LocatorAssertionsToHaveAttributeOptions{
+		IgnoreCase: playwright.Bool(true),
+	}))
+	require.NoError(t, expect.Locator(locator).Not().ToHaveAttribute("id", "node"))
+}
+
 func TestLocatorAssertionsToHaveClass(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)

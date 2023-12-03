@@ -735,7 +735,7 @@ func (l *locatorImpl) SetChecked(checked bool, options ...LocatorSetCheckedOptio
 	return l.frame.SetChecked(l.selector, checked, opt)
 }
 
-func (l *locatorImpl) SetInputFiles(files []InputFile, options ...LocatorSetInputFilesOptions) error {
+func (l *locatorImpl) SetInputFiles(files interface{}, options ...LocatorSetInputFilesOptions) error {
 	if l.err != nil {
 		return l.err
 	}

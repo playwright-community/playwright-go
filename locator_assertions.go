@@ -204,10 +204,12 @@ func (la *locatorAssertionsImpl) ToContainText(expected interface{}, options ...
 
 func (la *locatorAssertionsImpl) ToHaveAttribute(name string, value interface{}, options ...LocatorAssertionsToHaveAttributeOptions) error {
 	var timeout *float64
+	var ignoreCase *bool
 	if len(options) == 1 {
 		timeout = options[0].Timeout
+		ignoreCase = options[0].IgnoreCase
 	}
-	expectedText := toExpectedTextValues([]interface{}{value}, false, false, nil)
+	expectedText := toExpectedTextValues([]interface{}{value}, false, false, ignoreCase)
 	return la.expect(
 		"to.have.attribute.value",
 		frameExpectOptions{

@@ -117,7 +117,15 @@ func (r *apiRequestContextImpl) innerFetch(url string, request Request, options 
 			case string:
 				headersArray, ok := overrides["headers"].([]map[string]string)
 				if ok && isJsonContentType(headersArray) {
-					overrides["jsonData"] = v
+					if json.Valid([]byte(v)) {
+						overrides["jsonData"] = v
+					} else {
+						data, err := json.Marshal(v)
+						if err != nil {
+							return nil, fmt.Errorf("could not marshal data: %w", err)
+						}
+						overrides["jsonData"] = string(data)
+					}
 				} else {
 					overrides["postData"] = base64.StdEncoding.EncodeToString([]byte(v))
 				}
@@ -298,7 +306,7 @@ func (r *apiResponseImpl) Body() ([]byte, error) {
 		},
 	})
 	if err != nil {
-		if isSafeCloseError(err) {
+		if errors.Is(err, ErrTargetClosed) {
 			return nil, errors.New("response has been disposed")
 		}
 		return nil, err

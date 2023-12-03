@@ -3,6 +3,7 @@ package playwright_test
 import (
 	"errors"
 	"fmt"
+	"math"
 	"testing"
 	"time"
 
@@ -258,5 +259,50 @@ func TestBrowserTypeConnectOverCDPTwice(t *testing.T) {
 
 	require.Len(t, browser1.Contexts()[0].Pages(), 2)
 	require.Len(t, browser2.Contexts()[0].Pages(), 2)
+}
 
+func TestSetInputFilesShouldPreserveLastModifiedTimestamp(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	remoteServer, err := newRemoteServer()
+	require.NoError(t, err)
+	defer remoteServer.Close()
+
+	browser, err := browserType.Connect(remoteServer.url)
+	require.NoError(t, err)
+	require.NotNil(t, browser)
+	browser_context, err := browser.NewContext()
+	require.NoError(t, err)
+	page, err := browser_context.NewPage()
+	require.NoError(t, err)
+	require.NoError(t, page.SetContent(`<input type=file multiple=true/>`))
+	input := page.Locator("input")
+	filenames := []string{
+		"file-to-upload.txt",
+		"file-to-upload-2.txt",
+	}
+	files := make([]string, len(filenames))
+	for i, filename := range filenames {
+		files[i] = Asset(filename)
+	}
+	require.NoError(t, input.SetInputFiles(files))
+	result, err := input.Evaluate(`input => [...input.files].map(f => f.name)`, nil)
+	require.NoError(t, err)
+	names, ok := result.([]interface{})
+	require.True(t, ok)
+	for i, name := range names {
+		require.Equal(t, filenames[i], name.(string))
+	}
+
+	results, err := input.Evaluate(`input => [...input.files].map(f => f.lastModified)`, nil)
+	require.NoError(t, err)
+	timestamps, ok := results.([]interface{})
+	require.True(t, ok)
+	for i, timestamp := range timestamps {
+		expected, err := getFileLastModifiedTimeMs(files[i])
+		require.NoError(t, err)
+		// On Linux browser sometimes reduces the timestamp by 1ms: 1696272058110.0715  -> 1696272058109 or even
+		// rounds it to seconds in WebKit: 1696272058110 -> 1696272058000.
+		require.Less(t, math.Abs(float64(expected-int64(timestamp.(int)))), 1000.0)
+	}
 }

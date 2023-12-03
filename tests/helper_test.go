@@ -360,3 +360,14 @@ func readFromZip(zipFile string, fileName string) ([]byte, error) {
 
 	return nil, fmt.Errorf("file %s not found in %s", fileName, zipFile)
 }
+
+func getFileLastModifiedTimeMs(path string) (int64, error) {
+	info, err := os.Stat(path)
+	if err != nil {
+		return 0, err
+	}
+	if info.IsDir() {
+		return 0, fmt.Errorf("%s is a directory", path)
+	}
+	return info.ModTime().UnixMilli(), nil
+}

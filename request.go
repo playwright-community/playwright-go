@@ -215,14 +215,14 @@ func (r *requestImpl) applyFallbackOverrides(options RouteFallbackOptions) {
 	}
 }
 
-func (r *requestImpl) targetClosed() <-chan bool {
+func (r *requestImpl) targetClosed() <-chan error {
 	channel := fromNullableChannel(r.initializer["frame"])
 	if channel == nil {
-		return make(<-chan bool, 1)
+		return make(<-chan error, 1)
 	}
 	frame, ok := channel.(*frameImpl)
 	if !ok || frame.page == nil {
-		return make(<-chan bool, 1)
+		return make(<-chan error, 1)
 	}
 	return frame.page.closedOrCrashed
 }

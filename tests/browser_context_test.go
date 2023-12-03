@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"runtime"
+	"sync/atomic"
 	"testing"
 
 	"github.com/playwright-community/playwright-go"
@@ -490,20 +491,20 @@ func TestBrowserContextCloseShouldAbortWaitForEvent(t *testing.T) {
 	_, err := context.ExpectPage(func() error {
 		return context.Close()
 	})
-	require.ErrorContains(t, err, "context closed")
+	require.ErrorIs(t, err, playwright.ErrTargetClosed)
 }
 
 func TestBrowserContextCloseShouldBeCallableTwice(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	closed := false
+	countClose := atomic.Int32{}
 	context.OnClose(func(bc playwright.BrowserContext) {
-		closed = true
+		countClose.Add(1)
 	})
 	require.NoError(t, context.Close())
-	require.True(t, closed)
 	require.NoError(t, context.Close())
 	require.NoError(t, context.Close())
+	require.Equal(t, int32(1), countClose.Load())
 }
 
 func TestPageErrorEventShouldWork(t *testing.T) {
@@ -517,5 +518,5 @@ func TestPageErrorEventShouldWork(t *testing.T) {
 	weberror, ok := ret.(playwright.WebError)
 	require.True(t, ok)
 	require.Equal(t, page, weberror.Page())
-	require.Contains(t, weberror.Error().(*playwright.Error).Stack, "boom")
+	require.ErrorContains(t, weberror.Error(), "boom")
 }

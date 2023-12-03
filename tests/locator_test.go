@@ -492,6 +492,46 @@ func TestLocatorsShouldUploadFile(t *testing.T) {
 	_, err := page.Goto(fmt.Sprintf("%s/input/fileupload.html", server.PREFIX))
 	require.NoError(t, err)
 	input := page.Locator("input[type=file]")
+	require.NoError(t, input.SetInputFiles(Asset("file-to-upload.txt")))
+	//nolint:staticcheck
+	elm, err := input.ElementHandle()
+	require.NoError(t, err)
+	ret, err := page.Evaluate(`e => e.files[0].name`, elm)
+	require.NoError(t, err)
+	require.Equal(t, "file-to-upload.txt", ret)
+}
+
+func TestLocatorsShouldUploadFileRemote(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	remoteServer, err := newRemoteServer()
+	require.NoError(t, err)
+	defer remoteServer.Close()
+	browser, err := browserType.Connect(remoteServer.url)
+	require.NoError(t, err)
+	require.NotNil(t, browser)
+	browser_context, err := browser.NewContext()
+	require.NoError(t, err)
+	page, err := browser_context.NewPage()
+	require.NoError(t, err)
+	_, err = page.Goto(fmt.Sprintf("%s/input/fileupload.html", server.PREFIX))
+	require.NoError(t, err)
+	input := page.Locator("input[type=file]")
+	require.NoError(t, input.SetInputFiles(Asset("file-to-upload.txt")))
+	//nolint:staticcheck
+	elm, err := input.ElementHandle()
+	require.NoError(t, err)
+	ret, err := page.Evaluate(`e => e.files[0].name`, elm)
+	require.NoError(t, err)
+	require.Equal(t, "file-to-upload.txt", ret)
+}
+
+func TestLocatorsShouldUploadFileUseBuffer(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(fmt.Sprintf("%s/input/fileupload.html", server.PREFIX))
+	require.NoError(t, err)
+	input := page.Locator("input[type=file]")
 	file, err := os.ReadFile(Asset("file-to-upload.txt"))
 	require.NoError(t, err)
 	require.NoError(t, input.SetInputFiles([]playwright.InputFile{

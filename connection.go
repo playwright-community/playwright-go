@@ -55,20 +55,20 @@ func (c *connection) Start() *Playwright {
 	return <-playwright
 }
 
-func (c *connection) Stop(errMsg ...string) error {
+func (c *connection) Stop() error {
 	err := c.onClose()
 	if err != nil {
 		return err
 	}
-	c.cleanup(errMsg...)
+	c.cleanup()
 	return nil
 }
 
-func (c *connection) cleanup(errMsg ...string) {
-	if len(errMsg) == 0 {
-		c.closedError.Store(errors.New("connection closed"))
+func (c *connection) cleanup(cause ...error) {
+	if len(cause) > 0 {
+		c.closedError.Store(fmt.Errorf("%w: %w", ErrTargetClosed, cause[0]))
 	} else {
-		c.closedError.Store(errors.New(errMsg[0]))
+		c.closedError.Store(ErrTargetClosed)
 	}
 	if c.afterClose != nil {
 		c.afterClose()
