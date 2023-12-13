@@ -25,6 +25,7 @@ type result struct {
 }
 
 type connection struct {
+	transport    transport
 	apiZone      sync.Map
 	objects      map[string]*channelOwner
 	lastID       int
@@ -33,21 +34,38 @@ type connection struct {
 	callbacks    sync.Map
 	afterClose   func()
 	onClose      func() error
-	onmessage    func(map[string]interface{}) error
 	isRemote     bool
 	localUtils   *localUtilsImpl
 	tracingCount atomic.Int32
 	abort        chan struct{}
-	closedError  atomic.Value
+	closedError  *safeValue[error]
 }
 
 func (c *connection) Start() (*Playwright, error) {
+	go func() {
+		for {
+			msg, err := c.transport.Poll()
+			if err != nil {
+				_ = c.transport.Close()
+				c.cleanup(err)
+				return
+			}
+			c.Dispatch(msg)
+		}
+	}()
+
+	c.onClose = func() error {
+		if err := c.transport.Close(); err != nil {
+			return err
+		}
+		return nil
+	}
+
 	return c.rootObject.initialize()
 }
 
 func (c *connection) Stop() error {
-	err := c.onClose()
-	if err != nil {
+	if err := c.onClose(); err != nil {
 		return err
 	}
 	c.cleanup()
@@ -56,9 +74,9 @@ func (c *connection) Stop() error {
 
 func (c *connection) cleanup(cause ...error) {
 	if len(cause) > 0 {
-		c.closedError.Store(fmt.Errorf("%w: %w", ErrTargetClosed, cause[0]))
+		c.closedError.Set(fmt.Errorf("%w: %w", ErrTargetClosed, cause[0]))
 	} else {
-		c.closedError.Store(ErrTargetClosed)
+		c.closedError.Set(ErrTargetClosed)
 	}
 	if c.afterClose != nil {
 		c.afterClose()
@@ -71,7 +89,7 @@ func (c *connection) cleanup(cause ...error) {
 }
 
 func (c *connection) Dispatch(msg *message) {
-	if c.closedError.Load() != nil {
+	if c.closedError.Get() != nil {
 		return
 	}
 	method := msg.Method
@@ -198,8 +216,8 @@ func (c *connection) replaceGuidsWithChannels(payload interface{}) interface{} {
 }
 
 func (c *connection) sendMessageToServer(object *channelOwner, method string, params interface{}, noReply bool) (*protocolCallback, error) {
-	if e := c.closedError.Load(); e != nil {
-		return nil, e.(error)
+	if err := c.closedError.Get(); err != nil {
+		return nil, err
 	}
 	if object.wasCollected {
 		return nil, errors.New("The object has been collected to prevent unbounded heap growth.")
@@ -233,7 +251,7 @@ func (c *connection) sendMessageToServer(object *channelOwner, method string, pa
 		c.LocalUtils().AddStackToTracingNoReply(id, stack)
 	}
 
-	if err := c.onmessage(message); err != nil {
+	if err := c.transport.Send(message); err != nil {
 		return nil, fmt.Errorf("could not send message: %w", err)
 	}
 
@@ -307,15 +325,17 @@ func serializeCallLocation(caller stack.Call) map[string]interface{} {
 	}
 }
 
-func newConnection(onClose func() error, localUtils ...*localUtilsImpl) *connection {
+func newConnection(transport transport, localUtils ...*localUtilsImpl) *connection {
 	connection := &connection{
-		abort:    make(chan struct{}, 1),
-		objects:  make(map[string]*channelOwner),
-		onClose:  onClose,
-		isRemote: false,
+		abort:       make(chan struct{}, 1),
+		objects:     make(map[string]*channelOwner),
+		transport:   transport,
+		isRemote:    false,
+		closedError: &safeValue[error]{},
 	}
 	if len(localUtils) > 0 {
 		connection.localUtils = localUtils[0]
+		connection.isRemote = true
 	}
 	connection.rootObject = newRootChannelOwner(connection)
 	return connection

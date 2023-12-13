@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 type browserContextImpl struct {
@@ -79,7 +80,7 @@ func (b *browserContextImpl) NewCDPSession(page interface{}) (CDPSession, error)
 
 	channel, err := b.channel.Send("newCDPSession", params)
 	if err != nil {
-		return nil, fmt.Errorf("could not send message: %w", err)
+		return nil, err
 	}
 
 	cdpSession := fromChannel(channel).(*cdpSessionImpl)
@@ -93,7 +94,7 @@ func (b *browserContextImpl) NewPage() (Page, error) {
 	}
 	channel, err := b.channel.Send("newPage")
 	if err != nil {
-		return nil, fmt.Errorf("could not send message: %w", err)
+		return nil, err
 	}
 	return fromChannel(channel).(*pageImpl), nil
 }
@@ -103,7 +104,7 @@ func (b *browserContextImpl) Cookies(urls ...string) ([]Cookie, error) {
 		"urls": urls,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("could not send message: %w", err)
+		return nil, err
 	}
 	cookies := make([]Cookie, len(result.([]interface{})))
 	for i, item := range result.([]interface{}) {
@@ -369,7 +370,15 @@ func (b *browserContextImpl) Close(options ...BrowserContextCloseOptions) error 
 	_, err = b.channel.Send("close", map[string]interface{}{
 		"reason": b.closeReason,
 	})
-	<-b.closed
+	if err != nil {
+		return err
+	}
+	timeout := b.timeoutSettings.Timeout()
+	select {
+	case <-time.After(time.Duration(timeout) * time.Millisecond):
+		return ErrTimeout
+	case <-b.closed:
+	}
 	return err
 }
 
