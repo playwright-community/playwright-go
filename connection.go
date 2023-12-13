@@ -38,6 +38,7 @@ type connection struct {
 	localUtils   *localUtilsImpl
 	tracingCount atomic.Int32
 	abort        chan struct{}
+	abortOnce    sync.Once
 	closedError  *safeValue[error]
 }
 
@@ -81,11 +82,13 @@ func (c *connection) cleanup(cause ...error) {
 	if c.afterClose != nil {
 		c.afterClose()
 	}
-	select {
-	case <-c.abort:
-	default:
-		close(c.abort)
-	}
+	c.abortOnce.Do(func() {
+		select {
+		case <-c.abort:
+		default:
+			close(c.abort)
+		}
+	})
 }
 
 func (c *connection) Dispatch(msg *message) {
