@@ -18,7 +18,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/mitchellh/go-ps"
 	"github.com/playwright-community/playwright-go"
 	"github.com/stretchr/testify/require"
 )
@@ -371,47 +370,4 @@ func getFileLastModifiedTimeMs(path string) (int64, error) {
 		return 0, fmt.Errorf("%s is a directory", path)
 	}
 	return info.ModTime().UnixMilli(), nil
-}
-
-// find and kill playwright process, only work for Windows/macOs
-func killPlaywrightProcess() error {
-	all, err := ps.Processes()
-	if err != nil {
-		return err
-	}
-	for _, process := range all {
-		if process.Executable() == "node" || process.Executable() == "node.exe" {
-			parent, err := ps.FindProcess(process.PPid())
-			if err != nil {
-				return err
-			}
-			if parent.Executable() == "bash" || parent.Executable() == "sh" || parent.Executable() == "cmd.exe" {
-				grandpa, err := ps.FindProcess(parent.PPid())
-				if err != nil {
-					return err
-				}
-				if strings.HasPrefix(grandpa.Executable(), "__debug_bin") || grandpa.Executable() == filepath.Base(os.Args[0]) {
-					if err := killProcessByPid(parent.Pid()); err != nil {
-						return err
-					}
-					if err := killProcessByPid(process.Pid()); err != nil {
-						return err
-					}
-					return nil
-				}
-			}
-		}
-	}
-	return fmt.Errorf("playwright process not found")
-}
-
-func killProcessByPid(pid int) error {
-	process, err := os.FindProcess(pid)
-	if err != nil {
-		return err
-	}
-	if err := process.Kill(); err != nil {
-		return err
-	}
-	return nil
 }
