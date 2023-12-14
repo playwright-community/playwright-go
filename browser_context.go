@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 )
 
 type browserContextImpl struct {
@@ -373,12 +372,7 @@ func (b *browserContextImpl) Close(options ...BrowserContextCloseOptions) error 
 	if err != nil {
 		return err
 	}
-	timeout := b.timeoutSettings.Timeout()
-	select {
-	case <-time.After(time.Duration(timeout) * time.Millisecond):
-		return ErrTimeout
-	case <-b.closed:
-	}
+	<-b.closed
 	return err
 }
 
