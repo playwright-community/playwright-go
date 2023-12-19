@@ -79,7 +79,7 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 	}
 	channel, err := b.channel.Send("newContext", options, overrides)
 	if err != nil {
-		return nil, fmt.Errorf("could not send message: %w", err)
+		return nil, err
 	}
 	context := fromChannel(channel).(*browserContextImpl)
 	context.browser = b
@@ -108,7 +108,7 @@ func (b *browserImpl) NewPage(options ...BrowserNewPageOptions) (Page, error) {
 func (b *browserImpl) NewBrowserCDPSession() (CDPSession, error) {
 	channel, err := b.channel.Send("newBrowserCDPSession")
 	if err != nil {
-		return nil, fmt.Errorf("could not send message: %w", err)
+		return nil, err
 	}
 
 	cdpSession := fromChannel(channel).(*cdpSessionImpl)

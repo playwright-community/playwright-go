@@ -261,7 +261,7 @@ func (e *elementHandleImpl) Screenshot(options ...ElementHandleScreenshotOptions
 	}
 	data, err := e.channel.Send("screenshot", options, overrides)
 	if err != nil {
-		return nil, fmt.Errorf("could not send message :%w", err)
+		return nil, err
 	}
 	image, err := base64.StdEncoding.DecodeString(data.(string))
 	if err != nil {

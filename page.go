@@ -342,7 +342,7 @@ func (p *pageImpl) Screenshot(options ...PageScreenshotOptions) ([]byte, error) 
 	}
 	data, err := p.channel.Send("screenshot", options, overrides)
 	if err != nil {
-		return nil, fmt.Errorf("could not send message :%w", err)
+		return nil, err
 	}
 	image, err := base64.StdEncoding.DecodeString(data.(string))
 	if err != nil {
@@ -363,7 +363,7 @@ func (p *pageImpl) PDF(options ...PagePdfOptions) ([]byte, error) {
 	}
 	data, err := p.channel.Send("pdf", options)
 	if err != nil {
-		return nil, fmt.Errorf("could not send message :%w", err)
+		return nil, err
 	}
 	pdf, err := base64.StdEncoding.DecodeString(data.(string))
 	if err != nil {

@@ -37,7 +37,7 @@ func (r *apiRequestImpl) NewContext(options ...APIRequestNewContextOptions) (API
 
 	channel, err := r.channel.Send("newRequest", options, overrides)
 	if err != nil {
-		return nil, fmt.Errorf("could not send message: %w", err)
+		return nil, err
 	}
 	return fromChannel(channel).(*apiRequestContextImpl), nil
 }
