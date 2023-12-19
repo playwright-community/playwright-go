@@ -8,6 +8,7 @@ require (
 	github.com/go-stack/stack v1.8.1
 	github.com/gorilla/websocket v1.5.1
 	github.com/h2non/filetype v1.1.3
+	github.com/mitchellh/go-ps v1.0.0
 	github.com/stretchr/testify v1.8.4
 	github.com/tidwall/gjson v1.17.0
 	go.uber.org/multierr v1.11.0

@@ -191,43 +191,11 @@ func (d *PlaywrightDriver) DownloadDriver() error {
 }
 
 func (d *PlaywrightDriver) run() (*connection, error) {
-	cmd := exec.Command(d.DriverBinaryLocation, "run-driver")
-	cmd.SysProcAttr = defaultSysProcAttr
-	cmd.Stderr = os.Stderr
-	stdin, err := cmd.StdinPipe()
+	transport, err := newPipeTransport(d.DriverBinaryLocation)
 	if err != nil {
-		return nil, fmt.Errorf("could not get stdin pipe: %w", err)
+		return nil, err
 	}
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		return nil, fmt.Errorf("could not get stdout pipe: %w", err)
-	}
-	if err := cmd.Start(); err != nil {
-		return nil, fmt.Errorf("could not start driver: %w", err)
-	}
-	transport := newPipeTransport(stdin, stdout)
-	go func() {
-		if err := transport.Start(); err != nil {
-			log.Fatal(err)
-		}
-	}()
-	connection := newConnection(func() error {
-		if err := stdin.Close(); err != nil {
-			return fmt.Errorf("could not close stdin: %v", err)
-		}
-		if err := stdout.Close(); err != nil {
-			return fmt.Errorf("could not close stdout: %v", err)
-		}
-		if err := cmd.Process.Kill(); err != nil {
-			return fmt.Errorf("could not kill process: %v", err)
-		}
-		if _, err := cmd.Process.Wait(); err != nil {
-			return fmt.Errorf("could not wait for process: %v", err)
-		}
-		return nil
-	})
-	connection.onmessage = transport.Send
-	transport.onmessage = connection.Dispatch
+	connection := newConnection(transport)
 	return connection, nil
 }
 
@@ -283,8 +251,8 @@ func Run(options ...*RunOptions) (*Playwright, error) {
 	if err != nil {
 		return nil, err
 	}
-	playwright := connection.Start()
-	return playwright, nil
+	playwright, err := connection.Start()
+	return playwright, err
 }
 
 func transformRunOptions(options []*RunOptions) *RunOptions {

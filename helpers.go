@@ -578,3 +578,20 @@ func prepareRecordHarOptions(option recordHarInputOptions) recordHarOptions {
 	}
 	return out
 }
+
+type safeValue[T any] struct {
+	sync.Mutex
+	v T
+}
+
+func (s *safeValue[T]) Set(v T) {
+	s.Lock()
+	defer s.Unlock()
+	s.v = v
+}
+
+func (s *safeValue[T]) Get() T {
+	s.Lock()
+	defer s.Unlock()
+	return s.v
+}
