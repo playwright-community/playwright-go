@@ -79,15 +79,32 @@ func routeAmbiguous(t *testing.T, page playwright.Page) {
 }
 
 func TestFrameLocatorFirst(t *testing.T) {
-	BeforeEach(t)
-	defer AfterEach(t)
-	routeAmbiguous(t, page)
-	_, err := page.Goto(server.EMPTY_PAGE)
-	require.NoError(t, err)
 
-	innerText, err := page.Locator("body").FrameLocator("iframe").First().GetByRole("button").InnerText()
-	require.NoError(t, err)
-	require.Equal(t, "Hello from iframe-1.html", innerText)
+	t.Run("basic", func(t *testing.T) {
+
+		BeforeEach(t)
+		defer AfterEach(t)
+		routeAmbiguous(t, page)
+		_, err := page.Goto(server.EMPTY_PAGE)
+		require.NoError(t, err)
+
+		innerText, err := page.Locator("body").FrameLocator("iframe").First().GetByRole("button").InnerText()
+		require.NoError(t, err)
+		require.Equal(t, "Hello from iframe-1.html", innerText)
+	})
+
+	t.Run("ambiguous", func(t *testing.T) {
+		BeforeEach(t)
+		defer AfterEach(t)
+		routeAmbiguous(t, page)
+		_, err := page.Goto(server.EMPTY_PAGE)
+		require.NoError(t, err)
+
+		innerText, err := page.Locator("body").FrameLocator("iframe").Nth(1).Locator("button").InnerText()
+		require.NoError(t, err)
+		require.Equal(t, "Hello from iframe-2.html", innerText)
+	})
+
 }
 
 func TestFrameLocatorNth(t *testing.T) {

@@ -13,7 +13,6 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"sync"
 	"testing"
@@ -209,52 +208,43 @@ func (s *testServer) WaitForRequestChan(path string) <-chan *http.Request {
 	return channel
 }
 
-func Map(vs interface{}, f func(interface{}) interface{}) []interface{} {
-	v := reflect.ValueOf(vs)
-	vsm := make([]interface{}, v.Len())
-	for i := 0; i < v.Len(); i++ {
-		vsm[i] = f(v.Index(i).Interface())
+func Map[T any, R any](vs []T, f func(T) R) []R {
+	vsm := make([]R, len(vs))
+	for i, v := range vs {
+		vsm[i] = f(v)
 	}
 	return vsm
 }
 
-// ChanToSlice reads all data from ch (which must be a chan), returning a
-// slice of the data. If ch is a 'T chan' then the return value is of type
-// []T inside the returned interface.
-// A typical call would be sl := ChanToSlice(ch).([]int)
-func ChanToSlice(ch interface{}, amount int) interface{} {
-	chv := reflect.ValueOf(ch)
-	slv := reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(ch).Elem()), 0, 0)
+// ChanToSlice reads amount of values from the channel, returns them as a slice
+func ChanToSlice[T any](ch chan T, amount int) []T {
+	data := make([]T, 0)
 	for i := 0; i < amount; i++ {
-		v, ok := chv.Recv()
-		if !ok {
-			return slv.Interface()
-		}
-		slv = reflect.Append(slv, v)
+		data = append(data, <-ch)
 	}
-	return slv.Interface()
+	return data
 }
 
-type syncSlice struct {
+type syncSlice[T any] struct {
 	sync.Mutex
-	slice []interface{}
+	slice []T
 }
 
-func (s *syncSlice) Append(v interface{}) {
+func (s *syncSlice[T]) Append(v T) {
 	s.Lock()
+	defer s.Unlock()
 	s.slice = append(s.slice, v)
-	s.Unlock()
 }
 
-func (s *syncSlice) Get() interface{} {
+func (s *syncSlice[T]) Get() []T {
 	s.Lock()
 	defer s.Unlock()
 	return s.slice
 }
 
-func newSyncSlice() *syncSlice {
-	return &syncSlice{
-		slice: make([]interface{}, 0),
+func newSyncSlice[T any]() *syncSlice[T] {
+	return &syncSlice[T]{
+		slice: make([]T, 0),
 	}
 }
 
