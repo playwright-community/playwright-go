@@ -28,8 +28,7 @@ type connection struct {
 	transport    transport
 	apiZone      sync.Map
 	objects      map[string]*channelOwner
-	lastID       int
-	lastIDLock   sync.Mutex
+	lastID       atomic.Uint32
 	rootObject   *rootChannelOwner
 	callbacks    sync.Map
 	afterClose   func()
@@ -97,7 +96,7 @@ func (c *connection) Dispatch(msg *message) {
 	}
 	method := msg.Method
 	if msg.ID != 0 {
-		cb, _ := c.callbacks.LoadAndDelete(msg.ID)
+		cb, _ := c.callbacks.LoadAndDelete(uint32(msg.ID))
 		if cb.(*protocolCallback).noReply {
 			return
 		}
@@ -226,10 +225,7 @@ func (c *connection) sendMessageToServer(object *channelOwner, method string, pa
 		return nil, errors.New("The object has been collected to prevent unbounded heap growth.")
 	}
 
-	c.lastIDLock.Lock()
-	c.lastID++
-	id := c.lastID
-	c.lastIDLock.Unlock()
+	id := c.lastID.Add(1)
 	cb, _ := c.callbacks.LoadOrStore(id, newProtocolCallback(noReply, c.abort))
 	var (
 		metadata = make(map[string]interface{}, 0)
@@ -356,7 +352,7 @@ func fromNullableChannel(v interface{}) interface{} {
 }
 
 type protocolCallback struct {
-	Callback chan result
+	callback chan result
 	noReply  bool
 	abort    <-chan struct{}
 }
@@ -367,8 +363,12 @@ func (pc *protocolCallback) SetResult(r result) {
 	}
 	select {
 	case <-pc.abort:
+		select {
+		case pc.callback <- r:
+		default:
+		}
 		return
-	case pc.Callback <- r:
+	case pc.callback <- r:
 	}
 }
 
@@ -377,10 +377,15 @@ func (pc *protocolCallback) GetResult() (interface{}, error) {
 		return nil, nil
 	}
 	select {
-	case result := <-pc.Callback:
+	case result := <-pc.callback:
 		return result.Data, result.Error
 	case <-pc.abort:
-		return nil, errors.New("Connection closed")
+		select {
+		case result := <-pc.callback:
+			return result.Data, result.Error
+		default:
+			return nil, errors.New("Connection closed")
+		}
 	}
 }
 
@@ -392,7 +397,7 @@ func newProtocolCallback(noReply bool, abort <-chan struct{}) *protocolCallback 
 		}
 	}
 	return &protocolCallback{
-		Callback: make(chan result),
+		callback: make(chan result, 1),
 		abort:    abort,
 	}
 }
