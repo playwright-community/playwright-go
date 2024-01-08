@@ -13,6 +13,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"testing"
@@ -276,6 +277,24 @@ func (t *testUtils) AttachFrame(page playwright.Page, frameId string, url string
 func (t *testUtils) DetachFrame(page playwright.Page, frameId string) error {
 	_, err := page.Evaluate(`frame_id => document.getElementById(frame_id).remove()`, frameId)
 	return err
+}
+
+func (tu *testUtils) DumpFrames(frame playwright.Frame, indentation string) []string {
+	desc := strings.Replace(frame.URL(), server.PREFIX, "http://localhost:<PORT>", 1)
+	if frame.Name() != "" {
+		desc = fmt.Sprintf("%s (%s)", desc, frame.Name())
+	}
+	result := []string{
+		indentation + desc,
+	}
+	sortedFrames := frame.ChildFrames()
+	sort.SliceStable(sortedFrames, func(i, j int) bool {
+		return (sortedFrames[i].URL() + sortedFrames[i].Name()) < (sortedFrames[j].URL() + sortedFrames[j].Name())
+	})
+	for _, f := range sortedFrames {
+		result = append(result, tu.DumpFrames(f, "    "+indentation)...)
+	}
+	return result
 }
 
 func (tu *testUtils) VerifyViewport(t *testing.T, page playwright.Page, width, height int) {

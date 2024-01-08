@@ -216,3 +216,18 @@ func TestFrameParent(t *testing.T) {
 	require.Equal(t, page.MainFrame(), frames[1].ParentFrame())
 	require.Equal(t, page.MainFrame(), frames[2].ParentFrame())
 }
+
+func TestFrameShouldHandleNestedFrames(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	_, err := page.Goto(server.PREFIX + "/frames/nested-frames.html")
+	require.NoError(t, err)
+	dump := utils.DumpFrames(page.MainFrame(), "")
+	require.Equal(t, []string{
+		"http://localhost:<PORT>/frames/nested-frames.html",
+		"    http://localhost:<PORT>/frames/frame.html (aframe)",
+		"    http://localhost:<PORT>/frames/two-frames.html (2frames)",
+		"        http://localhost:<PORT>/frames/frame.html (dos)",
+		"        http://localhost:<PORT>/frames/frame.html (uno)",
+	}, dump)
+}
