@@ -17,7 +17,6 @@ const (
 func TestWaiterWaitForEvent(t *testing.T) {
 	timeout := 500.0
 	emitter := &eventEmitter{}
-	emitter.initEventEmitter()
 	waiter := newWaiter().WithTimeout(timeout)
 	_, err := waiter.Wait()
 	require.Error(t, err)
@@ -35,7 +34,6 @@ func TestWaiterWaitForEvent(t *testing.T) {
 func TestWaiterWaitForEventWithPredicate(t *testing.T) {
 	timeout := 500.0
 	emitter := &eventEmitter{}
-	emitter.initEventEmitter()
 	waiter := newWaiter().WithTimeout(timeout)
 	waiter.WaitForEvent(emitter, testEventNameFoobar, func(payload interface{}) bool {
 		content, ok := payload.(string)
@@ -57,7 +55,6 @@ func TestWaiterWaitForEventWithPredicate(t *testing.T) {
 func TestWaiterRejectOnTimeout(t *testing.T) {
 	timeout := 300.0
 	emitter := &eventEmitter{}
-	emitter.initEventEmitter()
 	waiter := newWaiter().WithTimeout(timeout)
 	waiter.WaitForEvent(emitter, testEventNameFoobar, nil)
 	go func() {
@@ -73,7 +70,6 @@ func TestWaiterRejectOnEvent(t *testing.T) {
 	errCause := fmt.Errorf("reject on event")
 	errPredicate := fmt.Errorf("payload on event")
 	emitter := &eventEmitter{}
-	emitter.initEventEmitter()
 	waiter := newWaiter().RejectOnEvent(emitter, testEventNameReject, errCause)
 	waiter.RejectOnEvent(emitter, testEventNameFoobar, errPredicate, func(payload interface{}) bool {
 		content, ok := payload.(string)
@@ -99,7 +95,6 @@ func TestWaiterRejectOnEventWithPredicate(t *testing.T) {
 	errCause := fmt.Errorf("reject on event")
 	errPredicate := fmt.Errorf("payload on event")
 	emitter := &eventEmitter{}
-	emitter.initEventEmitter()
 	waiter := newWaiter().RejectOnEvent(emitter, testEventNameReject, errCause)
 	waiter.RejectOnEvent(emitter, testEventNameFoobar, errPredicate, func(payload interface{}) bool {
 		content, ok := payload.(string)
@@ -123,7 +118,6 @@ func TestWaiterRejectOnEventWithPredicate(t *testing.T) {
 
 func TestWaiterReturnErrorWhenMisuse(t *testing.T) {
 	emitter := &eventEmitter{}
-	emitter.initEventEmitter()
 	waiter := newWaiter()
 	waiter.WaitForEvent(emitter, testEventNameFoobar, nil)
 	waiter.WithTimeout(500)
