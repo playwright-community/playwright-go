@@ -9,6 +9,7 @@ type videoImpl struct {
 	page         *pageImpl
 	artifact     *artifactImpl
 	artifactChan chan *artifactImpl
+	done         chan struct{}
 	closeOnce    sync.Once
 	isRemote     bool
 }
@@ -49,9 +50,7 @@ func (v *videoImpl) artifactReady(artifact *artifactImpl) {
 
 func (v *videoImpl) pageClosed(p Page) {
 	v.closeOnce.Do(func() {
-		if v.artifactChan != nil {
-			close(v.artifactChan)
-		}
+		close(v.done)
 	})
 }
 
@@ -65,19 +64,31 @@ func (v *videoImpl) getArtifact() {
 			v.pageClosed(v.page)
 		}
 	}
-	artifact := <-v.artifactChan
-	if artifact != nil {
-		v.artifact = artifact
+	select {
+	case artifact := <-v.artifactChan:
+		if artifact != nil {
+			v.artifact = artifact
+		}
+	case <-v.done: // page closed
+		select { // make sure get artifact if it's ready before page closed
+		case artifact := <-v.artifactChan:
+			if artifact != nil {
+				v.artifact = artifact
+			}
+		default:
+		}
 	}
 }
 
 func newVideo(page *pageImpl) *videoImpl {
 	video := &videoImpl{
-		page:     page,
-		isRemote: page.connection.isRemote,
+		page:         page,
+		artifactChan: make(chan *artifactImpl, 1),
+		done:         make(chan struct{}, 1),
+		isRemote:     page.connection.isRemote,
 	}
-	video.artifactChan = make(chan *artifactImpl, 1)
-	if page.IsClosed() {
+
+	if page.isClosed {
 		video.pageClosed(page)
 	} else {
 		page.OnClose(video.pageClosed)

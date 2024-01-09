@@ -85,28 +85,28 @@ func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
       console.error('calling console.error');
       console.log(Promise.resolve('should not wait until resolved!'));
 	}`)
-	messages := ChanToSlice(messagesChan, 6).([]playwright.ConsoleMessage)
+	messages := ChanToSlice(messagesChan, 6)
 	require.NoError(t, err)
-	require.Equal(t, []interface{}{
+	require.Equal(t, []string{
 		"timeEnd",
 		"trace",
 		"dir",
 		"warning",
 		"error",
 		"log",
-	}, Map(messages, func(msg interface{}) interface{} {
-		return msg.(playwright.ConsoleMessage).Type()
+	}, Map(messages, func(msg playwright.ConsoleMessage) string {
+		return msg.Type()
 	}))
 
 	require.Contains(t, messages[0].Text(), "calling console.time")
-	require.Equal(t, []interface{}{
+	require.Equal(t, []string{
 		"calling console.trace",
 		"calling console.dir",
 		"calling console.warn",
 		"calling console.error",
 		"Promise",
-	}, Map(messages[1:], func(msg interface{}) interface{} {
-		return msg.(playwright.ConsoleMessage).Text()
+	}, Map(messages[1:], func(msg playwright.ConsoleMessage) string {
+		return msg.Text()
 	}))
 }
 

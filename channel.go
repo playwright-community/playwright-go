@@ -70,6 +70,5 @@ func newChannel(owner *channelOwner, object interface{}) *channel {
 		owner:      owner,
 		object:     object,
 	}
-	channel.initEventEmitter()
 	return channel
 }

@@ -14,6 +14,12 @@ func TestBrowserIsConnected(t *testing.T) {
 	require.True(t, browser.IsConnected())
 }
 
+func TestBrowserShouldReturnBrowserType(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	require.Equal(t, browserType, browser.BrowserType())
+}
+
 func TestBrowserVersion(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
@@ -23,7 +29,11 @@ func TestBrowserVersion(t *testing.T) {
 func TestBrowserNewContext(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	require.Equal(t, 1, len(context.Pages()))
+	context2, err := browser.NewContext()
+	require.NoError(t, err)
+	require.Equal(t, 2, len(browser.Contexts()))
+	require.NoError(t, context2.Close())
+	require.Equal(t, 1, len(browser.Contexts()))
 }
 
 func TestBrowserNewContextWithExtraHTTPHeaders(t *testing.T) {
