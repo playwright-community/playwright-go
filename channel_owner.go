@@ -93,7 +93,6 @@ func (c *channelOwner) createChannelOwner(self interface{}, parent *channelOwner
 	}
 	c.channel = newChannel(c, self)
 	c.eventToSubscriptionMapping = map[string]string{}
-	c.initEventEmitter()
 }
 
 type rootChannelOwner struct {

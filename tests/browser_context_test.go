@@ -520,3 +520,18 @@ func TestPageErrorEventShouldWork(t *testing.T) {
 	require.Equal(t, page, weberror.Page())
 	require.ErrorContains(t, weberror.Error(), "boom")
 }
+
+func TestBrowserContextOnResponse(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	responseChan := make(chan playwright.Response, 1)
+	context.OnResponse(func(response playwright.Response) {
+		responseChan <- response
+	})
+	_, err := page.Goto(fmt.Sprintf("%s/title.html", server.PREFIX))
+	require.NoError(t, err)
+	response := <-responseChan
+	body, err := response.Body()
+	require.NoError(t, err)
+	require.Equal(t, "<title>Woof-Woof</title>\n", string(body))
+}

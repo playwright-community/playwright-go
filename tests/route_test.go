@@ -174,7 +174,7 @@ func TestRouteFulfillPath(t *testing.T) {
 func TestRequestFinished(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
-	eventsStorage := newSyncSlice()
+	eventsStorage := newSyncSlice[string]()
 	var request playwright.Request
 	page.Once("request", func(r playwright.Request) {
 		request = r
@@ -187,7 +187,7 @@ func TestRequestFinished(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, response.Finished())
 	eventsStorage.Append("requestfinished")
-	require.Equal(t, []interface{}{"request", "response", "requestfinished"}, eventsStorage.Get())
+	require.Equal(t, []string{"request", "response", "requestfinished"}, eventsStorage.Get())
 	require.Equal(t, response.Request(), request)
 	require.Equal(t, response.Frame(), page.MainFrame())
 }
