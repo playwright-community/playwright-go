@@ -9,7 +9,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/danwakefield/fnmatch"
+	mapset "github.com/deckarep/golang-set/v2"
 )
 
 type (
@@ -174,47 +174,67 @@ func remapMapToStruct(inputMap interface{}, outStruct interface{}) {
 }
 
 type urlMatcher struct {
-	urlOrPredicate interface{}
+	raw     interface{}
+	pattern *regexp.Regexp
+	matchFn func(url string) bool
 }
 
 func newURLMatcher(urlOrPredicate, baseURL interface{}) *urlMatcher {
-	if baseURL != nil {
-		url, ok := urlOrPredicate.(string)
-		if ok && !strings.HasPrefix(url, "*") {
+	switch v := urlOrPredicate.(type) {
+	case *regexp.Regexp:
+		return &urlMatcher{pattern: v, raw: urlOrPredicate}
+	case string:
+		url := v
+		if baseURL != nil && !strings.HasPrefix(url, "*") {
 			base, ok := baseURL.(*string)
 			if ok && base != nil {
 				url = path.Join(*base, url)
-				return &urlMatcher{
-					urlOrPredicate: url,
-				}
 			}
 		}
+		return &urlMatcher{pattern: globMustToRegex(url), raw: urlOrPredicate}
 	}
-	return &urlMatcher{
-		urlOrPredicate: urlOrPredicate,
+	fn, ok := urlOrPredicate.(func(string) bool)
+	if ok {
+		return &urlMatcher{
+			matchFn: fn,
+			raw:     urlOrPredicate,
+		}
 	}
+	panic(fmt.Errorf("invalid urlOrPredicate: %v", urlOrPredicate))
 }
 
 func (u *urlMatcher) Matches(url string) bool {
-	switch v := u.urlOrPredicate.(type) {
+	if u.matchFn != nil {
+		return u.matchFn(url)
+	}
+	if u.pattern != nil {
+		return u.pattern.MatchString(url)
+	}
+	return false
+}
+
+// SameWith compares String() if urlOrPredicate is *regexp.Regexp
+func (u *urlMatcher) SameWith(urlOrPredicate interface{}) bool {
+	switch v := urlOrPredicate.(type) {
 	case *regexp.Regexp:
-		return v.MatchString(url)
-	case string:
-		return fnmatch.Match(v, url, 0)
+		return u.pattern.String() == v.String()
+	default:
+		return u.raw == urlOrPredicate
 	}
-	if reflect.TypeOf(u.urlOrPredicate).Kind() == reflect.Func {
-		function := reflect.ValueOf(u.urlOrPredicate)
-		result := function.Call([]reflect.Value{reflect.ValueOf(url)})
-		return result[0].Bool()
-	}
-	panic(u.urlOrPredicate)
+}
+
+type routeHandlerInvocation struct {
+	route    Route
+	complete chan bool
 }
 
 type routeHandlerEntry struct {
-	matcher *urlMatcher
-	handler routeHandler
-	times   int
-	count   int32
+	matcher           *urlMatcher
+	handler           routeHandler
+	times             int
+	count             int32
+	ignoreErrors      *atomic.Bool
+	activeInvocations mapset.Set[*routeHandlerInvocation]
 }
 
 func (r *routeHandlerEntry) Matches(url string) bool {
@@ -222,6 +242,51 @@ func (r *routeHandlerEntry) Matches(url string) bool {
 }
 
 func (r *routeHandlerEntry) Handle(route Route) chan bool {
+	handlerInvocation := &routeHandlerInvocation{
+		route:    route,
+		complete: make(chan bool, 1),
+	}
+	r.activeInvocations.Add(handlerInvocation)
+
+	defer func() {
+		handlerInvocation.complete <- true
+		r.activeInvocations.Remove(handlerInvocation)
+	}()
+	defer func() {
+		// If the handler was stopped (without waiting for completion), we ignore all exceptions.
+		if r.ignoreErrors.Load() {
+			_ = recover()
+			route.(*routeImpl).reportHandled(false)
+		}
+	}()
+
+	return r.handleInternal(route)
+}
+
+func (r *routeHandlerEntry) Stop(behavior string) {
+	// When a handler is manually unrouted or its page/context is closed we either
+	// - wait for the current handler invocations to finish
+	// - or do not wait, if the user opted out of it, but swallow all exceptions
+	//   that happen after the unroute/close.
+	if behavior == string(*UnrouteBehaviorIgnoreErrors) {
+		r.ignoreErrors.Store(true)
+	} else {
+		wg := &sync.WaitGroup{}
+		r.activeInvocations.Each(func(activation *routeHandlerInvocation) bool {
+			if !activation.route.(*routeImpl).didThrow {
+				wg.Add(1)
+				go func(complete chan bool) {
+					<-complete
+					wg.Done()
+				}(activation.complete)
+			}
+			return false
+		})
+		wg.Wait()
+	}
+}
+
+func (r *routeHandlerEntry) handleInternal(route Route) chan bool {
 	handled := route.(*routeImpl).startHandling()
 	atomic.AddInt32(&r.count, 1)
 	r.handler(route)
@@ -241,10 +306,12 @@ func newRouteHandlerEntry(matcher *urlMatcher, handler routeHandler, times ...in
 		n = times[0]
 	}
 	return &routeHandlerEntry{
-		matcher: matcher,
-		handler: handler,
-		times:   n,
-		count:   0,
+		matcher:           matcher,
+		handler:           handler,
+		times:             n,
+		count:             0,
+		ignoreErrors:      &atomic.Bool{},
+		activeInvocations: mapset.NewSet[*routeHandlerInvocation](),
 	}
 }
 
@@ -252,16 +319,16 @@ func prepareInterceptionPatterns(handlers []*routeHandlerEntry) []map[string]int
 	patterns := []map[string]interface{}{}
 	all := false
 	for _, h := range handlers {
-		switch h.matcher.urlOrPredicate.(type) {
+		switch h.matcher.raw.(type) {
 		case *regexp.Regexp:
-			pattern, flags := convertRegexp(h.matcher.urlOrPredicate.(*regexp.Regexp))
+			pattern, flags := convertRegexp(h.matcher.raw.(*regexp.Regexp))
 			patterns = append(patterns, map[string]interface{}{
 				"regexSource": pattern,
 				"regexFlags":  flags,
 			})
 		case string:
 			patterns = append(patterns, map[string]interface{}{
-				"glob": h.matcher.urlOrPredicate.(string),
+				"glob": h.matcher.raw.(string),
 			})
 		default:
 			all = true
@@ -275,51 +342,6 @@ func prepareInterceptionPatterns(handlers []*routeHandlerEntry) []map[string]int
 		}
 	}
 	return patterns
-}
-
-type safeStringSet struct {
-	sync.Mutex
-	v []string
-}
-
-func (s *safeStringSet) Has(expected string) bool {
-	s.Lock()
-	defer s.Unlock()
-	for _, v := range s.v {
-		if v == expected {
-			return true
-		}
-	}
-	return false
-}
-
-func (s *safeStringSet) Add(v string) {
-	if s.Has(v) {
-		return
-	}
-	s.Lock()
-	s.v = append(s.v, v)
-	s.Unlock()
-}
-
-func (s *safeStringSet) Remove(remove string) {
-	s.Lock()
-	defer s.Unlock()
-	newSlice := make([]string, 0)
-	for _, v := range s.v {
-		if v != remove {
-			newSlice = append(newSlice, v)
-		}
-	}
-	if len(s.v) != len(newSlice) {
-		s.v = newSlice
-	}
-}
-
-func newSafeStringSet(v []string) *safeStringSet {
-	return &safeStringSet{
-		v: v,
-	}
 }
 
 const defaultTimeout = 30 * 1000
@@ -447,24 +469,28 @@ func convertSelectOptionSet(values SelectOptionValues) map[string]interface{} {
 	return out
 }
 
-func unroute(inRoutes []*routeHandlerEntry, url interface{}, handlers ...routeHandler) ([]*routeHandlerEntry, error) {
+func unroute(inRoutes []*routeHandlerEntry, url interface{}, handlers ...routeHandler) ([]*routeHandlerEntry, []*routeHandlerEntry, error) {
 	var handler routeHandler
 	if len(handlers) == 1 {
 		handler = handlers[0]
 	}
 	handlerPtr := reflect.ValueOf(handler).Pointer()
 
-	routes := make([]*routeHandlerEntry, 0)
+	removed := make([]*routeHandlerEntry, 0)
+	remaining := make([]*routeHandlerEntry, 0)
 
 	for _, route := range inRoutes {
 		routeHandlerPtr := reflect.ValueOf(route.handler).Pointer()
-		if route.matcher.urlOrPredicate != url ||
+		// note: compare regex expression if url is a regexp, not pointer
+		if !route.matcher.SameWith(url) ||
 			(handler != nil && routeHandlerPtr != handlerPtr) {
-			routes = append(routes, route)
+			remaining = append(remaining, route)
+		} else {
+			removed = append(removed, route)
 		}
 	}
 
-	return routes, nil
+	return removed, remaining, nil
 }
 
 func serializeMapToNameAndValue(headers map[string]string) []map[string]string {

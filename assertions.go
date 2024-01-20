@@ -1,6 +1,7 @@
 package playwright
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -103,7 +104,7 @@ func toExpectedTextValues(
 	matchSubstring bool,
 	normalizeWhiteSpace bool,
 	ignoreCase *bool,
-) []expectedTextValue {
+) ([]expectedTextValue, error) {
 	var out []expectedTextValue
 	for _, item := range items {
 		switch item := item.(type) {
@@ -123,9 +124,11 @@ func toExpectedTextValues(
 				NormalizeWhiteSpace: Bool(normalizeWhiteSpace),
 				IgnoreCase:          ignoreCase,
 			})
+		default:
+			return nil, errors.New("value must be a string or regexp")
 		}
 	}
-	return out
+	return out, nil
 }
 
 func convertToInterfaceList(v interface{}) []interface{} {

@@ -14,6 +14,7 @@ type routeImpl struct {
 	channelOwner
 	handling *chan bool
 	context  *browserContextImpl
+	didThrow bool
 }
 
 func (r *routeImpl) startHandling() chan bool {
@@ -21,7 +22,7 @@ func (r *routeImpl) startHandling() chan bool {
 	defer r.Unlock()
 	handling := make(chan bool, 1)
 	r.handling = &handling
-	return *r.handling
+	return handling
 }
 
 func (r *routeImpl) reportHandled(done bool) {
@@ -59,19 +60,15 @@ func unpackOptionalArgument(input interface{}) interface{} {
 }
 
 func (r *routeImpl) Abort(errorCode ...string) error {
-	err := r.checkNotHandled()
-	if err != nil {
-		return err
-	}
-	err = r.raceWithPageClose(func() error {
-		_, err := r.channel.Send("abort", map[string]interface{}{
-			"errorCode":  unpackOptionalArgument(errorCode),
-			"requestUrl": r.Request().(*requestImpl).initializer["url"],
+	return r.handleRoute(func() error {
+		return r.raceWithPageClose(func() error {
+			_, err := r.channel.Send("abort", map[string]interface{}{
+				"errorCode":  unpackOptionalArgument(errorCode),
+				"requestUrl": r.Request().(*requestImpl).initializer["url"],
+			})
+			return err
 		})
-		return err
 	})
-	r.reportHandled(true)
-	return err
 }
 
 func (r *routeImpl) raceWithPageClose(f func() error) error {
@@ -82,13 +79,33 @@ func (r *routeImpl) raceWithPageClose(f func() error) error {
 
 	select {
 	case <-r.Request().(*requestImpl).targetClosed():
-		return errors.New("Target closed")
+		// upstream does not throw the err
+		return nil
 	case err := <-errChan:
 		return err
 	}
 }
 
 func (r *routeImpl) Fulfill(options ...RouteFulfillOptions) error {
+	return r.handleRoute(func() error {
+		return r.innerFulfill(options...)
+	})
+}
+
+func (r *routeImpl) handleRoute(cb func() error) error {
+	err := r.checkNotHandled()
+	if err != nil {
+		return err
+	}
+	if err := cb(); err != nil {
+		r.didThrow = true
+		return err
+	}
+	r.reportHandled(true)
+	return nil
+}
+
+func (r *routeImpl) innerFulfill(options ...RouteFulfillOptions) error {
 	err := r.checkNotHandled()
 	if err != nil {
 		return err
@@ -163,7 +180,6 @@ func (r *routeImpl) Fulfill(options ...RouteFulfillOptions) error {
 		_, err := r.channel.Send("fulfill", option, overrides)
 		return err
 	})
-	r.reportHandled(true)
 	return err
 }
 
@@ -212,14 +228,10 @@ func (r *routeImpl) Continue(options ...RouteContinueOptions) error {
 		}
 	}
 
-	err := r.checkNotHandled()
-	if err != nil {
-		return err
-	}
-	r.Request().(*requestImpl).applyFallbackOverrides(*option)
-	err = r.internalContinue(false)
-	r.reportHandled(true)
-	return err
+	return r.handleRoute(func() error {
+		r.Request().(*requestImpl).applyFallbackOverrides(*option)
+		return r.internalContinue(false)
+	})
 }
 
 func (r *routeImpl) internalContinue(isInternal bool) error {
@@ -247,15 +259,12 @@ func (r *routeImpl) internalContinue(isInternal bool) error {
 }
 
 func (r *routeImpl) redirectedNavigationRequest(url string) error {
-	err := r.checkNotHandled()
-	if err != nil {
+	return r.handleRoute(func() error {
+		_, err := r.channel.Send("redirectNavigationRequest", map[string]interface{}{
+			"url": url,
+		})
 		return err
-	}
-	_, err = r.channel.Send("redirectNavigationRequest", map[string]interface{}{
-		"url": url,
 	})
-	r.reportHandled(true)
-	return err
 }
 
 func newRoute(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *routeImpl {

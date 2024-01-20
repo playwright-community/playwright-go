@@ -6,6 +6,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	mapset "github.com/deckarep/golang-set/v2"
 )
 
 type frameImpl struct {
@@ -17,15 +19,16 @@ type frameImpl struct {
 	url         string
 	parentFrame Frame
 	childFrames []Frame
-	loadStates  *safeStringSet
+	loadStates  mapset.Set[string]
 }
 
 func newFrame(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *frameImpl {
-	var loadStates *safeStringSet
+	var loadStates mapset.Set[string]
+
 	if ls, ok := initializer["loadStates"].([]string); ok {
-		loadStates = newSafeStringSet(ls)
+		loadStates = mapset.NewSet[string](ls...)
 	} else {
-		loadStates = newSafeStringSet([]string{})
+		loadStates = mapset.NewSet[string]()
 	}
 	bt := &frameImpl{
 		name:        initializer["name"].(string),
@@ -136,7 +139,7 @@ func (f *frameImpl) WaitForLoadState(options ...FrameWaitForLoadStateOptions) er
 }
 
 func (f *frameImpl) waitForLoadStateImpl(state string, timeout *float64, cb func() error) error {
-	if f.loadStates.Has(state) {
+	if f.loadStates.ContainsOne(state) {
 		return nil
 	}
 	waiter, err := f.setNavigationWaiter(timeout)

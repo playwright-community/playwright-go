@@ -26,7 +26,6 @@ func (r *harRouter) addContextRoute(context BrowserContext) error {
 	if err != nil {
 		return err
 	}
-	context.Once("close", r.dispose)
 	return r.err
 }
 
@@ -43,7 +42,6 @@ func (r *harRouter) addPageRoute(page Page) error {
 	if err != nil {
 		return err
 	}
-	page.Once("close", r.dispose)
 	return r.err
 }
 

@@ -7,25 +7,29 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
+
+	"golang.org/x/exp/slices"
 )
 
 type browserContextImpl struct {
 	channelOwner
-	timeoutSettings   *timeoutSettings
-	isClosedOrClosing bool
-	options           *BrowserNewContextOptions
-	pages             []Page
-	routes            []*routeHandlerEntry
-	ownedPage         Page
-	browser           *browserImpl
-	serviceWorkers    []Worker
-	backgroundPages   []Page
-	bindings          map[string]BindingCallFunction
-	tracing           *tracingImpl
-	request           *apiRequestContextImpl
-	harRecorders      map[string]harRecordingMetadata
-	closed            chan struct{}
-	closeReason       *string
+	timeoutSettings *timeoutSettings
+	closeWasCalled  bool
+	options         *BrowserNewContextOptions
+	pages           []Page
+	routes          []*routeHandlerEntry
+	ownedPage       Page
+	browser         *browserImpl
+	serviceWorkers  []Worker
+	backgroundPages []Page
+	bindings        map[string]BindingCallFunction
+	tracing         *tracingImpl
+	request         *apiRequestContextImpl
+	harRecorders    map[string]harRecordingMetadata
+	closed          chan struct{}
+	closeReason     *string
+	harRouters      []*harRouter
 }
 
 func (b *browserContextImpl) SetDefaultNavigationTimeout(timeout float64) {
@@ -210,21 +214,57 @@ func (b *browserContextImpl) ExposeFunction(name string, binding ExposedFunction
 }
 
 func (b *browserContextImpl) Route(url interface{}, handler routeHandler, times ...int) error {
-	b.routes = append(b.routes, newRouteHandlerEntry(newURLMatcher(url, b.options.BaseURL), handler, times...))
+	b.Lock()
+	defer b.Unlock()
+	b.routes = slices.Insert(b.routes, 0, newRouteHandlerEntry(newURLMatcher(url, b.options.BaseURL), handler, times...))
 	return b.updateInterceptionPatterns()
 }
 
 func (b *browserContextImpl) Unroute(url interface{}, handlers ...routeHandler) error {
-	b.Lock()
-	defer b.Unlock()
-
-	routes, err := unroute(b.routes, url, handlers...)
+	removed, remaining, err := unroute(b.routes, url, handlers...)
 	if err != nil {
 		return err
 	}
-	b.routes = routes
+	return b.unrouteInternal(removed, remaining, UnrouteBehaviorDefault)
+}
 
-	return b.updateInterceptionPatterns()
+func (b *browserContextImpl) unrouteInternal(removed []*routeHandlerEntry, remaining []*routeHandlerEntry, behavior *UnrouteBehavior) error {
+	b.Lock()
+	defer b.Unlock()
+	b.routes = remaining
+	err := b.updateInterceptionPatterns()
+	if err != nil {
+		return err
+	}
+	if behavior == nil || behavior == UnrouteBehaviorDefault {
+		return nil
+	}
+	wg := &sync.WaitGroup{}
+	for _, entry := range removed {
+		wg.Add(1)
+		go func(entry *routeHandlerEntry) {
+			defer wg.Done()
+			entry.Stop(string(*behavior))
+		}(entry)
+	}
+	wg.Wait()
+	return nil
+}
+
+func (b *browserContextImpl) UnrouteAll(options ...BrowserContextUnrouteAllOptions) error {
+	var behavior *UnrouteBehavior
+	if len(options) == 1 {
+		behavior = options[0].Behavior
+	}
+	defer b.disposeHarRouters()
+	return b.unrouteInternal(b.routes, []*routeHandlerEntry{}, behavior)
+}
+
+func (b *browserContextImpl) disposeHarRouters() {
+	for _, router := range b.harRouters {
+		router.dispose()
+	}
+	b.harRouters = make([]*harRouter, 0)
 }
 
 func (b *browserContextImpl) Request() APIRequestContext {
@@ -255,6 +295,7 @@ func (b *browserContextImpl) RouteFromHAR(har string, options ...BrowserContextR
 		notFound = HarNotFoundAbort
 	}
 	router := newHarRouter(b.connection.localUtils, har, *notFound, opt.URL)
+	b.harRouters = append(b.harRouters, router)
 	return router.addContextRoute(b)
 }
 
@@ -318,15 +359,13 @@ func (b *browserContextImpl) ExpectPage(cb func() error, options ...BrowserConte
 }
 
 func (b *browserContextImpl) Close(options ...BrowserContextCloseOptions) error {
-	if b.isClosedOrClosing {
+	if b.closeWasCalled {
 		return nil
 	}
 	if len(options) == 1 {
 		b.closeReason = options[0].Reason
 	}
-	b.Lock()
-	b.isClosedOrClosing = true
-	b.Unlock()
+	b.closeWasCalled = true
 	innerClose := func() (interface{}, error) {
 		for harId, harMetaData := range b.harRecorders {
 			overrides := map[string]interface{}{}
@@ -456,6 +495,7 @@ func (b *browserContextImpl) onClose() {
 		b.browser.contexts = contexts
 		b.browser.Unlock()
 	}
+	b.disposeHarRouters()
 	b.Emit("close", b)
 }
 
@@ -473,20 +513,15 @@ func (b *browserContextImpl) onPage(page Page) {
 func (b *browserContextImpl) onRoute(route *routeImpl) {
 	go func() {
 		b.Lock()
-		defer b.Unlock()
 		route.context = b
+		page := route.Request().(*requestImpl).safePage()
 		routes := make([]*routeHandlerEntry, len(b.routes))
 		copy(routes, b.routes)
+		b.Unlock()
 
-		url := route.Request().URL()
-		for i, handlerEntry := range routes {
-			if !handlerEntry.Matches(url) {
-				continue
-			}
-			if handlerEntry.WillExceed() {
-				b.routes = append(b.routes[:i], b.routes[i+1:]...)
-			}
-			handled := handlerEntry.Handle(route)
+		checkInterceptionIfNeeded := func() {
+			b.Lock()
+			defer b.Unlock()
 			if len(b.routes) == 0 {
 				_, err := b.connection.WrapAPICall(func() (interface{}, error) {
 					err := b.updateInterceptionPatterns()
@@ -496,14 +531,37 @@ func (b *browserContextImpl) onRoute(route *routeImpl) {
 					log.Printf("could not update interception patterns: %v", err)
 				}
 			}
+		}
+
+		url := route.Request().URL()
+		for _, handlerEntry := range routes {
+			// If the page or the context was closed we stall all requests right away.
+			if (page != nil && page.closeWasCalled) || b.closeWasCalled {
+				return
+			}
+			if !handlerEntry.Matches(url) {
+				continue
+			}
+			if !slices.ContainsFunc(b.routes, func(entry *routeHandlerEntry) bool {
+				return entry == handlerEntry
+			}) {
+				continue
+			}
+			if handlerEntry.WillExceed() {
+				b.routes = slices.DeleteFunc(b.routes, func(rhe *routeHandlerEntry) bool {
+					return rhe == handlerEntry
+				})
+			}
+			handled := handlerEntry.Handle(route)
+			checkInterceptionIfNeeded()
 			yes := <-handled
 			if yes {
 				return
 			}
 		}
-		if err := route.internalContinue(true); err != nil {
-			log.Printf("could not continue request: %v", err)
-		}
+		// If the page is closed or unrouteAll() was called without waiting and interception disabled,
+		// the method will throw an error - silence it.
+		_ = route.internalContinue(true)
 	}()
 }
 
@@ -624,6 +682,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 		bindings:        make(map[string]BindingCallFunction),
 		harRecorders:    make(map[string]harRecordingMetadata),
 		closed:          make(chan struct{}, 1),
+		harRouters:      make([]*harRouter, 0),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	if parent.objectType == "Browser" {

@@ -176,7 +176,10 @@ func (la *locatorAssertionsImpl) ToContainText(expected interface{}, options ...
 
 	switch expected.(type) {
 	case []string, []*regexp.Regexp:
-		expectedText := toExpectedTextValues(convertToInterfaceList(expected), true, true, ignoreCase)
+		expectedText, err := toExpectedTextValues(convertToInterfaceList(expected), true, true, ignoreCase)
+		if err != nil {
+			return err
+		}
 		return la.expect(
 			"to.contain.text.array",
 			frameExpectOptions{
@@ -188,7 +191,10 @@ func (la *locatorAssertionsImpl) ToContainText(expected interface{}, options ...
 			"Locator expected to contain text",
 		)
 	default:
-		expectedText := toExpectedTextValues([]interface{}{expected}, true, true, ignoreCase)
+		expectedText, err := toExpectedTextValues([]interface{}{expected}, true, true, ignoreCase)
+		if err != nil {
+			return err
+		}
 		return la.expect(
 			"to.have.text",
 			frameExpectOptions{
@@ -209,7 +215,10 @@ func (la *locatorAssertionsImpl) ToHaveAttribute(name string, value interface{},
 		timeout = options[0].Timeout
 		ignoreCase = options[0].IgnoreCase
 	}
-	expectedText := toExpectedTextValues([]interface{}{value}, false, false, ignoreCase)
+	expectedText, err := toExpectedTextValues([]interface{}{value}, false, false, ignoreCase)
+	if err != nil {
+		return err
+	}
 	return la.expect(
 		"to.have.attribute.value",
 		frameExpectOptions{
@@ -229,7 +238,10 @@ func (la *locatorAssertionsImpl) ToHaveClass(expected interface{}, options ...Lo
 	}
 	switch expected.(type) {
 	case []string, []*regexp.Regexp:
-		expectedText := toExpectedTextValues(convertToInterfaceList(expected), false, false, nil)
+		expectedText, err := toExpectedTextValues(convertToInterfaceList(expected), false, false, nil)
+		if err != nil {
+			return err
+		}
 		return la.expect(
 			"to.have.class.array",
 			frameExpectOptions{
@@ -240,7 +252,10 @@ func (la *locatorAssertionsImpl) ToHaveClass(expected interface{}, options ...Lo
 			"Locator expected to have class",
 		)
 	default:
-		expectedText := toExpectedTextValues([]interface{}{expected}, false, false, nil)
+		expectedText, err := toExpectedTextValues([]interface{}{expected}, false, false, nil)
+		if err != nil {
+			return err
+		}
 		return la.expect(
 			"to.have.class",
 			frameExpectOptions{
@@ -271,7 +286,10 @@ func (la *locatorAssertionsImpl) ToHaveCSS(name string, value interface{}, optio
 	if len(options) == 1 {
 		timeout = options[0].Timeout
 	}
-	expectedText := toExpectedTextValues([]interface{}{value}, false, false, nil)
+	expectedText, err := toExpectedTextValues([]interface{}{value}, false, false, nil)
+	if err != nil {
+		return err
+	}
 	return la.expect(
 		"to.have.css",
 		frameExpectOptions{
@@ -289,7 +307,10 @@ func (la *locatorAssertionsImpl) ToHaveId(id interface{}, options ...LocatorAsse
 	if len(options) == 1 {
 		timeout = options[0].Timeout
 	}
-	expectedText := toExpectedTextValues([]interface{}{id}, false, false, nil)
+	expectedText, err := toExpectedTextValues([]interface{}{id}, false, false, nil)
+	if err != nil {
+		return err
+	}
 	return la.expect(
 		"to.have.id",
 		frameExpectOptions{ExpectedText: expectedText, Timeout: timeout},
@@ -329,7 +350,10 @@ func (la *locatorAssertionsImpl) ToHaveText(expected interface{}, options ...Loc
 
 	switch expected.(type) {
 	case []string, []*regexp.Regexp:
-		expectedText := toExpectedTextValues(convertToInterfaceList(expected), false, true, ignoreCase)
+		expectedText, err := toExpectedTextValues(convertToInterfaceList(expected), false, true, ignoreCase)
+		if err != nil {
+			return err
+		}
 		return la.expect(
 			"to.have.text.array",
 			frameExpectOptions{
@@ -341,7 +365,10 @@ func (la *locatorAssertionsImpl) ToHaveText(expected interface{}, options ...Loc
 			"Locator expected to have text",
 		)
 	default:
-		expectedText := toExpectedTextValues([]interface{}{expected}, false, true, ignoreCase)
+		expectedText, err := toExpectedTextValues([]interface{}{expected}, false, true, ignoreCase)
+		if err != nil {
+			return err
+		}
 		return la.expect(
 			"to.have.text",
 			frameExpectOptions{
@@ -360,7 +387,10 @@ func (la *locatorAssertionsImpl) ToHaveValue(value interface{}, options ...Locat
 	if len(options) == 1 {
 		timeout = options[0].Timeout
 	}
-	expectedText := toExpectedTextValues([]interface{}{value}, false, false, nil)
+	expectedText, err := toExpectedTextValues([]interface{}{value}, false, false, nil)
+	if err != nil {
+		return err
+	}
 	return la.expect(
 		"to.have.value",
 		frameExpectOptions{ExpectedText: expectedText, Timeout: timeout},
@@ -374,7 +404,10 @@ func (la *locatorAssertionsImpl) ToHaveValues(values []interface{}, options ...L
 	if len(options) == 1 {
 		timeout = options[0].Timeout
 	}
-	expectedText := toExpectedTextValues(values, false, false, nil)
+	expectedText, err := toExpectedTextValues(values, false, false, nil)
+	if err != nil {
+		return err
+	}
 	return la.expect(
 		"to.have.values",
 		frameExpectOptions{ExpectedText: expectedText, Timeout: timeout},

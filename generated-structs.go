@@ -631,6 +631,15 @@ type Geolocation struct {
 	// Non-negative accuracy value. Defaults to `0`.
 	Accuracy *float64 `json:"accuracy"`
 }
+type BrowserContextUnrouteAllOptions struct {
+	// Specifies wether to wait for already running handlers and what to do if they throw errors:
+	//  - `default` - do not wait for current handler calls (if any) to finish, if unrouted handler throws, it may
+	//   result in unhandled error
+	//  - `wait` - wait for current handler calls (if any) to finish
+	//  - `ignoreErrors` - do not wait for current handler calls (if any) to finish, all errors thrown by the handlers
+	//   after unrouting are silently caught
+	Behavior *UnrouteBehavior `json:"behavior"`
+}
 type BrowserContextExpectConsoleMessageOptions struct {
 	// Receives the [ConsoleMessage] object and resolves to truthy value when the waiting should resolve.
 	Predicate func(ConsoleMessage) bool `json:"predicate"`
@@ -691,10 +700,11 @@ type BrowserTypeConnectOverCDPOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type BrowserTypeLaunchOptions struct {
+	// **NOTE** Use custom browser args at your own risk, as some of them may break Playwright functionality.
 	// Additional arguments to pass to the browser instance. The list of Chromium flags can be found
 	// [here].
 	//
-	// [here]: http://peter.sh/experiments/chromium-command-line-switches/
+	// [here]: https://peter.sh/experiments/chromium-command-line-switches/
 	Args []string `json:"args"`
 	// Browser distribution channel.  Supported values are "chrome", "chrome-beta", "chrome-dev", "chrome-canary",
 	// "msedge", "msedge-beta", "msedge-dev", "msedge-canary". Read more about using
@@ -756,10 +766,11 @@ type BrowserTypeLaunchOptions struct {
 type BrowserTypeLaunchPersistentContextOptions struct {
 	// Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
 	AcceptDownloads *bool `json:"acceptDownloads"`
+	// **NOTE** Use custom browser args at your own risk, as some of them may break Playwright functionality.
 	// Additional arguments to pass to the browser instance. The list of Chromium flags can be found
 	// [here].
 	//
-	// [here]: http://peter.sh/experiments/chromium-command-line-switches/
+	// [here]: https://peter.sh/experiments/chromium-command-line-switches/
 	Args []string `json:"args"`
 	// When using [Page.Goto], [Page.Route], [Page.WaitForURL], [Page.ExpectRequest], or [Page.ExpectResponse] it takes
 	// the base URL in consideration by using the [`URL()`]
@@ -1118,6 +1129,10 @@ type ElementHandleScreenshotOptions struct {
 	// screenshots of high-dpi devices will be twice as large or even larger.
 	// Defaults to `"device"`.
 	Scale *ScreenshotScale `json:"scale"`
+	// Text of the stylesheet to apply while making the screenshot. This is where you can hide dynamic elements, make
+	// elements invisible or change their properties to help you creating repeatable screenshots. This stylesheet pierces
+	// the Shadow DOM and applies to the inner frames.
+	Style *string `json:"style"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
@@ -1643,8 +1658,12 @@ type FrameIsVisibleOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type FrameLocatorOptions struct {
-	// Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer
-	// one. For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+	// Narrows down the results of the method to those which contain elements matching this relative locator. For example,
+	// `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+	// Inner locator **must be relative** to the outer locator and is queried starting with the outer locator match, not
+	// the document root. For example, you can find `content` that has `div` in
+	// `<article><content><div>Playwright</div></content></article>`. However, looking for `content` that has `article
+	// div` will fail, because the inner locator must be relative and should not use any elements outside the `content`.
 	// Note that outer and inner locators must belong to the same frame. Inner locator must not contain [FrameLocator]s.
 	Has Locator `json:"has"`
 	// Matches elements that do not contain an element that matches an inner locator. Inner locator is queried against the
@@ -1964,8 +1983,12 @@ type FrameLocatorGetByTitleOptions struct {
 	Exact *bool `json:"exact"`
 }
 type FrameLocatorLocatorOptions struct {
-	// Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer
-	// one. For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+	// Narrows down the results of the method to those which contain elements matching this relative locator. For example,
+	// `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+	// Inner locator **must be relative** to the outer locator and is queried starting with the outer locator match, not
+	// the document root. For example, you can find `content` that has `div` in
+	// `<article><content><div>Playwright</div></content></article>`. However, looking for `content` that has `article
+	// div` will fail, because the inner locator must be relative and should not use any elements outside the `content`.
 	// Note that outer and inner locators must belong to the same frame. Inner locator must not contain [FrameLocator]s.
 	Has Locator `json:"has"`
 	// Matches elements that do not contain an element that matches an inner locator. Inner locator is queried against the
@@ -2148,8 +2171,12 @@ type LocatorFillOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorFilterOptions struct {
-	// Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer
-	// one. For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+	// Narrows down the results of the method to those which contain elements matching this relative locator. For example,
+	// `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+	// Inner locator **must be relative** to the outer locator and is queried starting with the outer locator match, not
+	// the document root. For example, you can find `content` that has `div` in
+	// `<article><content><div>Playwright</div></content></article>`. However, looking for `content` that has `article
+	// div` will fail, because the inner locator must be relative and should not use any elements outside the `content`.
 	// Note that outer and inner locators must belong to the same frame. Inner locator must not contain [FrameLocator]s.
 	Has Locator `json:"has"`
 	// Matches elements that do not contain an element that matches an inner locator. Inner locator is queried against the
@@ -2320,8 +2347,12 @@ type LocatorIsVisibleOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorLocatorOptions struct {
-	// Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer
-	// one. For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+	// Narrows down the results of the method to those which contain elements matching this relative locator. For example,
+	// `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+	// Inner locator **must be relative** to the outer locator and is queried starting with the outer locator match, not
+	// the document root. For example, you can find `content` that has `div` in
+	// `<article><content><div>Playwright</div></content></article>`. However, looking for `content` that has `article
+	// div` will fail, because the inner locator must be relative and should not use any elements outside the `content`.
 	// Note that outer and inner locators must belong to the same frame. Inner locator must not contain [FrameLocator]s.
 	Has Locator `json:"has"`
 	// Matches elements that do not contain an element that matches an inner locator. Inner locator is queried against the
@@ -2390,6 +2421,10 @@ type LocatorScreenshotOptions struct {
 	// screenshots of high-dpi devices will be twice as large or even larger.
 	// Defaults to `"device"`.
 	Scale *ScreenshotScale `json:"scale"`
+	// Text of the stylesheet to apply while making the screenshot. This is where you can hide dynamic elements, make
+	// elements invisible or change their properties to help you creating repeatable screenshots. This stylesheet pierces
+	// the Shadow DOM and applies to the inner frames.
+	Style *string `json:"style"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
@@ -3089,8 +3124,12 @@ type PageIsVisibleOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type PageLocatorOptions struct {
-	// Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer
-	// one. For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+	// Narrows down the results of the method to those which contain elements matching this relative locator. For example,
+	// `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+	// Inner locator **must be relative** to the outer locator and is queried starting with the outer locator match, not
+	// the document root. For example, you can find `content` that has `div` in
+	// `<article><content><div>Playwright</div></content></article>`. However, looking for `content` that has `article
+	// div` will fail, because the inner locator must be relative and should not use any elements outside the `content`.
 	// Note that outer and inner locators must belong to the same frame. Inner locator must not contain [FrameLocator]s.
 	Has Locator `json:"has"`
 	// Matches elements that do not contain an element that matches an inner locator. Inner locator is queried against the
@@ -3229,6 +3268,10 @@ type PageScreenshotOptions struct {
 	// screenshots of high-dpi devices will be twice as large or even larger.
 	// Defaults to `"device"`.
 	Scale *ScreenshotScale `json:"scale"`
+	// Text of the stylesheet to apply while making the screenshot. This is where you can hide dynamic elements, make
+	// elements invisible or change their properties to help you creating repeatable screenshots. This stylesheet pierces
+	// the Shadow DOM and applies to the inner frames.
+	Style *string `json:"style"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
@@ -3373,6 +3416,15 @@ type PageUncheckOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
+}
+type PageUnrouteAllOptions struct {
+	// Specifies wether to wait for already running handlers and what to do if they throw errors:
+	//  - `default` - do not wait for current handler calls (if any) to finish, if unrouted handler throws, it may
+	//   result in unhandled error
+	//  - `wait` - wait for current handler calls (if any) to finish
+	//  - `ignoreErrors` - do not wait for current handler calls (if any) to finish, all errors thrown by the handlers
+	//   after unrouting are silently caught
+	Behavior *UnrouteBehavior `json:"behavior"`
 }
 type Size struct {
 	// page width in pixels.
@@ -3650,8 +3702,9 @@ type SelectorsRegisterOptions struct {
 	ContentScript *bool `json:"contentScript"`
 }
 type TracingStartOptions struct {
-	// If specified, the trace is going to be saved into the file with the given name inside the “tracesDir” folder
-	// specified in [BrowserType.Launch].
+	// If specified, intermediate trace files are going to be saved into the files with the given name prefix inside the
+	// “tracesDir” folder specified in [BrowserType.Launch]. To specify the final trace zip file name, you need to pass
+	// `path` option to [Tracing.Stop] instead.
 	Name *string `json:"name"`
 	// Whether to capture screenshots during tracing. Screenshots are used to build a timeline preview.
 	Screenshots *bool `json:"screenshots"`
@@ -3665,8 +3718,9 @@ type TracingStartOptions struct {
 	Title *string `json:"title"`
 }
 type TracingStartChunkOptions struct {
-	// If specified, the trace is going to be saved into the file with the given name inside the “tracesDir” folder
-	// specified in [BrowserType.Launch].
+	// If specified, intermediate trace files are going to be saved into the files with the given name prefix inside the
+	// “tracesDir” folder specified in [BrowserType.Launch]. To specify the final trace zip file name, you need to pass
+	// `path` option to [Tracing.StopChunk] instead.
 	Name *string `json:"name"`
 	// Trace name to be shown in the Trace Viewer.
 	Title *string `json:"title"`
