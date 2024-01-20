@@ -150,12 +150,16 @@ func TestPageQuerySelector(t *testing.T) {
 	//nolint:staticcheck
 	one, err := page.QuerySelector("div#one")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	two, err := one.QuerySelector("span#two")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	three, err := two.QuerySelector("div#three")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	four, err := three.QuerySelector("span#four")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	textContent, err := four.TextContent()
 	require.NoError(t, err)
 	require.Equal(t, strings.TrimSpace(textContent), "foobar")
@@ -174,6 +178,7 @@ func TestPageQuerySelectorAll(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 3, len(elements))
 	for i := 0; i < 3; i++ {
+		//nolint:staticcheck
 		textContent, err := elements[i].TextContent()
 		require.NoError(t, err)
 		require.Equal(t, strconv.Itoa(i), textContent)
@@ -410,6 +415,7 @@ func TestPageWaitForSelector(t *testing.T) {
 	//nolint:staticcheck
 	element, err := page.WaitForSelector("text=myElement")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	textContent, err := element.TextContent()
 	require.NoError(t, err)
 	require.Equal(t, "myElement", textContent)

@@ -79,6 +79,7 @@ func TestFrameInnerHTML(t *testing.T) {
 	//nolint:staticcheck
 	handle, err := page.QuerySelector("#outer")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	innerHTML, err := handle.InnerHTML()
 	require.NoError(t, err)
 	require.Equal(t, `<div id="inner">Text,
