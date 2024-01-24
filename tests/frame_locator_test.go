@@ -79,9 +79,7 @@ func routeAmbiguous(t *testing.T, page playwright.Page) {
 }
 
 func TestFrameLocatorFirst(t *testing.T) {
-
 	t.Run("basic", func(t *testing.T) {
-
 		BeforeEach(t)
 		defer AfterEach(t)
 		routeAmbiguous(t, page)
@@ -104,7 +102,6 @@ func TestFrameLocatorFirst(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, "Hello from iframe-2.html", innerText)
 	})
-
 }
 
 func TestFrameLocatorNth(t *testing.T) {

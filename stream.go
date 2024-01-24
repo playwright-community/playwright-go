@@ -12,7 +12,7 @@ type streamImpl struct {
 }
 
 func (s *streamImpl) SaveAs(path string) error {
-	err := os.MkdirAll(filepath.Dir(path), 0777)
+	err := os.MkdirAll(filepath.Dir(path), 0o777)
 	if err != nil {
 		return err
 	}

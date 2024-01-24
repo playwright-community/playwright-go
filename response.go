@@ -85,6 +85,7 @@ func (r *responseImpl) AllHeaders() (map[string]string, error) {
 	}
 	return headers.Headers(), nil
 }
+
 func (r *responseImpl) HeadersArray() ([]NameValue, error) {
 	headers, err := r.ActualHeaders()
 	if err != nil {
@@ -92,6 +93,7 @@ func (r *responseImpl) HeadersArray() ([]NameValue, error) {
 	}
 	return headers.HeadersArray(), nil
 }
+
 func (r *responseImpl) HeaderValue(name string) (string, error) {
 	headers, err := r.ActualHeaders()
 	if err != nil {
@@ -99,6 +101,7 @@ func (r *responseImpl) HeaderValue(name string) (string, error) {
 	}
 	return headers.Get(name), err
 }
+
 func (r *responseImpl) HeaderValues(name string) ([]string, error) {
 	headers, err := r.ActualHeaders()
 	if err != nil {
@@ -106,6 +109,7 @@ func (r *responseImpl) HeaderValues(name string) ([]string, error) {
 	}
 	return headers.GetAll(name), err
 }
+
 func (r *responseImpl) ActualHeaders() (*rawHeaders, error) {
 	if r.rawHeaders == nil {
 		headers, err := r.channel.Send("rawResponseHeaders")

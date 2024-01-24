@@ -10,9 +10,7 @@ import (
 
 const fileSizeLimitInBytes = 50 * 1024 * 1024
 
-var (
-	ErrInputFilesSizeExceeded = errors.New("Cannot set buffer larger than 50Mb, please write it to a file and pass its path instead.")
-)
+var ErrInputFilesSizeExceeded = errors.New("Cannot set buffer larger than 50Mb, please write it to a file and pass its path instead.")
 
 type inputFiles struct {
 	Selector   *string             `json:"selector,omitempty"`
@@ -26,7 +24,7 @@ type inputFiles struct {
 //   - files should be one of: string, []string, InputFile, []InputFile,
 //     string: local file path
 func convertInputFiles(files interface{}, context *browserContextImpl) (*inputFiles, error) {
-	var converted = &inputFiles{}
+	converted := &inputFiles{}
 	switch items := files.(type) {
 	case InputFile:
 		if sizeOfInputFiles([]InputFile{items}) > fileSizeLimitInBytes {

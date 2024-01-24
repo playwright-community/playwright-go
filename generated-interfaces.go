@@ -139,7 +139,7 @@ type APIResponseAssertions interface {
 	ToBeOK() error
 }
 
-//  A Browser is created via [BrowserType.Launch]. An example of using a [Browser] to create a [Page]:
+// A Browser is created via [BrowserType.Launch]. An example of using a [Browser] to create a [Page]:
 type Browser interface {
 	EventEmitter
 	// Emitted when Browser gets disconnected from the browser application. This might happen because of one of the
@@ -210,7 +210,8 @@ type Browser interface {
 	Version() string
 }
 
-//  BrowserContexts provide a way to operate multiple independent browser sessions.
+//	BrowserContexts provide a way to operate multiple independent browser sessions.
+//
 // If a page opens another page, e.g. with a `window.open` call, the popup will belong to the parent page's browser
 // context.
 // Playwright allows creating "incognito" browser contexts with [Browser.NewContext] method. "Incognito" browser
@@ -517,14 +518,15 @@ type BrowserType interface {
 	Name() string
 }
 
-//  The `CDPSession` instances are used to talk raw Chrome Devtools Protocol:
-//  - protocol methods can be called with `session.send` method.
-//  - protocol events can be subscribed to with `session.on` method.
+//	The `CDPSession` instances are used to talk raw Chrome Devtools Protocol:
+//	- protocol methods can be called with `session.send` method.
+//	- protocol events can be subscribed to with `session.on` method.
+//
 // Useful links:
-//  - Documentation on DevTools Protocol can be found here:
-//   [DevTools Protocol Viewer].
-//  - Getting Started with DevTools Protocol:
-//   https://github.com/aslushnikov/getting-started-with-cdp/blob/master/README.md
+//   - Documentation on DevTools Protocol can be found here:
+//     [DevTools Protocol Viewer].
+//   - Getting Started with DevTools Protocol:
+//     https://github.com/aslushnikov/getting-started-with-cdp/blob/master/README.md
 //
 // [DevTools Protocol Viewer]: https://chromedevtools.github.io/devtools-protocol/
 type CDPSession interface {
@@ -633,7 +635,8 @@ type Download interface {
 	String() string
 }
 
-//  ElementHandle represents an in-page DOM element. ElementHandles can be created with the [Page.QuerySelector]
+//	ElementHandle represents an in-page DOM element. ElementHandles can be created with the [Page.QuerySelector]
+//
 // method.
 // **NOTE** The use of ElementHandle is discouraged, use [Locator] objects and web-first assertions instead.
 // ElementHandle prevents DOM element from garbage collection unless the handle is disposed with [JSHandle.Dispose].
@@ -1131,11 +1134,12 @@ type FileChooser interface {
 // At every point of time, page exposes its current frame tree via the [Page.MainFrame] and [Frame.ChildFrames]
 // methods.
 // [Frame] object's lifecycle is controlled by three events, dispatched on the page object:
-//  - [Page.OnFrameAttached] - fired when the frame gets attached to the page. A Frame can be attached to the page
-//   only once.
-//  - [Page.OnFrameNavigated] - fired when the frame commits navigation to a different URL.
-//  - [Page.OnFrameDetached] - fired when the frame gets detached from the page.  A Frame can be detached from the
-//   page only once.
+//   - [Page.OnFrameAttached] - fired when the frame gets attached to the page. A Frame can be attached to the page
+//     only once.
+//   - [Page.OnFrameNavigated] - fired when the frame commits navigation to a different URL.
+//   - [Page.OnFrameDetached] - fired when the frame gets detached from the page.  A Frame can be detached from the
+//     page only once.
+//
 // An example of dumping frame tree:
 type Frame interface {
 	// Returns the added tag when the script's onload fires or when the script content was injected into frame.
@@ -2848,7 +2852,8 @@ type Mouse interface {
 	Wheel(deltaX float64, deltaY float64) error
 }
 
-//  Page provides methods to interact with a single tab in a [Browser], or an
+//	Page provides methods to interact with a single tab in a [Browser], or an
+//
 // [extension background page] in Chromium. One [Browser]
 // instance might have multiple [Page] instances.
 // This example creates a page, navigates it to a URL, and then saves a screenshot:
@@ -3916,9 +3921,10 @@ type PlaywrightAssertions interface {
 }
 
 // Whenever the page sends a request for a network resource the following sequence of events are emitted by [Page]:
-//  - [Page.OnRequest] emitted when the request is issued by the page.
-//  - [Page.OnResponse] emitted when/if the response status and headers are received for the request.
-//  - [Page.OnRequestFinished] emitted when the response body is downloaded and the request is complete.
+//   - [Page.OnRequest] emitted when the request is issued by the page.
+//   - [Page.OnResponse] emitted when/if the response status and headers are received for the request.
+//   - [Page.OnRequestFinished] emitted when the response body is downloaded and the request is complete.
+//
 // If request fails at some point, then instead of `requestfinished` event (and possibly instead of 'response'
 // event), the  [Page.OnRequestFailed] event is emitted.
 // **NOTE** HTTP Error responses, such as 404 or 503, are still successful responses from HTTP standpoint, so request

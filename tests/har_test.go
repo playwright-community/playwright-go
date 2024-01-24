@@ -302,7 +302,7 @@ func TestFallbackContinueShouldContinueRequestsOnBadHar(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
 	harPath := filepath.Join(t.TempDir(), "invalid.har")
-	require.NoError(t, os.WriteFile(harPath, []byte(`{"log": {}}`), 0644))
+	require.NoError(t, os.WriteFile(harPath, []byte(`{"log": {}}`), 0o644))
 	err := context.RouteFromHAR(harPath, playwright.BrowserContextRouteFromHAROptions{
 		NotFound: playwright.HarNotFoundFallback,
 	})

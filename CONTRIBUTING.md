@@ -1,5 +1,8 @@
 # Contributing
 
+## Code style
+The Go code is linted with [golangci-lint](https://golangci-lint.run/) and formatted with [gofumpt](https://github.com/mvdan/gofumpt). Please configure your editor to run the tools while developing and make sure to run the tools before committing any code.
+
 ## Tests
 
 ### Test coverage

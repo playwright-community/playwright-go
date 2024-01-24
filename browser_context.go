@@ -66,6 +66,7 @@ func (b *browserContextImpl) Pages() []Page {
 func (b *browserContextImpl) Browser() Browser {
 	return b.browser
 }
+
 func (b *browserContextImpl) Tracing() Tracing {
 	return b.tracing
 }

@@ -174,7 +174,7 @@ func TestAssignFields(t *testing.T) {
 			omitExtra bool
 		}
 	)
-	var testV = "foo"
+	testV := "foo"
 
 	tests := []struct {
 		name    string

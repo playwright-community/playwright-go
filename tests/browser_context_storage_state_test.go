@@ -58,15 +58,16 @@ func TestBrowserContextStorageStateSetLocalStorage(t *testing.T) {
 	context, err := browser.NewContext(
 		playwright.BrowserNewContextOptions{
 			StorageState: &playwright.OptionalStorageState{
-				Origins: []playwright.Origin{{
-					Origin: "https://www.example.com",
-					LocalStorage: []playwright.NameValue{
-						{
-							Name:  "name1",
-							Value: "value1",
+				Origins: []playwright.Origin{
+					{
+						Origin: "https://www.example.com",
+						LocalStorage: []playwright.NameValue{
+							{
+								Name:  "name1",
+								Value: "value1",
+							},
 						},
 					},
-				},
 				},
 			},
 		},

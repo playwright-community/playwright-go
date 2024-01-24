@@ -395,7 +395,7 @@ func (p *pageImpl) Screenshot(options ...PageScreenshotOptions) ([]byte, error) 
 		return nil, fmt.Errorf("could not decode base64 :%w", err)
 	}
 	if path != nil {
-		if err := os.WriteFile(*path, image, 0644); err != nil {
+		if err := os.WriteFile(*path, image, 0o644); err != nil {
 			return nil, err
 		}
 	}
@@ -416,7 +416,7 @@ func (p *pageImpl) PDF(options ...PagePdfOptions) ([]byte, error) {
 		return nil, fmt.Errorf("could not decode base64 :%w", err)
 	}
 	if path != nil {
-		if err := os.WriteFile(*path, pdf, 0644); err != nil {
+		if err := os.WriteFile(*path, pdf, 0o644); err != nil {
 			return nil, err
 		}
 	}
@@ -704,6 +704,7 @@ func (p *pageImpl) AddInitScript(script Script) error {
 func (p *pageImpl) Keyboard() Keyboard {
 	return p.keyboard
 }
+
 func (p *pageImpl) Mouse() Mouse {
 	return p.mouse
 }
@@ -1028,6 +1029,7 @@ func (p *pageImpl) ExposeFunction(name string, binding ExposedFunction) error {
 		return binding(args...)
 	})
 }
+
 func (p *pageImpl) ExposeBinding(name string, binding BindingCallFunction, handle ...bool) error {
 	needsHandle := false
 	if len(handle) == 1 {

@@ -412,7 +412,6 @@ func isJsonContentType(headers []map[string]string) bool {
 				}
 			}
 		}
-
 	}
 	return false
 }

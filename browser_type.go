@@ -87,6 +87,7 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 	b.didCreateContext(context, option, tracesDir)
 	return context, nil
 }
+
 func (b *browserTypeImpl) Connect(wsEndpoint string, options ...BrowserTypeConnectOptions) (Browser, error) {
 	overrides := map[string]interface{}{
 		"wsEndpoint": wsEndpoint,

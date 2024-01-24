@@ -268,7 +268,7 @@ func (e *elementHandleImpl) Screenshot(options ...ElementHandleScreenshotOptions
 		return nil, fmt.Errorf("could not decode base64 :%w", err)
 	}
 	if path != nil {
-		if err := os.WriteFile(*path, image, 0644); err != nil {
+		if err := os.WriteFile(*path, image, 0o644); err != nil {
 			return nil, err
 		}
 	}

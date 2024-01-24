@@ -119,6 +119,7 @@ func TestBrowserContextSetHttpCredentials(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 200, response.Status())
 }
+
 func TestBrowserContextNewCDPSession(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
@@ -162,7 +163,8 @@ func TestBrowserContextAddCookies(t *testing.T) {
 			Name:  "password",
 			Value: "123456",
 			URL:   playwright.String(server.EMPTY_PAGE),
-		}}))
+		},
+	}))
 	cookie, err := page.Evaluate("() => document.cookie")
 	require.NoError(t, err)
 	require.Equal(t, "password=123456", cookie)
