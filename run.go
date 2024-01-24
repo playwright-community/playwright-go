@@ -69,7 +69,7 @@ func getDefaultCacheDirectory() (string, error) {
 
 func (d *PlaywrightDriver) isUpToDateDriver() (bool, error) {
 	if _, err := os.Stat(d.DriverDirectory); os.IsNotExist(err) {
-		if err := os.MkdirAll(d.DriverDirectory, 0777); err != nil {
+		if err := os.MkdirAll(d.DriverDirectory, 0o777); err != nil {
 			return false, fmt.Errorf("could not create driver directory: %w", err)
 		}
 	}
@@ -177,7 +177,7 @@ func (d *PlaywrightDriver) DownloadDriver() error {
 		if err := file.Close(); err != nil {
 			return fmt.Errorf("could not close file (zip file): %w", err)
 		}
-		if zipFile.Mode().Perm()&0100 != 0 && runtime.GOOS != "windows" {
+		if zipFile.Mode().Perm()&0o100 != 0 && runtime.GOOS != "windows" {
 			if err := makeFileExecutable(zipFileDiskPath); err != nil {
 				return fmt.Errorf("could not make executable: %w", err)
 			}

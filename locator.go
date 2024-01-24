@@ -138,7 +138,6 @@ func (l *locatorImpl) BoundingBox(options ...LocatorBoundingBoxOptions) (*Rect, 
 	result, err := l.withElement(func(handle ElementHandle) (interface{}, error) {
 		return handle.BoundingBox()
 	}, option)
-
 	if err != nil {
 		return nil, err
 	}
@@ -657,7 +656,6 @@ func (l *locatorImpl) Screenshot(options ...LocatorScreenshotOptions) ([]byte, e
 		}
 		return handle.Screenshot(screenshotOption)
 	}, option)
-
 	if err != nil {
 		return nil, err
 	}

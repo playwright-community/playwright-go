@@ -20,7 +20,9 @@ else
   echo 
 fi
 mv $PLAYWRIGHT_DIR/utils/doclint/generate_types/go/generated-{enums,interfaces,structs}.go .
+# fmt first or not, gofumpt's result will be different
 go fmt generated-{enums,interfaces,structs}.go > /dev/null
+gofumpt -w generated-{enums,interfaces,structs}.go > /dev/null
 
 echo "Updating README"
 echo "==============="

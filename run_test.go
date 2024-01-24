@@ -19,7 +19,8 @@ func TestDriverInstall(t *testing.T) {
 	driver, err := NewDriver(&RunOptions{
 		DriverDirectory: driverPath,
 		Browsers:        []string{getBrowserName()},
-		Verbose:         true})
+		Verbose:         true,
+	})
 	if err != nil {
 		t.Fatalf("could not start driver: %v", err)
 	}

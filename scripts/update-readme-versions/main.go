@@ -50,7 +50,7 @@ func main() {
 			log.Fatalf("could not close browser: %v", err)
 		}
 	}
-	if err := os.WriteFile(readmePath, readmeContent, 0644); err != nil {
+	if err := os.WriteFile(readmePath, readmeContent, 0o644); err != nil {
 		log.Fatalf("could not write readme: %v", err)
 	}
 	if err := pw.Stop(); err != nil {

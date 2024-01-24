@@ -5,6 +5,4 @@ package multierror
 
 import "errors"
 
-var (
-	Join = errors.Join
-)
+var Join = errors.Join

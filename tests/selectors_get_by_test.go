@@ -104,7 +104,8 @@ func TestSelectorsGetByRoleEscaping(t *testing.T) {
 		return page.GetByRole("link").EvaluateAll("els => els.map(e => e.outerHTML)")
 	}, []interface{}{
 		`<a href="https://playwright.dev">issues 123</a>`,
-		`<a href="https://playwright.dev">he llo 56</a>`})
+		`<a href="https://playwright.dev">he llo 56</a>`,
+	})
 	utils.AssertResult(t, func() (interface{}, error) {
 		return page.GetByRole("link", playwright.PageGetByRoleOptions{
 			Name: "issues 123",

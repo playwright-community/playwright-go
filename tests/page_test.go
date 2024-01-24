@@ -317,6 +317,7 @@ func TestPageExpectPopup(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, popup.URL(), server.EMPTY_PAGE)
 }
+
 func TestPageExpectNavigation(t *testing.T) {
 	t.Skip()
 	BeforeEach(t)
@@ -800,7 +801,7 @@ func TestPageFrame(t *testing.T) {
 	err := page.SetContent(fmt.Sprintf("<iframe name=target src=%s></iframe>", server.EMPTY_PAGE))
 	require.NoError(t, err)
 
-	var name = "target"
+	name := "target"
 	frame1 := page.Frame(playwright.PageFrameOptions{Name: &name})
 	require.Equal(t, name, frame1.Name())
 	require.Equal(t, server.EMPTY_PAGE, frame1.URL())
@@ -809,7 +810,7 @@ func TestPageFrame(t *testing.T) {
 	require.Equal(t, name, frame2.Name())
 	require.Equal(t, server.EMPTY_PAGE, frame2.URL())
 
-	var badName = "test"
+	badName := "test"
 	frame3 := page.Frame(playwright.PageFrameOptions{Name: &badName, URL: server.EMPTY_PAGE})
 	require.Equal(t, name, frame3.Name())
 	require.Equal(t, server.EMPTY_PAGE, frame3.URL())
@@ -941,6 +942,7 @@ func TestPageDragAndDrop(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, true, value)
 }
+
 func TestPageInputValue(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)

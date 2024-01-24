@@ -205,6 +205,7 @@ func TestBrowserTypeConnectArtifactPath(t *testing.T) {
 	require.Error(t, err)
 	require.Equal(t, err, errors.New("Path is not available when connecting remotely. Use SaveAs() to save a local copy."))
 }
+
 func TestBrowserTypeConnectOverCDP(t *testing.T) {
 	if !isChromium {
 		t.Skip("CDP is only supported on Chromium")

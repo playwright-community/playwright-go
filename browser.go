@@ -179,11 +179,11 @@ func (b *browserImpl) StopTracing() ([]byte, error) {
 		return binary, err
 	}
 	if b.chromiumTracingPath != nil {
-		err := os.MkdirAll(filepath.Dir(*b.chromiumTracingPath), 0777)
+		err := os.MkdirAll(filepath.Dir(*b.chromiumTracingPath), 0o777)
 		if err != nil {
 			return binary, err
 		}
-		err = os.WriteFile(*b.chromiumTracingPath, binary, 0644)
+		err = os.WriteFile(*b.chromiumTracingPath, binary, 0o644)
 		if err != nil {
 			return binary, err
 		}
