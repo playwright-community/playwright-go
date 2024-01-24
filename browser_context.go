@@ -232,8 +232,7 @@ func (b *browserContextImpl) unrouteInternal(removed []*routeHandlerEntry, remai
 	b.Lock()
 	defer b.Unlock()
 	b.routes = remaining
-	err := b.updateInterceptionPatterns()
-	if err != nil {
+	if err := b.updateInterceptionPatterns(); err != nil {
 		return err
 	}
 	if behavior == nil || behavior == UnrouteBehaviorDefault {

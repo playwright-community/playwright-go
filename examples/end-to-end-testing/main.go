@@ -36,7 +36,7 @@ func main() {
 	assertErrorToNilf("could not create context: %w", err)
 	page, err := context.NewPage()
 	assertErrorToNilf("could not create page: %w", err)
-	_, err = page.Goto("http://todomvc.com/examples/typescript-react/")
+	_, err = page.Goto("https://demo.playwright.dev/todomvc/")
 	assertErrorToNilf("could not goto: %w", err)
 
 	// Helper function to get the amount of todos on the page
