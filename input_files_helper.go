@@ -52,10 +52,12 @@ func convertInputFiles(files interface{}, context *browserContextImpl) (*inputFi
 			if err != nil {
 				return nil, fmt.Errorf("failed to get last modified time of %s: %w", file, err)
 			}
-			result, err := context.channel.Send("createTempFile", map[string]interface{}{
-				"name":           filepath.Base(file),
-				"lastModifiedMs": lastModifiedMs,
-			})
+			result, err := context.connection.WrapAPICall(func() (interface{}, error) {
+				return context.channel.Send("createTempFile", map[string]interface{}{
+					"name":           filepath.Base(file),
+					"lastModifiedMs": lastModifiedMs,
+				})
+			}, true)
 			if err != nil {
 				return nil, err
 			}

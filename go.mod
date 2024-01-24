@@ -3,7 +3,7 @@ module github.com/playwright-community/playwright-go
 go 1.19
 
 require (
-	github.com/danwakefield/fnmatch v0.0.0-20160403171240-cbb64ac3d964
+	github.com/deckarep/golang-set/v2 v2.6.0
 	github.com/go-jose/go-jose/v3 v3.0.1
 	github.com/go-stack/stack v1.8.1
 	github.com/gorilla/websocket v1.5.1

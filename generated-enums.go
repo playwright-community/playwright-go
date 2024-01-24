@@ -235,6 +235,19 @@ var (
 	RouteFromHarUpdateContentPolicyAttach                                  = getRouteFromHarUpdateContentPolicy("attach")
 )
 
+func getUnrouteBehavior(in string) *UnrouteBehavior {
+	v := UnrouteBehavior(in)
+	return &v
+}
+
+type UnrouteBehavior string
+
+var (
+	UnrouteBehaviorWait         *UnrouteBehavior = getUnrouteBehavior("wait")
+	UnrouteBehaviorIgnoreErrors                  = getUnrouteBehavior("ignoreErrors")
+	UnrouteBehaviorDefault                       = getUnrouteBehavior("default")
+)
+
 func getMouseButton(in string) *MouseButton {
 	v := MouseButton(in)
 	return &v

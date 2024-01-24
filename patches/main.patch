@@ -342,7 +342,7 @@ index 360b844d2..6b1bd2d1c 100644
  
  :::note
 diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
-index ffe0c5456..5cf49b621 100644
+index 98a1c7d39..d616ebc8c 100644
 --- a/docs/src/api/class-browsercontext.md
 +++ b/docs/src/api/class-browsercontext.md
 @@ -400,7 +400,7 @@ The order of evaluation of multiple scripts installed via [`method: BrowserConte
@@ -381,7 +381,7 @@ index ffe0c5456..5cf49b621 100644
  - returns: <[Array]<[Worker]>>
  
  :::note
-@@ -1428,6 +1428,13 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
+@@ -1436,6 +1436,13 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
  
  Optional handler function used to register a routing with [`method: BrowserContext.route`].
  
@@ -395,7 +395,7 @@ index ffe0c5456..5cf49b621 100644
  ### param: BrowserContext.unroute.handler
  * since: v1.8
  * langs: csharp, java
-@@ -1469,7 +1476,8 @@ Condition to wait for.
+@@ -1477,7 +1484,8 @@ Condition to wait for.
  
  ## async method: BrowserContext.waitForConsoleMessage
  * since: v1.34
@@ -405,7 +405,7 @@ index ffe0c5456..5cf49b621 100644
    - alias-python: expect_console_message
    - alias-csharp: RunAndWaitForConsoleMessage
  - returns: <[ConsoleMessage]>
-@@ -1500,7 +1508,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
+@@ -1508,7 +1516,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
  
  ## async method: BrowserContext.waitForEvent
  * since: v1.8
@@ -415,7 +415,7 @@ index ffe0c5456..5cf49b621 100644
    - alias-python: expect_event
  - returns: <[any]>
  
-@@ -1566,7 +1575,8 @@ Either a predicate that receives an event or an options object. Optional.
+@@ -1574,7 +1583,8 @@ Either a predicate that receives an event or an options object. Optional.
  
  ## async method: BrowserContext.waitForPage
  * since: v1.9
@@ -425,7 +425,7 @@ index ffe0c5456..5cf49b621 100644
    - alias-python: expect_page
    - alias-csharp: RunAndWaitForPage
  - returns: <[Page]>
-@@ -1585,7 +1595,7 @@ Will throw an error if the context closes before new [Page] is created.
+@@ -1593,7 +1603,7 @@ Will throw an error if the context closes before new [Page] is created.
  
  ### option: BrowserContext.waitForPage.predicate
  * since: v1.9
@@ -434,7 +434,7 @@ index ffe0c5456..5cf49b621 100644
  - `predicate` <[function]\([Page]\):[boolean]>
  
  Receives the [Page] object and resolves to truthy value when the waiting should resolve.
-@@ -1598,7 +1608,8 @@ Receives the [Page] object and resolves to truthy value when the waiting should
+@@ -1606,7 +1616,8 @@ Receives the [Page] object and resolves to truthy value when the waiting should
  
  ## async method: BrowserContext.waitForEvent2
  * since: v1.8
@@ -518,7 +518,7 @@ index 336ba55bd..42888ce06 100644
    * alias-csharp: RunAndWaitForNavigation
  - returns: <[null]|[Response]>
 diff --git a/docs/src/api/class-locatorassertions.md b/docs/src/api/class-locatorassertions.md
-index cf78c6ce9..441cdddf8 100644
+index ad06c2514..d4f56009d 100644
 --- a/docs/src/api/class-locatorassertions.md
 +++ b/docs/src/api/class-locatorassertions.md
 @@ -69,7 +69,7 @@ public class ExampleTests : PageTest
@@ -548,7 +548,7 @@ index cf78c6ce9..441cdddf8 100644
  - `expected` <[string]|[RegExp]|[Array]<[string]>|[Array]<[RegExp]>|[Array]<[string]|[RegExp]>>
  
  Expected class or RegExp or a list of those.
-@@ -1751,7 +1751,7 @@ Expected string or RegExp or a list of those.
+@@ -1757,7 +1757,7 @@ Expected string or RegExp or a list of those.
  
  ### param: LocatorAssertions.toHaveText.expected
  * since: v1.18
@@ -557,7 +557,7 @@ index cf78c6ce9..441cdddf8 100644
  - `expected` <[string]|[RegExp]|[Array]<[string]>|[Array]<[RegExp]>|[Array]<[string]|[RegExp]>>
  
  Expected string or RegExp or a list of those.
-@@ -1888,7 +1888,7 @@ await Expect(locator).ToHaveValuesAsync(new Regex[] { new Regex("R"), new Regex(
+@@ -1894,7 +1894,7 @@ await Expect(locator).ToHaveValuesAsync(new Regex[] { new Regex("R"), new Regex(
  
  ### param: LocatorAssertions.toHaveValues.values
  * since: v1.23
@@ -567,7 +567,7 @@ index cf78c6ce9..441cdddf8 100644
  
  Expected options currently selected.
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index e87554790..b6e94ec56 100644
+index 635f49ebb..868b48583 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
 @@ -618,7 +618,7 @@ The order of evaluation of multiple scripts installed via [`method: BrowserConte
@@ -693,7 +693,7 @@ index e87554790..b6e94ec56 100644
  ### param: Page.route.handler
  * since: v1.8
  * langs: csharp, java
-@@ -3695,12 +3702,12 @@ await page.GotoAsync("https://www.microsoft.com");
+@@ -3698,12 +3705,12 @@ await page.GotoAsync("https://www.microsoft.com");
  
  ### param: Page.setViewportSize.width
  * since: v1.10
@@ -708,7 +708,7 @@ index e87554790..b6e94ec56 100644
  - `height` <[int]> page height in pixels.
  
  ## async method: Page.tap
-@@ -3879,6 +3886,13 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
+@@ -3890,6 +3897,13 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
  
  Optional handler function to route the request.
  
@@ -722,7 +722,7 @@ index e87554790..b6e94ec56 100644
  ### param: Page.unroute.handler
  * since: v1.8
  * langs: csharp, java
-@@ -3917,7 +3931,8 @@ Performs action and waits for the Page to close.
+@@ -3928,7 +3942,8 @@ Performs action and waits for the Page to close.
  
  ## async method: Page.waitForConsoleMessage
  * since: v1.9
@@ -732,7 +732,7 @@ index e87554790..b6e94ec56 100644
    - alias-python: expect_console_message
    - alias-csharp: RunAndWaitForConsoleMessage
  - returns: <[ConsoleMessage]>
-@@ -3948,7 +3963,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
+@@ -3959,7 +3974,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
  
  ## async method: Page.waitForDownload
  * since: v1.9
@@ -742,7 +742,7 @@ index e87554790..b6e94ec56 100644
    - alias-python: expect_download
    - alias-csharp: RunAndWaitForDownload
  - returns: <[Download]>
-@@ -3979,7 +3995,8 @@ Receives the [Download] object and resolves to truthy value when the waiting sho
+@@ -3990,7 +4006,8 @@ Receives the [Download] object and resolves to truthy value when the waiting sho
  
  ## async method: Page.waitForEvent
  * since: v1.8
@@ -752,7 +752,7 @@ index e87554790..b6e94ec56 100644
    - alias-python: expect_event
  - returns: <[any]>
  
-@@ -4032,7 +4049,8 @@ Either a predicate that receives an event or an options object. Optional.
+@@ -4043,7 +4060,8 @@ Either a predicate that receives an event or an options object. Optional.
  
  ## async method: Page.waitForFileChooser
  * since: v1.9
@@ -762,7 +762,7 @@ index e87554790..b6e94ec56 100644
    - alias-python: expect_file_chooser
    - alias-csharp: RunAndWaitForFileChooser
  - returns: <[FileChooser]>
-@@ -4190,7 +4208,7 @@ await page.WaitForFunctionAsync("selector => !!document.querySelector(selector)"
+@@ -4201,7 +4219,7 @@ await page.WaitForFunctionAsync("selector => !!document.querySelector(selector)"
  
  Optional argument to pass to [`param: expression`].
  
@@ -771,7 +771,7 @@ index e87554790..b6e94ec56 100644
  * since: v1.8
  
  ### option: Page.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
-@@ -4283,6 +4301,11 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
+@@ -4294,6 +4312,11 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
  ```
  
  ### param: Page.waitForLoadState.state = %%-wait-for-load-state-state-%%
@@ -783,7 +783,7 @@ index e87554790..b6e94ec56 100644
  * since: v1.8
  
  ### option: Page.waitForLoadState.timeout = %%-navigation-timeout-%%
-@@ -4295,6 +4318,7 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
+@@ -4306,6 +4329,7 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
  * since: v1.8
  * deprecated: This method is inherently racy, please use [`method: Page.waitForURL`] instead.
  * langs:
@@ -791,7 +791,7 @@ index e87554790..b6e94ec56 100644
    * alias-python: expect_navigation
    * alias-csharp: RunAndWaitForNavigation
  - returns: <[null]|[Response]>
-@@ -4379,7 +4403,8 @@ a navigation.
+@@ -4390,7 +4414,8 @@ a navigation.
  
  ## async method: Page.waitForPopup
  * since: v1.9
@@ -801,7 +801,7 @@ index e87554790..b6e94ec56 100644
    - alias-python: expect_popup
    - alias-csharp: RunAndWaitForPopup
  - returns: <[Page]>
-@@ -4411,6 +4436,7 @@ Receives the [Page] object and resolves to truthy value when the waiting should
+@@ -4422,6 +4447,7 @@ Receives the [Page] object and resolves to truthy value when the waiting should
  ## async method: Page.waitForRequest
  * since: v1.8
  * langs:
@@ -809,7 +809,7 @@ index e87554790..b6e94ec56 100644
    * alias-python: expect_request
    * alias-csharp: RunAndWaitForRequest
  - returns: <[Request]>
-@@ -4518,7 +4544,8 @@ changed by using the [`method: Page.setDefaultTimeout`] method.
+@@ -4529,7 +4555,8 @@ changed by using the [`method: Page.setDefaultTimeout`] method.
  
  ## async method: Page.waitForRequestFinished
  * since: v1.12
@@ -819,7 +819,7 @@ index e87554790..b6e94ec56 100644
    - alias-python: expect_request_finished
    - alias-csharp: RunAndWaitForRequestFinished
  - returns: <[Request]>
-@@ -4550,6 +4577,7 @@ Receives the [Request] object and resolves to truthy value when the waiting shou
+@@ -4561,6 +4588,7 @@ Receives the [Request] object and resolves to truthy value when the waiting shou
  ## async method: Page.waitForResponse
  * since: v1.8
  * langs:
@@ -827,7 +827,7 @@ index e87554790..b6e94ec56 100644
    * alias-python: expect_response
    * alias-csharp: RunAndWaitForResponse
  - returns: <[Response]>
-@@ -4912,7 +4940,8 @@ await page.WaitForURLAsync("**/target.html");
+@@ -4923,7 +4951,8 @@ await page.WaitForURLAsync("**/target.html");
  
  ## async method: Page.waitForWebSocket
  * since: v1.9
@@ -837,7 +837,7 @@ index e87554790..b6e94ec56 100644
    - alias-python: expect_websocket
    - alias-csharp: RunAndWaitForWebSocket
  - returns: <[WebSocket]>
-@@ -4943,7 +4972,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
+@@ -4954,7 +4983,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
  
  ## async method: Page.waitForWorker
  * since: v1.9
@@ -847,7 +847,7 @@ index e87554790..b6e94ec56 100644
    - alias-python: expect_worker
    - alias-csharp: RunAndWaitForWorker
  - returns: <[Worker]>
-@@ -4985,7 +5015,8 @@ This does not contain ServiceWorkers
+@@ -4996,7 +5026,8 @@ This does not contain ServiceWorkers
  
  ## async method: Page.waitForEvent2
  * since: v1.8
@@ -858,7 +858,7 @@ index e87554790..b6e94ec56 100644
  - returns: <[any]>
  
 diff --git a/docs/src/api/class-pageassertions.md b/docs/src/api/class-pageassertions.md
-index fcb4f3865..83775cabc 100644
+index 75a3ec5e8..0180edb99 100644
 --- a/docs/src/api/class-pageassertions.md
 +++ b/docs/src/api/class-pageassertions.md
 @@ -71,7 +71,7 @@ public class ExampleTests : PageTest
@@ -970,7 +970,7 @@ index 13ff68b85..761ac8bc8 100644
  
  Returns the JSON representation of response body.
 diff --git a/docs/src/api/class-route.md b/docs/src/api/class-route.md
-index afbf07124..282188cfd 100644
+index f55843ef5..9ae18fd9d 100644
 --- a/docs/src/api/class-route.md
 +++ b/docs/src/api/class-route.md
 @@ -125,7 +125,7 @@ If set changes the post data of request.
@@ -1023,10 +1023,10 @@ index 4c3011430..4ced2d60d 100644
    - `path` ?<[path]> Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the
      current working directory. Optional.
 diff --git a/docs/src/api/class-tracing.md b/docs/src/api/class-tracing.md
-index 144a331a5..ed4dee220 100644
+index 6e7541e4c..829020738 100644
 --- a/docs/src/api/class-tracing.md
 +++ b/docs/src/api/class-tracing.md
-@@ -138,7 +138,7 @@ If this option is true tracing will
+@@ -142,7 +142,7 @@ If this option is true tracing will
  
  ### option: Tracing.start.sources
  * since: v1.17
@@ -1088,7 +1088,7 @@ index 3b3308b88..e21ea93ef 100644
  - returns: <[any]>
  
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index 293b415c4..1188b7f2d 100644
+index b28104814..61a952e6d 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
 @@ -8,7 +8,7 @@ When to consider operation succeeded, defaults to `load`. Events can be either:
@@ -1370,8 +1370,17 @@ index 293b415c4..1188b7f2d 100644
  - `recordVideo` <[Object]>
    - `dir` <[path]> Path to the directory to put videos into.
    - `size` ?<[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
-@@ -736,7 +761,7 @@ Whether to allow sites to register Service workers. Defaults to `'allow'`.
+@@ -735,7 +760,7 @@ Whether to allow sites to register Service workers. Defaults to `'allow'`.
+ * `'block'`: Playwright will block all registration of Service Workers.
  
+ ## unroute-all-options-behavior
+-* langs: js, csharp, python
++* langs: js, csharp, python, go
+ * since: v1.41
+ - `behavior` <[UnrouteBehavior]<"wait"|"ignoreErrors"|"default">>
+ 
+@@ -745,7 +770,7 @@ Specifies wether to wait for already running handlers and what to do if they thr
+ * `'ignoreErrors'` - do not wait for current handler calls (if any) to finish, all errors thrown by the handlers after unrouting are silently caught
  
  ## select-options-values
 -* langs: java, js, csharp
@@ -1379,7 +1388,7 @@ index 293b415c4..1188b7f2d 100644
  - `values` <[null]|[string]|[ElementHandle]|[Array]<[string]>|[Object]|[Array]<[ElementHandle]>|[Array]<[Object]>>
    - `value` ?<[string]> Matches by `option.value`. Optional.
    - `label` ?<[string]> Matches by `option.label`. Optional.
-@@ -754,7 +779,7 @@ the parameter is a string without wildcard characters, the method will wait for
+@@ -763,7 +788,7 @@ the parameter is a string without wildcard characters, the method will wait for
  equal to the string.
  
  ## wait-for-event-event
@@ -1388,7 +1397,7 @@ index 293b415c4..1188b7f2d 100644
  - `event` <[string]>
  
  Event name, same one typically passed into `*.on(event)`.
-@@ -812,7 +837,7 @@ only the first option matching one of the passed options is selected. Optional.
+@@ -821,7 +846,7 @@ only the first option matching one of the passed options is selected. Optional.
  Receives the event data and resolves to truthy value when the waiting should resolve.
  
  ## wait-for-event-timeout
@@ -1397,7 +1406,7 @@ index 293b415c4..1188b7f2d 100644
  - `timeout` <[float]>
  
  Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-@@ -832,7 +857,7 @@ using the [`method: AndroidDevice.setDefaultTimeout`] method.
+@@ -841,7 +866,7 @@ using the [`method: AndroidDevice.setDefaultTimeout`] method.
  Time to retry the assertion for in milliseconds. Defaults to `timeout` in `TestConfig.expect`.
  
  ## csharp-java-python-assertions-timeout
@@ -1406,7 +1415,7 @@ index 293b415c4..1188b7f2d 100644
  - `timeout` <[float]>
  
  Time to retry the assertion for in milliseconds. Defaults to `5000`.
-@@ -962,7 +987,7 @@ Firefox user preferences. Learn more about the Firefox user preferences at
+@@ -975,7 +1000,7 @@ Firefox user preferences. Learn more about the Firefox user preferences at
  [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
  
  ## csharp-java-browser-option-firefoxuserprefs

@@ -728,6 +728,52 @@ func TestShouldUpdateHarZipForContext(t *testing.T) {
 	require.NoError(t, expect.Locator(page2.Locator("body")).ToHaveCSS("background-color", "rgb(255, 192, 203)"))
 }
 
+func TestPageUnrouteAllShouldStopPageRouteFromHAR(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	harPath := Asset("har-fulfill.har")
+	context1, err := browser.NewContext()
+	require.NoError(t, err)
+	page1, err := context1.NewPage()
+	require.NoError(t, err)
+	// The har file contains requests for another domain, so the router
+	// is expected to abort all requests.
+	require.NoError(t, page1.RouteFromHAR(harPath, playwright.PageRouteFromHAROptions{
+		NotFound: playwright.HarNotFoundAbort,
+	}))
+	_, err = page1.Goto(server.EMPTY_PAGE)
+	require.Error(t, err)
+	require.NoError(t, page1.UnrouteAll(playwright.PageUnrouteAllOptions{
+		Behavior: playwright.UnrouteBehaviorWait,
+	}))
+	response, err := page1.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.True(t, response.Ok())
+}
+
+func TestContextUnrouteCallShouldStopContextRouteFromHAR(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	harPath := Asset("har-fulfill.har")
+	context1, err := browser.NewContext()
+	require.NoError(t, err)
+	page1, err := context1.NewPage()
+	require.NoError(t, err)
+	// The har file contains requests for another domain, so the router
+	// is expected to abort all requests.
+	require.NoError(t, context1.RouteFromHAR(harPath, playwright.BrowserContextRouteFromHAROptions{
+		NotFound: playwright.HarNotFoundAbort,
+	}))
+	_, err = page1.Goto(server.EMPTY_PAGE)
+	require.Error(t, err)
+	require.NoError(t, context1.UnrouteAll(playwright.BrowserContextUnrouteAllOptions{
+		Behavior: playwright.UnrouteBehaviorWait,
+	}))
+	response, err := page1.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.True(t, response.Ok())
+}
+
 func TestShouldUpdateHarZipForPage(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)

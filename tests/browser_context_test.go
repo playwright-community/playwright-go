@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"sync/atomic"
 	"testing"
@@ -243,7 +244,7 @@ func TestBrowserContextUnrouteShouldWork(t *testing.T) {
 		intercepted = append(intercepted, 1)
 		require.NoError(t, route.Continue())
 	}
-	require.NoError(t, context.Route("**/empty.html", handler1))
+	require.NoError(t, context.Route("**/*", handler1))
 	require.NoError(t, context.Route("**/empty.html", func(route playwright.Route) {
 		intercepted = append(intercepted, 2)
 		require.NoError(t, route.Continue())
@@ -252,26 +253,28 @@ func TestBrowserContextUnrouteShouldWork(t *testing.T) {
 		intercepted = append(intercepted, 3)
 		require.NoError(t, route.Continue())
 	}))
-	require.NoError(t, context.Route("**/*", func(route playwright.Route) {
+
+	handler4 := func(route playwright.Route) {
 		intercepted = append(intercepted, 4)
 		require.NoError(t, route.Continue())
-	}))
+	}
+	require.NoError(t, context.Route(regexp.MustCompile("empty.html"), handler4))
 
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.Equal(t, []int{1}, intercepted)
+	require.Equal(t, []int{4}, intercepted)
 
 	intercepted = []int{}
-	require.NoError(t, context.Unroute("**/empty.html", handler1))
+	require.NoError(t, context.Unroute(regexp.MustCompile("empty.html"), handler4))
 	_, err = page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.Equal(t, []int{2}, intercepted)
+	require.Equal(t, []int{3}, intercepted)
 
 	intercepted = []int{}
 	require.NoError(t, context.Unroute("**/empty.html"))
 	_, err = page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.Equal(t, []int{4}, intercepted)
+	require.Equal(t, []int{1}, intercepted)
 }
 
 func TestBrowserContextShouldReturnBackgroundPage(t *testing.T) {

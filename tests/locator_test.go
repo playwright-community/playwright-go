@@ -559,6 +559,7 @@ func TestLocatorsShouldQueryExistingElements(t *testing.T) {
 	require.Equal(t, 2, len(elements))
 	results := make([]string, 0)
 	for _, element := range elements {
+		//nolint:staticcheck
 		content, err := element.TextContent()
 		require.NoError(t, err)
 		results = append(results, content)
