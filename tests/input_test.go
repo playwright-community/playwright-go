@@ -179,6 +179,7 @@ func TestElementHandleFill(t *testing.T) {
 	//nolint:staticcheck
 	inputElement, err := page.QuerySelector("input")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	require.NoError(t, inputElement.Fill("abc123"))
 	result, err := page.Evaluate("window.clicked")
 	require.NoError(t, err)
@@ -208,6 +209,7 @@ func TestElementHandlePress(t *testing.T) {
 	//nolint:staticcheck
 	inputElement, err := page.QuerySelector("input")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	require.NoError(t, inputElement.Press("A"))
 	result, err := page.Evaluate("window.clicked")
 	require.NoError(t, err)

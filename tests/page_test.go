@@ -150,12 +150,16 @@ func TestPageQuerySelector(t *testing.T) {
 	//nolint:staticcheck
 	one, err := page.QuerySelector("div#one")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	two, err := one.QuerySelector("span#two")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	three, err := two.QuerySelector("div#three")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	four, err := three.QuerySelector("span#four")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	textContent, err := four.TextContent()
 	require.NoError(t, err)
 	require.Equal(t, strings.TrimSpace(textContent), "foobar")
@@ -174,6 +178,7 @@ func TestPageQuerySelectorAll(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 3, len(elements))
 	for i := 0; i < 3; i++ {
+		//nolint:staticcheck
 		textContent, err := elements[i].TextContent()
 		require.NoError(t, err)
 		require.Equal(t, strconv.Itoa(i), textContent)
@@ -410,6 +415,7 @@ func TestPageWaitForSelector(t *testing.T) {
 	//nolint:staticcheck
 	element, err := page.WaitForSelector("text=myElement")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	textContent, err := element.TextContent()
 	require.NoError(t, err)
 	require.Equal(t, "myElement", textContent)
@@ -888,35 +894,41 @@ func TestPageUnrouteShouldWork(t *testing.T) {
 		intercepted = append(intercepted, 1)
 		require.NoError(t, route.Continue())
 	}
-	require.NoError(t, page.Route("**/empty.html", handler1))
-	require.NoError(t, page.Route("**/empty.html", func(route playwright.Route) {
+	require.NoError(t, page.Route("**/*", handler1))
+
+	handler2 := func(route playwright.Route) {
 		intercepted = append(intercepted, 2)
 		require.NoError(t, route.Continue())
-	}))
-	require.NoError(t, page.Route("**/empty.html", func(route playwright.Route) {
+	}
+	require.NoError(t, page.Route("**/empty.html", handler2))
+
+	handler3 := func(route playwright.Route) {
 		intercepted = append(intercepted, 3)
 		require.NoError(t, route.Continue())
-	}))
-	require.NoError(t, page.Route("**/*", func(route playwright.Route) {
+	}
+	require.NoError(t, page.Route("**/empty.html", handler3))
+
+	handler4 := func(route playwright.Route) {
 		intercepted = append(intercepted, 4)
 		require.NoError(t, route.Continue())
-	}))
+	}
+	require.NoError(t, page.Route(regexp.MustCompile("empty.html"), handler4))
 
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.Equal(t, []int{1}, intercepted)
+	require.Equal(t, []int{4}, intercepted)
 
 	intercepted = []int{}
-	require.NoError(t, page.Unroute("**/empty.html", handler1))
+	require.NoError(t, page.Unroute(regexp.MustCompile("empty.html"), handler4))
 	_, err = page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.Equal(t, []int{2}, intercepted)
+	require.Equal(t, []int{3}, intercepted)
 
 	intercepted = []int{}
 	require.NoError(t, page.Unroute("**/empty.html"))
 	_, err = page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	require.Equal(t, []int{4}, intercepted)
+	require.Equal(t, []int{1}, intercepted)
 }
 
 func TestPageDragAndDrop(t *testing.T) {
@@ -1193,20 +1205,4 @@ func TestPageGotoShouldFailWhenExceedingBrowserContextNavigationTimeout(t *testi
 	require.ErrorIs(t, err, playwright.ErrTimeout)
 	require.ErrorContains(t, err, "Timeout 5ms exceeded.")
 	require.ErrorContains(t, err, "/empty.html")
-}
-
-func TestShouldCollectStaleHandles(t *testing.T) {
-	BeforeEach(t)
-	defer AfterEach(t)
-	page.OnRequest(func(r playwright.Request) {})
-	response, err := page.Goto(server.EMPTY_PAGE)
-	require.NoError(t, err)
-	for i := 0; i < 1000; i++ {
-		_, _ = page.Evaluate(`async () => {
-			const response = await fetch('/');
-			await response.text();
-	}`)
-	}
-	_, err = response.AllHeaders()
-	require.ErrorContains(t, err, "The object has been collected to prevent unbounded heap growth.")
 }

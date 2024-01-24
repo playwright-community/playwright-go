@@ -18,6 +18,7 @@ func TestFileChooser(t *testing.T) {
 	require.NoError(t, err)
 	file, err := os.ReadFile(Asset("file-to-upload.txt"))
 	require.NoError(t, err)
+	//nolint:staticcheck
 	require.NoError(t, input.SetInputFiles([]playwright.InputFile{
 		{
 			Name:     "file-to-upload.txt",
@@ -51,11 +52,13 @@ func TestFileChooserShouldEmitEvent(t *testing.T) {
 	require.NoError(t, err)
 	require.False(t, fileChooser.IsMultiple())
 	require.Equal(t, page, fileChooser.Page())
+	//nolint:staticcheck
 	elementHTML, err := fileChooser.Element().InnerHTML()
 	require.NoError(t, err)
 	//nolint:staticcheck
 	inputElement, err := page.QuerySelector("input")
 	require.NoError(t, err)
+	//nolint:staticcheck
 	inputElementHTML, err := inputElement.InnerHTML()
 	require.NoError(t, err)
 

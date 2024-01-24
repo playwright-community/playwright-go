@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 	"time"
+
+	"golang.org/x/exp/slices"
 )
 
 type pageImpl struct {
@@ -27,6 +30,8 @@ type pageImpl struct {
 	ownedContext    BrowserContext
 	bindings        map[string]BindingCallFunction
 	closeReason     *string
+	closeWasCalled  bool
+	harRouters      []*harRouter
 }
 
 func (p *pageImpl) Context() BrowserContext {
@@ -34,6 +39,10 @@ func (p *pageImpl) Context() BrowserContext {
 }
 
 func (p *pageImpl) Close(options ...PageCloseOptions) error {
+	if len(options) == 1 {
+		p.closeReason = options[0].Reason
+	}
+	p.closeWasCalled = true
 	_, err := p.channel.Send("close", options)
 	if err == nil && p.ownedContext != nil {
 		err = p.ownedContext.Close()
@@ -180,13 +189,50 @@ func (p *pageImpl) Unroute(url interface{}, handlers ...routeHandler) error {
 	p.Lock()
 	defer p.Unlock()
 
-	routes, err := unroute(p.routes, url, handlers...)
+	removed, remaining, err := unroute(p.routes, url, handlers...)
 	if err != nil {
 		return err
 	}
-	p.routes = routes
+	return p.unrouteInternal(removed, remaining, UnrouteBehaviorDefault)
+}
 
-	return p.updateInterceptionPatterns()
+func (p *pageImpl) unrouteInternal(removed []*routeHandlerEntry, remaining []*routeHandlerEntry, behavior *UnrouteBehavior) error {
+	p.routes = remaining
+	err := p.updateInterceptionPatterns()
+	if err != nil {
+		return err
+	}
+	if behavior == nil || behavior == UnrouteBehaviorDefault {
+		return nil
+	}
+	wg := &sync.WaitGroup{}
+	for _, entry := range removed {
+		wg.Add(1)
+		go func(entry *routeHandlerEntry) {
+			defer wg.Done()
+			entry.Stop(string(*behavior))
+		}(entry)
+	}
+	wg.Wait()
+	return nil
+}
+
+func (p *pageImpl) disposeHarRouters() {
+	for _, router := range p.harRouters {
+		router.dispose()
+	}
+	p.harRouters = make([]*harRouter, 0)
+}
+
+func (p *pageImpl) UnrouteAll(options ...PageUnrouteAllOptions) error {
+	var behavior *UnrouteBehavior
+	if len(options) == 1 {
+		behavior = options[0].Behavior
+	}
+	p.Lock()
+	defer p.Unlock()
+	defer p.disposeHarRouters()
+	return p.unrouteInternal(p.routes, []*routeHandlerEntry{}, behavior)
 }
 
 func (p *pageImpl) Content() (string, error) {
@@ -615,7 +661,7 @@ func (p *pageImpl) ExpectWorker(cb func() error, options ...PageExpectWorkerOpti
 func (p *pageImpl) Route(url interface{}, handler routeHandler, times ...int) error {
 	p.Lock()
 	defer p.Unlock()
-	p.routes = append(p.routes, newRouteHandlerEntry(newURLMatcher(url, p.browserContext.options.BaseURL), handler, times...))
+	p.routes = slices.Insert(p.routes, 0, newRouteHandlerEntry(newURLMatcher(url, p.browserContext.options.BaseURL), handler, times...))
 	return p.updateInterceptionPatterns()
 }
 
@@ -678,6 +724,7 @@ func (p *pageImpl) RouteFromHAR(har string, options ...PageRouteFromHAROptions) 
 		notFound = HarNotFoundAbort
 	}
 	router := newHarRouter(p.connection.localUtils, har, *notFound, opt.URL)
+	p.harRouters = append(p.harRouters, router)
 	return router.addPageRoute(p)
 }
 
@@ -696,6 +743,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		routes:       make([]*routeHandlerEntry, 0),
 		bindings:     make(map[string]BindingCallFunction),
 		viewportSize: viewportSize,
+		harRouters:   make([]*harRouter, 0),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.browserContext = fromChannel(parent.channel).(*browserContextImpl)
@@ -818,20 +866,14 @@ func (p *pageImpl) onFrameDetached(frame *frameImpl) {
 func (p *pageImpl) onRoute(route *routeImpl) {
 	go func() {
 		p.Lock()
-		defer p.Unlock()
 		route.context = p.browserContext
 		routes := make([]*routeHandlerEntry, len(p.routes))
 		copy(routes, p.routes)
+		p.Unlock()
 
-		url := route.Request().URL()
-		for i, handlerEntry := range routes {
-			if !handlerEntry.Matches(url) {
-				continue
-			}
-			if handlerEntry.WillExceed() {
-				p.routes = append(p.routes[:i], p.routes[i+1:]...)
-			}
-			handled := handlerEntry.Handle(route)
+		checkInterceptionIfNeeded := func() {
+			p.Lock()
+			defer p.Unlock()
 			if len(p.routes) == 0 {
 				_, err := p.connection.WrapAPICall(func() (interface{}, error) {
 					err := p.updateInterceptionPatterns()
@@ -841,6 +883,30 @@ func (p *pageImpl) onRoute(route *routeImpl) {
 					log.Printf("could not update interception patterns: %v", err)
 				}
 			}
+		}
+
+		url := route.Request().URL()
+		for _, handlerEntry := range routes {
+			// If the page was closed we stall all requests right away.
+			if p.closeWasCalled || p.browserContext.closeWasCalled {
+				return
+			}
+			if !handlerEntry.Matches(url) {
+				continue
+			}
+			if !slices.ContainsFunc(p.routes, func(entry *routeHandlerEntry) bool {
+				return entry == handlerEntry
+			}) {
+				continue
+			}
+			if handlerEntry.WillExceed() {
+				p.routes = slices.DeleteFunc(p.routes, func(rhe *routeHandlerEntry) bool {
+					return rhe == handlerEntry
+				})
+			}
+			handled := handlerEntry.Handle(route)
+			checkInterceptionIfNeeded()
+
 			if <-handled {
 				return
 			}
@@ -883,6 +949,7 @@ func (p *pageImpl) onClose() {
 		p.browserContext.backgroundPages = newBackgoundPages
 		p.browserContext.Unlock()
 	}
+	p.disposeHarRouters()
 	p.Emit("close", p)
 }
 

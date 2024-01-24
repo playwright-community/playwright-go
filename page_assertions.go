@@ -26,7 +26,10 @@ func (pa *pageAssertionsImpl) ToHaveTitle(titleOrRegExp interface{}, options ...
 	if len(options) == 1 {
 		timeout = options[0].Timeout
 	}
-	expectedValues := toExpectedTextValues([]interface{}{titleOrRegExp}, false, true, nil)
+	expectedValues, err := toExpectedTextValues([]interface{}{titleOrRegExp}, false, true, nil)
+	if err != nil {
+		return err
+	}
 	return pa.expect(
 		"to.have.title",
 		frameExpectOptions{ExpectedText: expectedValues, Timeout: timeout},
@@ -48,7 +51,10 @@ func (pa *pageAssertionsImpl) ToHaveURL(urlOrRegExp interface{}, options ...Page
 		urlOrRegExp = u.String()
 	}
 
-	expectedValues := toExpectedTextValues([]interface{}{urlOrRegExp}, false, false, nil)
+	expectedValues, err := toExpectedTextValues([]interface{}{urlOrRegExp}, false, false, nil)
+	if err != nil {
+		return err
+	}
 	return pa.expect(
 		"to.have.url",
 		frameExpectOptions{ExpectedText: expectedValues, Timeout: timeout},
