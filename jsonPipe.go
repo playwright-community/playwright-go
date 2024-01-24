@@ -13,7 +13,8 @@ type jsonPipe struct {
 
 func (j *jsonPipe) Send(message map[string]interface{}) error {
 	_, err := j.channel.Send("send", map[string]interface{}{
-		"message": message})
+		"message": message,
+	})
 	return err
 }
 

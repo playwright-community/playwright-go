@@ -117,7 +117,7 @@ func main() {
 	if err != nil {
 		assertErrorToNilf("could not get cwd %w", err)
 	}
-	if err := os.Mkdir(filepath.Join(cwd, "out"), 0777); err != nil && !os.IsExist(err) {
+	if err := os.Mkdir(filepath.Join(cwd, "out"), 0o777); err != nil && !os.IsExist(err) {
 		assertErrorToNilf("could not create output directory %w", err)
 	}
 

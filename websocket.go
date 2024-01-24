@@ -88,7 +88,7 @@ func (ws *webSocketImpl) WaitForEvent(event string, options ...WebSocketWaitForE
 
 func (ws *webSocketImpl) expectEvent(event string, cb func() error, options ...WebSocketExpectEventOptions) (interface{}, error) {
 	var predicate interface{} = nil
-	var timeout = ws.page.timeoutSettings.Timeout()
+	timeout := ws.page.timeoutSettings.Timeout()
 	if len(options) == 1 {
 		if options[0].Timeout != nil {
 			timeout = *options[0].Timeout

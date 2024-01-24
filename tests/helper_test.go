@@ -22,18 +22,20 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var pw *playwright.Playwright
-var browser playwright.Browser
-var context playwright.BrowserContext
-var page playwright.Page
-var expect playwright.PlaywrightAssertions
-var isChromium bool
-var isFirefox bool
-var isWebKit bool
-var browserName = getBrowserName()
-var server *testServer
-var browserType playwright.BrowserType
-var utils *testUtils
+var (
+	pw          *playwright.Playwright
+	browser     playwright.Browser
+	context     playwright.BrowserContext
+	page        playwright.Page
+	expect      playwright.PlaywrightAssertions
+	isChromium  bool
+	isFirefox   bool
+	isWebKit    bool
+	browserName = getBrowserName()
+	server      *testServer
+	browserType playwright.BrowserType
+	utils       *testUtils
+)
 
 func init() {
 	if err := mime.AddExtensionType(".js", "application/javascript"); err != nil {
@@ -249,8 +251,7 @@ func newSyncSlice[T any]() *syncSlice[T] {
 	}
 }
 
-type testUtils struct {
-}
+type testUtils struct{}
 
 func (t *testUtils) AttachFrame(page playwright.Page, frameId string, url string) (playwright.Frame, error) {
 	handle, err := page.EvaluateHandle(`async ({ frame_id, url }) => {

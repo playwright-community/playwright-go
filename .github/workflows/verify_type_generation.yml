@@ -8,13 +8,15 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ^1.19.9
+      - name: Install gofumpt
+        run: go install mvdan.cc/gofumpt@latest
       - name: Install Browsers
         run: |
           go install ./...

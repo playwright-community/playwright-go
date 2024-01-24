@@ -19,7 +19,7 @@ func newLocatorAssertions(locator Locator, isNot bool, defaultTimeout *float64) 
 }
 
 func (la *locatorAssertionsImpl) ToBeAttached(options ...LocatorAssertionsToBeAttachedOptions) error {
-	var expression = "to.be.attached"
+	expression := "to.be.attached"
 	var timeout *float64
 	if len(options) == 1 {
 		if options[0].Attached != nil && !*options[0].Attached {
@@ -36,7 +36,7 @@ func (la *locatorAssertionsImpl) ToBeAttached(options ...LocatorAssertionsToBeAt
 }
 
 func (la *locatorAssertionsImpl) ToBeChecked(options ...LocatorAssertionsToBeCheckedOptions) error {
-	var expression = "to.be.checked"
+	expression := "to.be.checked"
 	var timeout *float64
 	if len(options) == 1 {
 		if options[0].Checked != nil && !*options[0].Checked {
@@ -143,7 +143,8 @@ func (la *locatorAssertionsImpl) ToBeInViewport(options ...LocatorAssertionsToBe
 		"to.be.in.viewport",
 		frameExpectOptions{
 			ExpectedNumber: ratio,
-			Timeout:        timeout},
+			Timeout:        timeout,
+		},
 		nil,
 		"Locator expected to be in viewport",
 	)
