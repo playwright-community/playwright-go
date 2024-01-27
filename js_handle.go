@@ -221,7 +221,7 @@ func serializeValue(value interface{}, handles *[]*channel, depth int) interface
 		for i := range sV {
 			out = append(out, serializeValue(sV[i], handles, depth+1))
 		}
-		return map[string]interface{} {
+		return map[string]interface{}{
 			"a": out,
 		}
 	}

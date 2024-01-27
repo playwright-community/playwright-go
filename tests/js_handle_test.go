@@ -156,11 +156,11 @@ func TestJSHandleTypeSerializing(t *testing.T) {
 		require.Equal(t, v, value)
 	}
 	// The following cases seem to fail due to playwright
-	//floatV, err := page.Evaluate(`a => a`, 42.42)
-	//require.NoError(t, err)
-	//require.Equal(t, 42.42, floatV)
-	//now := time.Now()
-	//timeV, err := page.Evaluate(`a => a`, now)
-	//require.NoError(t, err)
-	//require.Equal(t, now, timeV)
+	// floatV, err := page.Evaluate(`a => a`, 42.42)
+	// require.NoError(t, err)
+	// require.Equal(t, 42.42, floatV)
+	// now := time.Now()
+	// timeV, err := page.Evaluate(`a => a`, now)
+	// require.NoError(t, err)
+	// require.Equal(t, now, timeV)
 }
