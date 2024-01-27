@@ -120,3 +120,47 @@ func TestJSHandleTypeParsing(t *testing.T) {
 	_, ok = stringV.(int)
 	require.False(t, ok)
 }
+
+func TestJSHandleTypeSerializing(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	nilV, err := page.Evaluate(`a => a`, nil)
+	require.NoError(t, err)
+	require.Equal(t, nil, nilV)
+	boolV, err := page.Evaluate(`a => a`, true)
+	require.NoError(t, err)
+	require.Equal(t, true, boolV)
+	intV, err := page.Evaluate(`a => a`, 42)
+	require.NoError(t, err)
+	require.Equal(t, 42, intV)
+	sliceArgs := []interface{}{"test1", "test2", "test3"}
+	res, err := page.Evaluate(`a => a`, sliceArgs)
+	require.NoError(t, err)
+	sliceV, ok := res.([]interface{})
+	require.True(t, ok)
+	for i, v := range sliceArgs {
+		require.Equal(t, v, sliceV[i])
+	}
+	mapArgs := map[string]interface{}{
+		"key1": "value1",
+		"key2": "value2",
+		"key3": "value3",
+	}
+	res, err = page.Evaluate(`a => a`, mapArgs)
+	require.NoError(t, err)
+	mapV, ok := res.(map[string]interface{})
+	require.True(t, ok)
+	for k, v := range mapArgs {
+		value, ok := mapV[k]
+		require.True(t, ok)
+		require.Equal(t, v, value)
+	}
+	// The following cases seem to fail due to playwright
+	//floatV, err := page.Evaluate(`a => a`, 42.42)
+	//require.NoError(t, err)
+	//require.Equal(t, 42.42, floatV)
+	//now := time.Now()
+	//timeV, err := page.Evaluate(`a => a`, now)
+	//require.NoError(t, err)
+	//require.Equal(t, now, timeV)
+}

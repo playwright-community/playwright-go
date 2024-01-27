@@ -216,11 +216,14 @@ func serializeValue(value interface{}, handles *[]*channel, depth int) interface
 		}
 	}
 	if refV.Kind() == reflect.Slice {
-		aV := value.([]interface{})
-		for i := range aV {
-			aV[i] = serializeValue(aV[i], handles, depth+1)
+		out := []interface{}{}
+		sV := value.([]interface{})
+		for i := range sV {
+			out = append(out, serializeValue(sV[i], handles, depth+1))
 		}
-		return aV
+		return map[string]interface{} {
+			"a": out,
+		}
 	}
 	if refV.Kind() == reflect.Map {
 		out := []interface{}{}
