@@ -228,12 +228,7 @@ func serializeValue(value interface{}, handles *[]*channel, depth int) interface
 		}
 	}
 
-	var refV reflect.Value
-	if v, ok := value.(reflect.Value); ok {
-		refV = v
-	} else {
-		refV = reflect.ValueOf(value)
-	}
+	refV := reflect.ValueOf(value)
 
 	switch refV.Kind() {
 	case reflect.Float32, reflect.Float64:
@@ -265,7 +260,7 @@ func serializeValue(value interface{}, handles *[]*channel, depth int) interface
 	case reflect.Slice:
 		aV := make([]interface{}, refV.Len())
 		for i := 0; i < refV.Len(); i++ {
-			aV[i] = serializeValue(refV.Index(i), handles, depth+1)
+			aV[i] = serializeValue(refV.Index(i).Interface(), handles, depth+1)
 		}
 		return map[string]interface{}{
 			"a": aV,
@@ -291,8 +286,9 @@ func serializeValue(value interface{}, handles *[]*channel, depth int) interface
 		return map[string]interface{}{
 			"o": out,
 		}
-	default:
-		return serializeValue(refV.Interface(), handles, depth+1)
+	}
+	return map[string]interface{}{
+		"v": "undefined",
 	}
 }
 

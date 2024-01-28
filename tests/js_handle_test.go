@@ -373,4 +373,10 @@ func TestEvaluate(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 42.5, val)
 	})
+
+	t.Run("unkown as undefined", func(t *testing.T) {
+		val, err := page.Evaluate(`a => a`, struct{}{})
+		require.NoError(t, err)
+		require.Equal(t, nil, val)
+	})
 }
