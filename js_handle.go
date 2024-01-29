@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"net/url"
 	"reflect"
 	"runtime/debug"
 	"strings"
@@ -95,13 +96,22 @@ func (j *jsHandleImpl) JSONValue() (interface{}, error) {
 }
 
 func parseValue(result interface{}, refs map[float64]interface{}) interface{} {
-	vMap := result.(map[string]interface{})
+	vMap, ok := result.(map[string]interface{})
+	if !ok {
+		return result
+	}
 	if v, ok := vMap["n"]; ok {
 		if math.Ceil(v.(float64))-v.(float64) == 0 {
 			return int(v.(float64))
 		}
 		return v.(float64)
 	}
+
+	if v, ok := vMap["u"]; ok {
+		u, _ := url.Parse(v.(string))
+		return u
+	}
+
 	if v, ok := vMap["bi"]; ok {
 		n := new(big.Int)
 		n.SetString(v.(string), 0)
@@ -135,11 +145,12 @@ func parseValue(result interface{}, refs map[float64]interface{}) interface{} {
 			return math.Inf(-1)
 		}
 		if v == "-0" {
-			return -0
+			return math.Copysign(0, -1)
 		}
+		return v
 	}
 	if v, ok := vMap["d"]; ok {
-		t, _ := time.Parse(time.RFC3339, v.(string))
+		t, _ := time.Parse(time.RFC3339Nano, v.(string))
 		return t
 	}
 	if v, ok := vMap["a"]; ok {
@@ -152,8 +163,8 @@ func parseValue(result interface{}, refs map[float64]interface{}) interface{} {
 	}
 	if v, ok := vMap["o"]; ok {
 		aV := v.([]interface{})
-		refs[vMap["id"].(float64)] = v
 		out := map[string]interface{}{}
+		refs[vMap["id"].(float64)] = out
 		for key := range aV {
 			entry := aV[key].(map[string]interface{})
 			out[entry["k"].(string)] = parseValue(entry["v"], refs)
@@ -178,6 +189,12 @@ func serializeValue(value interface{}, handles *[]*channel, depth int) interface
 			"h": h,
 		}
 	}
+	if u, ok := value.(*url.URL); ok {
+		return map[string]interface{}{
+			"u": u.String(),
+		}
+	}
+
 	if depth > 100 {
 		panic(errors.New("Maximum argument depth exceeded"))
 	}
@@ -191,54 +208,11 @@ func serializeValue(value interface{}, handles *[]*channel, depth int) interface
 			"bi": n.String(),
 		}
 	}
-	refV := reflect.ValueOf(value)
-	if refV.Kind() == reflect.Float32 || refV.Kind() == reflect.Float64 {
-		floatV := refV.Float()
-		if math.IsInf(floatV, 1) {
-			return map[string]interface{}{
-				"v": "Infinity",
-			}
-		}
-		if math.IsInf(floatV, -1) {
-			return map[string]interface{}{
-				"v": "-Infinity",
-			}
-		}
-		if floatV == -0 {
-			return map[string]interface{}{
-				"v": "-0",
-			}
-		}
-		if math.IsNaN(floatV) {
-			return map[string]interface{}{
-				"v": "NaN",
-			}
-		}
-	}
-	if refV.Kind() == reflect.Slice {
-		aV := value.([]interface{})
-		for i := range aV {
-			aV[i] = serializeValue(aV[i], handles, depth+1)
-		}
-		return aV
-	}
-	if refV.Kind() == reflect.Map {
-		out := []interface{}{}
-		vM := value.(map[string]interface{})
-		for key := range vM {
-			out = append(out, map[string]interface{}{
-				"k": key,
-				"v": serializeValue(vM[key], handles, depth+1),
-			})
-		}
-		return map[string]interface{}{
-			"o": out,
-		}
-	}
+
 	switch v := value.(type) {
 	case time.Time:
 		return map[string]interface{}{
-			"d": v.Format(time.RFC3339) + "Z",
+			"d": v.Format(time.RFC3339Nano),
 		}
 	case int:
 		return map[string]interface{}{
@@ -254,6 +228,65 @@ func serializeValue(value interface{}, handles *[]*channel, depth int) interface
 		}
 	}
 
+	refV := reflect.ValueOf(value)
+
+	switch refV.Kind() {
+	case reflect.Float32, reflect.Float64:
+		floatV := refV.Float()
+		if math.IsInf(floatV, 1) {
+			return map[string]interface{}{
+				"v": "Infinity",
+			}
+		}
+		if math.IsInf(floatV, -1) {
+			return map[string]interface{}{
+				"v": "-Infinity",
+			}
+		}
+		// https://github.com/golang/go/issues/2196
+		if floatV == math.Copysign(0, -1) {
+			return map[string]interface{}{
+				"v": "-0",
+			}
+		}
+		if math.IsNaN(floatV) {
+			return map[string]interface{}{
+				"v": "NaN",
+			}
+		}
+		return map[string]interface{}{
+			"n": floatV,
+		}
+	case reflect.Slice:
+		aV := make([]interface{}, refV.Len())
+		for i := 0; i < refV.Len(); i++ {
+			aV[i] = serializeValue(refV.Index(i).Interface(), handles, depth+1)
+		}
+		return map[string]interface{}{
+			"a": aV,
+		}
+	case reflect.Map:
+		out := []interface{}{}
+		vM := value.(map[string]interface{})
+		for key := range vM {
+			v := serializeValue(vM[key], handles, depth+1)
+			// had key, so convert "undefined" to "null"
+			if reflect.DeepEqual(v, map[string]interface{}{
+				"v": "undefined",
+			}) {
+				v = map[string]interface{}{
+					"v": "null",
+				}
+			}
+			out = append(out, map[string]interface{}{
+				"k": key,
+				"v": v,
+			})
+		}
+		return map[string]interface{}{
+			"o": out,
+		}
+	}
 	return map[string]interface{}{
 		"v": "undefined",
 	}
