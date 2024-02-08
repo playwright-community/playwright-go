@@ -45,3 +45,28 @@ func IntSlice(v ...int) *[]int {
 	o = append(o, v...)
 	return &o
 }
+
+// ToOptionalStorageState converts StorageState to OptionalStorageState for use directly in [Browser.NewContext]
+func (s StorageState) ToOptionalStorageState() *OptionalStorageState {
+	cookies := make([]OptionalCookie, len(s.Cookies))
+	for i, c := range s.Cookies {
+		cookies[i] = c.ToOptionalCookie()
+	}
+	return &OptionalStorageState{
+		Origins: s.Origins,
+		Cookies: cookies,
+	}
+}
+
+func (c Cookie) ToOptionalCookie() OptionalCookie {
+	return OptionalCookie{
+		Name:     c.Name,
+		Value:    c.Value,
+		Domain:   String(c.Domain),
+		Path:     String(c.Path),
+		Expires:  Float(c.Expires),
+		HttpOnly: Bool(c.HttpOnly),
+		Secure:   Bool(c.Secure),
+		SameSite: c.SameSite,
+	}
+}
