@@ -58,11 +58,13 @@ jobs:
     - name: Test
       env:
         BROWSER: ${{ matrix.browser }}
+        GOEXPERIMENT: nocoverageredesign
       if: matrix.os == 'ubuntu-latest'
       run: xvfb-run go test -v -covermode atomic -coverprofile=covprofile -coverpkg="github.com/playwright-community/playwright-go" --race ./...
     - name: Test
       env:
         BROWSER: ${{ matrix.browser }}
+        GOEXPERIMENT: nocoverageredesign
       if: matrix.os != 'ubuntu-latest'
       run: go test -v -covermode atomic -coverprofile=covprofile -coverpkg="github.com/playwright-community/playwright-go" --race ./...
     - name: Install goveralls
