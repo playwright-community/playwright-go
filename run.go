@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	playwrightCliVersion = "1.41.1"
+	playwrightCliVersion = "1.41.2"
 )
 
 var playwrightCDNMirrors = []string{
@@ -298,7 +298,7 @@ func (d *PlaywrightDriver) getDriverURLs() []string {
 	baseURLs := []string{}
 	pattern := "%s/builds/driver/playwright-%s-%s.zip"
 	if !d.isReleaseVersion() {
-		pattern = "%s/next/builds/driver/playwright-%s-%s.zip"
+		pattern = "%s/builds/driver/next/playwright-%s-%s.zip"
 	}
 
 	if hostEnv := os.Getenv("PLAYWRIGHT_DOWNLOAD_HOST"); hostEnv != "" {
@@ -314,7 +314,7 @@ func (d *PlaywrightDriver) getDriverURLs() []string {
 // isReleaseVersion checks if the version is not a beta or alpha release
 // this helps to determine the url from where to download the driver
 func (d *PlaywrightDriver) isReleaseVersion() bool {
-	return !strings.Contains(d.Version, "beta") && !strings.Contains(d.Version, "alpha")
+	return !strings.Contains(d.Version, "beta") && !strings.Contains(d.Version, "alpha") && !strings.Contains(d.Version, "next")
 }
 
 func makeFileExecutable(path string) error {
