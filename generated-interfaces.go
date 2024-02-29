@@ -224,8 +224,7 @@ type BrowserContext interface {
 	//  - The [Browser.Close] method was called.
 	OnClose(fn func(BrowserContext))
 
-	// Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`. Also
-	// emitted if the page throws an error or a warning.
+	// Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`.
 	// The arguments passed into `console.log` and the page are available on the [ConsoleMessage] event handler argument.
 	OnConsole(fn func(ConsoleMessage))
 
@@ -905,8 +904,8 @@ type ElementHandle interface {
 	// Holding down `Shift` will type the text that corresponds to the “key” in the upper case.
 	// If “key” is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
 	// texts.
-	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
-	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
+	// Shortcuts such as `key: "Control+o"`, `key: "Control++` or `key: "Control+Shift+T"` are supported as well. When
+	// specified with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	//
 	// Deprecated: Use locator-based [Locator.Press] instead. Read more about [locators].
 	//
@@ -1597,8 +1596,8 @@ type Frame interface {
 	// Holding down `Shift` will type the text that corresponds to the “key” in the upper case.
 	// If “key” is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
 	// texts.
-	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
-	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
+	// Shortcuts such as `key: "Control+o"`, `key: "Control++` or `key: "Control+Shift+T"` are supported as well. When
+	// specified with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	//
 	// Deprecated: Use locator-based [Locator.Press] instead. Read more about [locators].
 	//
@@ -2031,8 +2030,8 @@ type Keyboard interface {
 	// Holding down `Shift` will type the text that corresponds to the “key” in the upper case.
 	// If “key” is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
 	// texts.
-	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
-	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
+	// Shortcuts such as `key: "Control+o"`, `key: "Control++` or `key: "Control+Shift+T"` are supported as well. When
+	// specified with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	//
 	//  key: Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
 	//
@@ -2536,8 +2535,8 @@ type Locator interface {
 	// Holding down `Shift` will type the text that corresponds to the “key” in the upper case.
 	// If “key” is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
 	// texts.
-	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
-	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
+	// Shortcuts such as `key: "Control+o"`, `key: "Control++` or `key: "Control+Shift+T"` are supported as well. When
+	// specified with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	//
 	//  key: Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
 	//
@@ -2870,8 +2869,7 @@ type Page interface {
 	// Emitted when the page closes.
 	OnClose(fn func(Page))
 
-	// Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`. Also
-	// emitted if the page throws an error or a warning.
+	// Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`.
 	// The arguments passed into `console.log` are available on the [ConsoleMessage] event handler argument.
 	OnConsole(fn func(ConsoleMessage))
 
@@ -3489,8 +3487,8 @@ type Page interface {
 	// Holding down `Shift` will type the text that corresponds to the “key” in the upper case.
 	// If “key” is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
 	// texts.
-	// Shortcuts such as `key: "Control+o"` or `key: "Control+Shift+T"` are supported as well. When specified with the
-	// modifier, modifier is pressed and being held while the subsequent key is being pressed.
+	// Shortcuts such as `key: "Control+o"`, `key: "Control++` or `key: "Control+Shift+T"` are supported as well. When
+	// specified with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
 	//
 	// Deprecated: Use locator-based [Locator.Press] instead. Read more about [locators].
 	//
@@ -3522,6 +3520,32 @@ type Page interface {
 	//
 	// [locators]: https://playwright.dev/docs/locators
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
+
+	// Sometimes, the web page can show an overlay that obstructs elements behind it and prevents certain actions, like
+	// click, from completing. When such an overlay is shown predictably, we recommend dismissing it as a part of your
+	// test flow. However, sometimes such an overlay may appear non-deterministically, for example certain cookies consent
+	// dialogs behave this way. In this case, [Page.AddLocatorHandler] allows handling an overlay during an action that it
+	// would block.
+	// This method registers a handler for an overlay that is executed once the locator is visible on the page. The
+	// handler should get rid of the overlay so that actions blocked by it can proceed. This is useful for
+	// nondeterministic interstitial pages or dialogs, like a cookie consent dialog.
+	// Note that execution time of the handler counts towards the timeout of the action/assertion that executed the
+	// handler.
+	// You can register multiple handlers. However, only a single handler will be running at a time. Any actions inside a
+	// handler must not require another handler to run.
+	// **NOTE** Running the interceptor will alter your page state mid-test. For example it will change the currently
+	// focused element and move the mouse. Make sure that the actions that run after the interceptor are self-contained
+	// and do not rely on the focus and mouse state. <br /> <br /> For example, consider a test that calls [Locator.Focus]
+	// followed by [Keyboard.Press]. If your handler clicks a button between these two actions, the focused element most
+	// likely will be wrong, and key press will happen on the unexpected element. Use [Locator.Press] instead to avoid
+	// this problem. <br /> <br /> Another example is a series of mouse actions, where [Mouse.Move] is followed by
+	// [Mouse.Down]. Again, when the handler runs between these two actions, the mouse position will be wrong during the
+	// mouse down. Prefer methods like [Locator.Click] that are self-contained.
+	//
+	// 1. locator: Locator that triggers the handler.
+	// 2. handler: Function that should be run once “locator” appears. This function should get rid of the element that blocks actions
+	//    like click.
+	AddLocatorHandler(locator Locator, handler func()) error
 
 	// This method reloads the current page, in the same way as if the user had triggered a browser refresh. Returns the
 	// main resource response. In case of multiple redirects, the navigation will resolve with the response of the last
