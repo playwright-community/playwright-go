@@ -10,7 +10,9 @@ import (
 )
 
 func TestPageAddLocatorHandlerShouldWork(t *testing.T) {
-	BeforeEach(t)
+	BeforeEach(t, playwright.BrowserNewContextOptions{
+		HasTouch: playwright.Bool(false), // (v1.42.0) firefox 123.0 doesn't respond to pointerover when hasTouch is true
+	})
 	defer AfterEach(t)
 	_, err := page.Goto(fmt.Sprintf("%s/input/handle-locator.html", server.PREFIX))
 	require.NoError(t, err)
