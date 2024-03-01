@@ -135,6 +135,27 @@ func TestPagePDF(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestPagePDFWithOutline(t *testing.T) {
+	BeforeEach(t)
+	defer AfterEach(t)
+	if !isChromium {
+		t.Skip("Skipping")
+	}
+
+	_, err := page.Goto(fmt.Sprintf("%s/headings.html", server.PREFIX))
+	require.NoError(t, err)
+
+	pdfNoOutline, err := page.PDF()
+	require.NoError(t, err)
+	pdfWithOutline, err := page.PDF(playwright.PagePdfOptions{
+		Tagged:  playwright.Bool(true),
+		Outline: playwright.Bool(true),
+	})
+	require.NoError(t, err)
+
+	require.Greater(t, len(pdfWithOutline), len(pdfNoOutline))
+}
+
 func TestPageQuerySelector(t *testing.T) {
 	BeforeEach(t)
 	defer AfterEach(t)
