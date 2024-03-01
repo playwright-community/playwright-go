@@ -538,5 +538,5 @@ func TestBrowserContextOnResponse(t *testing.T) {
 	response := <-responseChan
 	body, err := response.Body()
 	require.NoError(t, err)
-	require.Equal(t, "<title>Woof-Woof</title>\n", string(body))
+	require.Equal(t, "<!DOCTYPE html>\n<title>Woof-Woof</title>\n", string(body))
 }
