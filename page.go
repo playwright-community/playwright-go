@@ -32,6 +32,47 @@ type pageImpl struct {
 	closeReason     *string
 	closeWasCalled  bool
 	harRouters      []*harRouter
+	locatorHandlers map[float64]func()
+}
+
+func (p *pageImpl) AddLocatorHandler(locator Locator, handler func()) error {
+	if locator == nil || handler == nil {
+		return errors.New("locator or handler must not be nil")
+	}
+	if locator.Err() != nil {
+		return locator.Err()
+	}
+	loc := locator.(*locatorImpl)
+	if loc.frame != p.mainFrame {
+		return errors.New("locator must belong to the main frame of this page")
+	}
+	uid, err := p.channel.Send("registerLocatorHandler", map[string]any{
+		"selector": loc.selector,
+	})
+	if err != nil {
+		return err
+	}
+	p.locatorHandlers[uid.(float64)] = handler
+	return nil
+}
+
+func (p *pageImpl) onLocatorHandlerTriggered(uid float64) {
+	handler, ok := p.locatorHandlers[uid]
+	if !ok {
+		return
+	}
+	go func() {
+		defer func() {
+			_, _ = p.connection.WrapAPICall(func() (interface{}, error) {
+				p.channel.SendNoReply("resolveLocatorHandlerNoReply", map[string]any{
+					"uid": uid,
+				})
+				return nil, nil
+			}, true)
+		}()
+
+		handler()
+	}()
 }
 
 func (p *pageImpl) Context() BrowserContext {
@@ -740,11 +781,12 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		viewportSize.Width = int(initializer["viewportSize"].(map[string]interface{})["width"].(float64))
 	}
 	bt := &pageImpl{
-		workers:      make([]Worker, 0),
-		routes:       make([]*routeHandlerEntry, 0),
-		bindings:     make(map[string]BindingCallFunction),
-		viewportSize: viewportSize,
-		harRouters:   make([]*harRouter, 0),
+		workers:         make([]Worker, 0),
+		routes:          make([]*routeHandlerEntry, 0),
+		bindings:        make(map[string]BindingCallFunction),
+		viewportSize:    viewportSize,
+		harRouters:      make([]*harRouter, 0),
+		locatorHandlers: make(map[float64]func(), 0),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.browserContext = fromChannel(parent.channel).(*browserContextImpl)
@@ -774,6 +816,9 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 	})
 	bt.channel.On("frameDetached", func(ev map[string]interface{}) {
 		bt.onFrameDetached(fromChannel(ev["frame"]).(*frameImpl))
+	})
+	bt.channel.On("locatorHandlerTriggered", func(ev map[string]interface{}) {
+		bt.onLocatorHandlerTriggered(ev["uid"].(float64))
 	})
 	bt.channel.On(
 		"load", func(ev map[string]interface{}) {
