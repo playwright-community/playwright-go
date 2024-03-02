@@ -567,7 +567,7 @@ index ad06c2514..d4f56009d 100644
  
  Expected options currently selected.
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index 922a7df3b..6ffd9d117 100644
+index c0cd3d0be..dde66ae7a 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
 @@ -618,7 +618,7 @@ The order of evaluation of multiple scripts installed via [`method: BrowserConte
@@ -679,7 +679,7 @@ index 922a7df3b..6ffd9d117 100644
  - `margin` <[Object]>
    - `top` ?<[string]> Top margin, accepts values labeled with units. Defaults to `0`.
    - `right` ?<[string]> Right margin, accepts values labeled with units. Defaults to `0`.
-@@ -3344,7 +3344,7 @@ await page.GetByRole("button", new() { Name = "Start here" }).ClickAsync();
+@@ -3346,7 +3346,7 @@ await page.GetByRole("button", new() { Name = "Start here" }).ClickAsync();
  Locator that triggers the handler.
  
  ### param: Page.addLocatorHandler.handler
@@ -688,7 +688,7 @@ index 922a7df3b..6ffd9d117 100644
  * since: v1.42
  - `handler` <[function]>
  
-@@ -3551,6 +3551,13 @@ it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/We
+@@ -3553,6 +3553,13 @@ it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/We
  
  handler function to route the request.
  
@@ -702,7 +702,7 @@ index 922a7df3b..6ffd9d117 100644
  ### param: Page.route.handler
  * since: v1.8
  * langs: csharp, java
-@@ -3932,12 +3939,12 @@ await page.GotoAsync("https://www.microsoft.com");
+@@ -3934,12 +3941,12 @@ await page.GotoAsync("https://www.microsoft.com");
  
  ### param: Page.setViewportSize.width
  * since: v1.10
@@ -717,7 +717,7 @@ index 922a7df3b..6ffd9d117 100644
  - `height` <[int]> page height in pixels.
  
  ## async method: Page.tap
-@@ -4124,6 +4131,13 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
+@@ -4126,6 +4133,13 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
  
  Optional handler function to route the request.
  
@@ -731,7 +731,7 @@ index 922a7df3b..6ffd9d117 100644
  ### param: Page.unroute.handler
  * since: v1.8
  * langs: csharp, java
-@@ -4162,7 +4176,8 @@ Performs action and waits for the Page to close.
+@@ -4164,7 +4178,8 @@ Performs action and waits for the Page to close.
  
  ## async method: Page.waitForConsoleMessage
  * since: v1.9
@@ -741,7 +741,7 @@ index 922a7df3b..6ffd9d117 100644
    - alias-python: expect_console_message
    - alias-csharp: RunAndWaitForConsoleMessage
  - returns: <[ConsoleMessage]>
-@@ -4193,7 +4208,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
+@@ -4195,7 +4210,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
  
  ## async method: Page.waitForDownload
  * since: v1.9
@@ -751,7 +751,7 @@ index 922a7df3b..6ffd9d117 100644
    - alias-python: expect_download
    - alias-csharp: RunAndWaitForDownload
  - returns: <[Download]>
-@@ -4224,7 +4240,8 @@ Receives the [Download] object and resolves to truthy value when the waiting sho
+@@ -4226,7 +4242,8 @@ Receives the [Download] object and resolves to truthy value when the waiting sho
  
  ## async method: Page.waitForEvent
  * since: v1.8
@@ -761,7 +761,7 @@ index 922a7df3b..6ffd9d117 100644
    - alias-python: expect_event
  - returns: <[any]>
  
-@@ -4277,7 +4294,8 @@ Either a predicate that receives an event or an options object. Optional.
+@@ -4279,7 +4296,8 @@ Either a predicate that receives an event or an options object. Optional.
  
  ## async method: Page.waitForFileChooser
  * since: v1.9
@@ -771,7 +771,7 @@ index 922a7df3b..6ffd9d117 100644
    - alias-python: expect_file_chooser
    - alias-csharp: RunAndWaitForFileChooser
  - returns: <[FileChooser]>
-@@ -4435,7 +4453,7 @@ await page.WaitForFunctionAsync("selector => !!document.querySelector(selector)"
+@@ -4437,7 +4455,7 @@ await page.WaitForFunctionAsync("selector => !!document.querySelector(selector)"
  
  Optional argument to pass to [`param: expression`].
  
@@ -780,7 +780,7 @@ index 922a7df3b..6ffd9d117 100644
  * since: v1.8
  
  ### option: Page.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
-@@ -4528,6 +4546,11 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
+@@ -4530,6 +4548,11 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
  ```
  
  ### param: Page.waitForLoadState.state = %%-wait-for-load-state-state-%%
@@ -792,7 +792,7 @@ index 922a7df3b..6ffd9d117 100644
  * since: v1.8
  
  ### option: Page.waitForLoadState.timeout = %%-navigation-timeout-%%
-@@ -4540,6 +4563,7 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
+@@ -4542,6 +4565,7 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
  * since: v1.8
  * deprecated: This method is inherently racy, please use [`method: Page.waitForURL`] instead.
  * langs:
@@ -800,7 +800,7 @@ index 922a7df3b..6ffd9d117 100644
    * alias-python: expect_navigation
    * alias-csharp: RunAndWaitForNavigation
  - returns: <[null]|[Response]>
-@@ -4624,7 +4648,8 @@ a navigation.
+@@ -4626,7 +4650,8 @@ a navigation.
  
  ## async method: Page.waitForPopup
  * since: v1.9
@@ -810,7 +810,7 @@ index 922a7df3b..6ffd9d117 100644
    - alias-python: expect_popup
    - alias-csharp: RunAndWaitForPopup
  - returns: <[Page]>
-@@ -4656,6 +4681,7 @@ Receives the [Page] object and resolves to truthy value when the waiting should
+@@ -4658,6 +4683,7 @@ Receives the [Page] object and resolves to truthy value when the waiting should
  ## async method: Page.waitForRequest
  * since: v1.8
  * langs:
@@ -818,7 +818,7 @@ index 922a7df3b..6ffd9d117 100644
    * alias-python: expect_request
    * alias-csharp: RunAndWaitForRequest
  - returns: <[Request]>
-@@ -4763,7 +4789,8 @@ changed by using the [`method: Page.setDefaultTimeout`] method.
+@@ -4765,7 +4791,8 @@ changed by using the [`method: Page.setDefaultTimeout`] method.
  
  ## async method: Page.waitForRequestFinished
  * since: v1.12
@@ -828,7 +828,7 @@ index 922a7df3b..6ffd9d117 100644
    - alias-python: expect_request_finished
    - alias-csharp: RunAndWaitForRequestFinished
  - returns: <[Request]>
-@@ -4795,6 +4822,7 @@ Receives the [Request] object and resolves to truthy value when the waiting shou
+@@ -4797,6 +4824,7 @@ Receives the [Request] object and resolves to truthy value when the waiting shou
  ## async method: Page.waitForResponse
  * since: v1.8
  * langs:
@@ -836,7 +836,7 @@ index 922a7df3b..6ffd9d117 100644
    * alias-python: expect_response
    * alias-csharp: RunAndWaitForResponse
  - returns: <[Response]>
-@@ -5157,7 +5185,8 @@ await page.WaitForURLAsync("**/target.html");
+@@ -5159,7 +5187,8 @@ await page.WaitForURLAsync("**/target.html");
  
  ## async method: Page.waitForWebSocket
  * since: v1.9
@@ -846,7 +846,7 @@ index 922a7df3b..6ffd9d117 100644
    - alias-python: expect_websocket
    - alias-csharp: RunAndWaitForWebSocket
  - returns: <[WebSocket]>
-@@ -5188,7 +5217,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
+@@ -5190,7 +5219,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
  
  ## async method: Page.waitForWorker
  * since: v1.9
@@ -856,7 +856,7 @@ index 922a7df3b..6ffd9d117 100644
    - alias-python: expect_worker
    - alias-csharp: RunAndWaitForWorker
  - returns: <[Worker]>
-@@ -5230,7 +5260,8 @@ This does not contain ServiceWorkers
+@@ -5232,7 +5262,8 @@ This does not contain ServiceWorkers
  
  ## async method: Page.waitForEvent2
  * since: v1.8

@@ -3521,30 +3521,36 @@ type Page interface {
 	// [locators]: https://playwright.dev/docs/locators
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
 
-	// Sometimes, the web page can show an overlay that obstructs elements behind it and prevents certain actions, like
-	// click, from completing. When such an overlay is shown predictably, we recommend dismissing it as a part of your
-	// test flow. However, sometimes such an overlay may appear non-deterministically, for example certain cookies consent
-	// dialogs behave this way. In this case, [Page.AddLocatorHandler] allows handling an overlay during an action that it
-	// would block.
-	// This method registers a handler for an overlay that is executed once the locator is visible on the page. The
-	// handler should get rid of the overlay so that actions blocked by it can proceed. This is useful for
-	// nondeterministic interstitial pages or dialogs, like a cookie consent dialog.
-	// Note that execution time of the handler counts towards the timeout of the action/assertion that executed the
-	// handler.
-	// You can register multiple handlers. However, only a single handler will be running at a time. Any actions inside a
-	// handler must not require another handler to run.
-	// **NOTE** Running the interceptor will alter your page state mid-test. For example it will change the currently
-	// focused element and move the mouse. Make sure that the actions that run after the interceptor are self-contained
-	// and do not rely on the focus and mouse state. <br /> <br /> For example, consider a test that calls [Locator.Focus]
+	// When testing a web page, sometimes unexpected overlays like a coookie consent dialog appear and block actions you
+	// want to automate, e.g. clicking a button. These overlays don't always show up in the same way or at the same time,
+	// making them tricky to handle in automated tests.
+	// This method lets you set up a special function, called a handler, that activates when it detects that overlay is
+	// visible. The handler's job is to remove the overlay, allowing your test to continue as if the overlay wasn't there.
+	// Things to keep in mind:
+	//  - When an overlay is shown predictably, we recommend explicitly waiting for it in your test and dismissing it as
+	//   a part of your normal test flow, instead of using [Page.AddLocatorHandler].
+	//  - Playwright checks for the overlay every time before executing or retrying an action that requires an
+	//   [actionability check], or before performing an auto-waiting assertion check. When overlay
+	//   is visible, Playwright calls the handler first, and then proceeds with the action/assertion.
+	//  - The execution time of the handler counts towards the timeout of the action/assertion that executed the handler.
+	//   If your handler takes too long, it might cause timeouts.
+	//  - You can register multiple handlers. However, only a single handler will be running at a time. Make sure the
+	//   actions within a handler don't depend on another handler.
+	// **NOTE** Running the handler will alter your page state mid-test. For example it will change the currently focused
+	// element and move the mouse. Make sure that actions that run after the handler are self-contained and do not rely on
+	// the focus and mouse state being unchanged. <br /> <br /> For example, consider a test that calls [Locator.Focus]
 	// followed by [Keyboard.Press]. If your handler clicks a button between these two actions, the focused element most
 	// likely will be wrong, and key press will happen on the unexpected element. Use [Locator.Press] instead to avoid
 	// this problem. <br /> <br /> Another example is a series of mouse actions, where [Mouse.Move] is followed by
 	// [Mouse.Down]. Again, when the handler runs between these two actions, the mouse position will be wrong during the
-	// mouse down. Prefer methods like [Locator.Click] that are self-contained.
+	// mouse down. Prefer self-contained actions like [Locator.Click] that do not rely on the state being unchanged by a
+	// handler.
 	//
 	// 1. locator: Locator that triggers the handler.
 	// 2. handler: Function that should be run once “locator” appears. This function should get rid of the element that blocks actions
 	//    like click.
+	//
+	// [actionability check]: https://playwright.dev/docs/actionability
 	AddLocatorHandler(locator Locator, handler func()) error
 
 	// This method reloads the current page, in the same way as if the user had triggered a browser refresh. Returns the
