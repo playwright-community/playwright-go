@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	playwrightCliVersion = "1.41.2"
+	playwrightCliVersion = "1.42.1"
 )
 
 var playwrightCDNMirrors = []string{

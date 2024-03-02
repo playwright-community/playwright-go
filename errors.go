@@ -44,6 +44,8 @@ func (e *Error) Is(target error) bool {
 func parseError(err Error) error {
 	if err.Name == "TimeoutError" {
 		return fmt.Errorf("%w: %w: %w", ErrPlaywright, ErrTimeout, &err)
+	} else if err.Name == "TargetClosedError" {
+		return fmt.Errorf("%w: %w: %w", ErrPlaywright, ErrTargetClosed, &err)
 	}
 	return fmt.Errorf("%w: %w", ErrPlaywright, &err)
 }

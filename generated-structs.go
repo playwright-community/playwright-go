@@ -3165,6 +3165,8 @@ type PagePdfOptions struct {
 	Landscape *bool `json:"landscape"`
 	// Paper margins, defaults to none.
 	Margin *Margin `json:"margin"`
+	// Whether or not to embed the document outline into the PDF. Defaults to `false`.
+	Outline *bool `json:"outline"`
 	// Paper ranges to print, e.g., '1-5, 8, 11-13'. Defaults to the empty string, which means print all pages.
 	PageRanges *string `json:"pageRanges"`
 	// The file path to save the PDF to. If “path” is a relative path, then it is resolved relative to the current working
@@ -3177,6 +3179,8 @@ type PagePdfOptions struct {
 	PrintBackground *bool `json:"printBackground"`
 	// Scale of the webpage rendering. Defaults to `1`. Scale amount must be between 0.1 and 2.
 	Scale *float64 `json:"scale"`
+	// Whether or not to generate tagged (accessible) PDF. Defaults to `false`.
+	Tagged *bool `json:"tagged"`
 	// Paper width, accepts values labeled with units.
 	Width *string `json:"width"`
 }
