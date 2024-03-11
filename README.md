@@ -105,6 +105,7 @@ func main() {
 
 ## More examples
 
+* Refer to [helper_test.go](./tests/helper_test.go) for End-To-End testing 
 * [Downloading files](./examples/download/main.go)
 * [End-To-End testing a website](./examples/end-to-end-testing/main.go)
 * [Executing JavaScript in the browser](./examples/javascript/main.go)
