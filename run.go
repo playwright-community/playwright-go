@@ -204,6 +204,9 @@ func (d *PlaywrightDriver) installBrowsers(driverPath string) error {
 	if d.options.Browsers != nil {
 		additionalArgs = append(additionalArgs, d.options.Browsers...)
 	}
+	if d.options.WithDependencies {
+		additionalArgs = append(additionalArgs, "--with-deps")
+	}
 	cmd := exec.Command(driverPath, additionalArgs...)
 	cmd.SysProcAttr = defaultSysProcAttr
 	cmd.Stdout = os.Stdout
@@ -225,6 +228,7 @@ type RunOptions struct {
 	SkipInstallBrowsers bool
 	Browsers            []string
 	Verbose             bool
+	WithDependencies    bool
 }
 
 // Install does download the driver and the browsers. If not called manually
