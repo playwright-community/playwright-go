@@ -103,6 +103,9 @@ func main() {
 }
 ```
 
+## Docker
+Refer to the [Dockerfile.example](./Dockerfile.example) to build your own docker image.
+
 ## More examples
 
 * Refer to [helper_test.go](./tests/helper_test.go) for End-To-End testing 
