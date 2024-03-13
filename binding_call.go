@@ -1,9 +1,5 @@
 package playwright
 
-import (
-	"log"
-)
-
 type BindingCall interface {
 	Call(f BindingCallFunction)
 }
@@ -31,7 +27,7 @@ func (b *bindingCallImpl) Call(f BindingCallFunction) {
 			if _, err := b.channel.Send("reject", map[string]interface{}{
 				"error": serializeError(r.(error)),
 			}); err != nil {
-				log.Printf("could not reject BindingCall: %v", err)
+				logger.Printf("could not reject BindingCall: %v\n", err)
 			}
 		}
 	}()
@@ -57,7 +53,7 @@ func (b *bindingCallImpl) Call(f BindingCallFunction) {
 		"result": serializeArgument(result),
 	})
 	if err != nil {
-		log.Printf("could not resolve BindingCall: %v", err)
+		logger.Printf("could not resolve BindingCall: %v\n", err)
 	}
 }
 
