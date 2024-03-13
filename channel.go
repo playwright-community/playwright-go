@@ -1,7 +1,6 @@
 package playwright
 
 import (
-	"log"
 	"reflect"
 )
 
@@ -59,7 +58,7 @@ func (c *channel) SendNoReply(method string, options ...interface{}) {
 		return c.connection.sendMessageToServer(c.owner, method, params, true)
 	}, false)
 	if err != nil {
-		log.Printf("SendNoReply failed: %v", err)
+		logger.Printf("SendNoReply failed: %v\n", err)
 	}
 }
 

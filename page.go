@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"sync"
 	"time"
@@ -926,7 +925,7 @@ func (p *pageImpl) onRoute(route *routeImpl) {
 					return nil, err
 				}, true)
 				if err != nil {
-					log.Printf("could not update interception patterns: %v", err)
+					logger.Printf("could not update interception patterns: %v\n", err)
 				}
 			}
 		}

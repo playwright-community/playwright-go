@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 
@@ -46,7 +45,7 @@ func (t *pipeTransport) Poll() (*message, error) {
 	if os.Getenv("DEBUGP") != "" {
 		fmt.Fprint(os.Stdout, "\x1b[33mRECV>\x1b[0m\n")
 		if err := json.NewEncoder(os.Stdout).Encode(msg); err != nil {
-			log.Printf("could not encode json: %v", err)
+			logger.Printf("could not encode json: %v\n", err)
 		}
 	}
 	return msg, nil
@@ -74,7 +73,7 @@ func (t *pipeTransport) Send(msg map[string]interface{}) error {
 	if os.Getenv("DEBUGP") != "" {
 		fmt.Fprint(os.Stdout, "\x1b[32mSEND>\x1b[0m\n")
 		if err := json.NewEncoder(os.Stdout).Encode(msg); err != nil {
-			log.Printf("could not encode json: %v", err)
+			logger.Printf("could not encode json: %v\n", err)
 		}
 	}
 	lengthPadding := make([]byte, 4)
@@ -103,14 +102,14 @@ func (t *pipeTransport) isClosed() bool {
 	}
 }
 
-func newPipeTransport(driverCli string) (transport, error) {
+func newPipeTransport(driverCli string, stderr io.Writer) (transport, error) {
 	t := &pipeTransport{
 		closed: make(chan struct{}, 1),
 	}
 
 	cmd := exec.Command(driverCli, "run-driver")
 	cmd.SysProcAttr = defaultSysProcAttr
-	cmd.Stderr = os.Stderr
+	cmd.Stderr = stderr
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return nil, fmt.Errorf("could not create stdin pipe: %w", err)

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"sync"
@@ -528,7 +527,7 @@ func (b *browserContextImpl) onRoute(route *routeImpl) {
 					return nil, err
 				}, true)
 				if err != nil {
-					log.Printf("could not update interception patterns: %v", err)
+					logger.Printf("could not update interception patterns: %v\n", err)
 				}
 			}
 		}

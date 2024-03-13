@@ -21,11 +21,14 @@ const (
 	playwrightCliVersion = "1.42.1"
 )
 
-var playwrightCDNMirrors = []string{
-	"https://playwright.azureedge.net",
-	"https://playwright-akamai.azureedge.net",
-	"https://playwright-verizon.azureedge.net",
-}
+var (
+	logger               = log.Default()
+	playwrightCDNMirrors = []string{
+		"https://playwright.azureedge.net",
+		"https://playwright-akamai.azureedge.net",
+		"https://playwright-verizon.azureedge.net",
+	}
+)
 
 type PlaywrightDriver struct {
 	DriverDirectory, DriverBinaryLocation, Version string
@@ -96,35 +99,29 @@ func (d *PlaywrightDriver) Install() error {
 	if d.options.SkipInstallBrowsers {
 		return nil
 	}
-	if d.options.Verbose {
-		log.Println("Downloading browsers...")
-	}
+
+	d.log("Downloading browsers...")
 	if err := d.installBrowsers(d.DriverBinaryLocation); err != nil {
 		return fmt.Errorf("could not install browsers: %w", err)
 	}
-	if d.options.Verbose {
-		log.Println("Downloaded browsers successfully")
-	}
+	d.log("Downloaded browsers successfully")
+
 	return nil
 }
 
 // Uninstall removes the driver and the browsers.
 func (d *PlaywrightDriver) Uninstall() error {
-	if d.options.Verbose {
-		log.Println("Removing browsers...")
-	}
+	d.log("Removing browsers...")
 	if err := d.uninstallBrowsers(d.DriverBinaryLocation); err != nil {
 		return fmt.Errorf("could not uninstall browsers: %w", err)
 	}
-	if d.options.Verbose {
-		log.Println("Removing driver...")
-	}
+
+	d.log("Removing driver...")
 	if err := os.RemoveAll(d.DriverDirectory); err != nil {
 		return fmt.Errorf("could not remove driver directory: %w", err)
 	}
-	if d.options.Verbose {
-		log.Println("Uninstall driver successfully")
-	}
+
+	d.log("Uninstall driver successfully")
 	return nil
 }
 
@@ -138,9 +135,7 @@ func (d *PlaywrightDriver) DownloadDriver() error {
 		return nil
 	}
 
-	if d.options.Verbose {
-		log.Printf("Downloading driver to %s", d.DriverDirectory)
-	}
+	d.log(fmt.Sprintf("Downloading driver to %s", d.DriverDirectory))
 
 	body, err := downloadDriver(d.getDriverURLs())
 	if err != nil {
@@ -184,14 +179,19 @@ func (d *PlaywrightDriver) DownloadDriver() error {
 		}
 	}
 
-	if d.options.Verbose {
-		log.Println("Downloaded driver successfully")
-	}
+	d.log("Downloaded driver successfully")
+
 	return nil
 }
 
+func (d *PlaywrightDriver) log(s string) {
+	if d.options.Verbose {
+		logger.Println(s)
+	}
+}
+
 func (d *PlaywrightDriver) run() (*connection, error) {
-	transport, err := newPipeTransport(d.DriverBinaryLocation)
+	transport, err := newPipeTransport(d.DriverBinaryLocation, d.options.Stderr)
 	if err != nil {
 		return nil, err
 	}
@@ -206,16 +206,16 @@ func (d *PlaywrightDriver) installBrowsers(driverPath string) error {
 	}
 	cmd := exec.Command(driverPath, additionalArgs...)
 	cmd.SysProcAttr = defaultSysProcAttr
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = d.options.Stdout
+	cmd.Stderr = d.options.Stderr
 	return cmd.Run()
 }
 
 func (d *PlaywrightDriver) uninstallBrowsers(driverPath string) error {
 	cmd := exec.Command(driverPath, "uninstall")
 	cmd.SysProcAttr = defaultSysProcAttr
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = d.options.Stdout
+	cmd.Stderr = d.options.Stderr
 	return cmd.Run()
 }
 
@@ -224,7 +224,9 @@ type RunOptions struct {
 	DriverDirectory     string
 	SkipInstallBrowsers bool
 	Browsers            []string
-	Verbose             bool
+	Verbose             bool // default true
+	Stdout              io.Writer
+	Stderr              io.Writer
 }
 
 // Install does download the driver and the browsers. If not called manually
@@ -256,12 +258,21 @@ func Run(options ...*RunOptions) (*Playwright, error) {
 }
 
 func transformRunOptions(options []*RunOptions) *RunOptions {
-	if len(options) == 1 {
-		return options[0]
-	}
-	return &RunOptions{
+	option := &RunOptions{
 		Verbose: true,
 	}
+	if len(options) == 1 {
+		option = options[0]
+	}
+	if option.Stdout == nil {
+		option.Stdout = os.Stdout
+	}
+	if option.Stderr == nil {
+		option.Stderr = os.Stderr
+	} else {
+		logger.SetOutput(option.Stderr)
+	}
+	return option
 }
 
 func getDriverName() string {
