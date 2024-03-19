@@ -11,7 +11,7 @@ import (
 
 func TestLocatorAllInnerTexts(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<div>A</div><div>B</div><div>C</div>`))
@@ -23,7 +23,7 @@ func TestLocatorAllInnerTexts(t *testing.T) {
 
 func TestLocatorAllTextContents(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<div>A</div><div>B</div><div>C</div>`))
@@ -35,7 +35,7 @@ func TestLocatorAllTextContents(t *testing.T) {
 
 func TestLocatorFill(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/dom.html")
 	require.NoError(t, err)
 
@@ -48,7 +48,7 @@ func TestLocatorFill(t *testing.T) {
 
 func TestLocatorGetAttribute(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/dom.html")
 	require.NoError(t, err)
 
@@ -62,7 +62,7 @@ func TestLocatorGetAttribute(t *testing.T) {
 
 func TestLocatorInnerHTML(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/dom.html")
 	require.NoError(t, err)
 
@@ -73,7 +73,7 @@ func TestLocatorInnerHTML(t *testing.T) {
 
 func TestLocatorInnerText(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/dom.html")
 	require.NoError(t, err)
 
@@ -84,7 +84,7 @@ func TestLocatorInnerText(t *testing.T) {
 
 func TestLocatorInputValue(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/dom.html")
 	require.NoError(t, err)
 	require.NoError(t, page.Locator("#input").Fill("input value"))
@@ -96,7 +96,7 @@ func TestLocatorInputValue(t *testing.T) {
 
 func TestLocatorIsChecked(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<input type='checkbox' checked><div>Not a checkbox</div>"))
@@ -108,7 +108,7 @@ func TestLocatorIsChecked(t *testing.T) {
 
 func TestLocatorIsDisabled(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	err = page.SetContent(`
@@ -133,7 +133,7 @@ func TestLocatorIsDisabled(t *testing.T) {
 
 func TestLocatorIsEditable(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	err = page.SetContent(`<input id=input1 disabled><textarea></textarea><input id=input2>
@@ -155,7 +155,7 @@ func TestLocatorIsEditable(t *testing.T) {
 
 func TestLocatorIsEnabled(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	err = page.SetContent(`
@@ -180,7 +180,7 @@ func TestLocatorIsEnabled(t *testing.T) {
 
 func TestLocatorIsHidden(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	err = page.SetContent(`
@@ -205,7 +205,7 @@ func TestLocatorIsHidden(t *testing.T) {
 
 func TestLocatorIsVisible(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	err = page.SetContent(`
@@ -230,7 +230,7 @@ func TestLocatorIsVisible(t *testing.T) {
 
 func TestLocatorLocatorHas(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 
@@ -270,7 +270,7 @@ func TestLocatorLocatorHas(t *testing.T) {
 
 func TestLocatorLocatorHasText(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 
@@ -308,7 +308,7 @@ func TestLocatorLocatorHasText(t *testing.T) {
 
 func TestLocatorSelectOption(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/dom.html")
 	require.NoError(t, err)
 
@@ -320,7 +320,7 @@ func TestLocatorSelectOption(t *testing.T) {
 
 func TestLocatorTextContent(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/dom.html")
 	require.NoError(t, err)
 
@@ -331,7 +331,7 @@ func TestLocatorTextContent(t *testing.T) {
 
 func TestLocatorShouldFocusAndBlurButton(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/input/button.html")
 	require.NoError(t, err)
 	button := page.Locator("button")
@@ -375,7 +375,7 @@ func TestLocatorShouldFocusAndBlurButton(t *testing.T) {
 
 func TestLocatorAllShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<div><p>A</p><p>B</p><p>C</p></div>`))
@@ -394,7 +394,7 @@ func TestLocatorAllShouldWork(t *testing.T) {
 
 func TestLocatorsShouldReturnBoundingBox(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetViewportSize(500, 500))
 	_, err := page.Goto(fmt.Sprintf("%s/grid.html", server.PREFIX))
 	require.NoError(t, err)
@@ -410,7 +410,7 @@ func TestLocatorsShouldReturnBoundingBox(t *testing.T) {
 
 func TestLocatorsCheckShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`<input id='checkbox' type='checkbox'></input>`))
 	require.NoError(t, page.Locator("input").Check())
 	ret, err := page.Evaluate("checkbox.checked")
@@ -424,7 +424,7 @@ func TestLocatorsCheckShouldWork(t *testing.T) {
 
 func TestLocatorsClearShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(fmt.Sprintf("%s/input/textarea.html", server.PREFIX))
 	require.NoError(t, err)
 	button := page.Locator("input")
@@ -442,7 +442,7 @@ func TestLocatorsClearShouldWork(t *testing.T) {
 
 func TestLocatorsClickShouldWorkForTextNodes(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(fmt.Sprintf("%s/input/button.html", server.PREFIX))
 	require.NoError(t, err)
 	_, err = page.Evaluate(`
@@ -466,7 +466,7 @@ func TestLocatorsClickShouldWorkForTextNodes(t *testing.T) {
 
 func TestLocatorsDispatchEventShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(fmt.Sprintf("%s/input/button.html", server.PREFIX))
 	require.NoError(t, err)
 	require.NoError(t, page.Locator("button").DispatchEvent("click", nil))
@@ -477,7 +477,7 @@ func TestLocatorsDispatchEventShouldWork(t *testing.T) {
 
 func TestLocatorsDragToShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(fmt.Sprintf("%s/drag-n-drop.html", server.PREFIX))
 	require.NoError(t, err)
 	require.NoError(t, page.Locator("#source").DragTo(page.Locator("#target")))
@@ -488,7 +488,7 @@ func TestLocatorsDragToShouldWork(t *testing.T) {
 
 func TestLocatorsShouldUploadFile(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(fmt.Sprintf("%s/input/fileupload.html", server.PREFIX))
 	require.NoError(t, err)
 	input := page.Locator("input[type=file]")
@@ -503,7 +503,7 @@ func TestLocatorsShouldUploadFile(t *testing.T) {
 
 func TestLocatorsShouldUploadFileRemote(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
 	defer remoteServer.Close()
@@ -528,7 +528,7 @@ func TestLocatorsShouldUploadFileRemote(t *testing.T) {
 
 func TestLocatorsShouldUploadFileUseBuffer(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(fmt.Sprintf("%s/input/fileupload.html", server.PREFIX))
 	require.NoError(t, err)
 	input := page.Locator("input[type=file]")
@@ -551,7 +551,7 @@ func TestLocatorsShouldUploadFileUseBuffer(t *testing.T) {
 
 func TestLocatorsShouldQueryExistingElements(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`<html><body><div>A</div><br/><div>B</div></body></html>`))
 	//nolint:staticcheck
 	elements, err := page.Locator("html").Locator("div").ElementHandles()
@@ -569,7 +569,7 @@ func TestLocatorsShouldQueryExistingElements(t *testing.T) {
 
 func TestLocatorsEvaluateAllShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`<html><body><div class="tweet"><div class="like">100</div><div class="like">10</div></div></body></html>`))
 	content, err := page.Locator(".tweet .like").EvaluateAll(`nodes => nodes.map(n => n.innerText)`)
 	require.NoError(t, err)
@@ -578,7 +578,7 @@ func TestLocatorsEvaluateAllShouldWork(t *testing.T) {
 
 func TestShouldSupportLocatorFilter(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`<section><div><span>hello</span></div><div><span>world</span></div></section>`)
 	require.NoError(t, err)
 	locator := page.Locator("div").Filter(playwright.LocatorFilterOptions{
@@ -590,7 +590,7 @@ func TestShouldSupportLocatorFilter(t *testing.T) {
 
 func TestShouldSupportLocatorAnd(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`
 		<div data-testid=foo>hello</div><div data-testid=bar>world</div>
     <span data-testid=foo>hello2</span><span data-testid=bar>world2</span>`)
@@ -604,7 +604,7 @@ func TestShouldSupportLocatorAnd(t *testing.T) {
 
 func TestShouldSupportLocatorOr(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`<div>hello</div><span>world</span>`)
 	require.NoError(t, err)
 	require.NoError(t, expect.Locator(page.Locator("div").Or(page.Locator("span"))).ToHaveCount(2))
@@ -621,7 +621,7 @@ func TestShouldSupportLocatorOr(t *testing.T) {
 
 func TestLocatorAndFrameLocatorShouldAcceptLocator(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`
 		<div><input value=outer></div>
     <iframe srcdoc="<div><input value=inner></div>"></iframe>
@@ -638,7 +638,7 @@ func TestLocatorAndFrameLocatorShouldAcceptLocator(t *testing.T) {
 
 func TestLocatorShouldSupportLocatorWithAndOr(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`
 		<div>one <span>two</span> <button>three</button> </div>
 		<span>four</span>
@@ -660,7 +660,7 @@ func TestLocatorShouldSupportLocatorWithAndOr(t *testing.T) {
 
 func TestLocatorHighlightShoudWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/grid.html")
 	require.NoError(t, err)
 	require.NoError(t, page.Locator(".box").Nth(3).Highlight())
@@ -671,7 +671,7 @@ func TestLocatorHighlightShoudWork(t *testing.T) {
 
 func TestLocatorShouldType(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`<input type='text' />`))
 	//nolint:staticcheck
 	require.NoError(t, page.Locator("input").Type("hello"))
@@ -683,7 +683,7 @@ func TestLocatorShouldType(t *testing.T) {
 
 func TestLocatorShouldPressSequentially(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`<input type='text' />`))
 	require.NoError(t, page.Locator("input").PressSequentially("hello"))
 	utils.AssertResult(t, func() (interface{}, error) {

@@ -9,7 +9,7 @@ import (
 
 func TestAssertionsResponseIsOKPass(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	response, err := page.Request().Get(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, expect.APIResponse(response).ToBeOK())
@@ -18,7 +18,7 @@ func TestAssertionsResponseIsOKPass(t *testing.T) {
 
 func TestAssertionsShouldPrintResponseWithTextContentTypeIfToBeOKFails(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	server.SetRoute("/text-content-type", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusNotFound)

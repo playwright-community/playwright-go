@@ -86,27 +86,19 @@ func AfterAll() {
 //
 //	Func TestFoo(t *testing.T) {
 //	  BeforeEach(t)
-//	  defer AfterEach(t)
 //	  // your test code
 //	}
 func BeforeEach(t *testing.T, contextOptions ...playwright.BrowserNewContextOptions) {
 	t.Helper()
+	opt := DEFAULT_CONTEXT_OPTIONS
 	if len(contextOptions) == 1 {
-		newContextWithOptions(t, contextOptions[0])
-		return
+		opt = contextOptions[0]
 	}
-	newContextWithOptions(t, DEFAULT_CONTEXT_OPTIONS)
-}
+	context, page = newBrowserContextAndPage(t, opt)
 
-// AfterEach closes the context and page after each test
-func AfterEach(t *testing.T, closeContext ...bool) {
-	t.Helper()
-	if len(closeContext) == 0 {
-		if err := context.Close(); err != nil {
-			t.Errorf("could not close context: %v", err)
-		}
-	}
-	server.AfterEach()
+	t.Cleanup(func() {
+		server.AfterEach()
+	})
 }
 
 func getBrowserName() string {
@@ -117,15 +109,20 @@ func getBrowserName() string {
 	return "chromium"
 }
 
-func newContextWithOptions(t *testing.T, contextOptions playwright.BrowserNewContextOptions) {
+func newBrowserContextAndPage(t *testing.T, options playwright.BrowserNewContextOptions) (playwright.BrowserContext, playwright.Page) {
 	t.Helper()
-	var err error
-	context, err = browser.NewContext(contextOptions)
+	context, err := browser.NewContext(options)
 	if err != nil {
 		t.Fatalf("could not create new context: %v", err)
 	}
-	page, err = context.NewPage()
+	t.Cleanup(func() {
+		if err := context.Close(); err != nil {
+			t.Errorf("could not close context: %v", err)
+		}
+	})
+	page, err := context.NewPage()
 	if err != nil {
 		t.Fatalf("could not create new page: %v", err)
 	}
+	return context, page
 }

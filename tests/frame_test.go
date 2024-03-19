@@ -11,7 +11,7 @@ import (
 
 func TestFrameWaitForNavigationShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	//nolint:staticcheck
@@ -26,7 +26,7 @@ func TestFrameWaitForNavigationShouldWork(t *testing.T) {
 
 func TestFrameWaitForNavigationShouldRespectTimeout(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	timeout := 500.0
 	//nolint:staticcheck
 	_, err := page.ExpectNavigation(func() error {
@@ -41,7 +41,7 @@ func TestFrameWaitForNavigationShouldRespectTimeout(t *testing.T) {
 
 func TestFrameWaitForURLShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 
@@ -58,7 +58,7 @@ func TestFrameWaitForURLShouldWork(t *testing.T) {
 
 func TestFrameWaitForNavigationAnchorLinks(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<a href="#foobar">foobar</a>`))
@@ -73,7 +73,7 @@ func TestFrameWaitForNavigationAnchorLinks(t *testing.T) {
 
 func TestFrameInnerHTML(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/dom.html")
 	require.NoError(t, err)
 	//nolint:staticcheck
@@ -93,7 +93,7 @@ more text</div>`, innerHTML)
 
 func TestFrameSetInputFiles(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<input type=file>"))
@@ -112,7 +112,7 @@ func TestFrameSetInputFiles(t *testing.T) {
 
 func TestShouldReportDifferentFrameInstanceWhenFrameReattaches(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	frame1, err := utils.AttachFrame(page, "frame1", server.EMPTY_PAGE)
 	require.NoError(t, err)
 
@@ -135,7 +135,7 @@ func TestShouldReportDifferentFrameInstanceWhenFrameReattaches(t *testing.T) {
 
 func TestShouldSendEventsWhenFramesAreManipulatedDynamically(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	// validate frameattached events
@@ -174,7 +174,7 @@ func TestShouldSendEventsWhenFramesAreManipulatedDynamically(t *testing.T) {
 
 func TestFrameElement(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	frame1, err := utils.AttachFrame(page, "frame1", server.EMPTY_PAGE)
@@ -206,7 +206,7 @@ func TestFrameElement(t *testing.T) {
 
 func TestFrameParent(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := utils.AttachFrame(page, "frame1", server.EMPTY_PAGE)
 	require.NoError(t, err)
 	_, err = utils.AttachFrame(page, "frame2", server.EMPTY_PAGE)
@@ -220,7 +220,7 @@ func TestFrameParent(t *testing.T) {
 
 func TestFrameShouldHandleNestedFrames(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/frames/nested-frames.html")
 	require.NoError(t, err)
 	dump := utils.DumpFrames(page.MainFrame(), "")

@@ -10,7 +10,7 @@ import (
 
 func TestConsoleShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	messages := make(chan playwright.ConsoleMessage, 1)
 	page.Once("console", func(message playwright.ConsoleMessage) {
 		messages <- message
@@ -41,7 +41,7 @@ func TestConsoleShouldWork(t *testing.T) {
 
 func TestConsoleShouldEmitSameLogTwice(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	messages := make(chan string, 2)
 	page.OnConsole(func(message playwright.ConsoleMessage) {
 		messages <- message.Text()
@@ -55,7 +55,7 @@ func TestConsoleShouldEmitSameLogTwice(t *testing.T) {
 
 func TestConsoleShouldUseTextForStr(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	messages := make(chan playwright.ConsoleMessage, 1)
 	page.OnConsole(func(message playwright.ConsoleMessage) {
 		messages <- message
@@ -68,7 +68,7 @@ func TestConsoleShouldUseTextForStr(t *testing.T) {
 
 func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	messagesChan := make(chan playwright.ConsoleMessage, 6)
 	page.OnConsole(func(message playwright.ConsoleMessage) {
 		messagesChan <- message
@@ -112,7 +112,7 @@ func TestConsoleShouldWorkForDifferentConsoleAPICalls(t *testing.T) {
 
 func TestConsoleShouldNotFailForWindowObjects(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	messages := make(chan playwright.ConsoleMessage, 1)
 	page.Once("console", func(message playwright.ConsoleMessage) {
 		messages <- message
@@ -129,7 +129,7 @@ func TestConsoleShouldNotFailForWindowObjects(t *testing.T) {
 
 func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	messages := make(chan playwright.ConsoleMessage, 1)
 	page.Once("console", func(message playwright.ConsoleMessage) {
 		messages <- message
@@ -145,7 +145,7 @@ func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
 
 func TestConsoleShouldHaveLocationForConsoleAPICalls(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	messageEvent, err := page.ExpectEvent("console", func() error {
 		_, err := page.Goto(server.PREFIX + "/consolelog.html")
 		return err

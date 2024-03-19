@@ -11,7 +11,7 @@ import (
 
 func TestBrowserContextStorageStateShouldCaptureLocalStorage(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	page1, err := context.NewPage()
 	require.NoError(t, err)
 	require.NoError(t, page1.Route("**/*", func(route playwright.Route) {
@@ -54,7 +54,7 @@ func TestBrowserContextStorageStateShouldCaptureLocalStorage(t *testing.T) {
 
 func TestBrowserContextStorageStateSetLocalStorage(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	context, err := browser.NewContext(
 		playwright.BrowserNewContextOptions{
 			StorageState: &playwright.OptionalStorageState{
@@ -91,7 +91,7 @@ func TestBrowserContextStorageStateSetLocalStorage(t *testing.T) {
 
 func TestBrowserContextStorageStateRoundTripThroughTheFile(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	page1, err := context.NewPage()
 	require.NoError(t, err)
 	defer page1.Close()
@@ -147,7 +147,7 @@ func TestBrowserContextStorageStateRoundTripThroughTheFile(t *testing.T) {
 
 func TestBrowserContextStorageStateRoundTripThroughConvert(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	page1, err := context.NewPage()
 	require.NoError(t, err)
 	defer page1.Close()

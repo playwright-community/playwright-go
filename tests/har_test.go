@@ -17,7 +17,7 @@ import (
 
 func TestShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := filepath.Join(t.TempDir(), "log.har")
 	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		RecordHarPath: playwright.String(harPath),
@@ -34,7 +34,7 @@ func TestShouldWork(t *testing.T) {
 
 func TestShouldOmitContent(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := filepath.Join(t.TempDir(), "log.har")
 	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		RecordHarPath:    playwright.String(harPath),
@@ -53,7 +53,7 @@ func TestShouldOmitContent(t *testing.T) {
 
 func TestShouldOmitContentLegacy(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := filepath.Join(t.TempDir(), "log.har")
 	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		RecordHarPath:        playwright.String(harPath),
@@ -72,7 +72,7 @@ func TestShouldOmitContentLegacy(t *testing.T) {
 
 func TestShouldAttachContent(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harZipFile := filepath.Join(t.TempDir(), "log.har.zip")
 	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		RecordHarPath:    playwright.String(harZipFile),
@@ -109,7 +109,7 @@ func TestShouldAttachContent(t *testing.T) {
 
 func TestShouldNotOmitContent(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := filepath.Join(t.TempDir(), "log.har")
 	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		RecordHarPath:        playwright.String(harPath),
@@ -130,7 +130,7 @@ func TestShouldNotOmitContent(t *testing.T) {
 
 func TestShouldIncludeContent(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := filepath.Join(t.TempDir(), "log.har")
 	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		RecordHarPath: playwright.String(harPath),
@@ -151,7 +151,7 @@ func TestShouldIncludeContent(t *testing.T) {
 
 func TestShouldDefaultToFullMode(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := filepath.Join(t.TempDir(), "log.har")
 	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		RecordHarPath: playwright.String(harPath),
@@ -172,7 +172,7 @@ func TestShouldDefaultToFullMode(t *testing.T) {
 
 func TestShouldSupportMinimalMode(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := filepath.Join(t.TempDir(), "log.har")
 	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		RecordHarPath: playwright.String(harPath),
@@ -194,7 +194,7 @@ func TestShouldSupportMinimalMode(t *testing.T) {
 
 func TestShouldFilterByGlob(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := filepath.Join(t.TempDir(), "log.har")
 	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		BaseURL:            &server.PREFIX,
@@ -217,7 +217,7 @@ func TestShouldFilterByGlob(t *testing.T) {
 
 func TestShouldFilterByRegexp(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := filepath.Join(t.TempDir(), "log.har")
 	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		BaseURL:            &server.PREFIX,
@@ -241,7 +241,7 @@ func TestShouldFilterByRegexp(t *testing.T) {
 
 func TestShouldContextRouteFromHarMatchingTheMethodAndFollowingRedirects(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := context.RouteFromHAR(Asset("har-fulfill.har"))
 	require.NoError(t, err)
 	_, err = page.Goto("http://no.playwright/")
@@ -256,7 +256,7 @@ func TestShouldContextRouteFromHarMatchingTheMethodAndFollowingRedirects(t *test
 
 func TestShouldPageRouteFromHarMatchingTheMethodAndFollowingRedirects(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.RouteFromHAR(Asset("har-fulfill.har"))
 	require.NoError(t, err)
 	_, err = page.Goto("http://no.playwright/")
@@ -271,7 +271,7 @@ func TestShouldPageRouteFromHarMatchingTheMethodAndFollowingRedirects(t *testing
 
 func TestFallbackContinueShouldContinueWhenNotFoundInHar(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := context.RouteFromHAR(Asset("har-fulfill.har"), playwright.BrowserContextRouteFromHAROptions{
 		NotFound: playwright.HarNotFoundFallback,
 	})
@@ -283,7 +283,7 @@ func TestFallbackContinueShouldContinueWhenNotFoundInHar(t *testing.T) {
 
 func TestByDefaultShouldAbortRequestsNotFoundInHar(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := context.RouteFromHAR(Asset("har-fulfill.har"))
 	require.NoError(t, err)
 	page, err := context.NewPage()
@@ -300,7 +300,7 @@ func TestByDefaultShouldAbortRequestsNotFoundInHar(t *testing.T) {
 
 func TestFallbackContinueShouldContinueRequestsOnBadHar(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := filepath.Join(t.TempDir(), "invalid.har")
 	require.NoError(t, os.WriteFile(harPath, []byte(`{"log": {}}`), 0o644))
 	err := context.RouteFromHAR(harPath, playwright.BrowserContextRouteFromHAROptions{
@@ -314,7 +314,7 @@ func TestFallbackContinueShouldContinueRequestsOnBadHar(t *testing.T) {
 
 func TestShouldOnlyHandleRequestsMatchingUrlFilter(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := context.RouteFromHAR(Asset("har-fulfill.har"), playwright.BrowserContextRouteFromHAROptions{
 		NotFound: playwright.HarNotFoundFallback,
 		URL:      "**/*.js",
@@ -340,7 +340,7 @@ func TestShouldOnlyHandleRequestsMatchingUrlFilter(t *testing.T) {
 
 func TestShouldOnlyHandleRequestsMatchingUrlFilterNoFallback(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := context.RouteFromHAR(Asset("har-fulfill.har"), playwright.BrowserContextRouteFromHAROptions{
 		URL: "**/*.js",
 	})
@@ -365,7 +365,7 @@ func TestShouldOnlyHandleRequestsMatchingUrlFilterNoFallback(t *testing.T) {
 
 func TestShouldOnlyHandleRequestsMatchingUrlFilterNoFallbackPage(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.RouteFromHAR(Asset("har-fulfill.har"), playwright.PageRouteFromHAROptions{
 		URL: "**/*.js",
 	})
@@ -390,7 +390,7 @@ func TestShouldOnlyHandleRequestsMatchingUrlFilterNoFallbackPage(t *testing.T) {
 
 func TestShouldSupportRegexFilter(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	urlPattern := regexp.MustCompile(`.*(\.js|.*\.css|no.playwright\/)`)
 	err := context.RouteFromHAR(Asset("har-fulfill.har"), playwright.BrowserContextRouteFromHAROptions{
 		URL: urlPattern,
@@ -406,7 +406,7 @@ func TestShouldSupportRegexFilter(t *testing.T) {
 
 func TestShouldGoBackToRedirectedNavigation(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	if isWebKit && runtime.GOOS == "linux" {
 		t.Skip("flaky: webkit on linux")
 	}
@@ -431,7 +431,7 @@ func TestShouldGoBackToRedirectedNavigation(t *testing.T) {
 
 func TestShouldGoForwardToRedirectedNavigation(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	if isFirefox {
 		// skipped upstream (https://github.com/microsoft/playwright/blob/6a8d835145e2f4002ee00b67a80a1f70af956703/tests/library/browsercontext-har.spec.ts#L214)
 		t.Skip("skipped upstream")
@@ -465,7 +465,7 @@ func TestShouldGoForwardToRedirectedNavigation(t *testing.T) {
 
 func TestShouldReloadRedirectedNavigation(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	if isWebKit && runtime.GOOS == "linux" {
 		t.Skip("flaky: webkit on linux")
 	}
@@ -491,7 +491,7 @@ func TestShouldReloadRedirectedNavigation(t *testing.T) {
 
 func TestShouldFulfillFromHarWithContentInAFile(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := context.RouteFromHAR(Asset("har-sha1.har"))
 	require.NoError(t, err)
 	_, err = page.Goto("http://no.playwright/")
@@ -503,7 +503,7 @@ func TestShouldFulfillFromHarWithContentInAFile(t *testing.T) {
 
 func TestShouldRoundTripHarZip(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := filepath.Join(t.TempDir(), "har.zip")
 	context1, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		RecordHarMode: playwright.HarModeMinimal,
@@ -534,7 +534,7 @@ func TestShouldRoundTripHarZip(t *testing.T) {
 
 func TestShouldRoundTripHarWithPostData(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	server.SetRoute("/echo", func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 		require.NoError(t, err)
@@ -593,7 +593,7 @@ func TestShouldRoundTripHarWithPostData(t *testing.T) {
 
 func TestShouldDisambiguateByHeader(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	server.SetRoute("/echo", func(w http.ResponseWriter, r *http.Request) {
 		_, err := w.Write([]byte(r.Header.Get("baz")))
 		require.NoError(t, err)
@@ -659,7 +659,7 @@ func TestShouldDisambiguateByHeader(t *testing.T) {
 
 func TestShouldProduceExtractedZip(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := filepath.Join(t.TempDir(), "har.har")
 	context1, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		RecordHarMode:    playwright.HarModeMinimal,
@@ -697,7 +697,7 @@ func TestShouldProduceExtractedZip(t *testing.T) {
 
 func TestShouldUpdateHarZipForContext(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := filepath.Join(t.TempDir(), "har.zip")
 	context1, err := browser.NewContext()
 	require.NoError(t, err)
@@ -730,7 +730,7 @@ func TestShouldUpdateHarZipForContext(t *testing.T) {
 
 func TestPageUnrouteAllShouldStopPageRouteFromHAR(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := Asset("har-fulfill.har")
 	context1, err := browser.NewContext()
 	require.NoError(t, err)
@@ -753,7 +753,7 @@ func TestPageUnrouteAllShouldStopPageRouteFromHAR(t *testing.T) {
 
 func TestContextUnrouteCallShouldStopContextRouteFromHAR(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := Asset("har-fulfill.har")
 	context1, err := browser.NewContext()
 	require.NoError(t, err)
@@ -776,7 +776,7 @@ func TestContextUnrouteCallShouldStopContextRouteFromHAR(t *testing.T) {
 
 func TestShouldUpdateHarZipForPage(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := filepath.Join(t.TempDir(), "har.zip")
 	context1, err := browser.NewContext()
 	require.NoError(t, err)
@@ -809,7 +809,7 @@ func TestShouldUpdateHarZipForPage(t *testing.T) {
 
 func TestShouldUpdateHarZipForPageWithDifferentOptions(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := filepath.Join(t.TempDir(), "har.zip")
 	context1, err := browser.NewContext()
 	require.NoError(t, err)
@@ -844,7 +844,7 @@ func TestShouldUpdateHarZipForPageWithDifferentOptions(t *testing.T) {
 
 func TestShouldUpdateExtractedHarZipForPage(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	harPath := filepath.Join(t.TempDir(), "har.har")
 	context1, err := browser.NewContext()
 	require.NoError(t, err)

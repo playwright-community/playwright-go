@@ -10,25 +10,25 @@ import (
 
 func TestBrowserIsConnected(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.True(t, browser.IsConnected())
 }
 
 func TestBrowserShouldReturnBrowserType(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.Equal(t, browserType, browser.BrowserType())
 }
 
 func TestBrowserVersion(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.Greater(t, len(browser.Version()), 2)
 }
 
 func TestBrowserNewContext(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	context2, err := browser.NewContext()
 	require.NoError(t, err)
 	require.Equal(t, 2, len(browser.Contexts()))
@@ -37,10 +37,10 @@ func TestBrowserNewContext(t *testing.T) {
 }
 
 func TestBrowserNewContextWithExtraHTTPHeaders(t *testing.T) {
-	newContextWithOptions(t, playwright.BrowserNewContextOptions{
+	context, page = newBrowserContextAndPage(t, playwright.BrowserNewContextOptions{
 		ExtraHttpHeaders: map[string]string{"extra-http": "42"},
 	})
-	defer AfterEach(t)
+
 	require.Equal(t, 1, len(context.Pages()))
 	intercepted := make(chan bool, 1)
 	err := page.Route("**/empty.html", func(route playwright.Route) {
@@ -58,7 +58,7 @@ func TestBrowserNewContextWithExtraHTTPHeaders(t *testing.T) {
 
 func TestBrowserNewPage(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.Equal(t, 1, len(browser.Contexts()))
 	page, err := browser.NewPage()
 	require.NoError(t, err)
@@ -71,7 +71,7 @@ func TestBrowserNewPage(t *testing.T) {
 
 func TestBrowserNewPageWithExtraHTTPHeaders(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.Equal(t, 1, len(browser.Contexts()))
 	page, err := browser.NewPage(playwright.BrowserNewPageOptions{
 		ExtraHttpHeaders: map[string]string{
@@ -102,7 +102,7 @@ func TestBrowserNewPageWithExtraHTTPHeaders(t *testing.T) {
 
 func TestBrowserShouldErrorUponSecondCreateNewPage(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	page, err := browser.NewPage()
 	require.NoError(t, err)
 	_, err = page.Context().NewPage()
@@ -113,7 +113,7 @@ func TestBrowserShouldErrorUponSecondCreateNewPage(t *testing.T) {
 
 func TestNewBrowserCDPSession(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	cdpSession, err := browser.NewBrowserCDPSession()
 	if isChromium {
 		require.NoError(t, err)
@@ -140,7 +140,7 @@ func TestBrowserClose(t *testing.T) {
 
 func TestBrowserShoulOutputATrace(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	if !isChromium {
 		t.Skip("This is only supported on Chromium")
 	}

@@ -8,7 +8,7 @@ import (
 
 func TestCDPSessionSend(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	cdpSession, err := browser.NewBrowserCDPSession()
 	if isChromium {
 		require.NoError(t, err)
@@ -23,7 +23,7 @@ func TestCDPSessionSend(t *testing.T) {
 
 func TestCDPSessionOn(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	cdpSession, err := page.Context().NewCDPSession(page)
 	if isChromium {
 		require.NoError(t, err)
@@ -42,7 +42,7 @@ func TestCDPSessionOn(t *testing.T) {
 
 func TestCDPSessionDetach(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	cdpSession, err := browser.NewBrowserCDPSession()
 	if isChromium {
 		require.NoError(t, err)

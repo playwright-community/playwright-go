@@ -13,7 +13,7 @@ import (
 
 func TestBrowserTypeBrowserName(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.Equal(t, pw.Chromium.Name(), "chromium")
 	require.Equal(t, pw.Firefox.Name(), "firefox")
 	require.Equal(t, pw.WebKit.Name(), "webkit")
@@ -21,13 +21,13 @@ func TestBrowserTypeBrowserName(t *testing.T) {
 
 func TestBrowserTypeExecutablePath(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.Greater(t, len(pw.Chromium.ExecutablePath()), 0)
 }
 
 func TestBrowserTypeLaunchPersistentContext(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	user_data_dir1 := t.TempDir()
 	browser_context, err := browserType.LaunchPersistentContext(user_data_dir1)
 	require.NoError(t, err)
@@ -65,7 +65,7 @@ func TestBrowserTypeLaunchPersistentContext(t *testing.T) {
 
 func TestBrowserTypeConnect(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
 	defer remoteServer.Close()
@@ -84,7 +84,7 @@ func TestBrowserTypeConnect(t *testing.T) {
 
 func TestBrowserTypeConnectShouldBeAbleToReconnectToBrowser(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
 	defer remoteServer.Close()
@@ -123,7 +123,7 @@ func TestBrowserTypeConnectShouldBeAbleToReconnectToBrowser(t *testing.T) {
 
 func TestBrowserTypeConnectShouldEmitDisconnectedEvent(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
 	disconnected1 := newSyncSlice[bool]()
@@ -156,7 +156,7 @@ func TestBrowserTypeConnectShouldEmitDisconnectedEvent(t *testing.T) {
 
 func TestBrowserTypeConnectSlowMo(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
 	defer remoteServer.Close()
@@ -179,7 +179,7 @@ func TestBrowserTypeConnectSlowMo(t *testing.T) {
 
 func TestBrowserTypeConnectArtifactPath(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
 	defer remoteServer.Close()
@@ -211,7 +211,7 @@ func TestBrowserTypeConnectOverCDP(t *testing.T) {
 		t.Skip("CDP is only supported on Chromium")
 	}
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	port, err := getFreePort()
 	require.NoError(t, err)
 	browserServer, err := browserType.Launch(playwright.BrowserTypeLaunchOptions{
@@ -231,7 +231,7 @@ func TestBrowserTypeConnectOverCDPTwice(t *testing.T) {
 		t.Skip("CDP is only supported on Chromium")
 	}
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	port, err := getFreePort()
 	require.NoError(t, err)
 	browserServer, err := browserType.Launch(playwright.BrowserTypeLaunchOptions{
@@ -264,7 +264,7 @@ func TestBrowserTypeConnectOverCDPTwice(t *testing.T) {
 
 func TestSetInputFilesShouldPreserveLastModifiedTimestamp(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
 	defer remoteServer.Close()

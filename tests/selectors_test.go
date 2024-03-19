@@ -10,7 +10,7 @@ import (
 
 func TestSelectorsRegisterShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	tagSelector := `
 	{
 		create(root, target) {
@@ -77,7 +77,7 @@ func TestSelectorsRegisterShouldWork(t *testing.T) {
 
 func TestSelectorsShouldUseDataTestIdInStrictErrors(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	pw.Selectors.SetTestIdAttribute("data-custom-id")
 	require.NoError(t, page.SetContent(`
 	<div>
@@ -105,7 +105,7 @@ func TestSelectorsShouldUseDataTestIdInStrictErrors(t *testing.T) {
 
 func TestSelectorsShouldWorkWithPath(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, pw.Selectors.Register("foo", playwright.Script{
 		Path: playwright.String(Asset("sectionselectorengine.js")),
 	}))

@@ -17,7 +17,7 @@ import (
 
 func TestFetchShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	request, err := pw.Request.NewContext()
 	require.NoError(t, err)
 	url := server.PREFIX + "/simple.json"
@@ -64,7 +64,7 @@ func TestFetchShouldWork(t *testing.T) {
 
 func TestShouldDisposeGlobalRequest(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	request, err := pw.Request.NewContext()
 	require.NoError(t, err)
 	response, err := request.Get(server.PREFIX + "/simple.json")
@@ -79,7 +79,7 @@ func TestShouldDisposeGlobalRequest(t *testing.T) {
 
 func TestShouldSupportGlobalUserAgentOption(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	request, err := pw.Request.NewContext(playwright.APIRequestNewContextOptions{
 		UserAgent: playwright.String("My Agent"),
 	})
@@ -94,7 +94,7 @@ func TestShouldSupportGlobalUserAgentOption(t *testing.T) {
 
 func TestShoulSupportGlobalTimeoutOption(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	request, err := pw.Request.NewContext(playwright.APIRequestNewContextOptions{
 		Timeout: playwright.Float(100),
 	})
@@ -108,7 +108,7 @@ func TestShoulSupportGlobalTimeoutOption(t *testing.T) {
 
 func TestShouldPropagateExtraHttpHeadersWithRedirects(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	server.SetRedirect("/a/redirect1", "/b/c/redirect2")
 	server.SetRedirect("/b/c/redirect2", "/simple.json")
 	request, err := pw.Request.NewContext(playwright.APIRequestNewContextOptions{
@@ -137,7 +137,7 @@ func TestShouldPropagateExtraHttpHeadersWithRedirects(t *testing.T) {
 
 func TestShouldSupportGlobalHttpCredentialsOption(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	server.SetBasicAuth("/empty.html", "user", "pass")
 	request, err := pw.Request.NewContext()
 	require.NoError(t, err)
@@ -173,7 +173,7 @@ func TestShouldSupportGlobalHttpCredentialsOption(t *testing.T) {
 
 func TestShouldSupportGlobalIgnoreHttpsErrorsOption(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	tlsServer := newTestServer(true)
 	defer tlsServer.testServer.Close()
 	request, err := pw.Request.NewContext(playwright.APIRequestNewContextOptions{
@@ -189,7 +189,7 @@ func TestShouldSupportGlobalIgnoreHttpsErrorsOption(t *testing.T) {
 
 func TestShouldResoleUrlRelativeToGlobalBaseUrlOption(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	request, err := pw.Request.NewContext(playwright.APIRequestNewContextOptions{
 		BaseURL: playwright.String(server.PREFIX),
 	})
@@ -203,7 +203,7 @@ func TestShouldResoleUrlRelativeToGlobalBaseUrlOption(t *testing.T) {
 
 func TestShouldUsePlaywrightAsAUserAgent(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	request, err := pw.Request.NewContext()
 	require.NoError(t, err)
 	resChan := server.WaitForRequestChan("/empty.html")
@@ -216,7 +216,7 @@ func TestShouldUsePlaywrightAsAUserAgent(t *testing.T) {
 
 func TestShouldReturnEmptyBody(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	request, err := pw.Request.NewContext()
 	require.NoError(t, err)
 	response, err := request.Get(server.PREFIX + "/empty.html")
@@ -234,7 +234,7 @@ func TestShouldReturnEmptyBody(t *testing.T) {
 
 func TestStorageStateShouldRoundTripThroughFile(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	storageState := &playwright.StorageState{
 		Cookies: []playwright.Cookie{
 			{
@@ -276,7 +276,7 @@ func TestStorageStateShouldRoundTripThroughFile(t *testing.T) {
 
 func TestShouldJsonStringifyBodyWhenContentTypeIsApplicationJson(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	request, err := pw.Request.NewContext()
 	require.NoError(t, err)
 	serializationData := []interface{}{
@@ -308,7 +308,7 @@ func TestShouldJsonStringifyBodyWhenContentTypeIsApplicationJson(t *testing.T) {
 
 func TestShouldAcceptAlreadySerializedDataAsBytesWhenContentTypeIsApplicationJson(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	request, err := pw.Request.NewContext()
 	require.NoError(t, err)
 	stringifiedValue, _ := json.Marshal(map[string]string{"foo": "bar"})
@@ -333,7 +333,7 @@ func TestShouldAcceptAlreadySerializedDataAsBytesWhenContentTypeIsApplicationJso
 
 func TestShouldErrorWhenMaxRedirectsIsExceeded(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	request, err := pw.Request.NewContext()
 	require.NoError(t, err)
 	server.SetRedirect("/a/redirect1", "/b/c/redirect2")
@@ -353,7 +353,7 @@ func TestShouldErrorWhenMaxRedirectsIsExceeded(t *testing.T) {
 
 func TestShouldNotFollowRedirectsWhenMaxRedirectsIsZero(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	request, err := pw.Request.NewContext()
 	require.NoError(t, err)
 	server.SetRedirect("/a/redirect1", "/b/c/redirect2")
@@ -371,7 +371,7 @@ func TestShouldNotFollowRedirectsWhenMaxRedirectsIsZero(t *testing.T) {
 
 func TestErrorWhenMaxRedirectsIsLessThanZero(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	request, err := pw.Request.NewContext()
 	require.NoError(t, err)
 	for _, method := range []string{"GET", "PUT", "POST", "OPTIONS", "HEAD", "PATCH"} {
@@ -385,7 +385,7 @@ func TestErrorWhenMaxRedirectsIsLessThanZero(t *testing.T) {
 
 func TestShouldSerializeNullValuesInJson(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	request, err := pw.Request.NewContext()
 	require.NoError(t, err)
 	server.SetRoute("/echo", func(w http.ResponseWriter, r *http.Request) {
@@ -406,7 +406,7 @@ func TestShouldSerializeNullValuesInJson(t *testing.T) {
 
 func TestShouldSupportApplicationXWwwFormUrlencoded(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	server.SetRoute("/empty.html", func(w http.ResponseWriter, r *http.Request) {
 		_, err := io.ReadAll(r.Body)
 		require.NoError(t, err)
@@ -426,7 +426,7 @@ func TestShouldSupportApplicationXWwwFormUrlencoded(t *testing.T) {
 
 func TestShouldSupportMultipartFormData(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	server.SetRoute("/empty.html", func(w http.ResponseWriter, r *http.Request) {
 		_, err := io.ReadAll(r.Body)
 		require.NoError(t, err)

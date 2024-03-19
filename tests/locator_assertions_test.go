@@ -10,7 +10,7 @@ import (
 
 func TestLocatorAssertionsToBeChecked(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`
 	<input id='checkbox1' type='checkbox' checked>
 	<input id='checkbox2' type='checkbox'>
@@ -31,7 +31,7 @@ func TestLocatorAssertionsToBeChecked(t *testing.T) {
 
 func TestLocatorAssertionsToBeDisabled(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`
 	<button disabled>button1</button>
 	<button>button2</button>
@@ -51,7 +51,7 @@ func TestLocatorAssertionsToBeDisabled(t *testing.T) {
 
 func TestLocatorAssertionsToBeEditable(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`
 	<input id=input1>
 	<input id=input2 disabled>
@@ -71,7 +71,7 @@ func TestLocatorAssertionsToBeEditable(t *testing.T) {
 
 func TestLocatorAssertionsToBeEmpty(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`
 	<textarea id="textarea1"></textarea>
 	<textarea id="textarea2">test</textarea>
@@ -95,7 +95,7 @@ func TestLocatorAssertionsToBeEmpty(t *testing.T) {
 
 func TestLocatorAssertionsToBeEnabled(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`
 	<button>button1</button>
 	<button disabled>button2</button>
@@ -115,7 +115,7 @@ func TestLocatorAssertionsToBeEnabled(t *testing.T) {
 
 func TestLocatorAssertionsToBeFocused(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`
 	<input id=input1>
 	<input id=input2>
@@ -134,7 +134,7 @@ func TestLocatorAssertionsToBeFocused(t *testing.T) {
 
 func TestLocatorAssertionsToBeHidden(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`
 	<details>
 		<summary>click to open</summary>
@@ -158,7 +158,7 @@ func TestLocatorAssertionsToBeHidden(t *testing.T) {
 
 func TestLocatorAssertionsToBeVisible(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`
 	<details>
 		<summary>click to open</summary>
@@ -183,7 +183,7 @@ func TestLocatorAssertionsToBeVisible(t *testing.T) {
 
 func TestLocatorAssertionsToContainText(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`<div><span style="display: none">foo</span>test1</div>`)
 	require.NoError(t, err)
 
@@ -202,7 +202,7 @@ func TestLocatorAssertionsToContainText(t *testing.T) {
 
 func TestLocatorAssertionsToHaveAttribute(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`
 	<input id="input1" type="text">
 	<input id="input2" type="number">
@@ -224,7 +224,7 @@ func TestLocatorAssertionsToHaveAttribute(t *testing.T) {
 
 func TestLocatorAssertionsToHaveAttributeIgnoreCase(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`<div id=NoDe>Text content</div>`)
 	require.NoError(t, err)
 	locator := page.Locator("#NoDe")
@@ -236,7 +236,7 @@ func TestLocatorAssertionsToHaveAttributeIgnoreCase(t *testing.T) {
 
 func TestLocatorAssertionsToHaveClass(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`
 	<div class="test1">test1</div>
 	<div class="test2">test2</div>
@@ -262,7 +262,7 @@ func TestLocatorAssertionsToHaveClass(t *testing.T) {
 
 func TestLocatorAssertionsToHaveCount(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`
 	<button>button1</button>
 	<button disabled>button2</button>
@@ -277,7 +277,7 @@ func TestLocatorAssertionsToHaveCount(t *testing.T) {
 
 func TestLocatorAssertionsToHaveCSS(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`
 	<button id="button1" style="display: flex">button1</button>
 	<button id="button2">button2</button>
@@ -296,7 +296,7 @@ func TestLocatorAssertionsToHaveCSS(t *testing.T) {
 
 func TestLocatorAssertionsToHaveId(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`
 	<button id="button1">button1</button>
 	<div>div</div>
@@ -314,7 +314,7 @@ func TestLocatorAssertionsToHaveId(t *testing.T) {
 
 func TestLocatorAssertionsToHaveJSProperty(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<div></div>"))
@@ -329,7 +329,7 @@ func TestLocatorAssertionsToHaveJSProperty(t *testing.T) {
 
 func TestLocatorAssertionsToHaveText(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`<div><span style="display: none">foo</span>test</div>`)
 	require.NoError(t, err)
 
@@ -349,7 +349,7 @@ func TestLocatorAssertionsToHaveText(t *testing.T) {
 
 func TestLocatorAssertionsToHaveValue(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`<input type="text" value="test">`)
 	require.NoError(t, err)
 
@@ -362,7 +362,7 @@ func TestLocatorAssertionsToHaveValue(t *testing.T) {
 
 func TestLocatorAssertionsToHaveValues(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`<select multiple>
 	<option value="R">Red</option>
 	<option value="G">Green</option>
@@ -381,7 +381,7 @@ func TestLocatorAssertionsToHaveValues(t *testing.T) {
 
 func TestToBeInViewportShouldRespectRatioOption(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`
 	<style>body, div, html { padding: 0; margin: 0; }</style>
       <div id=big style="height: 400vh;"></div>`)
@@ -414,7 +414,7 @@ func TestToBeInViewportShouldRespectRatioOption(t *testing.T) {
 
 func TestLocatorShouldBeAttachedWithHiddenElement(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`<button style="display:none">hello</button>`)
 	require.NoError(t, err)
 	locator := page.Locator("button")

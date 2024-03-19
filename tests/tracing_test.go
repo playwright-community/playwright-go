@@ -10,7 +10,7 @@ import (
 
 func TestBrowserContextOutputTrace(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	context, err := browser.NewContext()
 	require.NoError(t, err)
 	defer context.Close()
@@ -31,14 +31,14 @@ func TestBrowserContextOutputTrace(t *testing.T) {
 
 func TestTracingStartStop(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, context.Tracing().Start())
 	require.NoError(t, context.Tracing().Stop())
 }
 
 func TestBrowserContextShouldNoErrorWhenStoppingWithoutStart(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	context, err := browser.NewContext()
 	require.NoError(t, err)
 	defer context.Close()
@@ -47,7 +47,7 @@ func TestBrowserContextShouldNoErrorWhenStoppingWithoutStart(t *testing.T) {
 
 func TestBrowserContextOutputTraceChunk(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	context, err := browser.NewContext()
 	require.NoError(t, err)
 	defer context.Close()
@@ -87,7 +87,7 @@ func TestBrowserContextOutputTraceChunk(t *testing.T) {
 
 func TestBrowserContextTracingOutputMultipleChunks(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	context, err := browser.NewContext()
 	require.NoError(t, err)
 	defer context.Close()
@@ -110,7 +110,7 @@ func TestBrowserContextTracingOutputMultipleChunks(t *testing.T) {
 
 func TestBrowserContextTracingRemoteConnect(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
 	defer remoteServer.Close()

@@ -11,7 +11,7 @@ import (
 
 func TestBrowserContextExposeBinding(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	bindingSource := []*playwright.BindingSource{}
 	binding := func(source *playwright.BindingSource, a, b int) int {
 		bindingSource = append(bindingSource, source)
@@ -33,7 +33,7 @@ func TestBrowserContextExposeBinding(t *testing.T) {
 
 func TestBrowserContextExposeFunction(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := context.ExposeFunction("add", func(args ...interface{}) interface{} {
 		return args[0].(int) + args[1].(int)
 	})
@@ -60,7 +60,7 @@ func TestBrowserContextExposeFunction(t *testing.T) {
 
 func TestBrowserContextExposeBindingPanic(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := context.ExposeBinding("woof", func(source *playwright.BindingSource, args ...interface{}) interface{} {
 		panic(errors.New("WOOF WOOF"))
 	})
@@ -83,7 +83,7 @@ func TestBrowserContextExposeBindingPanic(t *testing.T) {
 
 func TestBrowserContextExposeBindingHandleShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	targets := []playwright.JSHandle{}
 
 	logme := func(t interface{}) int {
