@@ -16,16 +16,13 @@ import (
 )
 
 func TestShouldWork(t *testing.T) {
-	BeforeEach(t)
-
 	harPath := filepath.Join(t.TempDir(), "log.har")
-	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
+	BeforeEach(t, playwright.BrowserNewContextOptions{
 		RecordHarPath: playwright.String(harPath),
 	})
+	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
-	_, err = page.Goto(server.EMPTY_PAGE)
-	require.NoError(t, err)
-	require.NoError(t, context2.Close())
+	require.NoError(t, context.Close())
 	require.FileExists(t, harPath)
 	data, err := os.ReadFile(harPath)
 	require.NoError(t, err)
@@ -33,59 +30,55 @@ func TestShouldWork(t *testing.T) {
 }
 
 func TestShouldOmitContent(t *testing.T) {
-	BeforeEach(t)
-
 	harPath := filepath.Join(t.TempDir(), "log.har")
-	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
+	BeforeEach(t, playwright.BrowserNewContextOptions{
 		RecordHarPath:    playwright.String(harPath),
 		RecordHarContent: playwright.HarContentPolicyOmit,
 	})
+
+	_, err := page.Goto(server.PREFIX + "/har.html")
 	require.NoError(t, err)
-	_, err = page.Goto(server.PREFIX + "/har.html")
-	require.NoError(t, err)
-	require.NoError(t, context2.Close())
+	require.NoError(t, context.Close())
 	require.FileExists(t, harPath)
 	data, err := os.ReadFile(harPath)
 	require.NoError(t, err)
-	result := gjson.GetBytes(data, "log.entries.0.response.content")
+	result := gjson.GetBytes(data, "log.entries.0.response.content.text")
+	require.False(t, result.Exists())
+	result = gjson.GetBytes(data, "log.entries.0.response.content.encoding")
 	require.False(t, result.Exists())
 }
 
 func TestShouldOmitContentLegacy(t *testing.T) {
-	BeforeEach(t)
-
 	harPath := filepath.Join(t.TempDir(), "log.har")
-	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
+	BeforeEach(t, playwright.BrowserNewContextOptions{
 		RecordHarPath:        playwright.String(harPath),
 		RecordHarOmitContent: playwright.Bool(true),
 	})
+
+	_, err := page.Goto(server.PREFIX + "/har.html")
 	require.NoError(t, err)
-	_, err = page.Goto(server.PREFIX + "/har.html")
-	require.NoError(t, err)
-	require.NoError(t, context2.Close())
+	require.NoError(t, context.Close())
 	require.FileExists(t, harPath)
 	data, err := os.ReadFile(harPath)
 	require.NoError(t, err)
-	result := gjson.GetBytes(data, "log.entries.0.response.content")
+	result := gjson.GetBytes(data, "log.entries.0.response.content.text")
+	require.False(t, result.Exists())
+	result = gjson.GetBytes(data, "log.entries.0.response.content.encoding")
 	require.False(t, result.Exists())
 }
 
 func TestShouldAttachContent(t *testing.T) {
-	BeforeEach(t)
-
 	harZipFile := filepath.Join(t.TempDir(), "log.har.zip")
-	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
+	BeforeEach(t, playwright.BrowserNewContextOptions{
 		RecordHarPath:    playwright.String(harZipFile),
 		RecordHarContent: playwright.HarContentPolicyAttach,
 	})
+
+	_, err := page.Goto(server.PREFIX + "/har.html")
 	require.NoError(t, err)
-	page2, err := context2.NewPage()
+	_, err = page.Evaluate(`() => fetch('/pptr.png').then(r => r.arrayBuffer())`)
 	require.NoError(t, err)
-	_, err = page2.Goto(server.PREFIX + "/har.html")
-	require.NoError(t, err)
-	_, err = page2.Evaluate(`() => fetch('/pptr.png').then(r => r.arrayBuffer())`)
-	require.NoError(t, err)
-	require.NoError(t, context2.Close())
+	require.NoError(t, context.Close())
 	require.FileExists(t, harZipFile)
 	data, err := readFromZip(harZipFile, "har.har")
 	require.NoError(t, err)
@@ -108,19 +101,15 @@ func TestShouldAttachContent(t *testing.T) {
 }
 
 func TestShouldNotOmitContent(t *testing.T) {
-	BeforeEach(t)
-
 	harPath := filepath.Join(t.TempDir(), "log.har")
-	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
+	BeforeEach(t, playwright.BrowserNewContextOptions{
 		RecordHarPath:        playwright.String(harPath),
 		RecordHarOmitContent: playwright.Bool(false),
 	})
+
+	_, err := page.Goto(server.PREFIX + "/har.html")
 	require.NoError(t, err)
-	page2, err := context2.NewPage()
-	require.NoError(t, err)
-	_, err = page2.Goto(server.PREFIX + "/har.html")
-	require.NoError(t, err)
-	require.NoError(t, context2.Close())
+	require.NoError(t, context.Close())
 	require.FileExists(t, harPath)
 	data, err := os.ReadFile(harPath)
 	require.NoError(t, err)
@@ -129,18 +118,14 @@ func TestShouldNotOmitContent(t *testing.T) {
 }
 
 func TestShouldIncludeContent(t *testing.T) {
-	BeforeEach(t)
-
 	harPath := filepath.Join(t.TempDir(), "log.har")
-	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
+	BeforeEach(t, playwright.BrowserNewContextOptions{
 		RecordHarPath: playwright.String(harPath),
 	})
+
+	_, err := page.Goto(server.PREFIX + "/har.html")
 	require.NoError(t, err)
-	page2, err := context2.NewPage()
-	require.NoError(t, err)
-	_, err = page2.Goto(server.PREFIX + "/har.html")
-	require.NoError(t, err)
-	require.NoError(t, context2.Close())
+	require.NoError(t, context.Close())
 	require.FileExists(t, harPath)
 	data, err := os.ReadFile(harPath)
 	require.NoError(t, err)
@@ -150,18 +135,14 @@ func TestShouldIncludeContent(t *testing.T) {
 }
 
 func TestShouldDefaultToFullMode(t *testing.T) {
-	BeforeEach(t)
-
 	harPath := filepath.Join(t.TempDir(), "log.har")
-	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
+	BeforeEach(t, playwright.BrowserNewContextOptions{
 		RecordHarPath: playwright.String(harPath),
 	})
+
+	_, err := page.Goto(server.PREFIX + "/har.html")
 	require.NoError(t, err)
-	page2, err := context2.NewPage()
-	require.NoError(t, err)
-	_, err = page2.Goto(server.PREFIX + "/har.html")
-	require.NoError(t, err)
-	require.NoError(t, context2.Close())
+	require.NoError(t, context.Close())
 	require.FileExists(t, harPath)
 	data, err := os.ReadFile(harPath)
 	require.NoError(t, err)
@@ -171,19 +152,15 @@ func TestShouldDefaultToFullMode(t *testing.T) {
 }
 
 func TestShouldSupportMinimalMode(t *testing.T) {
-	BeforeEach(t)
-
 	harPath := filepath.Join(t.TempDir(), "log.har")
-	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
+	BeforeEach(t, playwright.BrowserNewContextOptions{
 		RecordHarPath: playwright.String(harPath),
 		RecordHarMode: playwright.HarModeMinimal,
 	})
+
+	_, err := page.Goto(server.PREFIX + "/har.html")
 	require.NoError(t, err)
-	page2, err := context2.NewPage()
-	require.NoError(t, err)
-	_, err = page2.Goto(server.PREFIX + "/har.html")
-	require.NoError(t, err)
-	require.NoError(t, context2.Close())
+	require.NoError(t, context.Close())
 	require.FileExists(t, harPath)
 	data, err := os.ReadFile(harPath)
 	require.NoError(t, err)
@@ -193,20 +170,16 @@ func TestShouldSupportMinimalMode(t *testing.T) {
 }
 
 func TestShouldFilterByGlob(t *testing.T) {
-	BeforeEach(t)
-
 	harPath := filepath.Join(t.TempDir(), "log.har")
-	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
+	BeforeEach(t, playwright.BrowserNewContextOptions{
 		BaseURL:            &server.PREFIX,
 		RecordHarPath:      playwright.String(harPath),
 		RecordHarURLFilter: "/*.css",
 	})
+
+	_, err := page.Goto(server.PREFIX + "/har.html")
 	require.NoError(t, err)
-	page2, err := context2.NewPage()
-	require.NoError(t, err)
-	_, err = page2.Goto(server.PREFIX + "/har.html")
-	require.NoError(t, err)
-	require.NoError(t, context2.Close())
+	require.NoError(t, context.Close())
 	require.FileExists(t, harPath)
 	data, err := os.ReadFile(harPath)
 	require.NoError(t, err)
@@ -216,21 +189,17 @@ func TestShouldFilterByGlob(t *testing.T) {
 }
 
 func TestShouldFilterByRegexp(t *testing.T) {
-	BeforeEach(t)
-
 	harPath := filepath.Join(t.TempDir(), "log.har")
-	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
+	BeforeEach(t, playwright.BrowserNewContextOptions{
 		BaseURL:            &server.PREFIX,
 		RecordHarPath:      playwright.String(harPath),
 		RecordHarURLFilter: regexp.MustCompile("(?i)HAR.X?HTML"),
 		IgnoreHttpsErrors:  playwright.Bool(true),
 	})
+
+	_, err := page.Goto(server.PREFIX + "/har.html")
 	require.NoError(t, err)
-	page2, err := context2.NewPage()
-	require.NoError(t, err)
-	_, err = page2.Goto(server.PREFIX + "/har.html")
-	require.NoError(t, err)
-	require.NoError(t, context2.Close())
+	require.NoError(t, context.Close())
 	require.FileExists(t, harPath)
 	data, err := os.ReadFile(harPath)
 	require.NoError(t, err)
@@ -286,8 +255,7 @@ func TestByDefaultShouldAbortRequestsNotFoundInHar(t *testing.T) {
 
 	err := context.RouteFromHAR(Asset("har-fulfill.har"))
 	require.NoError(t, err)
-	page, err := context.NewPage()
-	require.NoError(t, err)
+
 	_, err = page.Goto(server.EMPTY_PAGE)
 	if isChromium {
 		require.ErrorContains(t, err, "net::ERR_FAILED")
@@ -502,28 +470,22 @@ func TestShouldFulfillFromHarWithContentInAFile(t *testing.T) {
 }
 
 func TestShouldRoundTripHarZip(t *testing.T) {
-	BeforeEach(t)
-
 	harPath := filepath.Join(t.TempDir(), "har.zip")
-	context1, err := browser.NewContext(playwright.BrowserNewContextOptions{
+	BeforeEach(t, playwright.BrowserNewContextOptions{
 		RecordHarMode: playwright.HarModeMinimal,
 		RecordHarPath: playwright.String(harPath),
 	})
-	require.NoError(t, err)
-	page1, err := context1.NewPage()
-	require.NoError(t, err)
-	_, err = page1.Goto(server.PREFIX + "/one-style.html")
-	require.NoError(t, err)
-	require.NoError(t, context1.Close())
 
-	context2, err := browser.NewContext()
+	_, err := page.Goto(server.PREFIX + "/one-style.html")
+	require.NoError(t, err)
+	require.NoError(t, context.Close())
+
+	context2, page2 := newBrowserContextAndPage(t, playwright.BrowserNewContextOptions{})
 	require.NoError(t, err)
 
 	err = context2.RouteFromHAR(harPath, playwright.BrowserContextRouteFromHAROptions{
 		NotFound: playwright.HarNotFoundAbort,
 	})
-	require.NoError(t, err)
-	page2, err := context2.NewPage()
 	require.NoError(t, err)
 	_, err = page2.Goto(server.PREFIX + "/one-style.html")
 	require.NoError(t, err)
@@ -533,7 +495,11 @@ func TestShouldRoundTripHarZip(t *testing.T) {
 }
 
 func TestShouldRoundTripHarWithPostData(t *testing.T) {
-	BeforeEach(t)
+	harPath := filepath.Join(t.TempDir(), "har.zip")
+	BeforeEach(t, playwright.BrowserNewContextOptions{
+		RecordHarMode: playwright.HarModeMinimal,
+		RecordHarPath: playwright.String(harPath),
+	})
 
 	server.SetRoute("/echo", func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
@@ -546,36 +512,26 @@ func TestShouldRoundTripHarWithPostData(t *testing.T) {
 			return response.text();
 		}`
 
-	harPath := filepath.Join(t.TempDir(), "har.zip")
-	context1, err := browser.NewContext(playwright.BrowserNewContextOptions{
-		RecordHarMode: playwright.HarModeMinimal,
-		RecordHarPath: playwright.String(harPath),
-	})
-	require.NoError(t, err)
-	page1, err := context1.NewPage()
-	require.NoError(t, err)
-	_, err = page1.Goto(server.EMPTY_PAGE)
+	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 
-	data, err := page1.Evaluate(fetchFunction, "1")
+	data, err := page.Evaluate(fetchFunction, "1")
 	require.NoError(t, err)
 	require.Equal(t, "1", data)
-	data, err = page1.Evaluate(fetchFunction, "2")
+	data, err = page.Evaluate(fetchFunction, "2")
 	require.NoError(t, err)
 	require.Equal(t, "2", data)
-	data, err = page1.Evaluate(fetchFunction, "3")
+	data, err = page.Evaluate(fetchFunction, "3")
 	require.NoError(t, err)
 	require.Equal(t, "3", data)
-	require.NoError(t, context1.Close())
+	require.NoError(t, context.Close())
 
-	context2, err := browser.NewContext()
-	require.NoError(t, err)
+	context2, page2 := newBrowserContextAndPage(t, playwright.BrowserNewContextOptions{})
 	err = context2.RouteFromHAR(harPath, playwright.BrowserContextRouteFromHAROptions{
 		NotFound: playwright.HarNotFoundAbort,
 	})
 	require.NoError(t, err)
-	page2, err := context2.NewPage()
-	require.NoError(t, err)
+
 	_, err = page2.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	data, err = page2.Evaluate(fetchFunction, "1")
@@ -592,7 +548,11 @@ func TestShouldRoundTripHarWithPostData(t *testing.T) {
 }
 
 func TestShouldDisambiguateByHeader(t *testing.T) {
-	BeforeEach(t)
+	harPath := filepath.Join(t.TempDir(), "har.zip")
+	BeforeEach(t, playwright.BrowserNewContextOptions{
+		RecordHarMode: playwright.HarModeMinimal,
+		RecordHarPath: playwright.String(harPath),
+	})
 
 	server.SetRoute("/echo", func(w http.ResponseWriter, r *http.Request) {
 		_, err := w.Write([]byte(r.Header.Get("baz")))
@@ -612,34 +572,22 @@ func TestShouldDisambiguateByHeader(t *testing.T) {
 			return response.text();
 		}`
 
-	harPath := filepath.Join(t.TempDir(), "har.zip")
-	context1, err := browser.NewContext(playwright.BrowserNewContextOptions{
-		RecordHarMode: playwright.HarModeMinimal,
-		RecordHarPath: playwright.String(harPath),
-	})
-	require.NoError(t, err)
-	page1, err := context1.NewPage()
-	require.NoError(t, err)
-	_, err = page1.Goto(server.EMPTY_PAGE)
+	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 
-	data, err := page1.Evaluate(fetchFunction, "baz1")
+	data, err := page.Evaluate(fetchFunction, "baz1")
 	require.NoError(t, err)
 	require.Equal(t, "baz1", data)
-	data, err = page1.Evaluate(fetchFunction, "baz2")
+	data, err = page.Evaluate(fetchFunction, "baz2")
 	require.NoError(t, err)
 	require.Equal(t, "baz2", data)
-	data, err = page1.Evaluate(fetchFunction, "baz3")
+	data, err = page.Evaluate(fetchFunction, "baz3")
 	require.NoError(t, err)
 	require.Equal(t, "baz3", data)
-	require.NoError(t, context1.Close())
+	require.NoError(t, context.Close())
 
-	context2, err := browser.NewContext()
-	require.NoError(t, err)
-	err = context2.RouteFromHAR(harPath)
-	require.NoError(t, err)
-	page2, err := context2.NewPage()
-	require.NoError(t, err)
+	context2, page2 := newBrowserContextAndPage(t, playwright.BrowserNewContextOptions{})
+	require.NoError(t, context2.RouteFromHAR(harPath))
 	_, err = page2.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	data, err = page2.Evaluate(fetchFunction, "baz1")
@@ -658,20 +606,16 @@ func TestShouldDisambiguateByHeader(t *testing.T) {
 }
 
 func TestShouldProduceExtractedZip(t *testing.T) {
-	BeforeEach(t)
-
 	harPath := filepath.Join(t.TempDir(), "har.har")
-	context1, err := browser.NewContext(playwright.BrowserNewContextOptions{
+	BeforeEach(t, playwright.BrowserNewContextOptions{
 		RecordHarMode:    playwright.HarModeMinimal,
 		RecordHarPath:    playwright.String(harPath),
 		RecordHarContent: playwright.HarContentPolicyAttach,
 	})
+
+	_, err := page.Goto(server.PREFIX + "/one-style.html")
 	require.NoError(t, err)
-	page1, err := context1.NewPage()
-	require.NoError(t, err)
-	_, err = page1.Goto(server.PREFIX + "/one-style.html")
-	require.NoError(t, err)
-	require.NoError(t, context1.Close())
+	require.NoError(t, context.Close())
 
 	require.FileExists(t, harPath)
 	content, err := os.ReadFile(harPath)
@@ -679,14 +623,11 @@ func TestShouldProduceExtractedZip(t *testing.T) {
 	require.Contains(t, string(content), "log")
 	require.NotContains(t, string(content), "background-color")
 
-	context2, err := browser.NewContext()
-	require.NoError(t, err)
-	err = context2.RouteFromHAR(harPath, playwright.BrowserContextRouteFromHAROptions{
+	context2, page2 := newBrowserContextAndPage(t, playwright.BrowserNewContextOptions{})
+	require.NoError(t, context2.RouteFromHAR(harPath, playwright.BrowserContextRouteFromHAROptions{
 		NotFound: playwright.HarNotFoundAbort,
-	})
-	require.NoError(t, err)
-	page2, err := context2.NewPage()
-	require.NoError(t, err)
+	}))
+
 	response, err := page2.Goto(server.PREFIX + "/one-style.html")
 	require.NoError(t, err)
 	body, err := response.Body()
@@ -699,27 +640,21 @@ func TestShouldUpdateHarZipForContext(t *testing.T) {
 	BeforeEach(t)
 
 	harPath := filepath.Join(t.TempDir(), "har.zip")
-	context1, err := browser.NewContext()
-	require.NoError(t, err)
-	require.NoError(t, context1.RouteFromHAR(harPath, playwright.BrowserContextRouteFromHAROptions{
+	require.NoError(t, context.RouteFromHAR(harPath, playwright.BrowserContextRouteFromHAROptions{
 		Update: playwright.Bool(true),
 	}))
-	page1, err := context1.NewPage()
+	_, err := page.Goto(server.PREFIX + "/one-style.html")
 	require.NoError(t, err)
-	_, err = page1.Goto(server.PREFIX + "/one-style.html")
-	require.NoError(t, err)
-	require.NoError(t, context1.Close())
+	require.NoError(t, context.Close())
 
 	require.FileExists(t, harPath)
 
-	context2, err := browser.NewContext()
+	context2, page2 := newBrowserContextAndPage(t, playwright.BrowserNewContextOptions{})
 	require.NoError(t, err)
-	err = context2.RouteFromHAR(harPath, playwright.BrowserContextRouteFromHAROptions{
+	require.NoError(t, context2.RouteFromHAR(harPath, playwright.BrowserContextRouteFromHAROptions{
 		NotFound: playwright.HarNotFoundAbort,
-	})
-	require.NoError(t, err)
-	page2, err := context2.NewPage()
-	require.NoError(t, err)
+	}))
+
 	response, err := page2.Goto(server.PREFIX + "/one-style.html")
 	require.NoError(t, err)
 	body, err := response.Body()
@@ -732,21 +667,17 @@ func TestPageUnrouteAllShouldStopPageRouteFromHAR(t *testing.T) {
 	BeforeEach(t)
 
 	harPath := Asset("har-fulfill.har")
-	context1, err := browser.NewContext()
-	require.NoError(t, err)
-	page1, err := context1.NewPage()
-	require.NoError(t, err)
 	// The har file contains requests for another domain, so the router
 	// is expected to abort all requests.
-	require.NoError(t, page1.RouteFromHAR(harPath, playwright.PageRouteFromHAROptions{
+	require.NoError(t, page.RouteFromHAR(harPath, playwright.PageRouteFromHAROptions{
 		NotFound: playwright.HarNotFoundAbort,
 	}))
-	_, err = page1.Goto(server.EMPTY_PAGE)
+	_, err := page.Goto(server.EMPTY_PAGE)
 	require.Error(t, err)
-	require.NoError(t, page1.UnrouteAll(playwright.PageUnrouteAllOptions{
+	require.NoError(t, page.UnrouteAll(playwright.PageUnrouteAllOptions{
 		Behavior: playwright.UnrouteBehaviorWait,
 	}))
-	response, err := page1.Goto(server.EMPTY_PAGE)
+	response, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.True(t, response.Ok())
 }
@@ -755,21 +686,17 @@ func TestContextUnrouteCallShouldStopContextRouteFromHAR(t *testing.T) {
 	BeforeEach(t)
 
 	harPath := Asset("har-fulfill.har")
-	context1, err := browser.NewContext()
-	require.NoError(t, err)
-	page1, err := context1.NewPage()
-	require.NoError(t, err)
 	// The har file contains requests for another domain, so the router
 	// is expected to abort all requests.
-	require.NoError(t, context1.RouteFromHAR(harPath, playwright.BrowserContextRouteFromHAROptions{
+	require.NoError(t, context.RouteFromHAR(harPath, playwright.BrowserContextRouteFromHAROptions{
 		NotFound: playwright.HarNotFoundAbort,
 	}))
-	_, err = page1.Goto(server.EMPTY_PAGE)
+	_, err := page.Goto(server.EMPTY_PAGE)
 	require.Error(t, err)
-	require.NoError(t, context1.UnrouteAll(playwright.BrowserContextUnrouteAllOptions{
+	require.NoError(t, context.UnrouteAll(playwright.BrowserContextUnrouteAllOptions{
 		Behavior: playwright.UnrouteBehaviorWait,
 	}))
-	response, err := page1.Goto(server.EMPTY_PAGE)
+	response, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.True(t, response.Ok())
 }
@@ -778,27 +705,20 @@ func TestShouldUpdateHarZipForPage(t *testing.T) {
 	BeforeEach(t)
 
 	harPath := filepath.Join(t.TempDir(), "har.zip")
-	context1, err := browser.NewContext()
-	require.NoError(t, err)
-	page1, err := context1.NewPage()
-	require.NoError(t, err)
-	require.NoError(t, page1.RouteFromHAR(harPath, playwright.PageRouteFromHAROptions{
+	require.NoError(t, page.RouteFromHAR(harPath, playwright.PageRouteFromHAROptions{
 		Update: playwright.Bool(true),
 	}))
-	_, err = page1.Goto(server.PREFIX + "/one-style.html")
+	_, err := page.Goto(server.PREFIX + "/one-style.html")
 	require.NoError(t, err)
-	require.NoError(t, context1.Close())
+	require.NoError(t, context.Close())
 
 	require.FileExists(t, harPath)
 
-	context2, err := browser.NewContext()
-	require.NoError(t, err)
-	page2, err := context2.NewPage()
-	require.NoError(t, err)
-	err = page2.RouteFromHAR(harPath, playwright.PageRouteFromHAROptions{
+	_, page2 := newBrowserContextAndPage(t, playwright.BrowserNewContextOptions{})
+	require.NoError(t, page2.RouteFromHAR(harPath, playwright.PageRouteFromHAROptions{
 		NotFound: playwright.HarNotFoundAbort,
-	})
-	require.NoError(t, err)
+	}))
+
 	response, err := page2.Goto(server.PREFIX + "/one-style.html")
 	require.NoError(t, err)
 	body, err := response.Body()
@@ -811,24 +731,18 @@ func TestShouldUpdateHarZipForPageWithDifferentOptions(t *testing.T) {
 	BeforeEach(t)
 
 	harPath := filepath.Join(t.TempDir(), "har.zip")
-	context1, err := browser.NewContext()
-	require.NoError(t, err)
-	page1, err := context1.NewPage()
-	require.NoError(t, err)
-	require.NoError(t, page1.RouteFromHAR(harPath, playwright.PageRouteFromHAROptions{
-		Update: playwright.Bool(true),
-		// UpdateContent: playwright.RouteFromHarUpdateContentPolicyEmbed,
-		// UpdateMode:    playwright.HarModeFull,
+	require.NoError(t, page.RouteFromHAR(harPath, playwright.PageRouteFromHAROptions{
+		Update:        playwright.Bool(true),
+		UpdateContent: playwright.RouteFromHarUpdateContentPolicyEmbed,
+		UpdateMode:    playwright.HarModeFull,
 	}))
-	_, err = page1.Goto(server.PREFIX + "/one-style.html")
+	_, err := page.Goto(server.PREFIX + "/one-style.html")
 	require.NoError(t, err)
-	require.NoError(t, context1.Close())
+	require.NoError(t, context.Close())
 
 	require.FileExists(t, harPath)
 
-	context2, err := browser.NewContext()
-	require.NoError(t, err)
-	page2, err := context2.NewPage()
+	_, page2 := newBrowserContextAndPage(t, playwright.BrowserNewContextOptions{})
 	require.NoError(t, err)
 	err = page2.RouteFromHAR(harPath, playwright.PageRouteFromHAROptions{
 		NotFound: playwright.HarNotFoundAbort,
@@ -846,16 +760,12 @@ func TestShouldUpdateExtractedHarZipForPage(t *testing.T) {
 	BeforeEach(t)
 
 	harPath := filepath.Join(t.TempDir(), "har.har")
-	context1, err := browser.NewContext()
-	require.NoError(t, err)
-	page1, err := context1.NewPage()
-	require.NoError(t, err)
-	require.NoError(t, page1.RouteFromHAR(harPath, playwright.PageRouteFromHAROptions{
+	require.NoError(t, page.RouteFromHAR(harPath, playwright.PageRouteFromHAROptions{
 		Update: playwright.Bool(true),
 	}))
-	_, err = page1.Goto(server.PREFIX + "/one-style.html")
+	_, err := page.Goto(server.PREFIX + "/one-style.html")
 	require.NoError(t, err)
-	require.NoError(t, context1.Close())
+	require.NoError(t, context.Close())
 
 	require.FileExists(t, harPath)
 	content, err := os.ReadFile(harPath)
@@ -863,9 +773,7 @@ func TestShouldUpdateExtractedHarZipForPage(t *testing.T) {
 	require.Contains(t, string(content), "log")
 	require.NotContains(t, string(content), "background-color")
 
-	context2, err := browser.NewContext()
-	require.NoError(t, err)
-	page2, err := context2.NewPage()
+	_, page2 := newBrowserContextAndPage(t, playwright.BrowserNewContextOptions{})
 	require.NoError(t, err)
 	err = page2.RouteFromHAR(harPath, playwright.PageRouteFromHAROptions{
 		NotFound: playwright.HarNotFoundAbort,

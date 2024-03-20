@@ -35,17 +35,12 @@ func TestSelectorsRegisterShouldWork(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	context2, err := browser.NewContext()
-	require.NoError(t, err)
-
 	// Register another engine after creating context.
 	err = pw.Selectors.Register(selector2Name, playwright.Script{
 		Content: &tagSelector,
 	})
 	require.NoError(t, err)
 
-	page, err := context2.NewPage()
-	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<div><span></span></div><div></div>`))
 
 	ret, err := page.EvalOnSelector(selectorName+"=DIV", `e => e.nodeName`, nil)
@@ -72,7 +67,7 @@ func TestSelectorsRegisterShouldWork(t *testing.T) {
 	_, err = page.QuerySelector("tAG=DIV")
 	require.ErrorContains(t, err, `Unknown engine "tAG" while parsing selector tAG=DIV`)
 
-	require.NoError(t, context2.Close())
+	require.NoError(t, context.Close())
 }
 
 func TestSelectorsShouldUseDataTestIdInStrictErrors(t *testing.T) {

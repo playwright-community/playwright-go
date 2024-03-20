@@ -179,10 +179,13 @@ func TestVideo(t *testing.T) {
 		remoteServer, err := newRemoteServer()
 		require.NoError(t, err)
 		defer remoteServer.Close()
-		browser, err := browserType.Connect(remoteServer.url)
+
+		browser1, err := browserType.Connect(remoteServer.url)
 		require.NoError(t, err)
-		require.NotNil(t, browser)
-		browser_context, err := browser.NewContext(playwright.BrowserNewContextOptions{
+		require.NotNil(t, browser1)
+		defer browser1.Close()
+
+		browser_context, err := browser1.NewContext(playwright.BrowserNewContextOptions{
 			RecordVideo: &playwright.RecordVideo{
 				Dir: tmpDir,
 			},

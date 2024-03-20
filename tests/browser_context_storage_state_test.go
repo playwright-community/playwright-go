@@ -53,36 +53,28 @@ func TestBrowserContextStorageStateShouldCaptureLocalStorage(t *testing.T) {
 }
 
 func TestBrowserContextStorageStateSetLocalStorage(t *testing.T) {
-	BeforeEach(t)
-
-	context, err := browser.NewContext(
-		playwright.BrowserNewContextOptions{
-			StorageState: &playwright.OptionalStorageState{
-				Origins: []playwright.Origin{
-					{
-						Origin: "https://www.example.com",
-						LocalStorage: []playwright.NameValue{
-							{
-								Name:  "name1",
-								Value: "value1",
-							},
+	BeforeEach(t, playwright.BrowserNewContextOptions{
+		StorageState: &playwright.OptionalStorageState{
+			Origins: []playwright.Origin{
+				{
+					Origin: "https://www.example.com",
+					LocalStorage: []playwright.NameValue{
+						{
+							Name:  "name1",
+							Value: "value1",
 						},
 					},
 				},
 			},
 		},
-	)
-	require.NoError(t, err)
-	defer context.Close()
-	page, err := context.NewPage()
-	require.NoError(t, err)
-	defer page.Close()
+	})
+
 	require.NoError(t, page.Route("**/*", func(route playwright.Route) {
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
 			Body: "<html></html>",
 		}))
 	}))
-	_, err = page.Goto("https://www.example.com")
+	_, err := page.Goto("https://www.example.com")
 	require.NoError(t, err)
 	localStorage, err := page.Evaluate("window.localStorage")
 	require.NoError(t, err)
@@ -92,17 +84,14 @@ func TestBrowserContextStorageStateSetLocalStorage(t *testing.T) {
 func TestBrowserContextStorageStateRoundTripThroughTheFile(t *testing.T) {
 	BeforeEach(t)
 
-	page1, err := context.NewPage()
-	require.NoError(t, err)
-	defer page1.Close()
-	require.NoError(t, page1.Route("**/*", func(route playwright.Route) {
+	require.NoError(t, page.Route("**/*", func(route playwright.Route) {
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
 			Body: "<html></html>",
 		}))
 	}))
-	_, err = page1.Goto("https://www.example.com")
+	_, err := page.Goto("https://www.example.com")
 	require.NoError(t, err)
-	_, err = page1.Evaluate(`
+	_, err = page.Evaluate(`
 	() => {
 		localStorage["name1"] = "value1"
 		document.cookie = "username=John Doe"
@@ -121,15 +110,10 @@ func TestBrowserContextStorageStateRoundTripThroughTheFile(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, state, storageState)
 
-	context2, err := browser.NewContext(
-		playwright.BrowserNewContextOptions{
-			StorageStatePath: playwright.String(tempfile.Name()),
-		})
-	require.NoError(t, err)
-	defer context2.Close()
-	page2, err := context2.NewPage()
-	require.NoError(t, err)
-	defer page2.Close()
+	_, page2 := newBrowserContextAndPage(t, playwright.BrowserNewContextOptions{
+		StorageStatePath: playwright.String(tempfile.Name()),
+	})
+
 	require.NoError(t, page2.Route("**/*", func(route playwright.Route) {
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
 			Body: "<html></html>",
@@ -148,17 +132,14 @@ func TestBrowserContextStorageStateRoundTripThroughTheFile(t *testing.T) {
 func TestBrowserContextStorageStateRoundTripThroughConvert(t *testing.T) {
 	BeforeEach(t)
 
-	page1, err := context.NewPage()
-	require.NoError(t, err)
-	defer page1.Close()
-	require.NoError(t, page1.Route("**/*", func(route playwright.Route) {
+	require.NoError(t, page.Route("**/*", func(route playwright.Route) {
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
 			Body: "<html></html>",
 		}))
 	}))
-	_, err = page1.Goto("https://www.example.com")
+	_, err := page.Goto("https://www.example.com")
 	require.NoError(t, err)
-	_, err = page1.Evaluate(`
+	_, err = page.Evaluate(`
 	() => {
 		localStorage["name1"] = "value1"
 		document.cookie = "username=John Doe"
@@ -170,15 +151,10 @@ func TestBrowserContextStorageStateRoundTripThroughConvert(t *testing.T) {
 	storageState, err := context.StorageState()
 	require.NoError(t, err)
 
-	context2, err := browser.NewContext(
+	_, page2 := newBrowserContextAndPage(t,
 		playwright.BrowserNewContextOptions{
 			StorageState: storageState.ToOptionalStorageState(),
 		})
-	require.NoError(t, err)
-	defer context2.Close()
-	page2, err := context2.NewPage()
-	require.NoError(t, err)
-	defer page2.Close()
 	require.NoError(t, page2.Route("**/*", func(route playwright.Route) {
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
 			Body: "<html></html>",

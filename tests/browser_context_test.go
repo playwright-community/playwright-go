@@ -455,15 +455,16 @@ func TestBrowerContextEventsShouldFireInProperOrder(t *testing.T) {
 func TestBrowserContextShouldFireCloseEvent(t *testing.T) {
 	BeforeEach(t)
 
-	browser, err := browserType.Launch()
+	browser1, err := browserType.Launch()
 	require.NoError(t, err)
-	context, err := browser.NewContext()
+	defer browser1.Close()
+	context1, err := browser1.NewContext()
 	require.NoError(t, err)
 	closed := false
-	context.OnClose(func(bc playwright.BrowserContext) {
+	context1.OnClose(func(bc playwright.BrowserContext) {
 		closed = true
 	})
-	require.NoError(t, browser.Close())
+	require.NoError(t, browser1.Close())
 	require.True(t, closed)
 }
 
