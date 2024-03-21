@@ -9,7 +9,7 @@ import (
 
 func TestDialog(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	page.OnDialog(func(dialog playwright.Dialog) {
 		require.Equal(t, "alert", dialog.Type())
 		require.Equal(t, "", dialog.DefaultValue())
@@ -22,7 +22,7 @@ func TestDialog(t *testing.T) {
 
 func TestDialogDismiss(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	page.OnDialog(func(dialog playwright.Dialog) {
 		require.NoError(t, dialog.Dismiss())
 	})
@@ -33,7 +33,7 @@ func TestDialogDismiss(t *testing.T) {
 
 func TestDialogAcceptWithText(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	page.OnDialog(func(dialog playwright.Dialog) {
 		require.NoError(t, dialog.Accept("hey foobar"))
 	})
@@ -44,7 +44,7 @@ func TestDialogAcceptWithText(t *testing.T) {
 
 func TestDialogShouldWorkInPopup(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	var d playwright.Dialog
 	context.OnDialog(func(dialog playwright.Dialog) {
 		d = dialog

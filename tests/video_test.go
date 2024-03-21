@@ -21,7 +21,7 @@ func TestVideoShouldWork(t *testing.T) {
 			},
 		},
 	})
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/grid.html")
 	require.NoError(t, err)
 	_, err = page.Reload()
@@ -62,7 +62,7 @@ func TestVideo(t *testing.T) {
 				},
 			},
 		})
-		defer AfterEach(t)
+
 		_, err := page.Goto(server.PREFIX + "/grid.html")
 		require.NoError(t, err)
 		video := page.Video()
@@ -86,7 +86,7 @@ func TestVideo(t *testing.T) {
 				},
 			},
 		})
-		defer AfterEach(t)
+
 		_, err := page.Goto(server.PREFIX + "/grid.html")
 		require.NoError(t, err)
 		//nolint:staticcheck
@@ -111,7 +111,7 @@ func TestVideo(t *testing.T) {
 				},
 			},
 		})
-		defer AfterEach(t)
+
 		_, err := page.Goto(server.PREFIX + "/grid.html")
 		require.NoError(t, err)
 		video := page.Video()
@@ -128,7 +128,7 @@ func TestVideo(t *testing.T) {
 
 	t.Run("video should not exist when no dir specified", func(t *testing.T) {
 		BeforeEach(t)
-		defer AfterEach(t)
+
 		_, err := page.Goto(server.PREFIX + "/grid.html")
 		require.NoError(t, err)
 		video := page.Video()
@@ -146,7 +146,7 @@ func TestVideo(t *testing.T) {
 	t.Run("record video to path persistent", func(t *testing.T) {
 		tmpDir := t.TempDir()
 		BeforeEach(t)
-		defer AfterEach(t)
+
 		require.NoError(t, context.Close())
 
 		bt := browser.BrowserType()
@@ -175,14 +175,17 @@ func TestVideo(t *testing.T) {
 	t.Run("remote server should work with saveas", func(t *testing.T) {
 		tmpDir := t.TempDir()
 		BeforeEach(t)
-		defer AfterEach(t)
+
 		remoteServer, err := newRemoteServer()
 		require.NoError(t, err)
 		defer remoteServer.Close()
-		browser, err := browserType.Connect(remoteServer.url)
+
+		browser1, err := browserType.Connect(remoteServer.url)
 		require.NoError(t, err)
-		require.NotNil(t, browser)
-		browser_context, err := browser.NewContext(playwright.BrowserNewContextOptions{
+		require.NotNil(t, browser1)
+		defer browser1.Close()
+
+		browser_context, err := browser1.NewContext(playwright.BrowserNewContextOptions{
 			RecordVideo: &playwright.RecordVideo{
 				Dir: tmpDir,
 			},

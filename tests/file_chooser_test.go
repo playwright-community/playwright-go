@@ -10,7 +10,7 @@ import (
 
 func TestFileChooser(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/input/fileupload.html")
 	require.NoError(t, err)
 	//nolint:staticcheck
@@ -41,7 +41,7 @@ func TestFileChooser(t *testing.T) {
 
 func TestFileChooserShouldEmitEvent(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<input type=file>"))

@@ -13,7 +13,6 @@ import (
 
 func TestContextUnrouteShouldNotWaitForPendingHandlersToComplete(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
 
 	secondHandlerCalled := false
 
@@ -51,7 +50,6 @@ func TestContextUnrouteShouldNotWaitForPendingHandlersToComplete(t *testing.T) {
 
 func TestContextUnrouteAllRemovesAllHandlers(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
 
 	require.NoError(t, context.Route("**/*", func(route playwright.Route) {
 		require.NoError(t, route.Abort())
@@ -68,7 +66,6 @@ func TestContextUnrouteAllRemovesAllHandlers(t *testing.T) {
 
 func TestContextUnrouteAllShouldNotWaitForPendingHandlersToComplete(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
 
 	secondHandlerCalled := false
 
@@ -118,7 +115,6 @@ func TestContextUnrouteAllShouldNotWaitForPendingHandlersToComplete(t *testing.T
 
 func TestContextUnrouteAllShouldNotWaitForPendingHandlersToCompleteIfBehaviorIsIgnoreErrors(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
 
 	secondHandlerCalled := false
 
@@ -167,7 +163,6 @@ func TestContextUnrouteAllShouldNotWaitForPendingHandlersToCompleteIfBehaviorIsI
 
 func TestPageCloseShouldNotWaitForActiveRouteHandlersOnTheOwningContext(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
 
 	routeChan := make(chan playwright.Route)
 	require.NoError(t, context.Route(regexp.MustCompile(".*"), func(route playwright.Route) {
@@ -190,7 +185,6 @@ func TestPageCloseShouldNotWaitForActiveRouteHandlersOnTheOwningContext(t *testi
 
 func TestContextCloseShouldNotWaitForActiveRouteHandlersOnTheOwnedPages(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
 
 	routeChan := make(chan playwright.Route)
 	require.NoError(t, context.Route(regexp.MustCompile(".*"), func(route playwright.Route) {
@@ -213,7 +207,6 @@ func TestContextCloseShouldNotWaitForActiveRouteHandlersOnTheOwnedPages(t *testi
 
 func TestPageUnrouteShouldNotWaitForPendingHandlersToComplete(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
 
 	secondHandlerCalled := false
 
@@ -249,7 +242,6 @@ func TestPageUnrouteShouldNotWaitForPendingHandlersToComplete(t *testing.T) {
 
 func TestPageUnrouteAllRemovesAllRoutes(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
 
 	require.NoError(t, page.Route("**/*", func(route playwright.Route) {
 		require.NoError(t, route.Abort())
@@ -268,7 +260,6 @@ func TestPageUnrouteAllRemovesAllRoutes(t *testing.T) {
 
 func TestPageUnrouteShouldWaitForPendingHandlersToComplete(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
 
 	secondHandlerCalled := false
 
@@ -316,7 +307,6 @@ func TestPageUnrouteShouldWaitForPendingHandlersToComplete(t *testing.T) {
 
 func TestPageUnrouteAllShouldNotWaitForPendingHandlersToCompleteIfBehaviorIsIgnoreErrors(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
 
 	secondHandlerCalled := false
 
@@ -364,7 +354,6 @@ func TestPageUnrouteAllShouldNotWaitForPendingHandlersToCompleteIfBehaviorIsIgno
 
 func TestPageCloseDoesNotWaitForActiveRouteHandlers(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
 
 	secondHandlerCalled := false
 
@@ -393,7 +382,6 @@ func TestPageCloseDoesNotWaitForActiveRouteHandlers(t *testing.T) {
 
 func TestRouteContinueShouldNotThrowIfPageHasBeenClosed(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
 
 	routeChan := make(chan playwright.Route)
 	require.NoError(t, page.Route(regexp.MustCompile(".*"), func(route playwright.Route) {
@@ -414,7 +402,6 @@ func TestRouteContinueShouldNotThrowIfPageHasBeenClosed(t *testing.T) {
 
 func TestRouteFallbackShouldNotThroIfPageHasbeenClosed(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
 
 	routeChan := make(chan playwright.Route)
 	require.NoError(t, page.Route(regexp.MustCompile(".*"), func(route playwright.Route) {
@@ -435,7 +422,6 @@ func TestRouteFallbackShouldNotThroIfPageHasbeenClosed(t *testing.T) {
 
 func TestRouteFulfillShouldNotThrowIfPageHasBeenClosed(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
 
 	routeChan := make(chan playwright.Route)
 	require.NoError(t, page.Route("**/*", func(route playwright.Route) {

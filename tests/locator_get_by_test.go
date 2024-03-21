@@ -10,7 +10,7 @@ import (
 
 func TestGetByTestId(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`<div><div data-testid='Hello'>Hello world</div></div>`))
 
 	text, err := page.GetByTestId("Hello").TextContent()
@@ -28,7 +28,7 @@ func TestGetByTestId(t *testing.T) {
 
 func TestGetByTestIdEscapeId(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`<div><div data-testid='He"llo'>Hello world</div></div>`))
 
 	text, err := page.GetByTestId("He\"llo").TextContent()
@@ -41,7 +41,7 @@ func TestGetByTestIdEscapeId(t *testing.T) {
 
 func TestGetByText(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`<div><div>yo</div><div>ya</div><div>\nye  </div></div>`))
 	require.NoError(t, expect.Locator(page.GetByText("yo")).ToHaveCount(1))
 	require.NoError(t, expect.Locator(page.Locator("div").GetByText("yo")).ToHaveCount(1))
@@ -49,7 +49,7 @@ func TestGetByText(t *testing.T) {
 
 func TestGetByLabel(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`<div><label for=target>Name</label><input id=target type=text></div>`))
 
 	require.NoError(t, expect.Locator(page.GetByLabel("Name")).ToHaveCount(1))
@@ -64,7 +64,7 @@ func TestGetByLabel(t *testing.T) {
 
 func TestGetByPlaceholder(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`
 	<div>
     <input placeholder="Hello">
@@ -80,7 +80,7 @@ func TestGetByPlaceholder(t *testing.T) {
 
 func TestGetByAltText(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`
 	<div>
     <input alt="Hello">
@@ -93,7 +93,7 @@ func TestGetByAltText(t *testing.T) {
 
 func TestGetByTitle(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`
 	<div>
     <input title="Hello">
@@ -105,7 +105,7 @@ func TestGetByTitle(t *testing.T) {
 
 func TestGetByRole(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`<div>
 	<button>Hello</button>
 	<button>Hel"lo</button>

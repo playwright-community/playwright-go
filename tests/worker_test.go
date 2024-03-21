@@ -9,7 +9,7 @@ import (
 
 func TestWorkerShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	worker, err := page.ExpectWorker(func() error {
 		_, err := page.Goto(server.PREFIX + "/worker/worker.html")
 		return err
@@ -29,7 +29,7 @@ func TestWorkerShouldWork(t *testing.T) {
 
 func TestWorkerShouldEmitCreatedAndDestroyedEvents(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	var workerObj playwright.JSHandle
 	worker, err := page.ExpectWorker(func() error {
 		workerObjInterface, err := page.EvaluateHandle("() => new Worker(URL.createObjectURL(new Blob(['1'], {type: 'application/javascript'})))")
@@ -52,7 +52,7 @@ func TestWorkerShouldEmitCreatedAndDestroyedEvents(t *testing.T) {
 
 func TestWorkerShouldReportConsoleLogs(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	message, err := page.ExpectEvent("console", func() error {
 		_, err := page.Evaluate("() => new Worker(URL.createObjectURL(new Blob(['console.log(1)'], {type: 'application/javascript'})))")
 		return err
@@ -63,7 +63,7 @@ func TestWorkerShouldReportConsoleLogs(t *testing.T) {
 
 func TestWorkerShouldHaveJSHandlesForConsoleLogs(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	message, err := page.ExpectEvent("console", func() error {
 		_, err := page.Evaluate("() => new Worker(URL.createObjectURL(new Blob(['console.log(1,2,3,this)'], {type: 'application/javascript'})))")
 		return err
@@ -85,7 +85,7 @@ func TestWorkerShouldHaveJSHandlesForConsoleLogs(t *testing.T) {
 
 func TestWorkerShouldEvaluate(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	worker, err := page.ExpectWorker(func() error {
 		_, err := page.Evaluate("() => new Worker(URL.createObjectURL(new Blob(['console.log(1)'], {type: 'application/javascript'})))")
 		return err
@@ -98,7 +98,7 @@ func TestWorkerShouldEvaluate(t *testing.T) {
 
 func TestWorkershouldReportErrors(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	errChan := make(chan error, 1)
 	page.OnPageError(func(err error) {
 		errChan <- err
@@ -118,7 +118,7 @@ func TestWorkershouldReportErrors(t *testing.T) {
 
 func TestWorkerShouldClearUponCrossProcessNavigation(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	worker, err := page.ExpectWorker(func() error {
