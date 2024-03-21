@@ -13,7 +13,7 @@ func TestPageAddLocatorHandlerShouldWork(t *testing.T) {
 	BeforeEach(t, playwright.BrowserNewContextOptions{
 		HasTouch: playwright.Bool(false), // (v1.42.0) firefox 123.0 doesn't respond to pointerover when hasTouch is true
 	})
-	defer AfterEach(t)
+
 	_, err := page.Goto(fmt.Sprintf("%s/input/handle-locator.html", server.PREFIX))
 	require.NoError(t, err)
 
@@ -61,7 +61,7 @@ func TestPageAddLocatorHandlerShouldWork(t *testing.T) {
 
 func TestPageAddLocatorHandlerShouldWorkWithACustomCheck(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(fmt.Sprintf("%s/input/handle-locator.html", server.PREFIX))
 	require.NoError(t, err)
 
@@ -95,7 +95,7 @@ func TestPageAddLocatorHandlerShouldWorkWithACustomCheck(t *testing.T) {
 
 func TestPageAddLocatorHandlerShouldWorkWithLocatorHover(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(fmt.Sprintf("%s/input/handle-locator.html", server.PREFIX))
 	require.NoError(t, err)
 
@@ -119,7 +119,7 @@ func TestPageAddLocatorHandlerShouldWorkWithLocatorHover(t *testing.T) {
 
 func TestPageAddLocatorHandlerShouldWorkWithForceTrue(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(fmt.Sprintf("%s/input/handle-locator.html", server.PREFIX))
 	require.NoError(t, err)
 
@@ -147,7 +147,7 @@ func TestPageAddLocatorHandlerShouldWorkWithForceTrue(t *testing.T) {
 
 func TestPageAddLocatorHandlerShouldThrowWhenPageCloses(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(fmt.Sprintf("%s/input/handle-locator.html", server.PREFIX))
 	require.NoError(t, err)
 
@@ -166,7 +166,7 @@ func TestPageAddLocatorHandlerShouldThrowWhenPageCloses(t *testing.T) {
 
 func TestPageAddLocatorHandlerShouldThrowWhenHandlerTimesOut(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(fmt.Sprintf("%s/input/handle-locator.html", server.PREFIX))
 	require.NoError(t, err)
 
@@ -198,7 +198,7 @@ func TestPageAddLocatorHandlerShouldThrowWhenHandlerTimesOut(t *testing.T) {
 
 func TestPageAddLocatorHandlerShouldWorkWithToBeVisible(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(fmt.Sprintf("%s/input/handle-locator.html", server.PREFIX))
 	require.NoError(t, err)
 

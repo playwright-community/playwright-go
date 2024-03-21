@@ -12,7 +12,7 @@ import (
 
 func TestJSHandleGetProperty(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	aHandle, err := page.EvaluateHandle(`() => ({
 		one: 1,
 		two: 2,
@@ -28,7 +28,7 @@ func TestJSHandleGetProperty(t *testing.T) {
 
 func TestJSHandleGetProperties(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	aHandle, err := page.EvaluateHandle(`() => ({
 		one: 1,
 		two: 2,
@@ -52,7 +52,7 @@ func TestJSHandleGetProperties(t *testing.T) {
 
 func TestJSHandleEvaluate(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	aHandle, err := page.EvaluateHandle(`() => ({
 		one: 1,
 		two: 2,
@@ -69,7 +69,7 @@ func TestJSHandleEvaluate(t *testing.T) {
 
 func TestJSHandleEvaluateHandle(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	aHandle, err := page.EvaluateHandle(`() => ({
 		one: 1,
 		two: 2,
@@ -87,7 +87,7 @@ func TestJSHandleEvaluateHandle(t *testing.T) {
 
 func TestJSHandleTypeParsing(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	aHandle, err := page.EvaluateHandle(`() => ({
 		an_integer: 1,
 		a_float: 2.2222222222,
@@ -127,7 +127,6 @@ func TestJSHandleTypeParsing(t *testing.T) {
 
 func TestEvaluate(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
 
 	t.Run("should work", func(t *testing.T) {
 		val, err := page.Evaluate(`7 * 3`)

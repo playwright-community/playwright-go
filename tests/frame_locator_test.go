@@ -81,7 +81,7 @@ func routeAmbiguous(t *testing.T, page playwright.Page) {
 func TestFrameLocatorFirst(t *testing.T) {
 	t.Run("basic", func(t *testing.T) {
 		BeforeEach(t)
-		defer AfterEach(t)
+
 		routeAmbiguous(t, page)
 		_, err := page.Goto(server.EMPTY_PAGE)
 		require.NoError(t, err)
@@ -93,7 +93,7 @@ func TestFrameLocatorFirst(t *testing.T) {
 
 	t.Run("ambiguous", func(t *testing.T) {
 		BeforeEach(t)
-		defer AfterEach(t)
+
 		routeAmbiguous(t, page)
 		_, err := page.Goto(server.EMPTY_PAGE)
 		require.NoError(t, err)
@@ -106,7 +106,7 @@ func TestFrameLocatorFirst(t *testing.T) {
 
 func TestFrameLocatorNth(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	routeAmbiguous(t, page)
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -118,7 +118,7 @@ func TestFrameLocatorNth(t *testing.T) {
 
 func TestFrameLocatorLast(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	routeAmbiguous(t, page)
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -130,7 +130,7 @@ func TestFrameLocatorLast(t *testing.T) {
 
 func TestFrameLocatorLocator(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	routeIframe(t, page)
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -142,7 +142,7 @@ func TestFrameLocatorLocator(t *testing.T) {
 
 func TestFrameLocatorFrameLocator(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	routeIframe(t, page)
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)

@@ -13,7 +13,7 @@ import (
 
 func TestBrowserTypeBrowserName(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.Equal(t, pw.Chromium.Name(), "chromium")
 	require.Equal(t, pw.Firefox.Name(), "firefox")
 	require.Equal(t, pw.WebKit.Name(), "webkit")
@@ -21,13 +21,13 @@ func TestBrowserTypeBrowserName(t *testing.T) {
 
 func TestBrowserTypeExecutablePath(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.Greater(t, len(pw.Chromium.ExecutablePath()), 0)
 }
 
 func TestBrowserTypeLaunchPersistentContext(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	user_data_dir1 := t.TempDir()
 	browser_context, err := browserType.LaunchPersistentContext(user_data_dir1)
 	require.NoError(t, err)
@@ -65,36 +65,42 @@ func TestBrowserTypeLaunchPersistentContext(t *testing.T) {
 
 func TestBrowserTypeConnect(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
 	defer remoteServer.Close()
-	browser, err := browserType.Connect(remoteServer.url)
+
+	browser1, err := browserType.Connect(remoteServer.url)
 	require.NoError(t, err)
-	require.NotNil(t, browser)
-	browser_context, err := browser.NewContext()
+	require.NotNil(t, browser1)
+	defer browser1.Close()
+
+	browser_context, err := browser1.NewContext()
 	require.NoError(t, err)
 	page, err := browser_context.NewPage()
 	require.NoError(t, err)
 	result, err := page.Evaluate("11 * 11")
 	require.NoError(t, err)
 	require.Equal(t, result, 121)
-	require.NoError(t, browser.Close())
+	require.NoError(t, browser1.Close())
 }
 
 func TestBrowserTypeConnectShouldBeAbleToReconnectToBrowser(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
 	defer remoteServer.Close()
-	browser, err := browserType.Connect(remoteServer.url)
+
+	browser1, err := browserType.Connect(remoteServer.url)
 	require.NoError(t, err)
-	require.NotNil(t, browser)
-	require.Len(t, browser.Contexts(), 0)
-	browser_context, err := browser.NewContext()
+	require.NotNil(t, browser1)
+	defer browser1.Close()
+
+	require.Len(t, browser1.Contexts(), 0)
+	browser_context, err := browser1.NewContext()
 	require.NoError(t, err)
-	require.Len(t, browser.Contexts(), 1)
+	require.Len(t, browser1.Contexts(), 1)
 	require.Len(t, browser_context.Pages(), 0)
 	page, err := browser_context.NewPage()
 	require.Len(t, browser_context.Pages(), 1)
@@ -102,15 +108,17 @@ func TestBrowserTypeConnectShouldBeAbleToReconnectToBrowser(t *testing.T) {
 	result, err := page.Evaluate("11 * 11")
 	require.NoError(t, err)
 	require.Equal(t, result, 121)
-	require.NoError(t, browser.Close())
+	require.NoError(t, browser1.Close())
 
-	browser, err = browserType.Connect(remoteServer.url)
+	browser1, err = browserType.Connect(remoteServer.url)
 	require.NoError(t, err)
-	require.NotNil(t, browser)
-	require.Len(t, browser.Contexts(), 0)
-	browser_context, err = browser.NewContext()
+	require.NotNil(t, browser1)
+	defer browser1.Close()
+
+	require.Len(t, browser1.Contexts(), 0)
+	browser_context, err = browser1.NewContext()
 	require.NoError(t, err)
-	require.Len(t, browser.Contexts(), 1)
+	require.Len(t, browser1.Contexts(), 1)
 	require.Len(t, browser_context.Pages(), 0)
 	page, err = browser_context.NewPage()
 	require.Len(t, browser_context.Pages(), 1)
@@ -118,12 +126,12 @@ func TestBrowserTypeConnectShouldBeAbleToReconnectToBrowser(t *testing.T) {
 	result, err = page.Evaluate("11 * 11")
 	require.NoError(t, err)
 	require.Equal(t, result, 121)
-	require.NoError(t, browser.Close())
+	require.NoError(t, browser1.Close())
 }
 
 func TestBrowserTypeConnectShouldEmitDisconnectedEvent(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
 	disconnected1 := newSyncSlice[bool]()
@@ -156,16 +164,19 @@ func TestBrowserTypeConnectShouldEmitDisconnectedEvent(t *testing.T) {
 
 func TestBrowserTypeConnectSlowMo(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
 	defer remoteServer.Close()
-	browser, err := browserType.Connect(remoteServer.url, playwright.BrowserTypeConnectOptions{
+
+	browser1, err := browserType.Connect(remoteServer.url, playwright.BrowserTypeConnectOptions{
 		SlowMo: playwright.Float(100),
 	})
 	require.NoError(t, err)
-	require.NotNil(t, browser)
-	browser_context, err := browser.NewContext()
+	require.NotNil(t, browser1)
+	defer browser1.Close()
+
+	browser_context, err := browser1.NewContext()
 	require.NoError(t, err)
 	t1 := time.Now()
 	page, err := browser_context.NewPage()
@@ -174,21 +185,23 @@ func TestBrowserTypeConnectSlowMo(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, result, 121)
 	require.GreaterOrEqual(t, time.Since(t1), time.Duration(time.Millisecond*200))
-	require.NoError(t, browser.Close())
+	require.NoError(t, browser1.Close())
 }
 
 func TestBrowserTypeConnectArtifactPath(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
 	defer remoteServer.Close()
-	browser, err := browserType.Connect(remoteServer.url)
+
+	browser1, err := browserType.Connect(remoteServer.url)
 	require.NoError(t, err)
-	require.NotNil(t, browser)
-	defer browser.Close()
+	require.NotNil(t, browser1)
+	defer browser1.Close()
+
 	recordVideoDir := t.TempDir()
-	browserContext, err := browser.NewContext(playwright.BrowserNewContextOptions{
+	browserContext, err := browser1.NewContext(playwright.BrowserNewContextOptions{
 		RecordVideo: &playwright.RecordVideo{
 			Dir: recordVideoDir,
 		},
@@ -211,7 +224,7 @@ func TestBrowserTypeConnectOverCDP(t *testing.T) {
 		t.Skip("CDP is only supported on Chromium")
 	}
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	port, err := getFreePort()
 	require.NoError(t, err)
 	browserServer, err := browserType.Launch(playwright.BrowserTypeLaunchOptions{
@@ -231,7 +244,7 @@ func TestBrowserTypeConnectOverCDPTwice(t *testing.T) {
 		t.Skip("CDP is only supported on Chromium")
 	}
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	port, err := getFreePort()
 	require.NoError(t, err)
 	browserServer, err := browserType.Launch(playwright.BrowserTypeLaunchOptions{
@@ -264,15 +277,17 @@ func TestBrowserTypeConnectOverCDPTwice(t *testing.T) {
 
 func TestSetInputFilesShouldPreserveLastModifiedTimestamp(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	remoteServer, err := newRemoteServer()
 	require.NoError(t, err)
 	defer remoteServer.Close()
 
-	browser, err := browserType.Connect(remoteServer.url)
+	browser1, err := browserType.Connect(remoteServer.url)
 	require.NoError(t, err)
-	require.NotNil(t, browser)
-	browser_context, err := browser.NewContext()
+	require.NotNil(t, browser1)
+	defer browser1.Close()
+
+	browser_context, err := browser1.NewContext()
 	require.NoError(t, err)
 	page, err := browser_context.NewPage()
 	require.NoError(t, err)

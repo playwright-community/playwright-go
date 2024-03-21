@@ -12,7 +12,7 @@ import (
 
 func TestPageRouteContinue(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetExtraHTTPHeaders(map[string]string{
 		"extra-http": "42",
 	}))
@@ -43,7 +43,7 @@ func TestPageRouteContinue(t *testing.T) {
 
 func TestRouteContinueOverwrite(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	serverRequestChan := server.WaitForRequestChan("/sleep.zzz")
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -68,7 +68,7 @@ func TestRouteContinueOverwrite(t *testing.T) {
 
 func TestRouteContinueOverwriteBodyBytes(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	serverRequestChan := server.WaitForRequestChan("/sleep.zzz")
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -89,7 +89,7 @@ func TestRouteContinueOverwriteBodyBytes(t *testing.T) {
 
 func TestRouteFulfill(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	requestsChan := make(chan playwright.Request, 1)
 	err := page.Route("**/empty.html", func(route playwright.Route) {
 		request := route.Request()
@@ -129,7 +129,7 @@ func TestRouteFulfill(t *testing.T) {
 
 func TestRouteFulfillByteSlice(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	intercepted := make(chan bool, 1)
 	err := page.Route("**/empty.html", func(route playwright.Route) {
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
@@ -152,7 +152,7 @@ func TestRouteFulfillByteSlice(t *testing.T) {
 
 func TestRouteFulfillPath(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	intercepted := make(chan bool, 1)
 	err := page.Route("**/empty.html", func(route playwright.Route) {
 		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
@@ -173,7 +173,7 @@ func TestRouteFulfillPath(t *testing.T) {
 
 func TestRequestFinished(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	eventsStorage := newSyncSlice[string]()
 	var request playwright.Request
 	page.Once("request", func(r playwright.Request) {
@@ -194,7 +194,7 @@ func TestRequestFinished(t *testing.T) {
 
 func TestResponsePostData(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	requestData := map[string]interface{}{
 		"foo": "bar123",
 		"kek": true,
@@ -211,7 +211,7 @@ func TestResponsePostData(t *testing.T) {
 
 func TestRouteAbort(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	failedRequests := make(chan playwright.Request, 1)
 	page.Once("requestfailed", func(request playwright.Request) {
 		failedRequests <- request
@@ -228,7 +228,7 @@ func TestRouteAbort(t *testing.T) {
 
 func TestRequestPostData(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	server.SetRoute("/foobar", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 	})
@@ -262,7 +262,7 @@ func TestRequestPostData(t *testing.T) {
 
 func TestFulfillWithURLOverride(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.Route("**/*.html", func(route playwright.Route) {
 		response, err := route.Fetch(playwright.RouteFetchOptions{
 			URL: playwright.String(server.PREFIX + "/one-style.html"),
@@ -288,7 +288,7 @@ func TestFulfillWithURLOverride(t *testing.T) {
 
 func TestResponseSecurityDetails(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	if isWebKit {
 		t.Skip("https://github.com/microsoft/playwright/issues/6759")
 	}
@@ -310,7 +310,7 @@ func TestResponseSecurityDetails(t *testing.T) {
 
 func TestRequestTimingShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	result, err := page.ExpectEvent("requestfinished", func() error {
 		_, err := page.Goto(server.EMPTY_PAGE)
 		return err

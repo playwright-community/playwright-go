@@ -10,7 +10,7 @@ import (
 
 func TestElementHandleInnerText(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/dom.html")
 	require.NoError(t, err)
 	handle, err := page.QuerySelector("#inner")
@@ -25,7 +25,7 @@ func TestElementHandleInnerText(t *testing.T) {
 
 func TestElementHandleOwnerFrame(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	_, err = utils.AttachFrame(page, "iframe1", server.EMPTY_PAGE)
@@ -41,7 +41,7 @@ func TestElementHandleOwnerFrame(t *testing.T) {
 
 func TestElementHandleContentFrame(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	_, err = utils.AttachFrame(page, "frame1", server.EMPTY_PAGE)
@@ -55,7 +55,7 @@ func TestElementHandleContentFrame(t *testing.T) {
 
 func TestElementHandleGetAttribute(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/dom.html")
 	require.NoError(t, err)
 	handle, err := page.QuerySelector("#outer")
@@ -70,7 +70,7 @@ func TestElementHandleGetAttribute(t *testing.T) {
 
 func TestElementHandleDispatchEvent(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/input/button.html")
 	require.NoError(t, err)
 	element, err := page.QuerySelector("button")
@@ -83,7 +83,7 @@ func TestElementHandleDispatchEvent(t *testing.T) {
 
 func TestElementHandleDispatchEventInitObject(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	err := page.SetContent(`
 	<button onclick="window.eventBubbles = event.bubbles">ok</button>`)
 	require.NoError(t, err)
@@ -99,7 +99,7 @@ func TestElementHandleDispatchEventInitObject(t *testing.T) {
 
 func TestElementHandleHover(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/input/scrollable.html")
 	require.NoError(t, err)
 	btn, err := page.QuerySelector("#button-6")
@@ -112,7 +112,7 @@ func TestElementHandleHover(t *testing.T) {
 
 func TestElementHandleClick(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/input/button.html")
 	require.NoError(t, err)
 	btn, err := page.QuerySelector("button")
@@ -125,7 +125,7 @@ func TestElementHandleClick(t *testing.T) {
 
 func TestElementHandleDblclick(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.PREFIX + "/input/button.html")
 	require.NoError(t, err)
 	_, err = page.Evaluate(`() => {
@@ -150,7 +150,7 @@ func TestElementHandleDblclick(t *testing.T) {
 
 func TestElementBoundingBox(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetViewportSize(500, 500))
 	_, err := page.Goto(server.PREFIX + "/grid.html")
 	require.NoError(t, err)
@@ -166,7 +166,7 @@ func TestElementBoundingBox(t *testing.T) {
 
 func TestElementHandleTap(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<input id='checkbox' type='checkbox'></input>"))
@@ -184,7 +184,7 @@ func TestElementHandleTap(t *testing.T) {
 
 func TestElementHandleQuerySelectorNotExists(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`
@@ -200,7 +200,7 @@ func TestElementHandleQuerySelectorNotExists(t *testing.T) {
 
 func TestElementHandleQuerySelectorAll(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`
@@ -223,7 +223,7 @@ func TestElementHandleQuerySelectorAll(t *testing.T) {
 
 func TestElementHandleEvalOnSelector(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`
@@ -242,7 +242,7 @@ func TestElementHandleEvalOnSelector(t *testing.T) {
 
 func TestElementHandleEvalOnSelectorAll(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`
@@ -262,7 +262,7 @@ func TestElementHandleEvalOnSelectorAll(t *testing.T) {
 
 func TestElementHandleString(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	numberHandle, err := page.EvaluateHandle("() => 2")
 	require.NoError(t, err)
 	require.Equal(t, "2", numberHandle.String())
@@ -273,7 +273,7 @@ func TestElementHandleString(t *testing.T) {
 
 func TestElementHandleCheck(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`
 		<input type="checkbox"/>
 	`))
@@ -290,7 +290,7 @@ func TestElementHandleCheck(t *testing.T) {
 
 func TestElementHandleUnCheck(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`
 		<input type="checkbox" checked/>
 	`))
@@ -304,7 +304,7 @@ func TestElementHandleUnCheck(t *testing.T) {
 
 func TestElementHandleSelectOption(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<select id='lang'><option value='go'>go</option><option value='python'>python</option></select>"))
@@ -320,7 +320,7 @@ func TestElementHandleSelectOption(t *testing.T) {
 
 func TestElementHandleSelectOptionOverElementHandle(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<select id='lang'><option value='go'>go</option><option value='python'>python</option></select>"))
@@ -342,7 +342,7 @@ func TestElementHandleSelectOptionOverElementHandle(t *testing.T) {
 
 func TestElementHandleIsVisibleAndIsHiddenShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`<div>Hi</div><span></span>`))
 	div, err := page.QuerySelector("div")
 	require.NoError(t, err)
@@ -379,7 +379,7 @@ func TestElementHandleIsVisibleAndIsHiddenShouldWork(t *testing.T) {
 
 func TestElementHandleIsEnabledAndIsDisabledshouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`
 		<button disabled>button1</button>
 		<button>button2</button>
@@ -436,7 +436,7 @@ func TestElementHandleIsEnabledAndIsDisabledshouldWork(t *testing.T) {
 
 func TestElementHandleIsEditableShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`
 		<input id=input1 disabled><textarea></textarea><input id=input2>
 	`))
@@ -472,7 +472,7 @@ func TestElementHandleIsEditableShouldWork(t *testing.T) {
 
 func TestElementHandleIsCheckedShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`
 		<input type="checkbox" checked><div>Not a checkbox</div>
 	`))
@@ -500,7 +500,7 @@ func TestElementHandleIsCheckedShouldWork(t *testing.T) {
 
 func TestElementHandleWaitForElementState(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<div><p id='result'>test result</p></div>"))
@@ -513,7 +513,7 @@ func TestElementHandleWaitForElementState(t *testing.T) {
 
 func TestElementHandleWaitForSelector(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent("<div><p id='result'>test result</p></div>"))
@@ -532,7 +532,7 @@ func TestElementHandleWaitForSelector(t *testing.T) {
 
 func TestElemetHandleFocus(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<button onfocus="window.clicked=true"/>`))
@@ -546,7 +546,7 @@ func TestElemetHandleFocus(t *testing.T) {
 
 func TestElementHandleInputValue(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`
 	<input></input>
 	`))
@@ -564,7 +564,7 @@ func TestElementHandleInputValue(t *testing.T) {
 
 func TestElementHandleSetChecked(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`<input id='checkbox' type='checkbox'></input>`))
 	selectElement, err := page.QuerySelector("input")
 	require.NoError(t, err)

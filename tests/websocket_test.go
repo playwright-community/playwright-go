@@ -86,7 +86,7 @@ func newWebsocketServer() *webSocketServer {
 
 func TestWebSocketShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	wsServer := newWebsocketServer()
 	defer wsServer.Stop()
 	value, err := page.Evaluate(`port => {
@@ -102,7 +102,7 @@ func TestWebSocketShouldWork(t *testing.T) {
 
 func TestWebSocketShouldEmitCloseEvents(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	wsServer := newWebsocketServer()
 	defer wsServer.Stop()
 	ws, err := page.ExpectWebSocket(func() error {
@@ -128,7 +128,7 @@ func TestWebSocketShouldEmitCloseEvents(t *testing.T) {
 
 func TestWebSocketShouldEmitFrameEvents(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	wsServer := newWebsocketServer()
 	defer wsServer.Stop()
 
@@ -168,7 +168,7 @@ func TestWebSocketShouldEmitFrameEvents(t *testing.T) {
 
 func TestWebSocketShouldEmitBinaryFrameEvents(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	wsServer := newWebsocketServer()
 	defer wsServer.Stop()
 
@@ -210,7 +210,7 @@ func TestWebSocketShouldEmitBinaryFrameEvents(t *testing.T) {
 
 func TestWebSocketShouldRejectWaitForEventOnCloseAndError(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	wsServer := newWebsocketServer()
 	defer wsServer.Stop()
 	ws, err := page.ExpectWebSocket(func() error {
@@ -238,7 +238,7 @@ func TestWebSocketShouldRejectWaitForEventOnCloseAndError(t *testing.T) {
 
 func TestWebSocketShouldEmitErrorEvent(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	wsServer := newWebsocketServer()
 	defer wsServer.Stop()
 	chanMsg := make(chan string, 1)

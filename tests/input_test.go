@@ -10,7 +10,7 @@ import (
 
 func TestMouseMove(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	if isWebKit {
 		_, err := page.Evaluate(`() => new Promise(requestAnimationFrame)`)
 		require.NoError(t, err)
@@ -33,7 +33,7 @@ func TestMouseMove(t *testing.T) {
 
 func TestMouseDown(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<button onmousedown="window.clicked=true"/>`))
@@ -46,7 +46,7 @@ func TestMouseDown(t *testing.T) {
 
 func TestMouseUp(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<button onmouseup="window.clicked=true"/>`))
@@ -60,7 +60,7 @@ func TestMouseUp(t *testing.T) {
 
 func TestMouseClick(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<button onclick="window.clicked=true" style="width: 500px; height: 500px;"/>`))
@@ -73,7 +73,7 @@ func TestMouseClick(t *testing.T) {
 
 func TestMouseDblclick(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<button ondblclick="window.clicked=true" style="width: 500px; height: 500px;"/>`))
@@ -86,7 +86,7 @@ func TestMouseDblclick(t *testing.T) {
 
 func TestMouseWheel(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<div style="width: 5000px; height: 5000px;"></div>`))
@@ -102,7 +102,7 @@ func TestMouseWheel(t *testing.T) {
 
 func TestKeyboardDown(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<input onkeydown="window.clicked=true"/>`))
@@ -115,7 +115,7 @@ func TestKeyboardDown(t *testing.T) {
 
 func TestKeyboardUp(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<input onkeyup="window.clicked=true"/>`))
@@ -128,7 +128,7 @@ func TestKeyboardUp(t *testing.T) {
 
 func TestKeyboardInsertText(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<input oninput="window.clicked=true"/>`))
@@ -141,7 +141,7 @@ func TestKeyboardInsertText(t *testing.T) {
 
 func TestKeyboardType(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<input oninput="window.clicked=true"/>`))
@@ -154,7 +154,7 @@ func TestKeyboardType(t *testing.T) {
 
 func TestElementHandleType(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<input oninput="window.clicked=true"/>`))
@@ -171,7 +171,7 @@ func TestElementHandleType(t *testing.T) {
 
 func TestElementHandleFill(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<input oninput="window.clicked=true"/>`))
@@ -188,7 +188,7 @@ func TestElementHandleFill(t *testing.T) {
 
 func TestKeyboardInsertPress(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<input onkeydown="window.clicked=true"/>`))
@@ -201,7 +201,7 @@ func TestKeyboardInsertPress(t *testing.T) {
 
 func TestElementHandlePress(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<input onkeydown="window.clicked=true"/>`))
@@ -218,7 +218,7 @@ func TestElementHandlePress(t *testing.T) {
 
 func TestTouchscreenTap(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<button onclick="window.clicked=true" style="width: 500px; height: 500px;"/>`))

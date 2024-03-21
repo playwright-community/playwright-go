@@ -11,7 +11,6 @@ import (
 
 func TestSelectorsGetByEscaping(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
 
 	require.NoError(t, page.SetContent(`
 	<label id=label for=control>Hello my
@@ -91,7 +90,7 @@ world</label><input id=control />`))
 
 func TestSelectorsGetByRoleEscaping(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`
 		<a href="https://playwright.dev">issues 123</a>
 		<a href="https://playwright.dev">he llo 56</a>
@@ -160,7 +159,7 @@ func TestSelectorsGetByRoleEscaping(t *testing.T) {
 
 func TestSelectorsIncludeHiddenShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`<button style="display: none">Hidden</button>`))
 	utils.AssertResult(t, func() (interface{}, error) {
 		return page.GetByRole("button", playwright.PageGetByRoleOptions{

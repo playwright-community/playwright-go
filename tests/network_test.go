@@ -16,7 +16,7 @@ import (
 
 func TestRequestFulfill(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	requests := make(chan playwright.Request, 1)
 	routes := make(chan playwright.Route, 1)
 	err := page.Route("**/empty.html", func(route playwright.Route) {
@@ -54,7 +54,7 @@ func TestRequestFulfill(t *testing.T) {
 
 func TestRequestContinue(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	intercepted := make(chan bool, 1)
 	err := page.Route("**/empty.html", func(route playwright.Route) {
 		intercepted <- true
@@ -71,7 +71,7 @@ func TestRequestContinue(t *testing.T) {
 
 func TestRequestShouldFireForNavigationRequests(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	requests := make(chan playwright.Request, 1)
 	page.OnRequest(func(request playwright.Request) {
 		requests <- request
@@ -85,7 +85,7 @@ func TestRequestShouldFireForNavigationRequests(t *testing.T) {
 
 func TestShouldReportRequestHeadersArray(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	request, err := page.ExpectRequest("*/**", func() error {
@@ -118,7 +118,7 @@ func TestShouldReportResponseHeadersArray(t *testing.T) {
 		t.Skip("libcurl does not support non-set-cookie multivalue headers")
 	}
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	server.SetRoute("/headers", func(rw http.ResponseWriter, r *http.Request) {
 		rw.Header().Add("header-a", "value-a")
 		rw.Header().Add("header-a", "value-a-1")
@@ -182,7 +182,7 @@ func TestShouldReportResponseHeadersArray(t *testing.T) {
 
 func TestShouldReportResponseServerAddr(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	response, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	server_addr, err := response.ServerAddr()
@@ -195,7 +195,7 @@ func TestShouldReportResponseServerAddr(t *testing.T) {
 
 func TestShouldReportIfRequestWasFromServiceWorker(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	response, err := page.Goto(fmt.Sprintf("%s/serviceworkers/fetch/sw.html", server.PREFIX))
 	require.NoError(t, err)
 	require.False(t, response.FromServiceWorker())
@@ -215,7 +215,7 @@ func TestShouldReportIfRequestWasFromServiceWorker(t *testing.T) {
 
 func TestNetworkEventsRequest(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	requests := []playwright.Request{}
 	page.OnRequest(func(request playwright.Request) {
 		requests = append(requests, request)
@@ -233,7 +233,7 @@ func TestNetworkEventsRequest(t *testing.T) {
 
 func TestNetworkEventsResponse(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	responses := []playwright.Response{}
 	page.OnResponse(func(response playwright.Response) {
 		responses = append(responses, response)
@@ -249,7 +249,7 @@ func TestNetworkEventsResponse(t *testing.T) {
 
 func TestNetworkEventsShouldFireEventsInProperOrder(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	events := []string{}
 	page.OnRequest(func(request playwright.Request) {
 		events = append(events, "request")

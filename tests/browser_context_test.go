@@ -15,13 +15,13 @@ import (
 
 func TestBrowserContextNewPage(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.Equal(t, context.Browser(), browser)
 }
 
 func TestBrowserContextNewContext(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.Equal(t, 1, len(browser.Contexts()))
 	context2, err := browser.NewContext()
 	require.NoError(t, err)
@@ -35,7 +35,7 @@ func TestBrowserContextNewContext(t *testing.T) {
 
 func TestBrowserContextClose(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t, false)
+
 	context2, err := browser.NewContext()
 	require.NoError(t, err)
 	require.Equal(t, 2, len(browser.Contexts()))
@@ -49,7 +49,7 @@ func TestBrowserContextClose(t *testing.T) {
 
 func TestBrowserContextCloseWithHarDownload(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t, false)
+
 	tmpFile := filepath.Join(t.TempDir(), "test.har")
 	context2, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		RecordHarPath:        playwright.String(tmpFile),
@@ -64,7 +64,7 @@ func TestBrowserContextCloseWithHarDownload(t *testing.T) {
 
 func TestBrowserContextOffline(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	offline, err := page.Evaluate("window.navigator.onLine")
 	require.NoError(t, err)
 	require.True(t, offline.(bool))
@@ -82,7 +82,7 @@ func TestBrowserContextOffline(t *testing.T) {
 
 func TestBrowserContextSetExtraHTTPHeaders(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, context.SetExtraHTTPHeaders(map[string]string{
 		"extra-http": "42",
 	}))
@@ -100,14 +100,15 @@ func TestBrowserContextSetExtraHTTPHeaders(t *testing.T) {
 
 func TestBrowserContextSetHttpCredentials(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	server.SetBasicAuth("/empty.html", "user", "pass")
 
 	response, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.Equal(t, 401, response.Status())
 	context.Close()
-	newContextWithOptions(t, playwright.BrowserNewContextOptions{
+
+	context, page = newBrowserContextAndPage(t, playwright.BrowserNewContextOptions{
 		AcceptDownloads: playwright.Bool(true),
 		HasTouch:        playwright.Bool(true),
 		HttpCredentials: &playwright.HttpCredentials{
@@ -122,7 +123,7 @@ func TestBrowserContextSetHttpCredentials(t *testing.T) {
 
 func TestBrowserContextNewCDPSession(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	cdpSession, err := page.Context().NewCDPSession(page)
 	if isChromium {
 		require.NoError(t, err)
@@ -134,7 +135,7 @@ func TestBrowserContextNewCDPSession(t *testing.T) {
 
 func TestBrowserContextSetGeolocation(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, context.GrantPermissions([]string{"geolocation"}))
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
@@ -155,7 +156,7 @@ func TestBrowserContextSetGeolocation(t *testing.T) {
 
 func TestBrowserContextAddCookies(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, context.AddCookies([]playwright.OptionalCookie{
@@ -199,7 +200,7 @@ func TestBrowserContextAddCookies(t *testing.T) {
 
 func TestBrowserContextAddInitScript(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, context.AddInitScript(playwright.Script{
 		Content: playwright.String(`window['injected'] = 123;`),
 	}))
@@ -212,7 +213,7 @@ func TestBrowserContextAddInitScript(t *testing.T) {
 
 func TestBrowserContextAddInitScriptWithPath(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, context.AddInitScript(playwright.Script{
 		Path: playwright.String(Asset("injectedfile.js")),
 	}))
@@ -225,7 +226,7 @@ func TestBrowserContextAddInitScriptWithPath(t *testing.T) {
 
 func TestBrowserContextWindowOpenshouldUseParentTabContext(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	popupEvent, err := page.ExpectEvent("popup", func() error {
@@ -239,7 +240,6 @@ func TestBrowserContextWindowOpenshouldUseParentTabContext(t *testing.T) {
 
 func TestBrowserContextUnrouteShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
 
 	intercepted := []int{}
 	handler1 := func(route playwright.Route) {
@@ -281,7 +281,7 @@ func TestBrowserContextUnrouteShouldWork(t *testing.T) {
 
 func TestBrowserContextShouldReturnBackgroundPage(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	if !isChromium {
 		t.Skip()
 	}
@@ -336,7 +336,7 @@ func TestBrowserContextShouldReturnBackgroundPage(t *testing.T) {
 
 func TestPageEventShouldHaveURL(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	context.OnPage(func(p playwright.Page) {
 		require.Equal(t, server.EMPTY_PAGE, p.URL())
 	})
@@ -350,7 +350,7 @@ func TestPageEventShouldHaveURL(t *testing.T) {
 
 func TestConsoleEventShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	context.OnConsole(func(message playwright.ConsoleMessage) {
 		require.Equal(t, "hello", message.Text())
 	})
@@ -365,7 +365,7 @@ func TestConsoleEventShouldWork(t *testing.T) {
 
 func TestBrowserContextEventsRequest(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	var requests []playwright.Request
 	context.OnRequest(func(request playwright.Request) {
 		requests = append(requests, request)
@@ -388,7 +388,7 @@ func TestBrowserContextEventsRequest(t *testing.T) {
 
 func TestBrowserContextEventsResponse(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	var responses []playwright.Response
 	context.OnResponse(func(response playwright.Response) {
 		responses = append(responses, response)
@@ -411,7 +411,7 @@ func TestBrowserContextEventsResponse(t *testing.T) {
 
 func TestBrowserContextEventsRequestFailed(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	server.SetRoute("/one-style.css", func(w http.ResponseWriter, r *http.Request) {
 		hw, ok := w.(http.Hijacker)
 		if ok {
@@ -433,7 +433,7 @@ func TestBrowserContextEventsRequestFailed(t *testing.T) {
 
 func TestBrowerContextEventsShouldFireInProperOrder(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	var events []string
 	context.OnRequest(func(request playwright.Request) {
 		events = append(events, "request")
@@ -454,22 +454,23 @@ func TestBrowerContextEventsShouldFireInProperOrder(t *testing.T) {
 
 func TestBrowserContextShouldFireCloseEvent(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
-	browser, err := browserType.Launch()
+
+	browser1, err := browserType.Launch()
 	require.NoError(t, err)
-	context, err := browser.NewContext()
+	defer browser1.Close()
+	context1, err := browser1.NewContext()
 	require.NoError(t, err)
 	closed := false
-	context.OnClose(func(bc playwright.BrowserContext) {
+	context1.OnClose(func(bc playwright.BrowserContext) {
 		closed = true
 	})
-	require.NoError(t, browser.Close())
+	require.NoError(t, browser1.Close())
 	require.True(t, closed)
 }
 
 func TestDialogEventShouldWorkInImmdiatelyClosedPopup(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	if isFirefox {
 		t.Skip("flaky on firefox")
 	}
@@ -492,7 +493,7 @@ func TestDialogEventShouldWorkInImmdiatelyClosedPopup(t *testing.T) {
 
 func TestBrowserContextCloseShouldAbortWaitForEvent(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := context.ExpectPage(func() error {
 		return context.Close()
 	})
@@ -501,7 +502,7 @@ func TestBrowserContextCloseShouldAbortWaitForEvent(t *testing.T) {
 
 func TestBrowserContextCloseShouldBeCallableTwice(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	countClose := atomic.Int32{}
 	context.OnClose(func(bc playwright.BrowserContext) {
 		countClose.Add(1)
@@ -514,7 +515,7 @@ func TestBrowserContextCloseShouldBeCallableTwice(t *testing.T) {
 
 func TestPageErrorEventShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	ret, err := page.Context().ExpectEvent("weberror", func() error {
 		return page.SetContent(`<script>throw new Error("boom")</script>`)
 	})
@@ -528,7 +529,7 @@ func TestPageErrorEventShouldWork(t *testing.T) {
 
 func TestBrowserContextOnResponse(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	responseChan := make(chan playwright.Response, 1)
 	context.OnResponse(func(response playwright.Response) {
 		responseChan <- response
