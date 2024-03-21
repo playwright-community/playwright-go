@@ -10,7 +10,7 @@ import (
 
 func TestPageAssertionsToHaveTitle(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 	require.NoError(t, page.SetContent(`<title>new title</title>`))
@@ -32,7 +32,7 @@ func TestPageAssertionsToHaveTitle(t *testing.T) {
 
 func TestPageAssertionsToHaveURL(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	_, err := page.Goto(server.EMPTY_PAGE)
 	require.NoError(t, err)
 
@@ -45,7 +45,7 @@ func TestPageAssertionsToHaveURL(t *testing.T) {
 
 func TestPageAssertionsToHaveURLWithBaseURL(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	page, err := browser.NewPage(playwright.BrowserNewPageOptions{
 		BaseURL: &server.PREFIX,
 	})

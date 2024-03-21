@@ -11,7 +11,7 @@ import (
 
 func TestHasTextAndInternalTextShouldMatchFullNodeInStrictMode(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent(`<div id=div1>hello<span>world</span></div>
 		<div id=div2>hello</div>`))
 
@@ -51,7 +51,7 @@ func TestHasTextAndInternalTextShouldMatchFullNodeInStrictMode(t *testing.T) {
 
 func TestSelectorsTextShouldWork(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	require.NoError(t, page.SetContent("<div>yo</div><div>ya</div><div>\nye  </div>"))
 
 	utils.AssertResult(t, func() (interface{}, error) {

@@ -13,7 +13,7 @@ import (
 
 func TestDownloadBasic(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	server.SetRoute("/downloadWithFilename", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/octet-stream")
 		w.Header().Add("Content-Disposition", "attachment; filename=file.txt")
@@ -50,7 +50,7 @@ func TestDownloadBasic(t *testing.T) {
 
 func TestDownloadCancel(t *testing.T) {
 	BeforeEach(t)
-	defer AfterEach(t)
+
 	server.SetRoute("/downloadWithDelay", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/octet-stream")
 		w.Header().Add("Content-Disposition", "attachment")
