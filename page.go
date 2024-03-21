@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"sync"
-	"time"
 
 	"golang.org/x/exp/slices"
 )
@@ -543,52 +542,10 @@ func (p *pageImpl) ExpectEvent(event string, cb func() error, options ...PageExp
 }
 
 func (p *pageImpl) ExpectNavigation(cb func() error, options ...PageExpectNavigationOptions) (Response, error) {
-	option := PageExpectNavigationOptions{}
 	if len(options) == 1 {
-		option = options[0]
+		return p.mainFrame.ExpectNavigation(cb, FrameExpectNavigationOptions(options[0]))
 	}
-	if option.WaitUntil == nil {
-		option.WaitUntil = WaitUntilStateLoad
-	}
-	if option.Timeout == nil {
-		option.Timeout = Float(p.timeoutSettings.NavigationTimeout())
-	}
-	deadline := time.Now().Add(time.Duration(*option.Timeout) * time.Millisecond)
-	var matcher *urlMatcher
-	if option.URL != nil {
-		matcher = newURLMatcher(option.URL, p.browserContext.options.BaseURL)
-	}
-	predicate := func(events ...interface{}) bool {
-		ev := events[0].(map[string]interface{})
-		if ev["error"] != nil {
-			print("error")
-		}
-		return matcher == nil || matcher.Matches(ev["url"].(string))
-	}
-	waiter, err := p.mainFrame.(*frameImpl).setNavigationWaiter(option.Timeout)
-	if err != nil {
-		return nil, err
-	}
-
-	eventData, err := waiter.WaitForEvent(p.mainFrame.(*frameImpl), "navigated", predicate).RunAndWait(cb)
-	if err != nil || eventData == nil {
-		return nil, err
-	}
-
-	t := time.Until(deadline).Milliseconds()
-	if t > 0 {
-		err = p.mainFrame.(*frameImpl).waitForLoadStateImpl(string(*option.WaitUntil), Float(float64(t)), nil)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	event := eventData.(map[string]interface{})
-	if event["newDocument"] != nil && event["newDocument"].(map[string]interface{})["request"] != nil {
-		request := fromChannel(event["newDocument"].(map[string]interface{})["request"]).(*requestImpl)
-		return request.Response()
-	}
-	return nil, nil
+	return p.mainFrame.ExpectNavigation(cb)
 }
 
 func (p *pageImpl) ExpectConsoleMessage(cb func() error, options ...PageExpectConsoleMessageOptions) (ConsoleMessage, error) {

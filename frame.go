@@ -209,8 +209,11 @@ func (f *frameImpl) ExpectNavigation(cb func() error, options ...FrameExpectNavi
 	}
 	predicate := func(events ...interface{}) bool {
 		ev := events[0].(map[string]interface{})
-		if ev["error"] != nil {
-			print("error")
+		err, ok := ev["error"]
+		if ok {
+			// Any failed navigation results in a rejection.
+			logger.Printf("navigated to %s error: %v", ev["url"].(string), err)
+			return true
 		}
 		return matcher == nil || matcher.Matches(ev["url"].(string))
 	}
