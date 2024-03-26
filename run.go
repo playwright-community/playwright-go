@@ -229,9 +229,9 @@ type RunOptions struct {
 	Stderr              io.Writer
 }
 
-// Install does download the driver and the browsers. If not called manually
-// before playwright.Run() it will get executed there and might take a few seconds
-// to download the Playwright suite.
+// Install does download the driver and the browsers.
+//
+// Use this before playwright.Run() or use playwright cli to install the driver and browsers
 func Install(options ...*RunOptions) error {
 	driver, err := NewDriver(transformRunOptions(options))
 	if err != nil {
@@ -243,11 +243,18 @@ func Install(options ...*RunOptions) error {
 	return nil
 }
 
-// Run starts a Playwright instance
+// Run starts a Playwright instance.
+//
+// Requires the driver and the browsers to be installed before.
+// Either use Install() or use playwright cli.
 func Run(options ...*RunOptions) (*Playwright, error) {
 	driver, err := NewDriver(transformRunOptions(options))
 	if err != nil {
 		return nil, fmt.Errorf("could not get driver instance: %w", err)
+	}
+	up2date, err := driver.isUpToDateDriver()
+	if err != nil || !up2date {
+		return nil, fmt.Errorf("please install the driver (v%s) and browsers first: %w", playwrightCliVersion, err)
 	}
 	connection, err := driver.run()
 	if err != nil {
