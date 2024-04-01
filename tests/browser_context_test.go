@@ -541,3 +541,32 @@ func TestBrowserContextOnResponse(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "<!DOCTYPE html>\n<title>Woof-Woof</title>\n", string(body))
 }
+
+func TestBrowserContextGetSecureCookies(t *testing.T) {
+	BeforeEach(t, playwright.BrowserNewContextOptions{
+		IgnoreHttpsErrors: playwright.Bool(true), // webkit requires https to support secure cookies
+	})
+
+	tlsServer := newTestServer(true)
+	defer tlsServer.testServer.Close()
+
+	tlsServer.SetRoute("/cookie.html", func(w http.ResponseWriter, r *http.Request) {
+		// set secure cookie
+		cookie := http.Cookie{
+			Name:     "foo",
+			Value:    "bar",
+			Secure:   true,
+			HttpOnly: true,
+		}
+		http.SetCookie(w, &cookie)
+	})
+
+	_, err := page.Goto(fmt.Sprintf("%s/cookie.html", tlsServer.PREFIX))
+	require.NoError(t, err)
+	cookies, err := context.Cookies()
+	require.NoError(t, err)
+	require.Equal(t, 1, len(cookies))
+	require.Equal(t, "foo", cookies[0].Name)
+	require.Equal(t, "bar", cookies[0].Value)
+	require.True(t, cookies[0].Secure)
+}
