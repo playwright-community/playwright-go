@@ -80,6 +80,9 @@ func (j *jsHandleImpl) AsElement() ElementHandle {
 
 func (j *jsHandleImpl) Dispose() error {
 	_, err := j.channel.Send("dispose")
+	if errors.Is(err, ErrTargetClosed) {
+		return nil
+	}
 	return err
 }
 

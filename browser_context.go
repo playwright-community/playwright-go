@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"sync"
 
@@ -125,8 +126,53 @@ func (b *browserContextImpl) AddCookies(cookies []OptionalCookie) error {
 	return err
 }
 
-func (b *browserContextImpl) ClearCookies() error {
-	_, err := b.channel.Send("clearCookies")
+func (b *browserContextImpl) ClearCookies(options ...BrowserContextClearCookiesOptions) error {
+	params := map[string]interface{}{}
+	if len(options) == 1 {
+		if options[0].Domain != nil {
+			switch t := options[0].Domain.(type) {
+			case string:
+				params["domain"] = t
+			case *string:
+				params["domain"] = t
+			case *regexp.Regexp:
+				pattern, flag := convertRegexp(t)
+				params["domainRegexSource"] = pattern
+				params["domainRegexFlags"] = flag
+			default:
+				return errors.New("invalid type for domain, expected string or *regexp.Regexp")
+			}
+		}
+		if options[0].Name != nil {
+			switch t := options[0].Name.(type) {
+			case string:
+				params["name"] = t
+			case *string:
+				params["name"] = t
+			case *regexp.Regexp:
+				pattern, flag := convertRegexp(t)
+				params["nameRegexSource"] = pattern
+				params["nameRegexFlags"] = flag
+			default:
+				return errors.New("invalid type for name, expected string or *regexp.Regexp")
+			}
+		}
+		if options[0].Path != nil {
+			switch t := options[0].Path.(type) {
+			case string:
+				params["path"] = t
+			case *string:
+				params["path"] = t
+			case *regexp.Regexp:
+				pattern, flag := convertRegexp(t)
+				params["pathRegexSource"] = pattern
+				params["pathRegexFlags"] = flag
+			default:
+				return errors.New("invalid type for path, expected string or *regexp.Regexp")
+			}
+		}
+	}
+	_, err := b.channel.Send("clearCookies", params)
 	return err
 }
 

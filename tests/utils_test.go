@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -291,4 +292,12 @@ func getFileLastModifiedTimeMs(path string) (int64, error) {
 		return 0, fmt.Errorf("%s is a directory", path)
 	}
 	return info.ModTime().UnixMilli(), nil
+}
+
+func mustGetHostname(ref string) *string {
+	u, err := url.Parse(ref)
+	if err != nil {
+		return nil
+	}
+	return playwright.String(u.Hostname())
 }
