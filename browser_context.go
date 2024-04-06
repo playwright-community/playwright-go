@@ -44,10 +44,7 @@ func (b *browserContextImpl) setDefaultNavigationTimeoutImpl(timeout *float64) {
 }
 
 func (b *browserContextImpl) SetDefaultTimeout(timeout float64) {
-	b.timeoutSettings.SetDefaultTimeout(&timeout)
-	b.channel.SendNoReply("setDefaultTimeoutNoReply", map[string]interface{}{
-		"timeout": timeout,
-	})
+	b.setDefaultTimeoutImpl(&timeout)
 }
 
 func (b *browserContextImpl) setDefaultTimeoutImpl(timeout *float64) {
