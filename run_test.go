@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
 
@@ -68,8 +66,8 @@ func TestDriverDownloadHostEnv(t *testing.T) {
 }
 
 func TestShouldNotHangWhenPlaywrightUnexpectedExit(t *testing.T) {
-	if runtime.GOOS != "windows" || getBrowserName() != "chromium" {
-		t.Skip("chromium on windows only")
+	if getBrowserName() != "chromium" {
+		t.Skip("chromium only")
 		return
 	}
 
@@ -90,7 +88,7 @@ func TestShouldNotHangWhenPlaywrightUnexpectedExit(t *testing.T) {
 	require.Error(t, err)
 }
 
-// find and kill playwright process, only for Windows
+// find and kill playwright process
 func killPlaywrightProcess() error {
 	all, err := ps.Processes()
 	if err != nil {
@@ -98,24 +96,11 @@ func killPlaywrightProcess() error {
 	}
 	for _, process := range all {
 		if process.Executable() == "node" || process.Executable() == "node.exe" {
-			parent, err := ps.FindProcess(process.PPid())
-			if err != nil {
-				return err
-			}
-			if parent.Executable() == "cmd.exe" {
-				grandpa, err := ps.FindProcess(parent.PPid())
-				if err != nil {
+			if process.PPid() == os.Getpid() {
+				if err := killProcessByPid(process.Pid()); err != nil {
 					return err
 				}
-				if strings.HasPrefix(grandpa.Executable(), "__debug_bin") || grandpa.Executable() == filepath.Base(os.Args[0]) {
-					if err := killProcessByPid(parent.Pid()); err != nil {
-						return err
-					}
-					if err := killProcessByPid(process.Pid()); err != nil {
-						return err
-					}
-					return nil
-				}
+				return nil
 			}
 		}
 	}
