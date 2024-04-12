@@ -120,3 +120,7 @@ func (fl *frameLocatorImpl) Locator(selectorOrLocator interface{}, options ...Fr
 func (fl *frameLocatorImpl) Nth(index int) FrameLocator {
 	return newFrameLocator(fl.frame, fl.frameSelector+" >> nth="+strconv.Itoa(index))
 }
+
+func (fl *frameLocatorImpl) Owner() Locator {
+	return newLocator(fl.frame, fl.frameSelector)
+}
