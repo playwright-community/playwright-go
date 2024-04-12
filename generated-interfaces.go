@@ -295,8 +295,8 @@ type BrowserContext interface {
 	// Returns the browser instance of the context. If it was launched as a persistent context null gets returned.
 	Browser() Browser
 
-	// Clears context cookies.
-	ClearCookies() error
+	// Removes cookies from context. Accepts optional filter.
+	ClearCookies(options ...BrowserContextClearCookiesOptions) error
 
 	// Clears all permission overrides for the browser context.
 	ClearPermissions() error
@@ -1831,9 +1831,10 @@ type Frame interface {
 // matches a given selector.
 // **Converting Locator to FrameLocator**
 // If you have a [Locator] object pointing to an `iframe` it can be converted to [FrameLocator] using
-// [`:scope`] CSS selector:
-//
-// [`:scope`]: https://developer.mozilla.org/en-US/docs/Web/CSS/:scope
+// [Locator.ContentFrame].
+// **Converting FrameLocator to Locator**
+// If you have a [FrameLocator] object it can be converted to [Locator] pointing to the same `iframe` using
+// [FrameLocator.Owner].
 type FrameLocator interface {
 	// Returns locator to the first matching frame.
 	First() FrameLocator
@@ -1925,6 +1926,12 @@ type FrameLocator interface {
 
 	// Returns locator to the n-th matching frame. It's zero based, `nth(0)` selects the first frame.
 	Nth(index int) FrameLocator
+
+	// Returns a [Locator] object pointing to the same `iframe` as this frame locator.
+	// Useful when you have a [FrameLocator] object obtained somewhere, and later on would like to interact with the
+	// `iframe` element.
+	// For a reverse operation, use [Locator.ContentFrame].
+	Owner() Locator
 }
 
 // JSHandle represents an in-page JavaScript object. JSHandles can be created with the [Page.EvaluateHandle] method.
@@ -2242,6 +2249,12 @@ type Locator interface {
 	//
 	// Deprecated: Always prefer using [Locator]s and web assertions over [ElementHandle]s because latter are inherently racy.
 	ElementHandles() ([]ElementHandle, error)
+
+	// Returns a [FrameLocator] object pointing to the same `iframe` as this locator.
+	// Useful when you have a [Locator] object obtained somewhere, and later on would like to interact with the content
+	// inside the frame.
+	// For a reverse operation, use [FrameLocator.Owner].
+	ContentFrame() FrameLocator
 
 	// Execute JavaScript code in the page, taking the matching element as an argument.
 	//
@@ -3521,9 +3534,10 @@ type Page interface {
 	// [locators]: https://playwright.dev/docs/locators
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
 
-	// When testing a web page, sometimes unexpected overlays like a coookie consent dialog appear and block actions you
-	// want to automate, e.g. clicking a button. These overlays don't always show up in the same way or at the same time,
-	// making them tricky to handle in automated tests.
+	// **NOTE** This method is experimental and its behavior may change in the upcoming releases.
+	// When testing a web page, sometimes unexpected overlays like a "Sign up" dialog appear and block actions you want to
+	// automate, e.g. clicking a button. These overlays don't always show up in the same way or at the same time, making
+	// them tricky to handle in automated tests.
 	// This method lets you set up a special function, called a handler, that activates when it detects that overlay is
 	// visible. The handler's job is to remove the overlay, allowing your test to continue as if the overlay wasn't there.
 	// Things to keep in mind:
@@ -3531,7 +3545,9 @@ type Page interface {
 	//   a part of your normal test flow, instead of using [Page.AddLocatorHandler].
 	//  - Playwright checks for the overlay every time before executing or retrying an action that requires an
 	//   [actionability check], or before performing an auto-waiting assertion check. When overlay
-	//   is visible, Playwright calls the handler first, and then proceeds with the action/assertion.
+	//   is visible, Playwright calls the handler first, and then proceeds with the action/assertion. Note that the
+	//   handler is only called when you perform an action/assertion - if the overlay becomes visible but you don't
+	//   perform any actions, the handler will not be triggered.
 	//  - The execution time of the handler counts towards the timeout of the action/assertion that executed the handler.
 	//   If your handler takes too long, it might cause timeouts.
 	//  - You can register multiple handlers. However, only a single handler will be running at a time. Make sure the

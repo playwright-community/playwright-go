@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-	"os/exec"
 
 	"github.com/playwright-community/playwright-go"
 )
@@ -16,7 +15,7 @@ func main() {
 	if err = driver.DownloadDriver(); err != nil {
 		log.Fatalf("could not download driver: %v", err)
 	}
-	cmd := exec.Command(driver.DriverBinaryLocation, os.Args[1:]...)
+	cmd := driver.Command(os.Args[1:]...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {

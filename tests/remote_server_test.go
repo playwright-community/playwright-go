@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/playwright-community/playwright-go"
@@ -22,12 +20,7 @@ func newRemoteServer() (*remoteServer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not start Playwright: %v", err)
 	}
-	node := "node"
-	if runtime.GOOS == "windows" {
-		node = "node.exe"
-	}
-	cliJs := filepath.Join(driver.DriverDirectory, "package", "cli.js")
-	cmd := exec.Command(filepath.Join(driver.DriverDirectory, node), cliJs, "launch-server", "--browser", browserName)
+	cmd := driver.Command("launch-server", "--browser", browserName)
 	cmd.Stderr = os.Stderr
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {

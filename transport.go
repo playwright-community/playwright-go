@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 
 	"github.com/go-jose/go-jose/v3/json"
 )
@@ -102,13 +101,12 @@ func (t *pipeTransport) isClosed() bool {
 	}
 }
 
-func newPipeTransport(driverCli string, stderr io.Writer) (transport, error) {
+func newPipeTransport(driver *PlaywrightDriver, stderr io.Writer) (transport, error) {
 	t := &pipeTransport{
 		closed: make(chan struct{}, 1),
 	}
 
-	cmd := exec.Command(driverCli, "run-driver")
-	cmd.SysProcAttr = defaultSysProcAttr
+	cmd := driver.Command("run-driver")
 	cmd.Stderr = stderr
 	stdin, err := cmd.StdinPipe()
 	if err != nil {

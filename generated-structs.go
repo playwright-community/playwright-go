@@ -585,6 +585,14 @@ type Script struct {
 	// Raw script content. Optional.
 	Content *string `json:"content"`
 }
+type BrowserContextClearCookiesOptions struct {
+	// Only removes cookies with the given domain.
+	Domain interface{} `json:"domain"`
+	// Only removes cookies with the given name.
+	Name interface{} `json:"name"`
+	// Only removes cookies with the given path.
+	Path interface{} `json:"path"`
+}
 type BrowserContextCloseOptions struct {
 	// The reason to be reported to the operations interrupted by the context closure.
 	Reason *string `json:"reason"`
@@ -716,6 +724,10 @@ type BrowserTypeLaunchOptions struct {
 	ChromiumSandbox *bool `json:"chromiumSandbox"`
 	// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the
 	// “headless” option will be set `false`.
+	//
+	// Deprecated: Use [debugging tools] instead.
+	//
+	// [debugging tools]: https://playwright.dev/docs/debug
 	Devtools *bool `json:"devtools"`
 	// If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and
 	// is deleted when browser is closed. In either case, the downloads are deleted when the browser context they were
@@ -804,6 +816,10 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
 	// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the
 	// “headless” option will be set `false`.
+	//
+	// Deprecated: Use [debugging tools] instead.
+	//
+	// [debugging tools]: https://playwright.dev/docs/debug
 	Devtools *bool `json:"devtools"`
 	// If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and
 	// is deleted when browser is closed. In either case, the downloads are deleted when the browser context they were

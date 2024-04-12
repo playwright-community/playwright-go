@@ -190,6 +190,10 @@ func (l *locatorImpl) Click(options ...LocatorClickOptions) error {
 	return l.frame.Click(l.selector, opt)
 }
 
+func (l *locatorImpl) ContentFrame() FrameLocator {
+	return newFrameLocator(l.frame, l.selector)
+}
+
 func (l *locatorImpl) Count() (int, error) {
 	if l.err != nil {
 		return 0, l.err

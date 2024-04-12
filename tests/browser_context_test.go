@@ -570,3 +570,173 @@ func TestBrowserContextGetSecureCookies(t *testing.T) {
 	require.Equal(t, "bar", cookies[0].Value)
 	require.True(t, cookies[0].Secure)
 }
+
+func TestBrowserContextClearCookies(t *testing.T) {
+	t.Run("should remove cookies by name", func(t *testing.T) {
+		BeforeEach(t)
+		require.NoError(t, context.AddCookies([]playwright.OptionalCookie{
+			{
+				Name:   "cookie1",
+				Value:  "1",
+				Domain: mustGetHostname(server.PREFIX),
+				Path:   playwright.String("/"),
+			},
+			{
+				Name:   "cookie2",
+				Value:  "2",
+				Domain: mustGetHostname(server.PREFIX),
+				Path:   playwright.String("/"),
+			},
+		}))
+
+		_, err := page.Goto(server.PREFIX)
+		require.NoError(t, err)
+		expectPageCookies(t, "cookie1=1; cookie2=2")
+		require.NoError(t, context.ClearCookies(playwright.BrowserContextClearCookiesOptions{
+			Name: "cookie1",
+		}))
+		expectPageCookies(t, "cookie2=2")
+	})
+
+	t.Run("should remove cookies by name regex", func(t *testing.T) {
+		BeforeEach(t)
+		require.NoError(t, context.AddCookies([]playwright.OptionalCookie{
+			{
+				Name:   "cookie1",
+				Value:  "1",
+				Domain: mustGetHostname(server.PREFIX),
+				Path:   playwright.String("/"),
+			},
+			{
+				Name:   "cookie2",
+				Value:  "2",
+				Domain: mustGetHostname(server.PREFIX),
+				Path:   playwright.String("/"),
+			},
+		}))
+
+		_, err := page.Goto(server.PREFIX)
+		require.NoError(t, err)
+		expectPageCookies(t, "cookie1=1; cookie2=2")
+		require.NoError(t, context.ClearCookies(playwright.BrowserContextClearCookiesOptions{
+			Name: regexp.MustCompile(`coo.*1`),
+		}))
+		expectPageCookies(t, "cookie2=2")
+	})
+
+	t.Run("should remove cookies by domain", func(t *testing.T) {
+		BeforeEach(t)
+		require.NoError(t, context.AddCookies([]playwright.OptionalCookie{
+			{
+				Name:   "cookie1",
+				Value:  "1",
+				Domain: mustGetHostname(server.PREFIX),
+				Path:   playwright.String("/"),
+			},
+			{
+				Name:   "cookie2",
+				Value:  "2",
+				Domain: mustGetHostname(server.CROSS_PROCESS_PREFIX),
+				Path:   playwright.String("/"),
+			},
+		}))
+
+		_, err := page.Goto(server.PREFIX)
+		require.NoError(t, err)
+		expectPageCookies(t, "cookie1=1")
+
+		_, err = page.Goto(server.CROSS_PROCESS_PREFIX)
+		require.NoError(t, err)
+		expectPageCookies(t, "cookie2=2")
+
+		require.NoError(t, context.ClearCookies(playwright.BrowserContextClearCookiesOptions{
+			Domain: mustGetHostname(server.CROSS_PROCESS_PREFIX),
+		}))
+		expectPageCookies(t, "")
+
+		_, err = page.Goto(server.PREFIX)
+		require.NoError(t, err)
+		expectPageCookies(t, "cookie1=1")
+	})
+
+	t.Run("should remove cookies by path", func(t *testing.T) {
+		BeforeEach(t)
+		require.NoError(t, context.AddCookies([]playwright.OptionalCookie{
+			{
+				Name:   "cookie1",
+				Value:  "1",
+				Domain: mustGetHostname(server.PREFIX),
+				Path:   playwright.String("/api/v1"),
+			},
+			{
+				Name:   "cookie2",
+				Value:  "2",
+				Domain: mustGetHostname(server.PREFIX),
+				Path:   playwright.String("/api/v2"),
+			},
+			{
+				Name:   "cookie3",
+				Value:  "3",
+				Domain: mustGetHostname(server.PREFIX),
+				Path:   playwright.String("/"),
+			},
+		}))
+
+		_, err := page.Goto(fmt.Sprintf("%s/api/v1", server.PREFIX))
+		require.NoError(t, err)
+
+		ret, err := page.Evaluate(`document.cookie`)
+		require.NoError(t, err)
+		require.Equal(t, "cookie1=1; cookie3=3", ret)
+		require.NoError(t, context.ClearCookies(playwright.BrowserContextClearCookiesOptions{
+			Path: "/api/v1",
+		}))
+		expectPageCookies(t, "cookie3=3")
+
+		_, err = page.Goto(fmt.Sprintf("%s/api/v2", server.PREFIX))
+		require.NoError(t, err)
+		expectPageCookies(t, "cookie2=2; cookie3=3")
+
+		_, err = page.Goto(server.PREFIX)
+		require.NoError(t, err)
+		expectPageCookies(t, "cookie3=3")
+	})
+
+	t.Run("should remove cookies by name and domain", func(t *testing.T) {
+		BeforeEach(t)
+		require.NoError(t, context.AddCookies([]playwright.OptionalCookie{
+			{
+				Name:   "cookie1",
+				Value:  "1",
+				Domain: mustGetHostname(server.PREFIX),
+				Path:   playwright.String("/"),
+			},
+			{
+				Name:   "cookie1",
+				Value:  "1",
+				Domain: mustGetHostname(server.CROSS_PROCESS_PREFIX),
+				Path:   playwright.String("/"),
+			},
+		}))
+
+		_, err := page.Goto(server.PREFIX)
+		require.NoError(t, err)
+		expectPageCookies(t, "cookie1=1")
+		require.NoError(t, context.ClearCookies(playwright.BrowserContextClearCookiesOptions{
+			Name:   "cookie1",
+			Domain: mustGetHostname(server.PREFIX),
+		}))
+		expectPageCookies(t, "")
+
+		_, err = page.Goto(server.CROSS_PROCESS_PREFIX)
+		require.NoError(t, err)
+		expectPageCookies(t, "cookie1=1")
+	})
+}
+
+func expectPageCookies(t *testing.T, cookie string) {
+	t.Helper()
+	ret, err := page.Evaluate(`document.cookie`)
+	require.NoError(t, err)
+	require.Equal(t, cookie, ret)
+}
