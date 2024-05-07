@@ -14,10 +14,9 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: ^1.19.9
-        cache: false
       id: go
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@v3
+      uses: golangci/golangci-lint-action@v6
       with:
         version: latest
   test:
@@ -60,13 +59,13 @@ jobs:
         BROWSER: ${{ matrix.browser }}
         GOEXPERIMENT: nocoverageredesign
       if: matrix.os == 'ubuntu-latest'
-      run: xvfb-run go test -v -covermode atomic -coverprofile=covprofile -coverpkg="github.com/playwright-community/playwright-go" --race ./...
+      run: xvfb-run go test -timeout 15m -v -covermode atomic -coverprofile=covprofile -coverpkg="github.com/playwright-community/playwright-go" --race ./...
     - name: Test
       env:
         BROWSER: ${{ matrix.browser }}
         GOEXPERIMENT: nocoverageredesign
       if: matrix.os != 'ubuntu-latest'
-      run: go test -v -covermode atomic -coverprofile=covprofile -coverpkg="github.com/playwright-community/playwright-go" --race ./...
+      run: go test -timeout 15m -v -covermode atomic -coverprofile=covprofile -coverpkg="github.com/playwright-community/playwright-go" --race ./...
     - name: Install goveralls
       run: go install github.com/mattn/goveralls@latest
     - name: Send coverage
