@@ -30,47 +30,84 @@ type pageImpl struct {
 	closeReason     *string
 	closeWasCalled  bool
 	harRouters      []*harRouter
-	locatorHandlers map[float64]func()
+	locatorHandlers map[float64]*locatorHandlerEntry
 }
 
-func (p *pageImpl) AddLocatorHandler(locator Locator, handler func()) error {
+type locatorHandlerEntry struct {
+	locator *locatorImpl
+	handler func(Locator)
+	times   *int
+}
+
+func (p *pageImpl) AddLocatorHandler(locator Locator, handler func(Locator), options ...PageAddLocatorHandlerOptions) error {
 	if locator == nil || handler == nil {
 		return errors.New("locator or handler must not be nil")
 	}
 	if locator.Err() != nil {
 		return locator.Err()
 	}
+
+	var option PageAddLocatorHandlerOptions
+	if len(options) == 1 {
+		option = options[0]
+		if option.Times != nil && *option.Times == 0 {
+			return nil
+		}
+	}
+
 	loc := locator.(*locatorImpl)
 	if loc.frame != p.mainFrame {
 		return errors.New("locator must belong to the main frame of this page")
 	}
 	uid, err := p.channel.Send("registerLocatorHandler", map[string]any{
-		"selector": loc.selector,
+		"selector":    loc.selector,
+		"noWaitAfter": option.NoWaitAfter,
 	})
 	if err != nil {
 		return err
 	}
-	p.locatorHandlers[uid.(float64)] = handler
+	p.locatorHandlers[uid.(float64)] = &locatorHandlerEntry{locator: loc, handler: handler, times: option.Times}
 	return nil
 }
 
 func (p *pageImpl) onLocatorHandlerTriggered(uid float64) {
+	var remove *bool
 	handler, ok := p.locatorHandlers[uid]
 	if !ok {
 		return
+	}
+	if handler.times != nil {
+		*handler.times--
+		if *handler.times == 0 {
+			remove = Bool(true)
+		}
 	}
 	go func() {
 		defer func() {
 			_, _ = p.connection.WrapAPICall(func() (interface{}, error) {
 				p.channel.SendNoReply("resolveLocatorHandlerNoReply", map[string]any{
-					"uid": uid,
+					"uid":    uid,
+					"remove": remove,
 				})
 				return nil, nil
 			}, true)
 		}()
 
-		handler()
+		handler.handler(handler.locator)
 	}()
+}
+
+func (p *pageImpl) RemoveLocatorHandler(locator Locator) error {
+	for uid := range p.locatorHandlers {
+		if p.locatorHandlers[uid].locator.equals(locator) {
+			delete(p.locatorHandlers, uid)
+			_, _ = p.channel.Send("unregisterLocatorHandler", map[string]any{
+				"uid": uid,
+			})
+			return nil
+		}
+	}
+	return nil
 }
 
 func (p *pageImpl) Context() BrowserContext {
@@ -742,7 +779,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 		bindings:        make(map[string]BindingCallFunction),
 		viewportSize:    viewportSize,
 		harRouters:      make([]*harRouter, 0),
-		locatorHandlers: make(map[float64]func(), 0),
+		locatorHandlers: make(map[float64]*locatorHandlerEntry, 0),
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	bt.browserContext = fromChannel(parent.channel).(*browserContextImpl)

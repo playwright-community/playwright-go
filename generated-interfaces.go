@@ -37,8 +37,7 @@ type APIRequestContext interface {
 	Dispose() error
 
 	// Sends HTTP(S) request and returns its response. The method will populate request cookies from the context and
-	// update context cookies from the response. The method will automatically follow redirects. JSON objects can be
-	// passed directly to the request.
+	// update context cookies from the response. The method will automatically follow redirects.
 	//
 	//  urlOrRequest: Target URL or Request to get all parameters from.
 	Fetch(urlOrRequest interface{}, options ...APIRequestContextFetchOptions) (APIResponse, error)
@@ -218,6 +217,10 @@ type Browser interface {
 // contexts don't write any browsing data to disk.
 type BrowserContext interface {
 	EventEmitter
+	// **NOTE** Only works with Chromium browser's persistent context.
+	// Emitted when new background page is created in the context.
+	OnBackgroundPage(fn func(Page))
+
 	// Emitted when Browser context gets closed. This might happen because of one of the following:
 	//  - Browser context is closed.
 	//  - Browser application is closed or crashed.
@@ -240,7 +243,9 @@ type BrowserContext interface {
 	// will also fire for popup pages. See also [Page.OnPopup] to receive events about popups relevant to a specific page.
 	// The earliest moment that page is available is when it has navigated to the initial url. For example, when opening a
 	// popup with `window.open('http://example.com')`, this event will fire when the network request to
-	// "http://example.com" is done and its response has started loading in the popup.
+	// "http://example.com" is done and its response has started loading in the popup. If you would like to route/listen
+	// to this network request, use [BrowserContext.Route] and [BrowserContext.OnRequest] respectively instead of similar
+	// methods on the [Page].
 	// **NOTE** Use [Page.WaitForLoadState] to wait until the page gets to a particular state (you should not need it in
 	// most cases).
 	OnPage(fn func(Page))
@@ -900,7 +905,8 @@ type ElementHandle interface {
 	// `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`,
 	// `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`,
 	// etc.
-	// Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
+	// Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`,
+	// `ControlOrMeta`.
 	// Holding down `Shift` will type the text that corresponds to the “key” in the upper case.
 	// If “key” is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
 	// texts.
@@ -1592,7 +1598,8 @@ type Frame interface {
 	// `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`,
 	// `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`,
 	// etc.
-	// Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
+	// Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`,
+	// `ControlOrMeta`. `ControlOrMeta` resolves to `Control` on Windows and Linux and to `Meta` on macOS.
 	// Holding down `Shift` will type the text that corresponds to the “key” in the upper case.
 	// If “key” is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
 	// texts.
@@ -1780,6 +1787,10 @@ type Frame interface {
 	// This returns when the frame reaches a required load state, `load` by default. The navigation must have been
 	// committed when this method is called. If current document has already reached the required state, resolves
 	// immediately.
+	// **NOTE** Most of the time, this method is not needed because Playwright
+	// [auto-waits before every action].
+	//
+	// [auto-waits before every action]: https://playwright.dev/docs/actionability
 	WaitForLoadState(options ...FrameWaitForLoadStateOptions) error
 
 	// Waits for the frame navigation and returns the main resource response. In case of multiple redirects, the
@@ -2002,7 +2013,8 @@ type Keyboard interface {
 	// `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`,
 	// `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`,
 	// etc.
-	// Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
+	// Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`,
+	// `ControlOrMeta`. `ControlOrMeta` resolves to `Control` on Windows and Linux and to `Meta` on macOS.
 	// Holding down `Shift` will type the text that corresponds to the “key” in the upper case.
 	// If “key” is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
 	// texts.
@@ -2033,7 +2045,8 @@ type Keyboard interface {
 	// `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`,
 	// `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`,
 	// etc.
-	// Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
+	// Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`,
+	// `ControlOrMeta`. `ControlOrMeta` resolves to `Control` on Windows and Linux and to `Meta` on macOS.
 	// Holding down `Shift` will type the text that corresponds to the “key” in the upper case.
 	// If “key” is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
 	// texts.
@@ -2544,7 +2557,8 @@ type Locator interface {
 	// `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`,
 	// `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`,
 	// etc.
-	// Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
+	// Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`,
+	// `ControlOrMeta`. `ControlOrMeta` resolves to `Control` on Windows and Linux and to `Meta` on macOS.
 	// Holding down `Shift` will type the text that corresponds to the “key” in the upper case.
 	// If “key” is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
 	// texts.
@@ -2778,6 +2792,22 @@ type LocatorAssertions interface {
 	//  expected: Expected substring or RegExp or a list of those.
 	ToContainText(expected interface{}, options ...LocatorAssertionsToContainTextOptions) error
 
+	// Ensures the [Locator] points to an element with a given
+	// [accessible description].
+	//
+	//  description: Expected accessible description.
+	//
+	// [accessible description]: https://w3c.github.io/accname/#dfn-accessible-description
+	ToHaveAccessibleDescription(description interface{}, options ...LocatorAssertionsToHaveAccessibleDescriptionOptions) error
+
+	// Ensures the [Locator] points to an element with a given
+	// [accessible name].
+	//
+	//  name: Expected accessible name.
+	//
+	// [accessible name]: https://w3c.github.io/accname/#dfn-accessible-name
+	ToHaveAccessibleName(name interface{}, options ...LocatorAssertionsToHaveAccessibleNameOptions) error
+
 	// Ensures the [Locator] points to an element with given attribute.
 	//
 	// 1. name: Attribute name.
@@ -2812,6 +2842,15 @@ type LocatorAssertions interface {
 	// 1. name: Property name.
 	// 2. value: Property value.
 	ToHaveJSProperty(name string, value interface{}, options ...LocatorAssertionsToHaveJSPropertyOptions) error
+
+	// Ensures the [Locator] points to an element with a given [ARIA role].
+	// Note that role is matched as a string, disregarding the ARIA role hierarchy. For example, asserting  a superclass
+	// role `"checkbox"` on an element with a subclass role `"switch"` will fail.
+	//
+	//  role: Required aria role.
+	//
+	// [ARIA role]: https://www.w3.org/TR/wai-aria-1.2/#roles
+	ToHaveRole(role AriaRole, options ...LocatorAssertionsToHaveRoleOptions) error
 
 	// Ensures the [Locator] points to an element with the given text. All nested elements will be considered when
 	// computing the text content of the element. You can use regular expressions for the value as well.
@@ -2934,7 +2973,9 @@ type Page interface {
 	// but only for popups relevant to this page.
 	// The earliest moment that page is available is when it has navigated to the initial url. For example, when opening a
 	// popup with `window.open('http://example.com')`, this event will fire when the network request to
-	// "http://example.com" is done and its response has started loading in the popup.
+	// "http://example.com" is done and its response has started loading in the popup. If you would like to route/listen
+	// to this network request, use [BrowserContext.Route] and [BrowserContext.OnRequest] respectively instead of similar
+	// methods on the [Page].
 	// **NOTE** Use [Page.WaitForLoadState] to wait until the page gets to a particular state (you should not need it in
 	// most cases).
 	OnPopup(fn func(Page))
@@ -3496,7 +3537,8 @@ type Page interface {
 	// `F1` - `F12`, `Digit0`- `Digit9`, `KeyA`- `KeyZ`, `Backquote`, `Minus`, `Equal`, `Backslash`, `Backspace`, `Tab`,
 	// `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`,
 	// etc.
-	// Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
+	// Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`,
+	// `ControlOrMeta`. `ControlOrMeta` resolves to `Control` on Windows and Linux and to `Meta` on macOS.
 	// Holding down `Shift` will type the text that corresponds to the “key” in the upper case.
 	// If “key” is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
 	// texts.
@@ -3534,7 +3576,6 @@ type Page interface {
 	// [locators]: https://playwright.dev/docs/locators
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
 
-	// **NOTE** This method is experimental and its behavior may change in the upcoming releases.
 	// When testing a web page, sometimes unexpected overlays like a "Sign up" dialog appear and block actions you want to
 	// automate, e.g. clicking a button. These overlays don't always show up in the same way or at the same time, making
 	// them tricky to handle in automated tests.
@@ -3548,6 +3589,8 @@ type Page interface {
 	//   is visible, Playwright calls the handler first, and then proceeds with the action/assertion. Note that the
 	//   handler is only called when you perform an action/assertion - if the overlay becomes visible but you don't
 	//   perform any actions, the handler will not be triggered.
+	//  - After executing the handler, Playwright will ensure that overlay that triggered the handler is not visible
+	//   anymore. You can opt-out of this behavior with “noWaitAfter”.
 	//  - The execution time of the handler counts towards the timeout of the action/assertion that executed the handler.
 	//   If your handler takes too long, it might cause timeouts.
 	//  - You can register multiple handlers. However, only a single handler will be running at a time. Make sure the
@@ -3567,7 +3610,12 @@ type Page interface {
 	//    like click.
 	//
 	// [actionability check]: https://playwright.dev/docs/actionability
-	AddLocatorHandler(locator Locator, handler func()) error
+	AddLocatorHandler(locator Locator, handler func(Locator), options ...PageAddLocatorHandlerOptions) error
+
+	// Removes all locator handlers added by [Page.AddLocatorHandler] for a specific locator.
+	//
+	//  locator: Locator passed to [Page.AddLocatorHandler].
+	RemoveLocatorHandler(locator Locator) error
 
 	// This method reloads the current page, in the same way as if the user had triggered a browser refresh. Returns the
 	// main resource response. In case of multiple redirects, the navigation will resolve with the response of the last
@@ -3585,6 +3633,7 @@ type Page interface {
 	// **NOTE** [Page.Route] will not intercept requests intercepted by Service Worker. See
 	// [this] issue. We recommend disabling Service Workers when
 	// using request interception by setting “Browser.newContext.serviceWorkers” to `block`.
+	// **NOTE** [Page.Route] will not intercept the first request of a popup page. Use [BrowserContext.Route] instead.
 	//
 	// 1. url: A glob pattern, regex pattern or predicate receiving [URL] to match while routing. When a “baseURL” via the context
 	//    options was provided and the passed URL is a path, it gets merged via the
@@ -3826,6 +3875,10 @@ type Page interface {
 	// This resolves when the page reaches a required load state, `load` by default. The navigation must have been
 	// committed when this method is called. If current document has already reached the required state, resolves
 	// immediately.
+	// **NOTE** Most of the time, this method is not needed because Playwright
+	// [auto-waits before every action].
+	//
+	// [auto-waits before every action]: https://playwright.dev/docs/actionability
 	WaitForLoadState(options ...PageWaitForLoadStateOptions) error
 
 	// Waits for the main frame navigation and returns the main resource response. In case of multiple redirects, the

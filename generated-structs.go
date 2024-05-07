@@ -1014,7 +1014,8 @@ type ElementHandleClickOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-	// current modifiers back. If not specified, currently pressed modifiers are used.
+	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -1042,7 +1043,8 @@ type ElementHandleDblclickOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-	// current modifiers back. If not specified, currently pressed modifiers are used.
+	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -1079,7 +1081,8 @@ type ElementHandleHoverOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-	// current modifiers back. If not specified, currently pressed modifiers are used.
+	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -1218,7 +1221,8 @@ type ElementHandleTapOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-	// current modifiers back. If not specified, currently pressed modifiers are used.
+	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -1357,7 +1361,8 @@ type FrameClickOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-	// current modifiers back. If not specified, currently pressed modifiers are used.
+	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -1388,7 +1393,8 @@ type FrameDblclickOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-	// current modifiers back. If not specified, currently pressed modifiers are used.
+	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -1580,7 +1586,8 @@ type FrameHoverOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-	// current modifiers back. If not specified, currently pressed modifiers are used.
+	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -1785,7 +1792,8 @@ type FrameTapOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-	// current modifiers back. If not specified, currently pressed modifiers are used.
+	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -2083,7 +2091,8 @@ type LocatorClickOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-	// current modifiers back. If not specified, currently pressed modifiers are used.
+	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -2111,7 +2120,8 @@ type LocatorDblclickOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-	// current modifiers back. If not specified, currently pressed modifiers are used.
+	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -2299,7 +2309,8 @@ type LocatorHoverOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-	// current modifiers back. If not specified, currently pressed modifiers are used.
+	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -2510,7 +2521,8 @@ type LocatorTapOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-	// current modifiers back. If not specified, currently pressed modifiers are used.
+	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -2635,6 +2647,20 @@ type LocatorAssertionsToContainTextOptions struct {
 	// Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
 	UseInnerText *bool `json:"useInnerText"`
 }
+type LocatorAssertionsToHaveAccessibleDescriptionOptions struct {
+	// Whether to perform case-insensitive match. “ignoreCase” option takes precedence over the corresponding regular
+	// expression flag if specified.
+	IgnoreCase *bool `json:"ignoreCase"`
+	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToHaveAccessibleNameOptions struct {
+	// Whether to perform case-insensitive match. “ignoreCase” option takes precedence over the corresponding regular
+	// expression flag if specified.
+	IgnoreCase *bool `json:"ignoreCase"`
+	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
+	Timeout *float64 `json:"timeout"`
+}
 type LocatorAssertionsToHaveAttributeOptions struct {
 	// Whether to perform case-insensitive match. “ignoreCase” option takes precedence over the corresponding regular
 	// expression flag if specified.
@@ -2659,6 +2685,10 @@ type LocatorAssertionsToHaveIdOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type LocatorAssertionsToHaveJSPropertyOptions struct {
+	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
+	Timeout *float64 `json:"timeout"`
+}
+type LocatorAssertionsToHaveRoleOptions struct {
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2768,7 +2798,8 @@ type PageClickOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-	// current modifiers back. If not specified, currently pressed modifiers are used.
+	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -2808,7 +2839,8 @@ type PageDblclickOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-	// current modifiers back. If not specified, currently pressed modifiers are used.
+	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -3046,7 +3078,8 @@ type PageHoverOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-	// current modifiers back. If not specified, currently pressed modifiers are used.
+	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -3219,6 +3252,14 @@ type PageQuerySelectorOptions struct {
 	// element, the call throws an exception.
 	Strict *bool `json:"strict"`
 }
+type PageAddLocatorHandlerOptions struct {
+	// By default, after calling the handler Playwright will wait until the overlay becomes hidden, and only then
+	// Playwright will continue with the action/assertion that triggered the handler. This option allows to opt-out of
+	// this behavior, so that overlay can stay visible after the handler has run.
+	NoWaitAfter *bool `json:"noWaitAfter"`
+	// Specifies the maximum number of times this handler should be called. Unlimited by default.
+	Times *int `json:"times"`
+}
 type PageReloadOptions struct {
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultNavigationTimeout], [BrowserContext.SetDefaultTimeout],
@@ -3370,7 +3411,8 @@ type PageTapOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
 	// Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-	// current modifiers back. If not specified, currently pressed modifiers are used.
+	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
@@ -3600,6 +3642,9 @@ type PageAssertionsToHaveTitleOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type PageAssertionsToHaveURLOptions struct {
+	// Whether to perform case-insensitive match. “ignoreCase” option takes precedence over the corresponding regular
+	// expression flag if specified.
+	IgnoreCase *bool `json:"ignoreCase"`
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }

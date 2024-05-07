@@ -20,7 +20,8 @@ func TestPageAddLocatorHandlerShouldWork(t *testing.T) {
 	beforeCount := 0
 	afterCount := 0
 
-	err = page.AddLocatorHandler(page.GetByText("This interstitial covers the button"), func() {
+	originalLocator := page.GetByText("This interstitial covers the button")
+	err = page.AddLocatorHandler(originalLocator, func(loc playwright.Locator) {
 		beforeCount++
 		require.NoError(t, page.Locator("#close").Click())
 		afterCount++
@@ -65,12 +66,12 @@ func TestPageAddLocatorHandlerShouldWorkWithACustomCheck(t *testing.T) {
 	_, err := page.Goto(fmt.Sprintf("%s/input/handle-locator.html", server.PREFIX))
 	require.NoError(t, err)
 
-	err = page.AddLocatorHandler(page.Locator("body"), func() {
+	err = page.AddLocatorHandler(page.Locator("body"), func(playwright.Locator) {
 		ret, _ := page.GetByText("This interstitial covers the button").IsVisible()
 		if ret {
 			require.NoError(t, page.Locator("#close").Click())
 		}
-	})
+	}, playwright.PageAddLocatorHandlerOptions{NoWaitAfter: playwright.Bool(true)})
 	require.NoError(t, err)
 
 	for _, args := range [][]interface{}{
@@ -99,7 +100,7 @@ func TestPageAddLocatorHandlerShouldWorkWithLocatorHover(t *testing.T) {
 	_, err := page.Goto(fmt.Sprintf("%s/input/handle-locator.html", server.PREFIX))
 	require.NoError(t, err)
 
-	err = page.AddLocatorHandler(page.GetByText("This interstitial covers the button"), func() {
+	err = page.AddLocatorHandler(page.GetByText("This interstitial covers the button"), func(playwright.Locator) {
 		require.NoError(t, page.Locator("#close").Click())
 	})
 	require.NoError(t, err)
@@ -123,7 +124,7 @@ func TestPageAddLocatorHandlerShouldWorkWithForceTrue(t *testing.T) {
 	_, err := page.Goto(fmt.Sprintf("%s/input/handle-locator.html", server.PREFIX))
 	require.NoError(t, err)
 
-	err = page.AddLocatorHandler(page.GetByText("This interstitial covers the button"), func() {
+	err = page.AddLocatorHandler(page.GetByText("This interstitial covers the button"), func(playwright.Locator) {
 		require.NoError(t, page.Locator("#close").Click())
 	})
 	require.NoError(t, err)
@@ -151,7 +152,7 @@ func TestPageAddLocatorHandlerShouldThrowWhenPageCloses(t *testing.T) {
 	_, err := page.Goto(fmt.Sprintf("%s/input/handle-locator.html", server.PREFIX))
 	require.NoError(t, err)
 
-	err = page.AddLocatorHandler(page.GetByText("This interstitial covers the button"), func() {
+	err = page.AddLocatorHandler(page.GetByText("This interstitial covers the button"), func(playwright.Locator) {
 		require.NoError(t, page.Close())
 	})
 	require.NoError(t, err)
@@ -173,7 +174,7 @@ func TestPageAddLocatorHandlerShouldThrowWhenHandlerTimesOut(t *testing.T) {
 	called := atomic.Int32{}
 	stallChan := make(chan struct{})
 
-	err = page.AddLocatorHandler(page.GetByText("This interstitial covers the button"), func() {
+	err = page.AddLocatorHandler(page.GetByText("This interstitial covers the button"), func(playwright.Locator) {
 		called.Add(1)
 		// Deliberately timeout.
 		<-stallChan
@@ -204,7 +205,7 @@ func TestPageAddLocatorHandlerShouldWorkWithToBeVisible(t *testing.T) {
 
 	called := 0
 
-	err = page.AddLocatorHandler(page.GetByText("This interstitial covers the button"), func() {
+	err = page.AddLocatorHandler(page.GetByText("This interstitial covers the button"), func(playwright.Locator) {
 		called++
 		require.NoError(t, page.Locator("#close").Click())
 	})
@@ -215,4 +216,148 @@ func TestPageAddLocatorHandlerShouldWorkWithToBeVisible(t *testing.T) {
 	require.NoError(t, expect.Locator(page.Locator(`#target`)).ToBeVisible())
 	require.NoError(t, expect.Locator(page.Locator(`#interstitial`)).Not().ToBeVisible())
 	require.Equal(t, 1, called)
+}
+
+func TestPageAddLocatorHandlerShouldWorkWhenOwnerFrameDetaches(t *testing.T) {
+	BeforeEach(t)
+
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+
+	_, err = page.Evaluate(`() => {
+    const iframe = document.createElement('iframe');
+    iframe.src = 'data:text/html,<body>hello from iframe</body>';
+    document.body.append(iframe);
+
+    const target = document.createElement('button');
+    target.textContent = 'Click me';
+    target.id = 'target';
+    target.addEventListener('click', () => window._clicked = true);
+    document.body.appendChild(target);
+
+    const closeButton = document.createElement('button');
+    closeButton.textContent = 'close';
+    closeButton.id = 'close';
+    closeButton.addEventListener('click', () => iframe.remove());
+    document.body.appendChild(closeButton);
+  }`)
+	require.NoError(t, err)
+
+	err = page.AddLocatorHandler(page.FrameLocator("iframe").Locator("body"), func(playwright.Locator) {
+		require.NoError(t, page.Locator(`#close`).Click())
+	})
+	require.NoError(t, err)
+
+	require.NoError(t, page.Locator(`#target`).Click())
+	require.Nil(t, page.Frame())
+	ret, err := page.Evaluate(`window._clicked`)
+	require.NoError(t, err)
+	require.Equal(t, true, ret)
+}
+
+func TestPageAddLocatorHandlerShouldWorkWithTimes(t *testing.T) {
+	BeforeEach(t)
+
+	_, err := page.Goto(fmt.Sprintf("%s/input/handle-locator.html", server.PREFIX))
+	require.NoError(t, err)
+
+	called := 0
+
+	err = page.AddLocatorHandler(page.Locator("body"), func(playwright.Locator) {
+		called++
+	}, playwright.PageAddLocatorHandlerOptions{
+		NoWaitAfter: playwright.Bool(true),
+		Times:       playwright.Int(2),
+	})
+	require.NoError(t, err)
+
+	require.NoError(t, page.Locator("#aside").Hover())
+	_, err = page.Evaluate(`() => { window.clicked = 0; window.setupAnnoyingInterstitial("mouseover", 4); }`)
+	require.NoError(t, err)
+	err1 := page.Locator("#target").Click(
+		playwright.LocatorClickOptions{Timeout: playwright.Float(2000)})
+	require.Equal(t, 2, called)
+
+	ret, err := page.Evaluate(`window.clicked`)
+	require.NoError(t, err)
+	require.Equal(t, 0, ret)
+	require.NoError(t, expect.Locator(page.Locator("#interstitial")).ToBeVisible())
+	require.ErrorIs(t, err1, playwright.ErrTimeout)
+}
+
+func TestPageAddLocatorHandlerShouldWorkWithNoWaitAfter(t *testing.T) {
+	BeforeEach(t)
+
+	_, err := page.Goto(fmt.Sprintf("%s/input/handle-locator.html", server.PREFIX))
+	require.NoError(t, err)
+
+	called := 0
+
+	err = page.AddLocatorHandler(
+		page.GetByRole("button", playwright.PageGetByRoleOptions{Name: "close"}),
+		func(button playwright.Locator) {
+			called++
+			if called == 1 {
+				require.NoError(t, button.Click())
+			} else {
+				require.NoError(t, page.Locator("#interstitial").WaitFor(
+					playwright.LocatorWaitForOptions{State: playwright.WaitForSelectorStateHidden},
+				))
+			}
+		},
+		playwright.PageAddLocatorHandlerOptions{
+			NoWaitAfter: playwright.Bool(true),
+		})
+	require.NoError(t, err)
+
+	require.NoError(t, page.Locator("#aside").Hover())
+	_, err = page.Evaluate(`() => { window.clicked = 0; window.setupAnnoyingInterstitial("timeout", 1); }`)
+	require.NoError(t, err)
+	require.NoError(t, page.Locator("#target").Click())
+	ret, err := page.Evaluate(`window.clicked`)
+	require.NoError(t, err)
+	require.Equal(t, 1, ret)
+	require.NoError(t, expect.Locator(page.Locator("#interstitial")).Not().ToBeVisible())
+
+	require.Equal(t, 2, called)
+}
+
+func TestPageAddLocatorHandlerShouldRemoveLocatorHandler(t *testing.T) {
+	BeforeEach(t)
+
+	_, err := page.Goto(fmt.Sprintf("%s/input/handle-locator.html", server.PREFIX))
+	require.NoError(t, err)
+
+	called := 0
+
+	err = page.AddLocatorHandler(
+		page.GetByRole("button", playwright.PageGetByRoleOptions{Name: "close"}),
+		func(loc playwright.Locator) {
+			called++
+			require.NoError(t, loc.Click())
+		})
+	require.NoError(t, err)
+
+	_, err = page.Evaluate(`() => { window.clicked = 0; window.setupAnnoyingInterstitial("hide", 1); }`)
+	require.NoError(t, err)
+	require.NoError(t, page.Locator("#target").Click())
+	require.Equal(t, 1, called)
+
+	ret, err := page.Evaluate(`window.clicked`)
+	require.NoError(t, err)
+	require.Equal(t, 1, ret)
+	require.NoError(t, expect.Locator(page.Locator("#interstitial")).Not().ToBeVisible())
+
+	_, err = page.Evaluate(`() => { window.clicked = 0; window.setupAnnoyingInterstitial("hide", 1); }`)
+	require.NoError(t, err)
+	require.NoError(t, page.RemoveLocatorHandler(page.GetByRole("button", playwright.PageGetByRoleOptions{Name: "close"})))
+	err1 := page.Locator("#target").Click(
+		playwright.LocatorClickOptions{Timeout: playwright.Float(2000)})
+	require.Equal(t, 1, called)
+	ret, err = page.Evaluate(`window.clicked`)
+	require.NoError(t, err)
+	require.Equal(t, 0, ret)
+	require.NoError(t, expect.Locator(page.Locator("#interstitial")).ToBeVisible())
+
+	require.ErrorIs(t, err1, playwright.ErrTimeout)
 }
