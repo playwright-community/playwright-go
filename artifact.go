@@ -37,11 +37,11 @@ func (a *artifactImpl) SaveAs(path string) error {
 }
 
 func (a *artifactImpl) Failure() error {
-	failure, err := a.channel.Send("failure")
-	if failure == nil {
+	reason, err := a.channel.Send("failure")
+	if reason == nil {
 		return err
 	}
-	return fmt.Errorf("%v", failure)
+	return fmt.Errorf("%w: %v", ErrPlaywright, reason)
 }
 
 func (a *artifactImpl) Delete() error {
