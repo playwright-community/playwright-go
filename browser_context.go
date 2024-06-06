@@ -667,6 +667,10 @@ func (b *browserContextImpl) ServiceWorkers() []Worker {
 	return b.serviceWorkers
 }
 
+func (b *browserContextImpl) OnBackgroundPage(fn func(Page)) {
+	b.On("backgroundpage", fn)
+}
+
 func (b *browserContextImpl) OnClose(fn func(BrowserContext)) {
 	b.On("close", fn)
 }

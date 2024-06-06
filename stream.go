@@ -39,7 +39,7 @@ func (s *streamImpl) SaveAs(path string) error {
 			return err
 		}
 	}
-	return nil
+	return writer.Flush()
 }
 
 func (s *streamImpl) ReadAll() ([]byte, error) {

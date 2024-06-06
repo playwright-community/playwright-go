@@ -41,6 +41,12 @@ func TestPageAssertionsToHaveURL(t *testing.T) {
 		Timeout: playwright.Float(750),
 	}))
 	require.NoError(t, expect.Page(page).Not().ToHaveURL("https://playwright.dev"))
+
+	_, err = page.Goto("data:text/html,<div>A</div>")
+	require.NoError(t, err)
+	require.NoError(t, expect.Page(page).ToHaveURL("DATA:teXT/HTml,<div>a</div>", playwright.PageAssertionsToHaveURLOptions{
+		IgnoreCase: playwright.Bool(true),
+	}))
 }
 
 func TestPageAssertionsToHaveURLWithBaseURL(t *testing.T) {

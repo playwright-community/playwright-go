@@ -269,10 +269,11 @@ func getKeyboardModifier(in string) *KeyboardModifier {
 type KeyboardModifier string
 
 var (
-	KeyboardModifierAlt     *KeyboardModifier = getKeyboardModifier("Alt")
-	KeyboardModifierControl                   = getKeyboardModifier("Control")
-	KeyboardModifierMeta                      = getKeyboardModifier("Meta")
-	KeyboardModifierShift                     = getKeyboardModifier("Shift")
+	KeyboardModifierAlt           *KeyboardModifier = getKeyboardModifier("Alt")
+	KeyboardModifierControl                         = getKeyboardModifier("Control")
+	KeyboardModifierControlOrMeta                   = getKeyboardModifier("ControlOrMeta")
+	KeyboardModifierMeta                            = getKeyboardModifier("Meta")
+	KeyboardModifierShift                           = getKeyboardModifier("Shift")
 )
 
 func getScreenshotAnimations(in string) *ScreenshotAnimations {

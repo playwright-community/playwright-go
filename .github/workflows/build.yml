@@ -14,17 +14,18 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: ^1.19.9
-        cache: false
       id: go
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@v3
+      uses: golangci/golangci-lint-action@v6
       with:
         version: latest
   test:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # Stick with macos-13 for now which is Intel-based until
+        # https://github.com/microsoft/playwright/issues/30705 is fixed.
+        os: [ubuntu-latest, windows-latest, macos-13]
         browser: [chromium, firefox, webkit]
     runs-on: ${{ matrix.os }}
     name:  ${{ matrix.browser }} on ${{ matrix.os }}
@@ -60,13 +61,13 @@ jobs:
         BROWSER: ${{ matrix.browser }}
         GOEXPERIMENT: nocoverageredesign
       if: matrix.os == 'ubuntu-latest'
-      run: xvfb-run go test -v -covermode atomic -coverprofile=covprofile -coverpkg="github.com/playwright-community/playwright-go" --race ./...
+      run: xvfb-run go test -timeout 15m -v -covermode atomic -coverprofile=covprofile -coverpkg="github.com/playwright-community/playwright-go" --race ./...
     - name: Test
       env:
         BROWSER: ${{ matrix.browser }}
         GOEXPERIMENT: nocoverageredesign
       if: matrix.os != 'ubuntu-latest'
-      run: go test -v -covermode atomic -coverprofile=covprofile -coverpkg="github.com/playwright-community/playwright-go" --race ./...
+      run: go test -timeout 15m -v -covermode atomic -coverprofile=covprofile -coverpkg="github.com/playwright-community/playwright-go" --race ./...
     - name: Install goveralls
       run: go install github.com/mattn/goveralls@latest
     - name: Send coverage

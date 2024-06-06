@@ -209,6 +209,44 @@ func (la *locatorAssertionsImpl) ToContainText(expected interface{}, options ...
 	}
 }
 
+func (la *locatorAssertionsImpl) ToHaveAccessibleDescription(description interface{}, options ...LocatorAssertionsToHaveAccessibleDescriptionOptions) error {
+	var timeout *float64
+	var ignoreCase *bool
+	if len(options) == 1 {
+		timeout = options[0].Timeout
+		ignoreCase = options[0].IgnoreCase
+	}
+	expectedText, err := toExpectedTextValues([]interface{}{description}, false, false, ignoreCase)
+	if err != nil {
+		return err
+	}
+	return la.expect(
+		"to.have.accessible.description",
+		frameExpectOptions{ExpectedText: expectedText, Timeout: timeout},
+		description,
+		"Locator expected to have AccessibleDescription",
+	)
+}
+
+func (la *locatorAssertionsImpl) ToHaveAccessibleName(name interface{}, options ...LocatorAssertionsToHaveAccessibleNameOptions) error {
+	var timeout *float64
+	var ignoreCase *bool
+	if len(options) == 1 {
+		timeout = options[0].Timeout
+		ignoreCase = options[0].IgnoreCase
+	}
+	expectedText, err := toExpectedTextValues([]interface{}{name}, false, false, ignoreCase)
+	if err != nil {
+		return err
+	}
+	return la.expect(
+		"to.have.accessible.name",
+		frameExpectOptions{ExpectedText: expectedText, Timeout: timeout},
+		name,
+		"Locator expected to have AccessibleName",
+	)
+}
+
 func (la *locatorAssertionsImpl) ToHaveAttribute(name string, value interface{}, options ...LocatorAssertionsToHaveAttributeOptions) error {
 	var timeout *float64
 	var ignoreCase *bool
@@ -334,6 +372,23 @@ func (la *locatorAssertionsImpl) ToHaveJSProperty(name string, value interface{}
 		},
 		value,
 		"Locator expected to have JS Property",
+	)
+}
+
+func (la *locatorAssertionsImpl) ToHaveRole(role AriaRole, options ...LocatorAssertionsToHaveRoleOptions) error {
+	var timeout *float64
+	if len(options) == 1 {
+		timeout = options[0].Timeout
+	}
+	expectedText, err := toExpectedTextValues([]interface{}{string(role)}, false, false, nil)
+	if err != nil {
+		return err
+	}
+	return la.expect(
+		"to.have.role",
+		frameExpectOptions{ExpectedText: expectedText, Timeout: timeout},
+		role,
+		"Locator expected to have Role",
 	)
 }
 

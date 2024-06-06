@@ -424,3 +424,57 @@ func TestLocatorShouldBeAttachedWithHiddenElement(t *testing.T) {
 	}))
 	require.NoError(t, expect.Locator(page.Locator("input")).Not().ToBeAttached())
 }
+
+func TestLocatorToHaveAccessibleName(t *testing.T) {
+	BeforeEach(t)
+
+	err := page.SetContent(`<div role="button" aria-label="Hello"></div>`)
+	require.NoError(t, err)
+
+	locator := page.Locator("div")
+	require.NoError(t, expect.Locator(locator).ToHaveAccessibleName("Hello"))
+	require.NoError(t, expect.Locator(locator).Not().ToHaveAccessibleName("hello"))
+	require.NoError(t, expect.Locator(locator).ToHaveAccessibleName("hello", playwright.LocatorAssertionsToHaveAccessibleNameOptions{
+		IgnoreCase: playwright.Bool(true),
+	}))
+	require.NoError(t, expect.Locator(locator).ToHaveAccessibleName(regexp.MustCompile(`ell\w`)))
+	require.NoError(t, expect.Locator(locator).Not().ToHaveAccessibleName(regexp.MustCompile(`hello`)))
+	require.NoError(t, expect.Locator(locator).ToHaveAccessibleName(regexp.MustCompile(`hello`), playwright.LocatorAssertionsToHaveAccessibleNameOptions{
+		IgnoreCase: playwright.Bool(true),
+	}))
+}
+
+func TestLocatorToHaveAccessibleDescription(t *testing.T) {
+	BeforeEach(t)
+
+	err := page.SetContent(`<div role="button" aria-description="Hello"></div>`)
+	require.NoError(t, err)
+
+	locator := page.Locator("div")
+	require.NoError(t, expect.Locator(locator).ToHaveAccessibleDescription("Hello"))
+	require.NoError(t, expect.Locator(locator).Not().ToHaveAccessibleDescription("hello"))
+	require.NoError(t, expect.Locator(locator).ToHaveAccessibleDescription("hello", playwright.LocatorAssertionsToHaveAccessibleDescriptionOptions{
+		IgnoreCase: playwright.Bool(true),
+	}))
+	require.NoError(t, expect.Locator(locator).ToHaveAccessibleDescription(regexp.MustCompile(`ell\w`)))
+	require.NoError(t, expect.Locator(locator).Not().ToHaveAccessibleDescription(regexp.MustCompile(`hello`)))
+	require.NoError(t, expect.Locator(locator).ToHaveAccessibleDescription(regexp.MustCompile(`hello`), playwright.LocatorAssertionsToHaveAccessibleDescriptionOptions{
+		IgnoreCase: playwright.Bool(true),
+	}))
+	require.NoError(t, expect.Locator(locator).ToHaveAccessibleDescription(regexp.MustCompile(`ell\w`)))
+	require.NoError(t, expect.Locator(locator).Not().ToHaveAccessibleDescription(regexp.MustCompile(`hello`)))
+	require.NoError(t, expect.Locator(locator).ToHaveAccessibleDescription(regexp.MustCompile(`hello`), playwright.LocatorAssertionsToHaveAccessibleDescriptionOptions{
+		IgnoreCase: playwright.Bool(true),
+	}))
+}
+
+func TestLocatorToHaveRole(t *testing.T) {
+	BeforeEach(t)
+
+	err := page.SetContent(`<div role="button">Button!</div>`)
+	require.NoError(t, err)
+
+	locator := page.Locator("div")
+	require.NoError(t, expect.Locator(locator).ToHaveRole("button"))
+	require.NoError(t, expect.Locator(locator).Not().ToHaveRole("checkbox"))
+}
