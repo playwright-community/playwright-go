@@ -40,8 +40,10 @@ func (pa *pageAssertionsImpl) ToHaveTitle(titleOrRegExp interface{}, options ...
 
 func (pa *pageAssertionsImpl) ToHaveURL(urlOrRegExp interface{}, options ...PageAssertionsToHaveURLOptions) error {
 	var timeout *float64
+	var ignoreCase *bool
 	if len(options) == 1 {
 		timeout = options[0].Timeout
+		ignoreCase = options[0].IgnoreCase
 	}
 
 	baseURL := pa.actualPage.Context().(*browserContextImpl).options.BaseURL
@@ -51,7 +53,7 @@ func (pa *pageAssertionsImpl) ToHaveURL(urlOrRegExp interface{}, options ...Page
 		urlOrRegExp = u.String()
 	}
 
-	expectedValues, err := toExpectedTextValues([]interface{}{urlOrRegExp}, false, false, nil)
+	expectedValues, err := toExpectedTextValues([]interface{}{urlOrRegExp}, false, false, ignoreCase)
 	if err != nil {
 		return err
 	}

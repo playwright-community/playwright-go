@@ -238,7 +238,7 @@ func (c *connection) sendMessageToServer(object *channelOwner, method string, pa
 		}
 		stack = append(stack, apiZone.(parsedStackTrace).frames...)
 	}
-	metadata["wallTime"] = time.Now().Nanosecond()
+	metadata["wallTime"] = time.Now().UnixMilli()
 	message := map[string]interface{}{
 		"id":       id,
 		"guid":     object.guid,
