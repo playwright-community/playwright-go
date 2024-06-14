@@ -2,7 +2,6 @@ package playwright
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -10,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/mitchellh/go-ps"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
