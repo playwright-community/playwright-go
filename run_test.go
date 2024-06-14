@@ -2,6 +2,7 @@ package playwright
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -86,6 +87,21 @@ func TestShouldNotHangWhenPlaywrightUnexpectedExit(t *testing.T) {
 
 	_, err = context.NewPage()
 	require.Error(t, err)
+}
+
+func TestGetNodeExecutable(t *testing.T) {
+	// When PLAYWRIGHT_NODEJS_PATH is set, use that path.
+	err := os.Setenv("PLAYWRIGHT_NODEJS_PATH", "/envDir")
+	require.NoError(t, err)
+
+	executable := getNodeExecutable("/testDirectory")
+	assert.Equal(t, "/envDir", executable)
+
+	err = os.Unsetenv("PLAYWRIGHT_NODEJS_PATH")
+	require.NoError(t, err)
+
+	executable = getNodeExecutable("/testDirectory")
+	assert.Contains(t, executable, "/testDirectory")
 }
 
 // find and kill playwright process
