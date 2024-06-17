@@ -91,11 +91,11 @@ func TestShouldNotHangWhenPlaywrightUnexpectedExit(t *testing.T) {
 
 func TestGetNodeExecutable(t *testing.T) {
 	// When PLAYWRIGHT_NODEJS_PATH is set, use that path.
-	err := os.Setenv("PLAYWRIGHT_NODEJS_PATH", "envDir")
+	err := os.Setenv("PLAYWRIGHT_NODEJS_PATH", "envDir/node.exe")
 	require.NoError(t, err)
 
 	executable := getNodeExecutable("testDirectory")
-	assert.Equal(t, "envDir", executable)
+	assert.Equal(t, "envDir/node.exe", executable)
 
 	err = os.Unsetenv("PLAYWRIGHT_NODEJS_PATH")
 	require.NoError(t, err)
