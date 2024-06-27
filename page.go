@@ -84,6 +84,9 @@ func (p *pageImpl) onLocatorHandlerTriggered(uid float64) {
 	}
 	go func() {
 		defer func() {
+			if remove != nil && *remove {
+				delete(p.locatorHandlers, uid)
+			}
 			_, _ = p.connection.WrapAPICall(func() (interface{}, error) {
 				p.channel.SendNoReply("resolveLocatorHandlerNoReply", map[string]any{
 					"uid":    uid,
@@ -112,6 +115,10 @@ func (p *pageImpl) RemoveLocatorHandler(locator Locator) error {
 
 func (p *pageImpl) Context() BrowserContext {
 	return p.browserContext
+}
+
+func (b *pageImpl) Clock() (Clock, error) {
+	return b.browserContext.clock, nil
 }
 
 func (p *pageImpl) Close(options ...PageCloseOptions) error {

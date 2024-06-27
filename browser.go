@@ -84,6 +84,20 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 	context := fromChannel(channel).(*browserContextImpl)
 	context.browser = b
 	b.browserType.(*browserTypeImpl).didCreateContext(context, &option, nil)
+	if os.Getenv("PW_FREEZE_TIME") != "" {
+		_, err = b.connection.WrapAPICall(func() (interface{}, error) {
+			if err := context.clock.Install(ClockInstallOptions{Time: 0}); err != nil {
+				return nil, err
+			}
+			if err := context.clock.PauseAt(1000); err != nil {
+				return nil, err
+			}
+			return nil, nil
+		}, true)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return context, nil
 }
 
