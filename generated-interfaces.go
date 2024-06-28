@@ -222,7 +222,7 @@ type BrowserContext interface {
 	OnBackgroundPage(fn func(Page))
 
 	// Playwright has ability to mock clock and passage of time.
-	Clock() (Clock, error)
+	Clock() Clock
 
 	// Emitted when Browser context gets closed. This might happen because of one of the following:
 	//  - Browser context is closed.
@@ -2986,7 +2986,7 @@ type Mouse interface {
 type Page interface {
 	EventEmitter
 	// Playwright has ability to mock clock and passage of time.
-	Clock() (Clock, error)
+	Clock() Clock
 
 	// Emitted when the page closes.
 	OnClose(fn func(Page))

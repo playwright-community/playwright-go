@@ -1433,10 +1433,10 @@ index a1dd84c4e..f9164ab56 100644
  Firefox user preferences. Learn more about the Firefox user preferences at
 diff --git a/utils/doclint/generateGoApi.js b/utils/doclint/generateGoApi.js
 new file mode 100644
-index 000000000..12829ff0d
+index 000000000..b3c147d77
 --- /dev/null
 +++ b/utils/doclint/generateGoApi.js
-@@ -0,0 +1,853 @@
+@@ -0,0 +1,854 @@
 +/**
 + * Copyright (c) Microsoft Corporation.
 + *
@@ -1522,6 +1522,7 @@ index 000000000..12829ff0d
 +  'Browser',
 +  'BrowserType',
 +  'ChildFrames',
++  'Clock',
 +  'Context',
 +  'Contexts',
 +  'DefaultValue',

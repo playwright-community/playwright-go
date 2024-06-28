@@ -165,6 +165,12 @@ func (s *syncSlice[T]) Get() []T {
 	return s.slice
 }
 
+func (s *syncSlice[T]) Len() int {
+	s.Lock()
+	defer s.Unlock()
+	return len(s.slice)
+}
+
 func newSyncSlice[T any]() *syncSlice[T] {
 	return &syncSlice[T]{
 		slice: make([]T, 0),

@@ -33,8 +33,8 @@ type browserContextImpl struct {
 	clock           Clock
 }
 
-func (b *browserContextImpl) Clock() (Clock, error) {
-	return b.clock, nil
+func (b *browserContextImpl) Clock() Clock {
+	return b.clock
 }
 
 func (b *browserContextImpl) SetDefaultNavigationTimeout(timeout float64) {

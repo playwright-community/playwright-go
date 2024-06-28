@@ -117,8 +117,8 @@ func (p *pageImpl) Context() BrowserContext {
 	return p.browserContext
 }
 
-func (b *pageImpl) Clock() (Clock, error) {
-	return b.browserContext.clock, nil
+func (b *pageImpl) Clock() Clock {
+	return b.browserContext.clock
 }
 
 func (p *pageImpl) Close(options ...PageCloseOptions) error {
