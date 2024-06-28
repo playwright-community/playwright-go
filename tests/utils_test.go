@@ -301,3 +301,14 @@ func mustGetHostname(ref string) *string {
 	}
 	return playwright.String(u.Hostname())
 }
+
+func chromiumVersionLessThan(a, b string) bool {
+	left := strings.Split(a, ".")
+	right := strings.Split(b, ".")
+	for i := 0; i < len(left) && i < len(right); i++ {
+		if left[i] != right[i] {
+			return left[i] < right[i]
+		}
+	}
+	return len(left) < len(right)
+}

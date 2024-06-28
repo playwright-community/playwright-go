@@ -103,19 +103,21 @@ func convertInputFiles(files interface{}, context *browserContextImpl) (*inputFi
 		return nil, err
 	}
 	result := ret.(map[string]interface{})
-	if result["rootDir"] != nil {
-		converted.DirectoryStream = result["rootDir"].(*writableStream).channel
-	}
-	converted.Streams = make([]*channel, len(allFiles))
 
+	streams := make([]*channel, 0)
 	items := result["writableStreams"].([]interface{})
-
 	for i := 0; i < len(allFiles); i++ {
 		stream := fromChannel(items[i]).(*writableStream)
 		if err := stream.Copy(allFiles[i]); err != nil {
 			return nil, err
 		}
-		converted.Streams = append(converted.Streams, stream.channel)
+		streams = append(streams, stream.channel)
+	}
+
+	if result["rootDir"] != nil {
+		converted.DirectoryStream = result["rootDir"].(*channel)
+	} else {
+		converted.Streams = streams
 	}
 
 	return converted, nil

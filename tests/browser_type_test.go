@@ -4,11 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/playwright-community/playwright-go"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/exp/slices"
 )
 
 func TestBrowserTypeBrowserName(t *testing.T) {
@@ -320,5 +324,67 @@ func TestSetInputFilesShouldPreserveLastModifiedTimestamp(t *testing.T) {
 		// On Linux browser sometimes reduces the timestamp by 1ms: 1696272058110.0715  -> 1696272058109 or even
 		// rounds it to seconds in WebKit: 1696272058110 -> 1696272058000.
 		require.Less(t, math.Abs(float64(expected-int64(timestamp.(int)))), 1000.0)
+	}
+}
+
+func TestShouldUploadAFolderRemote(t *testing.T) {
+	BeforeEach(t)
+
+	remoteServer, err := newRemoteServer()
+	require.NoError(t, err)
+	defer remoteServer.Close()
+
+	browser1, err := browserType.Connect(remoteServer.url)
+	require.NoError(t, err)
+	require.NotNil(t, browser1)
+	defer browser1.Close()
+
+	browser_context, err := browser1.NewContext()
+	require.NoError(t, err)
+	page, err := browser_context.NewPage()
+	require.NoError(t, err)
+
+	_, err = page.Goto(fmt.Sprintf("%s%s", server.PREFIX, "/input/folderupload.html"))
+	require.NoError(t, err)
+
+	//nolint:staticcheck
+	input, err := page.QuerySelector("input")
+	require.NoError(t, err)
+
+	dir := filepath.Join(t.TempDir(), "file-upload-test")
+	require.NoError(t, os.MkdirAll(dir, 0o700))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "file1.txt"), []byte("file1 content"), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "file2"), []byte("file2 content"), 0o600))
+	require.Nil(t, os.Mkdir(filepath.Join(dir, "sub-dir"), 0o700))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "sub-dir", "really.txt"), []byte("sub-dir file content"), 0o600))
+
+	require.NoError(t, input.SetInputFiles(dir))
+
+	ret, err := input.Evaluate(`e => [...e.files].map(f => f.webkitRelativePath)`)
+	require.NoError(t, err)
+
+	expectResult := []interface{}{"file-upload-test/file1.txt", "file-upload-test/file2"}
+	// https://issues.chromium.org/issues/345393164
+	if !(isChromium && headless && chromiumVersionLessThan(browser.Version(), "127.0.6533.0")) {
+		expectResult = append(expectResult, "file-upload-test/sub-dir/really.txt")
+	}
+	slices.SortFunc(ret.([]interface{}), func(i, j interface{}) int {
+		return strings.Compare(i.(string), j.(string))
+	})
+	require.Equal(t, expectResult, ret.([]interface{}))
+
+	webkitRelativePaths, err := input.Evaluate(`e => [...e.files].map(f => f.webkitRelativePath)`)
+	require.NoError(t, err)
+	for i, path := range webkitRelativePaths.([]interface{}) {
+		content, err := input.Evaluate(`(e, i) => {
+			const reader = new FileReader();
+			const promise = new Promise(fulfill => reader.onload = fulfill);
+			reader.readAsText(e.files[i]);
+			return promise.then(() => reader.result);
+    }`, i)
+		require.NoError(t, err)
+		b, err := os.ReadFile(filepath.Join(dir, "..", path.(string)))
+		require.NoError(t, err)
+		require.Equal(t, string(b), content.(string))
 	}
 }
