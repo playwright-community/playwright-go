@@ -2,6 +2,7 @@ package playwright_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/playwright-community/playwright-go"
 	"github.com/stretchr/testify/require"
@@ -35,6 +36,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(window.stub)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(0))
+		time.Sleep(100 * time.Millisecond) // wait for binding call to resolve
 		require.Equal(t, 1, calls.Len())
 	})
 
@@ -47,6 +49,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(window.stub, 100)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(10))
+		time.Sleep(100 * time.Millisecond)
 		require.Equal(t, 0, calls.Len())
 	})
 
@@ -59,6 +62,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(window.stub, 100)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(100))
+		time.Sleep(100 * time.Millisecond)
 		require.Equal(t, 1, calls.Len())
 	})
 
@@ -71,6 +75,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(window.stub, 100); setTimeout(window.stub, 100)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(100))
+		time.Sleep(100 * time.Millisecond)
 		require.Equal(t, 2, calls.Len())
 	})
 
@@ -84,6 +89,7 @@ func TestPageClockRunFor(t *testing.T) {
 			"setTimeout(window.stub, 100); setTimeout(window.stub, 100); setTimeout(window.stub, 99); setTimeout(window.stub, 100)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(100))
+		time.Sleep(100 * time.Millisecond)
 		require.Equal(t, 4, calls.Len())
 	})
 
@@ -96,8 +102,10 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(window.stub, 150)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(50))
+		time.Sleep(100 * time.Millisecond)
 		require.Equal(t, 0, calls.Len())
 		require.NoError(t, page.Clock().RunFor(100))
+		time.Sleep(100 * time.Millisecond)
 		require.Equal(t, 1, calls.Len())
 	})
 
@@ -110,6 +118,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(() => { throw new Error(); }, 100); setTimeout(window.stub, 120)")
 		require.NoError(t, err)
 		require.Error(t, page.Clock().RunFor(120))
+		time.Sleep(100 * time.Millisecond)
 		require.Equal(t, 1, calls.Len())
 	})
 
@@ -146,6 +155,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setInterval(window.stub, 4000)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor("08"))
+		time.Sleep(100 * time.Millisecond)
 		require.Equal(t, 2, calls.Len())
 	})
 
@@ -158,6 +168,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setInterval(window.stub, 6000)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor("01:00"))
+		time.Sleep(100 * time.Millisecond)
 		require.Equal(t, 10, calls.Len())
 	})
 
@@ -170,6 +181,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setInterval(window.stub, 10000)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor("02:34:10"))
+		time.Sleep(100 * time.Millisecond)
 		require.Equal(t, 925, calls.Len())
 	})
 
@@ -182,6 +194,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setInterval(window.stub, 10000)")
 		require.NoError(t, err)
 		require.Error(t, page.Clock().RunFor("12:02:34:10"))
+		time.Sleep(100 * time.Millisecond)
 		require.Equal(t, 0, calls.Len())
 	})
 
@@ -195,6 +208,7 @@ func TestPageClockRunFor(t *testing.T) {
 		require.NoError(t, page.Clock().RunFor(value))
 		ret, err := page.Evaluate("Date.now()")
 		require.NoError(t, err)
+		time.Sleep(100 * time.Millisecond)
 		require.Equal(t, value, ret)
 	})
 }
@@ -209,6 +223,7 @@ func TestPageClockFastForward(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(() => { window.stub('should not be logged'); }, 1000)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().FastForward(500))
+		time.Sleep(100 * time.Millisecond)
 		require.Equal(t, 0, calls.Len())
 	})
 
@@ -221,6 +236,7 @@ func TestPageClockFastForward(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(() => { window.stub(Date.now()); }, 1000)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().FastForward(2000))
+		time.Sleep(100 * time.Millisecond)
 		require.Equal(t, [][]any{
 			{1000 + 2000},
 		}, calls.Get())
@@ -235,6 +251,7 @@ func TestPageClockFastForward(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(() => { window.stub(Date.now()); }, 100000)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().FastForward("01:50"))
+		time.Sleep(100 * time.Millisecond)
 		require.Equal(t, [][]any{
 			{1000 + 110000},
 		}, calls.Get())
