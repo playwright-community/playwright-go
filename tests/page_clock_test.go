@@ -417,11 +417,12 @@ func TestPageClockPopup(t *testing.T) {
 		now := time.Date(2015, 9, 25, 0, 0, 0, 0, time.UTC)
 		beforePageClock(t, 0, now)
 
-		var popup playwright.Page
+		popupChan := make(chan playwright.Page, 1)
 		page.OnPopup(func(d playwright.Page) {
-			popup = d
+			popupChan <- d
 		})
 		_, _ = page.Evaluate(`window.open('about:blank')`)
+		popup := <-popupChan
 		popupTime, _ := popup.Evaluate(`Date.now()`)
 		require.Equal(t, int(now.UnixMilli()), popupTime)
 		require.NoError(t, page.Clock().RunFor(1000))
@@ -436,11 +437,12 @@ func TestPageClockPopup(t *testing.T) {
 		beforePageClock(t, 0, now)
 		require.NoError(t, page.Clock().RunFor(1000))
 
-		var popup playwright.Page
+		popupChan := make(chan playwright.Page, 1)
 		page.OnPopup(func(d playwright.Page) {
-			popup = d
+			popupChan <- d
 		})
 		_, _ = page.Evaluate(`window.open('about:blank')`)
+		popup := <-popupChan
 		popupTime, _ := popup.Evaluate(`Date.now()`)
 		require.Equal(t, int(now.UnixMilli())+1000, popupTime)
 	})
