@@ -24,7 +24,7 @@ func (t *tracingImpl) Start(options ...TracingStartOptions) error {
 			return "", err
 		}
 
-		result, err := t.channel.Send("tracingStartChunk", options)
+		result, err := t.channel.Send("tracingStartChunk", chunkOption)
 		if err != nil {
 			return nil, err
 		}
