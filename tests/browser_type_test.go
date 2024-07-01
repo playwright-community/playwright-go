@@ -357,7 +357,7 @@ func TestShouldUploadAFolderRemote(t *testing.T) {
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "file2"), []byte("file2 content"), 0o600))
 	require.Nil(t, os.Mkdir(filepath.Join(dir, "sub-dir"), 0o700))
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "sub-dir", "really.txt"), []byte("sub-dir file content"), 0o600))
-
+	//nolint:staticcheck
 	require.NoError(t, input.SetInputFiles(dir))
 
 	ret, err := input.Evaluate(`e => [...e.files].map(f => f.webkitRelativePath)`)
