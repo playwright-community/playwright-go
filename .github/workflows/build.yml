@@ -23,9 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Stick with macos-13 for now which is Intel-based until
-        # https://github.com/microsoft/playwright/issues/30705 is fixed.
-        os: [ubuntu-latest, windows-latest, macos-13]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         browser: [chromium, firefox, webkit]
     runs-on: ${{ matrix.os }}
     name:  ${{ matrix.browser }} on ${{ matrix.os }}
