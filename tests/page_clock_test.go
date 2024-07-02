@@ -9,6 +9,7 @@ import (
 
 	"github.com/playwright-community/playwright-go"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/exp/slices"
 )
 
 func pageClockFixture(t *testing.T) *syncSlice[[]interface{}] {
@@ -135,6 +136,12 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setInterval(() => { window.stub(new Date().getTime()); }, 10)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(100))
+		time.Sleep(100 * time.Millisecond)
+		// Goroutines cannot guarantee order and need to be sorted before comparison
+		data := calls.Get()
+		slices.SortFunc(data, func(a, b []interface{}) int {
+			return a[0].(int) - b[0].(int)
+		})
 		require.Equal(t, [][]interface{}{
 			{10},
 			{20},
@@ -146,7 +153,7 @@ func TestPageClockRunFor(t *testing.T) {
 			{80},
 			{90},
 			{100},
-		}, calls.Get())
+		}, data)
 	})
 
 	t.Run("passes 8 seconds", func(t *testing.T) {
