@@ -30,6 +30,11 @@ type browserContextImpl struct {
 	closed          chan struct{}
 	closeReason     *string
 	harRouters      []*harRouter
+	clock           Clock
+}
+
+func (b *browserContextImpl) Clock() Clock {
+	return b.clock
 }
 
 func (b *browserContextImpl) SetDefaultNavigationTimeout(timeout float64) {
@@ -408,6 +413,16 @@ func (b *browserContextImpl) Close(options ...BrowserContextCloseOptions) error 
 		b.closeReason = options[0].Reason
 	}
 	b.closeWasCalled = true
+
+	_, err := b.channel.connection.WrapAPICall(func() (interface{}, error) {
+		return nil, b.request.Dispose(APIRequestContextDisposeOptions{
+			Reason: b.closeReason,
+		})
+	}, true)
+	if err != nil {
+		return err
+	}
+
 	innerClose := func() (interface{}, error) {
 		for harId, harMetaData := range b.harRecorders {
 			overrides := map[string]interface{}{}
@@ -442,7 +457,7 @@ func (b *browserContextImpl) Close(options ...BrowserContextCloseOptions) error 
 		return nil, nil
 	}
 
-	_, err := b.channel.connection.WrapAPICall(innerClose, true)
+	_, err = b.channel.connection.WrapAPICall(innerClose, true)
 	if err != nil {
 		return err
 	}
@@ -737,6 +752,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 	}
 	bt.tracing = fromChannel(initializer["tracing"]).(*tracingImpl)
 	bt.request = fromChannel(initializer["requestContext"]).(*apiRequestContextImpl)
+	bt.clock = newClock(bt)
 	bt.channel.On("bindingCall", func(params map[string]interface{}) {
 		bt.onBinding(fromChannel(params["binding"]).(*bindingCallImpl))
 	})

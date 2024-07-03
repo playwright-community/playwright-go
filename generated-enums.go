@@ -377,3 +377,15 @@ var (
 	MediaPrint             = getMedia("print")
 	MediaNoOverride        = getMedia("no-override")
 )
+
+func getHttpCredentialsSend(in string) *HttpCredentialsSend {
+	v := HttpCredentialsSend(in)
+	return &v
+}
+
+type HttpCredentialsSend string
+
+var (
+	HttpCredentialsSendUnauthorized *HttpCredentialsSend = getHttpCredentialsSend("unauthorized")
+	HttpCredentialsSendAlways                            = getHttpCredentialsSend("always")
+)

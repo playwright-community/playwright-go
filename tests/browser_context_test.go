@@ -173,9 +173,10 @@ func TestBrowserContextAddCookies(t *testing.T) {
 	cookies, err := context.Cookies()
 	require.NoError(t, err)
 	sameSite := playwright.SameSiteAttributeNone
-	if isChromium {
+	if isChromium || (isWebKit && runtime.GOOS == "linux") {
 		sameSite = playwright.SameSiteAttributeLax
 	}
+
 	require.Equal(t, []playwright.Cookie{
 		{
 			Name:    "password",

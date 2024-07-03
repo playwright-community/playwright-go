@@ -1,6 +1,7 @@
 package playwright
 
 import (
+	"errors"
 	"fmt"
 	"path"
 	"reflect"
@@ -257,6 +258,15 @@ func (r *routeHandlerEntry) Handle(route Route) chan bool {
 		if r.ignoreErrors.Load() {
 			_ = recover()
 			route.(*routeImpl).reportHandled(false)
+		} else {
+			e := recover()
+			if e != nil {
+				err, ok := e.(error)
+				if ok && errors.Is(err, ErrTargetClosed) {
+					panic(fmt.Errorf("\"%w\" while running route callback.\nConsider awaiting `page.UnrouteAll(playwright.PageUnrouteAllOptions{Behavior: playwright.UnrouteBehaviorIgnoreErrors})`\nbefore the end of the test to ignore remaining routes in flight.", err))
+				}
+				panic(e)
+			}
 		}
 	}()
 

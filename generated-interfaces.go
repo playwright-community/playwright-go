@@ -34,7 +34,7 @@ type APIRequestContext interface {
 	// All responses returned by [APIRequestContext.Get] and similar methods are stored in the memory, so that you can
 	// later call [APIResponse.Body].This method discards all its resources, calling any method on disposed
 	// [APIRequestContext] will throw an exception.
-	Dispose() error
+	Dispose(options ...APIRequestContextDisposeOptions) error
 
 	// Sends HTTP(S) request and returns its response. The method will populate request cookies from the context and
 	// update context cookies from the response. The method will automatically follow redirects.
@@ -221,6 +221,9 @@ type BrowserContext interface {
 	// Emitted when new background page is created in the context.
 	OnBackgroundPage(fn func(Page))
 
+	// Playwright has ability to mock clock and passage of time.
+	Clock() Clock
+
 	// Emitted when Browser context gets closed. This might happen because of one of the following:
 	//  - Browser context is closed.
 	//  - Browser application is closed or crashed.
@@ -338,21 +341,22 @@ type BrowserContext interface {
 	// specified.
 	//
 	//  permissions: A permission or an array of permissions to grant. Permissions can be one of the following values:
-	//    - `'geolocation'`
-	//    - `'midi'`
-	//    - `'midi-sysex'` (system-exclusive midi)
-	//    - `'notifications'`
-	//    - `'camera'`
-	//    - `'microphone'`
-	//    - `'background-sync'`
-	//    - `'ambient-light-sensor'`
 	//    - `'accelerometer'`
-	//    - `'gyroscope'`
-	//    - `'magnetometer'`
 	//    - `'accessibility-events'`
+	//    - `'ambient-light-sensor'`
+	//    - `'background-sync'`
+	//    - `'camera'`
 	//    - `'clipboard-read'`
 	//    - `'clipboard-write'`
+	//    - `'geolocation'`
+	//    - `'gyroscope'`
+	//    - `'magnetometer'`
+	//    - `'microphone'`
+	//    - `'midi-sysex'` (system-exclusive midi)
+	//    - `'midi'`
+	//    - `'notifications'`
 	//    - `'payment-handler'`
+	//    - `'storage-access'`
 	GrantPermissions(permissions []string, options ...BrowserContextGrantPermissionsOptions) error
 
 	// **NOTE** CDP sessions are only supported on Chromium-based browsers.
@@ -545,7 +549,61 @@ type CDPSession interface {
 	Send(method string, params map[string]interface{}) (interface{}, error)
 }
 
-// [ConsoleMessage] objects are dispatched by page via the [Page.OnConsole] event. For each console messages logged in
+// Accurately simulating time-dependent behavior is essential for verifying the correctness of applications. Learn
+// more about [clock emulation].
+// Note that clock is installed for the entire [BrowserContext], so the time in all the pages and iframes is
+// controlled by the same clock.
+//
+// [clock emulation]: https://playwright.dev/docs/clock
+type Clock interface {
+	// Advance the clock by jumping forward in time. Only fires due timers at most once. This is equivalent to user
+	// closing the laptop lid for a while and reopening it later, after given time.
+	//
+	//  ticks: Time may be the number of milliseconds to advance the clock by or a human-readable string. Valid string formats are
+	//    "08" for eight seconds, "01:00" for one minute and "02:34:10" for two hours, 34 minutes and ten seconds.
+	FastForward(ticks interface{}) error
+
+	// Install fake implementations for the following time-related functions:
+	//  - `Date`
+	//  - `setTimeout`
+	//  - `clearTimeout`
+	//  - `setInterval`
+	//  - `clearInterval`
+	//  - `requestAnimationFrame`
+	//  - `cancelAnimationFrame`
+	//  - `requestIdleCallback`
+	//  - `cancelIdleCallback`
+	//  - `performance`
+	// Fake timers are used to manually control the flow of time in tests. They allow you to advance time, fire timers,
+	// and control the behavior of time-dependent functions. See [Clock.RunFor] and [Clock.FastForward] for more
+	// information.
+	Install(options ...ClockInstallOptions) error
+
+	// Advance the clock, firing all the time-related callbacks.
+	//
+	//  ticks: Time may be the number of milliseconds to advance the clock by or a human-readable string. Valid string formats are
+	//    "08" for eight seconds, "01:00" for one minute and "02:34:10" for two hours, 34 minutes and ten seconds.
+	RunFor(ticks interface{}) error
+
+	// Advance the clock by jumping forward in time and pause the time. Once this method is called, no timers are fired
+	// unless [Clock.RunFor], [Clock.FastForward], [Clock.PauseAt] or [Clock.Resume] is called.
+	// Only fires due timers at most once. This is equivalent to user closing the laptop lid for a while and reopening it
+	// at the specified time and pausing.
+	PauseAt(time interface{}) error
+
+	// Resumes timers. Once this method is called, time resumes flowing, timers are fired as usual.
+	Resume() error
+
+	// Makes `Date.now` and `new Date()` return fixed fake time at all times, keeps all the timers running.
+	//
+	//  time: Time to be set.
+	SetFixedTime(time interface{}) error
+
+	// Sets current system time but does not trigger any timers.
+	SetSystemTime(time interface{}) error
+}
+
+// [ConsoleMessage] objects are dispatched by page via the [Page.OnConsole] event. For each console message logged in
 // the page there will be corresponding event in the Playwright context.
 type ConsoleMessage interface {
 	// List of arguments passed to a `console` function call. See also [Page.OnConsole].
@@ -960,12 +1018,14 @@ type ElementHandle interface {
 	// [IntersectionObserver]'s `ratio`.
 	// Throws when `elementHandle` does not point to an element
 	// [connected] to a Document or a ShadowRoot.
+	// See [scrolling] for alternative ways to scroll.
 	//
 	// Deprecated: Use locator-based [Locator.ScrollIntoViewIfNeeded] instead. Read more about [locators].
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [IntersectionObserver]: https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
 	// [connected]: https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected
+	// [scrolling]: https://playwright.dev/docs/input#scrolling
 	// [locators]: https://playwright.dev/docs/locators
 	ScrollIntoViewIfNeeded(options ...ElementHandleScrollIntoViewIfNeededOptions) error
 
@@ -1019,7 +1079,8 @@ type ElementHandle interface {
 	SetChecked(checked bool, options ...ElementHandleSetCheckedOptions) error
 
 	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then
-	// they are resolved relative to the current working directory. For empty array, clears the selected files.
+	// they are resolved relative to the current working directory. For empty array, clears the selected files. For inputs
+	// with a `[webkitdirectory]` attribute, only a single directory path is supported.
 	// This method expects [ElementHandle] to point to an
 	// [input element]. However, if the element is inside
 	// the `<label>` element that has an associated
@@ -2597,9 +2658,11 @@ type Locator interface {
 	// This method waits for [actionability] checks, then tries to scroll element into view, unless
 	// it is completely visible as defined by
 	// [IntersectionObserver]'s `ratio`.
+	// See [scrolling] for alternative ways to scroll.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	// [IntersectionObserver]: https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
+	// [scrolling]: https://playwright.dev/docs/input#scrolling
 	ScrollIntoViewIfNeeded(options ...LocatorScrollIntoViewIfNeededOptions) error
 
 	// Selects option or options in `<select>`.
@@ -2650,7 +2713,8 @@ type Locator interface {
 	// [actionability]: https://playwright.dev/docs/actionability
 	SetChecked(checked bool, options ...LocatorSetCheckedOptions) error
 
-	// Upload file or multiple files into `<input type=file>`.
+	// Upload file or multiple files into `<input type=file>`. For inputs with a `[webkitdirectory]` attribute, only a
+	// single directory path is supported.
 	//
 	// # Details
 	//
@@ -2894,12 +2958,15 @@ type Mouse interface {
 	// Dispatches a `mouseup` event.
 	Up(options ...MouseUpOptions) error
 
-	// Dispatches a `wheel` event.
+	// Dispatches a `wheel` event. This method is usually used to manually scroll the page. See
+	// [scrolling] for alternative ways to scroll.
 	// **NOTE** Wheel events may cause scrolling if they are not handled, and this method does not wait for the scrolling
 	// to finish before returning.
 	//
 	// 1. deltaX: Pixels to scroll horizontally.
 	// 2. deltaY: Pixels to scroll vertically.
+	//
+	// [scrolling]: https://playwright.dev/docs/input#scrolling
 	Wheel(deltaX float64, deltaY float64) error
 }
 
@@ -2918,6 +2985,9 @@ type Mouse interface {
 // [`EventEmitter`]: https://nodejs.org/api/events.html#events_class_eventemitter
 type Page interface {
 	EventEmitter
+	// Playwright has ability to mock clock and passage of time.
+	Clock() Clock
+
 	// Emitted when the page closes.
 	OnClose(fn func(Page))
 
@@ -3736,7 +3806,8 @@ type Page interface {
 	SetExtraHTTPHeaders(headers map[string]string) error
 
 	// Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then
-	// they are resolved relative to the current working directory. For empty array, clears the selected files.
+	// they are resolved relative to the current working directory. For empty array, clears the selected files. For inputs
+	// with a `[webkitdirectory]` attribute, only a single directory path is supported.
 	// This method expects “selector” to point to an
 	// [input element]. However, if the element is inside
 	// the `<label>` element that has an associated

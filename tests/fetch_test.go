@@ -1,6 +1,7 @@
 package playwright_test
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -75,6 +76,29 @@ func TestShouldDisposeGlobalRequest(t *testing.T) {
 	require.NoError(t, request.Dispose())
 	_, err = response.Body()
 	require.Error(t, err, "response has been disposed")
+}
+
+func TestShouldDisposeWithCustomErrorMessage(t *testing.T) {
+	BeforeEach(t)
+
+	request, err := pw.Request.NewContext()
+	require.NoError(t, err)
+	require.NoError(t, request.Dispose(playwright.APIRequestContextDisposeOptions{
+		Reason: playwright.String("My reason"),
+	}))
+	_, err = request.Get(server.EMPTY_PAGE)
+	require.ErrorContains(t, err, "My reason")
+}
+
+func TestShouldWorkAfterContextDisposed(t *testing.T) {
+	BeforeEach(t)
+
+	require.NoError(t, context.Close(playwright.BrowserContextCloseOptions{
+		Reason: playwright.String("Test ended."),
+	}))
+
+	_, err := context.Request().Get(server.EMPTY_PAGE)
+	require.ErrorContains(t, err, "Test ended.")
 }
 
 func TestShouldSupportGlobalUserAgentOption(t *testing.T) {
@@ -447,4 +471,62 @@ func TestShouldSupportMultipartFormData(t *testing.T) {
 		},
 	})
 	require.NoError(t, err)
+}
+
+func TestShouldSupportHttpCredentialsSendImmediatelyForBrowserContext(t *testing.T) {
+	BeforeEach(t, playwright.BrowserNewContextOptions{
+		HttpCredentials: &playwright.HttpCredentials{
+			Username: "user",
+			Password: "pass",
+			Origin:   playwright.String(strings.ToUpper(server.PREFIX)),
+			Send:     playwright.HttpCredentialsSendAlways,
+		},
+	})
+
+	exptectedAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte("user:pass"))
+
+	// First request
+	chanRes := server.WaitForRequestChan("/empty.html")
+	response, err := context.Request().Get(server.PREFIX + "/empty.html")
+	require.NoError(t, err)
+	res := <-chanRes
+	require.Equal(t, exptectedAuth, res.Header.Get("authorization"))
+	require.Equal(t, 200, response.Status())
+
+	// Second request
+	response, err = context.Request().Get(server.CROSS_PROCESS_PREFIX + "/empty.html")
+	require.NoError(t, err)
+	res = <-chanRes
+	// Not sent to another origin.
+	require.Equal(t, "", res.Header.Get("authorization"))
+	require.Equal(t, 200, response.Status())
+}
+
+func TestSupportHttpCredentialsSendImmediatelyForBrowserNewPage(t *testing.T) {
+	BeforeEach(t)
+
+	page1, err := browser.NewPage(playwright.BrowserNewPageOptions{
+		HttpCredentials: &playwright.HttpCredentials{
+			Username: "user",
+			Password: "pass",
+			Origin:   playwright.String(strings.ToUpper(server.PREFIX)),
+			Send:     playwright.HttpCredentialsSendAlways,
+		},
+	})
+	require.NoError(t, err)
+	chanRes := server.WaitForRequestChan("/empty.html")
+	response, err := page1.Request().Get(server.PREFIX + "/empty.html")
+	require.NoError(t, err)
+	res := <-chanRes
+	require.Equal(t, "Basic "+base64.StdEncoding.EncodeToString([]byte("user:pass")), res.Header.Get("authorization"))
+	require.Equal(t, 200, response.Status())
+
+	response, err = page1.Request().Get(server.CROSS_PROCESS_PREFIX + "/empty.html")
+	require.NoError(t, err)
+	res = <-chanRes
+	// Not sent to another origin.
+	require.Equal(t, "", res.Header.Get("authorization"))
+	require.Equal(t, 200, response.Status())
+
+	require.NoError(t, page1.Close())
 }

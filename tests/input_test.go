@@ -1,11 +1,16 @@
 package playwright_test
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/playwright-community/playwright-go"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/exp/slices"
 )
 
 func TestMouseMove(t *testing.T) {
@@ -226,4 +231,108 @@ func TestTouchscreenTap(t *testing.T) {
 	result, err := page.Evaluate("window.clicked")
 	require.NoError(t, err)
 	require.True(t, result.(bool))
+}
+
+func TestShouldUploadAFolder(t *testing.T) {
+	BeforeEach(t)
+
+	_, err := page.Goto(fmt.Sprintf("%s%s", server.PREFIX, "/input/folderupload.html"))
+	require.NoError(t, err)
+
+	//nolint:staticcheck
+	input, err := page.QuerySelector("input")
+	require.NoError(t, err)
+
+	dir := filepath.Join(t.TempDir(), "file-upload-test")
+	require.NoError(t, os.MkdirAll(dir, 0o700))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "file1.txt"), []byte("file1 content"), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "file2"), []byte("file2 content"), 0o600))
+	require.Nil(t, os.Mkdir(filepath.Join(dir, "sub-dir"), 0o700))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "sub-dir", "really.txt"), []byte("sub-dir file content"), 0o600))
+	//nolint:staticcheck
+	require.NoError(t, input.SetInputFiles(dir))
+
+	ret, err := input.Evaluate(`e => [...e.files].map(f => f.webkitRelativePath)`)
+	require.NoError(t, err)
+
+	expectResult := []interface{}{"file-upload-test/file1.txt", "file-upload-test/file2"}
+	// https://issues.chromium.org/issues/345393164
+	if !(isChromium && headless && chromiumVersionLessThan(browser.Version(), "127.0.6533.0")) {
+		expectResult = append(expectResult, "file-upload-test/sub-dir/really.txt")
+	}
+	slices.SortFunc(ret.([]interface{}), func(i, j interface{}) int {
+		return strings.Compare(i.(string), j.(string))
+	})
+	require.Equal(t, expectResult, ret.([]interface{}))
+
+	webkitRelativePaths, err := input.Evaluate(`e => [...e.files].map(f => f.webkitRelativePath)`)
+	require.NoError(t, err)
+	for i, path := range webkitRelativePaths.([]interface{}) {
+		content, err := input.Evaluate(`(e, i) => {
+			const reader = new FileReader();
+			const promise = new Promise(fulfill => reader.onload = fulfill);
+			reader.readAsText(e.files[i]);
+			return promise.then(() => reader.result);
+    }`, i)
+		require.NoError(t, err)
+		b, err := os.ReadFile(filepath.Join(dir, "..", path.(string)))
+		require.NoError(t, err)
+		require.Equal(t, string(b), content.(string))
+	}
+}
+
+func TestShouldUploadAFolderAndThrowForMultipleDirectories(t *testing.T) {
+	BeforeEach(t)
+
+	_, err := page.Goto(fmt.Sprintf("%s%s", server.PREFIX, "/input/folderupload.html"))
+	require.NoError(t, err)
+
+	input := page.Locator("input")
+	dir := filepath.Join(t.TempDir(), "file-upload-test")
+	require.NoError(t, os.MkdirAll(dir, 0o700))
+	require.Nil(t, os.Mkdir(filepath.Join(dir, "folder1"), 0o700))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "folder1", "file1.txt"), []byte("file1 content"), 0o600))
+	require.Nil(t, os.Mkdir(filepath.Join(dir, "folder2"), 0o700))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "folder2", "file2.txt"), []byte("file1content"), 0o600))
+
+	err = input.SetInputFiles([]string{
+		filepath.Join(dir, "folder1"),
+		filepath.Join(dir, "folder2"),
+	})
+
+	require.ErrorContains(t, err, "Multiple directories are not supported")
+}
+
+func TestShouldThrowIfADirectoryAndFilesArePassed(t *testing.T) {
+	BeforeEach(t)
+
+	_, err := page.Goto(fmt.Sprintf("%s%s", server.PREFIX, "/input/folderupload.html"))
+	require.NoError(t, err)
+
+	input := page.Locator("input")
+	dir := filepath.Join(t.TempDir(), "file-upload-test")
+	require.NoError(t, os.MkdirAll(dir, 0o700))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "file1.txt"), []byte("file1 content"), 0o600))
+
+	err = input.SetInputFiles([]string{
+		dir,
+		filepath.Join(dir, "file1.txt"),
+	})
+
+	require.ErrorContains(t, err, "File paths must be all files or a single directory")
+}
+
+func TestShouldThrowWhenUploadAFolderInANormalFileUploadInput(t *testing.T) {
+	BeforeEach(t)
+
+	_, err := page.Goto(fmt.Sprintf("%s%s", server.PREFIX, "/input/fileupload.html"))
+	require.NoError(t, err)
+
+	input := page.Locator("input[type=file]")
+	dir := filepath.Join(t.TempDir(), "file-upload-test")
+	require.NoError(t, os.MkdirAll(dir, 0o700))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "file1.txt"), []byte("file1 content"), 0o600))
+	//nolint:staticcheck
+	err = input.SetInputFiles(dir)
+	require.ErrorContains(t, err, "File input does not support directories, pass individual files instead")
 }
