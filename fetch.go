@@ -48,11 +48,20 @@ func newApiRequestImpl(pw *Playwright) *apiRequestImpl {
 
 type apiRequestContextImpl struct {
 	channelOwner
-	tracing *tracingImpl
+	tracing     *tracingImpl
+	closeReason *string
 }
 
-func (r *apiRequestContextImpl) Dispose() error {
-	_, err := r.channel.Send("dispose")
+func (r *apiRequestContextImpl) Dispose(options ...APIRequestContextDisposeOptions) error {
+	if len(options) == 1 {
+		r.closeReason = options[0].Reason
+	}
+	_, err := r.channel.Send("dispose", map[string]interface{}{
+		"reason": r.closeReason,
+	})
+	if errors.Is(err, ErrTargetClosed) {
+		return nil
+	}
 	return err
 }
 
@@ -82,6 +91,9 @@ func (r *apiRequestContextImpl) Fetch(urlOrRequest interface{}, options ...APIRe
 }
 
 func (r *apiRequestContextImpl) innerFetch(url string, request Request, options ...APIRequestContextFetchOptions) (APIResponse, error) {
+	if r.closeReason != nil {
+		return nil, fmt.Errorf("%w: %s", ErrTargetClosed, *r.closeReason)
+	}
 	overrides := map[string]interface{}{}
 	if url != "" {
 		overrides["url"] = url

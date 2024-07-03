@@ -270,11 +270,5 @@ func newRequest(parent *channelOwner, objectType string, guid string, initialize
 	}
 	req.provisionalHeaders = newRawHeaders(req.initializer["headers"])
 	req.fallbackOverrides = &serializedFallbackOverrides{}
-	if _, ok := initializer["postData"]; ok {
-		postDataBuffer, err := base64.StdEncoding.DecodeString(initializer["postData"].(string))
-		if err == nil {
-			req.fallbackOverrides.PostDataBuffer = postDataBuffer
-		}
-	}
 	return req
 }

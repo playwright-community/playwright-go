@@ -165,6 +165,12 @@ func (s *syncSlice[T]) Get() []T {
 	return s.slice
 }
 
+func (s *syncSlice[T]) Len() int {
+	s.Lock()
+	defer s.Unlock()
+	return len(s.slice)
+}
+
 func newSyncSlice[T any]() *syncSlice[T] {
 	return &syncSlice[T]{
 		slice: make([]T, 0),
@@ -300,4 +306,15 @@ func mustGetHostname(ref string) *string {
 		return nil
 	}
 	return playwright.String(u.Hostname())
+}
+
+func chromiumVersionLessThan(a, b string) bool {
+	left := strings.Split(a, ".")
+	right := strings.Split(b, ".")
+	for i := 0; i < len(left) && i < len(right); i++ {
+		if left[i] != right[i] {
+			return left[i] < right[i]
+		}
+	}
+	return len(left) < len(right)
 }

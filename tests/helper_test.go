@@ -23,6 +23,7 @@ var (
 	context     playwright.BrowserContext
 	page        playwright.Page
 	expect      playwright.PlaywrightAssertions
+	headless    = os.Getenv("HEADFUL") == ""
 	isChromium  bool
 	isFirefox   bool
 	isWebKit    bool
@@ -63,7 +64,7 @@ func BeforeAll() {
 	}
 	// launch browser, headless or not depending on HEADFUL env
 	browser, err = browserType.Launch(playwright.BrowserTypeLaunchOptions{
-		Headless: playwright.Bool(os.Getenv("HEADFUL") == ""),
+		Headless: playwright.Bool(headless),
 	})
 	if err != nil {
 		log.Fatalf("could not launch: %v", err)

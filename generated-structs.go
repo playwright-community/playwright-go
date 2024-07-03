@@ -70,6 +70,10 @@ type APIRequestContextDeleteOptions struct {
 	// Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 	Timeout *float64 `json:"timeout"`
 }
+type APIRequestContextDisposeOptions struct {
+	// The reason to be reported to the operations interrupted by the context disposal.
+	Reason *string `json:"reason"`
+}
 type APIRequestContextFetchOptions struct {
 	// Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
 	// and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
@@ -640,7 +644,7 @@ type Geolocation struct {
 	Accuracy *float64 `json:"accuracy"`
 }
 type BrowserContextUnrouteAllOptions struct {
-	// Specifies wether to wait for already running handlers and what to do if they throw errors:
+	// Specifies whether to wait for already running handlers and what to do if they throw errors:
 	//  - `default` - do not wait for current handler calls (if any) to finish, if unrouted handler throws, it may
 	//   result in unhandled error
 	//  - `wait` - wait for current handler calls (if any) to finish
@@ -962,6 +966,10 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	//
 	// [viewport emulation]: https://playwright.dev/docs/emulation#viewport
 	Viewport *Size `json:"viewport"`
+}
+type ClockInstallOptions struct {
+	// Time to initialize with, current system time by default.
+	Time interface{} `json:"time"`
 }
 type ConsoleMessageLocation struct {
 	// URL of the resource.
@@ -3480,7 +3488,7 @@ type PageUncheckOptions struct {
 	Trial *bool `json:"trial"`
 }
 type PageUnrouteAllOptions struct {
-	// Specifies wether to wait for already running handlers and what to do if they throw errors:
+	// Specifies whether to wait for already running handlers and what to do if they throw errors:
 	//  - `default` - do not wait for current handler calls (if any) to finish, if unrouted handler throws, it may
 	//   result in unhandled error
 	//  - `wait` - wait for current handler calls (if any) to finish
@@ -3809,6 +3817,11 @@ type HttpCredentials struct {
 	Password string `json:"password"`
 	// Restrain sending http credentials on specific origin (scheme://host:port).
 	Origin *string `json:"origin"`
+	// This option only applies to the requests sent from corresponding [APIRequestContext] and does not affect requests
+	// sent from the browser. `always` - `Authorization` header with basic authentication credentials will be sent with
+	// the each API request. `'unauthorized` - the credentials are only sent when 401 (Unauthorized) response with
+	// `WWW-Authenticate` header is received. Defaults to `unauthorized`.
+	Send *HttpCredentialsSend `json:"send"`
 }
 type Proxy struct {
 	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example `http://myproxy.com:3128` or
