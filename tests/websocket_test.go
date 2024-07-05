@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"testing"
+	"time"
 
 	goContext "context"
 
@@ -119,11 +120,8 @@ func TestWebSocketShouldEmitCloseEvents(t *testing.T) {
 		require.Equal(t, w.URL(), fmt.Sprintf("ws://localhost:%d/ws", wsServer.PORT))
 	})
 	require.Equal(t, ws.URL(), fmt.Sprintf("ws://localhost:%d/ws", wsServer.PORT))
-	if !ws.IsClosed() {
-		_, err = ws.WaitForEvent("close")
-		require.NoError(t, err)
-	}
-	require.True(t, ws.IsClosed())
+
+	require.Eventually(t, func() bool { return ws.IsClosed() }, 1*time.Second, 10*time.Millisecond)
 }
 
 func TestWebSocketShouldEmitFrameEvents(t *testing.T) {
