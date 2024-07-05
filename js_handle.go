@@ -7,8 +7,6 @@ import (
 	"math/big"
 	"net/url"
 	"reflect"
-	"runtime/debug"
-	"strings"
 	"time"
 )
 
@@ -305,17 +303,6 @@ func serializeArgument(arg interface{}) interface{} {
 	return map[string]interface{}{
 		"value":   value,
 		"handles": handles,
-	}
-}
-
-func serializeError(err error) map[string]interface{} {
-	stack := strings.Split(string(debug.Stack()), "\n")
-	return map[string]interface{}{
-		"error": &Error{
-			Name:    "Playwright for Go Error",
-			Message: err.Error(),
-			Stack:   strings.Join(stack[:len(stack)-5], "\n"),
-		},
 	}
 }
 
