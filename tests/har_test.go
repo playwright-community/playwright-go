@@ -786,3 +786,9 @@ func TestShouldUpdateExtractedHarZipForPage(t *testing.T) {
 	require.Contains(t, string(body), "hello, world!")
 	require.NoError(t, expect.Locator(page2.Locator("body")).ToHaveCSS("background-color", "rgb(255, 192, 203)"))
 }
+
+func TestShouldErrorWhenWrongZipFile(t *testing.T) {
+	BeforeEach(t)
+
+	require.Error(t, page.RouteFromHAR(Asset("chromium-linux.zip")))
+}
