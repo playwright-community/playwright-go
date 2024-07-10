@@ -1,5 +1,12 @@
 package playwright
 
+import (
+	"fmt"
+	"strings"
+
+	"github.com/go-stack/stack"
+)
+
 type BindingCall interface {
 	Call(f BindingCallFunction)
 }
@@ -54,6 +61,22 @@ func (b *bindingCallImpl) Call(f BindingCallFunction) {
 	})
 	if err != nil {
 		logger.Printf("could not resolve BindingCall: %v\n", err)
+	}
+}
+
+func serializeError(err error) map[string]interface{} {
+	st := stack.Trace().TrimRuntime()
+	if len(st) == 0 { // https://github.com/go-stack/stack/issues/27
+		st = stack.Trace()
+	}
+	return map[string]interface{}{
+		"error": &Error{
+			Name:    "Playwright for Go Error",
+			Message: err.Error(),
+			Stack: strings.ReplaceAll(strings.TrimFunc(fmt.Sprintf("%+v", st), func(r rune) bool {
+				return r == '[' || r == ']'
+			}), " ", "\n"),
+		},
 	}
 }
 

@@ -37,7 +37,7 @@ func TestBrowserNewContext(t *testing.T) {
 }
 
 func TestBrowserNewContextWithExtraHTTPHeaders(t *testing.T) {
-	context, page = newBrowserContextAndPage(t, playwright.BrowserNewContextOptions{
+	BeforeEach(t, playwright.BrowserNewContextOptions{
 		ExtraHttpHeaders: map[string]string{"extra-http": "42"},
 	})
 
