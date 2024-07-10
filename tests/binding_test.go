@@ -78,7 +78,7 @@ func TestBrowserContextExposeBindingPanic(t *testing.T) {
 	innerError := result.(map[string]interface{})
 	require.Equal(t, innerError["message"], "WOOF WOOF")
 	stack := strings.Split(innerError["stack"].(string), "\n")
-	require.Contains(t, stack[len(stack)-1], "binding_test.go")
+	require.Contains(t, stack[3], "binding_test.go")
 }
 
 func TestBrowserContextExposeBindingHandleShouldWork(t *testing.T) {
@@ -101,4 +101,25 @@ func TestBrowserContextExposeBindingHandleShouldWork(t *testing.T) {
 	res, err := targets[0].Evaluate("x => x.foo")
 	require.NoError(t, err)
 	require.Equal(t, 42, res)
+}
+
+func TestPageExposeBindingPanic(t *testing.T) {
+	BeforeEach(t)
+
+	err := page.ExposeBinding("woof", func(source *playwright.BindingSource, args ...interface{}) interface{} {
+		panic(errors.New("WOOF WOOF"))
+	})
+	require.NoError(t, err)
+	result, err := page.Evaluate(`async () => {
+		try {
+		  await window['woof']();
+		} catch (e) {
+		  return {message: e.message, stack: e.stack};
+		}
+	  }`)
+	require.NoError(t, err)
+	innerError := result.(map[string]interface{})
+	require.Equal(t, innerError["message"], "WOOF WOOF")
+	stack := strings.Split(innerError["stack"].(string), "\n")
+	require.Contains(t, stack[3], "binding_test.go")
 }

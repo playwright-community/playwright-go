@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/playwright-community/playwright-go"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/exp/slices"
 )
 
 func pageClockFixture(t *testing.T) *syncSlice[[]interface{}] {
@@ -40,8 +40,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(window.stub)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(0))
-		time.Sleep(100 * time.Millisecond) // wait for binding call to resolve
-		require.Equal(t, 1, calls.Len())
+		require.Eventually(t, func() bool { return calls.Len() == 1 }, 100*time.Millisecond, 10*time.Millisecond)
 	})
 
 	t.Run("does not trigger without sufficient delay", func(t *testing.T) {
@@ -53,8 +52,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(window.stub, 100)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(10))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, 0, calls.Len())
+		require.Eventually(t, func() bool { return calls.Len() == 0 }, 100*time.Millisecond, 10*time.Millisecond)
 	})
 
 	t.Run("triggers after sufficient delay", func(t *testing.T) {
@@ -66,8 +64,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(window.stub, 100)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(100))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, 1, calls.Len())
+		require.Eventually(t, func() bool { return calls.Len() == 1 }, 100*time.Millisecond, 10*time.Millisecond)
 	})
 
 	t.Run("triggers simultaneous timers", func(t *testing.T) {
@@ -79,8 +76,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(window.stub, 100); setTimeout(window.stub, 100)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(100))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, 2, calls.Len())
+		require.Eventually(t, func() bool { return calls.Len() == 2 }, 1*time.Second, 10*time.Millisecond)
 	})
 
 	t.Run("triggers multiple simultaneous timers", func(t *testing.T) {
@@ -93,8 +89,7 @@ func TestPageClockRunFor(t *testing.T) {
 			"setTimeout(window.stub, 100); setTimeout(window.stub, 100); setTimeout(window.stub, 99); setTimeout(window.stub, 100)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(100))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, 4, calls.Len())
+		require.Eventually(t, func() bool { return calls.Len() == 4 }, 1*time.Second, 10*time.Millisecond)
 	})
 
 	t.Run("waits after setTimeout was called", func(t *testing.T) {
@@ -106,11 +101,9 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(window.stub, 150)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(50))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, 0, calls.Len())
+		require.Eventually(t, func() bool { return calls.Len() == 0 }, 100*time.Millisecond, 10*time.Millisecond)
 		require.NoError(t, page.Clock().RunFor(100))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, 1, calls.Len())
+		require.Eventually(t, func() bool { return calls.Len() == 1 }, 1*time.Second, 10*time.Millisecond)
 	})
 
 	t.Run("triggers event when some throw", func(t *testing.T) {
@@ -122,8 +115,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(() => { throw new Error(); }, 100); setTimeout(window.stub, 120)")
 		require.NoError(t, err)
 		require.Error(t, page.Clock().RunFor(120))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, 1, calls.Len())
+		require.Eventually(t, func() bool { return calls.Len() == 1 }, 1*time.Second, 10*time.Millisecond)
 	})
 
 	t.Run("creates updated Date while ticking", func(t *testing.T) {
@@ -136,13 +128,9 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setInterval(() => { window.stub(new Date().getTime()); }, 10)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(100))
-		time.Sleep(100 * time.Millisecond)
+		require.Eventually(t, func() bool { return calls.Len() == 10 }, 1*time.Second, 10*time.Millisecond)
 		// Goroutines cannot guarantee order and need to be sorted before comparison
-		data := calls.Get()
-		slices.SortFunc(data, func(a, b []interface{}) int {
-			return a[0].(int) - b[0].(int)
-		})
-		require.Equal(t, [][]interface{}{
+		require.ElementsMatch(t, [][]interface{}{
 			{10},
 			{20},
 			{30},
@@ -153,7 +141,7 @@ func TestPageClockRunFor(t *testing.T) {
 			{80},
 			{90},
 			{100},
-		}, data)
+		}, calls.Get())
 	})
 
 	t.Run("passes 8 seconds", func(t *testing.T) {
@@ -165,8 +153,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setInterval(window.stub, 4000)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor("08"))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, 2, calls.Len())
+		require.Eventually(t, func() bool { return calls.Len() == 2 }, 1*time.Second, 10*time.Millisecond)
 	})
 
 	t.Run("passes 1 minute", func(t *testing.T) {
@@ -178,8 +165,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setInterval(window.stub, 6000)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor("01:00"))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, 10, calls.Len())
+		require.Eventually(t, func() bool { return calls.Len() == 10 }, 1*time.Second, 10*time.Millisecond)
 	})
 
 	t.Run("passes 2 hours 34 minutes and 10 seconds", func(t *testing.T) {
@@ -191,8 +177,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setInterval(window.stub, 10000)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor("02:34:10"))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, 925, calls.Len())
+		require.Eventually(t, func() bool { return calls.Len() == 925 }, 1*time.Second, 10*time.Millisecond)
 	})
 
 	t.Run("throws for invalid format", func(t *testing.T) {
@@ -204,8 +189,7 @@ func TestPageClockRunFor(t *testing.T) {
 		_, err := page.Evaluate("setInterval(window.stub, 10000)")
 		require.NoError(t, err)
 		require.Error(t, page.Clock().RunFor("12:02:34:10"))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, 0, calls.Len())
+		require.Eventually(t, func() bool { return calls.Len() == 0 }, 1*time.Second, 10*time.Millisecond)
 	})
 
 	t.Run("returns the current now value", func(t *testing.T) {
@@ -218,8 +202,9 @@ func TestPageClockRunFor(t *testing.T) {
 		require.NoError(t, page.Clock().RunFor(value))
 		ret, err := page.Evaluate("Date.now()")
 		require.NoError(t, err)
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, value, ret)
+		require.EventuallyWithT(t, func(collect *assert.CollectT) {
+			require.Equal(collect, value, ret)
+		}, 1*time.Second, 10*time.Millisecond)
 	})
 }
 
@@ -233,8 +218,7 @@ func TestPageClockFastForward(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(() => { window.stub('should not be logged'); }, 1000)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().FastForward(500))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, 0, calls.Len())
+		require.Eventually(t, func() bool { return calls.Len() == 0 }, 1*time.Second, 10*time.Millisecond)
 	})
 
 	t.Run("pushes back exeution time for skipped timers", func(t *testing.T) {
@@ -246,10 +230,11 @@ func TestPageClockFastForward(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(() => { window.stub(Date.now()); }, 1000)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().FastForward(2000))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, [][]any{
-			{1000 + 2000},
-		}, calls.Get())
+		require.EventuallyWithT(t, func(collect *assert.CollectT) {
+			require.Equal(collect, [][]any{
+				{1000 + 2000},
+			}, calls.Get())
+		}, 1*time.Second, 10*time.Millisecond)
 	})
 
 	t.Run("supports string time arguments", func(t *testing.T) {
@@ -261,10 +246,11 @@ func TestPageClockFastForward(t *testing.T) {
 		_, err := page.Evaluate("setTimeout(() => { window.stub(Date.now()); }, 100000)")
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().FastForward("01:50"))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, [][]any{
-			{1000 + 110000},
-		}, calls.Get())
+		require.EventuallyWithT(t, func(collect *assert.CollectT) {
+			require.Equal(collect, [][]any{
+				{1000 + 110000},
+			}, calls.Get())
+		}, 1*time.Second, 10*time.Millisecond)
 	})
 }
 
@@ -289,8 +275,7 @@ func TestPageClockStubTimers(t *testing.T) {
 		_, err := page.Evaluate(`setTimeout(window.stub, 1000)`)
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(1000))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, 1, calls.Len())
+		require.Eventually(t, func() bool { return calls.Len() == 1 }, 1*time.Second, 10*time.Millisecond)
 	})
 
 	t.Run("global fake setTimeout should return id", func(t *testing.T) {
@@ -314,8 +299,7 @@ func TestPageClockStubTimers(t *testing.T) {
       clearTimeout(to);`)
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(1000))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, 0, calls.Len())
+		require.Eventually(t, func() bool { return calls.Len() == 0 }, 1*time.Second, 10*time.Millisecond)
 	})
 
 	t.Run("replaces global setInterval", func(t *testing.T) {
@@ -327,8 +311,7 @@ func TestPageClockStubTimers(t *testing.T) {
 		_, err := page.Evaluate(`setInterval(window.stub, 500)`)
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(1000))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, 2, calls.Len())
+		require.Eventually(t, func() bool { return calls.Len() == 2 }, 1*time.Second, 10*time.Millisecond)
 	})
 
 	t.Run("replaces global clearInterval", func(t *testing.T) {
@@ -341,8 +324,7 @@ func TestPageClockStubTimers(t *testing.T) {
       clearInterval(to);`)
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(1000))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, 0, calls.Len())
+		require.Eventually(t, func() bool { return calls.Len() == 0 }, 1*time.Second, 10*time.Millisecond)
 	})
 
 	t.Run("replaces global performance now", func(t *testing.T) {
@@ -560,10 +542,11 @@ func TestPageClockFixedTime(t *testing.T) {
 		_, err = page.Evaluate(`setTimeout(() => window.stub(Date.now()))`)
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(0))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, [][]interface{}{
-			{200},
-		}, calls.Get())
+		require.EventuallyWithT(t, func(collect *assert.CollectT) {
+			require.Equal(collect, [][]interface{}{
+				{200},
+			}, calls.Get())
+		}, 1*time.Second, 10*time.Millisecond)
 	})
 }
 
@@ -667,11 +650,13 @@ func TestPageClockWhileOnPause(t *testing.T) {
 			}, 1000);`)
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().FastForward(1000))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, [][]any{{"outer"}}, calls.Get())
+		require.EventuallyWithT(t, func(collect *assert.CollectT) {
+			require.Equal(collect, [][]any{{"outer"}}, calls.Get())
+		}, time.Second, 10*time.Millisecond)
 		require.NoError(t, page.Clock().FastForward(1))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, [][]any{{"outer"}, {"inner"}}, calls.Get())
+		require.EventuallyWithT(t, func(collect *assert.CollectT) {
+			require.Equal(collect, [][]any{{"outer"}, {"inner"}}, calls.Get())
+		}, time.Second, 10*time.Millisecond)
 	})
 
 	t.Run("run for should not run nested immediate", func(t *testing.T) {
@@ -690,11 +675,13 @@ func TestPageClockWhileOnPause(t *testing.T) {
 			}, 1000);`)
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(1000))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, [][]any{{"outer"}}, calls.Get())
+		require.EventuallyWithT(t, func(collect *assert.CollectT) {
+			require.Equal(collect, [][]any{{"outer"}}, calls.Get())
+		}, time.Second, 10*time.Millisecond)
 		require.NoError(t, page.Clock().RunFor(1))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, [][]any{{"outer"}, {"inner"}}, calls.Get())
+		require.EventuallyWithT(t, func(collect *assert.CollectT) {
+			require.Equal(collect, [][]any{{"outer"}, {"inner"}}, calls.Get())
+		}, time.Second, 10*time.Millisecond)
 	})
 
 	t.Run("run for should not run nested immediate from microtask", func(t *testing.T) {
@@ -713,10 +700,12 @@ func TestPageClockWhileOnPause(t *testing.T) {
 			}, 1000);`)
 		require.NoError(t, err)
 		require.NoError(t, page.Clock().RunFor(1000))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, [][]any{{"outer"}}, calls.Get())
+		require.EventuallyWithT(t, func(collect *assert.CollectT) {
+			require.Equal(collect, [][]any{{"outer"}}, calls.Get())
+		}, time.Second, 10*time.Millisecond)
 		require.NoError(t, page.Clock().RunFor(1))
-		time.Sleep(100 * time.Millisecond)
-		require.Equal(t, [][]any{{"outer"}, {"inner"}}, calls.Get())
+		require.EventuallyWithT(t, func(collect *assert.CollectT) {
+			require.Equal(collect, [][]any{{"outer"}, {"inner"}}, calls.Get())
+		}, time.Second, 10*time.Millisecond)
 	})
 }
