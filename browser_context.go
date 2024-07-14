@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/playwright-community/playwright-go/internal/safe"
 	"golang.org/x/exp/slices"
 )
 
@@ -23,7 +24,7 @@ type browserContextImpl struct {
 	browser         *browserImpl
 	serviceWorkers  []Worker
 	backgroundPages []Page
-	bindings        map[string]BindingCallFunction
+	bindings        *safe.SyncMap[string, BindingCallFunction]
 	tracing         *tracingImpl
 	request         *apiRequestContextImpl
 	harRecorders    map[string]harRecordingMetadata
@@ -240,18 +241,21 @@ func (b *browserContextImpl) ExposeBinding(name string, binding BindingCallFunct
 		needsHandle = handle[0]
 	}
 	for _, page := range b.Pages() {
-		if _, ok := page.(*pageImpl).bindings[name]; ok {
+		if _, ok := page.(*pageImpl).bindings.Load(name); ok {
 			return fmt.Errorf("Function '%s' has been already registered in one of the pages", name)
 		}
 	}
-	if _, ok := b.bindings[name]; ok {
+	if _, ok := b.bindings.Load(name); ok {
 		return fmt.Errorf("Function '%s' has been already registered", name)
 	}
-	b.bindings[name] = binding
 	_, err := b.channel.Send("exposeBinding", map[string]interface{}{
 		"name":        name,
 		"needsHandle": needsHandle,
 	})
+	if err != nil {
+		return err
+	}
+	b.bindings.Store(name, binding)
 	return err
 }
 
@@ -533,11 +537,11 @@ func (b *browserContextImpl) StorageState(paths ...string) (*StorageState, error
 }
 
 func (b *browserContextImpl) onBinding(binding *bindingCallImpl) {
-	function := b.bindings[binding.initializer["name"].(string)]
-	if function == nil {
+	function, ok := b.bindings.Load(binding.initializer["name"].(string))
+	if !ok || function == nil {
 		return
 	}
-	go binding.Call(function)
+	binding.Call(function)
 }
 
 func (b *browserContextImpl) onClose() {
@@ -740,7 +744,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 		pages:           make([]Page, 0),
 		backgroundPages: make([]Page, 0),
 		routes:          make([]*routeHandlerEntry, 0),
-		bindings:        make(map[string]BindingCallFunction),
+		bindings:        safe.NewSyncMap[string, BindingCallFunction](),
 		harRecorders:    make(map[string]harRecordingMetadata),
 		closed:          make(chan struct{}, 1),
 		harRouters:      make([]*harRouter, 0),
@@ -754,7 +758,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 	bt.request = fromChannel(initializer["requestContext"]).(*apiRequestContextImpl)
 	bt.clock = newClock(bt)
 	bt.channel.On("bindingCall", func(params map[string]interface{}) {
-		bt.onBinding(fromChannel(params["binding"]).(*bindingCallImpl))
+		go bt.onBinding(fromChannel(params["binding"]).(*bindingCallImpl))
 	})
 
 	bt.channel.On("close", bt.onClose)
