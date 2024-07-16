@@ -7,6 +7,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/playwright-community/playwright-go/internal/safe"
 	"golang.org/x/exp/slices"
 )
 
@@ -26,7 +27,7 @@ type pageImpl struct {
 	routes          []*routeHandlerEntry
 	viewportSize    *Size
 	ownedContext    BrowserContext
-	bindings        map[string]BindingCallFunction
+	bindings        *safe.SyncMap[string, BindingCallFunction]
 	closeReason     *string
 	closeWasCalled  bool
 	harRouters      []*harRouter
@@ -783,7 +784,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 	bt := &pageImpl{
 		workers:         make([]Worker, 0),
 		routes:          make([]*routeHandlerEntry, 0),
-		bindings:        make(map[string]BindingCallFunction),
+		bindings:        safe.NewSyncMap[string, BindingCallFunction](),
 		viewportSize:    viewportSize,
 		harRouters:      make([]*harRouter, 0),
 		locatorHandlers: make(map[float64]*locatorHandlerEntry, 0),
@@ -799,7 +800,7 @@ func newPage(parent *channelOwner, objectType string, guid string, initializer m
 	bt.keyboard = newKeyboard(bt.channel)
 	bt.touchscreen = newTouchscreen(bt.channel)
 	bt.channel.On("bindingCall", func(params map[string]interface{}) {
-		bt.onBinding(fromChannel(params["binding"]).(*bindingCallImpl))
+		go bt.onBinding(fromChannel(params["binding"]).(*bindingCallImpl))
 	})
 	bt.channel.On("close", bt.onClose)
 	bt.channel.On("crash", func() {
@@ -882,11 +883,11 @@ func (p *pageImpl) closeErrorWithReason() error {
 }
 
 func (p *pageImpl) onBinding(binding *bindingCallImpl) {
-	function := p.bindings[binding.initializer["name"].(string)]
-	if function == nil {
+	function, ok := p.bindings.Load(binding.initializer["name"].(string))
+	if !ok || function == nil {
 		return
 	}
-	go binding.Call(function)
+	binding.Call(function)
 }
 
 func (p *pageImpl) onFrameAttached(frame *frameImpl) {
@@ -1080,18 +1081,21 @@ func (p *pageImpl) ExposeBinding(name string, binding BindingCallFunction, handl
 	if len(handle) == 1 {
 		needsHandle = handle[0]
 	}
-	if _, ok := p.bindings[name]; ok {
+	if _, ok := p.bindings.Load(name); ok {
 		return fmt.Errorf("Function '%s' has been already registered", name)
 	}
-	if _, ok := p.browserContext.bindings[name]; ok {
+	if _, ok := p.browserContext.bindings.Load(name); ok {
 		return fmt.Errorf("Function '%s' has been already registered in the browser context", name)
 	}
-	p.bindings[name] = binding
 	_, err := p.channel.Send("exposeBinding", map[string]interface{}{
 		"name":        name,
 		"needsHandle": needsHandle,
 	})
-	return err
+	if err != nil {
+		return err
+	}
+	p.bindings.Store(name, binding)
+	return nil
 }
 
 func (p *pageImpl) SelectOption(selector string, values SelectOptionValues, options ...PageSelectOptionOptions) ([]string, error) {

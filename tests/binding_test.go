@@ -2,7 +2,9 @@ package playwright_test
 
 import (
 	"errors"
+	"fmt"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/playwright-community/playwright-go"
@@ -122,4 +124,31 @@ func TestPageExposeBindingPanic(t *testing.T) {
 	require.Equal(t, innerError["message"], "WOOF WOOF")
 	stack := strings.Split(innerError["stack"].(string), "\n")
 	require.Contains(t, stack[3], "binding_test.go")
+}
+
+func TestPageBindingsNoRace(t *testing.T) {
+	BeforeEach(t)
+
+	wg := &sync.WaitGroup{}
+	wg.Add(10)
+	for i := 0; i < 10; i++ {
+		i := i
+		go func() {
+			defer wg.Done()
+			err := page.ExposeBinding(fmt.Sprintf("foo%d", i), func(source *playwright.BindingSource, args ...interface{}) interface{} {
+				return 42
+			})
+			require.NoError(t, err)
+		}()
+	}
+	wg.Wait()
+	ret, err := page.Evaluate(`async () => {
+		try {
+		  return await window['foo9']();
+		} catch (e) {
+		  return {message: e.message, stack: e.stack};
+		}
+	  }`)
+	require.NoError(t, err)
+	require.Equal(t, 42, ret)
 }
