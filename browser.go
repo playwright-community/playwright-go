@@ -1,6 +1,7 @@
 package playwright
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -45,6 +46,14 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 	if option.ExtraHttpHeaders != nil {
 		overrides["extraHTTPHeaders"] = serializeMapToNameAndValue(options[0].ExtraHttpHeaders)
 		options[0].ExtraHttpHeaders = nil
+	}
+	if option.ClientCertificates != nil {
+		certs, err := transformClientCertificate(option.ClientCertificates)
+		if err != nil {
+			return nil, err
+		}
+		overrides["clientCertificates"] = certs
+		options[0].ClientCertificates = nil
 	}
 	if option.StorageStatePath != nil {
 		var storageState *OptionalStorageState
@@ -216,4 +225,43 @@ func newBrowser(parent *channelOwner, objectType string, guid string, initialize
 	b.browserType = newBrowserType(parent.parent, parent.objectType, parent.guid, parent.initializer)
 	b.channel.On("close", b.onClose)
 	return b
+}
+
+func transformClientCertificate(clientCertificates []ClientCertificate) ([]map[string]interface{}, error) {
+	results := make([]map[string]interface{}, 0)
+
+	for _, cert := range clientCertificates {
+		data := map[string]interface{}{
+			"origin":     cert.Origin,
+			"passphrase": cert.Passphrase,
+		}
+		if cert.CertPath != nil {
+			content, err := os.ReadFile(*cert.CertPath)
+			if err != nil {
+				return nil, err
+			}
+			data["cert"] = base64.StdEncoding.EncodeToString(content)
+		}
+		if cert.KeyPath != nil {
+			content, err := os.ReadFile(*cert.KeyPath)
+			if err != nil {
+				return nil, err
+			}
+			data["key"] = base64.StdEncoding.EncodeToString(content)
+		}
+
+		if cert.PfxPath != nil {
+			content, err := os.ReadFile(*cert.PfxPath)
+			if err != nil {
+				return nil, err
+			}
+			data["pfx"] = base64.StdEncoding.EncodeToString(content)
+		}
+
+		results = append(results, data)
+	}
+	if len(results) == 0 {
+		return nil, nil
+	}
+	return results, nil
 }

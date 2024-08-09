@@ -52,6 +52,14 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 			}
 			options[0].AcceptDownloads = nil
 		}
+		if options[0].ClientCertificates != nil {
+			certs, err := transformClientCertificate(options[0].ClientCertificates)
+			if err != nil {
+				return nil, err
+			}
+			overrides["clientCertificates"] = certs
+			options[0].ClientCertificates = nil
+		}
 		if options[0].ExtraHttpHeaders != nil {
 			overrides["extraHTTPHeaders"] = serializeMapToNameAndValue(options[0].ExtraHttpHeaders)
 			options[0].ExtraHttpHeaders = nil

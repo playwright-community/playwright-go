@@ -280,10 +280,6 @@ type BrowserContext interface {
 
 	// Adds cookies into this browser context. All pages within this context will have these cookies installed. Cookies
 	// can be obtained via [BrowserContext.Cookies].
-	//
-	//  cookies: Adds cookies to the browser context.
-	//
-	//    For the cookie to apply to all subdomains as well, prefix domain with a dot, like this: ".example.com".
 	AddCookies(cookies []OptionalCookie) error
 
 	// Adds a script which would be evaluated in one of the following scenarios:
@@ -589,6 +585,8 @@ type Clock interface {
 	// unless [Clock.RunFor], [Clock.FastForward], [Clock.PauseAt] or [Clock.Resume] is called.
 	// Only fires due timers at most once. This is equivalent to user closing the laptop lid for a while and reopening it
 	// at the specified time and pausing.
+	//
+	//  time: Time to pause at.
 	PauseAt(time interface{}) error
 
 	// Resumes timers. Once this method is called, time resumes flowing, timers are fired as usual.
@@ -600,6 +598,8 @@ type Clock interface {
 	SetFixedTime(time interface{}) error
 
 	// Sets current system time but does not trigger any timers.
+	//
+	//  time: Time to be set.
 	SetSystemTime(time interface{}) error
 }
 
@@ -733,8 +733,7 @@ type ElementHandle interface {
 	//  2. Wait for [actionability] checks on the element, unless “force” option is set.
 	//  3. Scroll the element into view if needed.
 	//  4. Use [Page.Mouse] to click in the center of the element.
-	//  5. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set.
-	//  6. Ensure that the element is now checked. If not, this method throws.
+	//  5. Ensure that the element is now checked. If not, this method throws.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
@@ -767,8 +766,6 @@ type ElementHandle interface {
 	//  1. Wait for [actionability] checks on the element, unless “force” option is set.
 	//  2. Scroll the element into view if needed.
 	//  3. Use [Page.Mouse] to double click in the center of the element, or the specified “position”.
-	//  4. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set. Note that if
-	//    the first click of the `dblclick()` triggers a navigation event, this method will throw.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
@@ -869,7 +866,6 @@ type ElementHandle interface {
 	//  1. Wait for [actionability] checks on the element, unless “force” option is set.
 	//  2. Scroll the element into view if needed.
 	//  3. Use [Page.Mouse] to hover over the center of the element, or the specified “position”.
-	//  4. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
@@ -1065,8 +1061,7 @@ type ElementHandle interface {
 	//    the element is detached during the checks, the whole action is retried.
 	//  4. Scroll the element into view if needed.
 	//  5. Use [Page.Mouse] to click in the center of the element.
-	//  6. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set.
-	//  7. Ensure that the element is now checked or unchecked. If not, this method throws.
+	//  6. Ensure that the element is now checked or unchecked. If not, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
 	//
@@ -1097,7 +1092,6 @@ type ElementHandle interface {
 	//  1. Wait for [actionability] checks on the element, unless “force” option is set.
 	//  2. Scroll the element into view if needed.
 	//  3. Use [Page.Touchscreen] to tap the center of the element, or the specified “position”.
-	//  4. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
@@ -1131,8 +1125,7 @@ type ElementHandle interface {
 	//  2. Wait for [actionability] checks on the element, unless “force” option is set.
 	//  3. Scroll the element into view if needed.
 	//  4. Use [Page.Mouse] to click in the center of the element.
-	//  5. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set.
-	//  6. Ensure that the element is now unchecked. If not, this method throws.
+	//  5. Ensure that the element is now unchecked. If not, this method throws.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
@@ -1225,8 +1218,7 @@ type Frame interface {
 	//    the element is detached during the checks, the whole action is retried.
 	//  4. Scroll the element into view if needed.
 	//  5. Use [Page.Mouse] to click in the center of the element.
-	//  6. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set.
-	//  7. Ensure that the element is now checked. If not, this method throws.
+	//  6. Ensure that the element is now checked. If not, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
 	//
@@ -1268,9 +1260,8 @@ type Frame interface {
 	//  2. Wait for [actionability] checks on the matched element, unless “force” option is set. If
 	//    the element is detached during the checks, the whole action is retried.
 	//  3. Scroll the element into view if needed.
-	//  4. Use [Page.Mouse] to double click in the center of the element, or the specified “position”.
-	//  5. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set. Note that if
-	//    the first click of the `dblclick()` triggers a navigation event, this method will throw.
+	//  4. Use [Page.Mouse] to double click in the center of the element, or the specified “position”. if the first
+	//    click of the `dblclick()` triggers a navigation event, this method will throw.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
 	// **NOTE** `frame.dblclick()` dispatches two `click` events and a single `dblclick` event.
@@ -1514,7 +1505,6 @@ type Frame interface {
 	//    the element is detached during the checks, the whole action is retried.
 	//  3. Scroll the element into view if needed.
 	//  4. Use [Page.Mouse] to hover over the center of the element, or the specified “position”.
-	//  5. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
 	//
@@ -1728,8 +1718,7 @@ type Frame interface {
 	//    the element is detached during the checks, the whole action is retried.
 	//  5. Scroll the element into view if needed.
 	//  6. Use [Page.Mouse] to click in the center of the element.
-	//  7. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set.
-	//  8. Ensure that the element is now checked or unchecked. If not, this method throws.
+	//  7. Ensure that the element is now checked or unchecked. If not, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
 	//
@@ -1774,7 +1763,6 @@ type Frame interface {
 	//    the element is detached during the checks, the whole action is retried.
 	//  3. Scroll the element into view if needed.
 	//  4. Use [Page.Touchscreen] to tap the center of the element, or the specified “position”.
-	//  5. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
 	// **NOTE** `frame.tap()` requires that the `hasTouch` option of the browser context be set to true.
@@ -1820,8 +1808,7 @@ type Frame interface {
 	//    the element is detached during the checks, the whole action is retried.
 	//  4. Scroll the element into view if needed.
 	//  5. Use [Page.Mouse] to click in the center of the element.
-	//  6. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set.
-	//  7. Ensure that the element is now unchecked. If not, this method throws.
+	//  6. Ensure that the element is now unchecked. If not, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
 	//
@@ -2200,8 +2187,7 @@ type Locator interface {
 	//  2. Wait for [actionability] checks on the element, unless “force” option is set.
 	//  3. Scroll the element into view if needed.
 	//  4. Use [Page.Mouse] to click in the center of the element.
-	//  5. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set.
-	//  6. Ensure that the element is now checked. If not, this method throws.
+	//  5. Ensure that the element is now checked. If not, this method throws.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
@@ -2255,8 +2241,6 @@ type Locator interface {
 	//  1. Wait for [actionability] checks on the element, unless “force” option is set.
 	//  2. Scroll the element into view if needed.
 	//  3. Use [Page.Mouse] to double click in the center of the element, or the specified “position”.
-	//  4. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set. Note that if
-	//    the first click of the `dblclick()` triggers a navigation event, this method will throw.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
@@ -2500,7 +2484,6 @@ type Locator interface {
 	//  1. Wait for [actionability] checks on the element, unless “force” option is set.
 	//  2. Scroll the element into view if needed.
 	//  3. Use [Page.Mouse] to hover over the center of the element, or the specified “position”.
-	//  4. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
@@ -2703,8 +2686,7 @@ type Locator interface {
 	//    the element is detached during the checks, the whole action is retried.
 	//  4. Scroll the element into view if needed.
 	//  5. Use [Page.Mouse] to click in the center of the element.
-	//  6. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set.
-	//  7. Ensure that the element is now checked or unchecked. If not, this method throws.
+	//  6. Ensure that the element is now checked or unchecked. If not, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
 	//
@@ -2737,7 +2719,6 @@ type Locator interface {
 	//  1. Wait for [actionability] checks on the element, unless “force” option is set.
 	//  2. Scroll the element into view if needed.
 	//  3. Use [Page.Touchscreen] to tap the center of the element, or the specified “position”.
-	//  4. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
@@ -2773,8 +2754,7 @@ type Locator interface {
 	//  2. Wait for [actionability] checks on the element, unless “force” option is set.
 	//  3. Scroll the element into view if needed.
 	//  4. Use [Page.Mouse] to click in the center of the element.
-	//  5. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set.
-	//  6. Ensure that the element is now unchecked. If not, this method throws.
+	//  5. Ensure that the element is now unchecked. If not, this method throws.
 	// If the element is detached from the DOM at any moment during the action, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
@@ -2944,15 +2924,24 @@ type LocatorAssertions interface {
 // Every `page` object has its own Mouse, accessible with [Page.Mouse].
 type Mouse interface {
 	// Shortcut for [Mouse.Move], [Mouse.Down], [Mouse.Up].
+	//
+	// 1. x: X coordinate relative to the main frame's viewport in CSS pixels.
+	// 2. y: Y coordinate relative to the main frame's viewport in CSS pixels.
 	Click(x float64, y float64, options ...MouseClickOptions) error
 
 	// Shortcut for [Mouse.Move], [Mouse.Down], [Mouse.Up], [Mouse.Down] and [Mouse.Up].
+	//
+	// 1. x: X coordinate relative to the main frame's viewport in CSS pixels.
+	// 2. y: Y coordinate relative to the main frame's viewport in CSS pixels.
 	Dblclick(x float64, y float64, options ...MouseDblclickOptions) error
 
 	// Dispatches a `mousedown` event.
 	Down(options ...MouseDownOptions) error
 
 	// Dispatches a `mousemove` event.
+	//
+	// 1. x: X coordinate relative to the main frame's viewport in CSS pixels.
+	// 2. y: Y coordinate relative to the main frame's viewport in CSS pixels.
 	Move(x float64, y float64, options ...MouseMoveOptions) error
 
 	// Dispatches a `mouseup` event.
@@ -3107,8 +3096,7 @@ type Page interface {
 	//    the element is detached during the checks, the whole action is retried.
 	//  4. Scroll the element into view if needed.
 	//  5. Use [Page.Mouse] to click in the center of the element.
-	//  6. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set.
-	//  7. Ensure that the element is now checked. If not, this method throws.
+	//  6. Ensure that the element is now checked. If not, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
 	//
@@ -3159,8 +3147,6 @@ type Page interface {
 	//    the element is detached during the checks, the whole action is retried.
 	//  3. Scroll the element into view if needed.
 	//  4. Use [Page.Mouse] to double click in the center of the element, or the specified “position”.
-	//  5. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set. Note that if
-	//    the first click of the `dblclick()` triggers a navigation event, this method will throw.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
 	// **NOTE** `page.dblclick()` dispatches two `click` events and a single `dblclick` event.
@@ -3405,12 +3391,12 @@ type Page interface {
 	GetByTitle(text interface{}, options ...PageGetByTitleOptions) Locator
 
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of
-	// the last redirect. If can not go back, returns `null`.
+	// the last redirect. If cannot go back, returns `null`.
 	// Navigate to the previous page in history.
 	GoBack(options ...PageGoBackOptions) (Response, error)
 
 	// Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of
-	// the last redirect. If can not go forward, returns `null`.
+	// the last redirect. If cannot go forward, returns `null`.
 	// Navigate to the next page in history.
 	GoForward(options ...PageGoForwardOptions) (Response, error)
 
@@ -3443,7 +3429,6 @@ type Page interface {
 	//    the element is detached during the checks, the whole action is retried.
 	//  3. Scroll the element into view if needed.
 	//  4. Use [Page.Mouse] to hover over the center of the element, or the specified “position”.
-	//  5. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
 	//
@@ -3756,8 +3741,7 @@ type Page interface {
 	//    the element is detached during the checks, the whole action is retried.
 	//  5. Scroll the element into view if needed.
 	//  6. Use [Page.Mouse] to click in the center of the element.
-	//  7. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set.
-	//  8. Ensure that the element is now checked or unchecked. If not, this method throws.
+	//  7. Ensure that the element is now checked or unchecked. If not, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
 	//
@@ -3836,7 +3820,6 @@ type Page interface {
 	//    the element is detached during the checks, the whole action is retried.
 	//  3. Scroll the element into view if needed.
 	//  4. Use [Page.Touchscreen] to tap the center of the element, or the specified “position”.
-	//  5. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
 	// **NOTE** [Page.Tap] the method will throw if “hasTouch” option of the browser context is false.
@@ -3884,8 +3867,7 @@ type Page interface {
 	//    the element is detached during the checks, the whole action is retried.
 	//  4. Scroll the element into view if needed.
 	//  5. Use [Page.Mouse] to click in the center of the element.
-	//  6. Wait for initiated navigations to either succeed or fail, unless “noWaitAfter” option is set.
-	//  7. Ensure that the element is now unchecked. If not, this method throws.
+	//  6. Ensure that the element is now unchecked. If not, this method throws.
 	// When all steps combined have not finished during the specified “timeout”, this method throws a [TimeoutError].
 	// Passing zero timeout disables this.
 	//
@@ -4128,7 +4110,7 @@ type Request interface {
 	// are NOT lower-cased. Headers with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
 	HeadersArray() ([]NameValue, error)
 
-	// Returns the value of the header matching the name. The name is case insensitive.
+	// Returns the value of the header matching the name. The name is case-insensitive.
 	//
 	//  name: Name of the header.
 	HeaderValue(name string) (string, error)
@@ -4212,14 +4194,14 @@ type Response interface {
 	// names are NOT lower-cased. Headers with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
 	HeadersArray() ([]NameValue, error)
 
-	// Returns the value of the header matching the name. The name is case insensitive. If multiple headers have the same
+	// Returns the value of the header matching the name. The name is case-insensitive. If multiple headers have the same
 	// name (except `set-cookie`), they are returned as a list separated by `, `. For `set-cookie`, the `\n` separator is
 	// used. If no headers are found, `null` is returned.
 	//
 	//  name: Name of the header.
 	HeaderValue(name string) (string, error)
 
-	// Returns all values of the headers matching the name, for example `set-cookie`. The name is case insensitive.
+	// Returns all values of the headers matching the name, for example `set-cookie`. The name is case-insensitive.
 	//
 	//  name: Name of the header.
 	HeaderValues(name string) ([]string, error)
@@ -4316,6 +4298,9 @@ type Selectors interface {
 type Touchscreen interface {
 	// Dispatches a `touchstart` and `touchend` event with a single touch at the position (“x”,“y”).
 	// **NOTE** [Page.Tap] the method will throw if “hasTouch” option of the browser context is false.
+	//
+	// 1. x: X coordinate relative to the main frame's viewport in CSS pixels.
+	// 2. y: Y coordinate relative to the main frame's viewport in CSS pixels.
 	Tap(x int, y int) error
 }
 
