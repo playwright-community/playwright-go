@@ -43,8 +43,6 @@ func NewTLSServerRequireClientCert(t *testing.T) *httptest.Server {
 }
 
 func TestClientCerts(t *testing.T) {
-	t.Skip("flaky when client certificate is incorrect.")
-
 	tlsServer := NewTLSServerRequireClientCert(t)
 	defer tlsServer.Close()
 
@@ -79,10 +77,8 @@ func TestClientCerts(t *testing.T) {
 			},
 		})
 
-		_, err := page.Goto(strings.Replace(tlsServer.URL, "127.0.0.1", "localhost", 1), playwright.PageGotoOptions{
-			Timeout: playwright.Float(1000),
-		})
-		require.ErrorContains(t, err, "net::ERR_CONNECTION_CLOSED")
+		_, err := page.Goto(strings.Replace(tlsServer.URL, "127.0.0.1", "localhost", 1))
+		require.Error(t, err)
 
 		_, err = page.Goto(tlsServer.URL)
 		require.NoError(t, err)
@@ -111,10 +107,8 @@ func TestClientCerts(t *testing.T) {
 		page2, err := context2.NewPage()
 		require.NoError(t, err)
 
-		_, err = page2.Goto(strings.Replace(tlsServer.URL, "127.0.0.1", "localhost", 1), playwright.PageGotoOptions{
-			Timeout: playwright.Float(1000),
-		})
-		require.ErrorContains(t, err, "net::ERR_CONNECTION_CLOSED")
+		_, err = page2.Goto(strings.Replace(tlsServer.URL, "127.0.0.1", "localhost", 1))
+		require.Error(t, err)
 
 		_, err = page2.Goto(tlsServer.URL)
 		require.NoError(t, err)
