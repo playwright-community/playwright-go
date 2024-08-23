@@ -32,7 +32,7 @@ func NewTLSServerRequireClientCert(t *testing.T) *httptest.Server {
 		_, err := w.Write(body)
 		require.NoError(t, err)
 	}))
-	ts.EnableHTTP2 = true
+	// ts.EnableHTTP2 = true	// Wait for https://github.com/microsoft/playwright/pull/32258
 	ts.TLS = &tls.Config{
 		ClientAuth:   tls.RequireAndVerifyClientCert, // Uses the go standard client certificate verification method
 		Certificates: []tls.Certificate{cert},
@@ -77,8 +77,9 @@ func TestClientCerts(t *testing.T) {
 			},
 		})
 
-		_, err := page.Goto(strings.Replace(tlsServer.URL, "127.0.0.1", "localhost", 1))
-		require.Error(t, err)
+		resp, err := page.Goto(strings.Replace(tlsServer.URL, "127.0.0.1", "localhost", 1))
+		require.NoError(t, err)
+		require.False(t, resp.Ok()) // status code 503, client didn't provide a certificate due to origin mismatch
 
 		_, err = page.Goto(tlsServer.URL)
 		require.NoError(t, err)
@@ -107,8 +108,9 @@ func TestClientCerts(t *testing.T) {
 		page2, err := context2.NewPage()
 		require.NoError(t, err)
 
-		_, err = page2.Goto(strings.Replace(tlsServer.URL, "127.0.0.1", "localhost", 1))
-		require.Error(t, err)
+		resp, err := page2.Goto(strings.Replace(tlsServer.URL, "127.0.0.1", "localhost", 1))
+		require.NoError(t, err)
+		require.False(t, resp.Ok()) // status code 503, client didn't provide a certificate due to origin mismatch
 
 		_, err = page2.Goto(tlsServer.URL)
 		require.NoError(t, err)
@@ -133,7 +135,8 @@ func TestClientCerts(t *testing.T) {
 		require.NoError(t, err)
 		resp, err := request.Get(tlsServer.URL)
 		require.NoError(t, err)
-		require.Equal(t, 200, resp.Status())
+		require.True(t, resp.Ok())
+
 		body, err := resp.Body()
 		require.NoError(t, err)
 		require.Contains(t, string(body), "Hello Alice, your certificate was issued by localhost!")
