@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -43,6 +44,9 @@ func NewTLSServerRequireClientCert(t *testing.T) *httptest.Server {
 }
 
 func TestClientCerts(t *testing.T) {
+	if isWebKit && runtime.GOOS == "darwin" {
+		t.Skip("WebKit does not proxy localhost on macOS")
+	}
 	tlsServer := NewTLSServerRequireClientCert(t)
 	defer tlsServer.Close()
 
@@ -61,10 +65,12 @@ func TestClientCerts(t *testing.T) {
 		})
 		require.NoError(t, err)
 		_, err = request.Get(tlsServer.URL)
-		require.ErrorContains(t, err, "alert unknown ca")
+		require.Error(t, err)
+		require.Regexp(t, `alert (unknown ca|bad certificate)`, err.Error()) // go v1.19-1.20 fails with "bad certificate"
 
 		require.NoError(t, request.Dispose())
 	})
+
 	t.Run("should work with new context", func(t *testing.T) {
 		BeforeEach(t, playwright.BrowserNewContextOptions{
 			IgnoreHttpsErrors: playwright.Bool(true), // TODO: Remove this once we can pass a custom CA.
