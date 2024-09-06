@@ -80,7 +80,7 @@ func TestBrowserContextExposeBindingPanic(t *testing.T) {
 	innerError := result.(map[string]interface{})
 	require.Equal(t, innerError["message"], "WOOF WOOF")
 	stack := strings.Split(innerError["stack"].(string), "\n")
-	require.Contains(t, stack[3], "binding_test.go")
+	require.Contains(t, stack[4], "binding_test.go")
 }
 
 func TestBrowserContextExposeBindingHandleShouldWork(t *testing.T) {
@@ -123,7 +123,7 @@ func TestPageExposeBindingPanic(t *testing.T) {
 	innerError := result.(map[string]interface{})
 	require.Equal(t, innerError["message"], "WOOF WOOF")
 	stack := strings.Split(innerError["stack"].(string), "\n")
-	require.Contains(t, stack[3], "binding_test.go")
+	require.Contains(t, stack[4], "binding_test.go")
 }
 
 func TestPageBindingsNoRace(t *testing.T) {

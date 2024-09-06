@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -529,4 +530,31 @@ func TestSupportHttpCredentialsSendImmediatelyForBrowserNewPage(t *testing.T) {
 	require.Equal(t, 200, response.Status())
 
 	require.NoError(t, page1.Close())
+}
+
+func TestFetchShouldRetryECONNRESET(t *testing.T) {
+	BeforeEach(t)
+
+	requestCount := atomic.Int32{}
+	server.SetRoute("/test", func(w http.ResponseWriter, r *http.Request) {
+		if requestCount.Add(1) <= 3 {
+			server.CloseClientConnections()
+			return
+		}
+		w.Header().Add("Content-Type", "text/plain")
+		_, _ = w.Write([]byte("Hello!"))
+	})
+
+	request, err := pw.Request.NewContext()
+	require.NoError(t, err)
+	response, err := request.Get(server.PREFIX+"/test", playwright.APIRequestContextGetOptions{
+		MaxRetries: playwright.Int(3),
+	})
+	require.NoError(t, err)
+	require.Equal(t, 200, response.Status())
+	body, err := response.Body()
+	require.NoError(t, err)
+	require.Equal(t, []byte("Hello!"), body)
+	require.Equal(t, int32(4), requestCount.Load())
+	require.NoError(t, request.Dispose())
 }

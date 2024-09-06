@@ -12,6 +12,18 @@ type APIRequestNewContextOptions struct {
 	//
 	// [`URL()`]: https://developer.mozilla.org/en-US/docs/Web/API/URL/URL
 	BaseURL *string `json:"baseURL"`
+	// TLS Client Authentication allows the server to request a client certificate and verify it.
+	//
+	// # Details
+	//
+	// An array of client certificates to be used. Each certificate object must have either both `certPath` and `keyPath`,
+	// a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
+	// `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
+	// with an exact match to the request origin that the certificate is valid for.
+	// **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
+	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
+	// work by replacing `localhost` with `local.playwright`.
+	ClientCertificates []ClientCertificate `json:"clientCertificates"`
 	// An object containing additional HTTP headers to be sent with every request. Defaults to none.
 	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
 	// Credentials for [HTTP authentication]. If no
@@ -57,6 +69,9 @@ type APIRequestContextDeleteOptions struct {
 	// Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
 	// exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 	MaxRedirects *int `json:"maxRedirects"`
+	// Maximum number of times network errors should be retried. Currently only `ECONNRESET` error is retried. Does not
+	// retry based on HTTP response codes. An error will be thrown if the limit is exceeded. Defaults to `0` - no retries.
+	MaxRetries *int `json:"maxRetries"`
 	// Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
 	// request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
 	// explicitly provided. File values can be passed either as
@@ -94,6 +109,9 @@ type APIRequestContextFetchOptions struct {
 	// Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
 	// exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 	MaxRedirects *int `json:"maxRedirects"`
+	// Maximum number of times network errors should be retried. Currently only `ECONNRESET` error is retried. Does not
+	// retry based on HTTP response codes. An error will be thrown if the limit is exceeded. Defaults to `0` - no retries.
+	MaxRetries *int `json:"maxRetries"`
 	// If set changes the fetch method (e.g. [PUT] or
 	// [POST]. If not specified, GET method is used.
 	//
@@ -133,6 +151,9 @@ type APIRequestContextGetOptions struct {
 	// Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
 	// exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 	MaxRedirects *int `json:"maxRedirects"`
+	// Maximum number of times network errors should be retried. Currently only `ECONNRESET` error is retried. Does not
+	// retry based on HTTP response codes. An error will be thrown if the limit is exceeded. Defaults to `0` - no retries.
+	MaxRetries *int `json:"maxRetries"`
 	// Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
 	// request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
 	// explicitly provided. File values can be passed either as
@@ -166,6 +187,9 @@ type APIRequestContextHeadOptions struct {
 	// Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
 	// exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 	MaxRedirects *int `json:"maxRedirects"`
+	// Maximum number of times network errors should be retried. Currently only `ECONNRESET` error is retried. Does not
+	// retry based on HTTP response codes. An error will be thrown if the limit is exceeded. Defaults to `0` - no retries.
+	MaxRetries *int `json:"maxRetries"`
 	// Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
 	// request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
 	// explicitly provided. File values can be passed either as
@@ -199,6 +223,9 @@ type APIRequestContextPatchOptions struct {
 	// Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
 	// exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 	MaxRedirects *int `json:"maxRedirects"`
+	// Maximum number of times network errors should be retried. Currently only `ECONNRESET` error is retried. Does not
+	// retry based on HTTP response codes. An error will be thrown if the limit is exceeded. Defaults to `0` - no retries.
+	MaxRetries *int `json:"maxRetries"`
 	// Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
 	// request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
 	// explicitly provided. File values can be passed either as
@@ -232,6 +259,9 @@ type APIRequestContextPostOptions struct {
 	// Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
 	// exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 	MaxRedirects *int `json:"maxRedirects"`
+	// Maximum number of times network errors should be retried. Currently only `ECONNRESET` error is retried. Does not
+	// retry based on HTTP response codes. An error will be thrown if the limit is exceeded. Defaults to `0` - no retries.
+	MaxRetries *int `json:"maxRetries"`
 	// Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
 	// request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
 	// explicitly provided. File values can be passed either as
@@ -265,6 +295,9 @@ type APIRequestContextPutOptions struct {
 	// Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
 	// exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 	MaxRedirects *int `json:"maxRedirects"`
+	// Maximum number of times network errors should be retried. Currently only `ECONNRESET` error is retried. Does not
+	// retry based on HTTP response codes. An error will be thrown if the limit is exceeded. Defaults to `0` - no retries.
+	MaxRetries *int `json:"maxRetries"`
 	// Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
 	// request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
 	// explicitly provided. File values can be passed either as
@@ -308,6 +341,18 @@ type BrowserNewContextOptions struct {
 	BaseURL *string `json:"baseURL"`
 	// Toggles bypassing page's Content-Security-Policy. Defaults to `false`.
 	BypassCSP *bool `json:"bypassCSP"`
+	// TLS Client Authentication allows the server to request a client certificate and verify it.
+	//
+	// # Details
+	//
+	// An array of client certificates to be used. Each certificate object must have either both `certPath` and `keyPath`,
+	// a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
+	// `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
+	// with an exact match to the request origin that the certificate is valid for.
+	// **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
+	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
+	// work by replacing `localhost` with `local.playwright`.
+	ClientCertificates []ClientCertificate `json:"clientCertificates"`
 	// Emulates `prefers-colors-scheme` media feature, supported values are `light`, `dark`, `no-preference`. See
 	// [Page.EmulateMedia] for more details. Passing `no-override` resets emulation to system defaults. Defaults to
 	// `light`.
@@ -363,9 +408,6 @@ type BrowserNewContextOptions struct {
 	// details. Defaults to none.
 	Permissions []string `json:"permissions"`
 	// Network proxy settings to use with this context. Defaults to none.
-	// **NOTE** For Chromium on Windows the browser needs to be launched with the global proxy for this option to work. If
-	// all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({
-	// proxy: { server: 'http://per-context' } })`.
 	Proxy *Proxy `json:"proxy"`
 	// Optional setting to control resource content management. If `omit` is specified, content is not persisted. If
 	// `attach` is specified, resources are persisted as separate files and all of these files are archived along with the
@@ -399,8 +441,13 @@ type BrowserNewContextOptions struct {
 	//  - `block`: Playwright will block all registration of Service Workers.
 	//
 	// [Service Workers]: https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API
-	ServiceWorkers *ServiceWorkerPolicy  `json:"serviceWorkers"`
-	StorageState   *OptionalStorageState `json:"storageState"`
+	ServiceWorkers *ServiceWorkerPolicy `json:"serviceWorkers"`
+	// Learn more about [storage state and auth].
+	// Populates context with given storage state. This option can be used to initialize context with logged-in
+	// information obtained via [BrowserContext.StorageState].
+	//
+	// [storage state and auth]: https://playwright.dev/docs/auth
+	StorageState *OptionalStorageState `json:"storageState"`
 	// Populates context with given storage state. This option can be used to initialize context with logged-in
 	// information obtained via [BrowserContext.StorageState]. Path to the file with saved storage state.
 	StorageStatePath *string `json:"storageStatePath"`
@@ -439,6 +486,18 @@ type BrowserNewPageOptions struct {
 	BaseURL *string `json:"baseURL"`
 	// Toggles bypassing page's Content-Security-Policy. Defaults to `false`.
 	BypassCSP *bool `json:"bypassCSP"`
+	// TLS Client Authentication allows the server to request a client certificate and verify it.
+	//
+	// # Details
+	//
+	// An array of client certificates to be used. Each certificate object must have either both `certPath` and `keyPath`,
+	// a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
+	// `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
+	// with an exact match to the request origin that the certificate is valid for.
+	// **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
+	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
+	// work by replacing `localhost` with `local.playwright`.
+	ClientCertificates []ClientCertificate `json:"clientCertificates"`
 	// Emulates `prefers-colors-scheme` media feature, supported values are `light`, `dark`, `no-preference`. See
 	// [Page.EmulateMedia] for more details. Passing `no-override` resets emulation to system defaults. Defaults to
 	// `light`.
@@ -494,9 +553,6 @@ type BrowserNewPageOptions struct {
 	// details. Defaults to none.
 	Permissions []string `json:"permissions"`
 	// Network proxy settings to use with this context. Defaults to none.
-	// **NOTE** For Chromium on Windows the browser needs to be launched with the global proxy for this option to work. If
-	// all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({
-	// proxy: { server: 'http://per-context' } })`.
 	Proxy *Proxy `json:"proxy"`
 	// Optional setting to control resource content management. If `omit` is specified, content is not persisted. If
 	// `attach` is specified, resources are persisted as separate files and all of these files are archived along with the
@@ -530,8 +586,13 @@ type BrowserNewPageOptions struct {
 	//  - `block`: Playwright will block all registration of Service Workers.
 	//
 	// [Service Workers]: https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API
-	ServiceWorkers *ServiceWorkerPolicy  `json:"serviceWorkers"`
-	StorageState   *OptionalStorageState `json:"storageState"`
+	ServiceWorkers *ServiceWorkerPolicy `json:"serviceWorkers"`
+	// Learn more about [storage state and auth].
+	// Populates context with given storage state. This option can be used to initialize context with logged-in
+	// information obtained via [BrowserContext.StorageState].
+	//
+	// [storage state and auth]: https://playwright.dev/docs/auth
+	StorageState *OptionalStorageState `json:"storageState"`
 	// Populates context with given storage state. This option can be used to initialize context with logged-in
 	// information obtained via [BrowserContext.StorageState]. Path to the file with saved storage state.
 	StorageStatePath *string `json:"storageStatePath"`
@@ -567,11 +628,12 @@ type BrowserStartTracingOptions struct {
 type OptionalCookie struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
-	// either url or domain / path are required. Optional.
+	// Either url or domain / path are required. Optional.
 	URL *string `json:"url"`
-	// either url or domain / path are required Optional.
+	// For the cookie to apply to all subdomains as well, prefix domain with a dot, like this: ".example.com". Either url
+	// or domain / path are required. Optional.
 	Domain *string `json:"domain"`
-	// either url or domain / path are required Optional.
+	// Either url or domain / path are required Optional.
 	Path *string `json:"path"`
 	// Unix time in seconds. Optional.
 	Expires *float64 `json:"expires"`
@@ -809,6 +871,18 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	Channel *string `json:"channel"`
 	// Enable Chromium sandboxing. Defaults to `false`.
 	ChromiumSandbox *bool `json:"chromiumSandbox"`
+	// TLS Client Authentication allows the server to request a client certificate and verify it.
+	//
+	// # Details
+	//
+	// An array of client certificates to be used. Each certificate object must have either both `certPath` and `keyPath`,
+	// a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
+	// `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
+	// with an exact match to the request origin that the certificate is valid for.
+	// **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
+	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
+	// work by replacing `localhost` with `local.playwright`.
+	ClientCertificates []ClientCertificate `json:"clientCertificates"`
 	// Emulates `prefers-colors-scheme` media feature, supported values are `light`, `dark`, `no-preference`. See
 	// [Page.EmulateMedia] for more details. Passing `no-override` resets emulation to system defaults. Defaults to
 	// `light`.
@@ -994,9 +1068,9 @@ type ElementHandleCheckOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -1028,6 +1102,8 @@ type ElementHandleClickOptions struct {
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
 	// navigating to inaccessible pages. Defaults to `false`.
+	//
+	// Deprecated: This option will default to `true` in the future.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -1054,9 +1130,9 @@ type ElementHandleDblclickOptions struct {
 	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
 	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -1075,9 +1151,9 @@ type ElementHandleFillOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
@@ -1092,9 +1168,9 @@ type ElementHandleHoverOptions struct {
 	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
 	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -1119,6 +1195,8 @@ type ElementHandlePressOptions struct {
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
 	// navigating to inaccessible pages. Defaults to `false`.
+	//
+	// Deprecated: This option will default to `true` in the future.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
@@ -1176,9 +1254,9 @@ type ElementHandleSelectOptionOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
@@ -1198,9 +1276,9 @@ type ElementHandleSetCheckedOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -1215,9 +1293,9 @@ type ElementHandleSetCheckedOptions struct {
 	Trial *bool `json:"trial"`
 }
 type ElementHandleSetInputFilesOptions struct {
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
@@ -1232,9 +1310,9 @@ type ElementHandleTapOptions struct {
 	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
 	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -1251,9 +1329,9 @@ type ElementHandleTapOptions struct {
 type ElementHandleTypeOptions struct {
 	// Time to wait between key presses in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
@@ -1264,9 +1342,9 @@ type ElementHandleUncheckOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -1302,9 +1380,9 @@ type ElementHandleWaitForSelectorOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 type FileChooserSetFilesOptions struct {
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
@@ -1316,7 +1394,7 @@ type FrameAddScriptTagOptions struct {
 	// Path to the JavaScript file to be injected into frame. If `path` is a relative path, then it is resolved relative
 	// to the current working directory.
 	Path *string `json:"path"`
-	// Script type. Use 'module' in order to load a Javascript ES6 module. See
+	// Script type. Use 'module' in order to load a JavaScript ES6 module. See
 	// [script] for more details.
 	//
 	// [script]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script
@@ -1338,9 +1416,9 @@ type FrameCheckOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -1375,6 +1453,8 @@ type FrameClickOptions struct {
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
 	// navigating to inaccessible pages. Defaults to `false`.
+	//
+	// Deprecated: This option will default to `true` in the future.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -1404,9 +1484,9 @@ type FrameDblclickOptions struct {
 	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
 	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -1436,9 +1516,9 @@ type FrameDragAndDropOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Clicks on the source element at this point relative to the top-left corner of the element's padding box. If not
 	// specified, some visible point of the element is used.
@@ -1468,9 +1548,9 @@ type FrameFillOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1597,9 +1677,9 @@ type FrameHoverOptions struct {
 	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
 	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -1715,6 +1795,8 @@ type FramePressOptions struct {
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
 	// navigating to inaccessible pages. Defaults to `false`.
+	//
+	// Deprecated: This option will default to `true` in the future.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1733,9 +1815,9 @@ type FrameSelectOptionOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1749,9 +1831,9 @@ type FrameSetCheckedOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -1783,9 +1865,9 @@ type FrameSetContentOptions struct {
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type FrameSetInputFilesOptions struct {
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1803,9 +1885,9 @@ type FrameTapOptions struct {
 	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
 	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -1833,9 +1915,9 @@ type FrameTextContentOptions struct {
 type FrameTypeOptions struct {
 	// Time to wait between key presses in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1849,9 +1931,9 @@ type FrameUncheckOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -2058,9 +2140,9 @@ type LocatorCheckOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -2079,9 +2161,9 @@ type LocatorClearOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
@@ -2105,6 +2187,8 @@ type LocatorClickOptions struct {
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
 	// navigating to inaccessible pages. Defaults to `false`.
+	//
+	// Deprecated: This option will default to `true` in the future.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -2131,9 +2215,9 @@ type LocatorDblclickOptions struct {
 	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
 	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -2157,9 +2241,9 @@ type LocatorDragToOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Clicks on the source element at this point relative to the top-left corner of the element's padding box. If not
 	// specified, some visible point of the element is used.
@@ -2196,9 +2280,9 @@ type LocatorFillOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
@@ -2320,9 +2404,9 @@ type LocatorHoverOptions struct {
 	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
 	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -2408,6 +2492,8 @@ type LocatorPressOptions struct {
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
 	// navigating to inaccessible pages. Defaults to `false`.
+	//
+	// Deprecated: This option will default to `true` in the future.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
@@ -2416,9 +2502,9 @@ type LocatorPressOptions struct {
 type LocatorPressSequentiallyOptions struct {
 	// Time to wait between key presses in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
@@ -2476,9 +2562,9 @@ type LocatorSelectOptionOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
@@ -2498,9 +2584,9 @@ type LocatorSetCheckedOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -2515,9 +2601,9 @@ type LocatorSetCheckedOptions struct {
 	Trial *bool `json:"trial"`
 }
 type LocatorSetInputFilesOptions struct {
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
@@ -2532,9 +2618,9 @@ type LocatorTapOptions struct {
 	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
 	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -2556,9 +2642,9 @@ type LocatorTextContentOptions struct {
 type LocatorTypeOptions struct {
 	// Time to wait between key presses in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
@@ -2569,9 +2655,9 @@ type LocatorUncheckOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -2753,7 +2839,7 @@ type PageAddScriptTagOptions struct {
 	// Path to the JavaScript file to be injected into frame. If `path` is a relative path, then it is resolved relative
 	// to the current working directory.
 	Path *string `json:"path"`
-	// Script type. Use 'module' in order to load a Javascript ES6 module. See
+	// Script type. Use 'module' in order to load a JavaScript ES6 module. See
 	// [script] for more details.
 	//
 	// [script]: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script
@@ -2775,9 +2861,9 @@ type PageCheckOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -2812,6 +2898,8 @@ type PageClickOptions struct {
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
 	// navigating to inaccessible pages. Defaults to `false`.
+	//
+	// Deprecated: This option will default to `true` in the future.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -2850,9 +2938,9 @@ type PageDblclickOptions struct {
 	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
 	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -2882,9 +2970,9 @@ type PageDragAndDropOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Clicks on the source element at this point relative to the top-left corner of the element's padding box. If not
 	// specified, some visible point of the element is used.
@@ -2926,9 +3014,9 @@ type PageFillOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3089,9 +3177,9 @@ type PageHoverOptions struct {
 	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
 	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -3247,6 +3335,8 @@ type PagePressOptions struct {
 	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
 	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
 	// navigating to inaccessible pages. Defaults to `false`.
+	//
+	// Deprecated: This option will default to `true` in the future.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3294,7 +3384,8 @@ type PageRouteFromHAROptions struct {
 	// separate files or entries in the ZIP archive. If `embed` is specified, content is stored inline the HAR file.
 	UpdateContent *RouteFromHarUpdateContentPolicy `json:"updateContent"`
 	// When set to `minimal`, only record information necessary for routing from HAR. This omits sizes, timing, page,
-	// cookies, security and other types of HAR information that are not used when replaying from HAR. Defaults to `full`.
+	// cookies, security and other types of HAR information that are not used when replaying from HAR. Defaults to
+	// `minimal`.
 	UpdateMode *HarMode `json:"updateMode"`
 	// A glob pattern, regular expression or predicate to match the request URL. Only requests with URL matching the
 	// pattern will be served from the HAR file. If not specified, all requests are served from the HAR file.
@@ -3352,9 +3443,9 @@ type PageSelectOptionOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3368,9 +3459,9 @@ type PageSetCheckedOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -3402,9 +3493,9 @@ type PageSetContentOptions struct {
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
 type PageSetInputFilesOptions struct {
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3422,9 +3513,9 @@ type PageTapOptions struct {
 	// current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
 	// "Control" on Windows and Linux and to "Meta" on macOS.
 	Modifiers []KeyboardModifier `json:"modifiers"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -3452,9 +3543,9 @@ type PageTextContentOptions struct {
 type PageTypeOptions struct {
 	// Time to wait between key presses in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3468,9 +3559,9 @@ type PageUncheckOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
+	//
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
@@ -3743,6 +3834,9 @@ type RouteFetchOptions struct {
 	// Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
 	// exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 	MaxRedirects *int `json:"maxRedirects"`
+	// Maximum number of times network errors should be retried. Currently only `ECONNRESET` error is retried. Does not
+	// retry based on HTTP response codes. An error will be thrown if the limit is exceeded. Defaults to `0` - no retries.
+	MaxRetries *int `json:"maxRetries"`
 	// If set changes the request method (e.g. GET or POST).
 	Method *string `json:"method"`
 	// If set changes the post data of request.
@@ -3811,6 +3905,24 @@ type WebSocketWaitForEventOptions struct {
 	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout].
 	Timeout *float64 `json:"timeout"`
+}
+type ClientCertificate struct {
+	// Exact origin that the certificate is valid for. Origin includes `https` protocol, a hostname and optionally a port.
+	Origin string `json:"origin"`
+	// Path to the file with the certificate in PEM format.
+	CertPath *string `json:"certPath"`
+	// Direct value of the certificate in PEM format.
+	Cert []byte `json:"cert"`
+	// Path to the file with the private key in PEM format.
+	KeyPath *string `json:"keyPath"`
+	// Direct value of the private key in PEM format.
+	Key []byte `json:"key"`
+	// Path to the PFX or PKCS12 encoded private key and certificate chain.
+	PfxPath *string `json:"pfxPath"`
+	// Direct value of the PFX or PKCS12 encoded private key and certificate chain.
+	Pfx []byte `json:"pfx"`
+	// Passphrase for the private key (PEM or PFX).
+	Passphrase *string `json:"passphrase"`
 }
 type HttpCredentials struct {
 	Username string `json:"username"`

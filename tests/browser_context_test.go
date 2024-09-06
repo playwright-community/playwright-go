@@ -741,3 +741,27 @@ func expectPageCookies(t *testing.T, cookie string) {
 	require.NoError(t, err)
 	require.Equal(t, cookie, ret)
 }
+
+func TestBrowserContextShouldRetryECONNRESET(t *testing.T) {
+	BeforeEach(t)
+
+	requestCount := atomic.Int32{}
+	server.SetRoute("/test", func(w http.ResponseWriter, r *http.Request) {
+		if requestCount.Add(1) <= 3 {
+			server.CloseClientConnections()
+			return
+		}
+		w.Header().Add("Content-Type", "text/plain")
+		_, _ = w.Write([]byte("Hello!"))
+	})
+
+	response, err := context.Request().Fetch(server.PREFIX+"/test", playwright.APIRequestContextFetchOptions{
+		MaxRetries: playwright.Int(3),
+	})
+	require.NoError(t, err)
+	require.Equal(t, 200, response.Status())
+	body, err := response.Body()
+	require.NoError(t, err)
+	require.Equal(t, []byte("Hello!"), body)
+	require.Equal(t, int32(4), requestCount.Load())
+}

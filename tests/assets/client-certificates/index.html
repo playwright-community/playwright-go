@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+
+<!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Playwright for Go | Playwright is a Node.js library to automate Chromium, Firefox and WebKit with a single API. Playwright is built to enable cross-browser web automation that is ever-green, capable, reliable and fast.</title>
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Playwright for Go" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Playwright is a Node.js library to automate Chromium, Firefox and WebKit with a single API. Playwright is built to enable cross-browser web automation that is ever-green, capable, reliable and fast." />
+<meta property="og:description" content="Playwright is a Node.js library to automate Chromium, Firefox and WebKit with a single API. Playwright is built to enable cross-browser web automation that is ever-green, capable, reliable and fast." />
+<link rel="canonical" href="https://playwright-community.github.io//playwright-go/tests/assets/client-certificates/" />
+<meta property="og:url" content="https://playwright-community.github.io//playwright-go/tests/assets/client-certificates/" />
+<meta property="og:site_name" content="Playwright for Go" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Playwright for Go" />
+<script type="application/ld+json">
+{"description":"Playwright is a Node.js library to automate Chromium, Firefox and WebKit with a single API. Playwright is built to enable cross-browser web automation that is ever-green, capable, reliable and fast.","headline":"Playwright for Go","url":"https://playwright-community.github.io//playwright-go/tests/assets/client-certificates/","@type":"WebPage","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preload" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap" as="style" type="text/css" crossorigin>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#157878">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="stylesheet" href="/playwright-go/assets/css/style.css?v=">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/playwright-go/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+  <body>
+    <a id="skip-to-content" href="#content">Skip to the content.</a>
+
+    <header class="page-header" role="banner">
+      <h1 class="project-name">Playwright for Go</h1>
+      <h2 class="project-tagline">Playwright is a Node.js library to automate Chromium, Firefox and WebKit with a single API. Playwright is built to enable cross-browser web automation that is ever-green, capable, reliable and fast.</h2>
+      
+      
+    </header>
+
+    <main id="content" class="main-content" role="main">
+      <h1 id="client-certificate-test-certificates">Client Certificate test-certificates</h1>
+
+<h2 id="server">Server</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>openssl req <span class="se">\</span>
+	<span class="nt">-x509</span> <span class="se">\</span>
+	<span class="nt">-newkey</span> rsa:4096 <span class="se">\</span>
+	<span class="nt">-keyout</span> server/server_key.pem <span class="se">\</span>
+	<span class="nt">-out</span> server/server_cert.pem <span class="se">\</span>
+	<span class="nt">-nodes</span> <span class="se">\</span>
+	<span class="nt">-days</span> 365 <span class="se">\</span>
+	<span class="nt">-subj</span> <span class="s2">"/CN=localhost/O=Client</span><span class="se">\ </span><span class="s2">Certificate</span><span class="se">\ </span><span class="s2">Demo"</span> <span class="se">\</span>
+	<span class="nt">-addext</span> <span class="s2">"subjectAltName=DNS:localhost,DNS:local.playwright"</span>
+</code></pre></div></div>
+
+<h2 id="trusted-client-certificate-server-signedvalid">Trusted client-certificate (server signed/valid)</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir -p client/trusted
+# generate server-signed (valid) certifcate
+openssl req \
+	-newkey rsa:4096 \
+	-keyout client/trusted/key.pem \
+	-out client/trusted/csr.pem \
+	-nodes \
+	-days 365 \
+	-subj "/CN=Alice"
+
+# sign with server_cert.pem
+openssl x509 \
+	-req \
+	-in client/trusted/csr.pem \
+	-CA server/server_cert.pem \
+	-CAkey server/server_key.pem \
+	-out client/trusted/cert.pem \
+	-set_serial 01 \
+	-days 365
+# create pfx
+openssl pkcs12 -export -out client/trusted/cert.pfx -inkey client/trusted/key.pem -in client/trusted/cert.pem -passout pass:secure
+</code></pre></div></div>
+
+<h2 id="self-signed-certificate-invalid">Self-signed certificate (invalid)</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir -p client/self-signed
+openssl req \
+	-newkey rsa:4096 \
+	-keyout client/self-signed/key.pem \
+	-out client/self-signed/csr.pem \
+	-nodes \
+	-days 365 \
+	-subj "/CN=Bob"
+
+# sign with self-signed/key.pem
+openssl x509 \
+	-req \
+	-in client/self-signed/csr.pem \
+	-signkey client/self-signed/key.pem \
+	-out client/self-signed/cert.pem \
+	-days 365
+</code></pre></div></div>
+
+
+      <footer class="site-footer">
+        
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a>.</span>
+      </footer>
+    </main>
+  </body>
+</html>

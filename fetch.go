@@ -16,6 +16,14 @@ type apiRequestImpl struct {
 func (r *apiRequestImpl) NewContext(options ...APIRequestNewContextOptions) (APIRequestContext, error) {
 	overrides := map[string]interface{}{}
 	if len(options) == 1 {
+		if options[0].ClientCertificates != nil {
+			certs, err := transformClientCertificate(options[0].ClientCertificates)
+			if err != nil {
+				return nil, err
+			}
+			overrides["clientCertificates"] = certs
+			options[0].ClientCertificates = nil
+		}
 		if options[0].ExtraHttpHeaders != nil {
 			overrides["extraHTTPHeaders"] = serializeMapToNameAndValue(options[0].ExtraHttpHeaders)
 			options[0].ExtraHttpHeaders = nil
@@ -104,6 +112,9 @@ func (r *apiRequestContextImpl) innerFetch(url string, request Request, options 
 	if len(options) == 1 {
 		if options[0].MaxRedirects != nil && *options[0].MaxRedirects < 0 {
 			return nil, errors.New("maxRedirects must be non-negative")
+		}
+		if options[0].MaxRetries != nil && *options[0].MaxRetries < 0 {
+			return nil, errors.New("maxRetries must be non-negative")
 		}
 		// only one of them can be specified
 		if countNonNil(options[0].Data, options[0].Form, options[0].Multipart) > 1 {
