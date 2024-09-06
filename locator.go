@@ -170,9 +170,8 @@ func (l *locatorImpl) Clear(options ...LocatorClearOptions) error {
 	}
 	if len(options) == 1 {
 		return l.Fill("", LocatorFillOptions{
-			Force:       options[0].Force,
-			NoWaitAfter: options[0].NoWaitAfter,
-			Timeout:     options[0].Timeout,
+			Force:   options[0].Force,
+			Timeout: options[0].Timeout,
 		})
 	} else {
 		return l.Fill("")

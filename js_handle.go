@@ -172,6 +172,14 @@ func parseValue(result interface{}, refs map[float64]interface{}) interface{} {
 		}
 		return out
 	}
+
+	if v, ok := vMap["e"]; ok {
+		return parseError(Error{
+			Name:    v.(map[string]interface{})["n"].(string),
+			Message: v.(map[string]interface{})["m"].(string),
+			Stack:   v.(map[string]interface{})["s"].(string),
+		})
+	}
 	panic(fmt.Errorf("Unexpected value: %v", vMap))
 }
 
@@ -193,6 +201,26 @@ func serializeValue(value interface{}, handles *[]*channel, depth int) interface
 	if u, ok := value.(*url.URL); ok {
 		return map[string]interface{}{
 			"u": u.String(),
+		}
+	}
+
+	if err, ok := value.(error); ok {
+		var e *Error
+		if errors.As(err, &e) {
+			return map[string]interface{}{
+				"e": map[string]interface{}{
+					"n": e.Name,
+					"m": e.Message,
+					"s": e.Stack,
+				},
+			}
+		}
+		return map[string]interface{}{
+			"e": map[string]interface{}{
+				"n": "",
+				"m": err.Error(),
+				"s": "",
+			},
 		}
 	}
 

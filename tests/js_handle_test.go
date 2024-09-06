@@ -1,12 +1,14 @@
 package playwright_test
 
 import (
+	"errors"
 	"math"
 	"math/big"
 	"net/url"
 	"testing"
 	"time"
 
+	"github.com/playwright-community/playwright-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -311,9 +313,35 @@ func TestEvaluate(t *testing.T) {
 	})
 
 	t.Run("evaluate exception", func(t *testing.T) {
-		val, err := page.Evaluate(`new Error("error message")`)
+		val, err := page.Evaluate(`() => {
+			function innerFunction() {
+				const e = new Error('error message');
+				e.name = 'foobar';
+				return e;
+			}
+			return innerFunction();
+		}`)
 		require.NoError(t, err)
-		require.Contains(t, val, "Error: error message")
+		var e *playwright.Error
+		require.True(t, errors.As(val.(error), &e))
+		require.Equal(t, "foobar", e.Name)
+		require.Equal(t, "error message", e.Message)
+		require.Contains(t, e.Stack, "innerFunction")
+	})
+
+	t.Run("pass exception argument", func(t *testing.T) {
+		eee := &playwright.Error{
+			Name:    "foobar",
+			Message: "error message",
+			Stack:   "test stack",
+		}
+		val, err := page.Evaluate(`e => {
+			return { message: e.message, name: e.name, stack: e.stack };
+		}`, eee)
+		require.NoError(t, err)
+		require.Equal(t, "foobar", val.(map[string]interface{})["name"])
+		require.Equal(t, "error message", val.(map[string]interface{})["message"])
+		require.Contains(t, val.(map[string]interface{})["stack"], "test stack")
 	})
 
 	t.Run("evaluate date", func(t *testing.T) {

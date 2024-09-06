@@ -3,6 +3,7 @@ package playwright_test
 import (
 	"archive/zip"
 	"bytes"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
@@ -73,6 +74,14 @@ func (t *testServer) AfterEach() {
 	defer t.Unlock()
 	t.routes = make(map[string]http.HandlerFunc)
 	t.requestSubscriberes = make(map[string][]chan *http.Request)
+}
+
+func (t *testServer) CloseClientConnections() {
+	t.testServer.CloseClientConnections()
+}
+
+func (t *testServer) SetTLSConfig(config *tls.Config) {
+	t.testServer.TLS = config
 }
 
 func (t *testServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
