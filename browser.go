@@ -235,14 +235,19 @@ func transformClientCertificate(clientCertificates []ClientCertificate) ([]map[s
 			"origin":     cert.Origin,
 			"passphrase": cert.Passphrase,
 		}
-		if cert.CertPath != nil {
+		if len(cert.Cert) > 0 {
+			data["cert"] = base64.StdEncoding.EncodeToString(cert.Cert)
+		} else if cert.CertPath != nil {
 			content, err := os.ReadFile(*cert.CertPath)
 			if err != nil {
 				return nil, err
 			}
 			data["cert"] = base64.StdEncoding.EncodeToString(content)
 		}
-		if cert.KeyPath != nil {
+
+		if len(cert.Key) > 0 {
+			data["key"] = base64.StdEncoding.EncodeToString(cert.Key)
+		} else if cert.KeyPath != nil {
 			content, err := os.ReadFile(*cert.KeyPath)
 			if err != nil {
 				return nil, err
@@ -250,7 +255,9 @@ func transformClientCertificate(clientCertificates []ClientCertificate) ([]map[s
 			data["key"] = base64.StdEncoding.EncodeToString(content)
 		}
 
-		if cert.PfxPath != nil {
+		if len(cert.Pfx) > 0 {
+			data["pfx"] = base64.StdEncoding.EncodeToString(cert.Pfx)
+		} else if cert.PfxPath != nil {
 			content, err := os.ReadFile(*cert.PfxPath)
 			if err != nil {
 				return nil, err

@@ -16,10 +16,10 @@ type APIRequestNewContextOptions struct {
 	//
 	// # Details
 	//
-	// An array of client certificates to be used. Each certificate object must have both `certPath` and `keyPath` or a
-	// single `pfxPath` to load the client certificate. Optionally, `passphrase` property should be provided if the
-	// certficiate is encrypted. The `origin` property should be provided with an exact match to the request origin that
-	// the certificate is valid for.
+	// An array of client certificates to be used. Each certificate object must have either both `certPath` and `keyPath`,
+	// a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
+	// `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
+	// with an exact match to the request origin that the certificate is valid for.
 	// **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
 	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
 	// work by replacing `localhost` with `local.playwright`.
@@ -345,10 +345,10 @@ type BrowserNewContextOptions struct {
 	//
 	// # Details
 	//
-	// An array of client certificates to be used. Each certificate object must have both `certPath` and `keyPath` or a
-	// single `pfxPath` to load the client certificate. Optionally, `passphrase` property should be provided if the
-	// certficiate is encrypted. The `origin` property should be provided with an exact match to the request origin that
-	// the certificate is valid for.
+	// An array of client certificates to be used. Each certificate object must have either both `certPath` and `keyPath`,
+	// a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
+	// `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
+	// with an exact match to the request origin that the certificate is valid for.
 	// **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
 	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
 	// work by replacing `localhost` with `local.playwright`.
@@ -408,9 +408,6 @@ type BrowserNewContextOptions struct {
 	// details. Defaults to none.
 	Permissions []string `json:"permissions"`
 	// Network proxy settings to use with this context. Defaults to none.
-	// **NOTE** For Chromium on Windows the browser needs to be launched with the global proxy for this option to work. If
-	// all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({
-	// proxy: { server: 'http://per-context' } })`.
 	Proxy *Proxy `json:"proxy"`
 	// Optional setting to control resource content management. If `omit` is specified, content is not persisted. If
 	// `attach` is specified, resources are persisted as separate files and all of these files are archived along with the
@@ -493,10 +490,10 @@ type BrowserNewPageOptions struct {
 	//
 	// # Details
 	//
-	// An array of client certificates to be used. Each certificate object must have both `certPath` and `keyPath` or a
-	// single `pfxPath` to load the client certificate. Optionally, `passphrase` property should be provided if the
-	// certficiate is encrypted. The `origin` property should be provided with an exact match to the request origin that
-	// the certificate is valid for.
+	// An array of client certificates to be used. Each certificate object must have either both `certPath` and `keyPath`,
+	// a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
+	// `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
+	// with an exact match to the request origin that the certificate is valid for.
 	// **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
 	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
 	// work by replacing `localhost` with `local.playwright`.
@@ -556,9 +553,6 @@ type BrowserNewPageOptions struct {
 	// details. Defaults to none.
 	Permissions []string `json:"permissions"`
 	// Network proxy settings to use with this context. Defaults to none.
-	// **NOTE** For Chromium on Windows the browser needs to be launched with the global proxy for this option to work. If
-	// all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({
-	// proxy: { server: 'http://per-context' } })`.
 	Proxy *Proxy `json:"proxy"`
 	// Optional setting to control resource content management. If `omit` is specified, content is not persisted. If
 	// `attach` is specified, resources are persisted as separate files and all of these files are archived along with the
@@ -881,10 +875,10 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	//
 	// # Details
 	//
-	// An array of client certificates to be used. Each certificate object must have both `certPath` and `keyPath` or a
-	// single `pfxPath` to load the client certificate. Optionally, `passphrase` property should be provided if the
-	// certficiate is encrypted. The `origin` property should be provided with an exact match to the request origin that
-	// the certificate is valid for.
+	// An array of client certificates to be used. Each certificate object must have either both `certPath` and `keyPath`,
+	// a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
+	// `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
+	// with an exact match to the request origin that the certificate is valid for.
 	// **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
 	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
 	// work by replacing `localhost` with `local.playwright`.
@@ -1260,11 +1254,9 @@ type ElementHandleSelectOptionOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
 	//
-	// Deprecated: This option will default to `true` in the future.
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
@@ -1823,11 +1815,9 @@ type FrameSelectOptionOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
 	//
-	// Deprecated: This option will default to `true` in the future.
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -2572,11 +2562,9 @@ type LocatorSelectOptionOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
 	//
-	// Deprecated: This option will default to `true` in the future.
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
@@ -3396,7 +3384,8 @@ type PageRouteFromHAROptions struct {
 	// separate files or entries in the ZIP archive. If `embed` is specified, content is stored inline the HAR file.
 	UpdateContent *RouteFromHarUpdateContentPolicy `json:"updateContent"`
 	// When set to `minimal`, only record information necessary for routing from HAR. This omits sizes, timing, page,
-	// cookies, security and other types of HAR information that are not used when replaying from HAR. Defaults to `full`.
+	// cookies, security and other types of HAR information that are not used when replaying from HAR. Defaults to
+	// `minimal`.
 	UpdateMode *HarMode `json:"updateMode"`
 	// A glob pattern, regular expression or predicate to match the request URL. Only requests with URL matching the
 	// pattern will be served from the HAR file. If not specified, all requests are served from the HAR file.
@@ -3454,11 +3443,9 @@ type PageSelectOptionOptions struct {
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Force *bool `json:"force"`
-	// Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-	// can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-	// navigating to inaccessible pages. Defaults to `false`.
+	// This option has no effect.
 	//
-	// Deprecated: This option will default to `true` in the future.
+	// Deprecated: This option has no effect.
 	NoWaitAfter *bool `json:"noWaitAfter"`
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3924,10 +3911,16 @@ type ClientCertificate struct {
 	Origin string `json:"origin"`
 	// Path to the file with the certificate in PEM format.
 	CertPath *string `json:"certPath"`
+	// Direct value of the certificate in PEM format.
+	Cert []byte `json:"cert"`
 	// Path to the file with the private key in PEM format.
 	KeyPath *string `json:"keyPath"`
+	// Direct value of the private key in PEM format.
+	Key []byte `json:"key"`
 	// Path to the PFX or PKCS12 encoded private key and certificate chain.
 	PfxPath *string `json:"pfxPath"`
+	// Direct value of the PFX or PKCS12 encoded private key and certificate chain.
+	Pfx []byte `json:"pfx"`
 	// Passphrase for the private key (PEM or PFX).
 	Passphrase *string `json:"passphrase"`
 }

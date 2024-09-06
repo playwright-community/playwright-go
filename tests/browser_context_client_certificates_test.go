@@ -33,7 +33,7 @@ func NewTLSServerRequireClientCert(t *testing.T) *httptest.Server {
 		_, err := w.Write(body)
 		require.NoError(t, err)
 	}))
-	// ts.EnableHTTP2 = true	// Wait for https://github.com/microsoft/playwright/pull/32258
+	// ts.EnableHTTP2 = true
 	ts.TLS = &tls.Config{
 		ClientAuth:   tls.RequireAndVerifyClientCert, // Uses the go standard client certificate verification method
 		Certificates: []tls.Certificate{cert},
@@ -84,8 +84,12 @@ func TestClientCerts(t *testing.T) {
 		})
 
 		resp, err := page.Goto(strings.Replace(tlsServer.URL, "127.0.0.1", "localhost", 1))
-		require.NoError(t, err)
-		require.False(t, resp.Ok()) // status code 503, client didn't provide a certificate due to origin mismatch
+		if tlsServer.EnableHTTP2 {
+			require.ErrorContains(t, err, "net::ERR_CONNECTION_CLOSED")
+		} else {
+			require.NoError(t, err)
+			require.False(t, resp.Ok()) // status code 503, client didn't provide a certificate due to origin mismatch
+		}
 
 		_, err = page.Goto(tlsServer.URL)
 		require.NoError(t, err)
@@ -115,8 +119,12 @@ func TestClientCerts(t *testing.T) {
 		require.NoError(t, err)
 
 		resp, err := page2.Goto(strings.Replace(tlsServer.URL, "127.0.0.1", "localhost", 1))
-		require.NoError(t, err)
-		require.False(t, resp.Ok()) // status code 503, client didn't provide a certificate due to origin mismatch
+		if tlsServer.EnableHTTP2 {
+			require.ErrorContains(t, err, "net::ERR_CONNECTION_CLOSED")
+		} else {
+			require.NoError(t, err)
+			require.False(t, resp.Ok()) // status code 503, client didn't provide a certificate due to origin mismatch
+		}
 
 		_, err = page2.Goto(tlsServer.URL)
 		require.NoError(t, err)
@@ -170,5 +178,29 @@ func TestClientCerts(t *testing.T) {
 		require.NoError(t, err)
 		require.Contains(t, string(body), "Hello Alice, your certificate was issued by localhost!")
 		require.NoError(t, request.Dispose())
+	})
+
+	t.Run("should pass with matching certificates when passing as content", func(t *testing.T) {
+		certContent, err := os.ReadFile(Asset("client-certificates/client/trusted/cert.pem"))
+		require.NoError(t, err)
+		keyContent, err := os.ReadFile(Asset("client-certificates/client/trusted/key.pem"))
+		require.NoError(t, err)
+
+		BeforeEach(t, playwright.BrowserNewContextOptions{
+			IgnoreHttpsErrors: playwright.Bool(true), // TODO: Remove this once we can pass a custom CA.
+			ClientCertificates: []playwright.ClientCertificate{
+				{
+					Origin: tlsServer.URL,
+					Cert:   certContent,
+					Key:    keyContent,
+				},
+			},
+		})
+
+		_, err = page.Goto(tlsServer.URL)
+		require.NoError(t, err)
+		content, err := page.GetByTestId("message").TextContent()
+		require.NoError(t, err)
+		require.Equal(t, "Hello Alice, your certificate was issued by localhost!", content)
 	})
 }

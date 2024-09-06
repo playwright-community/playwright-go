@@ -103,8 +103,8 @@ type APIResponse interface {
 	// An object with all the response HTTP headers associated with this response.
 	Headers() map[string]string
 
-	// An array with all the request HTTP headers associated with this response. Header names are not lower-cased. Headers
-	// with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
+	// An array with all the response HTTP headers associated with this response. Header names are not lower-cased.
+	// Headers with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
 	HeadersArray() []NameValue
 
 	// Returns the JSON representation of response body.
@@ -209,12 +209,11 @@ type Browser interface {
 	Version() string
 }
 
-//	BrowserContexts provide a way to operate multiple independent browser sessions.
-//
+// BrowserContexts provide a way to operate multiple independent browser sessions.
 // If a page opens another page, e.g. with a `window.open` call, the popup will belong to the parent page's browser
 // context.
-// Playwright allows creating "incognito" browser contexts with [Browser.NewContext] method. "Incognito" browser
-// contexts don't write any browsing data to disk.
+// Playwright allows creating isolated non-persistent browser contexts with [Browser.NewContext] method.
+// Non-persistent browser contexts don't write any browsing data to disk.
 type BrowserContext interface {
 	EventEmitter
 	// **NOTE** Only works with Chromium browser's persistent context.
@@ -522,9 +521,9 @@ type BrowserType interface {
 	Name() string
 }
 
-//	The `CDPSession` instances are used to talk raw Chrome Devtools Protocol:
-//	- protocol methods can be called with `session.send` method.
-//	- protocol events can be subscribed to with `session.on` method.
+// The `CDPSession` instances are used to talk raw Chrome Devtools Protocol:
+//   - protocol methods can be called with `session.send` method.
+//   - protocol events can be subscribed to with `session.on` method.
 //
 // Useful links:
 //   - Documentation on DevTools Protocol can be found here:
@@ -2959,8 +2958,7 @@ type Mouse interface {
 	Wheel(deltaX float64, deltaY float64) error
 }
 
-//	Page provides methods to interact with a single tab in a [Browser], or an
-//
+// Page provides methods to interact with a single tab in a [Browser], or an
 // [extension background page] in Chromium. One [Browser]
 // instance might have multiple [Page] instances.
 // This example creates a page, navigates it to a URL, and then saves a screenshot:
@@ -4244,19 +4242,19 @@ type Route interface {
 	// Aborts the route's request.
 	Abort(errorCode ...string) error
 
-	// Continues route's request with optional overrides.
+	// Sends route's request to the network with optional overrides.
 	//
 	// # Details
 	//
 	// Note that any overrides such as “url” or “headers” only apply to the request being routed. If this request results
 	// in a redirect, overrides will not be applied to the new redirected request. If you want to propagate a header
 	// through redirects, use the combination of [Route.Fetch] and [Route.Fulfill] instead.
+	// [Route.Continue] will immediately send the request to the network, other matching handlers won't be invoked. Use
+	// [Route.Fallback] If you want next matching handler in the chain to be invoked.
 	Continue(options ...RouteContinueOptions) error
 
-	// When several routes match the given pattern, they run in the order opposite to their registration. That way the
-	// last registered route can always override all the previous ones. In the example below, request will be handled by
-	// the bottom-most handler first, then it'll fall back to the previous one and in the end will be aborted by the first
-	// registered route.
+	// Continues route's request with optional overrides. The method is similar to [Route.Continue] with the difference
+	// that other matching handlers will be invoked before sending the request.
 	Fallback(options ...RouteFallbackOptions) error
 
 	// Performs the request and fetches result without fulfilling it, so that the response could be modified and then
