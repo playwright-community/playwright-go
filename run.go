@@ -13,8 +13,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-
-	"github.com/playwright-community/playwright-go/internal/multierror"
 )
 
 const (
@@ -372,17 +370,17 @@ func downloadDriver(driverURLs []string) (body []byte, e error) {
 	for _, driverURL := range driverURLs {
 		resp, err := http.Get(driverURL)
 		if err != nil {
-			e = multierror.Join(e, fmt.Errorf("could not download driver from %s: %w", driverURL, err))
+			e = errors.Join(e, fmt.Errorf("could not download driver from %s: %w", driverURL, err))
 			continue
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusOK {
-			e = multierror.Join(e, fmt.Errorf("error: got non 200 status code: %d (%s) from %s", resp.StatusCode, resp.Status, driverURL))
+			e = errors.Join(e, fmt.Errorf("error: got non 200 status code: %d (%s) from %s", resp.StatusCode, resp.Status, driverURL))
 			continue
 		}
 		body, err = io.ReadAll(resp.Body)
 		if err != nil {
-			e = multierror.Join(e, fmt.Errorf("could not read response body: %w", err))
+			e = errors.Join(e, fmt.Errorf("could not read response body: %w", err))
 			continue
 		}
 		return body, nil

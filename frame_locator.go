@@ -1,10 +1,9 @@
 package playwright
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
-
-	"github.com/playwright-community/playwright-go/internal/multierror"
 )
 
 type frameLocatorImpl struct {
@@ -102,7 +101,7 @@ func (fl *frameLocatorImpl) Locator(selectorOrLocator interface{}, options ...Fr
 	locator, ok := selectorOrLocator.(*locatorImpl)
 	if ok {
 		if fl.frame != locator.frame {
-			locator.err = multierror.Join(locator.err, ErrLocatorNotSameFrame)
+			locator.err = errors.Join(locator.err, ErrLocatorNotSameFrame)
 			return locator
 		}
 		return newLocator(locator.frame,

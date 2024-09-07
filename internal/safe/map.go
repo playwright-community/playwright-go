@@ -1,9 +1,8 @@
 package safe
 
 import (
+	"maps"
 	"sync"
-
-	"golang.org/x/exp/maps"
 )
 
 // SyncMap is a thread-safe map
@@ -64,7 +63,7 @@ func (m *SyncMap[K, V]) Delete(k K) {
 func (m *SyncMap[K, V]) Clear() {
 	m.Lock()
 	defer m.Unlock()
-	maps.Clear(m.m)
+	clear(m.m)
 }
 
 func (m *SyncMap[K, V]) Len() int {

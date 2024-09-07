@@ -1,11 +1,19 @@
 package playwright
 
+import "encoding/json"
+
 type channel struct {
 	eventEmitter
 	guid       string
 	connection *connection
 	owner      *channelOwner // to avoid type conversion
 	object     interface{}   // retain type info (for fromChannel needed)
+}
+
+func (c *channel) MarshalJSON() ([]byte, error) {
+	return json.Marshal(map[string]string{
+		"guid": c.guid,
+	})
 }
 
 func (c *channel) Send(method string, options ...interface{}) (interface{}, error) {

@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"slices"
 	"sync"
 
 	"github.com/playwright-community/playwright-go/internal/safe"
-	"golang.org/x/exp/slices"
 )
 
 type pageImpl struct {
