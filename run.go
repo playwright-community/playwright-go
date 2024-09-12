@@ -53,7 +53,7 @@ func NewDriver(options *RunOptions) (*PlaywrightDriver, error) {
 
 func getDefaultCacheDirectory() (string, error) {
 	if cachePath := os.Getenv("PLAYWRIGHT_BROWSERS_PATH"); cachePath != "" {
-		return cachePath
+		return cachePath, nil
 	}
 
 	userHomeDir, err := os.UserHomeDir()
