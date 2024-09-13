@@ -38,6 +38,9 @@ type PlaywrightDriver struct {
 func NewDriver(options *RunOptions) (*PlaywrightDriver, error) {
 	baseDriverDirectory := options.DriverDirectory
 	if baseDriverDirectory == "" {
+		baseDriverDirectory := os.Getenv("PLAYWRIGHT_DRIVER_PATH")
+	}
+	if baseDriverDirectory == "" {
 		var err error
 		baseDriverDirectory, err = getDefaultCacheDirectory()
 		if err != nil {
@@ -52,10 +55,6 @@ func NewDriver(options *RunOptions) (*PlaywrightDriver, error) {
 }
 
 func getDefaultCacheDirectory() (string, error) {
-	if cachePath := os.Getenv("PLAYWRIGHT_BROWSERS_PATH"); cachePath != "" {
-		return cachePath, nil
-	}
-
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", fmt.Errorf("could not get user home directory: %w", err)
