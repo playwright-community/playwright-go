@@ -38,7 +38,7 @@ type PlaywrightDriver struct {
 func NewDriver(options *RunOptions) (*PlaywrightDriver, error) {
 	baseDriverDirectory := options.DriverDirectory
 	if baseDriverDirectory == "" {
-		baseDriverDirectory := os.Getenv("PLAYWRIGHT_DRIVER_PATH")
+		baseDriverDirectory = os.Getenv("PLAYWRIGHT_DRIVER_PATH")
 	}
 	if baseDriverDirectory == "" {
 		var err error
