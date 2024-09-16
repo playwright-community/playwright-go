@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"sync"
 	"time"
 
 	mapset "github.com/deckarep/golang-set/v2"
@@ -12,7 +11,6 @@ import (
 
 type frameImpl struct {
 	channelOwner
-	sync.RWMutex
 	detached    bool
 	page        *pageImpl
 	name        string
@@ -30,23 +28,23 @@ func newFrame(parent *channelOwner, objectType string, guid string, initializer 
 	} else {
 		loadStates = mapset.NewSet[string]()
 	}
-	bt := &frameImpl{
+	f := &frameImpl{
 		name:        initializer["name"].(string),
 		url:         initializer["url"].(string),
 		loadStates:  loadStates,
 		childFrames: make([]Frame, 0),
 	}
-	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
+	f.createChannelOwner(f, parent, objectType, guid, initializer)
 
 	channelOwner := fromNullableChannel(initializer["parentFrame"])
 	if channelOwner != nil {
-		bt.parentFrame = channelOwner.(*frameImpl)
-		bt.parentFrame.(*frameImpl).childFrames = append(bt.parentFrame.(*frameImpl).childFrames, bt)
+		f.parentFrame = channelOwner.(*frameImpl)
+		f.parentFrame.(*frameImpl).childFrames = append(f.parentFrame.(*frameImpl).childFrames, f)
 	}
 
-	bt.channel.On("navigated", bt.onFrameNavigated)
-	bt.channel.On("loadstate", bt.onLoadState)
-	return bt
+	f.channel.On("navigated", f.onFrameNavigated)
+	f.channel.On("loadstate", f.onLoadState)
+	return f
 }
 
 func (f *frameImpl) URL() string {

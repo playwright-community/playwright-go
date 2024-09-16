@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	playwrightCliVersion = "1.47.0"
+	playwrightCliVersion = "1.47.1"
 )
 
 var (

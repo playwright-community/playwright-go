@@ -12,10 +12,10 @@ index 2f832e1dd..b8a33f161 100644
    - `cookies` <[Array]<[Object]>>
      - `name` <[string]>
 diff --git a/docs/src/api/class-apirequestcontext.md b/docs/src/api/class-apirequestcontext.md
-index a6333d6b0..9a37f42aa 100644
+index 1d3e72823..2db19192e 100644
 --- a/docs/src/api/class-apirequestcontext.md
 +++ b/docs/src/api/class-apirequestcontext.md
-@@ -156,12 +156,18 @@ context cookies from the response. The method will automatically follow redirect
+@@ -159,12 +159,18 @@ context cookies from the response. The method will automatically follow redirect
  ### option: APIRequestContext.delete.data = %%-js-python-csharp-fetch-option-data-%%
  * since: v1.17
  
@@ -34,7 +34,7 @@ index a6333d6b0..9a37f42aa 100644
  ### option: APIRequestContext.delete.multipart = %%-js-fetch-option-multipart-%%
  * since: v1.17
  
-@@ -171,6 +177,9 @@ context cookies from the response. The method will automatically follow redirect
+@@ -174,6 +180,9 @@ context cookies from the response. The method will automatically follow redirect
  ### option: APIRequestContext.delete.multipart = %%-csharp-fetch-option-multipart-%%
  * since: v1.17
  
@@ -44,7 +44,7 @@ index a6333d6b0..9a37f42aa 100644
  ### option: APIRequestContext.delete.timeout = %%-js-python-csharp-fetch-option-timeout-%%
  * since: v1.16
  
-@@ -314,7 +323,7 @@ Target URL or Request to get all parameters from.
+@@ -320,7 +329,7 @@ Target URL or Request to get all parameters from.
  
  ### option: APIRequestContext.fetch.method
  * since: v1.16
@@ -53,7 +53,7 @@ index a6333d6b0..9a37f42aa 100644
  - `method` <[string]>
  
  If set changes the fetch method (e.g. [PUT](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT) or
-@@ -326,12 +335,18 @@ If set changes the fetch method (e.g. [PUT](https://developer.mozilla.org/en-US/
+@@ -332,12 +341,18 @@ If set changes the fetch method (e.g. [PUT](https://developer.mozilla.org/en-US/
  ### option: APIRequestContext.fetch.data = %%-js-python-csharp-fetch-option-data-%%
  * since: v1.16
  
@@ -72,7 +72,7 @@ index a6333d6b0..9a37f42aa 100644
  ### option: APIRequestContext.fetch.multipart = %%-js-fetch-option-multipart-%%
  * since: v1.16
  
-@@ -341,6 +356,9 @@ If set changes the fetch method (e.g. [PUT](https://developer.mozilla.org/en-US/
+@@ -347,6 +362,9 @@ If set changes the fetch method (e.g. [PUT](https://developer.mozilla.org/en-US/
  ### option: APIRequestContext.fetch.multipart = %%-csharp-fetch-option-multipart-%%
  * since: v1.16
  
@@ -82,7 +82,7 @@ index a6333d6b0..9a37f42aa 100644
  ### option: APIRequestContext.fetch.timeout = %%-js-python-csharp-fetch-option-timeout-%%
  * since: v1.16
  
-@@ -433,12 +451,18 @@ await request.GetAsync("https://example.com/api/getText", new() { Params = query
+@@ -442,12 +460,18 @@ await request.GetAsync("https://example.com/api/getText", new() { Params = query
  ### option: APIRequestContext.get.data = %%-js-python-csharp-fetch-option-data-%%
  * since: v1.26
  
@@ -101,7 +101,7 @@ index a6333d6b0..9a37f42aa 100644
  ### option: APIRequestContext.get.multipart = %%-js-fetch-option-multipart-%%
  * since: v1.26
  
-@@ -448,6 +472,9 @@ await request.GetAsync("https://example.com/api/getText", new() { Params = query
+@@ -457,6 +481,9 @@ await request.GetAsync("https://example.com/api/getText", new() { Params = query
  ### option: APIRequestContext.get.multipart = %%-csharp-fetch-option-multipart-%%
  * since: v1.26
  
@@ -111,7 +111,7 @@ index a6333d6b0..9a37f42aa 100644
  ### option: APIRequestContext.get.timeout = %%-js-python-csharp-fetch-option-timeout-%%
  * since: v1.16
  
-@@ -492,12 +519,18 @@ context cookies from the response. The method will automatically follow redirect
+@@ -504,12 +531,18 @@ context cookies from the response. The method will automatically follow redirect
  ### option: APIRequestContext.head.data = %%-js-python-csharp-fetch-option-data-%%
  * since: v1.26
  
@@ -130,7 +130,7 @@ index a6333d6b0..9a37f42aa 100644
  ### option: APIRequestContext.head.multipart = %%-js-fetch-option-multipart-%%
  * since: v1.26
  
-@@ -507,6 +540,9 @@ context cookies from the response. The method will automatically follow redirect
+@@ -519,6 +552,9 @@ context cookies from the response. The method will automatically follow redirect
  ### option: APIRequestContext.head.multipart = %%-csharp-fetch-option-multipart-%%
  * since: v1.26
  
@@ -140,7 +140,7 @@ index a6333d6b0..9a37f42aa 100644
  ### option: APIRequestContext.head.timeout = %%-js-python-csharp-fetch-option-timeout-%%
  * since: v1.16
  
-@@ -551,12 +587,18 @@ context cookies from the response. The method will automatically follow redirect
+@@ -566,12 +602,18 @@ context cookies from the response. The method will automatically follow redirect
  ### option: APIRequestContext.patch.data = %%-js-python-csharp-fetch-option-data-%%
  * since: v1.16
  
@@ -159,7 +159,7 @@ index a6333d6b0..9a37f42aa 100644
  ### option: APIRequestContext.patch.multipart = %%-js-fetch-option-multipart-%%
  * since: v1.16
  
-@@ -566,6 +608,9 @@ context cookies from the response. The method will automatically follow redirect
+@@ -581,6 +623,9 @@ context cookies from the response. The method will automatically follow redirect
  ### option: APIRequestContext.patch.multipart = %%-csharp-fetch-option-multipart-%%
  * since: v1.16
  
@@ -169,7 +169,7 @@ index a6333d6b0..9a37f42aa 100644
  ### option: APIRequestContext.patch.timeout = %%-js-python-csharp-fetch-option-timeout-%%
  * since: v1.16
  
-@@ -731,12 +776,18 @@ await request.PostAsync("https://example.com/api/uploadScript", new() { Multipar
+@@ -749,12 +794,18 @@ await request.PostAsync("https://example.com/api/uploadScript", new() { Multipar
  ### option: APIRequestContext.post.data = %%-js-python-csharp-fetch-option-data-%%
  * since: v1.16
  
@@ -188,7 +188,7 @@ index a6333d6b0..9a37f42aa 100644
  ### option: APIRequestContext.post.multipart = %%-js-fetch-option-multipart-%%
  * since: v1.16
  
-@@ -746,6 +797,9 @@ await request.PostAsync("https://example.com/api/uploadScript", new() { Multipar
+@@ -764,6 +815,9 @@ await request.PostAsync("https://example.com/api/uploadScript", new() { Multipar
  ### option: APIRequestContext.post.multipart = %%-csharp-fetch-option-multipart-%%
  * since: v1.16
  
@@ -198,7 +198,7 @@ index a6333d6b0..9a37f42aa 100644
  ### option: APIRequestContext.post.timeout = %%-js-python-csharp-fetch-option-timeout-%%
  * since: v1.16
  
-@@ -790,12 +844,18 @@ context cookies from the response. The method will automatically follow redirect
+@@ -811,12 +865,18 @@ context cookies from the response. The method will automatically follow redirect
  ### option: APIRequestContext.put.data = %%-js-python-csharp-fetch-option-data-%%
  * since: v1.16
  
@@ -217,7 +217,7 @@ index a6333d6b0..9a37f42aa 100644
  ### option: APIRequestContext.put.multipart = %%-js-fetch-option-multipart-%%
  * since: v1.16
  
-@@ -805,6 +865,9 @@ context cookies from the response. The method will automatically follow redirect
+@@ -826,6 +886,9 @@ context cookies from the response. The method will automatically follow redirect
  ### option: APIRequestContext.put.multipart = %%-csharp-fetch-option-multipart-%%
  * since: v1.16
  
@@ -1101,7 +1101,7 @@ index 3b3308b88..e21ea93ef 100644
  - returns: <[any]>
  
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index ccd6bae8f..059ed0b8e 100644
+index cbec1a5e2..e15948aef 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
 @@ -8,7 +8,7 @@ When to consider operation succeeded, defaults to `load`. Events can be either:
@@ -1216,7 +1216,7 @@ index ccd6bae8f..059ed0b8e 100644
  - `params` <[Object]<[string], [Serializable]>>
  
  Query parameters to be sent with the URL.
-@@ -381,19 +404,19 @@ Query parameters to be sent with the URL.
+@@ -387,19 +410,19 @@ Query parameters to be sent with the URL.
  Optional request parameters.
  
  ## js-python-csharp-fetch-option-headers
@@ -1239,7 +1239,7 @@ index ccd6bae8f..059ed0b8e 100644
  - `failOnStatusCode` <[boolean]>
  
  Whether to throw on response codes other than 2xx and 3xx. By default response object is returned
-@@ -417,6 +440,14 @@ unless explicitly provided.
+@@ -423,6 +446,14 @@ unless explicitly provided.
  
  An instance of [FormData] can be created via [`method: APIRequestContext.createFormData`].
  
@@ -1254,7 +1254,7 @@ index ccd6bae8f..059ed0b8e 100644
  ## js-fetch-option-multipart
  * langs: js
  - `multipart` <[FormData]|[Object]<[string], [string]|[float]|[boolean]|[ReadStream]|[Object]>>
-@@ -450,6 +481,15 @@ unless explicitly provided. File values can be passed as file-like object contai
+@@ -456,6 +487,15 @@ unless explicitly provided. File values can be passed as file-like object contai
  
  An instance of [FormData] can be created via [`method: APIRequestContext.createFormData`].
  
@@ -1270,7 +1270,7 @@ index ccd6bae8f..059ed0b8e 100644
  ## js-python-csharp-fetch-option-data
  * langs: js, python, csharp
  - `data` <[string]|[Buffer]|[Serializable]>
-@@ -458,21 +498,29 @@ Allows to set post data of the request. If the data parameter is an object, it w
+@@ -464,21 +504,29 @@ Allows to set post data of the request. If the data parameter is an object, it w
  and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type` header will be
  set to `application/octet-stream` if not explicitly set.
  
@@ -1303,7 +1303,7 @@ index ccd6bae8f..059ed0b8e 100644
  - `maxRetries` <[int]>
  
  Maximum number of times network errors should be retried. Currently only `ECONNRESET` error is retried. Does not retry based on HTTP response codes. An error will be thrown if the limit is exceeded. Defaults to `0` - no retries.
-@@ -514,7 +562,7 @@ Function to be evaluated in the worker context.
+@@ -520,7 +568,7 @@ Function to be evaluated in the worker context.
  Function to be evaluated in the main Electron process.
  
  ## python-context-option-viewport
@@ -1312,7 +1312,7 @@ index ccd6bae8f..059ed0b8e 100644
  - `viewport` <[null]|[Object]>
    - `width` <[int]> page width in pixels.
    - `height` <[int]> page height in pixels.
-@@ -522,7 +570,7 @@ Function to be evaluated in the main Electron process.
+@@ -528,7 +576,7 @@ Function to be evaluated in the main Electron process.
  Sets a consistent viewport for each page. Defaults to an 1280x720 viewport. `no_viewport` disables the fixed viewport. Learn more about [viewport emulation](../emulation.md#viewport).
  
  ## python-context-option-no-viewport
@@ -1321,7 +1321,7 @@ index ccd6bae8f..059ed0b8e 100644
  - `noViewport` <[boolean]>
  
  Does not enforce fixed viewport, allows resizing window in the headed mode.
-@@ -628,11 +676,11 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+@@ -634,11 +682,11 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
  [`method: Page.emulateMedia`] for more details. Passing `null` resets emulation to system defaults. Defaults to `'light'`.
  
  ## context-option-colorscheme-csharp-python
@@ -1336,7 +1336,7 @@ index ccd6bae8f..059ed0b8e 100644
  
  ## context-option-reducedMotion
  * langs: js, java
-@@ -641,10 +689,10 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+@@ -647,10 +695,10 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
  Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See [`method: Page.emulateMedia`] for more details. Passing `null` resets emulation to system defaults. Defaults to `'no-preference'`.
  
  ## context-option-reducedMotion-csharp-python
@@ -1350,7 +1350,7 @@ index ccd6bae8f..059ed0b8e 100644
  
  ## context-option-forcedColors
  * langs: js, java
-@@ -653,10 +701,10 @@ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce
+@@ -659,10 +707,10 @@ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce
  Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See [`method: Page.emulateMedia`] for more details. Passing `null` resets emulation to system defaults. Defaults to `'none'`.
  
  ## context-option-forcedColors-csharp-python
@@ -1364,7 +1364,7 @@ index ccd6bae8f..059ed0b8e 100644
  
  ## context-option-logger
  * langs: js
-@@ -691,7 +739,7 @@ specified, the HAR is not recorded. Make sure to await [`method: BrowserContext.
+@@ -697,7 +745,7 @@ specified, the HAR is not recorded. Make sure to await [`method: BrowserContext.
  saved.
  
  ## context-option-recordhar-path
@@ -1373,7 +1373,7 @@ index ccd6bae8f..059ed0b8e 100644
    - alias-python: record_har_path
  - `recordHarPath` <[path]>
  
-@@ -700,33 +748,33 @@ specified HAR file on the filesystem. If not specified, the HAR is not recorded.
+@@ -706,33 +754,33 @@ specified HAR file on the filesystem. If not specified, the HAR is not recorded.
  call [`method: BrowserContext.close`] for the HAR to be saved.
  
  ## context-option-recordhar-omit-content
@@ -1412,7 +1412,7 @@ index ccd6bae8f..059ed0b8e 100644
  - `recordVideo` <[Object]>
    - `dir` <[path]> Path to the directory to put videos into.
    - `size` ?<[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
-@@ -795,7 +843,7 @@ Specifies whether to wait for already running listeners and what to do if they t
+@@ -801,7 +849,7 @@ Specifies whether to wait for already running listeners and what to do if they t
  * `'ignoreErrors'` - do not wait for current listener calls (if any) to finish, all errors thrown by the listeners after removal are silently caught
  
  ## unroute-all-options-behavior
@@ -1421,7 +1421,7 @@ index ccd6bae8f..059ed0b8e 100644
  * since: v1.41
  - `behavior` <[UnrouteBehavior]<"wait"|"ignoreErrors"|"default">>
  
-@@ -806,7 +854,7 @@ Specifies whether to wait for already running handlers and what to do if they th
+@@ -812,7 +860,7 @@ Specifies whether to wait for already running handlers and what to do if they th
  
  
  ## select-options-values
@@ -1430,7 +1430,7 @@ index ccd6bae8f..059ed0b8e 100644
  - `values` <[null]|[string]|[ElementHandle]|[Array]<[string]>|[Object]|[Array]<[ElementHandle]>|[Array]<[Object]>>
    - `value` ?<[string]> Matches by `option.value`. Optional.
    - `label` ?<[string]> Matches by `option.label`. Optional.
-@@ -824,7 +872,7 @@ the parameter is a string without wildcard characters, the method will wait for
+@@ -830,7 +878,7 @@ the parameter is a string without wildcard characters, the method will wait for
  equal to the string.
  
  ## wait-for-event-event
@@ -1439,7 +1439,7 @@ index ccd6bae8f..059ed0b8e 100644
  - `event` <[string]>
  
  Event name, same one typically passed into `*.on(event)`.
-@@ -882,7 +930,7 @@ only the first option matching one of the passed options is selected. Optional.
+@@ -888,7 +936,7 @@ only the first option matching one of the passed options is selected. Optional.
  Receives the event data and resolves to truthy value when the waiting should resolve.
  
  ## wait-for-event-timeout
@@ -1448,7 +1448,7 @@ index ccd6bae8f..059ed0b8e 100644
  - `timeout` <[float]>
  
  Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-@@ -902,7 +950,7 @@ using the [`method: AndroidDevice.setDefaultTimeout`] method.
+@@ -908,7 +956,7 @@ using the [`method: AndroidDevice.setDefaultTimeout`] method.
  Time to retry the assertion for in milliseconds. Defaults to `timeout` in `TestConfig.expect`.
  
  ## csharp-java-python-assertions-timeout
@@ -1457,7 +1457,7 @@ index ccd6bae8f..059ed0b8e 100644
  - `timeout` <[float]>
  
  Time to retry the assertion for in milliseconds. Defaults to `5000`.
-@@ -1041,7 +1089,7 @@ Firefox user preferences. Learn more about the Firefox user preferences at
+@@ -1047,7 +1095,7 @@ Firefox user preferences. Learn more about the Firefox user preferences at
  [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
  
  ## csharp-java-browser-option-firefoxuserprefs
