@@ -217,7 +217,7 @@ func (c *connection) sendMessageToServer(object *channelOwner, method string, pa
 		"id":       id,
 		"guid":     object.guid,
 		"method":   method,
-		"params":   params, // MarshalJSON will replace channel with guid
+		"params":   params, // channel.MarshalJSON will replace channel with guid
 		"metadata": metadata,
 	}
 	if c.tracingCount.Load() > 0 && len(stack) > 0 && object.guid != "localUtils" {
