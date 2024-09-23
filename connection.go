@@ -164,33 +164,6 @@ func (c *connection) WrapAPICall(cb func() (interface{}, error), isInternal bool
 	return cb()
 }
 
-func (c *connection) replaceChannelsWithGuids(payload interface{}) interface{} {
-	if payload == nil {
-		return nil
-	}
-	if channel, isChannel := payload.(*channel); isChannel {
-		return map[string]string{
-			"guid": channel.guid,
-		}
-	}
-	v := reflect.ValueOf(payload)
-	if v.Kind() == reflect.Slice {
-		listV := make([]interface{}, 0)
-		for i := 0; i < v.Len(); i++ {
-			listV = append(listV, c.replaceChannelsWithGuids(v.Index(i).Interface()))
-		}
-		return listV
-	}
-	if v.Kind() == reflect.Map {
-		mapV := make(map[string]interface{})
-		for _, key := range v.MapKeys() {
-			mapV[key.String()] = c.replaceChannelsWithGuids(v.MapIndex(key).Interface())
-		}
-		return mapV
-	}
-	return payload
-}
-
 func (c *connection) replaceGuidsWithChannels(payload interface{}) interface{} {
 	if payload == nil {
 		return nil
@@ -244,7 +217,7 @@ func (c *connection) sendMessageToServer(object *channelOwner, method string, pa
 		"id":       id,
 		"guid":     object.guid,
 		"method":   method,
-		"params":   c.replaceChannelsWithGuids(params),
+		"params":   params, // channel.MarshalJSON will replace channel with guid
 		"metadata": metadata,
 	}
 	if c.tracingCount.Load() > 0 && len(stack) > 0 && object.guid != "localUtils" {
