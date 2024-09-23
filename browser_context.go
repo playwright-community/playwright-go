@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"slices"
 	"strings"
 	"sync"
 
 	"github.com/playwright-community/playwright-go/internal/safe"
-	"golang.org/x/exp/slices"
 )
 
 type browserContextImpl struct {

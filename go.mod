@@ -1,6 +1,6 @@
 module github.com/playwright-community/playwright-go
 
-go 1.19
+go 1.22
 
 require (
 	github.com/deckarep/golang-set/v2 v2.6.0
@@ -12,8 +12,6 @@ require (
 	github.com/orisano/pixelmatch v0.0.0-20230914042517-fa304d1dc785
 	github.com/stretchr/testify v1.8.4
 	github.com/tidwall/gjson v1.17.0
-	go.uber.org/multierr v1.11.0
-	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842
 )
 
 require (

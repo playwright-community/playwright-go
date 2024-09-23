@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-
-	"github.com/playwright-community/playwright-go/internal/multierror"
 )
 
 var (
@@ -35,7 +33,7 @@ func newLocator(frame *frameImpl, selector string, options ...LocatorLocatorOpti
 	if option.Has != nil {
 		has := option.Has.(*locatorImpl)
 		if frame != has.frame {
-			locator.err = multierror.Join(locator.err, ErrLocatorNotSameFrame)
+			locator.err = errors.Join(locator.err, ErrLocatorNotSameFrame)
 		} else {
 			selector += fmt.Sprintf(` >> internal:has=%s`, escapeText(has.selector))
 		}
@@ -43,7 +41,7 @@ func newLocator(frame *frameImpl, selector string, options ...LocatorLocatorOpti
 	if option.HasNot != nil {
 		hasNot := option.HasNot.(*locatorImpl)
 		if frame != hasNot.frame {
-			locator.err = multierror.Join(locator.err, ErrLocatorNotSameFrame)
+			locator.err = errors.Join(locator.err, ErrLocatorNotSameFrame)
 		} else {
 			selector += fmt.Sprintf(` >> internal:has-not=%s`, escapeText(hasNot.selector))
 		}
@@ -598,7 +596,7 @@ func (l *locatorImpl) Locator(selectorOrLocator interface{}, options ...LocatorL
 	locator, ok := selectorOrLocator.(*locatorImpl)
 	if ok {
 		if l.frame != locator.frame {
-			l.err = multierror.Join(l.err, ErrLocatorNotSameFrame)
+			l.err = errors.Join(l.err, ErrLocatorNotSameFrame)
 			return l
 		}
 		return newLocator(l.frame,
@@ -606,7 +604,7 @@ func (l *locatorImpl) Locator(selectorOrLocator interface{}, options ...LocatorL
 			options...,
 		)
 	}
-	l.err = multierror.Join(l.err, fmt.Errorf("invalid locator parameter: %v", selectorOrLocator))
+	l.err = errors.Join(l.err, fmt.Errorf("invalid locator parameter: %v", selectorOrLocator))
 	return l
 }
 

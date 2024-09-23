@@ -3,9 +3,8 @@ package playwright
 import (
 	"math"
 	"reflect"
+	"slices"
 	"sync"
-
-	"golang.org/x/exp/slices"
 )
 
 type EventEmitter interface {
@@ -119,10 +118,10 @@ func (er *eventRegister) count() int {
 	return len(er.listeners)
 }
 
-func (e *eventRegister) removeHandler(handler interface{}) {
+func (er *eventRegister) removeHandler(handler interface{}) {
 	handlerPtr := reflect.ValueOf(handler).Pointer()
 
-	e.listeners = slices.DeleteFunc(e.listeners, func(l listener) bool {
+	er.listeners = slices.DeleteFunc(er.listeners, func(l listener) bool {
 		return reflect.ValueOf(l.handler).Pointer() == handlerPtr
 	})
 }
