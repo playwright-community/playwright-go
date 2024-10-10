@@ -3,6 +3,7 @@ package playwright
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"time"
 
@@ -210,7 +211,7 @@ func (f *frameImpl) ExpectNavigation(cb func() error, options ...FrameExpectNavi
 		err, ok := ev["error"]
 		if ok {
 			// Any failed navigation results in a rejection.
-			logger.Error("navigated to %s error: %v", ev["url"].(string), err)
+			logger.Error("navigation error", slog.Any("url", ev["url"].(string)), slog.Any("error", err))
 			return true
 		}
 		return matcher == nil || matcher.Matches(ev["url"].(string))

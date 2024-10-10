@@ -14,7 +14,7 @@ import (
 	"runtime"
 	"strings"
 
-	pwlogger "github.com/playwright-community/playwright-go/internal/logger"
+	"github.com/playwright-community/playwright-go/internal/pwlogger"
 )
 
 const (

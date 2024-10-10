@@ -2,6 +2,9 @@ package playwright
 
 import (
 	"errors"
+	"log/slog"
+
+	"github.com/playwright-community/playwright-go/internal/pwlogger"
 )
 
 type harRouter struct {
@@ -19,7 +22,7 @@ func (r *harRouter) addContextRoute(context BrowserContext) error {
 	err := context.Route(r.urlOrPredicate, func(route Route) {
 		err := r.handle(route)
 		if err != nil {
-			logger.Error("%v", err)
+			logger.Error("Error handling context route", pwlogger.ErrAttr(err))
 		}
 	})
 	if err != nil {
@@ -35,7 +38,7 @@ func (r *harRouter) addPageRoute(page Page) error {
 	err := page.Route(r.urlOrPredicate, func(route Route) {
 		err := r.handle(route)
 		if err != nil {
-			logger.Error("%v", err)
+			logger.Error("Error handling page route", pwlogger.ErrAttr(err))
 		}
 	})
 	if err != nil {
@@ -84,7 +87,7 @@ func (r *harRouter) handle(route Route) error {
 			Headers: deserializeNameAndValueToMap(response.Headers),
 		})
 	case "error":
-		logger.Error("har action error: %v", *response.Message)
+		logger.Error("har action error", slog.Any("error", *response.Message))
 		fallthrough
 	case "noentry":
 	}

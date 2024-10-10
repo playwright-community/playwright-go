@@ -1,6 +1,7 @@
-package logger
+package pwlogger
 
 import (
+	"context"
 	"log/slog"
 	"strings"
 )
@@ -41,7 +42,7 @@ func (sw *SlogWriter) Write(p []byte) (n int, err error) {
 	attrs := append(sw.cmdAttrs,
 		slog.String("stream", sw.stream.String()),
 	)
-	sw.logger.LogAttrs(nil, slog.LevelInfo, message, attrs...)
+	sw.logger.LogAttrs(context.TODO(), slog.LevelInfo, message, attrs...)
 	return len(p), nil
 }
 
@@ -52,4 +53,8 @@ func NewSlogWriter(logger *slog.Logger, stream StreamType, cmdAttrs ...slog.Attr
 		stream:   stream,
 		cmdAttrs: cmdAttrs,
 	}
+}
+
+func ErrAttr(err error) slog.Attr {
+	return slog.Any("error", err)
 }

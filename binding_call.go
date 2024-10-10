@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/playwright-community/playwright-go/internal/pwlogger"
+
 	"github.com/go-stack/stack"
 )
 
@@ -34,7 +36,7 @@ func (b *bindingCallImpl) Call(f BindingCallFunction) {
 			if _, err := b.channel.Send("reject", map[string]interface{}{
 				"error": serializeError(r.(error)),
 			}); err != nil {
-				logger.Error("could not reject BindingCall: %v", err)
+				logger.Error("could not reject BindingCall", pwlogger.ErrAttr(err))
 			}
 		}
 	}()
@@ -60,7 +62,7 @@ func (b *bindingCallImpl) Call(f BindingCallFunction) {
 		"result": serializeArgument(result),
 	})
 	if err != nil {
-		logger.Error("could not resolve BindingCall: %v", err)
+		logger.Error("could not resolve BindingCall", pwlogger.ErrAttr(err))
 	}
 }
 
