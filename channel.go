@@ -77,7 +77,7 @@ func (c *channel) innerSendNoReply(method string, isInternal bool, options ...in
 	}, isInternal)
 	if err != nil {
 		// ignore error actively, log only for debug
-		logger.Printf("SendNoReply failed: %v\n", err)
+		logger.Error("SendNoReply failed: %v", err)
 	}
 }
 

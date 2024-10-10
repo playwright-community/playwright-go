@@ -34,7 +34,7 @@ func (b *bindingCallImpl) Call(f BindingCallFunction) {
 			if _, err := b.channel.Send("reject", map[string]interface{}{
 				"error": serializeError(r.(error)),
 			}); err != nil {
-				logger.Printf("could not reject BindingCall: %v\n", err)
+				logger.Error("could not reject BindingCall: %v", err)
 			}
 		}
 	}()
@@ -60,7 +60,7 @@ func (b *bindingCallImpl) Call(f BindingCallFunction) {
 		"result": serializeArgument(result),
 	})
 	if err != nil {
-		logger.Printf("could not resolve BindingCall: %v\n", err)
+		logger.Error("could not resolve BindingCall: %v", err)
 	}
 }
 

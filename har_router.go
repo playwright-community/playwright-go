@@ -19,7 +19,7 @@ func (r *harRouter) addContextRoute(context BrowserContext) error {
 	err := context.Route(r.urlOrPredicate, func(route Route) {
 		err := r.handle(route)
 		if err != nil {
-			logger.Println(err)
+			logger.Error("%v", err)
 		}
 	})
 	if err != nil {
@@ -35,7 +35,7 @@ func (r *harRouter) addPageRoute(page Page) error {
 	err := page.Route(r.urlOrPredicate, func(route Route) {
 		err := r.handle(route)
 		if err != nil {
-			logger.Println(err)
+			logger.Error("%v", err)
 		}
 	})
 	if err != nil {
@@ -84,7 +84,7 @@ func (r *harRouter) handle(route Route) error {
 			Headers: deserializeNameAndValueToMap(response.Headers),
 		})
 	case "error":
-		logger.Printf("har action error: %v\n", *response.Message)
+		logger.Error("har action error: %v", *response.Message)
 		fallthrough
 	case "noentry":
 	}
