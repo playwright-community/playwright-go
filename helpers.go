@@ -133,11 +133,6 @@ func transformOptions(options ...interface{}) map[string]interface{} {
 }
 
 func remapValue(inMapValue reflect.Value, outStructValue reflect.Value) {
-	if !inMapValue.IsValid() {
-		outStructValue.Set(reflect.Zero(outStructValue.Type()))
-		return
-	}
-
 	switch outStructValue.Type().Kind() {
 	case reflect.Bool:
 		outStructValue.SetBool(inMapValue.Bool())
