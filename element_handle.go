@@ -189,6 +189,11 @@ func (e *elementHandleImpl) BoundingBox() (*Rect, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if boundingBox == nil {
+		return nil, nil
+	}
+
 	out := &Rect{}
 	remapMapToStruct(boundingBox, out)
 	return out, nil

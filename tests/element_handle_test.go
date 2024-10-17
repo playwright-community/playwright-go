@@ -151,17 +151,46 @@ func TestElementHandleDblclick(t *testing.T) {
 func TestElementBoundingBox(t *testing.T) {
 	BeforeEach(t)
 
-	require.NoError(t, page.SetViewportSize(500, 500))
-	_, err := page.Goto(server.PREFIX + "/grid.html")
-	require.NoError(t, err)
-	element_handle, err := page.QuerySelector(".box:nth-of-type(13)")
-	require.NoError(t, err)
-	box, err := element_handle.BoundingBox()
-	require.NoError(t, err)
-	require.Equal(t, 100.0, box.X)
-	require.Equal(t, 50.0, box.Y)
-	require.Equal(t, 50.0, box.Width)
-	require.Equal(t, 50.0, box.Height)
+	testCases := []struct {
+		name        string
+		setup       func() error
+		selector    string
+		expectedBox *playwright.Rect
+	}{
+		{
+			name: "Test element bounding box",
+			setup: func() error {
+				require.NoError(t, page.SetViewportSize(500, 500))
+				_, err := page.Goto(server.PREFIX + "/grid.html")
+				return err
+			},
+			selector:    ".box:nth-of-type(13)",
+			expectedBox: &playwright.Rect{X: 100.0, Y: 50.0, Width: 50.0, Height: 50.0},
+		},
+		{
+			name: "Bounding box of display:none element should be nil",
+			setup: func() error {
+				_, err := page.Goto(server.EMPTY_PAGE)
+				require.NoError(t, err)
+				return page.SetContent("<div id='hidden' style='display:none'>Hidden</div>")
+			},
+			selector:    "#hidden",
+			expectedBox: nil,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			require.NoError(t, tc.setup())
+
+			elementHandle, err := page.QuerySelector(tc.selector)
+			require.NoError(t, err)
+			box, err := elementHandle.BoundingBox()
+			require.NoError(t, err)
+
+			require.Equal(t, tc.expectedBox, box)
+		})
+	}
 }
 
 func TestElementHandleTap(t *testing.T) {
