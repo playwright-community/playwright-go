@@ -8,6 +8,8 @@ import (
 	"io"
 	"os"
 
+	"github.com/playwright-community/playwright-go/internal/pwlogger"
+
 	"github.com/go-jose/go-jose/v3/json"
 )
 
@@ -44,7 +46,7 @@ func (t *pipeTransport) Poll() (*message, error) {
 	if os.Getenv("DEBUGP") != "" {
 		fmt.Fprint(os.Stdout, "\x1b[33mRECV>\x1b[0m\n")
 		if err := json.NewEncoder(os.Stdout).Encode(msg); err != nil {
-			logger.Printf("could not encode json: %v\n", err)
+			logger.Error("could not encode json", pwlogger.ErrAttr(err))
 		}
 	}
 	return msg, nil
@@ -72,7 +74,7 @@ func (t *pipeTransport) Send(msg map[string]interface{}) error {
 	if os.Getenv("DEBUGP") != "" {
 		fmt.Fprint(os.Stdout, "\x1b[32mSEND>\x1b[0m\n")
 		if err := json.NewEncoder(os.Stdout).Encode(msg); err != nil {
-			logger.Printf("could not encode json: %v\n", err)
+			logger.Error("could not encode json", pwlogger.ErrAttr(err))
 		}
 	}
 	lengthPadding := make([]byte, 4)

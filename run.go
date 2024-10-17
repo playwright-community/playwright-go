@@ -6,21 +6,24 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/playwright-community/playwright-go/internal/pwlogger"
 )
 
 const (
-	playwrightCliVersion = "1.47.2"
+	playwrightCliVersion      = "1.47.2"
+	playwrightDriverLogSource = "playwright-driver"
 )
 
 var (
-	logger               = log.Default()
+	logger               = slog.Default()
 	playwrightCDNMirrors = []string{
 		"https://playwright.azureedge.net",
 		"https://playwright-akamai.azureedge.net",
@@ -186,7 +189,7 @@ func (d *PlaywrightDriver) DownloadDriver() error {
 
 func (d *PlaywrightDriver) log(s string) {
 	if d.options.Verbose {
-		logger.Println(s)
+		logger.Info(s)
 	}
 }
 
@@ -232,6 +235,10 @@ type RunOptions struct {
 	Verbose  bool // default true
 	Stdout   io.Writer
 	Stderr   io.Writer
+	Logger   *slog.Logger
+	// If set, will capture all output to the logger
+	// This will override Stdout and Stderr
+	CaptureAllOutputWithLogger bool
 }
 
 // Install does download the driver and the browsers.
@@ -291,8 +298,17 @@ func transformRunOptions(options ...*RunOptions) (*RunOptions, error) {
 	}
 	if option.Stderr == nil {
 		option.Stderr = os.Stderr
+	}
+	if option.Logger == nil {
+		logger = slog.New(slog.NewTextHandler(option.Stderr, nil))
 	} else {
-		logger.SetOutput(option.Stderr)
+		logger = option.Logger
+	}
+
+	if option.CaptureAllOutputWithLogger {
+		sourceLogAttr := slog.String("source", playwrightDriverLogSource) // Indicate that the logs are from the driver
+		option.Stdout = pwlogger.NewSlogWriter(logger, pwlogger.StdoutStream, sourceLogAttr)
+		option.Stderr = pwlogger.NewSlogWriter(logger, pwlogger.StderrStream, sourceLogAttr)
 	}
 	return option, nil
 }

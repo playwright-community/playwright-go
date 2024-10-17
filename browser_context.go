@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/playwright-community/playwright-go/internal/pwlogger"
+
 	"github.com/playwright-community/playwright-go/internal/safe"
 )
 
@@ -589,7 +591,7 @@ func (b *browserContextImpl) onRoute(route *routeImpl) {
 					return nil, err
 				}, true)
 				if err != nil {
-					logger.Printf("could not update interception patterns: %v\n", err)
+					logger.Error("Could not update interception patterns", pwlogger.ErrAttr(err))
 				}
 			}
 		}
