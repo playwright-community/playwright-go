@@ -1340,3 +1340,8 @@ func (p *pageImpl) OnWebSocket(fn func(WebSocket)) {
 func (p *pageImpl) OnWorker(fn func(Worker)) {
 	p.On("worker", fn)
 }
+
+func (p *pageImpl) RequestGC() error {
+	_, err := p.channel.Send("requestGC")
+	return err
+}
