@@ -3,7 +3,6 @@ package playwright
 import (
 	"bufio"
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -28,24 +27,25 @@ func (t *pipeTransport) Poll() (*message, error) {
 	if t.isClosed() {
 		return nil, fmt.Errorf("transport closed")
 	}
-	lengthContent := make([]byte, 4)
-	_, err := io.ReadFull(t.bufReader, lengthContent)
-	if err == io.EOF || errors.Is(err, os.ErrClosed) {
-		return nil, fmt.Errorf("pipe closed: %w", err)
-	} else if err != nil {
-		return nil, fmt.Errorf("could not read padding: %w", err)
+
+	var length uint32
+	err := binary.Read(t.bufReader, binary.LittleEndian, &length)
+	if err != nil {
+		return nil, fmt.Errorf("could not read protocol padding: %w", err)
 	}
-	length := binary.LittleEndian.Uint32(lengthContent)
+
+	data := make([]byte, length)
+	_, err = io.ReadFull(t.bufReader, data)
+	if err != nil {
+		return nil, fmt.Errorf("could not read protocol data: %w", err)
+	}
 
 	msg := &message{}
-	if err := json.NewDecoder(io.LimitReader(t.bufReader, int64(length))).Decode(&msg); err != nil {
+	if err := json.Unmarshal(data, &msg); err != nil {
 		return nil, fmt.Errorf("could not decode json: %w", err)
 	}
 	if os.Getenv("DEBUGP") != "" {
-		fmt.Fprint(os.Stdout, "\x1b[33mRECV>\x1b[0m\n")
-		if err := json.NewEncoder(os.Stdout).Encode(msg); err != nil {
-			logger.Printf("could not encode json: %v\n", err)
-		}
+		fmt.Fprintf(os.Stdout, "\x1b[33mRECV>\x1b[0m\n%s\n", data)
 	}
 	return msg, nil
 }
@@ -70,11 +70,9 @@ func (t *pipeTransport) Send(msg map[string]interface{}) error {
 		return fmt.Errorf("pipeTransport: could not marshal json: %w", err)
 	}
 	if os.Getenv("DEBUGP") != "" {
-		fmt.Fprint(os.Stdout, "\x1b[32mSEND>\x1b[0m\n")
-		if err := json.NewEncoder(os.Stdout).Encode(msg); err != nil {
-			logger.Printf("could not encode json: %v\n", err)
-		}
+		fmt.Fprintf(os.Stdout, "\x1b[32mSEND>\x1b[0m\n%s\n", msgBytes)
 	}
+
 	lengthPadding := make([]byte, 4)
 	binary.LittleEndian.PutUint32(lengthPadding, uint32(len(msgBytes)))
 	if _, err = t.writer.Write(append(lengthPadding, msgBytes...)); err != nil {
