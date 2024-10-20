@@ -55,7 +55,7 @@ type message struct {
 	GUID   string                 `json:"guid"`
 	Method string                 `json:"method,omitempty"`
 	Params map[string]interface{} `json:"params,omitempty"`
-	Result interface{}            `json:"result,omitempty"`
+	Result map[string]interface{} `json:"result,omitempty"`
 	Error  *struct {
 		Error Error `json:"error"`
 	} `json:"error,omitempty"`

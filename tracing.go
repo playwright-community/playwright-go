@@ -89,7 +89,7 @@ func (t *tracingImpl) doStopChunk(filePath string) (err error) {
 		if err != nil {
 			return err
 		}
-		entries, ok := result.(map[string]interface{})["entries"]
+		entries, ok := result["entries"]
 		if !ok {
 			return fmt.Errorf("could not convert result to map: %v", result)
 		}
@@ -109,7 +109,7 @@ func (t *tracingImpl) doStopChunk(filePath string) (err error) {
 	if err != nil {
 		return err
 	}
-	artifactChannel, ok := result.(map[string]interface{})["artifact"]
+	artifactChannel, ok := result["artifact"]
 	if !ok {
 		return fmt.Errorf("could not convert result to map: %v", result)
 	}

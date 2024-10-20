@@ -10,6 +10,12 @@ type selectorsOwnerImpl struct {
 	channelOwner
 }
 
+func (s *selectorsOwnerImpl) setTestIdAttributeName(name string) {
+	s.channel.SendNoReply("setTestIdAttributeName", false, map[string]interface{}{
+		"testIdAttributeName": name,
+	})
+}
+
 func newSelectorsOwner(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *selectorsOwnerImpl {
 	obj := &selectorsOwnerImpl{}
 	obj.createChannelOwner(obj, parent, objectType, guid, initializer)
@@ -57,9 +63,7 @@ func (s *selectorsImpl) Register(name string, script Script, options ...Selector
 func (s *selectorsImpl) SetTestIdAttribute(name string) {
 	setTestIdAttributeName(name)
 	s.channels.Range(func(key, value any) bool {
-		value.(*selectorsOwnerImpl).channel.SendNoReply("setTestIdAttributeName", map[string]interface{}{
-			"testIdAttributeName": name,
-		})
+		value.(*selectorsOwnerImpl).setTestIdAttributeName(name)
 		return true
 	})
 }
@@ -67,10 +71,8 @@ func (s *selectorsImpl) SetTestIdAttribute(name string) {
 func (s *selectorsImpl) addChannel(channel *selectorsOwnerImpl) {
 	s.channels.Store(channel.guid, channel)
 	for _, params := range s.registrations {
-		channel.channel.SendNoReply("register", params)
-		channel.channel.SendNoReply("setTestIdAttributeName", map[string]interface{}{
-			"testIdAttributeName": getTestIdAttributeName(),
-		})
+		channel.channel.SendNoReply("register", false, params)
+		channel.setTestIdAttributeName(getTestIdAttributeName())
 	}
 }
 

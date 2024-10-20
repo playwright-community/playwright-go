@@ -50,11 +50,10 @@ func (l *localUtilsImpl) HarOpen(file string) (string, error) {
 		},
 	})
 	if err == nil {
-		value := result.(map[string]interface{})
-		if harId, ok := value["harId"]; ok {
+		if harId, ok := result["harId"]; ok {
 			return harId.(string), nil
 		}
-		if err, ok := value["error"]; ok {
+		if err, ok := result["error"]; ok {
 			return "", fmt.Errorf("%w:%v", ErrPlaywright, err)
 		}
 	}
@@ -82,10 +81,6 @@ func (l *localUtilsImpl) HarLookup(option harLookupOptions) (*harLookupResult, e
 	if ret == nil {
 		return nil, err
 	}
-	retMap, ok := ret.(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("expected harLookupResult, got %T", retMap)
-	}
 	var result harLookupResult
 	mJson, err := json.Marshal(ret)
 	if err != nil {
@@ -105,13 +100,12 @@ func (l *localUtilsImpl) HarLookup(option harLookupOptions) (*harLookupResult, e
 	return &result, err
 }
 
-func (l *localUtilsImpl) HarClose(harId string) error {
-	_, err := l.channel.Send("harClose", []map[string]interface{}{
+func (l *localUtilsImpl) HarClose(harId string) {
+	l.channel.SendNoReply("harClose", true, []map[string]interface{}{
 		{
 			"harId": harId,
 		},
 	})
-	return err
 }
 
 func (l *localUtilsImpl) HarUnzip(zipFile, harFile string) error {
@@ -145,7 +139,7 @@ func (l *localUtilsImpl) TraceDiscarded(stacksId string) error {
 }
 
 func (l *localUtilsImpl) AddStackToTracingNoReply(id uint32, stack []map[string]interface{}) {
-	l.channel.SendNoReply("addStackToTracingNoReply", map[string]interface{}{
+	l.channel.SendNoReply("addStackToTracingNoReply", true, map[string]interface{}{
 		"callData": map[string]interface{}{
 			"id":    id,
 			"stack": stack,

@@ -860,7 +860,7 @@ func (l *locatorImpl) expect(expression string, options frameExpectOptions) (*fr
 		overrides["expectedValue"] = serializeArgument(options.ExpectedValue)
 		options.ExpectedValue = nil
 	}
-	response, err := l.frame.channel.SendReturnAsDict("expect", options, overrides)
+	result, err := l.frame.channel.SendReturnAsDict("expect", options, overrides)
 	if err != nil {
 		return nil, err
 	}
@@ -869,15 +869,14 @@ func (l *locatorImpl) expect(expression string, options frameExpectOptions) (*fr
 		matches  bool
 		log      []string
 	)
-	responseMap := response.(map[string]interface{})
 
-	if v, ok := responseMap["received"]; ok {
+	if v, ok := result["received"]; ok {
 		received = parseResult(v)
 	}
-	if v, ok := responseMap["matches"]; ok {
+	if v, ok := result["matches"]; ok {
 		matches = v.(bool)
 	}
-	if v, ok := responseMap["log"]; ok {
+	if v, ok := result["log"]; ok {
 		for _, l := range v.([]interface{}) {
 			log = append(log, l.(string))
 		}
