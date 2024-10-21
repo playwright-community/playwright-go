@@ -19,13 +19,13 @@ func (c *channel) MarshalJSON() ([]byte, error) {
 func (c *channel) Send(method string, options ...interface{}) (interface{}, error) {
 	return c.connection.WrapAPICall(func() (interface{}, error) {
 		return c.innerSend(method, options...).GetResultValue()
-	}, false)
+	}, c.owner.isInternalType)
 }
 
 func (c *channel) SendReturnAsDict(method string, options ...interface{}) (map[string]interface{}, error) {
 	ret, err := c.connection.WrapAPICall(func() (interface{}, error) {
 		return c.innerSend(method, options...).GetResult()
-	}, false)
+	}, c.owner.isInternalType)
 	return ret.(map[string]interface{}), err
 }
 

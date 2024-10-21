@@ -16,6 +16,7 @@ type channelOwner struct {
 	initializer                map[string]interface{}
 	parent                     *channelOwner
 	wasCollected               bool
+	isInternalType             bool
 }
 
 func (c *channelOwner) dispose(reason ...string) {
@@ -93,6 +94,10 @@ func (c *channelOwner) createChannelOwner(self interface{}, parent *channelOwner
 	}
 	c.channel = newChannel(c, self)
 	c.eventToSubscriptionMapping = map[string]string{}
+}
+
+func (c *channelOwner) markAsInternalType() {
+	c.isInternalType = true
 }
 
 type rootChannelOwner struct {

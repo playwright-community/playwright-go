@@ -159,5 +159,6 @@ func newLocalUtils(parent *channelOwner, objectType string, guid string, initial
 		}
 		remapMapToStruct(entry["descriptor"], l.Devices[entry["name"].(string)])
 	}
+	l.markAsInternalType()
 	return l
 }
