@@ -20,6 +20,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/coder/websocket"
 	"github.com/playwright-community/playwright-go"
 	"github.com/stretchr/testify/require"
 )
@@ -45,28 +46,37 @@ func Asset(path string) string {
 
 func newTestServer(tls ...bool) *testServer {
 	ts := &testServer{
+		eventEmitter:        playwright.NewEventEmitter(),
+		mux:                 http.NewServeMux(),
 		routes:              make(map[string]http.HandlerFunc),
 		requestSubscriberes: make(map[string][]chan *http.Request),
 	}
+	ts.mux.HandleFunc("/ws", ts.wsHandler)
+	ts.mux.HandleFunc("/", ts.handler)
 	if len(tls) > 0 && tls[0] {
-		ts.testServer = httptest.NewTLSServer(http.HandlerFunc(ts.serveHTTP))
+		ts.testServer = httptest.NewTLSServer(ts.mux)
 	} else {
-		ts.testServer = httptest.NewServer(http.HandlerFunc(ts.serveHTTP))
+		ts.testServer = httptest.NewServer(ts.mux)
 	}
 	ts.PREFIX = ts.testServer.URL
 	ts.EMPTY_PAGE = ts.testServer.URL + "/empty.html"
 	ts.CROSS_PROCESS_PREFIX = strings.Replace(ts.testServer.URL, "127.0.0.1", "localhost", 1)
+	ts.PORT = ts.testServer.URL[strings.LastIndex(ts.testServer.URL, ":")+1:]
 	return ts
 }
 
 type testServer struct {
 	sync.Mutex
+	eventEmitter         playwright.EventEmitter
+	mux                  *http.ServeMux
 	testServer           *httptest.Server
 	routes               map[string]http.HandlerFunc
 	requestSubscriberes  map[string][]chan *http.Request
 	PREFIX               string
 	EMPTY_PAGE           string
 	CROSS_PROCESS_PREFIX string
+	WS_PREFIX            string
+	PORT                 string
 }
 
 func (t *testServer) AfterEach() {
@@ -74,6 +84,9 @@ func (t *testServer) AfterEach() {
 	defer t.Unlock()
 	t.routes = make(map[string]http.HandlerFunc)
 	t.requestSubscriberes = make(map[string][]chan *http.Request)
+	t.eventEmitter.RemoveListeners("connection")
+	t.eventEmitter.RemoveListeners("message")
+	t.testServer.CloseClientConnections()
 }
 
 func (t *testServer) CloseClientConnections() {
@@ -84,12 +97,67 @@ func (t *testServer) SetTLSConfig(config *tls.Config) {
 	t.testServer.TLS = config
 }
 
-func (t *testServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
+func (t *testServer) OnceWebSocketConnection(handler func(c *websocket.Conn, r *http.Request)) {
+	t.eventEmitter.Once("connection", handler)
+}
+
+func (t *testServer) OnWebSocketMessage(handler func(c *websocket.Conn, r *http.Request, msgType websocket.MessageType, msg []byte)) {
+	t.eventEmitter.On("message", handler)
+}
+
+func (t *testServer) OnceWebSocketMessage(handler func(c *websocket.Conn, r *http.Request, msgType websocket.MessageType, msg []byte)) {
+	t.eventEmitter.Once("message", handler)
+}
+
+func (t *testServer) SendOnWebSocketConnection(msgType websocket.MessageType, data []byte) {
+	t.OnceWebSocketConnection(func(c *websocket.Conn, r *http.Request) {
+		err := c.Write(r.Context(), msgType, data)
+		if err != nil {
+			log.Println("testServer: could not write ws message:", err)
+			return
+		}
+	})
+}
+
+func (t *testServer) WaitForWebSocketConnection() <-chan *websocket.Conn {
+	channel := make(chan *websocket.Conn)
+	t.OnceWebSocketConnection(func(c *websocket.Conn, r *http.Request) {
+		channel <- c
+		close(channel)
+	})
+	return channel
+}
+
+func (t *testServer) wsHandler(w http.ResponseWriter, r *http.Request) {
+	c, err := websocket.Accept(w, r, &websocket.AcceptOptions{
+		InsecureSkipVerify: true,
+	})
+	if err != nil {
+		log.Println("testServer: could not upgrade ws connection:", err)
+		return
+	}
+	defer c.Close(websocket.StatusNormalClosure, "")
+
+	t.eventEmitter.Emit("connection", c, r)
+
+	for {
+		typ, message, err := c.Read(r.Context())
+		if err != nil {
+			if websocket.CloseStatus(err) != websocket.StatusNormalClosure && websocket.CloseStatus(err) != websocket.StatusNoStatusRcvd {
+				log.Println("testServer: could not read ws message:", err)
+			}
+			break
+		}
+		t.eventEmitter.Emit("message", c, r, typ, message)
+	}
+}
+
+func (t *testServer) handler(w http.ResponseWriter, r *http.Request) {
 	t.Lock()
 	defer t.Unlock()
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Printf("Error reading body: %v", err)
+		log.Printf("testServer: Error reading body: %v", err)
 		http.Error(w, "can't read body", http.StatusBadRequest)
 		return
 	}
