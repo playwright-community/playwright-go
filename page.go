@@ -89,7 +89,7 @@ func (p *pageImpl) onLocatorHandlerTriggered(uid float64) {
 				delete(p.locatorHandlers, uid)
 			}
 			_, _ = p.connection.WrapAPICall(func() (interface{}, error) {
-				p.channel.SendNoReply("resolveLocatorHandlerNoReply", map[string]any{
+				p.channel.SendNoReply("resolveLocatorHandlerNoReply", true, map[string]any{
 					"uid":    uid,
 					"remove": remove,
 				})
@@ -105,7 +105,7 @@ func (p *pageImpl) RemoveLocatorHandler(locator Locator) error {
 	for uid := range p.locatorHandlers {
 		if p.locatorHandlers[uid].locator.equals(locator) {
 			delete(p.locatorHandlers, uid)
-			_, _ = p.channel.Send("unregisterLocatorHandler", map[string]any{
+			p.channel.SendNoReply("unregisterLocatorHandler", false, map[string]any{
 				"uid": uid,
 			})
 			return nil
@@ -194,14 +194,14 @@ func (p *pageImpl) Frames() []Frame {
 
 func (p *pageImpl) SetDefaultNavigationTimeout(timeout float64) {
 	p.timeoutSettings.SetDefaultNavigationTimeout(&timeout)
-	p.channel.SendNoReply("setDefaultNavigationTimeoutNoReply", map[string]interface{}{
+	p.channel.SendNoReply("setDefaultNavigationTimeoutNoReply", true, map[string]interface{}{
 		"timeout": timeout,
 	})
 }
 
 func (p *pageImpl) SetDefaultTimeout(timeout float64) {
 	p.timeoutSettings.SetDefaultTimeout(&timeout)
-	p.channel.SendNoReply("setDefaultTimeoutNoReply", map[string]interface{}{
+	p.channel.SendNoReply("setDefaultTimeoutNoReply", true, map[string]interface{}{
 		"timeout": timeout,
 	})
 }
@@ -1339,4 +1339,9 @@ func (p *pageImpl) OnWebSocket(fn func(WebSocket)) {
 
 func (p *pageImpl) OnWorker(fn func(Worker)) {
 	p.On("worker", fn)
+}
+
+func (p *pageImpl) RequestGC() error {
+	_, err := p.channel.Send("requestGC")
+	return err
 }

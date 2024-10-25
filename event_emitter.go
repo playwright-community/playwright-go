@@ -13,6 +13,7 @@ type EventEmitter interface {
 	On(name string, handler interface{})
 	Once(name string, handler interface{})
 	RemoveListener(name string, handler interface{})
+	RemoveListeners(name string)
 }
 
 type (
@@ -30,6 +31,10 @@ type (
 		once    bool
 	}
 )
+
+func NewEventEmitter() EventEmitter {
+	return &eventEmitter{}
+}
 
 func (e *eventEmitter) Emit(name string, payload ...interface{}) (hasListener bool) {
 	e.eventsMutex.Lock()
@@ -62,6 +67,13 @@ func (e *eventEmitter) RemoveListener(name string, handler interface{}) {
 		defer evt.Unlock()
 		evt.removeHandler(handler)
 	}
+}
+
+func (e *eventEmitter) RemoveListeners(name string) {
+	e.eventsMutex.Lock()
+	defer e.eventsMutex.Unlock()
+	e.init()
+	delete(e.events, name)
 }
 
 // ListenerCount count the listeners by name, count all if name is empty

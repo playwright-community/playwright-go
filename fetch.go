@@ -334,7 +334,7 @@ func (r *apiResponseImpl) Body() ([]byte, error) {
 		}
 		return nil, err
 	}
-	body := result.(map[string]interface{})["binary"]
+	body := result["binary"]
 	if body == nil {
 		return nil, errors.New("response has been disposed")
 	}
