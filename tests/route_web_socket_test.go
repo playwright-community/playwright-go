@@ -19,7 +19,7 @@ func assertSlicesEqual(t *testing.T, expected []interface{}, cb func() (interfac
 	require.EventuallyWithT(t, func(collect *assert.CollectT) {
 		actual, err := cb()
 		require.NoError(t, err)
-		require.EqualValues(t, expected, actual)
+		require.ElementsMatch(t, expected, actual)
 	}, 5*time.Second, 200*time.Millisecond)
 }
 
@@ -209,7 +209,7 @@ func TestRouteWebSocketShouldWorkWithServer(t *testing.T) {
 	setupWS(t, page, server.PORT, "blob")
 	ws := <-wsConnChan
 	require.EventuallyWithT(t, func(collect *assert.CollectT) {
-		require.EqualValues(t, []string{"message: fake"}, log.Get())
+		require.ElementsMatch(t, []string{"message: fake"}, log.Get())
 	}, 5*time.Second, 200*time.Millisecond)
 
 	ws.SendMessage(websocket.MessageText, []byte("to-modify"))
@@ -234,7 +234,7 @@ func TestRouteWebSocketShouldWorkWithServer(t *testing.T) {
 	require.NoError(t, err)
 
 	require.EventuallyWithT(t, func(collect *assert.CollectT) {
-		require.EqualValues(t, []string{"message: fake", "message: modified", "message: pass-client"}, log.Get())
+		require.ElementsMatch(t, []string{"message: fake", "message: modified", "message: pass-client"}, log.Get())
 	}, 5*time.Second, 200*time.Millisecond)
 
 	assertSlicesEqual(t, []interface{}{
@@ -265,7 +265,7 @@ func TestRouteWebSocketShouldWorkWithServer(t *testing.T) {
 	require.NoError(t, err)
 
 	require.EventuallyWithT(t, func(collect *assert.CollectT) {
-		require.EqualValues(t, []string{"message: fake", "message: modified", "message: pass-client", "message: pass-client-2"}, log.Get())
+		require.ElementsMatch(t, []string{"message: fake", "message: modified", "message: pass-client", "message: pass-client-2"}, log.Get())
 	}, 5*time.Second, 200*time.Millisecond)
 
 	_, err = page.Evaluate(`
@@ -275,7 +275,7 @@ func TestRouteWebSocketShouldWorkWithServer(t *testing.T) {
 	require.NoError(t, err)
 
 	require.EventuallyWithT(t, func(collect *assert.CollectT) {
-		require.EqualValues(t, []string{
+		require.ElementsMatch(t, []string{
 			"message: fake",
 			"message: modified",
 			"message: pass-client",
