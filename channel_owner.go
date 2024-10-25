@@ -16,6 +16,7 @@ type channelOwner struct {
 	initializer                map[string]interface{}
 	parent                     *channelOwner
 	wasCollected               bool
+	isInternalType             bool
 }
 
 func (c *channelOwner) dispose(reason ...string) {
@@ -48,7 +49,7 @@ func (c *channelOwner) setEventSubscriptionMapping(mapping map[string]string) {
 func (c *channelOwner) updateSubscription(event string, enabled bool) {
 	protocolEvent, ok := c.eventToSubscriptionMapping[event]
 	if ok {
-		c.channel.SendNoReply("updateSubscription", map[string]interface{}{
+		c.channel.SendNoReply("updateSubscription", true, map[string]interface{}{
 			"event":   protocolEvent,
 			"enabled": enabled,
 		})
@@ -95,18 +96,22 @@ func (c *channelOwner) createChannelOwner(self interface{}, parent *channelOwner
 	c.eventToSubscriptionMapping = map[string]string{}
 }
 
+func (c *channelOwner) markAsInternalType() {
+	c.isInternalType = true
+}
+
 type rootChannelOwner struct {
 	channelOwner
 }
 
 func (r *rootChannelOwner) initialize() (*Playwright, error) {
-	result, err := r.channel.Send("initialize", map[string]interface{}{
+	ret, err := r.channel.SendReturnAsDict("initialize", map[string]interface{}{
 		"sdkLanguage": "javascript",
 	})
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(result).(*Playwright), nil
+	return fromChannel(ret["playwright"]).(*Playwright), nil
 }
 
 func newRootChannelOwner(connection *connection) *rootChannelOwner {

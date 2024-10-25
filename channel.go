@@ -18,46 +18,27 @@ func (c *channel) MarshalJSON() ([]byte, error) {
 
 func (c *channel) Send(method string, options ...interface{}) (interface{}, error) {
 	return c.connection.WrapAPICall(func() (interface{}, error) {
-		return c.innerSend(method, false, options...)
-	}, false)
+		return c.innerSend(method, options...).GetResultValue()
+	}, c.owner.isInternalType)
 }
 
-func (c *channel) SendReturnAsDict(method string, options ...interface{}) (interface{}, error) {
-	return c.connection.WrapAPICall(func() (interface{}, error) {
-		return c.innerSend(method, true, options...)
-	}, true)
+func (c *channel) SendReturnAsDict(method string, options ...interface{}) (map[string]interface{}, error) {
+	ret, err := c.connection.WrapAPICall(func() (interface{}, error) {
+		return c.innerSend(method, options...).GetResult()
+	}, c.owner.isInternalType)
+	return ret.(map[string]interface{}), err
 }
 
-func (c *channel) innerSend(method string, returnAsDict bool, options ...interface{}) (interface{}, error) {
+func (c *channel) innerSend(method string, options ...interface{}) *protocolCallback {
 	params := transformOptions(options...)
-	callback, err := c.connection.sendMessageToServer(c.owner, method, params, false)
-	if err != nil {
-		return nil, err
-	}
-	result, err := callback.GetResult()
-	if err != nil {
-		return nil, err
-	}
-	if result == nil {
-		return nil, nil
-	}
-	if returnAsDict {
-		return result, nil
-	}
-	if mapV, ok := result.(map[string]interface{}); ok && len(mapV) <= 1 {
-		for key := range mapV {
-			return mapV[key], nil
-		}
-		return nil, nil
-	}
-	return result, nil
+	return c.connection.sendMessageToServer(c.owner, method, params, false)
 }
 
-func (c *channel) SendNoReply(method string, options ...interface{}) {
+func (c *channel) SendNoReply(method string, isInternal bool, options ...interface{}) {
 	params := transformOptions(options...)
 	_, err := c.connection.WrapAPICall(func() (interface{}, error) {
-		return c.connection.sendMessageToServer(c.owner, method, params, true)
-	}, false)
+		return c.connection.sendMessageToServer(c.owner, method, params, true).GetResult()
+	}, isInternal)
 	if err != nil {
 		logger.Printf("SendNoReply failed: %v\n", err)
 	}

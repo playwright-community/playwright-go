@@ -20,11 +20,6 @@ var (
 	apiNameTransform     = regexp.MustCompile(`(?U)\(\*(.+)(Impl)?\)`)
 )
 
-type result struct {
-	Data  interface{}
-	Error error
-}
-
 type connection struct {
 	transport    transport
 	apiZone      sync.Map
@@ -102,13 +97,9 @@ func (c *connection) Dispatch(msg *message) {
 			return
 		}
 		if msg.Error != nil {
-			cb.SetResult(result{
-				Error: parseError(msg.Error.Error),
-			})
+			cb.SetError(parseError(msg.Error.Error))
 		} else {
-			cb.SetResult(result{
-				Data: c.replaceGuidsWithChannels(msg.Result),
-			})
+			cb.SetResult(c.replaceGuidsWithChannels(msg.Result).(map[string]interface{}))
 		}
 		return
 	}
@@ -191,16 +182,20 @@ func (c *connection) replaceGuidsWithChannels(payload interface{}) interface{} {
 	return payload
 }
 
-func (c *connection) sendMessageToServer(object *channelOwner, method string, params interface{}, noReply bool) (*protocolCallback, error) {
+func (c *connection) sendMessageToServer(object *channelOwner, method string, params interface{}, noReply bool) (cb *protocolCallback) {
+	cb = newProtocolCallback(noReply, c.abort)
+
 	if err := c.closedError.Get(); err != nil {
-		return nil, err
+		cb.SetError(err)
+		return
 	}
 	if object.wasCollected {
-		return nil, errors.New("The object has been collected to prevent unbounded heap growth.")
+		cb.SetError(errors.New("The object has been collected to prevent unbounded heap growth."))
+		return
 	}
 
 	id := c.lastID.Add(1)
-	cb, _ := c.callbacks.LoadOrStore(id, newProtocolCallback(noReply, c.abort))
+	c.callbacks.Store(id, cb)
 	var (
 		metadata = make(map[string]interface{}, 0)
 		stack    = make([]map[string]interface{}, 0)
@@ -225,10 +220,11 @@ func (c *connection) sendMessageToServer(object *channelOwner, method string, pa
 	}
 
 	if err := c.transport.Send(message); err != nil {
-		return nil, fmt.Errorf("could not send message: %w", err)
+		cb.SetError(fmt.Errorf("could not send message: %w", err))
+		return
 	}
 
-	return cb, nil
+	return
 }
 
 func (c *connection) setInTracing(isTracing bool) {
@@ -327,41 +323,66 @@ func fromNullableChannel(v interface{}) interface{} {
 }
 
 type protocolCallback struct {
-	callback chan result
-	noReply  bool
-	abort    <-chan struct{}
+	done    chan struct{}
+	noReply bool
+	abort   <-chan struct{}
+	once    sync.Once
+	value   map[string]interface{}
+	err     error
 }
 
-func (pc *protocolCallback) SetResult(r result) {
+func (pc *protocolCallback) setResultOnce(result map[string]interface{}, err error) {
+	pc.once.Do(func() {
+		pc.value = result
+		pc.err = err
+		close(pc.done)
+	})
+}
+
+func (pc *protocolCallback) waitResult() {
 	if pc.noReply {
 		return
 	}
 	select {
+	case <-pc.done: // wait for result
+		return
 	case <-pc.abort:
 		select {
-		case pc.callback <- r:
+		case <-pc.done:
+			return
 		default:
+			pc.err = errors.New("Connection closed")
+			return
 		}
-		return
-	case pc.callback <- r:
 	}
 }
 
-func (pc *protocolCallback) GetResult() (interface{}, error) {
-	if pc.noReply {
-		return nil, nil
+func (pc *protocolCallback) SetError(err error) {
+	pc.setResultOnce(nil, err)
+}
+
+func (pc *protocolCallback) SetResult(result map[string]interface{}) {
+	pc.setResultOnce(result, nil)
+}
+
+func (pc *protocolCallback) GetResult() (map[string]interface{}, error) {
+	pc.waitResult()
+	return pc.value, pc.err
+}
+
+// GetResultValue returns value if the map has only one element
+func (pc *protocolCallback) GetResultValue() (interface{}, error) {
+	pc.waitResult()
+	if len(pc.value) == 0 { // empty map treated as nil
+		return nil, pc.err
 	}
-	select {
-	case result := <-pc.callback:
-		return result.Data, result.Error
-	case <-pc.abort:
-		select {
-		case result := <-pc.callback:
-			return result.Data, result.Error
-		default:
-			return nil, errors.New("Connection closed")
+	if len(pc.value) == 1 {
+		for key := range pc.value {
+			return pc.value[key], pc.err
 		}
 	}
+
+	return pc.value, pc.err
 }
 
 func newProtocolCallback(noReply bool, abort <-chan struct{}) *protocolCallback {
@@ -372,7 +393,7 @@ func newProtocolCallback(noReply bool, abort <-chan struct{}) *protocolCallback 
 		}
 	}
 	return &protocolCallback{
-		callback: make(chan result, 1),
-		abort:    abort,
+		done:  make(chan struct{}),
+		abort: abort,
 	}
 }

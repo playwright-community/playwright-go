@@ -20,7 +20,6 @@ type APIRequestNewContextOptions struct {
 	// a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
 	// `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
 	// with an exact match to the request origin that the certificate is valid for.
-	// **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
 	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
 	// work by replacing `localhost` with `local.playwright`.
 	ClientCertificates []ClientCertificate `json:"clientCertificates"`
@@ -49,6 +48,7 @@ type APIRequestNewContextOptions struct {
 	// Specific user agent to use in this context.
 	UserAgent *string `json:"userAgent"`
 }
+
 type APIRequestContextDeleteOptions struct {
 	// Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
 	// and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
@@ -85,10 +85,12 @@ type APIRequestContextDeleteOptions struct {
 	// Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 	Timeout *float64 `json:"timeout"`
 }
+
 type APIRequestContextDisposeOptions struct {
 	// The reason to be reported to the operations interrupted by the context disposal.
 	Reason *string `json:"reason"`
 }
+
 type APIRequestContextFetchOptions struct {
 	// Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
 	// and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
@@ -131,6 +133,7 @@ type APIRequestContextFetchOptions struct {
 	// Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 	Timeout *float64 `json:"timeout"`
 }
+
 type APIRequestContextGetOptions struct {
 	// Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
 	// and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
@@ -167,6 +170,7 @@ type APIRequestContextGetOptions struct {
 	// Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 	Timeout *float64 `json:"timeout"`
 }
+
 type APIRequestContextHeadOptions struct {
 	// Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
 	// and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
@@ -203,6 +207,7 @@ type APIRequestContextHeadOptions struct {
 	// Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 	Timeout *float64 `json:"timeout"`
 }
+
 type APIRequestContextPatchOptions struct {
 	// Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
 	// and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
@@ -239,6 +244,7 @@ type APIRequestContextPatchOptions struct {
 	// Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 	Timeout *float64 `json:"timeout"`
 }
+
 type APIRequestContextPostOptions struct {
 	// Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
 	// and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
@@ -275,6 +281,7 @@ type APIRequestContextPostOptions struct {
 	// Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 	Timeout *float64 `json:"timeout"`
 }
+
 type APIRequestContextPutOptions struct {
 	// Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
 	// and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
@@ -311,20 +318,24 @@ type APIRequestContextPutOptions struct {
 	// Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 	Timeout *float64 `json:"timeout"`
 }
+
 type StorageState struct {
 	Cookies []Cookie `json:"cookies"`
 	Origins []Origin `json:"origins"`
 }
+
 type NameValue struct {
 	// Name of the header.
 	Name string `json:"name"`
 	// Value of the header.
 	Value string `json:"value"`
 }
+
 type BrowserCloseOptions struct {
 	// The reason to be reported to the operations interrupted by the browser closure.
 	Reason *string `json:"reason"`
 }
+
 type BrowserNewContextOptions struct {
 	// Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
 	AcceptDownloads *bool `json:"acceptDownloads"`
@@ -349,7 +360,6 @@ type BrowserNewContextOptions struct {
 	// a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
 	// `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
 	// with an exact match to the request origin that the certificate is valid for.
-	// **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
 	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
 	// work by replacing `localhost` with `local.playwright`.
 	ClientCertificates []ClientCertificate `json:"clientCertificates"`
@@ -433,7 +443,7 @@ type BrowserNewContextOptions struct {
 	// `no-preference`.
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
 	// Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the
-	// “viewport” is set.
+	// “[object Object]” is set.
 	Screen *Size `json:"screen"`
 	// Whether to allow sites to register Service workers. Defaults to `allow`.
 	//  - `allow`: [Service Workers] can be
@@ -470,6 +480,7 @@ type BrowserNewContextOptions struct {
 	// [viewport emulation]: https://playwright.dev/docs/emulation#viewport
 	Viewport *Size `json:"viewport"`
 }
+
 type BrowserNewPageOptions struct {
 	// Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
 	AcceptDownloads *bool `json:"acceptDownloads"`
@@ -494,7 +505,6 @@ type BrowserNewPageOptions struct {
 	// a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
 	// `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
 	// with an exact match to the request origin that the certificate is valid for.
-	// **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
 	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
 	// work by replacing `localhost` with `local.playwright`.
 	ClientCertificates []ClientCertificate `json:"clientCertificates"`
@@ -578,7 +588,7 @@ type BrowserNewPageOptions struct {
 	// `no-preference`.
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
 	// Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the
-	// “viewport” is set.
+	// “[object Object]” is set.
 	Screen *Size `json:"screen"`
 	// Whether to allow sites to register Service workers. Defaults to `allow`.
 	//  - `allow`: [Service Workers] can be
@@ -615,6 +625,7 @@ type BrowserNewPageOptions struct {
 	// [viewport emulation]: https://playwright.dev/docs/emulation#viewport
 	Viewport *Size `json:"viewport"`
 }
+
 type BrowserStartTracingOptions struct {
 	// specify custom categories to use instead of default.
 	Categories []string `json:"categories"`
@@ -625,6 +636,7 @@ type BrowserStartTracingOptions struct {
 	// captures screenshots in the trace.
 	Screenshots *bool `json:"screenshots"`
 }
+
 type OptionalCookie struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
@@ -644,6 +656,7 @@ type OptionalCookie struct {
 	// Optional.
 	SameSite *SameSiteAttribute `json:"sameSite"`
 }
+
 type Script struct {
 	// Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
 	// directory. Optional.
@@ -651,6 +664,7 @@ type Script struct {
 	// Raw script content. Optional.
 	Content *string `json:"content"`
 }
+
 type BrowserContextClearCookiesOptions struct {
 	// Only removes cookies with the given domain.
 	Domain interface{} `json:"domain"`
@@ -659,10 +673,12 @@ type BrowserContextClearCookiesOptions struct {
 	// Only removes cookies with the given path.
 	Path interface{} `json:"path"`
 }
+
 type BrowserContextCloseOptions struct {
 	// The reason to be reported to the operations interrupted by the context closure.
 	Reason *string `json:"reason"`
 }
+
 type Cookie struct {
 	Name   string `json:"name"`
 	Value  string `json:"value"`
@@ -674,10 +690,12 @@ type Cookie struct {
 	Secure   bool               `json:"secure"`
 	SameSite *SameSiteAttribute `json:"sameSite"`
 }
+
 type BrowserContextGrantPermissionsOptions struct {
 	// The [origin] to grant permissions to, e.g. "https://example.com".
 	Origin *string `json:"origin"`
 }
+
 type BrowserContextRouteFromHAROptions struct {
 	//  - If set to 'abort' any request not found in the HAR file will be aborted.
 	//  - If set to 'fallback' falls through to the next route handler in the handler chain.
@@ -697,6 +715,7 @@ type BrowserContextRouteFromHAROptions struct {
 	// pattern will be served from the HAR file. If not specified, all requests are served from the HAR file.
 	URL interface{} `json:"url"`
 }
+
 type Geolocation struct {
 	// Latitude between -90 and 90.
 	Latitude float64 `json:"latitude"`
@@ -705,6 +724,7 @@ type Geolocation struct {
 	// Non-negative accuracy value. Defaults to `0`.
 	Accuracy *float64 `json:"accuracy"`
 }
+
 type BrowserContextUnrouteAllOptions struct {
 	// Specifies whether to wait for already running handlers and what to do if they throw errors:
 	//  - `default` - do not wait for current handler calls (if any) to finish, if unrouted handler throws, it may
@@ -714,6 +734,7 @@ type BrowserContextUnrouteAllOptions struct {
 	//   after unrouting are silently caught
 	Behavior *UnrouteBehavior `json:"behavior"`
 }
+
 type BrowserContextExpectConsoleMessageOptions struct {
 	// Receives the [ConsoleMessage] object and resolves to truthy value when the waiting should resolve.
 	Predicate func(ConsoleMessage) bool `json:"predicate"`
@@ -721,6 +742,7 @@ type BrowserContextExpectConsoleMessageOptions struct {
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout].
 	Timeout *float64 `json:"timeout"`
 }
+
 type BrowserContextExpectEventOptions struct {
 	// Receives the event data and resolves to truthy value when the waiting should resolve.
 	Predicate interface{} `json:"predicate"`
@@ -728,6 +750,7 @@ type BrowserContextExpectEventOptions struct {
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout].
 	Timeout *float64 `json:"timeout"`
 }
+
 type BrowserContextExpectPageOptions struct {
 	// Receives the [Page] object and resolves to truthy value when the waiting should resolve.
 	Predicate func(Page) bool `json:"predicate"`
@@ -735,6 +758,7 @@ type BrowserContextExpectPageOptions struct {
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout].
 	Timeout *float64 `json:"timeout"`
 }
+
 type BrowserContextWaitForEventOptions struct {
 	// Receives the event data and resolves to truthy value when the waiting should resolve.
 	Predicate interface{} `json:"predicate"`
@@ -742,6 +766,7 @@ type BrowserContextWaitForEventOptions struct {
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout].
 	Timeout *float64 `json:"timeout"`
 }
+
 type BrowserTypeConnectOptions struct {
 	// This option exposes network available on the connecting client to the browser being connected to. Consists of a
 	// list of rules separated by comma.
@@ -763,6 +788,7 @@ type BrowserTypeConnectOptions struct {
 	// Maximum time in milliseconds to wait for the connection to be established. Defaults to `0` (no timeout).
 	Timeout *float64 `json:"timeout"`
 }
+
 type BrowserTypeConnectOverCDPOptions struct {
 	// Additional HTTP headers to be sent with connect request. Optional.
 	Headers map[string]string `json:"headers"`
@@ -773,6 +799,7 @@ type BrowserTypeConnectOverCDPOptions struct {
 	// `0` to disable timeout.
 	Timeout *float64 `json:"timeout"`
 }
+
 type BrowserTypeLaunchOptions struct {
 	// **NOTE** Use custom browser args at your own risk, as some of them may break Playwright functionality.
 	// Additional arguments to pass to the browser instance. The list of Chromium flags can be found
@@ -789,7 +816,7 @@ type BrowserTypeLaunchOptions struct {
 	// Enable Chromium sandboxing. Defaults to `false`.
 	ChromiumSandbox *bool `json:"chromiumSandbox"`
 	// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the
-	// “headless” option will be set `false`.
+	// “[object Object]” option will be set `false`.
 	//
 	// Deprecated: Use [debugging tools] instead.
 	//
@@ -801,7 +828,7 @@ type BrowserTypeLaunchOptions struct {
 	DownloadsPath *string `json:"downloadsPath"`
 	// Specify environment variables that will be visible to the browser. Defaults to `process.env`.
 	Env map[string]string `json:"env"`
-	// Path to a browser executable to run instead of the bundled one. If “executablePath” is a relative path, then it is
+	// Path to a browser executable to run instead of the bundled one. If “[object Object]” is a relative path, then it is
 	// resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium,
 	// Firefox or WebKit, use at your own risk.
 	ExecutablePath *string `json:"executablePath"`
@@ -819,16 +846,16 @@ type BrowserTypeLaunchOptions struct {
 	// Whether to run browser in headless mode. More details for
 	// [Chromium] and
 	// [Firefox]. Defaults to `true` unless the
-	// “devtools” option is `true`.
+	// “[object Object]” option is `true`.
 	//
 	// [Chromium]: https://developers.google.com/web/updates/2017/04/headless-chrome
 	// [Firefox]: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
 	Headless *bool `json:"headless"`
-	// If `true`, Playwright does not pass its own configurations args and only uses the ones from “args”. Dangerous
-	// option; use with care. Defaults to `false`.
+	// If `true`, Playwright does not pass its own configurations args and only uses the ones from “[object Object]”.
+	// Dangerous option; use with care. Defaults to `false`.
 	IgnoreAllDefaultArgs *bool `json:"ignoreAllDefaultArgs"`
-	// If `true`, Playwright does not pass its own configurations args and only uses the ones from “args”. Dangerous
-	// option; use with care.
+	// If `true`, Playwright does not pass its own configurations args and only uses the ones from “[object Object]”.
+	// Dangerous option; use with care.
 	IgnoreDefaultArgs []string `json:"ignoreDefaultArgs"`
 	// Network proxy settings.
 	Proxy *Proxy `json:"proxy"`
@@ -841,6 +868,7 @@ type BrowserTypeLaunchOptions struct {
 	// If specified, traces are saved into this directory.
 	TracesDir *string `json:"tracesDir"`
 }
+
 type BrowserTypeLaunchPersistentContextOptions struct {
 	// Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
 	AcceptDownloads *bool `json:"acceptDownloads"`
@@ -879,7 +907,6 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
 	// `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
 	// with an exact match to the request origin that the certificate is valid for.
-	// **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
 	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
 	// work by replacing `localhost` with `local.playwright`.
 	ClientCertificates []ClientCertificate `json:"clientCertificates"`
@@ -893,7 +920,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// [emulating devices with device scale factor]: https://playwright.dev/docs/emulation#devices
 	DeviceScaleFactor *float64 `json:"deviceScaleFactor"`
 	// **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the
-	// “headless” option will be set `false`.
+	// “[object Object]” option will be set `false`.
 	//
 	// Deprecated: Use [debugging tools] instead.
 	//
@@ -905,7 +932,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	DownloadsPath *string `json:"downloadsPath"`
 	// Specify environment variables that will be visible to the browser. Defaults to `process.env`.
 	Env map[string]string `json:"env"`
-	// Path to a browser executable to run instead of the bundled one. If “executablePath” is a relative path, then it is
+	// Path to a browser executable to run instead of the bundled one. If “[object Object]” is a relative path, then it is
 	// resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium,
 	// Firefox or WebKit, use at your own risk.
 	ExecutablePath *string `json:"executablePath"`
@@ -934,7 +961,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// Whether to run browser in headless mode. More details for
 	// [Chromium] and
 	// [Firefox]. Defaults to `true` unless the
-	// “devtools” option is `true`.
+	// “[object Object]” option is `true`.
 	//
 	// [Chromium]: https://developers.google.com/web/updates/2017/04/headless-chrome
 	// [Firefox]: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
@@ -944,11 +971,11 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	//
 	// [HTTP authentication]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication
 	HttpCredentials *HttpCredentials `json:"httpCredentials"`
-	// If `true`, Playwright does not pass its own configurations args and only uses the ones from “args”. Dangerous
-	// option; use with care. Defaults to `false`.
+	// If `true`, Playwright does not pass its own configurations args and only uses the ones from “[object Object]”.
+	// Dangerous option; use with care. Defaults to `false`.
 	IgnoreAllDefaultArgs *bool `json:"ignoreAllDefaultArgs"`
-	// If `true`, Playwright does not pass its own configurations args and only uses the ones from “args”. Dangerous
-	// option; use with care.
+	// If `true`, Playwright does not pass its own configurations args and only uses the ones from “[object Object]”.
+	// Dangerous option; use with care.
 	IgnoreDefaultArgs []string `json:"ignoreDefaultArgs"`
 	// Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
 	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
@@ -1005,7 +1032,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// `no-preference`.
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
 	// Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the
-	// “viewport” is set.
+	// “[object Object]” is set.
 	Screen *Size `json:"screen"`
 	// Whether to allow sites to register Service workers. Defaults to `allow`.
 	//  - `allow`: [Service Workers] can be
@@ -1041,10 +1068,12 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// [viewport emulation]: https://playwright.dev/docs/emulation#viewport
 	Viewport *Size `json:"viewport"`
 }
+
 type ClockInstallOptions struct {
 	// Time to initialize with, current system time by default.
 	Time interface{} `json:"time"`
 }
+
 type ConsoleMessageLocation struct {
 	// URL of the resource.
 	URL string `json:"url"`
@@ -1053,6 +1082,7 @@ type ConsoleMessageLocation struct {
 	// 0-based column number in the resource.
 	ColumnNumber int `json:"columnNumber"`
 }
+
 type Rect struct {
 	// the x coordinate of the element in pixels.
 	X float64 `json:"x"`
@@ -1063,6 +1093,7 @@ type Rect struct {
 	// the height of the element in pixels.
 	Height float64 `json:"height"`
 }
+
 type ElementHandleCheckOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -1084,6 +1115,7 @@ type ElementHandleCheckOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type ElementHandleClickOptions struct {
 	// Defaults to `left`.
 	Button *MouseButton `json:"button"`
@@ -1117,6 +1149,7 @@ type ElementHandleClickOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type ElementHandleDblclickOptions struct {
 	// Defaults to `left`.
 	Button *MouseButton `json:"button"`
@@ -1146,6 +1179,7 @@ type ElementHandleDblclickOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type ElementHandleFillOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -1159,6 +1193,7 @@ type ElementHandleFillOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type ElementHandleHoverOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -1184,11 +1219,13 @@ type ElementHandleHoverOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type ElementHandleInputValueOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type ElementHandlePressOptions struct {
 	// Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
@@ -1202,6 +1239,7 @@ type ElementHandlePressOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type ElementHandleScreenshotOptions struct {
 	// When set to `"disabled"`, stops CSS animations, CSS transitions and Web Animations. Animations get different
 	// treatment depending on their duration:
@@ -1213,7 +1251,7 @@ type ElementHandleScreenshotOptions struct {
 	// changed.  Defaults to `"hide"`.
 	Caret *ScreenshotCaret `json:"caret"`
 	// Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
-	// box `#FF00FF` (customized by “maskColor”) that completely covers its bounding box.
+	// box `#FF00FF` (customized by “[object Object]”) that completely covers its bounding box.
 	Mask []Locator `json:"mask"`
 	// Specify the color of the overlay box for masked elements, in
 	// [CSS color format]. Default color is pink `#FF00FF`.
@@ -1223,9 +1261,9 @@ type ElementHandleScreenshotOptions struct {
 	// Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images.
 	// Defaults to `false`.
 	OmitBackground *bool `json:"omitBackground"`
-	// The file path to save the image to. The screenshot type will be inferred from file extension. If “path” is a
-	// relative path, then it is resolved relative to the current working directory. If no path is provided, the image
-	// won't be saved to the disk.
+	// The file path to save the image to. The screenshot type will be inferred from file extension. If “[object Object]”
+	// is a relative path, then it is resolved relative to the current working directory. If no path is provided, the
+	// image won't be saved to the disk.
 	Path *string `json:"path"`
 	// The quality of the image, between 0-100. Not applicable to `png` images.
 	Quality *int `json:"quality"`
@@ -1244,11 +1282,13 @@ type ElementHandleScreenshotOptions struct {
 	// Specify screenshot type, defaults to `png`.
 	Type *ScreenshotType `json:"type"`
 }
+
 type ElementHandleScrollIntoViewIfNeededOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type ElementHandleSelectOptionOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -1262,6 +1302,7 @@ type ElementHandleSelectOptionOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type ElementHandleSelectTextOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -1271,6 +1312,7 @@ type ElementHandleSelectTextOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type ElementHandleSetCheckedOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -1292,6 +1334,7 @@ type ElementHandleSetCheckedOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type ElementHandleSetInputFilesOptions struct {
 	// This option has no effect.
 	//
@@ -1301,6 +1344,7 @@ type ElementHandleSetInputFilesOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type ElementHandleTapOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -1326,6 +1370,7 @@ type ElementHandleTapOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type ElementHandleTypeOptions struct {
 	// Time to wait between key presses in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
@@ -1337,6 +1382,7 @@ type ElementHandleTypeOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type ElementHandleUncheckOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -1358,11 +1404,13 @@ type ElementHandleUncheckOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type ElementHandleWaitForElementStateOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type ElementHandleWaitForSelectorOptions struct {
 	// Defaults to `visible`. Can be either:
 	//  - `attached` - wait for element to be present in DOM.
@@ -1379,6 +1427,7 @@ type ElementHandleWaitForSelectorOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FileChooserSetFilesOptions struct {
 	// This option has no effect.
 	//
@@ -1388,6 +1437,7 @@ type FileChooserSetFilesOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameAddScriptTagOptions struct {
 	// Raw JavaScript content to be injected into frame.
 	Content *string `json:"content"`
@@ -1402,6 +1452,7 @@ type FrameAddScriptTagOptions struct {
 	// URL of a script to be added.
 	URL *string `json:"url"`
 }
+
 type FrameAddStyleTagOptions struct {
 	// Raw CSS content to be injected into frame.
 	Content *string `json:"content"`
@@ -1411,6 +1462,7 @@ type FrameAddStyleTagOptions struct {
 	// URL of the `<link>` tag.
 	URL *string `json:"url"`
 }
+
 type FrameCheckOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -1435,6 +1487,7 @@ type FrameCheckOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type FrameClickOptions struct {
 	// Defaults to `left`.
 	Button *MouseButton `json:"button"`
@@ -1466,11 +1519,14 @@ type FrameClickOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability] checks and skips the action. Defaults
-	// to `false`. Useful to wait until the element is ready for the action without performing it.
+	// to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+	// `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+	// are pressed.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type FrameDblclickOptions struct {
 	// Defaults to `left`.
 	Button *MouseButton `json:"button"`
@@ -1498,11 +1554,14 @@ type FrameDblclickOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability] checks and skips the action. Defaults
-	// to `false`. Useful to wait until the element is ready for the action without performing it.
+	// to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+	// `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+	// are pressed.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type FrameDispatchEventOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1511,6 +1570,7 @@ type FrameDispatchEventOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameDragAndDropOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -1538,11 +1598,13 @@ type FrameDragAndDropOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type FrameEvalOnSelectorOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
 	Strict *bool `json:"strict"`
 }
+
 type FrameFillOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -1559,6 +1621,7 @@ type FrameFillOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameFocusOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1567,6 +1630,7 @@ type FrameFocusOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameGetAttributeOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1575,21 +1639,25 @@ type FrameGetAttributeOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameGetByAltTextOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type FrameGetByLabelOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type FrameGetByPlaceholderOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type FrameGetByRoleOptions struct {
 	// An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls.
 	// Learn more about [`aria-checked`].
@@ -1602,8 +1670,8 @@ type FrameGetByRoleOptions struct {
 	//
 	// [`aria-disabled`]: https://www.w3.org/TR/wai-aria-1.2/#aria-disabled
 	Disabled *bool `json:"disabled"`
-	// Whether “name” is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when “name” is a
-	// regular expression. Note that exact match still trims whitespace.
+	// Whether “[object Object]” is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when
+	// “[object Object]” is a regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 	// An attribute that is usually set by `aria-expanded`.
 	// Learn more about [`aria-expanded`].
@@ -1624,7 +1692,7 @@ type FrameGetByRoleOptions struct {
 	// [`aria-level`]: https://www.w3.org/TR/wai-aria-1.2/#aria-level
 	Level *int `json:"level"`
 	// Option to match the [accessible name]. By default, matching is
-	// case-insensitive and searches for a substring, use “exact” to control this behavior.
+	// case-insensitive and searches for a substring, use “[object Object]” to control this behavior.
 	// Learn more about [accessible name].
 	//
 	// [accessible name]: https://w3c.github.io/accname/#dfn-accessible-name
@@ -1641,16 +1709,19 @@ type FrameGetByRoleOptions struct {
 	// [`aria-selected`]: https://www.w3.org/TR/wai-aria-1.2/#aria-selected
 	Selected *bool `json:"selected"`
 }
+
 type FrameGetByTextOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type FrameGetByTitleOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type FrameGotoOptions struct {
 	// Referer header value. If provided it will take preference over the referer header value set by
 	// [Page.SetExtraHTTPHeaders].
@@ -1668,6 +1739,7 @@ type FrameGotoOptions struct {
 	//   loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
+
 type FrameHoverOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -1691,11 +1763,14 @@ type FrameHoverOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability] checks and skips the action. Defaults
-	// to `false`. Useful to wait until the element is ready for the action without performing it.
+	// to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+	// `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+	// are pressed.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type FrameInnerHTMLOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1704,6 +1779,7 @@ type FrameInnerHTMLOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameInnerTextOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1712,6 +1788,7 @@ type FrameInnerTextOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameInputValueOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1720,6 +1797,7 @@ type FrameInputValueOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameIsCheckedOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1728,6 +1806,7 @@ type FrameIsCheckedOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameIsDisabledOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1736,6 +1815,7 @@ type FrameIsDisabledOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameIsEditableOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1744,6 +1824,7 @@ type FrameIsEditableOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameIsEnabledOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1752,6 +1833,7 @@ type FrameIsEnabledOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameIsHiddenOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1760,6 +1842,7 @@ type FrameIsHiddenOptions struct {
 	// Deprecated: This option is ignored. [Frame.IsHidden] does not wait for the element to become hidden and returns immediately.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameIsVisibleOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1768,6 +1851,7 @@ type FrameIsVisibleOptions struct {
 	// Deprecated: This option is ignored. [Frame.IsVisible] does not wait for the element to become visible and returns immediately.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameLocatorOptions struct {
 	// Narrows down the results of the method to those which contain elements matching this relative locator. For example,
 	// `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
@@ -1789,6 +1873,7 @@ type FrameLocatorOptions struct {
 	// `<article><div>Playwright</div></article>`.
 	HasText interface{} `json:"hasText"`
 }
+
 type FramePressOptions struct {
 	// Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
@@ -1805,11 +1890,13 @@ type FramePressOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameQuerySelectorOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
 	Strict *bool `json:"strict"`
 }
+
 type FrameSelectOptionOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -1826,6 +1913,7 @@ type FrameSelectOptionOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameSetCheckedOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -1850,6 +1938,7 @@ type FrameSetCheckedOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type FrameSetContentOptions struct {
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultNavigationTimeout], [BrowserContext.SetDefaultTimeout],
@@ -1864,6 +1953,7 @@ type FrameSetContentOptions struct {
 	//   loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
+
 type FrameSetInputFilesOptions struct {
 	// This option has no effect.
 	//
@@ -1876,6 +1966,7 @@ type FrameSetInputFilesOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameTapOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -1899,11 +1990,14 @@ type FrameTapOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability] checks and skips the action. Defaults
-	// to `false`. Useful to wait until the element is ready for the action without performing it.
+	// to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+	// `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+	// are pressed.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type FrameTextContentOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -1912,6 +2006,7 @@ type FrameTextContentOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameTypeOptions struct {
 	// Time to wait between key presses in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
@@ -1926,6 +2021,7 @@ type FrameTypeOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameUncheckOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -1950,15 +2046,17 @@ type FrameUncheckOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type FrameWaitForFunctionOptions struct {
-	// If “polling” is `raf`, then “expression” is constantly executed in `requestAnimationFrame` callback. If “polling”
-	// is a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to
-	// `raf`.
+	// If “[object Object]” is `raf`, then “[object Object]” is constantly executed in `requestAnimationFrame` callback.
+	// If “[object Object]” is a number, then it is treated as an interval in milliseconds at which the function would be
+	// executed. Defaults to `raf`.
 	Polling interface{} `json:"polling"`
 	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameWaitForLoadStateOptions struct {
 	// Optional load state to wait for, defaults to `load`. If the state has been already reached while loading current
 	// document, the method resolves immediately. Can be one of:
@@ -1972,6 +2070,7 @@ type FrameWaitForLoadStateOptions struct {
 	// [Page.SetDefaultNavigationTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameExpectNavigationOptions struct {
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultNavigationTimeout], [BrowserContext.SetDefaultTimeout],
@@ -1990,6 +2089,7 @@ type FrameExpectNavigationOptions struct {
 	//   loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
+
 type FrameWaitForSelectorOptions struct {
 	// Defaults to `visible`. Can be either:
 	//  - `attached` - wait for element to be present in DOM.
@@ -2006,6 +2106,7 @@ type FrameWaitForSelectorOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type FrameWaitForURLOptions struct {
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultNavigationTimeout], [BrowserContext.SetDefaultTimeout],
@@ -2020,21 +2121,25 @@ type FrameWaitForURLOptions struct {
 	//   loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
+
 type FrameLocatorGetByAltTextOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type FrameLocatorGetByLabelOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type FrameLocatorGetByPlaceholderOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type FrameLocatorGetByRoleOptions struct {
 	// An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls.
 	// Learn more about [`aria-checked`].
@@ -2047,8 +2152,8 @@ type FrameLocatorGetByRoleOptions struct {
 	//
 	// [`aria-disabled`]: https://www.w3.org/TR/wai-aria-1.2/#aria-disabled
 	Disabled *bool `json:"disabled"`
-	// Whether “name” is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when “name” is a
-	// regular expression. Note that exact match still trims whitespace.
+	// Whether “[object Object]” is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when
+	// “[object Object]” is a regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 	// An attribute that is usually set by `aria-expanded`.
 	// Learn more about [`aria-expanded`].
@@ -2069,7 +2174,7 @@ type FrameLocatorGetByRoleOptions struct {
 	// [`aria-level`]: https://www.w3.org/TR/wai-aria-1.2/#aria-level
 	Level *int `json:"level"`
 	// Option to match the [accessible name]. By default, matching is
-	// case-insensitive and searches for a substring, use “exact” to control this behavior.
+	// case-insensitive and searches for a substring, use “[object Object]” to control this behavior.
 	// Learn more about [accessible name].
 	//
 	// [accessible name]: https://w3c.github.io/accname/#dfn-accessible-name
@@ -2086,16 +2191,19 @@ type FrameLocatorGetByRoleOptions struct {
 	// [`aria-selected`]: https://www.w3.org/TR/wai-aria-1.2/#aria-selected
 	Selected *bool `json:"selected"`
 }
+
 type FrameLocatorGetByTextOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type FrameLocatorGetByTitleOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type FrameLocatorLocatorOptions struct {
 	// Narrows down the results of the method to those which contain elements matching this relative locator. For example,
 	// `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
@@ -2117,24 +2225,29 @@ type FrameLocatorLocatorOptions struct {
 	// `<article><div>Playwright</div></article>`.
 	HasText interface{} `json:"hasText"`
 }
+
 type KeyboardPressOptions struct {
 	// Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
 }
+
 type KeyboardTypeOptions struct {
 	// Time to wait between key presses in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
 }
+
 type LocatorBlurOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorBoundingBoxOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorCheckOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -2156,6 +2269,7 @@ type LocatorCheckOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type LocatorClearOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -2169,6 +2283,7 @@ type LocatorClearOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorClickOptions struct {
 	// Defaults to `left`.
 	Button *MouseButton `json:"button"`
@@ -2197,11 +2312,14 @@ type LocatorClickOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability] checks and skips the action. Defaults
-	// to `false`. Useful to wait until the element is ready for the action without performing it.
+	// to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+	// `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+	// are pressed.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type LocatorDblclickOptions struct {
 	// Defaults to `left`.
 	Button *MouseButton `json:"button"`
@@ -2226,16 +2344,20 @@ type LocatorDblclickOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability] checks and skips the action. Defaults
-	// to `false`. Useful to wait until the element is ready for the action without performing it.
+	// to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+	// `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+	// are pressed.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type LocatorDispatchEventOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorDragToOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -2260,21 +2382,25 @@ type LocatorDragToOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type LocatorElementHandleOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorEvaluateOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorEvaluateHandleOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorFillOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -2288,6 +2414,7 @@ type LocatorFillOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorFilterOptions struct {
 	// Narrows down the results of the method to those which contain elements matching this relative locator. For example,
 	// `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
@@ -2309,31 +2436,37 @@ type LocatorFilterOptions struct {
 	// `<article><div>Playwright</div></article>`.
 	HasText interface{} `json:"hasText"`
 }
+
 type LocatorFocusOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorGetAttributeOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorGetByAltTextOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type LocatorGetByLabelOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type LocatorGetByPlaceholderOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type LocatorGetByRoleOptions struct {
 	// An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls.
 	// Learn more about [`aria-checked`].
@@ -2346,8 +2479,8 @@ type LocatorGetByRoleOptions struct {
 	//
 	// [`aria-disabled`]: https://www.w3.org/TR/wai-aria-1.2/#aria-disabled
 	Disabled *bool `json:"disabled"`
-	// Whether “name” is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when “name” is a
-	// regular expression. Note that exact match still trims whitespace.
+	// Whether “[object Object]” is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when
+	// “[object Object]” is a regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 	// An attribute that is usually set by `aria-expanded`.
 	// Learn more about [`aria-expanded`].
@@ -2368,7 +2501,7 @@ type LocatorGetByRoleOptions struct {
 	// [`aria-level`]: https://www.w3.org/TR/wai-aria-1.2/#aria-level
 	Level *int `json:"level"`
 	// Option to match the [accessible name]. By default, matching is
-	// case-insensitive and searches for a substring, use “exact” to control this behavior.
+	// case-insensitive and searches for a substring, use “[object Object]” to control this behavior.
 	// Learn more about [accessible name].
 	//
 	// [accessible name]: https://w3c.github.io/accname/#dfn-accessible-name
@@ -2385,16 +2518,19 @@ type LocatorGetByRoleOptions struct {
 	// [`aria-selected`]: https://www.w3.org/TR/wai-aria-1.2/#aria-selected
 	Selected *bool `json:"selected"`
 }
+
 type LocatorGetByTextOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type LocatorGetByTitleOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type LocatorHoverOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -2415,56 +2551,68 @@ type LocatorHoverOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability] checks and skips the action. Defaults
-	// to `false`. Useful to wait until the element is ready for the action without performing it.
+	// to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+	// `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+	// are pressed.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type LocatorInnerHTMLOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorInnerTextOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorInputValueOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorIsCheckedOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorIsDisabledOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorIsEditableOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorIsEnabledOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorIsHiddenOptions struct {
 	//
 	// Deprecated: This option is ignored. [Locator.IsHidden] does not wait for the element to become hidden and returns immediately.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorIsVisibleOptions struct {
 	//
 	// Deprecated: This option is ignored. [Locator.IsVisible] does not wait for the element to become visible and returns immediately.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorLocatorOptions struct {
 	// Narrows down the results of the method to those which contain elements matching this relative locator. For example,
 	// `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
@@ -2486,6 +2634,7 @@ type LocatorLocatorOptions struct {
 	// `<article><div>Playwright</div></article>`.
 	HasText interface{} `json:"hasText"`
 }
+
 type LocatorPressOptions struct {
 	// Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
@@ -2499,6 +2648,7 @@ type LocatorPressOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorPressSequentiallyOptions struct {
 	// Time to wait between key presses in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
@@ -2510,6 +2660,7 @@ type LocatorPressSequentiallyOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorScreenshotOptions struct {
 	// When set to `"disabled"`, stops CSS animations, CSS transitions and Web Animations. Animations get different
 	// treatment depending on their duration:
@@ -2521,7 +2672,7 @@ type LocatorScreenshotOptions struct {
 	// changed.  Defaults to `"hide"`.
 	Caret *ScreenshotCaret `json:"caret"`
 	// Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
-	// box `#FF00FF` (customized by “maskColor”) that completely covers its bounding box.
+	// box `#FF00FF` (customized by “[object Object]”) that completely covers its bounding box.
 	Mask []Locator `json:"mask"`
 	// Specify the color of the overlay box for masked elements, in
 	// [CSS color format]. Default color is pink `#FF00FF`.
@@ -2531,9 +2682,9 @@ type LocatorScreenshotOptions struct {
 	// Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images.
 	// Defaults to `false`.
 	OmitBackground *bool `json:"omitBackground"`
-	// The file path to save the image to. The screenshot type will be inferred from file extension. If “path” is a
-	// relative path, then it is resolved relative to the current working directory. If no path is provided, the image
-	// won't be saved to the disk.
+	// The file path to save the image to. The screenshot type will be inferred from file extension. If “[object Object]”
+	// is a relative path, then it is resolved relative to the current working directory. If no path is provided, the
+	// image won't be saved to the disk.
 	Path *string `json:"path"`
 	// The quality of the image, between 0-100. Not applicable to `png` images.
 	Quality *int `json:"quality"`
@@ -2552,11 +2703,13 @@ type LocatorScreenshotOptions struct {
 	// Specify screenshot type, defaults to `png`.
 	Type *ScreenshotType `json:"type"`
 }
+
 type LocatorScrollIntoViewIfNeededOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorSelectOptionOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -2570,6 +2723,7 @@ type LocatorSelectOptionOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorSelectTextOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -2579,6 +2733,7 @@ type LocatorSelectTextOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorSetCheckedOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -2600,6 +2755,7 @@ type LocatorSetCheckedOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type LocatorSetInputFilesOptions struct {
 	// This option has no effect.
 	//
@@ -2609,6 +2765,7 @@ type LocatorSetInputFilesOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorTapOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -2629,16 +2786,20 @@ type LocatorTapOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability] checks and skips the action. Defaults
-	// to `false`. Useful to wait until the element is ready for the action without performing it.
+	// to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+	// `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+	// are pressed.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type LocatorTextContentOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorTypeOptions struct {
 	// Time to wait between key presses in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
@@ -2650,6 +2811,7 @@ type LocatorTypeOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorUncheckOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -2671,6 +2833,7 @@ type LocatorUncheckOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type LocatorWaitForOptions struct {
 	// Defaults to `visible`. Can be either:
 	//  - `attached` - wait for element to be present in DOM.
@@ -2684,42 +2847,51 @@ type LocatorWaitForOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToBeAttachedOptions struct {
 	Attached *bool `json:"attached"`
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToBeCheckedOptions struct {
 	Checked *bool `json:"checked"`
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToBeDisabledOptions struct {
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToBeEditableOptions struct {
 	Editable *bool `json:"editable"`
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToBeEmptyOptions struct {
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToBeEnabledOptions struct {
 	Enabled *bool `json:"enabled"`
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToBeFocusedOptions struct {
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToBeHiddenOptions struct {
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToBeInViewportOptions struct {
 	// The minimal ratio of the element to intersect viewport. If equals to `0`, then element should intersect viewport at
 	// any positive ratio. Defaults to `0`.
@@ -2727,13 +2899,15 @@ type LocatorAssertionsToBeInViewportOptions struct {
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToBeVisibleOptions struct {
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 	Visible *bool    `json:"visible"`
 }
+
 type LocatorAssertionsToContainTextOptions struct {
-	// Whether to perform case-insensitive match. “ignoreCase” option takes precedence over the corresponding regular
+	// Whether to perform case-insensitive match. “[object Object]” option takes precedence over the corresponding regular
 	// expression flag if specified.
 	IgnoreCase *bool `json:"ignoreCase"`
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
@@ -2741,53 +2915,63 @@ type LocatorAssertionsToContainTextOptions struct {
 	// Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
 	UseInnerText *bool `json:"useInnerText"`
 }
+
 type LocatorAssertionsToHaveAccessibleDescriptionOptions struct {
-	// Whether to perform case-insensitive match. “ignoreCase” option takes precedence over the corresponding regular
+	// Whether to perform case-insensitive match. “[object Object]” option takes precedence over the corresponding regular
 	// expression flag if specified.
 	IgnoreCase *bool `json:"ignoreCase"`
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToHaveAccessibleNameOptions struct {
-	// Whether to perform case-insensitive match. “ignoreCase” option takes precedence over the corresponding regular
+	// Whether to perform case-insensitive match. “[object Object]” option takes precedence over the corresponding regular
 	// expression flag if specified.
 	IgnoreCase *bool `json:"ignoreCase"`
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToHaveAttributeOptions struct {
-	// Whether to perform case-insensitive match. “ignoreCase” option takes precedence over the corresponding regular
+	// Whether to perform case-insensitive match. “[object Object]” option takes precedence over the corresponding regular
 	// expression flag if specified.
 	IgnoreCase *bool `json:"ignoreCase"`
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToHaveClassOptions struct {
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToHaveCountOptions struct {
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToHaveCSSOptions struct {
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToHaveIdOptions struct {
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToHaveJSPropertyOptions struct {
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToHaveRoleOptions struct {
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToHaveTextOptions struct {
-	// Whether to perform case-insensitive match. “ignoreCase” option takes precedence over the corresponding regular
+	// Whether to perform case-insensitive match. “[object Object]” option takes precedence over the corresponding regular
 	// expression flag if specified.
 	IgnoreCase *bool `json:"ignoreCase"`
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
@@ -2795,14 +2979,17 @@ type LocatorAssertionsToHaveTextOptions struct {
 	// Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
 	UseInnerText *bool `json:"useInnerText"`
 }
+
 type LocatorAssertionsToHaveValueOptions struct {
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type LocatorAssertionsToHaveValuesOptions struct {
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type MouseClickOptions struct {
 	// Defaults to `left`.
 	Button *MouseButton `json:"button"`
@@ -2811,28 +2998,33 @@ type MouseClickOptions struct {
 	// Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
 }
+
 type MouseDblclickOptions struct {
 	// Defaults to `left`.
 	Button *MouseButton `json:"button"`
 	// Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
 }
+
 type MouseDownOptions struct {
 	// Defaults to `left`.
 	Button *MouseButton `json:"button"`
 	// defaults to 1. See [UIEvent.Detail].
 	ClickCount *int `json:"clickCount"`
 }
+
 type MouseMoveOptions struct {
 	// Defaults to 1. Sends intermediate `mousemove` events.
 	Steps *int `json:"steps"`
 }
+
 type MouseUpOptions struct {
 	// Defaults to `left`.
 	Button *MouseButton `json:"button"`
 	// defaults to 1. See [UIEvent.Detail].
 	ClickCount *int `json:"clickCount"`
 }
+
 type PageAddScriptTagOptions struct {
 	// Raw JavaScript content to be injected into frame.
 	Content *string `json:"content"`
@@ -2847,6 +3039,7 @@ type PageAddScriptTagOptions struct {
 	// URL of a script to be added.
 	URL *string `json:"url"`
 }
+
 type PageAddStyleTagOptions struct {
 	// Raw CSS content to be injected into frame.
 	Content *string `json:"content"`
@@ -2856,6 +3049,7 @@ type PageAddStyleTagOptions struct {
 	// URL of the `<link>` tag.
 	URL *string `json:"url"`
 }
+
 type PageCheckOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -2880,6 +3074,7 @@ type PageCheckOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type PageClickOptions struct {
 	// Defaults to `left`.
 	Button *MouseButton `json:"button"`
@@ -2911,11 +3106,14 @@ type PageClickOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability] checks and skips the action. Defaults
-	// to `false`. Useful to wait until the element is ready for the action without performing it.
+	// to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+	// `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+	// are pressed.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type PageCloseOptions struct {
 	// The reason to be reported to the operations interrupted by the page closure.
 	Reason *string `json:"reason"`
@@ -2925,6 +3123,7 @@ type PageCloseOptions struct {
 	// [before unload]: https://developer.mozilla.org/en-US/docs/Web/Events/beforeunload
 	RunBeforeUnload *bool `json:"runBeforeUnload"`
 }
+
 type PageDblclickOptions struct {
 	// Defaults to `left`.
 	Button *MouseButton `json:"button"`
@@ -2952,11 +3151,14 @@ type PageDblclickOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability] checks and skips the action. Defaults
-	// to `false`. Useful to wait until the element is ready for the action without performing it.
+	// to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+	// `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+	// are pressed.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type PageDispatchEventOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -2965,6 +3167,7 @@ type PageDispatchEventOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageDragAndDropOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -2992,6 +3195,7 @@ type PageDragAndDropOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type PageEmulateMediaOptions struct {
 	// Emulates `prefers-colors-scheme` media feature, supported values are `light`, `dark`, `no-preference`.
 	// Passing `no-override` disables color scheme emulation.
@@ -3004,11 +3208,13 @@ type PageEmulateMediaOptions struct {
 	// `no-override` disables reduced motion emulation.
 	ReducedMotion *ReducedMotion `json:"reducedMotion"`
 }
+
 type PageEvalOnSelectorOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
 	Strict *bool `json:"strict"`
 }
+
 type PageFillOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -3025,6 +3231,7 @@ type PageFillOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageFocusOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3033,12 +3240,14 @@ type PageFocusOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageFrameOptions struct {
 	// Frame name specified in the `iframe`'s `name` attribute. Optional.
 	Name *string `json:"name"`
 	// A glob pattern, regex pattern or predicate receiving frame's `url` as a [URL] object. Optional.
 	URL interface{} `json:"url"`
 }
+
 type PageGetAttributeOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3047,21 +3256,25 @@ type PageGetAttributeOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageGetByAltTextOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type PageGetByLabelOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type PageGetByPlaceholderOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type PageGetByRoleOptions struct {
 	// An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls.
 	// Learn more about [`aria-checked`].
@@ -3074,8 +3287,8 @@ type PageGetByRoleOptions struct {
 	//
 	// [`aria-disabled`]: https://www.w3.org/TR/wai-aria-1.2/#aria-disabled
 	Disabled *bool `json:"disabled"`
-	// Whether “name” is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when “name” is a
-	// regular expression. Note that exact match still trims whitespace.
+	// Whether “[object Object]” is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when
+	// “[object Object]” is a regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 	// An attribute that is usually set by `aria-expanded`.
 	// Learn more about [`aria-expanded`].
@@ -3096,7 +3309,7 @@ type PageGetByRoleOptions struct {
 	// [`aria-level`]: https://www.w3.org/TR/wai-aria-1.2/#aria-level
 	Level *int `json:"level"`
 	// Option to match the [accessible name]. By default, matching is
-	// case-insensitive and searches for a substring, use “exact” to control this behavior.
+	// case-insensitive and searches for a substring, use “[object Object]” to control this behavior.
 	// Learn more about [accessible name].
 	//
 	// [accessible name]: https://w3c.github.io/accname/#dfn-accessible-name
@@ -3113,16 +3326,19 @@ type PageGetByRoleOptions struct {
 	// [`aria-selected`]: https://www.w3.org/TR/wai-aria-1.2/#aria-selected
 	Selected *bool `json:"selected"`
 }
+
 type PageGetByTextOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type PageGetByTitleOptions struct {
 	// Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
 	// regular expression. Note that exact match still trims whitespace.
 	Exact *bool `json:"exact"`
 }
+
 type PageGoBackOptions struct {
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultNavigationTimeout], [BrowserContext.SetDefaultTimeout],
@@ -3137,6 +3353,7 @@ type PageGoBackOptions struct {
 	//   loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
+
 type PageGoForwardOptions struct {
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultNavigationTimeout], [BrowserContext.SetDefaultTimeout],
@@ -3151,6 +3368,7 @@ type PageGoForwardOptions struct {
 	//   loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
+
 type PageGotoOptions struct {
 	// Referer header value. If provided it will take preference over the referer header value set by
 	// [Page.SetExtraHTTPHeaders].
@@ -3168,6 +3386,7 @@ type PageGotoOptions struct {
 	//   loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
+
 type PageHoverOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -3191,11 +3410,14 @@ type PageHoverOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability] checks and skips the action. Defaults
-	// to `false`. Useful to wait until the element is ready for the action without performing it.
+	// to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+	// `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+	// are pressed.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type PageInnerHTMLOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3204,6 +3426,7 @@ type PageInnerHTMLOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageInnerTextOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3212,6 +3435,7 @@ type PageInnerTextOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageInputValueOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3220,6 +3444,7 @@ type PageInputValueOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageIsCheckedOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3228,6 +3453,7 @@ type PageIsCheckedOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageIsDisabledOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3236,6 +3462,7 @@ type PageIsDisabledOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageIsEditableOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3244,6 +3471,7 @@ type PageIsEditableOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageIsEnabledOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3252,6 +3480,7 @@ type PageIsEnabledOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageIsHiddenOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3260,6 +3489,7 @@ type PageIsHiddenOptions struct {
 	// Deprecated: This option is ignored. [Page.IsHidden] does not wait for the element to become hidden and returns immediately.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageIsVisibleOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3268,6 +3498,7 @@ type PageIsVisibleOptions struct {
 	// Deprecated: This option is ignored. [Page.IsVisible] does not wait for the element to become visible and returns immediately.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageLocatorOptions struct {
 	// Narrows down the results of the method to those which contain elements matching this relative locator. For example,
 	// `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
@@ -3289,12 +3520,13 @@ type PageLocatorOptions struct {
 	// `<article><div>Playwright</div></article>`.
 	HasText interface{} `json:"hasText"`
 }
+
 type PagePdfOptions struct {
 	// Display header and footer. Defaults to `false`.
 	DisplayHeaderFooter *bool `json:"displayHeaderFooter"`
-	// HTML template for the print footer. Should use the same format as the “headerTemplate”.
+	// HTML template for the print footer. Should use the same format as the “[object Object]”.
 	FooterTemplate *string `json:"footerTemplate"`
-	// Paper format. If set, takes priority over “width” or “height” options. Defaults to 'Letter'.
+	// Paper format. If set, takes priority over “[object Object]” or “[object Object]” options. Defaults to 'Letter'.
 	Format *string `json:"format"`
 	// HTML template for the print header. Should be valid HTML markup with following classes used to inject printing
 	// values into them:
@@ -3314,11 +3546,12 @@ type PagePdfOptions struct {
 	Outline *bool `json:"outline"`
 	// Paper ranges to print, e.g., '1-5, 8, 11-13'. Defaults to the empty string, which means print all pages.
 	PageRanges *string `json:"pageRanges"`
-	// The file path to save the PDF to. If “path” is a relative path, then it is resolved relative to the current working
-	// directory. If no path is provided, the PDF won't be saved to the disk.
+	// The file path to save the PDF to. If “[object Object]” is a relative path, then it is resolved relative to the
+	// current working directory. If no path is provided, the PDF won't be saved to the disk.
 	Path *string `json:"path"`
-	// Give any CSS `@page` size declared in the page priority over what is declared in “width” and “height” or “format”
-	// options. Defaults to `false`, which will scale the content to fit the paper size.
+	// Give any CSS `@page` size declared in the page priority over what is declared in “[object Object]” and
+	// “[object Object]” or “[object Object]” options. Defaults to `false`, which will scale the content to fit the paper
+	// size.
 	PreferCSSPageSize *bool `json:"preferCSSPageSize"`
 	// Print background graphics. Defaults to `false`.
 	PrintBackground *bool `json:"printBackground"`
@@ -3329,6 +3562,7 @@ type PagePdfOptions struct {
 	// Paper width, accepts values labeled with units.
 	Width *string `json:"width"`
 }
+
 type PagePressOptions struct {
 	// Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
@@ -3345,11 +3579,13 @@ type PagePressOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageQuerySelectorOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
 	Strict *bool `json:"strict"`
 }
+
 type PageAddLocatorHandlerOptions struct {
 	// By default, after calling the handler Playwright will wait until the overlay becomes hidden, and only then
 	// Playwright will continue with the action/assertion that triggered the handler. This option allows to opt-out of
@@ -3358,6 +3594,7 @@ type PageAddLocatorHandlerOptions struct {
 	// Specifies the maximum number of times this handler should be called. Unlimited by default.
 	Times *int `json:"times"`
 }
+
 type PageReloadOptions struct {
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultNavigationTimeout], [BrowserContext.SetDefaultTimeout],
@@ -3372,6 +3609,7 @@ type PageReloadOptions struct {
 	//   loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
+
 type PageRouteFromHAROptions struct {
 	//  - If set to 'abort' any request not found in the HAR file will be aborted.
 	//  - If set to 'fallback' missing requests will be sent to the network.
@@ -3391,6 +3629,7 @@ type PageRouteFromHAROptions struct {
 	// pattern will be served from the HAR file. If not specified, all requests are served from the HAR file.
 	URL interface{} `json:"url"`
 }
+
 type PageScreenshotOptions struct {
 	// When set to `"disabled"`, stops CSS animations, CSS transitions and Web Animations. Animations get different
 	// treatment depending on their duration:
@@ -3407,7 +3646,7 @@ type PageScreenshotOptions struct {
 	// `false`.
 	FullPage *bool `json:"fullPage"`
 	// Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
-	// box `#FF00FF` (customized by “maskColor”) that completely covers its bounding box.
+	// box `#FF00FF` (customized by “[object Object]”) that completely covers its bounding box.
 	Mask []Locator `json:"mask"`
 	// Specify the color of the overlay box for masked elements, in
 	// [CSS color format]. Default color is pink `#FF00FF`.
@@ -3417,9 +3656,9 @@ type PageScreenshotOptions struct {
 	// Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images.
 	// Defaults to `false`.
 	OmitBackground *bool `json:"omitBackground"`
-	// The file path to save the image to. The screenshot type will be inferred from file extension. If “path” is a
-	// relative path, then it is resolved relative to the current working directory. If no path is provided, the image
-	// won't be saved to the disk.
+	// The file path to save the image to. The screenshot type will be inferred from file extension. If “[object Object]”
+	// is a relative path, then it is resolved relative to the current working directory. If no path is provided, the
+	// image won't be saved to the disk.
 	Path *string `json:"path"`
 	// The quality of the image, between 0-100. Not applicable to `png` images.
 	Quality *int `json:"quality"`
@@ -3438,6 +3677,7 @@ type PageScreenshotOptions struct {
 	// Specify screenshot type, defaults to `png`.
 	Type *ScreenshotType `json:"type"`
 }
+
 type PageSelectOptionOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -3454,6 +3694,7 @@ type PageSelectOptionOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageSetCheckedOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -3478,6 +3719,7 @@ type PageSetCheckedOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type PageSetContentOptions struct {
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultNavigationTimeout], [BrowserContext.SetDefaultTimeout],
@@ -3492,6 +3734,7 @@ type PageSetContentOptions struct {
 	//   loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
+
 type PageSetInputFilesOptions struct {
 	// This option has no effect.
 	//
@@ -3504,6 +3747,7 @@ type PageSetInputFilesOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageTapOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -3527,11 +3771,14 @@ type PageTapOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 	// When set, this method only performs the [actionability] checks and skips the action. Defaults
-	// to `false`. Useful to wait until the element is ready for the action without performing it.
+	// to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+	// `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+	// are pressed.
 	//
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type PageTextContentOptions struct {
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
@@ -3540,6 +3787,7 @@ type PageTextContentOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageTypeOptions struct {
 	// Time to wait between key presses in milliseconds. Defaults to 0.
 	Delay *float64 `json:"delay"`
@@ -3554,6 +3802,7 @@ type PageTypeOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageUncheckOptions struct {
 	// Whether to bypass the [actionability] checks. Defaults to `false`.
 	//
@@ -3578,6 +3827,7 @@ type PageUncheckOptions struct {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Trial *bool `json:"trial"`
 }
+
 type PageUnrouteAllOptions struct {
 	// Specifies whether to wait for already running handlers and what to do if they throw errors:
 	//  - `default` - do not wait for current handler calls (if any) to finish, if unrouted handler throws, it may
@@ -3587,12 +3837,14 @@ type PageUnrouteAllOptions struct {
 	//   after unrouting are silently caught
 	Behavior *UnrouteBehavior `json:"behavior"`
 }
+
 type Size struct {
 	// page width in pixels.
 	Width int `json:"width"`
 	// page height in pixels.
 	Height int `json:"height"`
 }
+
 type PageExpectConsoleMessageOptions struct {
 	// Receives the [ConsoleMessage] object and resolves to truthy value when the waiting should resolve.
 	Predicate func(ConsoleMessage) bool `json:"predicate"`
@@ -3600,6 +3852,7 @@ type PageExpectConsoleMessageOptions struct {
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout].
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageExpectDownloadOptions struct {
 	// Receives the [Download] object and resolves to truthy value when the waiting should resolve.
 	Predicate func(Download) bool `json:"predicate"`
@@ -3607,6 +3860,7 @@ type PageExpectDownloadOptions struct {
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout].
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageExpectEventOptions struct {
 	// Receives the event data and resolves to truthy value when the waiting should resolve.
 	Predicate interface{} `json:"predicate"`
@@ -3614,6 +3868,7 @@ type PageExpectEventOptions struct {
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout].
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageExpectFileChooserOptions struct {
 	// Receives the [FileChooser] object and resolves to truthy value when the waiting should resolve.
 	Predicate func(FileChooser) bool `json:"predicate"`
@@ -3621,15 +3876,17 @@ type PageExpectFileChooserOptions struct {
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout].
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageWaitForFunctionOptions struct {
-	// If “polling” is `raf`, then “expression” is constantly executed in `requestAnimationFrame` callback. If “polling”
-	// is a number, then it is treated as an interval in milliseconds at which the function would be executed. Defaults to
-	// `raf`.
+	// If “[object Object]” is `raf`, then “[object Object]” is constantly executed in `requestAnimationFrame` callback.
+	// If “[object Object]” is a number, then it is treated as an interval in milliseconds at which the function would be
+	// executed. Defaults to `raf`.
 	Polling interface{} `json:"polling"`
 	// Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageWaitForLoadStateOptions struct {
 	// Optional load state to wait for, defaults to `load`. If the state has been already reached while loading current
 	// document, the method resolves immediately. Can be one of:
@@ -3643,6 +3900,7 @@ type PageWaitForLoadStateOptions struct {
 	// [Page.SetDefaultNavigationTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageExpectNavigationOptions struct {
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultNavigationTimeout], [BrowserContext.SetDefaultTimeout],
@@ -3661,6 +3919,7 @@ type PageExpectNavigationOptions struct {
 	//   loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
+
 type PageExpectPopupOptions struct {
 	// Receives the [Page] object and resolves to truthy value when the waiting should resolve.
 	Predicate func(Page) bool `json:"predicate"`
@@ -3668,11 +3927,13 @@ type PageExpectPopupOptions struct {
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout].
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageExpectRequestOptions struct {
 	// Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can
 	// be changed by using the [Page.SetDefaultTimeout] method.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageExpectRequestFinishedOptions struct {
 	// Receives the [Request] object and resolves to truthy value when the waiting should resolve.
 	Predicate func(Request) bool `json:"predicate"`
@@ -3680,11 +3941,13 @@ type PageExpectRequestFinishedOptions struct {
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout].
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageExpectResponseOptions struct {
 	// Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageWaitForSelectorOptions struct {
 	// Defaults to `visible`. Can be either:
 	//  - `attached` - wait for element to be present in DOM.
@@ -3701,6 +3964,7 @@ type PageWaitForSelectorOptions struct {
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageWaitForURLOptions struct {
 	// Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultNavigationTimeout], [BrowserContext.SetDefaultTimeout],
@@ -3715,6 +3979,7 @@ type PageWaitForURLOptions struct {
 	//   loading.
 	WaitUntil *WaitUntilState `json:"waitUntil"`
 }
+
 type PageExpectWebSocketOptions struct {
 	// Receives the [WebSocket] object and resolves to truthy value when the waiting should resolve.
 	Predicate func(WebSocket) bool `json:"predicate"`
@@ -3722,6 +3987,7 @@ type PageExpectWebSocketOptions struct {
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout].
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageExpectWorkerOptions struct {
 	// Receives the [Worker] object and resolves to truthy value when the waiting should resolve.
 	Predicate func(Worker) bool `json:"predicate"`
@@ -3729,6 +3995,7 @@ type PageExpectWorkerOptions struct {
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout].
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageWaitForEventOptions struct {
 	// Receives the event data and resolves to truthy value when the waiting should resolve.
 	Predicate interface{} `json:"predicate"`
@@ -3736,17 +4003,20 @@ type PageWaitForEventOptions struct {
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout].
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageAssertionsToHaveTitleOptions struct {
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type PageAssertionsToHaveURLOptions struct {
-	// Whether to perform case-insensitive match. “ignoreCase” option takes precedence over the corresponding regular
+	// Whether to perform case-insensitive match. “[object Object]” option takes precedence over the corresponding regular
 	// expression flag if specified.
 	IgnoreCase *bool `json:"ignoreCase"`
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
+
 type RequestSizesResult struct {
 	// Size of the request body (POST data payload) in bytes. Set to 0 if there was no body.
 	RequestBodySize int `json:"requestBodySize"`
@@ -3759,6 +4029,7 @@ type RequestSizesResult struct {
 	// body.
 	ResponseHeadersSize int `json:"responseHeadersSize"`
 }
+
 type RequestTiming struct {
 	// Request start time in milliseconds elapsed since January 1, 1970 00:00:00 UTC
 	StartTime float64 `json:"startTime"`
@@ -3788,6 +4059,7 @@ type RequestTiming struct {
 	// available.
 	ResponseEnd float64 `json:"responseEnd"`
 }
+
 type ResponseSecurityDetailsResult struct {
 	// Common Name component of the Issuer field. from the certificate. This should only be used for informational
 	// purposes. Optional.
@@ -3802,11 +4074,13 @@ type ResponseSecurityDetailsResult struct {
 	// Unix timestamp (in seconds) specifying when this cert becomes invalid. Optional.
 	ValidTo *float64 `json:"validTo"`
 }
+
 type ResponseServerAddrResult struct {
 	// IPv4 or IPV6 address of the server.
 	IpAddress string `json:"ipAddress"`
 	Port      int    `json:"port"`
 }
+
 type RouteContinueOptions struct {
 	// If set changes the request HTTP headers. Header values will be converted to a string.
 	Headers map[string]string `json:"headers"`
@@ -3817,6 +4091,7 @@ type RouteContinueOptions struct {
 	// If set changes the request URL. New URL must have same protocol as original one.
 	URL *string `json:"url"`
 }
+
 type RouteFallbackOptions struct {
 	// If set changes the request HTTP headers. Header values will be converted to a string.
 	Headers map[string]string `json:"headers"`
@@ -3828,6 +4103,7 @@ type RouteFallbackOptions struct {
 	// route matching, all the routes are matched using the original request URL.
 	URL *string `json:"url"`
 }
+
 type RouteFetchOptions struct {
 	// If set changes the request HTTP headers. Header values will be converted to a string.
 	Headers map[string]string `json:"headers"`
@@ -3846,6 +4122,7 @@ type RouteFetchOptions struct {
 	// If set changes the request URL. New URL must have same protocol as original one.
 	URL *string `json:"url"`
 }
+
 type RouteFulfillOptions struct {
 	// Response body.
 	Body interface{} `json:"body"`
@@ -3862,16 +4139,18 @@ type RouteFulfillOptions struct {
 	// Response status code, defaults to `200`.
 	Status *int `json:"status"`
 }
+
 type SelectorsRegisterOptions struct {
 	// Whether to run this selector engine in isolated JavaScript environment. This environment has access to the same
 	// DOM, but not any JavaScript objects from the frame's scripts. Defaults to `false`. Note that running as a content
 	// script is not guaranteed when this engine is used together with other registered engines.
 	ContentScript *bool `json:"contentScript"`
 }
+
 type TracingStartOptions struct {
 	// If specified, intermediate trace files are going to be saved into the files with the given name prefix inside the
-	// “tracesDir” folder specified in [BrowserType.Launch]. To specify the final trace zip file name, you need to pass
-	// `path` option to [Tracing.Stop] instead.
+	// “[object Object]” directory specified in [BrowserType.Launch]. To specify the final trace zip file name, you need
+	// to pass `path` option to [Tracing.Stop] instead.
 	Name *string `json:"name"`
 	// Whether to capture screenshots during tracing. Screenshots are used to build a timeline preview.
 	Screenshots *bool `json:"screenshots"`
@@ -3884,14 +4163,16 @@ type TracingStartOptions struct {
 	// Trace name to be shown in the Trace Viewer.
 	Title *string `json:"title"`
 }
+
 type TracingStartChunkOptions struct {
 	// If specified, intermediate trace files are going to be saved into the files with the given name prefix inside the
-	// “tracesDir” folder specified in [BrowserType.Launch]. To specify the final trace zip file name, you need to pass
-	// `path` option to [Tracing.StopChunk] instead.
+	// “[object Object]” directory specified in [BrowserType.Launch]. To specify the final trace zip file name, you need
+	// to pass `path` option to [Tracing.StopChunk] instead.
 	Name *string `json:"name"`
 	// Trace name to be shown in the Trace Viewer.
 	Title *string `json:"title"`
 }
+
 type WebSocketExpectEventOptions struct {
 	// Receives the event data and resolves to truthy value when the waiting should resolve.
 	Predicate interface{} `json:"predicate"`
@@ -3899,6 +4180,7 @@ type WebSocketExpectEventOptions struct {
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout].
 	Timeout *float64 `json:"timeout"`
 }
+
 type WebSocketWaitForEventOptions struct {
 	// Receives the event data and resolves to truthy value when the waiting should resolve.
 	Predicate interface{} `json:"predicate"`
@@ -3906,6 +4188,7 @@ type WebSocketWaitForEventOptions struct {
 	// default value can be changed by using the [BrowserContext.SetDefaultTimeout].
 	Timeout *float64 `json:"timeout"`
 }
+
 type ClientCertificate struct {
 	// Exact origin that the certificate is valid for. Origin includes `https` protocol, a hostname and optionally a port.
 	Origin string `json:"origin"`
@@ -3924,6 +4207,7 @@ type ClientCertificate struct {
 	// Passphrase for the private key (PEM or PFX).
 	Passphrase *string `json:"passphrase"`
 }
+
 type HttpCredentials struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
@@ -3935,6 +4219,7 @@ type HttpCredentials struct {
 	// `WWW-Authenticate` header is received. Defaults to `unauthorized`.
 	Send *HttpCredentialsSend `json:"send"`
 }
+
 type Proxy struct {
 	// Proxy to be used for all requests. HTTP and SOCKS proxies are supported, for example `http://myproxy.com:3128` or
 	// `socks5://myproxy.com:3128`. Short form `myproxy.com:3128` is considered an HTTP proxy.
@@ -3946,10 +4231,12 @@ type Proxy struct {
 	// Optional password to use if HTTP proxy requires authentication.
 	Password *string `json:"password"`
 }
+
 type Origin struct {
 	Origin       string      `json:"origin"`
 	LocalStorage []NameValue `json:"localStorage"`
 }
+
 type RecordVideo struct {
 	// Path to the directory to put videos into.
 	Dir string `json:"dir"`
@@ -3958,16 +4245,19 @@ type RecordVideo struct {
 	// each page will be scaled down if necessary to fit the specified size.
 	Size *Size `json:"size"`
 }
+
 type OptionalStorageState struct {
 	// Cookies to set for context
 	Cookies []OptionalCookie `json:"cookies"`
 	// localStorage to set for context
 	Origins []Origin `json:"origins"`
 }
+
 type Position struct {
 	X float64 `json:"x"`
 	Y float64 `json:"y"`
 }
+
 type Margin struct {
 	// Top margin, accepts values labeled with units. Defaults to `0`.
 	Top *string `json:"top"`

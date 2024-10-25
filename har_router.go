@@ -45,9 +45,7 @@ func (r *harRouter) addPageRoute(page Page) error {
 }
 
 func (r *harRouter) dispose() {
-	go func() {
-		r.err = r.localUtils.HarClose(r.harId)
-	}()
+	r.localUtils.HarClose(r.harId)
 }
 
 func (r *harRouter) handle(route Route) error {

@@ -3,100 +3,27 @@ package playwright_test
 import (
 	"bytes"
 	"fmt"
-	"log"
-	"net"
 	"net/http"
 	"testing"
 	"time"
 
-	goContext "context"
-
-	"github.com/gorilla/websocket"
+	"github.com/coder/websocket"
 	"github.com/playwright-community/playwright-go"
 	"github.com/stretchr/testify/require"
 )
 
-type webSocketServer struct {
-	PORT   int
-	server *http.Server
-}
-
-func (ws *webSocketServer) Stop() {
-	if err := ws.server.Shutdown(goContext.Background()); err != nil {
-		log.Printf("could not stop ws server: %v", err)
-	}
-}
-
-var wsUpgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
-}
-
-func (ws *webSocketServer) handler(w http.ResponseWriter, r *http.Request) {
-	c, err := wsUpgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Print("could not upgrade ws connection:", err)
-		return
-	}
-	if err := c.WriteMessage(websocket.TextMessage, []byte("incoming")); err != nil {
-		log.Println("could not write ws message:", err)
-		return
-	}
-	defer c.Close()
-	for {
-		mt, message, err := c.ReadMessage()
-		if err != nil {
-			if !websocket.IsCloseError(err, websocket.CloseNoStatusReceived) {
-				log.Println("could not read ws message:", err)
-			}
-			break
-		}
-		if bytes.Equal(message, []byte("echo-bin")) {
-			if err := c.WriteMessage(websocket.BinaryMessage, []byte{4, 2}); err != nil {
-				log.Println("could not write ws message:", err)
-				return
-			}
-		}
-		if bytes.Equal(message, []byte("echo-text")) {
-			if err := c.WriteMessage(mt, []byte("text")); err != nil {
-				log.Println("could not write ws message:", err)
-				return
-			}
-		}
-	}
-}
-
-func newWebsocketServer() *webSocketServer {
-	wsServer := &webSocketServer{
-		PORT: 8012,
-	}
-	mux := http.NewServeMux()
-	mux.HandleFunc("/ws", wsServer.handler)
-	wsServer.server = &http.Server{Handler: mux}
-
-	listener, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", wsServer.PORT))
-	if err != nil {
-		log.Fatal(err)
-	}
-	go func() {
-		if err := wsServer.server.Serve(listener); err != nil && err != http.ErrServerClosed {
-			log.Printf("could not start ws server: %v", err)
-		}
-	}()
-	return wsServer
-}
-
 func TestWebSocketShouldWork(t *testing.T) {
 	BeforeEach(t)
 
-	wsServer := newWebsocketServer()
-	defer wsServer.Stop()
+	server.SendOnWebSocketConnection(websocket.MessageText, []byte("incoming"))
+
 	value, err := page.Evaluate(`port => {
         let cb;
         const result = new Promise(f => cb = f);
         const ws = new WebSocket('ws://localhost:' + port + '/ws');
         ws.addEventListener('message', data => { ws.close(); cb(data.data); });
         return result;
-	}`, wsServer.PORT)
+	}`, server.PORT)
 	require.NoError(t, err)
 	require.Equal(t, "incoming", value)
 }
@@ -104,22 +31,22 @@ func TestWebSocketShouldWork(t *testing.T) {
 func TestWebSocketShouldEmitCloseEvents(t *testing.T) {
 	BeforeEach(t)
 
-	wsServer := newWebsocketServer()
-	defer wsServer.Stop()
+	server.SendOnWebSocketConnection(websocket.MessageText, []byte("incoming"))
+
 	ws, err := page.ExpectWebSocket(func() error {
 		_, err := page.Evaluate(`port => {
 					const ws = new WebSocket('ws://localhost:' + port + '/ws');
 					ws.addEventListener('message', data => { ws.close() });
-        }`, wsServer.PORT)
+        }`, server.PORT)
 		return err
 	}, playwright.PageExpectWebSocketOptions{
 		Timeout: playwright.Float(1000),
 	})
 	require.NoError(t, err)
 	ws.OnClose(func(w playwright.WebSocket) {
-		require.Equal(t, w.URL(), fmt.Sprintf("ws://localhost:%d/ws", wsServer.PORT))
+		require.Equal(t, w.URL(), fmt.Sprintf("ws://localhost:%s/ws", server.PORT))
 	})
-	require.Equal(t, ws.URL(), fmt.Sprintf("ws://localhost:%d/ws", wsServer.PORT))
+	require.Equal(t, ws.URL(), fmt.Sprintf("ws://localhost:%s/ws", server.PORT))
 
 	require.Eventually(t, func() bool { return ws.IsClosed() }, 1*time.Second, 10*time.Millisecond)
 }
@@ -127,8 +54,12 @@ func TestWebSocketShouldEmitCloseEvents(t *testing.T) {
 func TestWebSocketShouldEmitFrameEvents(t *testing.T) {
 	BeforeEach(t)
 
-	wsServer := newWebsocketServer()
-	defer wsServer.Stop()
+	server.SendOnWebSocketConnection(websocket.MessageText, []byte("incoming"))
+	server.OnceWebSocketMessage(func(c *websocket.Conn, r *http.Request, msgType websocket.MessageType, msg []byte) {
+		if bytes.Equal(msg, []byte("echo-text")) {
+			_ = c.Write(r.Context(), msgType, []byte("text"))
+		}
+	})
 
 	sent := [][]byte{}
 	received := [][]byte{}
@@ -149,16 +80,11 @@ func TestWebSocketShouldEmitFrameEvents(t *testing.T) {
                 ws.send('echo-text');
             });
 						ws.addEventListener('message', data => { count++; if (count >= 2) { ws.close() } });
-        }`, wsServer.PORT)
+        }`, server.PORT)
 		return err
 	})
 	require.NoError(t, err)
-	if !ws.IsClosed() {
-		_, err = ws.WaitForEvent("close", playwright.WebSocketWaitForEventOptions{
-			Timeout: playwright.Float(1000),
-		})
-		require.NoError(t, err)
-	}
+	require.Eventually(t, func() bool { return ws.IsClosed() }, 1*time.Second, 10*time.Millisecond)
 
 	require.Equal(t, sent, [][]byte{[]byte("echo-text")})
 	require.Equal(t, received, [][]byte{[]byte("incoming"), []byte("text")})
@@ -167,8 +93,12 @@ func TestWebSocketShouldEmitFrameEvents(t *testing.T) {
 func TestWebSocketShouldEmitBinaryFrameEvents(t *testing.T) {
 	BeforeEach(t)
 
-	wsServer := newWebsocketServer()
-	defer wsServer.Stop()
+	server.SendOnWebSocketConnection(websocket.MessageText, []byte("incoming"))
+	server.OnWebSocketMessage(func(c *websocket.Conn, r *http.Request, msgType websocket.MessageType, msg []byte) {
+		if bytes.Equal(msg, []byte("echo-bin")) {
+			_ = c.Write(r.Context(), websocket.MessageBinary, []byte{4, 2})
+		}
+	})
 
 	sent := [][]byte{}
 	received := [][]byte{}
@@ -193,28 +123,23 @@ func TestWebSocketShouldEmitBinaryFrameEvents(t *testing.T) {
                 ws.send('echo-bin');
             });
 						ws.addEventListener('message', data => { count++; if (count >= 2) { ws.close() } });
-        }`, wsServer.PORT)
+        }`, server.PORT)
 		return err
 	})
 	require.NoError(t, err)
-	if !ws.IsClosed() {
-		_, err = ws.WaitForEvent("close")
-		require.NoError(t, err)
-	}
+	require.Eventually(t, func() bool { return ws.IsClosed() }, 1*time.Second, 10*time.Millisecond)
 
-	require.Equal(t, sent, [][]byte{{0, 1, 2, 3, 4}, []byte("echo-bin")})
-	require.Equal(t, received, [][]byte{[]byte("incoming"), {4, 2}})
+	require.Equal(t, [][]byte{{0, 1, 2, 3, 4}, []byte("echo-bin")}, sent)
+	require.Equal(t, [][]byte{[]byte("incoming"), {4, 2}}, received)
 }
 
 func TestWebSocketShouldRejectWaitForEventOnCloseAndError(t *testing.T) {
 	BeforeEach(t)
 
-	wsServer := newWebsocketServer()
-	defer wsServer.Stop()
 	ws, err := page.ExpectWebSocket(func() error {
 		_, err := page.Evaluate(`port => {
             ws = new WebSocket('ws://localhost:' + port + '/ws');
-        }`, wsServer.PORT)
+        }`, server.PORT)
 		return err
 	})
 	require.NoError(t, err)
@@ -237,8 +162,6 @@ func TestWebSocketShouldRejectWaitForEventOnCloseAndError(t *testing.T) {
 func TestWebSocketShouldEmitErrorEvent(t *testing.T) {
 	BeforeEach(t)
 
-	wsServer := newWebsocketServer()
-	defer wsServer.Stop()
 	chanMsg := make(chan string, 1)
 	page.OnWebSocket(func(ws playwright.WebSocket) {
 		ws.OnSocketError(func(err string) {
@@ -247,7 +170,7 @@ func TestWebSocketShouldEmitErrorEvent(t *testing.T) {
 	})
 	_, err := page.Evaluate(`port => {
 			ws = new WebSocket('ws://localhost:' + port + '/bogus-ws');
-		}`, wsServer.PORT)
+		}`, server.PORT)
 	require.NoError(t, err)
 	msg := <-chanMsg
 	if isFirefox {

@@ -63,8 +63,7 @@ func (r *routeImpl) Abort(errorCode ...string) error {
 	return r.handleRoute(func() error {
 		return r.raceWithPageClose(func() error {
 			_, err := r.channel.Send("abort", map[string]interface{}{
-				"errorCode":  unpackOptionalArgument(errorCode),
-				"requestUrl": r.Request().(*requestImpl).initializer["url"],
+				"errorCode": unpackOptionalArgument(errorCode),
 			})
 			return err
 		})
@@ -173,7 +172,6 @@ func (r *routeImpl) innerFulfill(options ...RouteFulfillOptions) error {
 	}
 	overrides["headers"] = serializeMapToNameAndValue(headers)
 	overrides["isBase64"] = isBase64
-	overrides["requestUrl"] = r.Request().(*requestImpl).initializer["url"]
 
 	option.Path = nil
 	err = r.raceWithPageClose(func() error {
@@ -234,7 +232,7 @@ func (r *routeImpl) Continue(options ...RouteContinueOptions) error {
 	})
 }
 
-func (r *routeImpl) internalContinue(isInternal bool) error {
+func (r *routeImpl) internalContinue(isFallback bool) error {
 	overrides := make(map[string]interface{})
 	overrides["url"] = r.Request().(*requestImpl).fallbackOverrides.URL
 	overrides["method"] = r.Request().(*requestImpl).fallbackOverrides.Method
@@ -246,16 +244,11 @@ func (r *routeImpl) internalContinue(isInternal bool) error {
 	if postDataBuf != nil {
 		overrides["postData"] = base64.StdEncoding.EncodeToString(postDataBuf)
 	}
-	overrides["requestUrl"] = r.Request().(*requestImpl).initializer["url"]
-	overrides["isFallback"] = isInternal
-	_, err := r.channel.connection.WrapAPICall(func() (interface{}, error) {
-		err := r.raceWithPageClose(func() error {
-			_, err := r.channel.Send("continue", overrides)
-			return err
-		})
-		return nil, err
-	}, isInternal)
-	return err
+	overrides["isFallback"] = isFallback
+	return r.raceWithPageClose(func() error {
+		_, err := r.channel.Send("continue", overrides)
+		return err
+	})
 }
 
 func (r *routeImpl) redirectedNavigationRequest(url string) error {
