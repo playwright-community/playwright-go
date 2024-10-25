@@ -86,6 +86,7 @@ func (t *testServer) AfterEach() {
 	t.requestSubscriberes = make(map[string][]chan *http.Request)
 	t.eventEmitter.RemoveListeners("connection")
 	t.eventEmitter.RemoveListeners("message")
+	t.eventEmitter.RemoveListeners("close")
 	t.testServer.CloseClientConnections()
 }
 

@@ -77,7 +77,7 @@ func (r *webSocketRouteImpl) ConnectToServer() (WebSocketRoute, error) {
 	if r.connected.Load() {
 		return nil, fmt.Errorf("Already connected to the server")
 	}
-	go r.channel.SendNoReply("connect")
+	r.channel.SendNoReply("connect")
 	r.connected.Store(true)
 	return r.server, nil
 }
