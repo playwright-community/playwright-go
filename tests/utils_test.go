@@ -97,8 +97,29 @@ func (t *testServer) SetTLSConfig(config *tls.Config) {
 	t.testServer.TLS = config
 }
 
+type wsConnection struct {
+	Conn *websocket.Conn
+	Req  *http.Request
+}
+
+func (c *wsConnection) SendMessage(msgType websocket.MessageType, data []byte) {
+	err := c.Conn.Write(c.Req.Context(), msgType, data)
+	if err != nil {
+		log.Println("testServer: could not write ws message:", err)
+		return
+	}
+}
+
 func (t *testServer) OnceWebSocketConnection(handler func(c *websocket.Conn, r *http.Request)) {
 	t.eventEmitter.Once("connection", handler)
+}
+
+func (t *testServer) OnWebSocketClose(handler func(err *websocket.CloseError)) {
+	t.eventEmitter.On("close", handler)
+}
+
+func (t *testServer) OnceWebSocketClose(handler func(err *websocket.CloseError)) {
+	t.eventEmitter.Once("close", handler)
 }
 
 func (t *testServer) OnWebSocketMessage(handler func(c *websocket.Conn, r *http.Request, msgType websocket.MessageType, msg []byte)) {
@@ -119,10 +140,10 @@ func (t *testServer) SendOnWebSocketConnection(msgType websocket.MessageType, da
 	})
 }
 
-func (t *testServer) WaitForWebSocketConnection() <-chan *websocket.Conn {
-	channel := make(chan *websocket.Conn)
+func (t *testServer) WaitForWebSocketConnection() <-chan *wsConnection {
+	channel := make(chan *wsConnection)
 	t.OnceWebSocketConnection(func(c *websocket.Conn, r *http.Request) {
-		channel <- c
+		channel <- &wsConnection{Conn: c, Req: r}
 		close(channel)
 	})
 	return channel
@@ -143,7 +164,13 @@ func (t *testServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 	for {
 		typ, message, err := c.Read(r.Context())
 		if err != nil {
-			if websocket.CloseStatus(err) != websocket.StatusNormalClosure && websocket.CloseStatus(err) != websocket.StatusNoStatusRcvd {
+			closeErr := new(websocket.CloseError)
+			if errors.As(err, closeErr) {
+				t.eventEmitter.Emit("close", closeErr)
+			}
+			switch websocket.CloseStatus(err) {
+			case websocket.StatusNormalClosure, websocket.StatusGoingAway, websocket.StatusNoStatusRcvd:
+			default:
 				log.Println("testServer: could not read ws message:", err)
 			}
 			break

@@ -4189,6 +4189,17 @@ type WebSocketWaitForEventOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 
+type WebSocketRouteCloseOptions struct {
+	// Optional [close code].
+	//
+	// [close code]: https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close#code
+	Code *int `json:"code"`
+	// Optional [close reason].
+	//
+	// [close reason]: https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close#reason
+	Reason *string `json:"reason"`
+}
+
 type ClientCertificate struct {
 	// Exact origin that the certificate is valid for. Origin includes `https` protocol, a hostname and optionally a port.
 	Origin string `json:"origin"`

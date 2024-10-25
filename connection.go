@@ -34,6 +34,7 @@ type connection struct {
 	tracingCount atomic.Int32
 	abort        chan struct{}
 	abortOnce    sync.Once
+	err          *safeValue[error] // for event listener error
 	closedError  *safeValue[error]
 }
 
@@ -301,6 +302,7 @@ func newConnection(transport transport, localUtils ...*localUtilsImpl) *connecti
 		objects:     safe.NewSyncMap[string, *channelOwner](),
 		transport:   transport,
 		isRemote:    false,
+		err:         &safeValue[error]{},
 		closedError: &safeValue[error]{},
 	}
 	if len(localUtils) > 0 {
@@ -393,7 +395,7 @@ func newProtocolCallback(noReply bool, abort <-chan struct{}) *protocolCallback 
 		}
 	}
 	return &protocolCallback{
-		done:  make(chan struct{}),
+		done:  make(chan struct{}, 1),
 		abort: abort,
 	}
 }
