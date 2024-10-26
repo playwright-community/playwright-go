@@ -253,15 +253,18 @@ func (r *routeImpl) internalContinue(isFallback bool) error {
 
 func (r *routeImpl) redirectedNavigationRequest(url string) error {
 	return r.handleRoute(func() error {
-		_, err := r.channel.Send("redirectNavigationRequest", map[string]interface{}{
-			"url": url,
+		return r.raceWithPageClose(func() error {
+			_, err := r.channel.Send("redirectNavigationRequest", map[string]interface{}{
+				"url": url,
+			})
+			return err
 		})
-		return err
 	})
 }
 
 func newRoute(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *routeImpl {
 	bt := &routeImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
+	bt.markAsInternalType()
 	return bt
 }

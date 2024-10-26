@@ -765,3 +765,18 @@ func TestBrowserContextShouldRetryECONNRESET(t *testing.T) {
 	require.Equal(t, []byte("Hello!"), body)
 	require.Equal(t, int32(4), requestCount.Load())
 }
+
+func TestBrowserContextShouldShowErrorAfterFulfill(t *testing.T) {
+	BeforeEach(t)
+
+	require.NoError(t, page.Route("**/*", func(route playwright.Route) {
+		require.NoError(t, route.Continue())
+		panic("Exception text!?")
+	}))
+
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	// Any next API call should throw because handler did throw during previous goto()
+	_, err = page.Goto(server.EMPTY_PAGE)
+	require.ErrorContains(t, err, "Exception text!?")
+}
