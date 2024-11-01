@@ -11,7 +11,7 @@ type selectorsOwnerImpl struct {
 }
 
 func (s *selectorsOwnerImpl) setTestIdAttributeName(name string) {
-	s.channel.SendNoReply("setTestIdAttributeName", false, map[string]interface{}{
+	s.channel.SendNoReply("setTestIdAttributeName", map[string]interface{}{
 		"testIdAttributeName": name,
 	})
 }
@@ -71,7 +71,7 @@ func (s *selectorsImpl) SetTestIdAttribute(name string) {
 func (s *selectorsImpl) addChannel(channel *selectorsOwnerImpl) {
 	s.channels.Store(channel.guid, channel)
 	for _, params := range s.registrations {
-		channel.channel.SendNoReply("register", false, params)
+		channel.channel.SendNoReply("register", params)
 		channel.setTestIdAttributeName(getTestIdAttributeName())
 	}
 }

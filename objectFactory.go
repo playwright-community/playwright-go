@@ -62,6 +62,8 @@ func createObjectFactory(parent *channelOwner, objectType string, guid string, i
 		return newTracing(parent, objectType, guid, initializer)
 	case "WebSocket":
 		return newWebsocket(parent, objectType, guid, initializer)
+	case "WebSocketRoute":
+		return newWebSocketRoute(parent, objectType, guid, initializer)
 	case "Worker":
 		return newWorker(parent, objectType, guid, initializer)
 	case "WritableStream":

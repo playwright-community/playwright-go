@@ -20,6 +20,7 @@ type browserContextImpl struct {
 	options         *BrowserNewContextOptions
 	pages           []Page
 	routes          []*routeHandlerEntry
+	webSocketRoutes []*webSocketRouteHandler
 	ownedPage       Page
 	browser         *browserImpl
 	serviceWorkers  []Worker
@@ -44,7 +45,7 @@ func (b *browserContextImpl) SetDefaultNavigationTimeout(timeout float64) {
 
 func (b *browserContextImpl) setDefaultNavigationTimeoutImpl(timeout *float64) {
 	b.timeoutSettings.SetDefaultNavigationTimeout(timeout)
-	b.channel.SendNoReply("setDefaultNavigationTimeoutNoReply", true, map[string]interface{}{
+	b.channel.SendNoReplyInternal("setDefaultNavigationTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
 	})
 }
@@ -55,7 +56,7 @@ func (b *browserContextImpl) SetDefaultTimeout(timeout float64) {
 
 func (b *browserContextImpl) setDefaultTimeoutImpl(timeout *float64) {
 	b.timeoutSettings.SetDefaultTimeout(timeout)
-	b.channel.SendNoReply("setDefaultTimeoutNoReply", true, map[string]interface{}{
+	b.channel.SendNoReplyInternal("setDefaultTimeoutNoReply", map[string]interface{}{
 		"timeout": timeout,
 	})
 }
@@ -541,7 +542,7 @@ func (b *browserContextImpl) onBinding(binding *bindingCallImpl) {
 	if !ok || function == nil {
 		return
 	}
-	binding.Call(function)
+	go binding.Call(function)
 }
 
 func (b *browserContextImpl) onClose() {
@@ -572,58 +573,56 @@ func (b *browserContextImpl) onPage(page Page) {
 }
 
 func (b *browserContextImpl) onRoute(route *routeImpl) {
-	go func() {
+	b.Lock()
+	route.context = b
+	page := route.Request().(*requestImpl).safePage()
+	routes := make([]*routeHandlerEntry, len(b.routes))
+	copy(routes, b.routes)
+	b.Unlock()
+
+	checkInterceptionIfNeeded := func() {
 		b.Lock()
-		route.context = b
-		page := route.Request().(*requestImpl).safePage()
-		routes := make([]*routeHandlerEntry, len(b.routes))
-		copy(routes, b.routes)
-		b.Unlock()
-
-		checkInterceptionIfNeeded := func() {
-			b.Lock()
-			defer b.Unlock()
-			if len(b.routes) == 0 {
-				_, err := b.connection.WrapAPICall(func() (interface{}, error) {
-					err := b.updateInterceptionPatterns()
-					return nil, err
-				}, true)
-				if err != nil {
-					logger.Printf("could not update interception patterns: %v\n", err)
-				}
+		defer b.Unlock()
+		if len(b.routes) == 0 {
+			_, err := b.connection.WrapAPICall(func() (interface{}, error) {
+				err := b.updateInterceptionPatterns()
+				return nil, err
+			}, true)
+			if err != nil {
+				logger.Printf("could not update interception patterns: %v\n", err)
 			}
 		}
+	}
 
-		url := route.Request().URL()
-		for _, handlerEntry := range routes {
-			// If the page or the context was closed we stall all requests right away.
-			if (page != nil && page.closeWasCalled) || b.closeWasCalled {
-				return
-			}
-			if !handlerEntry.Matches(url) {
-				continue
-			}
-			if !slices.ContainsFunc(b.routes, func(entry *routeHandlerEntry) bool {
-				return entry == handlerEntry
-			}) {
-				continue
-			}
-			if handlerEntry.WillExceed() {
-				b.routes = slices.DeleteFunc(b.routes, func(rhe *routeHandlerEntry) bool {
-					return rhe == handlerEntry
-				})
-			}
-			handled := handlerEntry.Handle(route)
-			checkInterceptionIfNeeded()
-			yes := <-handled
-			if yes {
-				return
-			}
+	url := route.Request().URL()
+	for _, handlerEntry := range routes {
+		// If the page or the context was closed we stall all requests right away.
+		if (page != nil && page.closeWasCalled) || b.closeWasCalled {
+			return
 		}
-		// If the page is closed or unrouteAll() was called without waiting and interception disabled,
-		// the method will throw an error - silence it.
-		_ = route.internalContinue(true)
-	}()
+		if !handlerEntry.Matches(url) {
+			continue
+		}
+		if !slices.ContainsFunc(b.routes, func(entry *routeHandlerEntry) bool {
+			return entry == handlerEntry
+		}) {
+			continue
+		}
+		if handlerEntry.WillExceed() {
+			b.routes = slices.DeleteFunc(b.routes, func(rhe *routeHandlerEntry) bool {
+				return rhe == handlerEntry
+			})
+		}
+		handled := handlerEntry.Handle(route)
+		checkInterceptionIfNeeded()
+		yes := <-handled
+		if yes {
+			return
+		}
+	}
+	// If the page is closed or unrouteAll() was called without waiting and interception disabled,
+	// the method will throw an error - silence it.
+	_ = route.internalContinue(true)
 }
 
 func (b *browserContextImpl) updateInterceptionPatterns() error {
@@ -726,6 +725,40 @@ func (b *browserContextImpl) OnWebError(fn func(WebError)) {
 	b.On("weberror", fn)
 }
 
+func (b *browserContextImpl) RouteWebSocket(url interface{}, handler func(WebSocketRoute)) error {
+	b.Lock()
+	defer b.Unlock()
+	b.webSocketRoutes = slices.Insert(b.webSocketRoutes, 0, newWebSocketRouteHandler(newURLMatcher(url, b.options.BaseURL), handler))
+
+	return b.updateWebSocketInterceptionPatterns()
+}
+
+func (b *browserContextImpl) onWebSocketRoute(wr WebSocketRoute) {
+	b.Lock()
+	index := slices.IndexFunc(b.webSocketRoutes, func(r *webSocketRouteHandler) bool {
+		return r.Matches(wr.URL())
+	})
+	if index == -1 {
+		b.Unlock()
+		_, err := wr.ConnectToServer()
+		if err != nil {
+			logger.Println(err)
+		}
+		return
+	}
+	handler := b.webSocketRoutes[index]
+	b.Unlock()
+	handler.Handle(wr)
+}
+
+func (b *browserContextImpl) updateWebSocketInterceptionPatterns() error {
+	patterns := prepareWebSocketRouteHandlerInterceptionPatterns(b.webSocketRoutes)
+	_, err := b.channel.Send("setWebSocketInterceptionPatterns", map[string]interface{}{
+		"patterns": patterns,
+	})
+	return err
+}
+
 func (b *browserContextImpl) effectiveCloseReason() *string {
 	b.Lock()
 	defer b.Unlock()
@@ -758,7 +791,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 	bt.request = fromChannel(initializer["requestContext"]).(*apiRequestContextImpl)
 	bt.clock = newClock(bt)
 	bt.channel.On("bindingCall", func(params map[string]interface{}) {
-		go bt.onBinding(fromChannel(params["binding"]).(*bindingCallImpl))
+		bt.onBinding(fromChannel(params["binding"]).(*bindingCallImpl))
 	})
 
 	bt.channel.On("close", bt.onClose)
@@ -766,7 +799,14 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 		bt.onPage(fromChannel(payload["page"]).(*pageImpl))
 	})
 	bt.channel.On("route", func(params map[string]interface{}) {
-		bt.onRoute(fromChannel(params["route"]).(*routeImpl))
+		bt.channel.CreateTask(func() {
+			bt.onRoute(fromChannel(params["route"]).(*routeImpl))
+		})
+	})
+	bt.channel.On("webSocketRoute", func(params map[string]interface{}) {
+		bt.channel.CreateTask(func() {
+			bt.onWebSocketRoute(fromChannel(params["webSocketRoute"]).(*webSocketRouteImpl))
+		})
 	})
 	bt.channel.On("backgroundPage", bt.onBackgroundPage)
 	bt.channel.On("serviceWorker", func(params map[string]interface{}) {
