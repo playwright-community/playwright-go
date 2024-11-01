@@ -49,7 +49,7 @@ func (c *channelOwner) setEventSubscriptionMapping(mapping map[string]string) {
 func (c *channelOwner) updateSubscription(event string, enabled bool) {
 	protocolEvent, ok := c.eventToSubscriptionMapping[event]
 	if ok {
-		c.channel.SendNoReply("updateSubscription", true, map[string]interface{}{
+		c.channel.SendNoReplyInternal("updateSubscription", map[string]interface{}{
 			"event":   protocolEvent,
 			"enabled": enabled,
 		})
