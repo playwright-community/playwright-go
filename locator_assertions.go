@@ -472,6 +472,22 @@ func (la *locatorAssertionsImpl) ToHaveValues(values []interface{}, options ...L
 	)
 }
 
+func (la *locatorAssertionsImpl) ToMatchAriaSnapshot(expected string, options ...LocatorAssertionsToMatchAriaSnapshotOptions) error {
+	var timeout *float64
+	if len(options) == 1 {
+		timeout = options[0].Timeout
+	}
+	return la.expect(
+		"to.match.aria",
+		frameExpectOptions{
+			ExpectedValue: expected,
+			Timeout:       timeout,
+		},
+		expected,
+		"Locator expected to match Aria snapshot",
+	)
+}
+
 func (la *locatorAssertionsImpl) Not() LocatorAssertions {
 	return newLocatorAssertions(la.actualLocator, true, la.defaultTimeout)
 }

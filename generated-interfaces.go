@@ -602,11 +602,16 @@ type Clock interface {
 	Resume() error
 
 	// Makes `Date.now` and `new Date()` return fixed fake time at all times, keeps all the timers running.
+	// Use this method for simple scenarios where you only need to test with a predefined time. For more advanced
+	// scenarios, use [Clock.Install] instead. Read docs on [clock emulation] to learn more.
 	//
 	//  time: Time to be set.
+	//
+	// [clock emulation]: https://playwright.dev/docs/clock
 	SetFixedTime(time interface{}) error
 
-	// Sets current system time but does not trigger any timers.
+	// Sets system time, but does not trigger any timers. Use this to test how the web page reacts to a time shift, for
+	// example switching from summer to winter time, or changing time zones.
 	//
 	//  time: Time to be set.
 	SetSystemTime(time interface{}) error
@@ -2179,6 +2184,37 @@ type Locator interface {
 	//  locator: Additional locator to match.
 	And(locator Locator) Locator
 
+	// Captures the aria snapshot of the given element. Read more about [aria snapshots] and
+	// [LocatorAssertions.ToMatchAriaSnapshot] for the corresponding assertion.
+	//
+	// # Details
+	//
+	// This method captures the aria snapshot of the given element. The snapshot is a string that represents the state of
+	// the element and its children. The snapshot can be used to assert the state of the element in the test, or to
+	// compare it to state in the future.
+	// The ARIA snapshot is represented using [YAML] markup language:
+	//  - The keys of the objects are the roles and optional accessible names of the elements.
+	//  - The values are either text content or an array of child elements.
+	//  - Generic static text can be represented with the `text` key.
+	// Below is the HTML markup and the respective ARIA snapshot:
+	// ```html
+	// <ul aria-label="Links">
+	//   <li><a href="/">Home</a></li>
+	//   <li><a href="/about">About</a></li>
+	// <ul>
+	// ```
+	// ```yml
+	//  - list "Links":
+	//   - listitem:
+	//     - link "Home"
+	//   - listitem:
+	//     - link "About"
+	// ```
+	//
+	// [aria snapshots]: https://playwright.dev/docs/aria-snapshots
+	// [YAML]: https://yaml.org/spec/1.2.2/
+	AriaSnapshot(options ...LocatorAriaSnapshotOptions) (string, error)
+
 	// Calls [blur] on the element.
 	//
 	// [blur]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/blur
@@ -2949,6 +2985,11 @@ type LocatorAssertions interface {
 	//
 	//  values: Expected options currently selected.
 	ToHaveValues(values []interface{}, options ...LocatorAssertionsToHaveValuesOptions) error
+
+	// Asserts that the target element matches the given [accessibility snapshot].
+	//
+	// [accessibility snapshot]: https://playwright.dev/docs/aria-snapshots
+	ToMatchAriaSnapshot(expected string, options ...LocatorAssertionsToMatchAriaSnapshotOptions) error
 }
 
 // The Mouse class operates in main-frame CSS pixels relative to the top-left corner of the viewport.
@@ -4309,9 +4350,9 @@ type Route interface {
 	//
 	// # Details
 	//
-	// Note that any overrides such as “[object Object]” or “[object Object]” only apply to the request being routed. If
-	// this request results in a redirect, overrides will not be applied to the new redirected request. If you want to
-	// propagate a header through redirects, use the combination of [Route.Fetch] and [Route.Fulfill] instead.
+	// The “[object Object]” option applies to both the routed request and any redirects it initiates. However,
+	// “[object Object]”, “[object Object]”, and “[object Object]” only apply to the original request and are not carried
+	// over to redirected requests.
 	// [Route.Continue] will immediately send the request to the network, other matching handlers won't be invoked. Use
 	// [Route.Fallback] If you want next matching handler in the chain to be invoked.
 	Continue(options ...RouteContinueOptions) error
@@ -4379,6 +4420,16 @@ type Tracing interface {
 	// Start a new trace chunk. If you'd like to record multiple traces on the same [BrowserContext], use [Tracing.Start]
 	// once, and then create multiple trace chunks with [Tracing.StartChunk] and [Tracing.StopChunk].
 	StartChunk(options ...TracingStartChunkOptions) error
+
+	// **NOTE** Use `test.step` instead when available.
+	// Creates a new group within the trace, assigning any subsequent API calls to this group, until [Tracing.GroupEnd] is
+	// called. Groups can be nested and will be visible in the trace viewer.
+	//
+	//  name: Group name shown in the trace viewer.
+	Group(name string, options ...TracingGroupOptions) error
+
+	// Closes the last group created by [Tracing.Group].
+	GroupEnd() error
 
 	// Stop tracing.
 	Stop(path ...string) error

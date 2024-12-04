@@ -128,6 +128,19 @@ func (l *locatorImpl) Blur(options ...LocatorBlurOptions) error {
 	return err
 }
 
+func (l *locatorImpl) AriaSnapshot(options ...LocatorAriaSnapshotOptions) (string, error) {
+	var option LocatorAriaSnapshotOptions
+	if len(options) == 1 {
+		option = options[0]
+	}
+	ret, err := l.frame.channel.Send("ariaSnapshot", option,
+		map[string]interface{}{"selector": l.selector})
+	if err != nil {
+		return "", err
+	}
+	return ret.(string), nil
+}
+
 func (l *locatorImpl) BoundingBox(options ...LocatorBoundingBoxOptions) (*Rect, error) {
 	if l.err != nil {
 		return nil, l.err

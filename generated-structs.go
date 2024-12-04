@@ -363,9 +363,11 @@ type BrowserNewContextOptions struct {
 	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
 	// work by replacing `localhost` with `local.playwright`.
 	ClientCertificates []ClientCertificate `json:"clientCertificates"`
-	// Emulates `prefers-colors-scheme` media feature, supported values are `light`, `dark`, `no-preference`. See
-	// [Page.EmulateMedia] for more details. Passing `no-override` resets emulation to system defaults. Defaults to
-	// `light`.
+	// Emulates [prefers-colors-scheme]
+	// media feature, supported values are `light` and `dark`. See [Page.EmulateMedia] for more details. Passing
+	// `no-override` resets emulation to system defaults. Defaults to `light`.
+	//
+	// [prefers-colors-scheme]: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme
 	ColorScheme *ColorScheme `json:"colorScheme"`
 	// Specify device scale factor (can be thought of as dpr). Defaults to `1`. Learn more about
 	// [emulating devices with device scale factor].
@@ -508,9 +510,11 @@ type BrowserNewPageOptions struct {
 	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
 	// work by replacing `localhost` with `local.playwright`.
 	ClientCertificates []ClientCertificate `json:"clientCertificates"`
-	// Emulates `prefers-colors-scheme` media feature, supported values are `light`, `dark`, `no-preference`. See
-	// [Page.EmulateMedia] for more details. Passing `no-override` resets emulation to system defaults. Defaults to
-	// `light`.
+	// Emulates [prefers-colors-scheme]
+	// media feature, supported values are `light` and `dark`. See [Page.EmulateMedia] for more details. Passing
+	// `no-override` resets emulation to system defaults. Defaults to `light`.
+	//
+	// [prefers-colors-scheme]: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme
 	ColorScheme *ColorScheme `json:"colorScheme"`
 	// Specify device scale factor (can be thought of as dpr). Defaults to `1`. Learn more about
 	// [emulating devices with device scale factor].
@@ -910,9 +914,11 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
 	// work by replacing `localhost` with `local.playwright`.
 	ClientCertificates []ClientCertificate `json:"clientCertificates"`
-	// Emulates `prefers-colors-scheme` media feature, supported values are `light`, `dark`, `no-preference`. See
-	// [Page.EmulateMedia] for more details. Passing `no-override` resets emulation to system defaults. Defaults to
-	// `light`.
+	// Emulates [prefers-colors-scheme]
+	// media feature, supported values are `light` and `dark`. See [Page.EmulateMedia] for more details. Passing
+	// `no-override` resets emulation to system defaults. Defaults to `light`.
+	//
+	// [prefers-colors-scheme]: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme
 	ColorScheme *ColorScheme `json:"colorScheme"`
 	// Specify device scale factor (can be thought of as dpr). Defaults to `1`. Learn more about
 	// [emulating devices with device scale factor].
@@ -2236,6 +2242,12 @@ type KeyboardTypeOptions struct {
 	Delay *float64 `json:"delay"`
 }
 
+type LocatorAriaSnapshotOptions struct {
+	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
+	Timeout *float64 `json:"timeout"`
+}
+
 type LocatorBlurOptions struct {
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
@@ -2990,6 +3002,11 @@ type LocatorAssertionsToHaveValuesOptions struct {
 	Timeout *float64 `json:"timeout"`
 }
 
+type LocatorAssertionsToMatchAriaSnapshotOptions struct {
+	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
+	Timeout *float64 `json:"timeout"`
+}
+
 type MouseClickOptions struct {
 	// Defaults to `left`.
 	Button *MouseButton `json:"button"`
@@ -3197,8 +3214,11 @@ type PageDragAndDropOptions struct {
 }
 
 type PageEmulateMediaOptions struct {
-	// Emulates `prefers-colors-scheme` media feature, supported values are `light`, `dark`, `no-preference`.
-	// Passing `no-override` disables color scheme emulation.
+	// Emulates [prefers-colors-scheme]
+	// media feature, supported values are `light` and `dark`. Passing `no-override` disables color scheme
+	// emulation. `no-preference` is deprecated.
+	//
+	// [prefers-colors-scheme]: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme
 	ColorScheme  *ColorScheme  `json:"colorScheme"`
 	ForcedColors *ForcedColors `json:"forcedColors"`
 	// Changes the CSS media type of the page. The only allowed values are `screen`, `print` and `no-override`.
@@ -4173,6 +4193,12 @@ type TracingStartChunkOptions struct {
 	Title *string `json:"title"`
 }
 
+type TracingGroupOptions struct {
+	// Specifies a custom location for the group to be shown in the trace viewer. Defaults to the location of the
+	// [Tracing.Group] call.
+	Location *TracingGroupOptionsLocation `json:"location"`
+}
+
 type WebSocketExpectEventOptions struct {
 	// Receives the event data and resolves to truthy value when the waiting should resolve.
 	Predicate interface{} `json:"predicate"`
@@ -4278,4 +4304,10 @@ type Margin struct {
 	Bottom *string `json:"bottom"`
 	// Left margin, accepts values labeled with units. Defaults to `0`.
 	Left *string `json:"left"`
+}
+
+type TracingGroupOptionsLocation struct {
+	File   string `json:"file"`
+	Line   *int   `json:"line"`
+	Column *int   `json:"column"`
 }
