@@ -248,7 +248,7 @@ index 5a901b76b..26da2aa12 100644
  
  Returns the JSON representation of response body.
 diff --git a/docs/src/api/class-apiresponseassertions.md b/docs/src/api/class-apiresponseassertions.md
-index 6fce864d0..237865884 100644
+index 9584365d8..35ce3c1bc 100644
 --- a/docs/src/api/class-apiresponseassertions.md
 +++ b/docs/src/api/class-apiresponseassertions.md
 @@ -48,7 +48,7 @@ def test_navigates_to_login_page(page: Page) -> None:
@@ -261,7 +261,7 @@ index 6fce864d0..237865884 100644
  
  Makes the assertion check for the opposite condition. For example, this code tests that the response status is not successful:
 diff --git a/docs/src/api/class-browser.md b/docs/src/api/class-browser.md
-index 59cf4c99c..95f686ffa 100644
+index 4dabfc52e..eb986309e 100644
 --- a/docs/src/api/class-browser.md
 +++ b/docs/src/api/class-browser.md
 @@ -261,6 +261,9 @@ await browser.CloseAsync();
@@ -322,7 +322,7 @@ index 59cf4c99c..95f686ffa 100644
  
  :::note
 diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
-index b504bf457..453add560 100644
+index 8d6c57a3e..8001ddc34 100644
 --- a/docs/src/api/class-browsercontext.md
 +++ b/docs/src/api/class-browsercontext.md
 @@ -417,7 +417,7 @@ The order of evaluation of multiple scripts installed via [`method: BrowserConte
@@ -334,7 +334,7 @@ index b504bf457..453add560 100644
  - `script` <[function]|[string]|[Object]>
    - `path` ?<[path]> Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the
      current working directory. Optional.
-@@ -1210,7 +1210,7 @@ handler function to route the request.
+@@ -1211,7 +1211,7 @@ handler function to route the request.
  
  ### param: BrowserContext.route.handler
  * since: v1.8
@@ -343,7 +343,7 @@ index b504bf457..453add560 100644
  - `handler` <[function]\([Route]\)>
  
  handler function to route the request.
-@@ -1353,7 +1353,7 @@ Handler function to route the WebSocket.
+@@ -1354,7 +1354,7 @@ Handler function to route the WebSocket.
  
  ### param: BrowserContext.routeWebSocket.handler
  * since: v1.48
@@ -352,7 +352,7 @@ index b504bf457..453add560 100644
  - `handler` <[function]\([WebSocketRoute]\)>
  
  Handler function to route the WebSocket.
-@@ -1361,7 +1361,7 @@ Handler function to route the WebSocket.
+@@ -1362,7 +1362,7 @@ Handler function to route the WebSocket.
  
  ## method: BrowserContext.serviceWorkers
  * since: v1.11
@@ -361,7 +361,7 @@ index b504bf457..453add560 100644
  - returns: <[Array]<[Worker]>>
  
  :::note
-@@ -1548,6 +1548,13 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
+@@ -1549,6 +1549,13 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
  
  Optional handler function used to register a routing with [`method: BrowserContext.route`].
  
@@ -375,7 +375,7 @@ index b504bf457..453add560 100644
  ### param: BrowserContext.unroute.handler
  * since: v1.8
  * langs: csharp, java
-@@ -1589,7 +1596,8 @@ Condition to wait for.
+@@ -1590,7 +1597,8 @@ Condition to wait for.
  
  ## async method: BrowserContext.waitForConsoleMessage
  * since: v1.34
@@ -385,7 +385,7 @@ index b504bf457..453add560 100644
    - alias-python: expect_console_message
    - alias-csharp: RunAndWaitForConsoleMessage
  - returns: <[ConsoleMessage]>
-@@ -1620,7 +1628,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
+@@ -1621,7 +1629,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
  
  ## async method: BrowserContext.waitForEvent
  * since: v1.8
@@ -395,7 +395,7 @@ index b504bf457..453add560 100644
    - alias-python: expect_event
  - returns: <[any]>
  
-@@ -1686,7 +1695,8 @@ Either a predicate that receives an event or an options object. Optional.
+@@ -1687,7 +1696,8 @@ Either a predicate that receives an event or an options object. Optional.
  
  ## async method: BrowserContext.waitForPage
  * since: v1.9
@@ -405,7 +405,7 @@ index b504bf457..453add560 100644
    - alias-python: expect_page
    - alias-csharp: RunAndWaitForPage
  - returns: <[Page]>
-@@ -1705,7 +1715,7 @@ Will throw an error if the context closes before new [Page] is created.
+@@ -1706,7 +1716,7 @@ Will throw an error if the context closes before new [Page] is created.
  
  ### option: BrowserContext.waitForPage.predicate
  * since: v1.9
@@ -414,7 +414,7 @@ index b504bf457..453add560 100644
  - `predicate` <[function]\([Page]\):[boolean]>
  
  Receives the [Page] object and resolves to truthy value when the waiting should resolve.
-@@ -1718,7 +1728,8 @@ Receives the [Page] object and resolves to truthy value when the waiting should
+@@ -1719,7 +1729,8 @@ Receives the [Page] object and resolves to truthy value when the waiting should
  
  ## async method: BrowserContext.waitForEvent2
  * since: v1.8
@@ -438,7 +438,7 @@ index a14dd58fb..8e3807d87 100644
  - `params` ?<[Map<string, Object>]>
  
 diff --git a/docs/src/api/class-clock.md b/docs/src/api/class-clock.md
-index f2ee2433b..b89e77f92 100644
+index 38ca32976..9996c04a0 100644
 --- a/docs/src/api/class-clock.md
 +++ b/docs/src/api/class-clock.md
 @@ -71,7 +71,7 @@ Fake timers are used to manually control the flow of time in tests. They allow y
@@ -459,7 +459,7 @@ index f2ee2433b..b89e77f92 100644
  * since: v1.45
  - `time` <[float]|[string]|[Date]>
  
-@@ -233,7 +233,7 @@ await page.Clock.SetFixedTimeAsync("2020-02-02");
+@@ -235,7 +235,7 @@ await page.Clock.SetFixedTimeAsync("2020-02-02");
  Time to be set in milliseconds.
  
  ### param: Clock.setFixedTime.time
@@ -468,7 +468,7 @@ index f2ee2433b..b89e77f92 100644
  * since: v1.45
  - `time` <[float]|[string]|[Date]>
  
-@@ -291,7 +291,7 @@ await page.Clock.SetSystemTimeAsync("2020-02-02");
+@@ -293,7 +293,7 @@ await page.Clock.SetSystemTimeAsync("2020-02-02");
  Time to be set in milliseconds.
  
  ### param: Clock.setSystemTime.time
@@ -478,7 +478,7 @@ index f2ee2433b..b89e77f92 100644
  - `time` <[float]|[string]|[Date]>
  
 diff --git a/docs/src/api/class-consolemessage.md b/docs/src/api/class-consolemessage.md
-index 2268ee3ed..44cdaffce 100644
+index 347838ae4..e461d6f9f 100644
 --- a/docs/src/api/class-consolemessage.md
 +++ b/docs/src/api/class-consolemessage.md
 @@ -112,7 +112,7 @@ List of arguments passed to a `console` function call. See also [`event: Page.co
@@ -538,7 +538,7 @@ index e286c63bf..7dbd5f4fd 100644
    * alias-csharp: RunAndWaitForNavigation
  - returns: <[null]|[Response]>
 diff --git a/docs/src/api/class-locatorassertions.md b/docs/src/api/class-locatorassertions.md
-index 1ff5e5211..31dd3a4b0 100644
+index 369dd995e..5b9f62bba 100644
 --- a/docs/src/api/class-locatorassertions.md
 +++ b/docs/src/api/class-locatorassertions.md
 @@ -67,7 +67,7 @@ public class ExampleTests : PageTest
@@ -587,7 +587,7 @@ index 1ff5e5211..31dd3a4b0 100644
  
  Expected options currently selected.
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index f0c8b34b0..a6d46e70b 100644
+index f65a90493..712022a65 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
 @@ -621,7 +621,7 @@ The order of evaluation of multiple scripts installed via [`method: BrowserConte
@@ -599,63 +599,63 @@ index f0c8b34b0..a6d46e70b 100644
  - `script` <[function]|[string]|[Object]>
    - `path` ?<[path]> Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the
      current working directory. Optional.
-@@ -1270,11 +1270,11 @@ Passing `null` disables CSS media emulation.
+@@ -1267,6 +1267,14 @@ Passing `null` disables CSS media emulation.
+ Changes the CSS media type of the page. The only allowed values are `'Screen'`, `'Print'` and `'Null'`.
+ Passing `'Null'` disables CSS media emulation.
  
- ### option: Page.emulateMedia.media
- * since: v1.9
--* langs: csharp, python
--- `media` <[Media]<"screen"|"print"|"null">>
-+* langs: csharp, python, go
++### option: Page.emulateMedia.media
++* since: v1.9
++* langs: go
 +- `media` <[Media]<"screen"|"print"|"no-override">>
- 
--Changes the CSS media type of the page. The only allowed values are `'Screen'`, `'Print'` and `'Null'`.
--Passing `'Null'` disables CSS media emulation.
++
 +Changes the CSS media type of the page. The only allowed values are `'screen'`, `'print'` and `'no-override'`.
 +Passing `'no-override'` disables CSS media emulation.
- 
++
  ### option: Page.emulateMedia.colorScheme
  * since: v1.9
-@@ -1286,11 +1286,11 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
+ * langs: js, java
+@@ -1283,6 +1291,14 @@ Emulates [prefers-colors-scheme](https://developer.mozilla.org/en-US/docs/Web/CS
+ Emulates [prefers-colors-scheme](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme) media feature, supported values are `'light'` and `'dark'`. Passing
+ `'Null'` disables color scheme emulation. `'no-preference'` is deprecated.
  
- ### option: Page.emulateMedia.colorScheme
- * since: v1.9
--* langs: csharp, python
--- `colorScheme` <[ColorScheme]<"light"|"dark"|"no-preference"|"null">>
-+* langs: csharp, python, go
++### option: Page.emulateMedia.colorScheme
++* since: v1.9
++* langs: go
 +- `colorScheme` <[ColorScheme]<"light"|"dark"|"no-preference"|"no-override">>
- 
- Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. Passing
--`'Null'` disables color scheme emulation.
-+`'no-override'` disables color scheme emulation.
- 
++
++Emulates [prefers-colors-scheme](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme) media feature, supported values are `'light'` and `'dark'`. Passing
++`'no-override'` disables color scheme emulation. `'no-preference'` is deprecated.
++
  ### option: Page.emulateMedia.reducedMotion
  * since: v1.12
-@@ -1301,10 +1301,10 @@ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce
+ * langs: js, java
+@@ -1297,6 +1313,13 @@ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce
  
- ### option: Page.emulateMedia.reducedMotion
- * since: v1.12
--* langs: csharp, python
--- `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"null">>
-+* langs: csharp, python, go
+ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.
+ 
++### option: Page.emulateMedia.reducedMotion
++* since: v1.12
++* langs: go
 +- `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"no-override">>
- 
--Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `null` disables reduced motion emulation.
++
 +Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing `no-override` disables reduced motion emulation.
- 
++
  ### option: Page.emulateMedia.forcedColors
  * since: v1.15
-@@ -1315,8 +1315,8 @@ Emulates `'forced-colors'` media feature, supported values are `'active'` and `'
+ * langs: js, java
+@@ -1309,6 +1332,11 @@ Emulates `'forced-colors'` media feature, supported values are `'active'` and `'
+ * langs: csharp, python
+ - `forcedColors` <[ForcedColors]<"active"|"none"|"null">>
  
- ### option: Page.emulateMedia.forcedColors
- * since: v1.15
--* langs: csharp, python
--- `forcedColors` <[ForcedColors]<"active"|"none"|"null">>
-+* langs: csharp, python, go
++### option: Page.emulateMedia.forcedColors
++* since: v1.15
++* langs: go
 +- `forcedColors` <[ForcedColors]<"active"|"none"|"no-override">>
- 
++
  ## async method: Page.evalOnSelector
  * since: v1.9
-@@ -2136,14 +2136,14 @@ Frame name specified in the `iframe`'s `name` attribute.
+ * discouraged: This method does not wait for the element to pass actionability
+@@ -2128,14 +2156,14 @@ Frame name specified in the `iframe`'s `name` attribute.
  
  ### option: Page.frame.name
  * since: v1.8
@@ -672,7 +672,7 @@ index f0c8b34b0..a6d46e70b 100644
  - `url` ?<[string]|[RegExp]|[function]\([URL]\):[boolean]>
  
  A glob pattern, regex pattern or predicate receiving frame's `url` as a [URL] object. Optional.
-@@ -2917,7 +2917,7 @@ Paper width, accepts values labeled with units.
+@@ -2909,7 +2937,7 @@ Paper width, accepts values labeled with units.
  
  ### option: Page.pdf.width
  * since: v1.8
@@ -681,7 +681,7 @@ index f0c8b34b0..a6d46e70b 100644
  - `width` <[string]>
  
  Paper width, accepts values labeled with units.
-@@ -2931,7 +2931,7 @@ Paper height, accepts values labeled with units.
+@@ -2923,7 +2951,7 @@ Paper height, accepts values labeled with units.
  
  ### option: Page.pdf.height
  * since: v1.8
@@ -690,7 +690,7 @@ index f0c8b34b0..a6d46e70b 100644
  - `height` <[string]>
  
  Paper height, accepts values labeled with units.
-@@ -2949,7 +2949,7 @@ Paper margins, defaults to none.
+@@ -2941,7 +2969,7 @@ Paper margins, defaults to none.
  
  ### option: Page.pdf.margin
  * since: v1.8
@@ -699,7 +699,7 @@ index f0c8b34b0..a6d46e70b 100644
  - `margin` <[Object]>
    - `top` ?<[string]> Top margin, accepts values labeled with units. Defaults to `0`.
    - `right` ?<[string]> Right margin, accepts values labeled with units. Defaults to `0`.
-@@ -3370,7 +3370,7 @@ Function that should be run once [`param: locator`] appears. This function shoul
+@@ -3362,7 +3390,7 @@ Function that should be run once [`param: locator`] appears. This function shoul
  Function that should be run once [`param: locator`] appears. This function should get rid of the element that blocks actions like click.
  
  ### param: Page.addLocatorHandler.handler
@@ -708,7 +708,7 @@ index f0c8b34b0..a6d46e70b 100644
  * since: v1.42
  - `handler` <[function]\([Locator]\)>
  
-@@ -3618,6 +3618,13 @@ it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/We
+@@ -3610,6 +3638,13 @@ it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/We
  
  handler function to route the request.
  
@@ -722,7 +722,7 @@ index f0c8b34b0..a6d46e70b 100644
  ### param: Page.route.handler
  * since: v1.8
  * langs: csharp, java
-@@ -3752,7 +3759,7 @@ Handler function to route the WebSocket.
+@@ -3744,7 +3779,7 @@ Handler function to route the WebSocket.
  
  ### param: Page.routeWebSocket.handler
  * since: v1.48
@@ -731,7 +731,7 @@ index f0c8b34b0..a6d46e70b 100644
  - `handler` <[function]\([WebSocketRoute]\)>
  
  Handler function to route the WebSocket.
-@@ -4081,14 +4088,14 @@ await page.GotoAsync("https://www.microsoft.com");
+@@ -4073,14 +4108,14 @@ await page.GotoAsync("https://www.microsoft.com");
  
  ### param: Page.setViewportSize.width
  * since: v1.10
@@ -748,7 +748,7 @@ index f0c8b34b0..a6d46e70b 100644
  - `height` <[int]>
  
  Page height in pixels.
-@@ -4275,6 +4282,13 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
+@@ -4267,6 +4302,13 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
  
  Optional handler function to route the request.
  
@@ -762,7 +762,7 @@ index f0c8b34b0..a6d46e70b 100644
  ### param: Page.unroute.handler
  * since: v1.8
  * langs: csharp, java
-@@ -4313,7 +4327,8 @@ Performs action and waits for the Page to close.
+@@ -4305,7 +4347,8 @@ Performs action and waits for the Page to close.
  
  ## async method: Page.waitForConsoleMessage
  * since: v1.9
@@ -772,7 +772,7 @@ index f0c8b34b0..a6d46e70b 100644
    - alias-python: expect_console_message
    - alias-csharp: RunAndWaitForConsoleMessage
  - returns: <[ConsoleMessage]>
-@@ -4344,7 +4359,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
+@@ -4336,7 +4379,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
  
  ## async method: Page.waitForDownload
  * since: v1.9
@@ -782,7 +782,7 @@ index f0c8b34b0..a6d46e70b 100644
    - alias-python: expect_download
    - alias-csharp: RunAndWaitForDownload
  - returns: <[Download]>
-@@ -4375,7 +4391,8 @@ Receives the [Download] object and resolves to truthy value when the waiting sho
+@@ -4367,7 +4411,8 @@ Receives the [Download] object and resolves to truthy value when the waiting sho
  
  ## async method: Page.waitForEvent
  * since: v1.8
@@ -792,7 +792,7 @@ index f0c8b34b0..a6d46e70b 100644
    - alias-python: expect_event
  - returns: <[any]>
  
-@@ -4428,7 +4445,8 @@ Either a predicate that receives an event or an options object. Optional.
+@@ -4420,7 +4465,8 @@ Either a predicate that receives an event or an options object. Optional.
  
  ## async method: Page.waitForFileChooser
  * since: v1.9
@@ -802,7 +802,7 @@ index f0c8b34b0..a6d46e70b 100644
    - alias-python: expect_file_chooser
    - alias-csharp: RunAndWaitForFileChooser
  - returns: <[FileChooser]>
-@@ -4586,7 +4604,7 @@ await page.WaitForFunctionAsync("selector => !!document.querySelector(selector)"
+@@ -4578,7 +4624,7 @@ await page.WaitForFunctionAsync("selector => !!document.querySelector(selector)"
  
  Optional argument to pass to [`param: expression`].
  
@@ -811,7 +811,7 @@ index f0c8b34b0..a6d46e70b 100644
  * since: v1.8
  
  ### option: Page.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
-@@ -4683,6 +4701,11 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
+@@ -4675,6 +4721,11 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
  ```
  
  ### param: Page.waitForLoadState.state = %%-wait-for-load-state-state-%%
@@ -823,7 +823,7 @@ index f0c8b34b0..a6d46e70b 100644
  * since: v1.8
  
  ### option: Page.waitForLoadState.timeout = %%-navigation-timeout-%%
-@@ -4695,6 +4718,7 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
+@@ -4687,6 +4738,7 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
  * since: v1.8
  * deprecated: This method is inherently racy, please use [`method: Page.waitForURL`] instead.
  * langs:
@@ -831,7 +831,7 @@ index f0c8b34b0..a6d46e70b 100644
    * alias-python: expect_navigation
    * alias-csharp: RunAndWaitForNavigation
  - returns: <[null]|[Response]>
-@@ -4779,7 +4803,8 @@ a navigation.
+@@ -4771,7 +4823,8 @@ a navigation.
  
  ## async method: Page.waitForPopup
  * since: v1.9
@@ -841,7 +841,7 @@ index f0c8b34b0..a6d46e70b 100644
    - alias-python: expect_popup
    - alias-csharp: RunAndWaitForPopup
  - returns: <[Page]>
-@@ -4811,6 +4836,7 @@ Receives the [Page] object and resolves to truthy value when the waiting should
+@@ -4803,6 +4856,7 @@ Receives the [Page] object and resolves to truthy value when the waiting should
  ## async method: Page.waitForRequest
  * since: v1.8
  * langs:
@@ -849,7 +849,7 @@ index f0c8b34b0..a6d46e70b 100644
    * alias-python: expect_request
    * alias-csharp: RunAndWaitForRequest
  - returns: <[Request]>
-@@ -4918,7 +4944,8 @@ changed by using the [`method: Page.setDefaultTimeout`] method.
+@@ -4910,7 +4964,8 @@ changed by using the [`method: Page.setDefaultTimeout`] method.
  
  ## async method: Page.waitForRequestFinished
  * since: v1.12
@@ -859,7 +859,7 @@ index f0c8b34b0..a6d46e70b 100644
    - alias-python: expect_request_finished
    - alias-csharp: RunAndWaitForRequestFinished
  - returns: <[Request]>
-@@ -4950,6 +4977,7 @@ Receives the [Request] object and resolves to truthy value when the waiting shou
+@@ -4942,6 +4997,7 @@ Receives the [Request] object and resolves to truthy value when the waiting shou
  ## async method: Page.waitForResponse
  * since: v1.8
  * langs:
@@ -867,7 +867,7 @@ index f0c8b34b0..a6d46e70b 100644
    * alias-python: expect_response
    * alias-csharp: RunAndWaitForResponse
  - returns: <[Response]>
-@@ -5313,7 +5341,8 @@ await page.WaitForURLAsync("**/target.html");
+@@ -5305,7 +5361,8 @@ await page.WaitForURLAsync("**/target.html");
  
  ## async method: Page.waitForWebSocket
  * since: v1.9
@@ -877,7 +877,7 @@ index f0c8b34b0..a6d46e70b 100644
    - alias-python: expect_websocket
    - alias-csharp: RunAndWaitForWebSocket
  - returns: <[WebSocket]>
-@@ -5344,7 +5373,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
+@@ -5336,7 +5393,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
  
  ## async method: Page.waitForWorker
  * since: v1.9
@@ -887,7 +887,7 @@ index f0c8b34b0..a6d46e70b 100644
    - alias-python: expect_worker
    - alias-csharp: RunAndWaitForWorker
  - returns: <[Worker]>
-@@ -5386,7 +5416,8 @@ This does not contain ServiceWorkers
+@@ -5378,7 +5436,8 @@ This does not contain ServiceWorkers
  
  ## async method: Page.waitForEvent2
  * since: v1.8
@@ -898,7 +898,7 @@ index f0c8b34b0..a6d46e70b 100644
  - returns: <[any]>
  
 diff --git a/docs/src/api/class-pageassertions.md b/docs/src/api/class-pageassertions.md
-index 5e5690765..946a6dc86 100644
+index 8eefd41f0..161b55b53 100644
 --- a/docs/src/api/class-pageassertions.md
 +++ b/docs/src/api/class-pageassertions.md
 @@ -69,7 +69,7 @@ public class ExampleTests : PageTest
@@ -911,7 +911,7 @@ index 5e5690765..946a6dc86 100644
  
  Makes the assertion check for the opposite condition. For example, this code tests that the page URL doesn't contain `"error"`:
 diff --git a/docs/src/api/class-playwrightassertions.md b/docs/src/api/class-playwrightassertions.md
-index 7a960e34e..375498833 100644
+index aa4e0a42a..2b822104e 100644
 --- a/docs/src/api/class-playwrightassertions.md
 +++ b/docs/src/api/class-playwrightassertions.md
 @@ -1,5 +1,5 @@
@@ -921,7 +921,7 @@ index 7a960e34e..375498833 100644
  * since: v1.17
  
  Playwright gives you Web-First Assertions with convenience methods for creating assertions that will wait and retry until the expected condition is met.
-@@ -80,6 +80,7 @@ By default, the timeout for assertions is set to 5 seconds.
+@@ -79,6 +79,7 @@ By default, the timeout for assertions is set to 5 seconds.
    - alias-python: expect
    - alias-js: expect
    - alias-csharp: Expect
@@ -929,7 +929,7 @@ index 7a960e34e..375498833 100644
  - returns: <[APIResponseAssertions]>
  
  Creates a [APIResponseAssertions] object for the given [APIResponse].
-@@ -118,6 +119,7 @@ Value that will be asserted.
+@@ -117,6 +118,7 @@ Value that will be asserted.
    - alias-python: expect
    - alias-js: expect
    - alias-csharp: Expect
@@ -937,7 +937,7 @@ index 7a960e34e..375498833 100644
  - returns: <[LocatorAssertions]>
  
  Creates a [LocatorAssertions] object for the given [Locator].
-@@ -145,6 +147,7 @@ await Expect(locator).ToBeVisibleAsync();
+@@ -144,6 +146,7 @@ await Expect(locator).ToBeVisibleAsync();
    - alias-python: expect
    - alias-js: expect
    - alias-csharp: Expect
@@ -1010,7 +1010,7 @@ index cddaf6965..6aa3225f5 100644
  
  Returns the JSON representation of response body.
 diff --git a/docs/src/api/class-route.md b/docs/src/api/class-route.md
-index 106fbf55e..b5c898fd8 100644
+index c4e5fcb2e..59c9c939d 100644
 --- a/docs/src/api/class-route.md
 +++ b/docs/src/api/class-route.md
 @@ -127,7 +127,7 @@ If set changes the post data of request.
@@ -1063,7 +1063,7 @@ index 4c3011430..4ced2d60d 100644
    - `path` ?<[path]> Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the
      current working directory. Optional.
 diff --git a/docs/src/api/class-tracing.md b/docs/src/api/class-tracing.md
-index 065896925..9a14dc3fe 100644
+index 5a89dbdac..860d66276 100644
 --- a/docs/src/api/class-tracing.md
 +++ b/docs/src/api/class-tracing.md
 @@ -142,7 +142,7 @@ If this option is true tracing will
@@ -1155,7 +1155,7 @@ index e23316ebc..ae3d20b9f 100644
  * since: v1.48
  * langs: csharp, java
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index e86c0a19f..08559dc31 100644
+index 9b8d3de31..8aa9741c9 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
 @@ -8,7 +8,7 @@ When to consider operation succeeded, defaults to `load`. Events can be either:
@@ -1375,36 +1375,34 @@ index e86c0a19f..08559dc31 100644
  - `noViewport` <[boolean]>
  
  Does not enforce fixed viewport, allows resizing window in the headed mode.
-@@ -643,11 +691,11 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
- [`method: Page.emulateMedia`] for more details. Passing `null` resets emulation to system defaults. Defaults to `'light'`.
+@@ -649,6 +697,13 @@ Emulates [prefers-colors-scheme](https://developer.mozilla.org/en-US/docs/Web/CS
+ Emulates [prefers-colors-scheme](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme) media feature, supported values are `'light'` and `'dark'`. See
+ [`method: Page.emulateMedia`] for more details. Passing `'null'` resets emulation to system defaults. Defaults to `'light'`.
  
- ## context-option-colorscheme-csharp-python
--* langs: csharp, python
--- `colorScheme` <[ColorScheme]<"light"|"dark"|"no-preference"|"null">>
-+* langs: csharp, python, go
++## context-option-colorscheme-go
++* langs: go
 +- `colorScheme` <[ColorScheme]<"light"|"dark"|"no-preference"|"no-override">>
- 
- Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
--[`method: Page.emulateMedia`] for more details. Passing `'null'` resets emulation to system defaults. Defaults to `'light'`.
++
++Emulates [prefers-colors-scheme](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme) media feature, supported values are `'light'` and `'dark'`. See
 +[`method: Page.emulateMedia`] for more details. Passing `'no-override'` resets emulation to system defaults. Defaults to `'light'`.
- 
++
  ## context-option-reducedMotion
  * langs: js, java
-@@ -656,10 +704,10 @@ Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`
- Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See [`method: Page.emulateMedia`] for more details. Passing `null` resets emulation to system defaults. Defaults to `'no-preference'`.
+ - `reducedMotion` <null|[ReducedMotion]<"reduce"|"no-preference">>
+@@ -661,6 +716,12 @@ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce
  
- ## context-option-reducedMotion-csharp-python
--* langs: csharp, python
--- `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"null">>
-+* langs: csharp, python, go
+ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See [`method: Page.emulateMedia`] for more details. Passing `'null'` resets emulation to system defaults. Defaults to `'no-preference'`.
+ 
++## context-option-reducedMotion-go
++* langs: go
 +- `reducedMotion` <[ReducedMotion]<"reduce"|"no-preference"|"no-override">>
- 
--Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See [`method: Page.emulateMedia`] for more details. Passing `'null'` resets emulation to system defaults. Defaults to `'no-preference'`.
++
 +Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See [`method: Page.emulateMedia`] for more details. Passing `'no-override'` resets emulation to system defaults. Defaults to `'no-preference'`.
- 
++
  ## context-option-forcedColors
  * langs: js, java
-@@ -668,10 +716,10 @@ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce
+ - `forcedColors` <null|[ForcedColors]<"active"|"none">>
+@@ -668,10 +729,10 @@ Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce
  Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See [`method: Page.emulateMedia`] for more details. Passing `null` resets emulation to system defaults. Defaults to `'none'`.
  
  ## context-option-forcedColors-csharp-python
@@ -1418,7 +1416,7 @@ index e86c0a19f..08559dc31 100644
  
  ## context-option-logger
  * langs: js
-@@ -706,7 +754,7 @@ specified, the HAR is not recorded. Make sure to await [`method: BrowserContext.
+@@ -706,7 +767,7 @@ specified, the HAR is not recorded. Make sure to await [`method: BrowserContext.
  saved.
  
  ## context-option-recordhar-path
@@ -1427,7 +1425,7 @@ index e86c0a19f..08559dc31 100644
    - alias-python: record_har_path
  - `recordHarPath` <[path]>
  
-@@ -715,33 +763,33 @@ specified HAR file on the filesystem. If not specified, the HAR is not recorded.
+@@ -715,33 +776,33 @@ specified HAR file on the filesystem. If not specified, the HAR is not recorded.
  call [`method: BrowserContext.close`] for the HAR to be saved.
  
  ## context-option-recordhar-omit-content
@@ -1466,7 +1464,7 @@ index e86c0a19f..08559dc31 100644
  - `recordVideo` <[Object]>
    - `dir` <[path]> Path to the directory to put videos into.
    - `size` ?<[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
-@@ -808,7 +856,7 @@ Specifies whether to wait for already running listeners and what to do if they t
+@@ -808,7 +869,7 @@ Specifies whether to wait for already running listeners and what to do if they t
  * `'ignoreErrors'` - do not wait for current listener calls (if any) to finish, all errors thrown by the listeners after removal are silently caught
  
  ## unroute-all-options-behavior
@@ -1475,7 +1473,7 @@ index e86c0a19f..08559dc31 100644
  * since: v1.41
  - `behavior` <[UnrouteBehavior]<"wait"|"ignoreErrors"|"default">>
  
-@@ -819,7 +867,7 @@ Specifies whether to wait for already running handlers and what to do if they th
+@@ -819,7 +880,7 @@ Specifies whether to wait for already running handlers and what to do if they th
  
  
  ## select-options-values
@@ -1484,7 +1482,7 @@ index e86c0a19f..08559dc31 100644
  - `values` <[null]|[string]|[ElementHandle]|[Array]<[string]>|[Object]|[Array]<[ElementHandle]>|[Array]<[Object]>>
    - `value` ?<[string]> Matches by `option.value`. Optional.
    - `label` ?<[string]> Matches by `option.label`. Optional.
-@@ -837,7 +885,7 @@ the parameter is a string without wildcard characters, the method will wait for
+@@ -837,7 +898,7 @@ the parameter is a string without wildcard characters, the method will wait for
  equal to the string.
  
  ## wait-for-event-event
@@ -1493,7 +1491,7 @@ index e86c0a19f..08559dc31 100644
  - `event` <[string]>
  
  Event name, same one typically passed into `*.on(event)`.
-@@ -895,7 +943,7 @@ only the first option matching one of the passed options is selected. Optional.
+@@ -895,7 +956,7 @@ only the first option matching one of the passed options is selected. Optional.
  Receives the event data and resolves to truthy value when the waiting should resolve.
  
  ## wait-for-event-timeout
@@ -1502,7 +1500,7 @@ index e86c0a19f..08559dc31 100644
  - `timeout` <[float]>
  
  Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-@@ -915,7 +963,7 @@ using the [`method: AndroidDevice.setDefaultTimeout`] method.
+@@ -915,7 +976,7 @@ using the [`method: AndroidDevice.setDefaultTimeout`] method.
  Time to retry the assertion for in milliseconds. Defaults to `timeout` in `TestConfig.expect`.
  
  ## csharp-java-python-assertions-timeout
@@ -1511,7 +1509,18 @@ index e86c0a19f..08559dc31 100644
  - `timeout` <[float]>
  
  Time to retry the assertion for in milliseconds. Defaults to `5000`.
-@@ -1054,7 +1102,7 @@ Firefox user preferences. Learn more about the Firefox user preferences at
+@@ -969,8 +1030,10 @@ between the same pixel in compared images, between zero (strict) and one (lax),
+ - %%-context-option-httpcredentials-%%
+ - %%-context-option-colorscheme-%%
+ - %%-context-option-colorscheme-csharp-python-%%
++- %%-context-option-colorscheme-go-%%
+ - %%-context-option-reducedMotion-%%
+ - %%-context-option-reducedMotion-csharp-python-%%
++- %%-context-option-reducedMotion-go-%%
+ - %%-context-option-forcedColors-%%
+ - %%-context-option-forcedColors-csharp-python-%%
+ - %%-context-option-logger-%%
+@@ -1054,7 +1117,7 @@ Firefox user preferences. Learn more about the Firefox user preferences at
  [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
  
  ## csharp-java-browser-option-firefoxuserprefs
@@ -1522,7 +1531,7 @@ index e86c0a19f..08559dc31 100644
  Firefox user preferences. Learn more about the Firefox user preferences at
 diff --git a/utils/doclint/generateGoApi.js b/utils/doclint/generateGoApi.js
 new file mode 100644
-index 000000000..cfb254664
+index 000000000..699b44433
 --- /dev/null
 +++ b/utils/doclint/generateGoApi.js
 @@ -0,0 +1,868 @@
@@ -1882,7 +1891,7 @@ index 000000000..cfb254664
 +        if (attemptedName === 'SourcePosition' || attemptedName === 'TargetPosition')
 +          attemptedName = `Position`;
 +        if (attemptedName === 'Location')
-+          attemptedName = 'ConsoleMessageLocation';
++          attemptedName = `${parent.name}Location`;
 +        if (attemptedName === 'Viewport')
 +          attemptedName = 'Size';
 +        if (attemptedName === 'Sizes')

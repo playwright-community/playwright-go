@@ -142,6 +142,20 @@ func (t *tracingImpl) startCollectingStacks(name string) (err error) {
 	return
 }
 
+func (t *tracingImpl) Group(name string, options ...TracingGroupOptions) error {
+	var option TracingGroupOptions
+	if len(options) == 1 {
+		option = options[0]
+	}
+	_, err := t.channel.Send("tracingGroup", option, map[string]interface{}{"name": name})
+	return err
+}
+
+func (t *tracingImpl) GroupEnd() error {
+	_, err := t.channel.Send("tracingGroupEnd")
+	return err
+}
+
 func newTracing(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *tracingImpl {
 	bt := &tracingImpl{}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
