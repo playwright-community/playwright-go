@@ -1,17 +1,54 @@
 package playwright
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/mitchellh/go-ps"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestRunOptionsRedirectStderr(t *testing.T) {
+	r, w := io.Pipe()
+	var output string
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		buf := bufio.NewReader(r)
+		line, _, err := buf.ReadLine()
+		if err == io.EOF {
+			return
+		}
+		output += string(line)
+		wg.Done()
+	}()
+
+	driverPath := t.TempDir()
+	options := &RunOptions{
+		Stderr:          w,
+		DriverDirectory: driverPath,
+		Browsers:        []string{},
+		Verbose:         true,
+	}
+	require.NoError(t, os.Setenv("HTTPS_PROXY", "http://localhost:8080")) // fail fast
+	defer os.Unsetenv("HTTPS_PROXY")
+	driver, err := NewDriver(options)
+	require.NoError(t, err)
+	err = driver.Install()
+	require.Error(t, err) // wrong proxy
+	wg.Wait()
+
+	assert.Contains(t, output, "Downloading driver")
+	require.Contains(t, output, fmt.Sprintf("path=%s", driverPath))
+}
 
 func TestDriverInstall(t *testing.T) {
 	driverPath := t.TempDir()

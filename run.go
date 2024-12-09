@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -13,14 +14,9 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-
-	"github.com/playwright-community/playwright-go/internal/pwlogger"
 )
 
-const (
-	playwrightCliVersion      = "1.49.0"
-	playwrightDriverLogSource = "playwright-driver"
-)
+const playwrightCliVersion = "1.49.0"
 
 var (
 	logger               = slog.Default()
@@ -140,7 +136,7 @@ func (d *PlaywrightDriver) DownloadDriver() error {
 		return nil
 	}
 
-	d.log(fmt.Sprintf("Downloading driver to %s", d.options.DriverDirectory))
+	d.log("Downloading driver", "path", d.options.DriverDirectory)
 
 	body, err := downloadDriver(d.getDriverURLs())
 	if err != nil {
@@ -189,9 +185,9 @@ func (d *PlaywrightDriver) DownloadDriver() error {
 	return nil
 }
 
-func (d *PlaywrightDriver) log(s string) {
+func (d *PlaywrightDriver) log(msg string, args ...any) {
 	if d.options.Verbose {
-		logger.Info(s)
+		logger.Info(msg, args...)
 	}
 }
 
@@ -240,9 +236,6 @@ type RunOptions struct {
 	Stdout   io.Writer
 	Stderr   io.Writer
 	Logger   *slog.Logger
-	// If set, will capture all output to the logger
-	// This will override Stdout and Stderr
-	CaptureAllOutputWithLogger bool
 }
 
 // Install does download the driver and the browsers.
@@ -302,17 +295,11 @@ func transformRunOptions(options ...*RunOptions) (*RunOptions, error) {
 	}
 	if option.Stderr == nil {
 		option.Stderr = os.Stderr
+	} else if option.Logger == nil {
+		log.SetOutput(option.Stderr)
 	}
-	if option.Logger == nil {
-		logger = slog.New(slog.NewTextHandler(option.Stderr, nil))
-	} else {
+	if option.Logger != nil {
 		logger = option.Logger
-	}
-
-	if option.CaptureAllOutputWithLogger {
-		sourceLogAttr := slog.String("source", playwrightDriverLogSource) // Indicate that the logs are from the driver
-		option.Stdout = pwlogger.NewSlogWriter(logger, pwlogger.StdoutStream, sourceLogAttr)
-		option.Stderr = pwlogger.NewSlogWriter(logger, pwlogger.StderrStream, sourceLogAttr)
 	}
 	return option, nil
 }

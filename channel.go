@@ -3,8 +3,6 @@ package playwright
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/playwright-community/playwright-go/internal/pwlogger"
 )
 
 type channel struct {
@@ -79,7 +77,7 @@ func (c *channel) innerSendNoReply(method string, isInternal bool, options ...in
 	}, isInternal)
 	if err != nil {
 		// ignore error actively, log only for debug
-		logger.Error("SendNoReply failed", pwlogger.ErrAttr(err))
+		logger.Error("SendNoReply failed", "error", err)
 	}
 }
 
