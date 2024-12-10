@@ -210,7 +210,7 @@ func (f *frameImpl) ExpectNavigation(cb func() error, options ...FrameExpectNavi
 		err, ok := ev["error"]
 		if ok {
 			// Any failed navigation results in a rejection.
-			logger.Printf("navigated to %s error: %v", ev["url"].(string), err)
+			logger.Error("navigation error", "url", ev["url"].(string), "error", err)
 			return true
 		}
 		return matcher == nil || matcher.Matches(ev["url"].(string))

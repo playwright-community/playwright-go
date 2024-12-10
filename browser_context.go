@@ -589,7 +589,7 @@ func (b *browserContextImpl) onRoute(route *routeImpl) {
 				return nil, err
 			}, true)
 			if err != nil {
-				logger.Printf("could not update interception patterns: %v\n", err)
+				logger.Error("could not update interception patterns", "error", err)
 			}
 		}
 	}
@@ -742,7 +742,7 @@ func (b *browserContextImpl) onWebSocketRoute(wr WebSocketRoute) {
 		b.Unlock()
 		_, err := wr.ConnectToServer()
 		if err != nil {
-			logger.Println(err)
+			logger.Error("could not connect to WebSocket server", "error", err)
 		}
 		return
 	}

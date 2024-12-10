@@ -934,7 +934,7 @@ func (p *pageImpl) onRoute(route *routeImpl) {
 				return nil, err
 			}, true)
 			if err != nil {
-				logger.Printf("could not update interception patterns: %v\n", err)
+				logger.Error("could not update interception patterns", "error", err)
 			}
 		}
 	}

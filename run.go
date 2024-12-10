@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/exec"
@@ -15,12 +16,10 @@ import (
 	"strings"
 )
 
-const (
-	playwrightCliVersion = "1.49.0"
-)
+const playwrightCliVersion = "1.49.0"
 
 var (
-	logger               = log.Default()
+	logger               = slog.Default()
 	playwrightCDNMirrors = []string{
 		"https://playwright.azureedge.net",
 		"https://playwright-akamai.azureedge.net",
@@ -137,7 +136,7 @@ func (d *PlaywrightDriver) DownloadDriver() error {
 		return nil
 	}
 
-	d.log(fmt.Sprintf("Downloading driver to %s", d.options.DriverDirectory))
+	d.log("Downloading driver", "path", d.options.DriverDirectory)
 
 	body, err := downloadDriver(d.getDriverURLs())
 	if err != nil {
@@ -186,9 +185,9 @@ func (d *PlaywrightDriver) DownloadDriver() error {
 	return nil
 }
 
-func (d *PlaywrightDriver) log(s string) {
+func (d *PlaywrightDriver) log(msg string, args ...any) {
 	if d.options.Verbose {
-		logger.Println(s)
+		logger.Info(msg, args...)
 	}
 }
 
@@ -236,6 +235,7 @@ type RunOptions struct {
 	Verbose  bool // default true
 	Stdout   io.Writer
 	Stderr   io.Writer
+	Logger   *slog.Logger
 }
 
 // Install does download the driver and the browsers.
@@ -295,8 +295,11 @@ func transformRunOptions(options ...*RunOptions) (*RunOptions, error) {
 	}
 	if option.Stderr == nil {
 		option.Stderr = os.Stderr
-	} else {
-		logger.SetOutput(option.Stderr)
+	} else if option.Logger == nil {
+		log.SetOutput(option.Stderr)
+	}
+	if option.Logger != nil {
+		logger = option.Logger
 	}
 	return option, nil
 }

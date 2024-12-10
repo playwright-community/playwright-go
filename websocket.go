@@ -50,7 +50,7 @@ func (ws *webSocketImpl) onFrameSent(opcode float64, data string) {
 	if opcode == 2 {
 		payload, err := base64.StdEncoding.DecodeString(data)
 		if err != nil {
-			logger.Printf("could not decode WebSocket.onFrameSent payload: %v\n", err)
+			logger.Error("could not decode WebSocket.onFrameSent payload", "error", err)
 			return
 		}
 		ws.Emit("framesent", payload)
@@ -63,7 +63,7 @@ func (ws *webSocketImpl) onFrameReceived(opcode float64, data string) {
 	if opcode == 2 {
 		payload, err := base64.StdEncoding.DecodeString(data)
 		if err != nil {
-			logger.Printf("could not decode WebSocket.onFrameReceived payload: %v\n", err)
+			logger.Error("could not decode WebSocket.onFrameReceived payload", "error", err)
 			return
 		}
 		ws.Emit("framereceived", payload)
