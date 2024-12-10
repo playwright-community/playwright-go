@@ -22,13 +22,16 @@ func TestRunOptionsRedirectStderr(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		buf := bufio.NewReader(r)
-		line, _, err := buf.ReadLine()
-		if err == io.EOF {
-			return
+		for {
+			line, _, err := buf.ReadLine()
+			if err == io.EOF {
+				break
+			}
+			output += string(line)
 		}
-		output += string(line)
-		wg.Done()
+		_ = r.Close()
 	}()
 
 	driverPath := t.TempDir()
@@ -38,12 +41,18 @@ func TestRunOptionsRedirectStderr(t *testing.T) {
 		Browsers:        []string{},
 		Verbose:         true,
 	}
-	require.NoError(t, os.Setenv("HTTPS_PROXY", "http://localhost:8080")) // fail fast
-	defer os.Unsetenv("HTTPS_PROXY")
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(404)
+	}))
+	defer ts.Close()
+
+	t.Setenv("PLAYWRIGHT_DOWNLOAD_HOST", ts.URL)
 	driver, err := NewDriver(options)
 	require.NoError(t, err)
 	err = driver.Install()
-	require.Error(t, err) // wrong proxy
+	require.Error(t, err)
+	require.NoError(t, w.Close())
 	wg.Wait()
 
 	assert.Contains(t, output, "Downloading driver")
