@@ -59,6 +59,33 @@ func TestRunOptionsRedirectStderr(t *testing.T) {
 	require.Contains(t, output, fmt.Sprintf("path=%s", driverPath))
 }
 
+func TestRunOptions_OnlyInstallShell(t *testing.T) {
+	if getBrowserName() != "chromium" {
+		t.Skip("chromium only")
+		return
+	}
+
+	driverPath := t.TempDir()
+	driver, err := NewDriver(&RunOptions{
+		DriverDirectory:  driverPath,
+		Browsers:         []string{getBrowserName()},
+		Verbose:          true,
+		OnlyInstallShell: true,
+	})
+	require.NoError(t, err)
+	browserPath := t.TempDir()
+
+	err = os.Setenv("PLAYWRIGHT_BROWSERS_PATH", browserPath)
+	require.NoError(t, err)
+	defer os.Unsetenv("PLAYWRIGHT_BROWSERS_PATH")
+
+	err = driver.Install()
+	require.NoError(t, err)
+
+	err = driver.Uninstall()
+	require.NoError(t, err)
+}
+
 func TestDriverInstall(t *testing.T) {
 	driverPath := t.TempDir()
 	driver, err := NewDriver(&RunOptions{
