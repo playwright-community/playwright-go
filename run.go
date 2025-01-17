@@ -210,6 +210,10 @@ func (d *PlaywrightDriver) installBrowsers() error {
 		additionalArgs = append(additionalArgs, "--only-shell")
 	}
 
+	if d.options.DryRun {
+		additionalArgs = append(additionalArgs, "--dry-run")
+	}
+
 	cmd := d.Command(additionalArgs...)
 	cmd.Stdout = d.options.Stdout
 	cmd.Stderr = d.options.Stderr
@@ -243,6 +247,8 @@ type RunOptions struct {
 	Stdout   io.Writer
 	Stderr   io.Writer
 	Logger   *slog.Logger
+	// DryRun does not install browser/dependencies. It will only print information.
+	DryRun bool
 }
 
 // Install does download the driver and the browsers.
