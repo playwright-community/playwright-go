@@ -41,6 +41,7 @@ func TestRunOptionsRedirectStderr(t *testing.T) {
 	err = driver.Install()
 	require.Error(t, err)
 	require.NoError(t, w.Close())
+	wg.Wait()
 
 	assert.Contains(t, output, "Downloading driver")
 	require.Contains(t, output, fmt.Sprintf("path=%s", driverPath))
