@@ -20,19 +20,7 @@ func TestRunOptionsRedirectStderr(t *testing.T) {
 	r, w := io.Pipe()
 	var output string
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		buf := bufio.NewReader(r)
-		for {
-			line, _, err := buf.ReadLine()
-			if err == io.EOF {
-				break
-			}
-			output += string(line)
-		}
-		_ = r.Close()
-	}()
+	readIOAsyncTilEOF(t, r, wg, &output)
 
 	driverPath := t.TempDir()
 	options := &RunOptions{
@@ -57,6 +45,40 @@ func TestRunOptionsRedirectStderr(t *testing.T) {
 
 	assert.Contains(t, output, "Downloading driver")
 	require.Contains(t, output, fmt.Sprintf("path=%s", driverPath))
+}
+
+func TestRunOptions_OnlyInstallShell(t *testing.T) {
+	if getBrowserName() != "chromium" {
+		t.Skip("chromium only")
+		return
+	}
+
+	r, w := io.Pipe()
+	var output string
+	wg := &sync.WaitGroup{}
+	readIOAsyncTilEOF(t, r, wg, &output)
+
+	driverPath := t.TempDir()
+	driver, err := NewDriver(&RunOptions{
+		Stdout:           w,
+		DriverDirectory:  driverPath,
+		Browsers:         []string{getBrowserName()},
+		Verbose:          true,
+		OnlyInstallShell: true,
+		DryRun:           true,
+	})
+	require.NoError(t, err)
+	browserPath := t.TempDir()
+
+	t.Setenv("PLAYWRIGHT_BROWSERS_PATH", browserPath)
+
+	err = driver.Install()
+	require.NoError(t, err)
+	require.NoError(t, w.Close())
+	wg.Wait()
+
+	assert.Contains(t, output, "browser: chromium-headless-shell version")
+	assert.NotContains(t, output, "browser: chromium version")
 }
 
 func TestDriverInstall(t *testing.T) {
@@ -186,4 +208,21 @@ func getBrowserName() string {
 		return browserName
 	}
 	return "chromium"
+}
+
+func readIOAsyncTilEOF(t *testing.T, r *io.PipeReader, wg *sync.WaitGroup, output *string) {
+	t.Helper()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		buf := bufio.NewReader(r)
+		for {
+			line, _, err := buf.ReadLine()
+			if err == io.EOF {
+				break
+			}
+			*output += string(line)
+		}
+		_ = r.Close()
+	}()
 }
