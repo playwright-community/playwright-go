@@ -261,7 +261,7 @@ index 9584365d8..35ce3c1bc 100644
  
  Makes the assertion check for the opposite condition. For example, this code tests that the response status is not successful:
 diff --git a/docs/src/api/class-browser.md b/docs/src/api/class-browser.md
-index 4dabfc52e..eb986309e 100644
+index 7867ce5c8..6a27ede39 100644
 --- a/docs/src/api/class-browser.md
 +++ b/docs/src/api/class-browser.md
 @@ -261,6 +261,9 @@ await browser.CloseAsync();
@@ -322,7 +322,7 @@ index 4dabfc52e..eb986309e 100644
  
  :::note
 diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
-index 8d6c57a3e..8001ddc34 100644
+index 85cbc4f62..a266b96a2 100644
 --- a/docs/src/api/class-browsercontext.md
 +++ b/docs/src/api/class-browsercontext.md
 @@ -417,7 +417,7 @@ The order of evaluation of multiple scripts installed via [`method: BrowserConte
@@ -334,7 +334,7 @@ index 8d6c57a3e..8001ddc34 100644
  - `script` <[function]|[string]|[Object]>
    - `path` ?<[path]> Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the
      current working directory. Optional.
-@@ -1211,7 +1211,7 @@ handler function to route the request.
+@@ -1216,7 +1216,7 @@ handler function to route the request.
  
  ### param: BrowserContext.route.handler
  * since: v1.8
@@ -343,7 +343,7 @@ index 8d6c57a3e..8001ddc34 100644
  - `handler` <[function]\([Route]\)>
  
  handler function to route the request.
-@@ -1354,7 +1354,7 @@ Handler function to route the WebSocket.
+@@ -1359,7 +1359,7 @@ Handler function to route the WebSocket.
  
  ### param: BrowserContext.routeWebSocket.handler
  * since: v1.48
@@ -352,7 +352,7 @@ index 8d6c57a3e..8001ddc34 100644
  - `handler` <[function]\([WebSocketRoute]\)>
  
  Handler function to route the WebSocket.
-@@ -1362,7 +1362,7 @@ Handler function to route the WebSocket.
+@@ -1367,7 +1367,7 @@ Handler function to route the WebSocket.
  
  ## method: BrowserContext.serviceWorkers
  * since: v1.11
@@ -361,7 +361,7 @@ index 8d6c57a3e..8001ddc34 100644
  - returns: <[Array]<[Worker]>>
  
  :::note
-@@ -1549,6 +1549,13 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
+@@ -1554,6 +1554,13 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
  
  Optional handler function used to register a routing with [`method: BrowserContext.route`].
  
@@ -375,7 +375,7 @@ index 8d6c57a3e..8001ddc34 100644
  ### param: BrowserContext.unroute.handler
  * since: v1.8
  * langs: csharp, java
-@@ -1590,7 +1597,8 @@ Condition to wait for.
+@@ -1595,7 +1602,8 @@ Condition to wait for.
  
  ## async method: BrowserContext.waitForConsoleMessage
  * since: v1.34
@@ -385,7 +385,7 @@ index 8d6c57a3e..8001ddc34 100644
    - alias-python: expect_console_message
    - alias-csharp: RunAndWaitForConsoleMessage
  - returns: <[ConsoleMessage]>
-@@ -1621,7 +1629,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
+@@ -1626,7 +1634,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
  
  ## async method: BrowserContext.waitForEvent
  * since: v1.8
@@ -395,7 +395,7 @@ index 8d6c57a3e..8001ddc34 100644
    - alias-python: expect_event
  - returns: <[any]>
  
-@@ -1687,7 +1696,8 @@ Either a predicate that receives an event or an options object. Optional.
+@@ -1692,7 +1701,8 @@ Either a predicate that receives an event or an options object. Optional.
  
  ## async method: BrowserContext.waitForPage
  * since: v1.9
@@ -405,7 +405,7 @@ index 8d6c57a3e..8001ddc34 100644
    - alias-python: expect_page
    - alias-csharp: RunAndWaitForPage
  - returns: <[Page]>
-@@ -1706,7 +1716,7 @@ Will throw an error if the context closes before new [Page] is created.
+@@ -1711,7 +1721,7 @@ Will throw an error if the context closes before new [Page] is created.
  
  ### option: BrowserContext.waitForPage.predicate
  * since: v1.9
@@ -414,7 +414,7 @@ index 8d6c57a3e..8001ddc34 100644
  - `predicate` <[function]\([Page]\):[boolean]>
  
  Receives the [Page] object and resolves to truthy value when the waiting should resolve.
-@@ -1719,7 +1729,8 @@ Receives the [Page] object and resolves to truthy value when the waiting should
+@@ -1724,7 +1734,8 @@ Receives the [Page] object and resolves to truthy value when the waiting should
  
  ## async method: BrowserContext.waitForEvent2
  * since: v1.8
@@ -438,7 +438,7 @@ index a14dd58fb..8e3807d87 100644
  - `params` ?<[Map<string, Object>]>
  
 diff --git a/docs/src/api/class-clock.md b/docs/src/api/class-clock.md
-index 38ca32976..9996c04a0 100644
+index e5610b424..748b93b68 100644
 --- a/docs/src/api/class-clock.md
 +++ b/docs/src/api/class-clock.md
 @@ -71,7 +71,7 @@ Fake timers are used to manually control the flow of time in tests. They allow y
@@ -450,7 +450,7 @@ index 38ca32976..9996c04a0 100644
  * since: v1.45
  - `time` <[float]|[string]|[Date]>
  
-@@ -169,7 +169,7 @@ await page.Clock.PauseAtAsync("2020-02-02");
+@@ -204,7 +204,7 @@ page.clock().pauseAt(format.parse("2024-12-10T10:00:00"));
  Time to pause at.
  
  ### param: Clock.pauseAt.time
@@ -459,7 +459,7 @@ index 38ca32976..9996c04a0 100644
  * since: v1.45
  - `time` <[float]|[string]|[Date]>
  
-@@ -235,7 +235,7 @@ await page.Clock.SetFixedTimeAsync("2020-02-02");
+@@ -270,7 +270,7 @@ await page.Clock.SetFixedTimeAsync("2020-02-02");
  Time to be set in milliseconds.
  
  ### param: Clock.setFixedTime.time
@@ -468,7 +468,7 @@ index 38ca32976..9996c04a0 100644
  * since: v1.45
  - `time` <[float]|[string]|[Date]>
  
-@@ -293,7 +293,7 @@ await page.Clock.SetSystemTimeAsync("2020-02-02");
+@@ -328,7 +328,7 @@ await page.Clock.SetSystemTimeAsync("2020-02-02");
  Time to be set in milliseconds.
  
  ### param: Clock.setSystemTime.time
@@ -538,7 +538,7 @@ index e286c63bf..7dbd5f4fd 100644
    * alias-csharp: RunAndWaitForNavigation
  - returns: <[null]|[Response]>
 diff --git a/docs/src/api/class-locatorassertions.md b/docs/src/api/class-locatorassertions.md
-index 5b4fc45fe..264b363f0 100644
+index 35f64ea71..8684a7468 100644
 --- a/docs/src/api/class-locatorassertions.md
 +++ b/docs/src/api/class-locatorassertions.md
 @@ -67,7 +67,7 @@ public class ExampleTests : PageTest
@@ -550,7 +550,7 @@ index 5b4fc45fe..264b363f0 100644
  - returns: <[LocatorAssertions]>
  
  Makes the assertion check for the opposite condition. For example, this code tests that the Locator doesn't contain text `"error"`:
-@@ -1139,7 +1139,7 @@ Expected substring or RegExp or a list of those.
+@@ -1149,7 +1149,7 @@ Expected substring or RegExp or a list of those.
  
  ### param: LocatorAssertions.toContainText.expected
  * since: v1.18
@@ -559,7 +559,7 @@ index 5b4fc45fe..264b363f0 100644
  - `expected` <[string]|[RegExp]|[Array]<[string]>|[Array]<[RegExp]>|[Array]<[string]|[RegExp]>>
  
  Expected substring or RegExp or a list of those.
-@@ -1434,7 +1434,7 @@ Expected class or RegExp or a list of those.
+@@ -1493,7 +1493,7 @@ Expected class or RegExp or a list of those.
  
  ### param: LocatorAssertions.toHaveClass.expected
  * since: v1.18
@@ -568,7 +568,7 @@ index 5b4fc45fe..264b363f0 100644
  - `expected` <[string]|[RegExp]|[Array]<[string]>|[Array]<[RegExp]>|[Array]<[string]|[RegExp]>>
  
  Expected class or RegExp or a list of those.
-@@ -1961,7 +1961,7 @@ Expected string or RegExp or a list of those.
+@@ -2020,7 +2020,7 @@ Expected string or RegExp or a list of those.
  
  ### param: LocatorAssertions.toHaveText.expected
  * since: v1.18
@@ -577,7 +577,7 @@ index 5b4fc45fe..264b363f0 100644
  - `expected` <[string]|[RegExp]|[Array]<[string]>|[Array]<[RegExp]>|[Array]<[string]|[RegExp]>>
  
  Expected string or RegExp or a list of those.
-@@ -2095,7 +2095,7 @@ await Expect(locator).ToHaveValuesAsync(new Regex[] { new Regex("R"), new Regex(
+@@ -2154,7 +2154,7 @@ await Expect(locator).ToHaveValuesAsync(new Regex[] { new Regex("R"), new Regex(
  
  ### param: LocatorAssertions.toHaveValues.values
  * since: v1.23
@@ -587,7 +587,7 @@ index 5b4fc45fe..264b363f0 100644
  
  Expected options currently selected.
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index f65a90493..712022a65 100644
+index ec58c027b..766fb5b64 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
 @@ -621,7 +621,7 @@ The order of evaluation of multiple scripts installed via [`method: BrowserConte
@@ -672,7 +672,7 @@ index f65a90493..712022a65 100644
  - `url` ?<[string]|[RegExp]|[function]\([URL]\):[boolean]>
  
  A glob pattern, regex pattern or predicate receiving frame's `url` as a [URL] object. Optional.
-@@ -2909,7 +2937,7 @@ Paper width, accepts values labeled with units.
+@@ -2905,7 +2933,7 @@ Paper width, accepts values labeled with units.
  
  ### option: Page.pdf.width
  * since: v1.8
@@ -681,7 +681,7 @@ index f65a90493..712022a65 100644
  - `width` <[string]>
  
  Paper width, accepts values labeled with units.
-@@ -2923,7 +2951,7 @@ Paper height, accepts values labeled with units.
+@@ -2919,7 +2947,7 @@ Paper height, accepts values labeled with units.
  
  ### option: Page.pdf.height
  * since: v1.8
@@ -690,7 +690,7 @@ index f65a90493..712022a65 100644
  - `height` <[string]>
  
  Paper height, accepts values labeled with units.
-@@ -2941,7 +2969,7 @@ Paper margins, defaults to none.
+@@ -2937,7 +2965,7 @@ Paper margins, defaults to none.
  
  ### option: Page.pdf.margin
  * since: v1.8
@@ -699,7 +699,7 @@ index f65a90493..712022a65 100644
  - `margin` <[Object]>
    - `top` ?<[string]> Top margin, accepts values labeled with units. Defaults to `0`.
    - `right` ?<[string]> Right margin, accepts values labeled with units. Defaults to `0`.
-@@ -3362,7 +3390,7 @@ Function that should be run once [`param: locator`] appears. This function shoul
+@@ -3358,7 +3386,7 @@ Function that should be run once [`param: locator`] appears. This function shoul
  Function that should be run once [`param: locator`] appears. This function should get rid of the element that blocks actions like click.
  
  ### param: Page.addLocatorHandler.handler
@@ -708,7 +708,7 @@ index f65a90493..712022a65 100644
  * since: v1.42
  - `handler` <[function]\([Locator]\)>
  
-@@ -3610,6 +3638,13 @@ it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/We
+@@ -3606,6 +3634,13 @@ it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/We
  
  handler function to route the request.
  
@@ -722,7 +722,7 @@ index f65a90493..712022a65 100644
  ### param: Page.route.handler
  * since: v1.8
  * langs: csharp, java
-@@ -3744,7 +3779,7 @@ Handler function to route the WebSocket.
+@@ -3740,7 +3775,7 @@ Handler function to route the WebSocket.
  
  ### param: Page.routeWebSocket.handler
  * since: v1.48
@@ -731,7 +731,7 @@ index f65a90493..712022a65 100644
  - `handler` <[function]\([WebSocketRoute]\)>
  
  Handler function to route the WebSocket.
-@@ -4073,14 +4108,14 @@ await page.GotoAsync("https://www.microsoft.com");
+@@ -4069,14 +4104,14 @@ await page.GotoAsync("https://www.microsoft.com");
  
  ### param: Page.setViewportSize.width
  * since: v1.10
@@ -748,7 +748,7 @@ index f65a90493..712022a65 100644
  - `height` <[int]>
  
  Page height in pixels.
-@@ -4267,6 +4302,13 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
+@@ -4263,6 +4298,13 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
  
  Optional handler function to route the request.
  
@@ -762,7 +762,7 @@ index f65a90493..712022a65 100644
  ### param: Page.unroute.handler
  * since: v1.8
  * langs: csharp, java
-@@ -4305,7 +4347,8 @@ Performs action and waits for the Page to close.
+@@ -4301,7 +4343,8 @@ Performs action and waits for the Page to close.
  
  ## async method: Page.waitForConsoleMessage
  * since: v1.9
@@ -772,7 +772,7 @@ index f65a90493..712022a65 100644
    - alias-python: expect_console_message
    - alias-csharp: RunAndWaitForConsoleMessage
  - returns: <[ConsoleMessage]>
-@@ -4336,7 +4379,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
+@@ -4332,7 +4375,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
  
  ## async method: Page.waitForDownload
  * since: v1.9
@@ -782,7 +782,7 @@ index f65a90493..712022a65 100644
    - alias-python: expect_download
    - alias-csharp: RunAndWaitForDownload
  - returns: <[Download]>
-@@ -4367,7 +4411,8 @@ Receives the [Download] object and resolves to truthy value when the waiting sho
+@@ -4363,7 +4407,8 @@ Receives the [Download] object and resolves to truthy value when the waiting sho
  
  ## async method: Page.waitForEvent
  * since: v1.8
@@ -792,7 +792,7 @@ index f65a90493..712022a65 100644
    - alias-python: expect_event
  - returns: <[any]>
  
-@@ -4420,7 +4465,8 @@ Either a predicate that receives an event or an options object. Optional.
+@@ -4416,7 +4461,8 @@ Either a predicate that receives an event or an options object. Optional.
  
  ## async method: Page.waitForFileChooser
  * since: v1.9
@@ -802,7 +802,7 @@ index f65a90493..712022a65 100644
    - alias-python: expect_file_chooser
    - alias-csharp: RunAndWaitForFileChooser
  - returns: <[FileChooser]>
-@@ -4578,7 +4624,7 @@ await page.WaitForFunctionAsync("selector => !!document.querySelector(selector)"
+@@ -4574,7 +4620,7 @@ await page.WaitForFunctionAsync("selector => !!document.querySelector(selector)"
  
  Optional argument to pass to [`param: expression`].
  
@@ -811,7 +811,7 @@ index f65a90493..712022a65 100644
  * since: v1.8
  
  ### option: Page.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
-@@ -4675,6 +4721,11 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
+@@ -4671,6 +4717,11 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
  ```
  
  ### param: Page.waitForLoadState.state = %%-wait-for-load-state-state-%%
@@ -823,7 +823,7 @@ index f65a90493..712022a65 100644
  * since: v1.8
  
  ### option: Page.waitForLoadState.timeout = %%-navigation-timeout-%%
-@@ -4687,6 +4738,7 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
+@@ -4683,6 +4734,7 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
  * since: v1.8
  * deprecated: This method is inherently racy, please use [`method: Page.waitForURL`] instead.
  * langs:
@@ -831,7 +831,7 @@ index f65a90493..712022a65 100644
    * alias-python: expect_navigation
    * alias-csharp: RunAndWaitForNavigation
  - returns: <[null]|[Response]>
-@@ -4771,7 +4823,8 @@ a navigation.
+@@ -4767,7 +4819,8 @@ a navigation.
  
  ## async method: Page.waitForPopup
  * since: v1.9
@@ -841,7 +841,7 @@ index f65a90493..712022a65 100644
    - alias-python: expect_popup
    - alias-csharp: RunAndWaitForPopup
  - returns: <[Page]>
-@@ -4803,6 +4856,7 @@ Receives the [Page] object and resolves to truthy value when the waiting should
+@@ -4799,6 +4852,7 @@ Receives the [Page] object and resolves to truthy value when the waiting should
  ## async method: Page.waitForRequest
  * since: v1.8
  * langs:
@@ -849,7 +849,7 @@ index f65a90493..712022a65 100644
    * alias-python: expect_request
    * alias-csharp: RunAndWaitForRequest
  - returns: <[Request]>
-@@ -4910,7 +4964,8 @@ changed by using the [`method: Page.setDefaultTimeout`] method.
+@@ -4906,7 +4960,8 @@ changed by using the [`method: Page.setDefaultTimeout`] method.
  
  ## async method: Page.waitForRequestFinished
  * since: v1.12
@@ -859,7 +859,7 @@ index f65a90493..712022a65 100644
    - alias-python: expect_request_finished
    - alias-csharp: RunAndWaitForRequestFinished
  - returns: <[Request]>
-@@ -4942,6 +4997,7 @@ Receives the [Request] object and resolves to truthy value when the waiting shou
+@@ -4938,6 +4993,7 @@ Receives the [Request] object and resolves to truthy value when the waiting shou
  ## async method: Page.waitForResponse
  * since: v1.8
  * langs:
@@ -867,7 +867,7 @@ index f65a90493..712022a65 100644
    * alias-python: expect_response
    * alias-csharp: RunAndWaitForResponse
  - returns: <[Response]>
-@@ -5305,7 +5361,8 @@ await page.WaitForURLAsync("**/target.html");
+@@ -5301,7 +5357,8 @@ await page.WaitForURLAsync("**/target.html");
  
  ## async method: Page.waitForWebSocket
  * since: v1.9
@@ -877,7 +877,7 @@ index f65a90493..712022a65 100644
    - alias-python: expect_websocket
    - alias-csharp: RunAndWaitForWebSocket
  - returns: <[WebSocket]>
-@@ -5336,7 +5393,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
+@@ -5332,7 +5389,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
  
  ## async method: Page.waitForWorker
  * since: v1.9
@@ -887,7 +887,7 @@ index f65a90493..712022a65 100644
    - alias-python: expect_worker
    - alias-csharp: RunAndWaitForWorker
  - returns: <[Worker]>
-@@ -5378,7 +5436,8 @@ This does not contain ServiceWorkers
+@@ -5374,7 +5432,8 @@ This does not contain ServiceWorkers
  
  ## async method: Page.waitForEvent2
  * since: v1.8
@@ -1155,7 +1155,7 @@ index e23316ebc..ae3d20b9f 100644
  * since: v1.48
  * langs: csharp, java
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index e059fffe4..2f18feb98 100644
+index a1f909a4f..9ce5576ea 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
 @@ -8,7 +8,7 @@ When to consider operation succeeded, defaults to `load`. Events can be either:

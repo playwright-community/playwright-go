@@ -36,28 +36,29 @@ func (pa *playwrightAssertionsImpl) Page(page Page) PageAssertions {
 }
 
 type expectedTextValue struct {
-	Str                 *string `json:"string"`
-	RegexSource         *string `json:"regexSource"`
-	RegexFlags          *string `json:"regexFlags"`
-	MatchSubstring      *bool   `json:"matchSubstring"`
-	IgnoreCase          *bool   `json:"ignoreCase"`
-	NormalizeWhiteSpace *bool   `json:"normalizeWhiteSpace"`
+	Str                 *string `json:"string,omitempty"`
+	RegexSource         *string `json:"regexSource,omitempty"`
+	RegexFlags          *string `json:"regexFlags,omitempty"`
+	MatchSubstring      *bool   `json:"matchSubstring,omitempty"`
+	IgnoreCase          *bool   `json:"ignoreCase,omitempty"`
+	NormalizeWhiteSpace *bool   `json:"normalizeWhiteSpace,omitempty"`
 }
 
 type frameExpectOptions struct {
-	ExpressionArg  interface{}         `json:"expressionArg"`
-	ExpectedText   []expectedTextValue `json:"expectedText"`
-	ExpectedNumber *float64            `json:"expectedNumber"`
-	ExpectedValue  interface{}         `json:"expectedValue"`
-	UseInnerText   *bool               `json:"useInnerText"`
+	ExpressionArg  interface{}         `json:"expressionArg,omitempty"`
+	ExpectedText   []expectedTextValue `json:"expectedText,omitempty"`
+	ExpectedNumber *float64            `json:"expectedNumber,omitempty"`
+	ExpectedValue  interface{}         `json:"expectedValue,omitempty"`
+	UseInnerText   *bool               `json:"useInnerText,omitempty"`
 	IsNot          bool                `json:"isNot"`
 	Timeout        *float64            `json:"timeout"`
 }
 
 type frameExpectResult struct {
 	Matches  bool        `json:"matches"`
-	Received interface{} `json:"received"`
-	Log      []string    `json:"log"`
+	Received interface{} `json:"received,omitempty"`
+	TimedOut *bool       `json:"timedOut,omitempty"`
+	Log      []string    `json:"log,omitempty"`
 }
 
 type assertionsBase struct {

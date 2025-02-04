@@ -154,8 +154,9 @@ type Browser interface {
 	// opened).
 	// In case this browser is connected to, clears all created contexts belonging to this browser and disconnects from
 	// the browser server.
-	// **NOTE** This is similar to force quitting the browser. Therefore, you should call [BrowserContext.Close] on any
-	// [BrowserContext]'s you explicitly created earlier with [Browser.NewContext] **before** calling [Browser.Close].
+	// **NOTE** This is similar to force-quitting the browser. To close pages gracefully and ensure you receive page close
+	// events, call [BrowserContext.Close] on any [BrowserContext] instances you explicitly created earlier using
+	// [Browser.NewContext] **before** calling [Browser.Close].
 	// The [Browser] object itself is considered to be disposed and cannot be used anymore.
 	Close(options ...BrowserCloseOptions) error
 
@@ -336,9 +337,13 @@ type BrowserContext interface {
 	// Grants specified permissions to the browser context. Only grants corresponding permissions to the given origin if
 	// specified.
 	//
-	//  permissions: A permission or an array of permissions to grant. Permissions can be one of the following values:
+	//  permissions: A list of permissions to grant.
+	//
+	//    **NOTE** Supported permissions differ between browsers, and even between different versions of the same browser.
+	//    Any permission may stop working after an update.
+	//
+	//    Here are some permissions that may be supported by some browsers:
 	//    - `'accelerometer'`
-	//    - `'accessibility-events'`
 	//    - `'ambient-light-sensor'`
 	//    - `'background-sync'`
 	//    - `'camera'`
@@ -428,7 +433,7 @@ type BrowserContext interface {
 	// **NOTE** [Page.SetDefaultNavigationTimeout], [Page.SetDefaultTimeout] and
 	// [BrowserContext.SetDefaultNavigationTimeout] take priority over [BrowserContext.SetDefaultTimeout].
 	//
-	//  timeout: Maximum time in milliseconds
+	//  timeout: Maximum time in milliseconds. Pass `0` to disable timeout.
 	SetDefaultTimeout(timeout float64)
 
 	// The extra HTTP headers will be sent with every request initiated by any page in the context. These headers are
@@ -2597,7 +2602,9 @@ type Locator interface {
 	// [assertions guide]: https://playwright.dev/docs/test-assertions
 	IsDisabled(options ...LocatorIsDisabledOptions) (bool, error)
 
-	// Returns whether the element is [editable].
+	// Returns whether the element is [editable]. If the target element is not an `<input>`,
+	// `<textarea>`, `<select>`, `[contenteditable]` and does not have a role allowing `[aria-readonly]`, this method
+	// throws an error.
 	// **NOTE** If you need to assert that an element is editable, prefer [LocatorAssertions.ToBeEditable] to avoid
 	// flakiness. See [assertions guide] for more details.
 	//
@@ -2645,12 +2652,13 @@ type Locator interface {
 	Nth(index int) Locator
 
 	// Creates a locator matching all elements that match one or both of the two locators.
-	// Note that when both locators match something, the resulting locator will have multiple matches and violate
-	// [locator strictness] guidelines.
+	// Note that when both locators match something, the resulting locator will have multiple matches, potentially causing
+	// a [locator strictness] violation.
 	//
 	//  locator: Alternative locator to match.
 	//
 	// [locator strictness]: https://playwright.dev/docs/locators#strictness
+	// ["strict mode violation" error]: https://playwright.dev/docs/locators#strictness
 	Or(locator Locator) Locator
 
 	// A page this locator belongs to.
@@ -2912,6 +2920,14 @@ type LocatorAssertions interface {
 	ToHaveAccessibleDescription(description interface{}, options ...LocatorAssertionsToHaveAccessibleDescriptionOptions) error
 
 	// Ensures the [Locator] points to an element with a given
+	// [aria errormessage].
+	//
+	//  errorMessage: Expected accessible error message.
+	//
+	// [aria errormessage]: https://w3c.github.io/aria/#aria-errormessage
+	ToHaveAccessibleErrorMessage(errorMessage interface{}, options ...LocatorAssertionsToHaveAccessibleErrorMessageOptions) error
+
+	// Ensures the [Locator] points to an element with a given
 	// [accessible name].
 	//
 	//  name: Expected accessible name.
@@ -2925,8 +2941,8 @@ type LocatorAssertions interface {
 	// 2. value: Expected attribute value.
 	ToHaveAttribute(name string, value interface{}, options ...LocatorAssertionsToHaveAttributeOptions) error
 
-	// Ensures the [Locator] points to an element with given CSS classes. This needs to be a full match or using a relaxed
-	// regular expression.
+	// Ensures the [Locator] points to an element with given CSS classes. When a string is provided, it must fully match
+	// the element's `class` attribute. To match individual classes or perform partial matches, use a regular expression:
 	//
 	//  expected: Expected class or RegExp or a list of those.
 	ToHaveClass(expected interface{}, options ...LocatorAssertionsToHaveClassOptions) error
@@ -3659,7 +3675,6 @@ type Page interface {
 	Pause() error
 
 	// Returns the PDF buffer.
-	// **NOTE** Generating a pdf is currently only supported in Chromium headless.
 	// `page.pdf()` generates a pdf of the page with `print` css media. To generate a pdf with `screen` media, call
 	// [Page.EmulateMedia] before calling `page.pdf()`:
 	// **NOTE** By default, `page.pdf()` generates a pdf with modified colors for printing. Use the
@@ -3875,7 +3890,7 @@ type Page interface {
 	// This setting will change the default maximum time for all the methods accepting “[object Object]” option.
 	// **NOTE** [Page.SetDefaultNavigationTimeout] takes priority over [Page.SetDefaultTimeout].
 	//
-	//  timeout: Maximum time in milliseconds
+	//  timeout: Maximum time in milliseconds. Pass `0` to disable timeout.
 	SetDefaultTimeout(timeout float64)
 
 	// The extra HTTP headers will be sent with every request the page initiates.
