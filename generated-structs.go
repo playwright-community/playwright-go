@@ -816,7 +816,7 @@ type BrowserTypeLaunchOptions struct {
 	// Use "chrome", "chrome-beta", "chrome-dev", "chrome-canary", "msedge", "msedge-beta", "msedge-dev", or
 	// "msedge-canary" to use branded [Google Chrome and Microsoft Edge].
 	//
-	// [opt in to new headless mode]: https://playwright.dev/docs/browsers#opt-in-to-new-headless-mode
+	// [opt in to new headless mode]: https://playwright.dev/docs/browsers#chromium-new-headless-mode
 	// [Google Chrome and Microsoft Edge]: https://playwright.dev/docs/browsers#google-chrome--microsoft-edge
 	Channel *string `json:"channel"`
 	// Enable Chromium sandboxing. Defaults to `false`.
@@ -902,7 +902,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// Use "chrome", "chrome-beta", "chrome-dev", "chrome-canary", "msedge", "msedge-beta", "msedge-dev", or
 	// "msedge-canary" to use branded [Google Chrome and Microsoft Edge].
 	//
-	// [opt in to new headless mode]: https://playwright.dev/docs/browsers#opt-in-to-new-headless-mode
+	// [opt in to new headless mode]: https://playwright.dev/docs/browsers#chromium-new-headless-mode
 	// [Google Chrome and Microsoft Edge]: https://playwright.dev/docs/browsers#google-chrome--microsoft-edge
 	Channel *string `json:"channel"`
 	// Enable Chromium sandboxing. Defaults to `false`.
@@ -2871,7 +2871,12 @@ type LocatorAssertionsToBeAttachedOptions struct {
 }
 
 type LocatorAssertionsToBeCheckedOptions struct {
+	// Provides state to assert for. Asserts for input to be checked by default. This option can't be used when
+	// “[object Object]” is set to true.
 	Checked *bool `json:"checked"`
+	// Asserts that the element is in the indeterminate (mixed) state. Only supported for checkboxes and radio buttons.
+	// This option can't be true when “[object Object]” is provided.
+	Indeterminate *bool `json:"indeterminate"`
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 }
@@ -2933,6 +2938,14 @@ type LocatorAssertionsToContainTextOptions struct {
 }
 
 type LocatorAssertionsToHaveAccessibleDescriptionOptions struct {
+	// Whether to perform case-insensitive match. “[object Object]” option takes precedence over the corresponding regular
+	// expression flag if specified.
+	IgnoreCase *bool `json:"ignoreCase"`
+	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
+	Timeout *float64 `json:"timeout"`
+}
+
+type LocatorAssertionsToHaveAccessibleErrorMessageOptions struct {
 	// Whether to perform case-insensitive match. “[object Object]” option takes precedence over the corresponding regular
 	// expression flag if specified.
 	IgnoreCase *bool `json:"ignoreCase"`
