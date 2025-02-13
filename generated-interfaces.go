@@ -495,16 +495,19 @@ type BrowserContext interface {
 // BrowserType provides methods to launch a specific browser instance or connect to an existing one. The following is
 // a typical example of using Playwright to drive automation:
 type BrowserType interface {
-	// This method attaches Playwright to an existing browser instance. When connecting to another browser launched via
-	// `BrowserType.launchServer` in Node.js, the major and minor version needs to match the client version (1.2.3 → is
-	// compatible with 1.2.x).
+	// This method attaches Playwright to an existing browser instance created via `BrowserType.launchServer` in Node.js.
+	// **NOTE** The major and minor version of the Playwright instance that connects needs to match the version of
+	// Playwright that launches the browser (1.2.3 → is compatible with 1.2.x).
 	//
-	//  wsEndpoint: A browser websocket endpoint to connect to.
+	//  wsEndpoint: A Playwright browser websocket endpoint to connect to. You obtain this endpoint via `BrowserServer.wsEndpoint`.
 	Connect(wsEndpoint string, options ...BrowserTypeConnectOptions) (Browser, error)
 
 	// This method attaches Playwright to an existing browser instance using the Chrome DevTools Protocol.
 	// The default browser context is accessible via [Browser.Contexts].
 	// **NOTE** Connecting over the Chrome DevTools Protocol is only supported for Chromium-based browsers.
+	// **NOTE** This connection is significantly lower fidelity than the Playwright protocol connection via
+	// [BrowserType.Connect]. If you are experiencing issues or attempting to use advanced functionality, you probably
+	// want to use [BrowserType.Connect].
 	//
 	//  endpointURL: A CDP websocket endpoint or http url to connect to. For example `http://localhost:9222/` or
 	//    `ws://127.0.0.1:9222/devtools/browser/387adf4c-243f-4051-a181-46798f4a46f4`.
