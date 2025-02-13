@@ -1,6 +1,7 @@
 package playwright
 
 import (
+	"fmt"
 	"regexp"
 )
 
@@ -36,19 +37,35 @@ func (la *locatorAssertionsImpl) ToBeAttached(options ...LocatorAssertionsToBeAt
 }
 
 func (la *locatorAssertionsImpl) ToBeChecked(options ...LocatorAssertionsToBeCheckedOptions) error {
-	expression := "to.be.checked"
 	var timeout *float64
+
+	expectedValue := map[string]interface{}{}
+	expected := "checked"
+
 	if len(options) == 1 {
-		if options[0].Checked != nil && !*options[0].Checked {
-			expression = "to.be.unchecked"
+		if options[0].Indeterminate != nil {
+			expectedValue["indeterminate"] = *options[0].Indeterminate
+			if *options[0].Indeterminate {
+				expected = "indeterminate"
+			}
+		} else {
+			if options[0].Checked != nil {
+				expectedValue["checked"] = *options[0].Checked
+				if !*options[0].Checked {
+					expected = "unchecked"
+				}
+			}
 		}
 		timeout = options[0].Timeout
 	}
 	return la.expect(
-		expression,
-		frameExpectOptions{Timeout: timeout},
+		"to.be.checked",
+		frameExpectOptions{
+			ExpectedValue: expectedValue,
+			Timeout:       timeout,
+		},
 		nil,
-		"Locator expected to be checked",
+		fmt.Sprintf("Locator expected to be %s", expected),
 	)
 }
 
@@ -225,6 +242,25 @@ func (la *locatorAssertionsImpl) ToHaveAccessibleDescription(description interfa
 		frameExpectOptions{ExpectedText: expectedText, Timeout: timeout},
 		description,
 		"Locator expected to have AccessibleDescription",
+	)
+}
+
+func (la *locatorAssertionsImpl) ToHaveAccessibleErrorMessage(errorMessage interface{}, options ...LocatorAssertionsToHaveAccessibleErrorMessageOptions) error {
+	var timeout *float64
+	var ignoreCase *bool
+	if len(options) == 1 {
+		timeout = options[0].Timeout
+		ignoreCase = options[0].IgnoreCase
+	}
+	expectedText, err := toExpectedTextValues([]interface{}{errorMessage}, false, false, ignoreCase)
+	if err != nil {
+		return err
+	}
+	return la.expect(
+		"to.have.accessible.error.message",
+		frameExpectOptions{ExpectedText: expectedText, Timeout: timeout},
+		errorMessage,
+		"Locator expected to have AccessibleErrorMessage",
 	)
 }
 

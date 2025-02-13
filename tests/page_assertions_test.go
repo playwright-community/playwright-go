@@ -63,3 +63,28 @@ func TestPageAssertionsToHaveURLWithBaseURL(t *testing.T) {
 	require.NoError(t, expect.Page(page).Not().ToHaveURL("https://playwright.dev"))
 	require.NoError(t, page.Close())
 }
+
+func TestPageAssertionsToHaveAccessibleErrorMessage(t *testing.T) {
+	BeforeEach(t)
+
+	require.NoError(t, page.SetContent(`
+		<form>
+			<input role="textbox" aria-invalid="true" aria-errormessage="error-message" />
+			<div id="error-message">Hello</div>
+			<div id="irrelevant-error">This should not be considered.</div>
+		</form>
+	`))
+
+	locator := page.Locator("input[role=\"textbox\"]")
+	require.NoError(t, expect.Locator(locator).ToHaveAccessibleErrorMessage("Hello"))
+	require.NoError(t, expect.Locator(locator).Not().ToHaveAccessibleErrorMessage("hello"))
+	require.NoError(t, expect.Locator(locator).ToHaveAccessibleErrorMessage("hello", playwright.LocatorAssertionsToHaveAccessibleErrorMessageOptions{
+		IgnoreCase: playwright.Bool(true),
+	}))
+	require.NoError(t, expect.Locator(locator).ToHaveAccessibleErrorMessage(regexp.MustCompile(`ell\w`)))
+	require.NoError(t, expect.Locator(locator).Not().ToHaveAccessibleErrorMessage(regexp.MustCompile(`hello`)))
+	require.NoError(t, expect.Locator(locator).ToHaveAccessibleErrorMessage(regexp.MustCompile(`hello`), playwright.LocatorAssertionsToHaveAccessibleErrorMessageOptions{
+		IgnoreCase: playwright.Bool(true),
+	}))
+	require.NoError(t, expect.Locator(locator).Not().ToHaveAccessibleErrorMessage("This should not be considered."))
+}
