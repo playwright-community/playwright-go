@@ -14,12 +14,14 @@ var (
 type locatorImpl struct {
 	frame    *frameImpl
 	selector string
-	options  *LocatorLocatorOptions
+	options  *LocatorOptions
 	err      error
 }
 
-func newLocator(frame *frameImpl, selector string, options ...LocatorLocatorOptions) *locatorImpl {
-	option := &LocatorLocatorOptions{}
+type LocatorOptions LocatorFilterOptions
+
+func newLocator(frame *frameImpl, selector string, options ...LocatorOptions) *locatorImpl {
+	option := &LocatorOptions{}
 	if len(options) == 1 {
 		option = &options[0]
 	}
@@ -46,6 +48,10 @@ func newLocator(frame *frameImpl, selector string, options ...LocatorLocatorOpti
 			selector += fmt.Sprintf(` >> internal:has-not=%s`, escapeText(hasNot.selector))
 		}
 	}
+	if option.Visible != nil {
+		selector += fmt.Sprintf(` >> visible=%s`, strconv.FormatBool(*option.Visible))
+	}
+
 	locator.selector = selector
 
 	return locator
@@ -339,7 +345,7 @@ func (l *locatorImpl) Fill(value string, options ...LocatorFillOptions) error {
 
 func (l *locatorImpl) Filter(options ...LocatorFilterOptions) Locator {
 	if len(options) == 1 {
-		return newLocator(l.frame, l.selector, LocatorLocatorOptions(options[0]))
+		return newLocator(l.frame, l.selector, LocatorOptions(options[0]))
 	}
 	return newLocator(l.frame, l.selector)
 }
@@ -602,9 +608,19 @@ func (l *locatorImpl) Last() Locator {
 }
 
 func (l *locatorImpl) Locator(selectorOrLocator interface{}, options ...LocatorLocatorOptions) Locator {
+	var option LocatorOptions
+	if len(options) == 1 {
+		option = LocatorOptions{
+			Has:        options[0].Has,
+			HasNot:     options[0].HasNot,
+			HasText:    options[0].HasText,
+			HasNotText: options[0].HasNotText,
+		}
+	}
+
 	selector, ok := selectorOrLocator.(string)
 	if ok {
-		return newLocator(l.frame, l.selector+" >> "+selector, options...)
+		return newLocator(l.frame, l.selector+" >> "+selector, option)
 	}
 	locator, ok := selectorOrLocator.(*locatorImpl)
 	if ok {
@@ -614,7 +630,7 @@ func (l *locatorImpl) Locator(selectorOrLocator interface{}, options ...LocatorL
 		}
 		return newLocator(l.frame,
 			l.selector+" >> internal:chain="+escapeText(locator.selector),
-			options...,
+			option,
 		)
 	}
 	l.err = errors.Join(l.err, fmt.Errorf("invalid locator parameter: %v", selectorOrLocator))

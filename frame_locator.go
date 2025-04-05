@@ -89,9 +89,14 @@ func (fl *frameLocatorImpl) Last() FrameLocator {
 }
 
 func (fl *frameLocatorImpl) Locator(selectorOrLocator interface{}, options ...FrameLocatorLocatorOptions) Locator {
-	var option LocatorLocatorOptions
+	var option LocatorOptions
 	if len(options) == 1 {
-		option = LocatorLocatorOptions(options[0])
+		option = LocatorOptions{
+			Has:        options[0].Has,
+			HasNot:     options[0].HasNot,
+			HasText:    options[0].HasText,
+			HasNotText: options[0].HasNotText,
+		}
 	}
 
 	selector, ok := selectorOrLocator.(string)

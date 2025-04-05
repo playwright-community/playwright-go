@@ -697,9 +697,14 @@ func (f *frameImpl) SetChecked(selector string, checked bool, options ...FrameSe
 }
 
 func (f *frameImpl) Locator(selector string, options ...FrameLocatorOptions) Locator {
-	var option LocatorLocatorOptions
+	var option LocatorOptions
 	if len(options) == 1 {
-		option = LocatorLocatorOptions(options[0])
+		option = LocatorOptions{
+			Has:        options[0].Has,
+			HasNot:     options[0].HasNot,
+			HasText:    options[0].HasText,
+			HasNotText: options[0].HasNotText,
+		}
 	}
 	return newLocator(f, selector, option)
 }

@@ -451,7 +451,8 @@ type BrowserContext interface {
 	//  offline: Whether to emulate network being offline for the browser context.
 	SetOffline(offline bool) error
 
-	// Returns storage state for this browser context, contains current cookies and local storage snapshot.
+	// Returns storage state for this browser context, contains current cookies, local storage snapshot and IndexedDB
+	// snapshot.
 	StorageState(path ...string) (*StorageState, error)
 
 	Tracing() Tracing
@@ -2789,7 +2790,8 @@ type Locator interface {
 	// [control]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control
 	SetInputFiles(files interface{}, options ...LocatorSetInputFilesOptions) error
 
-	// Perform a tap gesture on the element matching the locator.
+	// Perform a tap gesture on the element matching the locator. For examples of emulating other gestures by manually
+	// dispatching touch events, see the [emulating legacy touch events] page.
 	//
 	// # Details
 	//
@@ -2802,6 +2804,7 @@ type Locator interface {
 	// [TimeoutError]. Passing zero timeout disables this.
 	// **NOTE** `element.tap()` requires that the `hasTouch` option of the browser context be set to true.
 	//
+	// [emulating legacy touch events]: https://playwright.dev/docs/touch-events
 	// [actionability]: https://playwright.dev/docs/actionability
 	Tap(options ...LocatorTapOptions) error
 
@@ -4416,6 +4419,10 @@ type Selectors interface {
 
 // The Touchscreen class operates in main-frame CSS pixels relative to the top-left corner of the viewport. Methods on
 // the touchscreen can only be used in browser contexts that have been initialized with `hasTouch` set to true.
+// This class is limited to emulating tap gestures. For examples of other gestures simulated by manually dispatching
+// touch events, see the [emulating legacy touch events] page.
+//
+// [emulating legacy touch events]: https://playwright.dev/docs/touch-events
 type Touchscreen interface {
 	// Dispatches a `touchstart` and `touchend` event with a single touch at the position
 	// (“[object Object]”,“[object Object]”).
@@ -4482,7 +4489,9 @@ type WebError interface {
 	Error() error
 }
 
-// The [WebSocket] class represents websocket connections in the page.
+// The [WebSocket] class represents WebSocket connections within a page. It provides the ability to inspect and
+// manipulate the data being transmitted and received.
+// If you want to intercept or modify WebSocket frames, consider using [WebSocketRoute].
 type WebSocket interface {
 	// Fired when the websocket closes.
 	OnClose(fn func(WebSocket))
