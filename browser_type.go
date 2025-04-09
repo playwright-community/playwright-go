@@ -99,6 +99,17 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 func (b *browserTypeImpl) Connect(wsEndpoint string, options ...BrowserTypeConnectOptions) (Browser, error) {
 	overrides := map[string]interface{}{
 		"wsEndpoint": wsEndpoint,
+		"headers": map[string]string{
+			"x-playwright-browser": b.Name(),
+		},
+	}
+	if len(options) == 1 {
+		if options[0].Headers != nil {
+			for k, v := range options[0].Headers {
+				overrides["headers"].(map[string]string)[k] = v
+			}
+			options[0].Headers = nil
+		}
 	}
 	localUtils := b.connection.LocalUtils()
 	pipe, err := localUtils.channel.SendReturnAsDict("connect", options, overrides)
