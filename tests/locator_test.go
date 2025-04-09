@@ -694,3 +694,30 @@ func TestLocatorShouldPressSequentially(t *testing.T) {
 		return page.EvalOnSelector("input", "e => e.value", nil)
 	}, "hello")
 }
+
+func TestLocatorShouldSupportFilterVisible(t *testing.T) {
+	BeforeEach(t)
+
+	require.NoError(t, page.SetContent(`
+		<div>
+			<div class="item" style="display: none">Hidden data0</div>
+			<div class="item">visible data1</div>
+			<div class="item" style="display: none">Hidden data1</div>
+			<div class="item">visible data2</div>
+			<div class="item" style="display: none">Hidden data2</div>
+			<div class="item">visible data3</div>
+		</div>
+		`))
+
+	locator := page.Locator(".item").Filter(playwright.LocatorFilterOptions{
+		Visible: playwright.Bool(true),
+	}).Nth(1)
+
+	require.NoError(t, expect.Locator(locator).ToHaveText("visible data2"))
+	require.NoError(t, expect.Locator(page.Locator(".item").Filter(playwright.LocatorFilterOptions{
+		Visible: playwright.Bool(true),
+	}).GetByText("data3")).ToHaveText("visible data3"))
+	require.NoError(t, expect.Locator(page.Locator(".item").Filter(playwright.LocatorFilterOptions{
+		Visible: playwright.Bool(false),
+	}).GetByText("data1")).ToHaveText("Hidden data1"))
+}

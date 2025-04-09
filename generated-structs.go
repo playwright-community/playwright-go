@@ -25,6 +25,9 @@ type APIRequestNewContextOptions struct {
 	ClientCertificates []ClientCertificate `json:"clientCertificates"`
 	// An object containing additional HTTP headers to be sent with every request. Defaults to none.
 	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
+	// Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status
+	// codes.
+	FailOnStatusCode *bool `json:"failOnStatusCode"`
 	// Credentials for [HTTP authentication]. If no
 	// origin is specified, the username and password are sent to any servers upon unauthorized responses.
 	//
@@ -1261,7 +1264,11 @@ type ElementHandleScreenshotOptions struct {
 	// changed.  Defaults to `"hide"`.
 	Caret *ScreenshotCaret `json:"caret"`
 	// Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
-	// box `#FF00FF` (customized by “[object Object]”) that completely covers its bounding box.
+	// box `#FF00FF` (customized by “[object Object]”) that completely covers its bounding box. The mask is also applied
+	// to invisible elements, see [Matching only visible elements] to
+	// disable that.
+	//
+	// [Matching only visible elements]: https://playwright.dev/docs/locators#matching-only-visible-elements
 	Mask []Locator `json:"mask"`
 	// Specify the color of the overlay box for masked elements, in
 	// [CSS color format]. Default color is pink `#FF00FF`.
@@ -2451,6 +2458,8 @@ type LocatorFilterOptions struct {
 	// passed a [string], matching is case-insensitive and searches for a substring. For example, `"Playwright"` matches
 	// `<article><div>Playwright</div></article>`.
 	HasText interface{} `json:"hasText"`
+	// Only matches visible or invisible elements.
+	Visible *bool `json:"visible"`
 }
 
 type LocatorFocusOptions struct {
@@ -2688,7 +2697,11 @@ type LocatorScreenshotOptions struct {
 	// changed.  Defaults to `"hide"`.
 	Caret *ScreenshotCaret `json:"caret"`
 	// Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
-	// box `#FF00FF` (customized by “[object Object]”) that completely covers its bounding box.
+	// box `#FF00FF` (customized by “[object Object]”) that completely covers its bounding box. The mask is also applied
+	// to invisible elements, see [Matching only visible elements] to
+	// disable that.
+	//
+	// [Matching only visible elements]: https://playwright.dev/docs/locators#matching-only-visible-elements
 	Mask []Locator `json:"mask"`
 	// Specify the color of the overlay box for masked elements, in
 	// [CSS color format]. Default color is pink `#FF00FF`.
@@ -3236,7 +3249,12 @@ type PageEmulateMediaOptions struct {
 	// emulation. `no-preference` is deprecated.
 	//
 	// [prefers-colors-scheme]: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme
-	ColorScheme  *ColorScheme  `json:"colorScheme"`
+	ColorScheme *ColorScheme `json:"colorScheme"`
+	// Emulates `prefers-contrast` media feature, supported values are `no-preference`, `more`. Passing
+	// `no-override` disables contrast emulation.
+	Contrast *Contrast `json:"contrast"`
+	// Emulates `forced-colors` media feature, supported values are `active` and `none`. Passing `no-override`
+	// disables forced colors emulation.
 	ForcedColors *ForcedColors `json:"forcedColors"`
 	// Changes the CSS media type of the page. The only allowed values are `screen`, `print` and `no-override`.
 	// Passing `no-override` disables CSS media emulation.
@@ -3683,7 +3701,11 @@ type PageScreenshotOptions struct {
 	// `false`.
 	FullPage *bool `json:"fullPage"`
 	// Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
-	// box `#FF00FF` (customized by “[object Object]”) that completely covers its bounding box.
+	// box `#FF00FF` (customized by “[object Object]”) that completely covers its bounding box. The mask is also applied
+	// to invisible elements, see [Matching only visible elements] to
+	// disable that.
+	//
+	// [Matching only visible elements]: https://playwright.dev/docs/locators#matching-only-visible-elements
 	Mask []Locator `json:"mask"`
 	// Specify the color of the overlay box for masked elements, in
 	// [CSS color format]. Default color is pink `#FF00FF`.
@@ -4048,7 +4070,7 @@ type PageAssertionsToHaveTitleOptions struct {
 
 type PageAssertionsToHaveURLOptions struct {
 	// Whether to perform case-insensitive match. “[object Object]” option takes precedence over the corresponding regular
-	// expression flag if specified.
+	// expression parameter if specified. A provided predicate ignores this flag.
 	IgnoreCase *bool `json:"ignoreCase"`
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`

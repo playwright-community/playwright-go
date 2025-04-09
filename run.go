@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-const playwrightCliVersion = "1.50.1"
+const playwrightCliVersion = "1.51.1"
 
 var (
 	logger               = slog.Default()
