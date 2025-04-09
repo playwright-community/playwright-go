@@ -1,8 +1,8 @@
 diff --git a/docs/src/api/class-apirequest.md b/docs/src/api/class-apirequest.md
-index 2f832e1dd..b8a33f161 100644
+index c984b9f12..8a0ed6ed0 100644
 --- a/docs/src/api/class-apirequest.md
 +++ b/docs/src/api/class-apirequest.md
-@@ -48,7 +48,7 @@ Methods like [`method: APIRequestContext.get`] take the base URL into considerat
+@@ -55,7 +55,7 @@ Methods like [`method: APIRequestContext.get`] take the base URL into considerat
  
  ### option: APIRequest.newContext.storageState
  * since: v1.16
@@ -12,7 +12,7 @@ index 2f832e1dd..b8a33f161 100644
    - `cookies` <[Array]<[Object]>>
      - `name` <[string]>
 diff --git a/docs/src/api/class-apirequestcontext.md b/docs/src/api/class-apirequestcontext.md
-index 40742e2a1..74ce6194d 100644
+index c96e01991..5d5c232f4 100644
 --- a/docs/src/api/class-apirequestcontext.md
 +++ b/docs/src/api/class-apirequestcontext.md
 @@ -159,6 +159,9 @@ context cookies from the response. The method will automatically follow redirect
@@ -234,6 +234,14 @@ index 40742e2a1..74ce6194d 100644
  ### option: APIRequestContext.put.timeout = %%-js-python-csharp-fetch-option-timeout-%%
  * since: v1.16
  
+@@ -893,6 +956,7 @@ Returns storage state for this request context, contains current cookies and loc
+ 
+ ### option: APIRequestContext.storageState.indexedDB
+ * since: v1.51
++* langs: js, python, java, csharp
+ - `indexedDB` ?<boolean>
+ 
+ Set to `true` to include IndexedDB in the storage state snapshot.
 diff --git a/docs/src/api/class-apiresponse.md b/docs/src/api/class-apiresponse.md
 index 5a901b76b..26da2aa12 100644
 --- a/docs/src/api/class-apiresponse.md
@@ -322,7 +330,7 @@ index 7867ce5c8..6a27ede39 100644
  
  :::note
 diff --git a/docs/src/api/class-browsercontext.md b/docs/src/api/class-browsercontext.md
-index 85cbc4f62..a266b96a2 100644
+index 311b786da..f03926646 100644
 --- a/docs/src/api/class-browsercontext.md
 +++ b/docs/src/api/class-browsercontext.md
 @@ -417,7 +417,7 @@ The order of evaluation of multiple scripts installed via [`method: BrowserConte
@@ -361,7 +369,15 @@ index 85cbc4f62..a266b96a2 100644
  - returns: <[Array]<[Worker]>>
  
  :::note
-@@ -1554,6 +1554,13 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
+@@ -1524,6 +1524,7 @@ Returns storage state for this browser context, contains current cookies, local
+ 
+ ### option: BrowserContext.storageState.indexedDB
+ * since: v1.51
++* langs: js, python, java, csharp
+ - `indexedDB` ?<boolean>
+ 
+ Set to `true` to include [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) in the storage state snapshot.
+@@ -1565,6 +1566,13 @@ A glob pattern, regex pattern or predicate receiving [URL] used to register a ro
  
  Optional handler function used to register a routing with [`method: BrowserContext.route`].
  
@@ -375,7 +391,7 @@ index 85cbc4f62..a266b96a2 100644
  ### param: BrowserContext.unroute.handler
  * since: v1.8
  * langs: csharp, java
-@@ -1595,7 +1602,8 @@ Condition to wait for.
+@@ -1606,7 +1614,8 @@ Condition to wait for.
  
  ## async method: BrowserContext.waitForConsoleMessage
  * since: v1.34
@@ -385,7 +401,7 @@ index 85cbc4f62..a266b96a2 100644
    - alias-python: expect_console_message
    - alias-csharp: RunAndWaitForConsoleMessage
  - returns: <[ConsoleMessage]>
-@@ -1626,7 +1634,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
+@@ -1637,7 +1646,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
  
  ## async method: BrowserContext.waitForEvent
  * since: v1.8
@@ -395,7 +411,7 @@ index 85cbc4f62..a266b96a2 100644
    - alias-python: expect_event
  - returns: <[any]>
  
-@@ -1692,7 +1701,8 @@ Either a predicate that receives an event or an options object. Optional.
+@@ -1703,7 +1713,8 @@ Either a predicate that receives an event or an options object. Optional.
  
  ## async method: BrowserContext.waitForPage
  * since: v1.9
@@ -405,7 +421,7 @@ index 85cbc4f62..a266b96a2 100644
    - alias-python: expect_page
    - alias-csharp: RunAndWaitForPage
  - returns: <[Page]>
-@@ -1711,7 +1721,7 @@ Will throw an error if the context closes before new [Page] is created.
+@@ -1722,7 +1733,7 @@ Will throw an error if the context closes before new [Page] is created.
  
  ### option: BrowserContext.waitForPage.predicate
  * since: v1.9
@@ -414,7 +430,7 @@ index 85cbc4f62..a266b96a2 100644
  - `predicate` <[function]\([Page]\):[boolean]>
  
  Receives the [Page] object and resolves to truthy value when the waiting should resolve.
-@@ -1724,7 +1734,8 @@ Receives the [Page] object and resolves to truthy value when the waiting should
+@@ -1735,7 +1746,8 @@ Receives the [Page] object and resolves to truthy value when the waiting should
  
  ## async method: BrowserContext.waitForEvent2
  * since: v1.8
@@ -424,38 +440,6 @@ index 85cbc4f62..a266b96a2 100644
    - alias-python: wait_for_event
  - returns: <[any]>
  
-diff --git a/docs/src/api/class-browsertype.md b/docs/src/api/class-browsertype.md
-index 87a684db3..29c323f00 100644
---- a/docs/src/api/class-browsertype.md
-+++ b/docs/src/api/class-browsertype.md
-@@ -87,18 +87,6 @@ class BrowserTypeExamples
- 
- ## async method: BrowserType.connect
- * since: v1.8
--* langs: js
--- returns: <[Browser]>
--
--This method attaches Playwright to an existing browser instance created via [`method: BrowserType.launchServer`].
--
--:::note
--The major and minor version of the Playwright instance that connects needs to match the version of Playwright that launches the browser (1.2.3 → is compatible with 1.2.x).
--:::
--
--## async method: BrowserType.connect
--* since: v1.8
--* langs: python, csharp, java
- - returns: <[Browser]>
- 
- This method attaches Playwright to an existing browser instance created via `BrowserType.launchServer` in Node.js.
-@@ -111,7 +99,7 @@ The major and minor version of the Playwright instance that connects needs to ma
- * since: v1.10
- - `wsEndpoint` <[string]>
- 
--A Playwright browser websocket endpoint to connect to. You obtain this endpoint via [`method: BrowserServer.wsEndpoint`].
-+A Playwright browser websocket endpoint to connect to. You obtain this endpoint via `BrowserServer.wsEndpoint`.
- 
- ### option: BrowserType.connect.headers
- * since: v1.11
 diff --git a/docs/src/api/class-cdpsession.md b/docs/src/api/class-cdpsession.md
 index a14dd58fb..8e3807d87 100644
 --- a/docs/src/api/class-cdpsession.md
@@ -570,7 +554,7 @@ index e286c63bf..7dbd5f4fd 100644
    * alias-csharp: RunAndWaitForNavigation
  - returns: <[null]|[Response]>
 diff --git a/docs/src/api/class-locatorassertions.md b/docs/src/api/class-locatorassertions.md
-index d7b446326..b9f05dfec 100644
+index 59618d0fb..32d94778d 100644
 --- a/docs/src/api/class-locatorassertions.md
 +++ b/docs/src/api/class-locatorassertions.md
 @@ -67,7 +67,7 @@ public class ExampleTests : PageTest
@@ -619,7 +603,7 @@ index d7b446326..b9f05dfec 100644
  
  Expected options currently selected.
 diff --git a/docs/src/api/class-page.md b/docs/src/api/class-page.md
-index ec58c027b..766fb5b64 100644
+index b59f2cb3f..8ad144d44 100644
 --- a/docs/src/api/class-page.md
 +++ b/docs/src/api/class-page.md
 @@ -621,7 +621,7 @@ The order of evaluation of multiple scripts installed via [`method: BrowserConte
@@ -675,7 +659,7 @@ index ec58c027b..766fb5b64 100644
  ### option: Page.emulateMedia.forcedColors
  * since: v1.15
  * langs: js, java
-@@ -1309,6 +1332,11 @@ Emulates `'forced-colors'` media feature, supported values are `'active'` and `'
+@@ -1309,6 +1332,13 @@ Emulates `'forced-colors'` media feature, supported values are `'active'` and `'
  * langs: csharp, python
  - `forcedColors` <[ForcedColors]<"active"|"none"|"null">>
  
@@ -684,10 +668,26 @@ index ec58c027b..766fb5b64 100644
 +* langs: go
 +- `forcedColors` <[ForcedColors]<"active"|"none"|"no-override">>
 +
++Emulates `'forced-colors'` media feature, supported values are `'active'` and `'none'`. Passing `no-override` disables forced colors emulation.
++
+ ### option: Page.emulateMedia.contrast
+ * since: v1.51
+ * langs: js, java
+@@ -1321,6 +1351,13 @@ Emulates `'prefers-contrast'` media feature, supported values are `'no-preferenc
+ * langs: csharp, python
+ - `contrast` <[Contrast]<"no-preference"|"more"|"null">>
+ 
++### option: Page.emulateMedia.contrast
++* since: v1.51
++* langs: go
++- `contrast` <[Contrast]<"no-preference"|"more"|"no-override">>
++
++Emulates `'prefers-contrast'` media feature, supported values are `'no-preference'`, `'more'`. Passing `no-override` disables contrast emulation.
++
  ## async method: Page.evalOnSelector
  * since: v1.9
  * discouraged: This method does not wait for the element to pass actionability
-@@ -2128,14 +2156,14 @@ Frame name specified in the `iframe`'s `name` attribute.
+@@ -2140,14 +2177,14 @@ Frame name specified in the `iframe`'s `name` attribute.
  
  ### option: Page.frame.name
  * since: v1.8
@@ -704,7 +704,7 @@ index ec58c027b..766fb5b64 100644
  - `url` ?<[string]|[RegExp]|[function]\([URL]\):[boolean]>
  
  A glob pattern, regex pattern or predicate receiving frame's `url` as a [URL] object. Optional.
-@@ -2905,7 +2933,7 @@ Paper width, accepts values labeled with units.
+@@ -2917,7 +2954,7 @@ Paper width, accepts values labeled with units.
  
  ### option: Page.pdf.width
  * since: v1.8
@@ -713,7 +713,7 @@ index ec58c027b..766fb5b64 100644
  - `width` <[string]>
  
  Paper width, accepts values labeled with units.
-@@ -2919,7 +2947,7 @@ Paper height, accepts values labeled with units.
+@@ -2931,7 +2968,7 @@ Paper height, accepts values labeled with units.
  
  ### option: Page.pdf.height
  * since: v1.8
@@ -722,7 +722,7 @@ index ec58c027b..766fb5b64 100644
  - `height` <[string]>
  
  Paper height, accepts values labeled with units.
-@@ -2937,7 +2965,7 @@ Paper margins, defaults to none.
+@@ -2949,7 +2986,7 @@ Paper margins, defaults to none.
  
  ### option: Page.pdf.margin
  * since: v1.8
@@ -731,7 +731,7 @@ index ec58c027b..766fb5b64 100644
  - `margin` <[Object]>
    - `top` ?<[string]> Top margin, accepts values labeled with units. Defaults to `0`.
    - `right` ?<[string]> Right margin, accepts values labeled with units. Defaults to `0`.
-@@ -3358,7 +3386,7 @@ Function that should be run once [`param: locator`] appears. This function shoul
+@@ -3370,7 +3407,7 @@ Function that should be run once [`param: locator`] appears. This function shoul
  Function that should be run once [`param: locator`] appears. This function should get rid of the element that blocks actions like click.
  
  ### param: Page.addLocatorHandler.handler
@@ -740,7 +740,7 @@ index ec58c027b..766fb5b64 100644
  * since: v1.42
  - `handler` <[function]\([Locator]\)>
  
-@@ -3606,6 +3634,13 @@ it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/We
+@@ -3618,6 +3655,13 @@ it gets merged via the [`new URL()`](https://developer.mozilla.org/en-US/docs/We
  
  handler function to route the request.
  
@@ -754,7 +754,7 @@ index ec58c027b..766fb5b64 100644
  ### param: Page.route.handler
  * since: v1.8
  * langs: csharp, java
-@@ -3740,7 +3775,7 @@ Handler function to route the WebSocket.
+@@ -3752,7 +3796,7 @@ Handler function to route the WebSocket.
  
  ### param: Page.routeWebSocket.handler
  * since: v1.48
@@ -763,7 +763,7 @@ index ec58c027b..766fb5b64 100644
  - `handler` <[function]\([WebSocketRoute]\)>
  
  Handler function to route the WebSocket.
-@@ -4069,14 +4104,14 @@ await page.GotoAsync("https://www.microsoft.com");
+@@ -4081,14 +4125,14 @@ await page.GotoAsync("https://www.microsoft.com");
  
  ### param: Page.setViewportSize.width
  * since: v1.10
@@ -780,7 +780,7 @@ index ec58c027b..766fb5b64 100644
  - `height` <[int]>
  
  Page height in pixels.
-@@ -4263,6 +4298,13 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
+@@ -4275,6 +4319,13 @@ A glob pattern, regex pattern or predicate receiving [URL] to match while routin
  
  Optional handler function to route the request.
  
@@ -794,7 +794,7 @@ index ec58c027b..766fb5b64 100644
  ### param: Page.unroute.handler
  * since: v1.8
  * langs: csharp, java
-@@ -4301,7 +4343,8 @@ Performs action and waits for the Page to close.
+@@ -4313,7 +4364,8 @@ Performs action and waits for the Page to close.
  
  ## async method: Page.waitForConsoleMessage
  * since: v1.9
@@ -804,7 +804,7 @@ index ec58c027b..766fb5b64 100644
    - alias-python: expect_console_message
    - alias-csharp: RunAndWaitForConsoleMessage
  - returns: <[ConsoleMessage]>
-@@ -4332,7 +4375,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
+@@ -4344,7 +4396,8 @@ Receives the [ConsoleMessage] object and resolves to truthy value when the waiti
  
  ## async method: Page.waitForDownload
  * since: v1.9
@@ -814,7 +814,7 @@ index ec58c027b..766fb5b64 100644
    - alias-python: expect_download
    - alias-csharp: RunAndWaitForDownload
  - returns: <[Download]>
-@@ -4363,7 +4407,8 @@ Receives the [Download] object and resolves to truthy value when the waiting sho
+@@ -4375,7 +4428,8 @@ Receives the [Download] object and resolves to truthy value when the waiting sho
  
  ## async method: Page.waitForEvent
  * since: v1.8
@@ -824,7 +824,7 @@ index ec58c027b..766fb5b64 100644
    - alias-python: expect_event
  - returns: <[any]>
  
-@@ -4416,7 +4461,8 @@ Either a predicate that receives an event or an options object. Optional.
+@@ -4428,7 +4482,8 @@ Either a predicate that receives an event or an options object. Optional.
  
  ## async method: Page.waitForFileChooser
  * since: v1.9
@@ -834,7 +834,7 @@ index ec58c027b..766fb5b64 100644
    - alias-python: expect_file_chooser
    - alias-csharp: RunAndWaitForFileChooser
  - returns: <[FileChooser]>
-@@ -4574,7 +4620,7 @@ await page.WaitForFunctionAsync("selector => !!document.querySelector(selector)"
+@@ -4586,7 +4641,7 @@ await page.WaitForFunctionAsync("selector => !!document.querySelector(selector)"
  
  Optional argument to pass to [`param: expression`].
  
@@ -843,7 +843,7 @@ index ec58c027b..766fb5b64 100644
  * since: v1.8
  
  ### option: Page.waitForFunction.polling = %%-csharp-java-wait-for-function-polling-%%
-@@ -4671,6 +4717,11 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
+@@ -4683,6 +4738,11 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
  ```
  
  ### param: Page.waitForLoadState.state = %%-wait-for-load-state-state-%%
@@ -855,7 +855,7 @@ index ec58c027b..766fb5b64 100644
  * since: v1.8
  
  ### option: Page.waitForLoadState.timeout = %%-navigation-timeout-%%
-@@ -4683,6 +4734,7 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
+@@ -4695,6 +4755,7 @@ Console.WriteLine(await popup.TitleAsync()); // popup is ready to use.
  * since: v1.8
  * deprecated: This method is inherently racy, please use [`method: Page.waitForURL`] instead.
  * langs:
@@ -863,7 +863,7 @@ index ec58c027b..766fb5b64 100644
    * alias-python: expect_navigation
    * alias-csharp: RunAndWaitForNavigation
  - returns: <[null]|[Response]>
-@@ -4767,7 +4819,8 @@ a navigation.
+@@ -4779,7 +4840,8 @@ a navigation.
  
  ## async method: Page.waitForPopup
  * since: v1.9
@@ -873,7 +873,7 @@ index ec58c027b..766fb5b64 100644
    - alias-python: expect_popup
    - alias-csharp: RunAndWaitForPopup
  - returns: <[Page]>
-@@ -4799,6 +4852,7 @@ Receives the [Page] object and resolves to truthy value when the waiting should
+@@ -4811,6 +4873,7 @@ Receives the [Page] object and resolves to truthy value when the waiting should
  ## async method: Page.waitForRequest
  * since: v1.8
  * langs:
@@ -881,7 +881,7 @@ index ec58c027b..766fb5b64 100644
    * alias-python: expect_request
    * alias-csharp: RunAndWaitForRequest
  - returns: <[Request]>
-@@ -4906,7 +4960,8 @@ changed by using the [`method: Page.setDefaultTimeout`] method.
+@@ -4918,7 +4981,8 @@ changed by using the [`method: Page.setDefaultTimeout`] method.
  
  ## async method: Page.waitForRequestFinished
  * since: v1.12
@@ -891,7 +891,7 @@ index ec58c027b..766fb5b64 100644
    - alias-python: expect_request_finished
    - alias-csharp: RunAndWaitForRequestFinished
  - returns: <[Request]>
-@@ -4938,6 +4993,7 @@ Receives the [Request] object and resolves to truthy value when the waiting shou
+@@ -4950,6 +5014,7 @@ Receives the [Request] object and resolves to truthy value when the waiting shou
  ## async method: Page.waitForResponse
  * since: v1.8
  * langs:
@@ -899,7 +899,7 @@ index ec58c027b..766fb5b64 100644
    * alias-python: expect_response
    * alias-csharp: RunAndWaitForResponse
  - returns: <[Response]>
-@@ -5301,7 +5357,8 @@ await page.WaitForURLAsync("**/target.html");
+@@ -5313,7 +5378,8 @@ await page.WaitForURLAsync("**/target.html");
  
  ## async method: Page.waitForWebSocket
  * since: v1.9
@@ -909,7 +909,7 @@ index ec58c027b..766fb5b64 100644
    - alias-python: expect_websocket
    - alias-csharp: RunAndWaitForWebSocket
  - returns: <[WebSocket]>
-@@ -5332,7 +5389,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
+@@ -5344,7 +5410,8 @@ Receives the [WebSocket] object and resolves to truthy value when the waiting sh
  
  ## async method: Page.waitForWorker
  * since: v1.9
@@ -919,7 +919,7 @@ index ec58c027b..766fb5b64 100644
    - alias-python: expect_worker
    - alias-csharp: RunAndWaitForWorker
  - returns: <[Worker]>
-@@ -5374,7 +5432,8 @@ This does not contain ServiceWorkers
+@@ -5386,7 +5453,8 @@ This does not contain ServiceWorkers
  
  ## async method: Page.waitForEvent2
  * since: v1.8
@@ -930,7 +930,7 @@ index ec58c027b..766fb5b64 100644
  - returns: <[any]>
  
 diff --git a/docs/src/api/class-pageassertions.md b/docs/src/api/class-pageassertions.md
-index 8eefd41f0..161b55b53 100644
+index 6420735f2..7cfa9c3ca 100644
 --- a/docs/src/api/class-pageassertions.md
 +++ b/docs/src/api/class-pageassertions.md
 @@ -69,7 +69,7 @@ public class ExampleTests : PageTest
@@ -942,6 +942,15 @@ index 8eefd41f0..161b55b53 100644
  - returns: <[PageAssertions]>
  
  Makes the assertion check for the opposite condition. For example, this code tests that the page URL doesn't contain `"error"`:
+@@ -344,7 +344,7 @@ When [`option: Browser.newContext.baseURL`] is provided via the context options
+ 
+ ### param: PageAssertions.toHaveURL.urlOrRegExp
+ * since: v1.18
+-* langs: csharp, python, java
++* langs: csharp, python, java, go
+ - `urlOrRegExp` <[string]|[RegExp]>
+ 
+ Expected URL string or RegExp.
 diff --git a/docs/src/api/class-playwrightassertions.md b/docs/src/api/class-playwrightassertions.md
 index aa4e0a42a..2b822104e 100644
 --- a/docs/src/api/class-playwrightassertions.md
@@ -1108,10 +1117,10 @@ index 3b0011c7b..48a28fa24 100644
  
  Whether to include source files for trace actions.
 diff --git a/docs/src/api/class-websocket.md b/docs/src/api/class-websocket.md
-index 3b3308b88..e21ea93ef 100644
+index e33740eac..d89648d91 100644
 --- a/docs/src/api/class-websocket.md
 +++ b/docs/src/api/class-websocket.md
-@@ -16,6 +16,13 @@ Fired when the websocket closes.
+@@ -18,6 +18,13 @@ Fired when the websocket closes.
  
  Fired when the websocket receives a frame.
  
@@ -1125,7 +1134,7 @@ index 3b3308b88..e21ea93ef 100644
  ## event: WebSocket.frameReceived
  * since: v1.9
  * langs: python
-@@ -33,6 +40,13 @@ Fired when the websocket receives a frame.
+@@ -35,6 +42,13 @@ Fired when the websocket receives a frame.
  
  Fired when the websocket sends a frame.
  
@@ -1139,7 +1148,7 @@ index 3b3308b88..e21ea93ef 100644
  ## event: WebSocket.frameSent
  * since: v1.9
  * langs: python
-@@ -63,7 +77,8 @@ Contains the URL of the WebSocket.
+@@ -65,7 +79,8 @@ Contains the URL of the WebSocket.
  
  ## async method: WebSocket.waitForEvent
  * since: v1.8
@@ -1149,7 +1158,7 @@ index 3b3308b88..e21ea93ef 100644
    - alias-python: expect_event
  - returns: <[any]>
  
-@@ -140,7 +155,8 @@ Receives the [WebSocketFrame] object and resolves to truthy value when the waiti
+@@ -142,7 +157,8 @@ Receives the [WebSocketFrame] object and resolves to truthy value when the waiti
  
  ## async method: WebSocket.waitForEvent2
  * since: v1.8
@@ -1187,7 +1196,7 @@ index e23316ebc..ae3d20b9f 100644
  * since: v1.48
  * langs: csharp, java
 diff --git a/docs/src/api/params.md b/docs/src/api/params.md
-index d161f9106..0b15c9569 100644
+index fd548c9c4..99dd9f4c1 100644
 --- a/docs/src/api/params.md
 +++ b/docs/src/api/params.md
 @@ -8,7 +8,7 @@ When to consider operation succeeded, defaults to `load`. Events can be either:
@@ -1446,9 +1455,9 @@ index d161f9106..0b15c9569 100644
 -Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See [`method: Page.emulateMedia`] for more details. Passing `'null'` resets emulation to system defaults. Defaults to `'none'`.
 +Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See [`method: Page.emulateMedia`] for more details. Passing `'no-override'` resets emulation to system defaults. Defaults to `'none'`.
  
- ## context-option-logger
- * langs: js
-@@ -706,7 +767,7 @@ specified, the HAR is not recorded. Make sure to await [`method: BrowserContext.
+ ## context-option-contrast
+ * langs: js, java
+@@ -718,7 +779,7 @@ specified, the HAR is not recorded. Make sure to await [`method: BrowserContext.
  saved.
  
  ## context-option-recordhar-path
@@ -1457,7 +1466,7 @@ index d161f9106..0b15c9569 100644
    - alias-python: record_har_path
  - `recordHarPath` <[path]>
  
-@@ -715,33 +776,33 @@ specified HAR file on the filesystem. If not specified, the HAR is not recorded.
+@@ -727,33 +788,33 @@ specified HAR file on the filesystem. If not specified, the HAR is not recorded.
  call [`method: BrowserContext.close`] for the HAR to be saved.
  
  ## context-option-recordhar-omit-content
@@ -1496,7 +1505,7 @@ index d161f9106..0b15c9569 100644
  - `recordVideo` <[Object]>
    - `dir` <[path]> Path to the directory to put videos into.
    - `size` ?<[Object]> Optional dimensions of the recorded videos. If not specified the size will be equal to `viewport`
-@@ -808,7 +869,7 @@ Specifies whether to wait for already running listeners and what to do if they t
+@@ -820,7 +881,7 @@ Specifies whether to wait for already running listeners and what to do if they t
  * `'ignoreErrors'` - do not wait for current listener calls (if any) to finish, all errors thrown by the listeners after removal are silently caught
  
  ## unroute-all-options-behavior
@@ -1505,7 +1514,7 @@ index d161f9106..0b15c9569 100644
  * since: v1.41
  - `behavior` <[UnrouteBehavior]<"wait"|"ignoreErrors"|"default">>
  
-@@ -819,7 +880,7 @@ Specifies whether to wait for already running handlers and what to do if they th
+@@ -831,7 +892,7 @@ Specifies whether to wait for already running handlers and what to do if they th
  
  
  ## select-options-values
@@ -1514,7 +1523,7 @@ index d161f9106..0b15c9569 100644
  - `values` <[null]|[string]|[ElementHandle]|[Array]<[string]>|[Object]|[Array]<[ElementHandle]>|[Array]<[Object]>>
    - `value` ?<[string]> Matches by `option.value`. Optional.
    - `label` ?<[string]> Matches by `option.label`. Optional.
-@@ -837,7 +898,7 @@ the parameter is a string without wildcard characters, the method will wait for
+@@ -849,7 +910,7 @@ the parameter is a string without wildcard characters, the method will wait for
  equal to the string.
  
  ## wait-for-event-event
@@ -1523,7 +1532,7 @@ index d161f9106..0b15c9569 100644
  - `event` <[string]>
  
  Event name, same one typically passed into `*.on(event)`.
-@@ -895,7 +956,7 @@ only the first option matching one of the passed options is selected. Optional.
+@@ -907,7 +968,7 @@ only the first option matching one of the passed options is selected. Optional.
  Receives the event data and resolves to truthy value when the waiting should resolve.
  
  ## wait-for-event-timeout
@@ -1532,7 +1541,7 @@ index d161f9106..0b15c9569 100644
  - `timeout` <[float]>
  
  Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-@@ -915,7 +976,7 @@ using the [`method: AndroidDevice.setDefaultTimeout`] method.
+@@ -927,7 +988,7 @@ using the [`method: AndroidDevice.setDefaultTimeout`] method.
  Time to retry the assertion for in milliseconds. Defaults to `timeout` in `TestConfig.expect`.
  
  ## csharp-java-python-assertions-timeout
@@ -1541,7 +1550,7 @@ index d161f9106..0b15c9569 100644
  - `timeout` <[float]>
  
  Time to retry the assertion for in milliseconds. Defaults to `5000`.
-@@ -969,8 +1030,10 @@ between the same pixel in compared images, between zero (strict) and one (lax),
+@@ -981,8 +1042,10 @@ between the same pixel in compared images, between zero (strict) and one (lax),
  - %%-context-option-httpcredentials-%%
  - %%-context-option-colorscheme-%%
  - %%-context-option-colorscheme-csharp-python-%%
@@ -1551,8 +1560,8 @@ index d161f9106..0b15c9569 100644
 +- %%-context-option-reducedMotion-go-%%
  - %%-context-option-forcedColors-%%
  - %%-context-option-forcedColors-csharp-python-%%
- - %%-context-option-logger-%%
-@@ -1058,7 +1121,7 @@ Firefox user preferences. Learn more about the Firefox user preferences at
+ - %%-context-option-contrast-%%
+@@ -1072,7 +1135,7 @@ Firefox user preferences. Learn more about the Firefox user preferences at
  [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
  
  ## csharp-java-browser-option-firefoxuserprefs

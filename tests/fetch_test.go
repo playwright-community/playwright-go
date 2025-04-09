@@ -558,3 +558,41 @@ func TestFetchShouldRetryECONNRESET(t *testing.T) {
 	require.Equal(t, int32(4), requestCount.Load())
 	require.NoError(t, request.Dispose())
 }
+
+func TestFetchShouldThrowWhenFailOnStatusCodeIsTrue(t *testing.T) {
+	BeforeEach(t)
+
+	server.SetRoute("/empty.html", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(404)
+	})
+
+	req, err := pw.Request.NewContext(playwright.APIRequestNewContextOptions{
+		FailOnStatusCode: playwright.Bool(true),
+	})
+	require.NoError(t, err)
+
+	_, err = req.Fetch(server.EMPTY_PAGE)
+	require.ErrorContains(t, err, "404 Not Found")
+
+	require.NoError(t, req.Dispose())
+}
+
+func TestFetchShouldNotThrowWhenFailOnStatusCodeIsFalse(t *testing.T) {
+	BeforeEach(t)
+
+	server.SetRoute("/empty.html", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(404)
+	})
+
+	req, err := pw.Request.NewContext(playwright.APIRequestNewContextOptions{
+		FailOnStatusCode: playwright.Bool(false),
+	})
+	require.NoError(t, err)
+
+	resp, err := req.Fetch(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.Equal(t, 404, resp.Status())
+	require.NoError(t, req.Dispose())
+}

@@ -365,6 +365,19 @@ var (
 	LoadStateNetworkidle                 = getLoadState("networkidle")
 )
 
+func getContrast(in string) *Contrast {
+	v := Contrast(in)
+	return &v
+}
+
+type Contrast string
+
+var (
+	ContrastNoPreference *Contrast = getContrast("no-preference")
+	ContrastMore                   = getContrast("more")
+	ContrastNoOverride             = getContrast("no-override")
+)
+
 func getMedia(in string) *Media {
 	v := Media(in)
 	return &v

@@ -1217,3 +1217,41 @@ func TestPageGotoShouldFailWhenExceedingBrowserContextNavigationTimeout(t *testi
 	require.ErrorContains(t, err, "Timeout 5ms exceeded.")
 	require.ErrorContains(t, err, "/empty.html")
 }
+
+func TestShouldEmulateContrast(t *testing.T) {
+	BeforeEach(t)
+
+	ret, err := page.Evaluate(`matchMedia('(prefers-contrast: no-preference)').matches`)
+	require.NoError(t, err)
+	require.True(t, ret.(bool))
+
+	err = page.EmulateMedia(playwright.PageEmulateMediaOptions{
+		Contrast: playwright.ContrastNoPreference,
+	})
+	require.NoError(t, err)
+	_, err = page.Evaluate(`matchMedia('(prefers-contrast: no-preference)').matches`)
+	require.NoError(t, err)
+
+	ret, err = page.Evaluate(`matchMedia('(prefers-contrast: more)').matches`)
+	require.NoError(t, err)
+	require.False(t, ret.(bool))
+
+	err = page.EmulateMedia(playwright.PageEmulateMediaOptions{
+		Contrast: playwright.ContrastMore,
+	})
+	require.NoError(t, err)
+	ret, err = page.Evaluate(`matchMedia('(prefers-contrast: no-preference)').matches`)
+	require.NoError(t, err)
+	require.False(t, ret.(bool))
+	ret, err = page.Evaluate(`matchMedia('(prefers-contrast: more)').matches`)
+	require.NoError(t, err)
+	require.True(t, ret.(bool))
+
+	err = page.EmulateMedia(playwright.PageEmulateMediaOptions{
+		Contrast: playwright.ContrastNoOverride,
+	})
+	require.NoError(t, err)
+	ret, err = page.Evaluate(`matchMedia('(prefers-contrast: no-preference)').matches`)
+	require.NoError(t, err)
+	require.True(t, ret.(bool))
+}
