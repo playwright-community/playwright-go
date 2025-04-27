@@ -35,6 +35,10 @@ type APIRequestNewContextOptions struct {
 	HttpCredentials *HttpCredentials `json:"httpCredentials"`
 	// Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
 	IgnoreHttpsErrors *bool `json:"ignoreHTTPSErrors"`
+	// Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
+	// exceeded. Defaults to `20`. Pass `0` to not follow redirects. This can be overwritten for each request
+	// individually.
+	MaxRedirects *int `json:"maxRedirects"`
 	// Network proxy settings.
 	Proxy *Proxy `json:"proxy"`
 	// Populates context with given storage state. This option can be used to initialize context with logged-in
@@ -858,7 +862,7 @@ type BrowserTypeLaunchOptions struct {
 	// “[object Object]” option is `true`.
 	//
 	// [Chromium]: https://developers.google.com/web/updates/2017/04/headless-chrome
-	// [Firefox]: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
+	// [Firefox]: https://hacks.mozilla.org/2017/12/using-headless-mode-in-firefox/
 	Headless *bool `json:"headless"`
 	// If `true`, Playwright does not pass its own configurations args and only uses the ones from “[object Object]”.
 	// Dangerous option; use with care. Defaults to `false`.
@@ -977,7 +981,7 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// “[object Object]” option is `true`.
 	//
 	// [Chromium]: https://developers.google.com/web/updates/2017/04/headless-chrome
-	// [Firefox]: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
+	// [Firefox]: https://hacks.mozilla.org/2017/12/using-headless-mode-in-firefox/
 	Headless *bool `json:"headless"`
 	// Credentials for [HTTP authentication]. If no
 	// origin is specified, the username and password are sent to any servers upon unauthorized responses.
@@ -2254,6 +2258,9 @@ type KeyboardTypeOptions struct {
 }
 
 type LocatorAriaSnapshotOptions struct {
+	// Generate symbolic reference for each element. One can use `aria-ref=<ref>` locator immediately after capturing the
+	// snapshot to perform actions on the element.
+	Ref *bool `json:"ref"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
@@ -2413,14 +2420,14 @@ type LocatorElementHandleOptions struct {
 }
 
 type LocatorEvaluateOptions struct {
-	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
-	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
+	// Maximum time in milliseconds to wait for the locator before evaluating. Note that after locator is resolved,
+	// evaluation itself is not limited by the timeout. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 	Timeout *float64 `json:"timeout"`
 }
 
 type LocatorEvaluateHandleOptions struct {
-	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
-	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
+	// Maximum time in milliseconds to wait for the locator before evaluating. Note that after locator is resolved,
+	// evaluation itself is not limited by the timeout. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 	Timeout *float64 `json:"timeout"`
 }
 
@@ -2938,6 +2945,11 @@ type LocatorAssertionsToBeVisibleOptions struct {
 	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
 	Timeout *float64 `json:"timeout"`
 	Visible *bool    `json:"visible"`
+}
+
+type LocatorAssertionsToContainClassOptions struct {
+	// Time to retry the assertion for in milliseconds. Defaults to `5000`.
+	Timeout *float64 `json:"timeout"`
 }
 
 type LocatorAssertionsToContainTextOptions struct {
