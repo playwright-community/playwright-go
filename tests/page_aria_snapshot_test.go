@@ -94,6 +94,82 @@ func TestShouldSnapshotComplex(t *testing.T) {
 	checkAndMatchSnapshot(t, page.Locator("body"), `
 	- list:
 		- listitem:
-			- link "link"
+			- link "link":
+				- /url: about:blank
 	`)
+}
+
+func TestShouldSnapshotWithRef(t *testing.T) {
+	BeforeEach(t)
+
+	require.NoError(t, page.SetContent(`<ul><li><a href="about:blank">link</a></li></ul>`))
+	expected := Unshift(`
+	- list [ref=s1e3]:
+		- listitem [ref=s1e4]:
+			- link "link" [ref=s1e5]:
+				- /url: about:blank
+	`)
+	ariaSnapshot, err := page.Locator("body").AriaSnapshot(playwright.LocatorAriaSnapshotOptions{
+		Ref: playwright.Bool(true),
+	})
+	require.NoError(t, err)
+	require.Equal(t, expected, ariaSnapshot)
+}
+
+func TestShouldSnapshotWithUnexpectedChildrenEqual(t *testing.T) {
+	BeforeEach(t)
+
+	require.NoError(t, page.SetContent(`
+		<ul>
+			<li>One</li>
+			<li>Two</li>
+			<li>Three</li>
+		</ul>
+	`))
+	require.NoError(t, expect.Locator(page.Locator("body")).ToMatchAriaSnapshot(Unshift(`
+	- list:
+		- listitem: One
+		- listitem: Three
+	`)))
+	require.Error(t, expect.Locator(page.Locator("body")).ToMatchAriaSnapshot(Unshift(`
+	- list:
+		- /children: equal
+		- listitem: One
+		- listitem: Three
+	`), playwright.LocatorAssertionsToMatchAriaSnapshotOptions{Timeout: playwright.Float(1000)}))
+}
+
+func TestShouldSnapshotWithUnexpectedChildrenDeepEqual(t *testing.T) {
+	BeforeEach(t)
+
+	require.NoError(t, page.SetContent(`
+      <ul>
+        <li>
+          <ul>
+            <li>1.1</li>
+            <li>1.2</li>
+          </ul>
+        </li>
+      </ul>
+	`))
+	require.NoError(t, expect.Locator(page.Locator("body")).ToMatchAriaSnapshot(`
+      - list:
+        - listitem:
+          - list:
+            - listitem: 1.1
+	`))
+	require.NoError(t, expect.Locator(page.Locator("body")).ToMatchAriaSnapshot(`
+        - list:
+          - /children: equal
+          - listitem:
+            - list:
+              - listitem: 1.1
+	`))
+	require.Error(t, expect.Locator(page.Locator("body")).ToMatchAriaSnapshot(`
+          - list:
+            - /children: deep-equal
+            - listitem:
+              - list:
+                - listitem: 1.1
+	`, playwright.LocatorAssertionsToMatchAriaSnapshotOptions{Timeout: playwright.Float(1000)}))
 }

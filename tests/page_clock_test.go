@@ -600,7 +600,6 @@ func TestPageClockWhileRunning(t *testing.T) {
 		require.NoError(t, page.Clock().PauseAt(1000))
 		//nolint:staticcheck
 		page.WaitForTimeout(1000)
-		require.NoError(t, page.Clock().Resume())
 		now, err := page.Evaluate(`Date.now()`)
 		require.NoError(t, err)
 		require.LessOrEqual(t, 0, now)
