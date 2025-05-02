@@ -1,11 +1,13 @@
 module github.com/playwright-community/playwright-go
 
-go 1.22
+go 1.23.0
+
+toolchain go1.23.0
 
 require (
 	github.com/coder/websocket v1.8.12
 	github.com/deckarep/golang-set/v2 v2.6.0
-	github.com/go-jose/go-jose/v3 v3.0.3
+	github.com/go-jose/go-jose/v3 v3.0.4
 	github.com/go-stack/stack v1.8.1
 	github.com/h2non/filetype v1.1.3
 	github.com/mitchellh/go-ps v1.0.0
@@ -21,6 +23,7 @@ require (
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
+	golang.org/x/crypto v0.37.0 // indirect - required until go-jose upgraded to v4 #539
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
