@@ -180,6 +180,45 @@ func (la *locatorAssertionsImpl) ToBeVisible(options ...LocatorAssertionsToBeVis
 	)
 }
 
+func (la *locatorAssertionsImpl) ToContainClass(expected interface{}, options ...LocatorAssertionsToContainClassOptions) error {
+	var timeout *float64
+	if len(options) == 1 {
+		timeout = options[0].Timeout
+	}
+	switch expected.(type) {
+	case []string:
+		expectedText, err := toExpectedTextValues(convertToInterfaceList(expected), false, false, nil)
+		if err != nil {
+			return err
+		}
+		return la.expect(
+			"to.contain.class.array",
+			frameExpectOptions{
+				ExpectedText: expectedText,
+				Timeout:      timeout,
+			},
+			expected,
+			"Locator expected to contain class",
+		)
+	case string:
+		expectedText, err := toExpectedTextValues([]interface{}{expected}, false, false, nil)
+		if err != nil {
+			return err
+		}
+		return la.expect(
+			"to.contain.class",
+			frameExpectOptions{
+				ExpectedText: expectedText,
+				Timeout:      timeout,
+			},
+			expected,
+			"Locator expected to contain class",
+		)
+	default:
+		return fmt.Errorf("expected should be string or []string, but got %T", expected)
+	}
+}
+
 func (la *locatorAssertionsImpl) ToContainText(expected interface{}, options ...LocatorAssertionsToContainTextOptions) error {
 	var (
 		timeout      *float64

@@ -3,7 +3,6 @@ package playwright
 import (
 	"errors"
 	"fmt"
-	"path"
 	"reflect"
 	"regexp"
 	"strings"
@@ -180,19 +179,15 @@ type urlMatcher struct {
 	matchFn func(url string) bool
 }
 
-func newURLMatcher(urlOrPredicate, baseURL interface{}) *urlMatcher {
+func newURLMatcher(urlOrPredicate interface{}, baseURL *string, isWsUrl ...bool) *urlMatcher {
 	switch v := urlOrPredicate.(type) {
 	case *regexp.Regexp:
 		return &urlMatcher{pattern: v, raw: urlOrPredicate}
 	case string:
-		url := v
-		if baseURL != nil && !strings.HasPrefix(url, "*") {
-			base, ok := baseURL.(*string)
-			if ok && base != nil {
-				url = path.Join(*base, url)
-			}
+		return &urlMatcher{
+			pattern: resolveGlobToRegex(baseURL, v, len(isWsUrl) > 0 && isWsUrl[0]),
+			raw:     urlOrPredicate,
 		}
-		return &urlMatcher{pattern: globMustToRegex(url), raw: urlOrPredicate}
 	}
 	fn, ok := urlOrPredicate.(func(string) bool)
 	if ok {

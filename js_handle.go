@@ -1,6 +1,9 @@
 package playwright
 
 import (
+	"bytes"
+	"encoding/base64"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"math"
@@ -180,6 +183,59 @@ func parseValue(result interface{}, refs map[float64]interface{}) interface{} {
 			Stack:   v.(map[string]interface{})["s"].(string),
 		})
 	}
+	if v, ok := vMap["ta"]; ok {
+		b, b_ok := v.(map[string]interface{})["b"].(string)
+		k, k_ok := v.(map[string]interface{})["k"].(string)
+		if b_ok && k_ok {
+			decoded, err := base64.StdEncoding.DecodeString(b)
+			if err != nil {
+				panic(fmt.Errorf("Unexpected value: %v", vMap))
+			}
+			r := bytes.NewReader(decoded)
+			switch k {
+			case "i8":
+				result := make([]int8, len(decoded))
+				return mustReadArray(r, &result)
+			case "ui8", "ui8c":
+				result := make([]uint8, len(decoded))
+				return mustReadArray(r, &result)
+			case "i16":
+				size := mustBeDivisible(len(decoded), 2)
+				result := make([]int16, size)
+				return mustReadArray(r, &result)
+			case "ui16":
+				size := mustBeDivisible(len(decoded), 2)
+				result := make([]uint16, size)
+				return mustReadArray(r, &result)
+			case "i32":
+				size := mustBeDivisible(len(decoded), 4)
+				result := make([]int32, size)
+				return mustReadArray(r, &result)
+			case "ui32":
+				size := mustBeDivisible(len(decoded), 4)
+				result := make([]uint32, size)
+				return mustReadArray(r, &result)
+			case "f32":
+				size := mustBeDivisible(len(decoded), 4)
+				result := make([]float32, size)
+				return mustReadArray(r, &result)
+			case "f64":
+				size := mustBeDivisible(len(decoded), 8)
+				result := make([]float64, size)
+				return mustReadArray(r, &result)
+			case "bi64":
+				size := mustBeDivisible(len(decoded), 8)
+				result := make([]int64, size)
+				return mustReadArray(r, &result)
+			case "bui64":
+				size := mustBeDivisible(len(decoded), 8)
+				result := make([]uint64, size)
+				return mustReadArray(r, &result)
+			default:
+				panic(fmt.Errorf("Unsupported array type: %s", k))
+			}
+		}
+	}
 	panic(fmt.Errorf("Unexpected value: %v", vMap))
 }
 
@@ -343,4 +399,23 @@ func newJSHandle(parent *channelOwner, objectType string, guid string, initializ
 		bt.preview = ev["preview"].(string)
 	})
 	return bt
+}
+
+func mustBeDivisible(length int, wordSize int) int {
+	if length%wordSize != 0 {
+		panic(fmt.Errorf(`Decoded bytes length %d is not a multiple of word size %d`, length, wordSize))
+	}
+	return length / wordSize
+}
+
+func mustReadArray[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](r *bytes.Reader, v *[]T) []float64 {
+	err := binary.Read(r, binary.LittleEndian, v)
+	if err != nil {
+		panic(err)
+	}
+	data := make([]float64, len(*v))
+	for i, v := range *v {
+		data[i] = float64(v)
+	}
+	return data
 }

@@ -1355,7 +1355,7 @@ func (p *pageImpl) RequestGC() error {
 func (p *pageImpl) RouteWebSocket(url interface{}, handler func(WebSocketRoute)) error {
 	p.Lock()
 	defer p.Unlock()
-	p.webSocketRoutes = slices.Insert(p.webSocketRoutes, 0, newWebSocketRouteHandler(newURLMatcher(url, p.browserContext.options.BaseURL), handler))
+	p.webSocketRoutes = slices.Insert(p.webSocketRoutes, 0, newWebSocketRouteHandler(newURLMatcher(url, p.browserContext.options.BaseURL, true), handler))
 
 	return p.updateWebSocketInterceptionPatterns()
 }
