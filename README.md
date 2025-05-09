@@ -21,20 +21,20 @@ Headless execution is supported for all the browsers on all platforms.
 
 ## Installation
 
-```txt
+```shell
 go get -u github.com/playwright-community/playwright-go
 ```
 
-Install the browsers and OS dependencies:
+Install the playwright driver and browsers (with OS dependencies if provide `--with-deps`). **Note** that you should replace the version number `0.xxxx.x` with the version used in your current `go.mod`. Each minor version upgrade requires a specific Playwright driver version.
 
-```bash
-go run github.com/playwright-community/playwright-go/cmd/playwright@latest install --with-deps
+```shell
+go run github.com/playwright-community/playwright-go/cmd/playwright@v0.xxxx.x install --with-deps
 # Or
-go install github.com/playwright-community/playwright-go/cmd/playwright@latest
+go install github.com/playwright-community/playwright-go/cmd/playwright@v0.xxxx.x
 playwright install --with-deps
 ```
 
-Alternatively you can do it inside your program via which downloads the driver and browsers:
+Alternatively, you can download the driver and browsers in your code. But if your operating system lacks those browser dependencies, you still need to install them manually, because installing system dependencies requires privileges.
 
 ```go
 err := playwright.Install()
