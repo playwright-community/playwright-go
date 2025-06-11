@@ -10,11 +10,19 @@ import (
 	"strings"
 )
 
+type Redirecter interface {
+	Redirect(url string) error
+}
+
 type routeImpl struct {
 	channelOwner
 	handling *chan bool
 	context  *browserContextImpl
 	didThrow bool
+}
+
+func (r *routeImpl) Redirect(url string) error {
+	return r.redirectedNavigationRequest(url)
 }
 
 func (r *routeImpl) startHandling() chan bool {
