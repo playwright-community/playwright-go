@@ -276,7 +276,11 @@ func Run(options ...*RunOptions) (*Playwright, error) {
 	}
 	up2date, err := driver.isUpToDateDriver()
 	if err != nil || !up2date {
-		return nil, fmt.Errorf("please install the driver (v%s) first: %w", playwrightCliVersion, err)
+		ferr := fmt.Errorf("please install the driver (v%s) first", playwrightCliVersion)
+		if err != nil {
+			ferr = fmt.Errorf("%w: %w", ferr, err)
+		}
+		return nil, ferr
 	}
 	connection, err := driver.run()
 	if err != nil {
