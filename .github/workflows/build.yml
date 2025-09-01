@@ -67,13 +67,14 @@ jobs:
       run: go test -timeout 15m -v -coverprofile=covprofile -coverpkg="github.com/playwright-community/playwright-go" --race ./...
     - name: Send coverage
       uses: shogo82148/actions-goveralls@v1
+      if: matrix.go == 'stable'
       with:
           path-to-profile: covprofile
           flag-name: ${{ matrix.os }}-${{ matrix.browser }}
           parallel: true
       continue-on-error: true
   finish:
-    if: ${{ always() }}
+    if: matrix.go == 'stable'
     needs: test
     runs-on: ubuntu-latest
     steps:
