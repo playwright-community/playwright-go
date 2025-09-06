@@ -1,6 +1,7 @@
 package playwright
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -135,4 +136,55 @@ func TestWaiterReturnErrorWhenMisuse(t *testing.T) {
 	waiter.RejectOnEvent(emitter, testEventNameFoo, nil)
 	_, err = waiter.Wait()
 	require.ErrorContains(t, err, "call RejectOnEvent before WaitForEvent")
+}
+
+func TestWaiterDeadlockForErrChanCapIs1AndCallbackErr(t *testing.T) {
+	timeout := 500.0
+	emitter := &eventEmitter{}
+	w := &waiter{
+		// just receive event timeout err or callback err
+		errChan: make(chan error, 1),
+	}
+
+	overCh := make(chan struct{})
+	errUnReachable := errors.New("unreachable")
+	err := errUnReachable
+
+	go func() {
+		_, err = w.WithTimeout(timeout).WaitForEvent(emitter, "", nil).RunAndWait(func() error {
+			time.Sleep(1 * time.Second)
+			close(overCh)
+			//block for this err, for waiter.errChan has cache event timeout err
+			return errors.New("mock timeout error")
+		})
+		panic("unreachable")
+	}()
+
+	<-overCh
+	time.Sleep(2 * time.Second)
+	require.ErrorIs(t, err, errUnReachable)
+}
+
+func TestWaiterHasNotDeadlockForErrChanCapBiggerThan1AndCallbackErr(t *testing.T) {
+	timeout := 500.0
+	emitter := &eventEmitter{}
+	w := newWaiter().WithTimeout(timeout)
+	errMockTimeout := errors.New("mock timeout error")
+
+	var err error
+	overCh := make(chan struct{})
+	go func() {
+		time.Sleep(2 * time.Second)
+		require.Error(t, err)
+		require.NotErrorIs(t, err, errMockTimeout)
+		require.ErrorIs(t, err, ErrTimeout)
+		close(overCh)
+	}()
+
+	_, err = w.WaitForEvent(emitter, "", nil).RunAndWait(func() error {
+		time.Sleep(1 * time.Second)
+		return errMockTimeout
+	})
+
+	<-overCh
 }
