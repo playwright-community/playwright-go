@@ -74,7 +74,7 @@ jobs:
           parallel: true
       continue-on-error: true
   finish:
-    if: matrix.go == 'stable'
+    if: ${{ always() }}
     needs: test
     runs-on: ubuntu-latest
     steps:
