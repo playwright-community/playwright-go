@@ -193,6 +193,9 @@ func (r *requestImpl) Sizes() (*RequestSizesResult, error) {
 	if err != nil {
 		return nil, err
 	}
+	if response == nil {
+		return nil, fmt.Errorf("sizes could not be retrieved because request has no response")
+	}
 	sizes, err := response.(*responseImpl).channel.Send("sizes")
 	if err != nil {
 		return nil, err
