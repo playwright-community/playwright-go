@@ -382,8 +382,8 @@ type BrowserContext interface {
 	// [this] issue. We recommend disabling Service Workers when
 	// using request interception by setting “[object Object]” to `block`.
 	//
-	// 1. url: A glob pattern, regex pattern or predicate receiving [URL] to match while routing. When a “[object Object]” via the
-	//    context options was provided and the passed URL is a path, it gets merged via the
+	// 1. url: A glob pattern, regex pattern, or predicate that receives a [URL] to match during routing. If “[object Object]” is
+	//    set in the context options and the provided URL is a string that does not start with `*`, it is resolved using the
 	//    [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
 	// 2. handler: handler function to route the request.
 	//
@@ -529,11 +529,15 @@ type BrowserType interface {
 	// Launches browser that uses persistent storage located at “[object Object]” and returns the only context. Closing
 	// this context will automatically close the browser.
 	//
-	//  userDataDir: Path to a User Data Directory, which stores browser session data like cookies and local storage. More details for
+	//  userDataDir: Path to a User Data Directory, which stores browser session data like cookies and local storage. Pass an empty
+	//    string to create a temporary directory.
+	//
+	//    More details for
 	//    [Chromium](https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md#introduction) and
-	//    [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile). Note that Chromium's
-	//    user data directory is the **parent** directory of the "Profile Path" seen at `chrome://version`. Pass an empty
-	//    string to use a temporary directory instead.
+	//    [Firefox](https://wiki.mozilla.org/Firefox/CommandLineOptions#User_profile). Chromium's user data directory is the
+	//    **parent** directory of the "Profile Path" seen at `chrome://version`.
+	//
+	//    Note that browsers do not allow launching multiple instances with the same User Data Directory.
 	LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (BrowserContext, error)
 
 	// Returns browser name. For example: `chromium`, `webkit` or `firefox`.
@@ -2906,6 +2910,16 @@ type LocatorAssertions interface {
 	// [visible]: https://playwright.dev/docs/actionability#visible
 	ToBeVisible(options ...LocatorAssertionsToBeVisibleOptions) error
 
+	// Ensures the [Locator] points to an element with given CSS classes. All classes from the asserted value, separated
+	// by spaces, must be present in the
+	// [Element.ClassList] in any order.
+	//
+	//  expected: A string containing expected class names, separated by spaces, or a list of such strings to assert multiple
+	//    elements.
+	//
+	// [Element.ClassList]: https://developer.mozilla.org/en-US/docs/Web/API/Element/classList
+	ToContainClass(expected interface{}, options ...LocatorAssertionsToContainClassOptions) error
+
 	// Ensures the [Locator] points to an element that contains the given text. All nested elements will be considered
 	// when computing the text content of the element. You can use regular expressions for the value as well.
 	//
@@ -2948,7 +2962,7 @@ type LocatorAssertions interface {
 	ToHaveAttribute(name string, value interface{}, options ...LocatorAssertionsToHaveAttributeOptions) error
 
 	// Ensures the [Locator] points to an element with given CSS classes. When a string is provided, it must fully match
-	// the element's `class` attribute. To match individual classes or perform partial matches, use a regular expression:
+	// the element's `class` attribute. To match individual classes use [LocatorAssertions.ToContainClass].
 	//
 	//  expected: Expected class or RegExp or a list of those.
 	ToHaveClass(expected interface{}, options ...LocatorAssertionsToHaveClassOptions) error
@@ -3796,8 +3810,8 @@ type Page interface {
 	// using request interception by setting “[object Object]” to `block`.
 	// **NOTE** [Page.Route] will not intercept the first request of a popup page. Use [BrowserContext.Route] instead.
 	//
-	// 1. url: A glob pattern, regex pattern or predicate receiving [URL] to match while routing. When a “[object Object]” via the
-	//    context options was provided and the passed URL is a path, it gets merged via the
+	// 1. url: A glob pattern, regex pattern, or predicate that receives a [URL] to match during routing. If “[object Object]” is
+	//    set in the context options and the provided URL is a string that does not start with `*`, it is resolved using the
 	//    [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
 	// 2. handler: handler function to route the request.
 	//
@@ -4376,6 +4390,9 @@ type Route interface {
 	// over to redirected requests.
 	// [Route.Continue] will immediately send the request to the network, other matching handlers won't be invoked. Use
 	// [Route.Fallback] If you want next matching handler in the chain to be invoked.
+	// **NOTE** The `Cookie` header cannot be overridden using this method. If a value is provided, it will be ignored,
+	// and the cookie will be loaded from the browser's cookie store. To set custom cookies, use
+	// [BrowserContext.AddCookies].
 	Continue(options ...RouteContinueOptions) error
 
 	// Continues route's request with optional overrides. The method is similar to [Route.Continue] with the difference

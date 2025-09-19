@@ -2,6 +2,7 @@ package playwright_test
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"math/big"
 	"net/url"
@@ -406,4 +407,28 @@ func TestEvaluate(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, nil, val)
 	})
+}
+
+func TestEvaluateTransferTypedArrays(t *testing.T) {
+	BeforeEach(t)
+
+	testTypedArray := func(t *testing.T, typedArray string, expected []float64, valueSuffix string) {
+		t.Run(typedArray, func(t *testing.T) {
+			val, err := page.Evaluate(fmt.Sprintf(`() => new %s([1%s, 2%s, 3%s])`, typedArray, valueSuffix, valueSuffix, valueSuffix))
+			require.NoError(t, err)
+			require.Equal(t, expected, val.([]float64))
+		})
+	}
+
+	testTypedArray(t, "Int8Array", []float64{1, 2, 3}, "")
+	testTypedArray(t, "Uint8Array", []float64{1, 2, 3}, "")
+	testTypedArray(t, "Uint8ClampedArray", []float64{1, 2, 3}, "")
+	testTypedArray(t, "Int16Array", []float64{1, 2, 3}, "")
+	testTypedArray(t, "Uint16Array", []float64{1, 2, 3}, "")
+	testTypedArray(t, "Int32Array", []float64{1, 2, 3}, "")
+	testTypedArray(t, "Uint32Array", []float64{1, 2, 3}, "")
+	testTypedArray(t, "Float32Array", []float64{1.5, 2.5, 3.5}, ".5")
+	testTypedArray(t, "Float64Array", []float64{1.5, 2.5, 3.5}, ".5")
+	testTypedArray(t, "BigInt64Array", []float64{1, 2, 3}, "n")
+	testTypedArray(t, "BigUint64Array", []float64{1, 2, 3}, "n")
 }

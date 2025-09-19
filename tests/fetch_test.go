@@ -596,3 +596,23 @@ func TestFetchShouldNotThrowWhenFailOnStatusCodeIsFalse(t *testing.T) {
 	require.Equal(t, 404, resp.Status())
 	require.NoError(t, req.Dispose())
 }
+
+func TestShouldFollowMaxRedirects(t *testing.T) {
+	BeforeEach(t)
+
+	redirectCount := atomic.Int32{}
+	server.SetRoute("/empty.html", func(w http.ResponseWriter, r *http.Request) {
+		redirectCount.Add(1)
+		w.Header().Add("Location", server.EMPTY_PAGE)
+		w.WriteHeader(301)
+	})
+
+	request, err := pw.Request.NewContext(playwright.APIRequestNewContextOptions{
+		MaxRedirects: playwright.Int(1),
+	})
+	require.NoError(t, err)
+	_, err = request.Fetch(server.EMPTY_PAGE)
+	require.ErrorContains(t, err, "Max redirect count exceeded")
+	require.Equal(t, int32(2), redirectCount.Load())
+	require.NoError(t, request.Dispose())
+}

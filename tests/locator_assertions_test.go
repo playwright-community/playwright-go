@@ -478,3 +478,23 @@ func TestLocatorToHaveRole(t *testing.T) {
 	require.NoError(t, expect.Locator(locator).ToHaveRole("button"))
 	require.NoError(t, expect.Locator(locator).Not().ToHaveRole("checkbox"))
 }
+
+func TestLocatorToContainClass(t *testing.T) {
+	BeforeEach(t)
+
+	err := page.SetContent(`<div class="foo bar baz"></div>`)
+	require.NoError(t, err)
+
+	locator := page.Locator("div")
+	require.NoError(t, expect.Locator(locator).ToContainClass(""))
+	require.NoError(t, expect.Locator(locator).ToContainClass("bar"))
+	require.NoError(t, expect.Locator(locator).ToContainClass("baz bar"))
+	require.NoError(t, expect.Locator(locator).Not().ToContainClass("  baz   not-matching "))
+
+	err = page.SetContent(`<div class="foo"></div><div class="hello bar"></div><div class="baz"></div>`)
+	require.NoError(t, err)
+
+	require.NoError(t, expect.Locator(locator).ToContainClass([]string{"foo", "hello", "baz"}))
+	require.NoError(t, expect.Locator(locator).Not().ToContainClass([]string{"not-there", "hello", "baz"})) // Class not there
+	require.NoError(t, expect.Locator(locator).Not().ToContainClass([]string{"foo", "hello"}))              // Length mismatch
+}

@@ -56,7 +56,7 @@
 <p><a href="https://pkg.go.dev/github.com/playwright-community/playwright-go"><img src="https://pkg.go.dev/badge/github.com/playwright-community/playwright-go" alt="PkgGoDev" /></a>
 <a href="http://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License" /></a>
 <a href="https://goreportcard.com/report/github.com/playwright-community/playwright-go"><img src="https://goreportcard.com/badge/github.com/playwright-community/playwright-go" alt="Go Report Card" /></a> <img src="https://github.com/playwright-community/playwright-go/workflows/Go/badge.svg" alt="Build Status" />
-<a href="https://aka.ms/playwright-slack"><img src="https://img.shields.io/badge/join-slack-infomational" alt="Join Slack" /></a> <a href="https://coveralls.io/github/playwright-community/playwright-go?branch=main"><img src="https://coveralls.io/repos/github/playwright-community/playwright-go/badge.svg?branch=main" alt="Coverage Status" /></a> <!-- GEN:chromium-version-badge --><a href="https://www.chromium.org/Home"><img src="https://img.shields.io/badge/chromium-134.0.6998.35-blue.svg?logo=google-chrome" alt="Chromium version" /></a><!-- GEN:stop --> <!-- GEN:firefox-version-badge --><a href="https://www.mozilla.org/en-US/firefox/new/"><img src="https://img.shields.io/badge/firefox-135.0-blue.svg?logo=mozilla-firefox" alt="Firefox version" /></a><!-- GEN:stop --> <!-- GEN:webkit-version-badge --><a href="https://webkit.org/"><img src="https://img.shields.io/badge/webkit-18.4-blue.svg?logo=safari" alt="WebKit version" /></a><!-- GEN:stop --></p>
+<a href="https://aka.ms/playwright-slack"><img src="https://img.shields.io/badge/join-slack-infomational" alt="Join Slack" /></a> <a href="https://coveralls.io/github/playwright-community/playwright-go?branch=main"><img src="https://coveralls.io/repos/github/playwright-community/playwright-go/badge.svg?branch=main" alt="Coverage Status" /></a> <!-- GEN:chromium-version-badge --><a href="https://www.chromium.org/Home"><img src="https://img.shields.io/badge/chromium-136.0.7103.25-blue.svg?logo=google-chrome" alt="Chromium version" /></a><!-- GEN:stop --> <!-- GEN:firefox-version-badge --><a href="https://www.mozilla.org/en-US/firefox/new/"><img src="https://img.shields.io/badge/firefox-137.0-blue.svg?logo=mozilla-firefox" alt="Firefox version" /></a><!-- GEN:stop --> <!-- GEN:webkit-version-badge --><a href="https://webkit.org/"><img src="https://img.shields.io/badge/webkit-18.4-blue.svg?logo=safari" alt="WebKit version" /></a><!-- GEN:stop --></p>
 
 <table>
   <tbody>
@@ -80,7 +80,7 @@
   </thead>
   <tbody>
     <tr>
-      <td style="text-align: left">Chromium <!-- GEN:chromium-version -->134.0.6998.35<!-- GEN:stop --></td>
+      <td style="text-align: left">Chromium <!-- GEN:chromium-version -->136.0.7103.25<!-- GEN:stop --></td>
       <td style="text-align: center">✅</td>
       <td style="text-align: center">✅</td>
       <td style="text-align: center">✅</td>
@@ -92,7 +92,7 @@
       <td style="text-align: center">✅</td>
     </tr>
     <tr>
-      <td style="text-align: left">Firefox <!-- GEN:firefox-version -->135.0<!-- GEN:stop --></td>
+      <td style="text-align: left">Firefox <!-- GEN:firefox-version -->137.0<!-- GEN:stop --></td>
       <td style="text-align: center">✅</td>
       <td style="text-align: center">✅</td>
       <td style="text-align: center">✅</td>
@@ -104,18 +104,18 @@
 
 <h2 id="installation">Installation</h2>
 
-<pre><code class="language-txt">go get -u github.com/playwright-community/playwright-go
-</code></pre>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>go get <span class="nt">-u</span> github.com/playwright-community/playwright-go
+</code></pre></div></div>
 
-<p>Install the browsers and OS dependencies:</p>
+<p>Install the playwright driver and browsers (with OS dependencies if provide <code class="language-plaintext highlighter-rouge">--with-deps</code>). <strong>Note</strong> that you should replace the version number <code class="language-plaintext highlighter-rouge">0.xxxx.x</code> with the version used in your current <code class="language-plaintext highlighter-rouge">go.mod</code>. Each minor version upgrade requires a specific Playwright driver version.</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>go run github.com/playwright-community/playwright-go/cmd/playwright@latest <span class="nb">install</span> <span class="nt">--with-deps</span>
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>go run github.com/playwright-community/playwright-go/cmd/playwright@v0.xxxx.x <span class="nb">install</span> <span class="nt">--with-deps</span>
 <span class="c"># Or</span>
-go <span class="nb">install </span>github.com/playwright-community/playwright-go/cmd/playwright@latest
+go <span class="nb">install </span>github.com/playwright-community/playwright-go/cmd/playwright@v0.xxxx.x
 playwright <span class="nb">install</span> <span class="nt">--with-deps</span>
 </code></pre></div></div>
 
-<p>Alternatively you can do it inside your program via which downloads the driver and browsers:</p>
+<p>Alternatively, you can download the driver and browsers in your code. But if your operating system lacks those browser dependencies, you still need to install them manually, because installing system dependencies requires privileges.</p>
 
 <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">err</span> <span class="o">:=</span> <span class="n">playwright</span><span class="o">.</span><span class="n">Install</span><span class="p">()</span>
 </code></pre></div></div>

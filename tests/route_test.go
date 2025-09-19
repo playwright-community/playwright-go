@@ -2,6 +2,7 @@ package playwright_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"testing"
@@ -323,4 +324,21 @@ func TestRequestTimingShouldWork(t *testing.T) {
 	require.GreaterOrEqual(t, timing.ResponseStart, timing.RequestStart)
 	require.GreaterOrEqual(t, timing.ResponseEnd, timing.ResponseStart)
 	require.Less(t, timing.ResponseEnd, 10000.0)
+}
+
+func TestShouldInterceptByGlob(t *testing.T) {
+	BeforeEach(t)
+
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+	require.NoError(t, page.Route("http://localhos**?*oo", func(route playwright.Route) {
+		require.NoError(t, route.Fulfill(playwright.RouteFulfillOptions{
+			Body:   "intercepted",
+			Status: playwright.Int(200),
+		}))
+	}))
+
+	ret, err := page.Evaluate(`url => fetch(url).then(r => r.text())`, fmt.Sprintf("%s/?foo", server.CROSS_PROCESS_PREFIX))
+	require.NoError(t, err)
+	require.Equal(t, "intercepted", ret)
 }
