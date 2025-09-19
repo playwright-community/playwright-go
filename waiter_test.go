@@ -3,6 +3,7 @@ package playwright
 import (
 	"errors"
 	"fmt"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -139,52 +140,85 @@ func TestWaiterReturnErrorWhenMisuse(t *testing.T) {
 }
 
 func TestWaiterDeadlockForErrChanCapIs1AndCallbackErr(t *testing.T) {
-	timeout := 500.0
+	// deadlock happen on waiter timeout before callback return err
+	waiterTimeout := 500.0
+	callbackTimeout := time.Duration(waiterTimeout+500.0) * time.Millisecond
+
+	mockCallbackErr := errors.New("mock callback error")
+
 	emitter := &eventEmitter{}
 	w := &waiter{
 		// just receive event timeout err or callback err
 		errChan: make(chan error, 1),
 	}
 
-	overCh := make(chan struct{})
-	errUnReachable := errors.New("unreachable")
-	err := errUnReachable
-
+	callbackOverCh := make(chan struct{})
+	callbackErrCh := make(chan error)
+	isAfterWaiterRunAndWaitExecuted := atomic.Bool{}
 	go func() {
-		_, err = w.WithTimeout(timeout).WaitForEvent(emitter, "", nil).RunAndWait(func() error {
-			time.Sleep(1 * time.Second)
-			close(overCh)
-			//block for this err, for waiter.errChan has cache event timeout err
-			return errors.New("mock timeout error")
+		_, err := w.WithTimeout(waiterTimeout).WaitForEvent(emitter, "", nil).RunAndWait(func() error {
+			time.Sleep(callbackTimeout)
+			close(callbackOverCh)
+			// block for this err, for waiter.errChan has cache event timeout err
+			return mockCallbackErr
 		})
-		panic("unreachable")
+
+		isAfterWaiterRunAndWaitExecuted.Store(true)
+		callbackErrCh <- err
 	}()
 
-	<-overCh
-	time.Sleep(2 * time.Second)
-	require.ErrorIs(t, err, errUnReachable)
+	<-callbackOverCh
+	// ensure RunAndWait invoke on where callback err send to waiter.errChan
+	time.Sleep(callbackTimeout)
+
+	// Originally it was executed, but because waiter.errChan is currently caching the waiter timeout error,
+	// the callback error is blocked (because waitFunc has not been executed yet,
+	// waiter.errChan has not started receiving).
+	require.False(t, isAfterWaiterRunAndWaitExecuted.Load())
+
+	// if not receive waiter timeout error, isAfterWaiterRunAndWaitExecuted should be always false
+	err1 := <-w.errChan
+	require.ErrorIs(t, err1, ErrTimeout)
+
+	// for w.errChan cache is empty, callback error is sent and received, and then return it
+	err2 := <-callbackErrCh
+	require.ErrorIs(t, err2, mockCallbackErr)
+	require.True(t, isAfterWaiterRunAndWaitExecuted.Load())
 }
 
 func TestWaiterHasNotDeadlockForErrChanCapBiggerThan1AndCallbackErr(t *testing.T) {
-	timeout := 500.0
-	emitter := &eventEmitter{}
-	w := newWaiter().WithTimeout(timeout)
-	errMockTimeout := errors.New("mock timeout error")
+	// deadlock happen on waiter timeout before callback return err
+	waiterTimeout := 500.0
+	callbackTimeout := time.Duration(waiterTimeout+500.0) * time.Millisecond
 
-	var err error
-	overCh := make(chan struct{})
+	mockCallbackErr := errors.New("mock callback error")
+
+	emitter := &eventEmitter{}
+	w := newWaiter()
+
+	callbackOverCh := make(chan struct{})
+	callbackErrCh := make(chan error)
+	isAfterWaiterRunAndWaitExecuted := atomic.Bool{}
 	go func() {
-		time.Sleep(2 * time.Second)
-		require.Error(t, err)
-		require.NotErrorIs(t, err, errMockTimeout)
-		require.ErrorIs(t, err, ErrTimeout)
-		close(overCh)
+		_, err := w.WithTimeout(waiterTimeout).WaitForEvent(emitter, "", nil).RunAndWait(func() error {
+			time.Sleep(callbackTimeout)
+			close(callbackOverCh)
+			return mockCallbackErr
+		})
+		isAfterWaiterRunAndWaitExecuted.Store(true)
+		callbackErrCh <- err
 	}()
 
-	_, err = w.WaitForEvent(emitter, "", nil).RunAndWait(func() error {
-		time.Sleep(1 * time.Second)
-		return errMockTimeout
-	})
+	<-callbackOverCh
+	// ensure RunAndWait invoke on where callback err send to waiter.errChan
+	time.Sleep(callbackTimeout)
 
-	<-overCh
+	// for waiter.errChan cap is 2(greater than 1), so it will not block(deadlock)
+	require.True(t, isAfterWaiterRunAndWaitExecuted.Load())
+
+	// the first err still is waiter timeout, and is returned
+	err1 := <-w.errChan
+	require.ErrorIs(t, err1, mockCallbackErr)
+	err2 := <-callbackErrCh
+	require.ErrorIs(t, err2, ErrTimeout)
 }
