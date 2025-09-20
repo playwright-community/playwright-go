@@ -175,7 +175,9 @@ func (w *waiter) reject(err error) {
 
 func newWaiter() *waiter {
 	w := &waiter{
-		errChan: make(chan error, 1),
+		// receive both event timeout err and callback err
+		// but just return event timeout err
+		errChan: make(chan error, 2),
 	}
 	return w
 }
