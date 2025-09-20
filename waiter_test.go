@@ -141,8 +141,8 @@ func TestWaiterReturnErrorWhenMisuse(t *testing.T) {
 
 func TestWaiterDeadlockForErrChanCapIs1AndCallbackErr(t *testing.T) {
 	// deadlock happen on waiter timeout before callback return err
-	waiterTimeout := 500.0
-	callbackTimeout := time.Duration(waiterTimeout+500.0) * time.Millisecond
+	waiterTimeout := 200.0
+	callbackTimeout := time.Duration(waiterTimeout+200.0) * time.Millisecond
 
 	mockCallbackErr := errors.New("mock callback error")
 
@@ -167,9 +167,10 @@ func TestWaiterDeadlockForErrChanCapIs1AndCallbackErr(t *testing.T) {
 		callbackErrCh <- err
 	}()
 
+	// ensure waiter timeout
 	<-callbackOverCh
-	// ensure RunAndWait invoke on where callback err send to waiter.errChan
-	time.Sleep(callbackTimeout)
+	// give some time but never enough
+	time.Sleep(200 * time.Millisecond)
 
 	// Originally it was executed, but because waiter.errChan is currently caching the waiter timeout error,
 	// the callback error is blocked (because waitFunc has not been executed yet,
@@ -188,8 +189,8 @@ func TestWaiterDeadlockForErrChanCapIs1AndCallbackErr(t *testing.T) {
 
 func TestWaiterHasNotDeadlockForErrChanCapBiggerThan1AndCallbackErr(t *testing.T) {
 	// deadlock happen on waiter timeout before callback return err
-	waiterTimeout := 500.0
-	callbackTimeout := time.Duration(waiterTimeout+500.0) * time.Millisecond
+	waiterTimeout := 100.0
+	callbackTimeout := time.Duration(waiterTimeout+100.0) * time.Millisecond
 
 	mockCallbackErr := errors.New("mock callback error")
 
@@ -209,12 +210,12 @@ func TestWaiterHasNotDeadlockForErrChanCapBiggerThan1AndCallbackErr(t *testing.T
 		callbackErrCh <- err
 	}()
 
+	// ensure waiter timeout
 	<-callbackOverCh
-	// ensure RunAndWait invoke on where callback err send to waiter.errChan
-	time.Sleep(callbackTimeout)
 
 	// for waiter.errChan cap is 2(greater than 1), so it will not block(deadlock)
-	require.True(t, isAfterWaiterRunAndWaitExecuted.Load())
+	require.Eventually(t,
+		func() bool { return isAfterWaiterRunAndWaitExecuted.Load() }, 100*time.Millisecond, 10*time.Microsecond)
 
 	// the first err still is waiter timeout, and is returned
 	err1 := <-w.errChan
