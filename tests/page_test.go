@@ -258,6 +258,15 @@ func TestPageExpectWorker(t *testing.T) {
 	require.Equal(t, worker, page.Workers()[0])
 	worker = page.Workers()[0]
 	require.Contains(t, worker.URL(), "worker.js")
+	// flaky in the macos-latest of gh action
+	require.Eventually(t,
+		func() bool {
+			v, err := worker.Evaluate(`() => self["workerFunction"] ? true : false`)
+			require.NoError(t, err)
+			return v == true
+		},
+		500*time.Millisecond, 10*time.Millisecond,
+	)
 	res, err := worker.Evaluate(`() => self["workerFunction"]()`)
 	require.NoError(t, err)
 	require.Equal(t, "worker function result", res)
