@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/playwright-community/playwright-go/internal/safe"
 )
@@ -16,7 +17,7 @@ import (
 type browserContextImpl struct {
 	channelOwner
 	timeoutSettings *timeoutSettings
-	closeWasCalled  bool
+	closeWasCalled  atomic.Bool
 	options         *BrowserNewContextOptions
 	pages           []Page
 	routes          []*routeHandlerEntry
@@ -411,13 +412,13 @@ func (b *browserContextImpl) ExpectPage(cb func() error, options ...BrowserConte
 }
 
 func (b *browserContextImpl) Close(options ...BrowserContextCloseOptions) error {
-	if b.closeWasCalled {
+	if b.closeWasCalled.Load() {
 		return nil
 	}
 	if len(options) == 1 {
 		b.closeReason = options[0].Reason
 	}
-	b.closeWasCalled = true
+	b.closeWasCalled.Store(true)
 
 	_, err := b.channel.connection.WrapAPICall(func() (interface{}, error) {
 		return nil, b.request.Dispose(APIRequestContextDisposeOptions{
@@ -597,7 +598,7 @@ func (b *browserContextImpl) onRoute(route *routeImpl) {
 	url := route.Request().URL()
 	for _, handlerEntry := range routes {
 		// If the page or the context was closed we stall all requests right away.
-		if (page != nil && page.closeWasCalled) || b.closeWasCalled {
+		if (page != nil && page.closeWasCalled) || b.closeWasCalled.Load() {
 			return
 		}
 		if !handlerEntry.Matches(url) {

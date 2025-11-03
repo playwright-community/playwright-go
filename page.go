@@ -942,7 +942,7 @@ func (p *pageImpl) onRoute(route *routeImpl) {
 	url := route.Request().URL()
 	for _, handlerEntry := range routes {
 		// If the page was closed we stall all requests right away.
-		if p.closeWasCalled || p.browserContext.closeWasCalled {
+		if p.closeWasCalled || p.browserContext.closeWasCalled.Load() {
 			return
 		}
 		if !handlerEntry.Matches(url) {
