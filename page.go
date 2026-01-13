@@ -754,7 +754,7 @@ func (p *pageImpl) ConsoleMessages() ([]ConsoleMessage, error) {
 	messages := result.([]interface{})
 	consoleMessages := make([]ConsoleMessage, len(messages))
 	for i, m := range messages {
-		consoleMessages[i] = fromChannel(m).(*consoleMessageImpl)
+		consoleMessages[i] = newConsoleMessage(m.(map[string]interface{}))
 	}
 	return consoleMessages, nil
 }
