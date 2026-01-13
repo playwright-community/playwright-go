@@ -217,8 +217,9 @@ type Browser interface {
 // Non-persistent browser contexts don't write any browsing data to disk.
 type BrowserContext interface {
 	EventEmitter
-	// **NOTE** Only works with Chromium browser's persistent context.
-	// Emitted when new background page is created in the context.
+	// This event is not emitted.
+	//
+	// Deprecated: Background pages have been removed from Chromium together with Manifest V2 extensions.
 	OnBackgroundPage(fn func(Page))
 
 	// Playwright has ability to mock clock and passage of time.
@@ -292,11 +293,13 @@ type BrowserContext interface {
 	//  script: Script to be evaluated in all pages in the browser context.
 	AddInitScript(script Script) error
 
-	// **NOTE** Background pages are only supported on Chromium-based browsers.
-	// All existing background pages in the context.
+	// Returns an empty list.
+	//
+	// Deprecated: Background pages have been removed from Chromium together with Manifest V2 extensions.
 	BackgroundPages() []Page
 
-	// Returns the browser instance of the context. If it was launched as a persistent context null gets returned.
+	// Gets the browser instance that owns the context. Returns `null` if the context is created outside of normal
+	// browser, e.g. Android or Electron.
 	Browser() Browser
 
 	// Removes cookies from context. Accepts optional filter.
@@ -351,6 +354,8 @@ type BrowserContext interface {
 	//    - `'clipboard-write'`
 	//    - `'geolocation'`
 	//    - `'gyroscope'`
+	//    - `'local-fonts'`
+	//    - `'local-network-access'`
 	//    - `'magnetometer'`
 	//    - `'microphone'`
 	//    - `'midi-sysex'` (system-exclusive midi)
@@ -538,6 +543,12 @@ type BrowserType interface {
 	//    **parent** directory of the "Profile Path" seen at `chrome://version`.
 	//
 	//    Note that browsers do not allow launching multiple instances with the same User Data Directory.
+	//
+	//    **NOTE** Chromium/Chrome: Due to recent Chrome policy changes, automating the default Chrome user profile is not
+	//    supported. Pointing `userDataDir` to Chrome's main "User Data" directory (the profile used for your regular
+	//    browsing) may result in pages not loading or the browser exiting. Create and use a separate directory (for example,
+	//    an empty folder) as your automation profile instead. See https://developer.chrome.com/blog/remote-debugging-port
+	//    for details.
 	LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (BrowserContext, error)
 
 	// Returns browser name. For example: `chromium`, `webkit` or `firefox`.
@@ -651,6 +662,10 @@ type ConsoleMessage interface {
 	// `trace`, `clear`, `startGroup`, `startGroupCollapsed`, `endGroup`, `assert`, `profile`,
 	// `profileEnd`, `count`, `timeEnd`.
 	Type() string
+
+	// The web worker or service worker that produced this console message, if any. Note that console messages from web
+	// workers also have non-null [ConsoleMessage.Page].
+	Worker() (Worker, error)
 }
 
 // [Dialog] objects are dispatched by page via the [Page.OnDialog] event.
@@ -2323,6 +2338,17 @@ type Locator interface {
 	// [actionability]: https://playwright.dev/docs/actionability
 	Dblclick(options ...LocatorDblclickOptions) error
 
+	// Describes the locator, description is used in the trace viewer and reports. Returns the locator pointing to the
+	// same element.
+	//
+	//  description: Locator description.
+	Describe(description string) Locator
+
+	// Returns locator description previously set with [Locator.Describe]. Returns `null` if no custom description has
+	// been set. Prefer `Locator.toString()` for a human-readable representation, as it uses the description when
+	// available.
+	Description() (string, error)
+
 	// Programmatically dispatch an event on the matching element.
 	//
 	// # Details
@@ -3029,7 +3055,13 @@ type LocatorAssertions interface {
 }
 
 // The Mouse class operates in main-frame CSS pixels relative to the top-left corner of the viewport.
+// **NOTE** If you want to debug where the mouse moved, you can use the [Trace viewer] or
+// [Playwright Inspector]. A red dot showing the location of the mouse will be shown for every
+// mouse action.
 // Every `page` object has its own Mouse, accessible with [Page.Mouse].
+//
+// [Trace viewer]: https://playwright.dev/docs/trace-viewer-intro
+// [Playwright Inspector]: https://playwright.dev/docs/running-tests
 type Mouse interface {
 	// Shortcut for [Mouse.Move], [Mouse.Down], [Mouse.Up].
 	//
@@ -3669,6 +3701,9 @@ type Page interface {
 
 	Keyboard() Keyboard
 
+	// Returns up to (currently) 200 last console messages from this page. See [Page.OnConsole] for more details.
+	ConsoleMessages() ([]ConsoleMessage, error)
+
 	// The method returns an element locator that can be used to perform actions on this page / frame. Locator is resolved
 	// to the element immediately before performing an action, so a series of actions on the same locator can in fact be
 	// performed on different DOM elements. That would happen if the DOM structure between those actions has changed.
@@ -3687,8 +3722,8 @@ type Page interface {
 	// Returns the opener for popup pages and `null` for others. If the opener has been closed already the returns `null`.
 	Opener() (Page, error)
 
-	// Pauses script execution. Playwright will stop executing the script and wait for the user to either press 'Resume'
-	// button in the page overlay or to call `playwright.resume()` in the DevTools console.
+	// Pauses script execution. Playwright will stop executing the script and wait for the user to either press the
+	// 'Resume' button in the page overlay or to call `playwright.resume()` in the DevTools console.
 	// User can inspect selectors or perform manual steps while paused. Resume will continue running the original script
 	// from the place it was paused.
 	// **NOTE** This method requires Playwright to be started in a headed mode, with a falsy “[object Object]” option.
@@ -3750,6 +3785,14 @@ type Page interface {
 	//
 	// [locators]: https://playwright.dev/docs/locators
 	QuerySelectorAll(selector string) ([]ElementHandle, error)
+
+	// Returns up to (currently) 100 last network request from this page. See [Page.OnRequest] for more details.
+	// Returned requests should be accessed immediately, otherwise they might be collected to prevent unbounded memory
+	// growth as new requests come in. Once collected, retrieving most information about the request is impossible.
+	// Note that requests reported through the [Page.OnRequest] request are not collected, so there is a trade off between
+	// efficient memory usage with [Page.Requests] and the amount of available information reported through
+	// [Page.OnRequest].
+	Requests() ([]Request, error)
 
 	// When testing a web page, sometimes unexpected overlays like a "Sign up" dialog appear and block actions you want to
 	// automate, e.g. clicking a button. These overlays don't always show up in the same way or at the same time, making
@@ -4452,11 +4495,30 @@ type Touchscreen interface {
 
 // API for collecting and saving Playwright traces. Playwright traces can be opened in
 // [Trace Viewer] after Playwright script runs.
+// **NOTE** You probably want to
+// [enable tracing in your config file] instead
+// of using `context.tracing`.
+// The `context.tracing` API captures browser operations and network activity, but it doesn't record test assertions
+// (like `expect` calls). We recommend
+// [enabling tracing through Playwright Test configuration],
+// which includes those assertions and provides a more complete trace for debugging test failures.
 // Start recording a trace before performing actions. At the end, stop tracing and save it to a file.
 //
 // [Trace Viewer]: https://playwright.dev/docs/trace-viewer
+// [enable tracing in your config file]: https://playwright.dev/docs/api/class-testoptions#test-options-trace
+// [enabling tracing through Playwright Test configuration]: https://playwright.dev/docs/api/class-testoptions#test-options-trace
 type Tracing interface {
 	// Start tracing.
+	// **NOTE** You probably want to
+	// [enable tracing in your config file] instead
+	// of using `Tracing.start`.
+	// The `context.tracing` API captures browser operations and network activity, but it doesn't record test assertions
+	// (like `expect` calls). We recommend
+	// [enabling tracing through Playwright Test configuration],
+	// which includes those assertions and provides a more complete trace for debugging test failures.
+	//
+	// [enable tracing in your config file]: https://playwright.dev/docs/api/class-testoptions#test-options-trace
+	// [enabling tracing through Playwright Test configuration]: https://playwright.dev/docs/api/class-testoptions#test-options-trace
 	Start(options ...TracingStartOptions) error
 
 	// Start a new trace chunk. If you'd like to record multiple traces on the same [BrowserContext], use [Tracing.Start]
@@ -4547,7 +4609,7 @@ type WebSocket interface {
 // [Page.RouteWebSocket] or [BrowserContext.RouteWebSocket], the `WebSocketRoute` object allows to handle the
 // WebSocket, like an actual server would do.
 // **Mocking**
-// By default, the routed WebSocket will not connect to the server. This way, you can mock entire communcation over
+// By default, the routed WebSocket will not connect to the server. This way, you can mock entire communication over
 // the WebSocket. Here is an example that responds to a `"request"` with a `"response"`.
 // Since we do not call [WebSocketRoute.ConnectToServer] inside the WebSocket route handler, Playwright assumes that
 // WebSocket will be mocked, and opens the WebSocket inside the page automatically.
@@ -4630,6 +4692,9 @@ type Worker interface {
 	//
 	// [WebWorker]: https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API
 	OnClose(fn func(Worker))
+
+	// Emitted when JavaScript within the worker calls one of console API methods, e.g. `console.log` or `console.dir`.
+	OnConsole(fn func(ConsoleMessage))
 
 	// Returns the return value of “[object Object]”.
 	// If the function passed to the [Worker.Evaluate] returns a [Promise], then [Worker.Evaluate] would wait for the

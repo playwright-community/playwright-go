@@ -31,10 +31,15 @@ func (p *Playwright) Stop() error {
 }
 
 func (p *Playwright) setSelectors(selectors Selectors) {
-	selectorsOwner := fromChannel(p.initializer["selectors"]).(*selectorsOwnerImpl)
-	p.Selectors.(*selectorsImpl).removeChannel(selectorsOwner)
-	p.Selectors = selectors
-	p.Selectors.(*selectorsImpl).addChannel(selectorsOwner)
+	// Selectors has been moved to client-side only in Playwright v1.57+
+	if p.initializer["selectors"] != nil {
+		selectorsOwner := fromChannel(p.initializer["selectors"]).(*selectorsOwnerImpl)
+		p.Selectors.(*selectorsImpl).removeChannel(selectorsOwner)
+		p.Selectors = selectors
+		p.Selectors.(*selectorsImpl).addChannel(selectorsOwner)
+	} else {
+		p.Selectors = selectors
+	}
 }
 
 func newPlaywright(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *Playwright {
@@ -50,10 +55,14 @@ func newPlaywright(parent *channelOwner, objectType string, guid string, initial
 	pw.Chromium.(*browserTypeImpl).playwright = pw
 	pw.Firefox.(*browserTypeImpl).playwright = pw
 	pw.WebKit.(*browserTypeImpl).playwright = pw
-	selectorsOwner := fromChannel(initializer["selectors"]).(*selectorsOwnerImpl)
-	pw.Selectors.(*selectorsImpl).addChannel(selectorsOwner)
-	pw.connection.afterClose = func() {
-		pw.Selectors.(*selectorsImpl).removeChannel(selectorsOwner)
+	// Selectors has been moved to client-side only in Playwright v1.57+
+	// Only set up channel if selectors is in the initializer (older protocol)
+	if initializer["selectors"] != nil {
+		selectorsOwner := fromChannel(initializer["selectors"]).(*selectorsOwnerImpl)
+		pw.Selectors.(*selectorsImpl).addChannel(selectorsOwner)
+		pw.connection.afterClose = func() {
+			pw.Selectors.(*selectorsImpl).removeChannel(selectorsOwner)
+		}
 	}
 	if pw.connection.localUtils != nil {
 		pw.Devices = pw.connection.localUtils.Devices

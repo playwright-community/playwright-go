@@ -115,7 +115,11 @@ func convertInputFiles(files interface{}, context *browserContextImpl) (*inputFi
 	}
 
 	if result["rootDir"] != nil {
-		converted.DirectoryStream = result["rootDir"].(*channel)
+		if ch, ok := result["rootDir"].(*channel); ok {
+			converted.DirectoryStream = ch
+		} else {
+			converted.DirectoryStream = fromChannel(result["rootDir"]).(*writableStream).channel
+		}
 	} else {
 		converted.Streams = streams
 	}

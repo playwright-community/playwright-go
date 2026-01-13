@@ -60,9 +60,14 @@ func (f *frameImpl) Name() string {
 }
 
 func (f *frameImpl) SetContent(content string, options ...FrameSetContentOptions) error {
-	_, err := f.channel.Send("setContent", map[string]interface{}{
+	overrides := map[string]interface{}{
 		"html": content,
-	}, options)
+	}
+	// timeout is required in Playwright v1.57+ protocol
+	if len(options) == 0 || options[0].Timeout == nil {
+		overrides["timeout"] = f.page.timeoutSettings.NavigationTimeout()
+	}
+	_, err := f.channel.Send("setContent", overrides, options)
 	return err
 }
 
@@ -75,9 +80,14 @@ func (f *frameImpl) Content() (string, error) {
 }
 
 func (f *frameImpl) Goto(url string, options ...FrameGotoOptions) (Response, error) {
-	channel, err := f.channel.Send("goto", map[string]interface{}{
+	overrides := map[string]interface{}{
 		"url": url,
-	}, options)
+	}
+	// timeout is required in Playwright v1.57+ protocol
+	if len(options) == 0 || options[0].Timeout == nil {
+		overrides["timeout"] = f.page.timeoutSettings.NavigationTimeout()
+	}
+	channel, err := f.channel.Send("goto", overrides, options)
 	if err != nil {
 		return nil, fmt.Errorf("Frame.Goto %s: %w", url, err)
 	}
@@ -414,7 +424,7 @@ func (f *frameImpl) DispatchEvent(selector, typ string, eventInit interface{}, o
 		"selector":  selector,
 		"type":      typ,
 		"eventInit": serializeArgument(eventInit),
-	})
+	}, options)
 	return err
 }
 
@@ -505,12 +515,18 @@ func (f *frameImpl) WaitForFunction(expression string, arg interface{}, options 
 	if len(options) == 1 {
 		option = options[0]
 	}
-	result, err := f.channel.Send("waitForFunction", map[string]interface{}{
+	overrides := map[string]interface{}{
 		"expression": expression,
 		"arg":        serializeArgument(arg),
-		"timeout":    option.Timeout,
 		"polling":    option.Polling,
-	})
+	}
+	// timeout is required in Playwright v1.57+ protocol
+	if option.Timeout == nil {
+		overrides["timeout"] = f.page.timeoutSettings.Timeout()
+	} else {
+		overrides["timeout"] = option.Timeout
+	}
+	result, err := f.channel.Send("waitForFunction", overrides)
 	if err != nil {
 		return nil, err
 	}

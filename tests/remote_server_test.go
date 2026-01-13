@@ -20,7 +20,7 @@ func newRemoteServer() (*remoteServer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not start Playwright: %v", err)
 	}
-	cmd := driver.Command("launch-server", "--browser", browserName)
+	cmd := driver.Command("run-server")
 	cmd.Stderr = os.Stderr
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -31,11 +31,17 @@ func newRemoteServer() (*remoteServer, error) {
 		return nil, fmt.Errorf("could not start server: %v", err)
 	}
 	scanner := bufio.NewReader(stdout)
-	url, err := scanner.ReadString('\n')
-	url = strings.TrimRight(url, "\n")
+	line, err := scanner.ReadString('\n')
 	if err != nil {
 		return nil, fmt.Errorf("could not read url: %v", err)
 	}
+	line = strings.TrimSpace(line)
+	// Remove "Listening on " prefix
+	const prefix = "Listening on "
+	if !strings.HasPrefix(line, prefix) {
+		return nil, fmt.Errorf("unexpected output format: %s", line)
+	}
+	url := strings.TrimPrefix(line, prefix)
 	return &remoteServer{
 		url: url,
 		cmd: cmd,
