@@ -23,8 +23,8 @@ func newSelectorsOwner(parent *channelOwner, objectType string, guid string, ini
 }
 
 type selectorsImpl struct {
-	mu            sync.RWMutex               // protects registrations slice
-	contexts      sync.Map                   // map of BrowserContext channels
+	mu            sync.RWMutex // protects registrations slice
+	contexts      sync.Map     // map of BrowserContext channels
 	registrations []map[string]interface{}
 }
 

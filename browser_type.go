@@ -19,7 +19,7 @@ func (b *browserTypeImpl) ExecutablePath() string {
 
 func (b *browserTypeImpl) Launch(options ...BrowserTypeLaunchOptions) (Browser, error) {
 	overrides := map[string]interface{}{}
-		// timeout is required in Playwright v1.57+ protocol
+	// timeout is required in Playwright v1.57+ protocol
 	if len(options) == 0 || options[0].Timeout == nil {
 		overrides["timeout"] = float64(30000) // default 30s
 	}

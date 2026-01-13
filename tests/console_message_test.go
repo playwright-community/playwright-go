@@ -143,8 +143,8 @@ func TestConsoleShouldTriggerCorrectLog(t *testing.T) {
 	headerString := "Access-Control-Allow-Origin"
 	corsString := "CORS"
 	require.Condition(t, func() bool {
-        return strings.Contains(message.Text(), headerString) || strings.Contains(message.Text(), corsString)
-    }, "The text should contain either '%s' or '%s'", headerString, corsString)
+		return strings.Contains(message.Text(), headerString) || strings.Contains(message.Text(), corsString)
+	}, "The text should contain either '%s' or '%s'", headerString, corsString)
 
 	require.Equal(t, "error", message.Type())
 }
