@@ -12,10 +12,11 @@ var (
 )
 
 type locatorImpl struct {
-	frame    *frameImpl
-	selector string
-	options  *LocatorOptions
-	err      error
+	frame       *frameImpl
+	selector    string
+	options     *LocatorOptions
+	err         error
+	description *string
 }
 
 type LocatorOptions LocatorFilterOptions
@@ -63,6 +64,23 @@ func (l *locatorImpl) equals(locator Locator) bool {
 
 func (l *locatorImpl) Err() error {
 	return l.err
+}
+
+func (l *locatorImpl) Describe(description string) Locator {
+	return &locatorImpl{
+		frame:       l.frame,
+		selector:    l.selector,
+		options:     l.options,
+		err:         l.err,
+		description: &description,
+	}
+}
+
+func (l *locatorImpl) Description() (string, error) {
+	if l.description == nil {
+		return "", nil
+	}
+	return *l.description, nil
 }
 
 func (l *locatorImpl) All() ([]Locator, error) {
@@ -125,10 +143,10 @@ func (l *locatorImpl) Blur(options ...LocatorBlurOptions) error {
 		"selector": l.selector,
 		"strict":   true,
 	}
-	if len(options) == 1 {
-		if options[0].Timeout != nil {
-			params["timeout"] = options[0].Timeout
-		}
+	if len(options) == 1 && options[0].Timeout != nil {
+		params["timeout"] = options[0].Timeout
+	} else {
+		params["timeout"] = float64(30000) // default 30s, required in Playwright v1.57+
 	}
 	_, err := l.frame.channel.Send("blur", params)
 	return err

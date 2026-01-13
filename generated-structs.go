@@ -20,6 +20,9 @@ type APIRequestNewContextOptions struct {
 	// a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
 	// `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
 	// with an exact match to the request origin that the certificate is valid for.
+	// Client certificate authentication is only active when at least one client certificate is provided. If you want to
+	// reject all client certificates sent by the server, you need to provide a client certificate with an `origin` that
+	// does not match any of the domains you plan to visit.
 	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
 	// work by replacing `localhost` with `local.playwright`.
 	ClientCertificates []ClientCertificate `json:"clientCertificates"`
@@ -327,8 +330,8 @@ type APIRequestContextPutOptions struct {
 }
 
 type StorageState struct {
-	Cookies []Cookie `json:"cookies"`
-	Origins []Origin `json:"origins"`
+	Cookies []StorageStateCookie `json:"cookies"`
+	Origins []Origin             `json:"origins"`
 }
 
 type NameValue struct {
@@ -367,6 +370,9 @@ type BrowserNewContextOptions struct {
 	// a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
 	// `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
 	// with an exact match to the request origin that the certificate is valid for.
+	// Client certificate authentication is only active when at least one client certificate is provided. If you want to
+	// reject all client certificates sent by the server, you need to provide a client certificate with an `origin` that
+	// does not match any of the domains you plan to visit.
 	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
 	// work by replacing `localhost` with `local.playwright`.
 	ClientCertificates []ClientCertificate `json:"clientCertificates"`
@@ -514,6 +520,9 @@ type BrowserNewPageOptions struct {
 	// a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
 	// `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
 	// with an exact match to the request origin that the certificate is valid for.
+	// Client certificate authentication is only active when at least one client certificate is provided. If you want to
+	// reject all client certificates sent by the server, you need to provide a client certificate with an `origin` that
+	// does not match any of the domains you plan to visit.
 	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
 	// work by replacing `localhost` with `local.playwright`.
 	ClientCertificates []ClientCertificate `json:"clientCertificates"`
@@ -651,12 +660,12 @@ type BrowserStartTracingOptions struct {
 type OptionalCookie struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
-	// Either url or domain / path are required. Optional.
+	// Either `url` or both `domain` and `path` are required. Optional.
 	URL *string `json:"url"`
-	// For the cookie to apply to all subdomains as well, prefix domain with a dot, like this: ".example.com". Either url
-	// or domain / path are required. Optional.
+	// For the cookie to apply to all subdomains as well, prefix domain with a dot, like this: ".example.com". Either
+	// `url` or both `domain` and `path` are required. Optional.
 	Domain *string `json:"domain"`
-	// Either url or domain / path are required Optional.
+	// Either `url` or both `domain` and `path` are required. Optional.
 	Path *string `json:"path"`
 	// Unix time in seconds. Optional.
 	Expires *float64 `json:"expires"`
@@ -666,6 +675,12 @@ type OptionalCookie struct {
 	Secure *bool `json:"secure"`
 	// Optional.
 	SameSite *SameSiteAttribute `json:"sameSite"`
+	// For partitioned third-party cookies (aka
+	// [CHIPS], the
+	// partition key. Optional.
+	//
+	// [CHIPS]: https://developer.mozilla.org/en-US/docs/Web/Privacy/Guides/Privacy_sandbox/Partitioned_cookies)
+	PartitionKey *string `json:"partitionKey"`
 }
 
 type Script struct {
@@ -696,10 +711,11 @@ type Cookie struct {
 	Domain string `json:"domain"`
 	Path   string `json:"path"`
 	// Unix time in seconds.
-	Expires  float64            `json:"expires"`
-	HttpOnly bool               `json:"httpOnly"`
-	Secure   bool               `json:"secure"`
-	SameSite *SameSiteAttribute `json:"sameSite"`
+	Expires      float64            `json:"expires"`
+	HttpOnly     bool               `json:"httpOnly"`
+	Secure       bool               `json:"secure"`
+	SameSite     *SameSiteAttribute `json:"sameSite"`
+	PartitionKey *string            `json:"partitionKey"`
 }
 
 type BrowserContextGrantPermissionsOptions struct {
@@ -847,8 +863,11 @@ type BrowserTypeLaunchOptions struct {
 	ExecutablePath *string `json:"executablePath"`
 	// Firefox user preferences. Learn more about the Firefox user preferences at
 	// [`about:config`].
+	// You can also provide a path to a custom [`policies.json` file] via
+	// `PLAYWRIGHT_FIREFOX_POLICIES_JSON` environment variable.
 	//
 	// [`about:config`]: https://support.mozilla.org/en-US/kb/about-config-editor-firefox
+	// [`policies.json` file]: https://mozilla.github.io/policy-templates/
 	FirefoxUserPrefs map[string]interface{} `json:"firefoxUserPrefs"`
 	// Close the browser process on SIGHUP. Defaults to `true`.
 	HandleSIGHUP *bool `json:"handleSIGHUP"`
@@ -922,6 +941,9 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	// a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
 	// `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
 	// with an exact match to the request origin that the certificate is valid for.
+	// Client certificate authentication is only active when at least one client certificate is provided. If you want to
+	// reject all client certificates sent by the server, you need to provide a client certificate with an `origin` that
+	// does not match any of the domains you plan to visit.
 	// **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
 	// work by replacing `localhost` with `local.playwright`.
 	ClientCertificates []ClientCertificate `json:"clientCertificates"`
@@ -957,8 +979,11 @@ type BrowserTypeLaunchPersistentContextOptions struct {
 	ExtraHttpHeaders map[string]string `json:"extraHTTPHeaders"`
 	// Firefox user preferences. Learn more about the Firefox user preferences at
 	// [`about:config`].
+	// You can also provide a path to a custom [`policies.json` file] via
+	// `PLAYWRIGHT_FIREFOX_POLICIES_JSON` environment variable.
 	//
 	// [`about:config`]: https://support.mozilla.org/en-US/kb/about-config-editor-firefox
+	// [`policies.json` file]: https://mozilla.github.io/policy-templates/
 	FirefoxUserPrefs map[string]interface{} `json:"firefoxUserPrefs"`
 	// Emulates `forced-colors` media feature, supported values are `active`, `none`. See [Page.EmulateMedia] for
 	// more details. Passing `no-override` resets emulation to system defaults. Defaults to `none`.
@@ -1157,6 +1182,9 @@ type ElementHandleClickOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
 	Position *Position `json:"position"`
+	// Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor
+	// position and the provided destination. When set to 1, emits a single `mousemove` event at the destination location.
+	Steps *int `json:"steps"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
@@ -1187,6 +1215,9 @@ type ElementHandleDblclickOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
 	Position *Position `json:"position"`
+	// Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor
+	// position and the provided destination. When set to 1, emits a single `mousemove` event at the destination location.
+	Steps *int `json:"steps"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
@@ -1533,6 +1564,9 @@ type FrameClickOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
 	Position *Position `json:"position"`
+	// Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor
+	// position and the provided destination. When set to 1, emits a single `mousemove` event at the destination location.
+	Steps *int `json:"steps"`
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
 	Strict *bool `json:"strict"`
@@ -1604,6 +1638,9 @@ type FrameDragAndDropOptions struct {
 	// Clicks on the source element at this point relative to the top-left corner of the element's padding box. If not
 	// specified, some visible point of the element is used.
 	SourcePosition *Position `json:"sourcePosition"`
+	// Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between the `mousedown` and `mouseup`
+	// of the drag. When set to 1, emits a single `mousemove` event at the destination location.
+	Steps *int `json:"steps"`
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
 	Strict *bool `json:"strict"`
@@ -2258,9 +2295,6 @@ type KeyboardTypeOptions struct {
 }
 
 type LocatorAriaSnapshotOptions struct {
-	// Generate symbolic reference for each element. One can use `aria-ref=<ref>` locator immediately after capturing the
-	// snapshot to perform actions on the element.
-	Ref *bool `json:"ref"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
@@ -2338,6 +2372,9 @@ type LocatorClickOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
 	Position *Position `json:"position"`
+	// Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor
+	// position and the provided destination. When set to 1, emits a single `mousemove` event at the destination location.
+	Steps *int `json:"steps"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
@@ -2370,6 +2407,9 @@ type LocatorDblclickOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
 	Position *Position `json:"position"`
+	// Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor
+	// position and the provided destination. When set to 1, emits a single `mousemove` event at the destination location.
+	Steps *int `json:"steps"`
 	// Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
 	// be changed by using the [BrowserContext.SetDefaultTimeout] or [Page.SetDefaultTimeout] methods.
 	Timeout *float64 `json:"timeout"`
@@ -2400,6 +2440,9 @@ type LocatorDragToOptions struct {
 	// Clicks on the source element at this point relative to the top-left corner of the element's padding box. If not
 	// specified, some visible point of the element is used.
 	SourcePosition *Position `json:"sourcePosition"`
+	// Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between the `mousedown` and `mouseup`
+	// of the drag. When set to 1, emits a single `mousemove` event at the destination location.
+	Steps *int `json:"steps"`
 	// Drops on the target element at this point relative to the top-left corner of the element's padding box. If not
 	// specified, some visible point of the element is used.
 	TargetPosition *Position `json:"targetPosition"`
@@ -3073,7 +3116,8 @@ type MouseDownOptions struct {
 }
 
 type MouseMoveOptions struct {
-	// Defaults to 1. Sends intermediate `mousemove` events.
+	// Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor
+	// position and the provided destination. When set to 1, emits a single `mousemove` event at the destination location.
 	Steps *int `json:"steps"`
 }
 
@@ -3158,6 +3202,9 @@ type PageClickOptions struct {
 	// A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
 	// the element.
 	Position *Position `json:"position"`
+	// Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor
+	// position and the provided destination. When set to 1, emits a single `mousemove` event at the destination location.
+	Steps *int `json:"steps"`
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
 	Strict *bool `json:"strict"`
@@ -3239,6 +3286,9 @@ type PageDragAndDropOptions struct {
 	// Clicks on the source element at this point relative to the top-left corner of the element's padding box. If not
 	// specified, some visible point of the element is used.
 	SourcePosition *Position `json:"sourcePosition"`
+	// Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between the `mousedown` and `mouseup`
+	// of the drag. When set to 1, emits a single `mousemove` event at the destination location.
+	Steps *int `json:"steps"`
 	// When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
 	// element, the call throws an exception.
 	Strict *bool `json:"strict"`
@@ -4320,6 +4370,18 @@ type Proxy struct {
 	Password *string `json:"password"`
 }
 
+type StorageStateCookie struct {
+	Name   string `json:"name"`
+	Value  string `json:"value"`
+	Domain string `json:"domain"`
+	Path   string `json:"path"`
+	// Unix time in seconds.
+	Expires  float64            `json:"expires"`
+	HttpOnly bool               `json:"httpOnly"`
+	Secure   bool               `json:"secure"`
+	SameSite *SameSiteAttribute `json:"sameSite"`
+}
+
 type Origin struct {
 	Origin       string      `json:"origin"`
 	LocalStorage []NameValue `json:"localStorage"`
@@ -4336,7 +4398,7 @@ type RecordVideo struct {
 
 type OptionalStorageState struct {
 	// Cookies to set for context
-	Cookies []OptionalCookie `json:"cookies"`
+	Cookies []OptionalStorageStateOptionalCookie `json:"cookies"`
 	// localStorage to set for context
 	Origins []Origin `json:"origins"`
 }
@@ -4361,4 +4423,24 @@ type TracingGroupOptionsLocation struct {
 	File   string `json:"file"`
 	Line   *int   `json:"line"`
 	Column *int   `json:"column"`
+}
+
+type OptionalStorageStateOptionalCookie struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+	// Either url or domain / path are required. Optional.
+	URL *string `json:"url"`
+	// For the cookie to apply to all subdomains as well, prefix domain with a dot, like this: ".example.com". Either url
+	// or domain / path are required. Optional.
+	Domain *string `json:"domain"`
+	// Either url or domain / path are required Optional.
+	Path *string `json:"path"`
+	// Unix time in seconds. Optional.
+	Expires *float64 `json:"expires"`
+	// Optional.
+	HttpOnly *bool `json:"httpOnly"`
+	// Optional.
+	Secure *bool `json:"secure"`
+	// Optional.
+	SameSite *SameSiteAttribute `json:"sameSite"`
 }

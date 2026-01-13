@@ -1,8 +1,10 @@
 package playwright
 
 import (
+	"fmt"
 	"net/url"
 	"path"
+	"strings"
 )
 
 type pageAssertionsImpl struct {
@@ -21,6 +23,65 @@ func newPageAssertions(page Page, isNot bool, defaultTimeout *float64) *pageAsse
 	}
 }
 
+// expectOnFrame calls the frame's expect method directly without a selector.
+// This is needed for page-level assertions like ToHaveTitle and ToHaveURL
+// which should not be bound to a specific element.
+func (pa *pageAssertionsImpl) expectOnFrame(
+	expression string,
+	options frameExpectOptions,
+	expected interface{},
+	message string,
+) error {
+	options.IsNot = pa.isNot
+	if options.Timeout == nil {
+		options.Timeout = pa.defaultTimeout
+	}
+	if options.IsNot {
+		message = strings.ReplaceAll(message, "expected to", "expected not to")
+	}
+
+	frame := pa.actualPage.MainFrame().(*frameImpl)
+	overrides := map[string]interface{}{
+		"expression": expression,
+	}
+	result, err := frame.channel.SendReturnAsDict("expect", options, overrides)
+	if err != nil {
+		return err
+	}
+
+	var (
+		received interface{}
+		matches  bool
+		log      []string
+	)
+
+	if v, ok := result["received"]; ok {
+		received = parseResult(v)
+	}
+	if v, ok := result["matches"]; ok {
+		matches = v.(bool)
+	}
+	if v, ok := result["log"]; ok {
+		for _, l := range v.([]interface{}) {
+			log = append(log, l.(string))
+		}
+	}
+
+	if matches == pa.isNot {
+		actual := received
+		logStr := strings.Join(log, "\n")
+		if logStr != "" {
+			logStr = "\nCall log:\n" + logStr
+		}
+		if expected != nil {
+			return fmt.Errorf("%s '%v'\nActual value: %v %s", message, expected, actual, logStr)
+		}
+		return fmt.Errorf("%s\nActual value: %v %s", message, actual, logStr)
+	}
+
+	return nil
+}
+
 func (pa *pageAssertionsImpl) ToHaveTitle(titleOrRegExp interface{}, options ...PageAssertionsToHaveTitleOptions) error {
 	var timeout *float64
 	if len(options) == 1 {
@@ -30,7 +91,7 @@ func (pa *pageAssertionsImpl) ToHaveTitle(titleOrRegExp interface{}, options ...
 	if err != nil {
 		return err
 	}
-	return pa.expect(
+	return pa.expectOnFrame(
 		"to.have.title",
 		frameExpectOptions{ExpectedText: expectedValues, Timeout: timeout},
 		titleOrRegExp,
@@ -57,7 +118,7 @@ func (pa *pageAssertionsImpl) ToHaveURL(urlOrRegExp interface{}, options ...Page
 	if err != nil {
 		return err
 	}
-	return pa.expect(
+	return pa.expectOnFrame(
 		"to.have.url",
 		frameExpectOptions{ExpectedText: expectedValues, Timeout: timeout},
 		urlOrRegExp,

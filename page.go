@@ -746,6 +746,32 @@ func (p *pageImpl) Keyboard() Keyboard {
 	return p.keyboard
 }
 
+func (p *pageImpl) ConsoleMessages() ([]ConsoleMessage, error) {
+	result, err := p.channel.Send("consoleMessages", nil)
+	if err != nil {
+		return nil, err
+	}
+	messages := result.([]interface{})
+	consoleMessages := make([]ConsoleMessage, len(messages))
+	for i, m := range messages {
+		consoleMessages[i] = fromChannel(m).(*consoleMessageImpl)
+	}
+	return consoleMessages, nil
+}
+
+func (p *pageImpl) Requests() ([]Request, error) {
+	result, err := p.channel.Send("requests", nil)
+	if err != nil {
+		return nil, err
+	}
+	requests := result.([]interface{})
+	reqs := make([]Request, len(requests))
+	for i, r := range requests {
+		reqs[i] = fromChannel(r).(*requestImpl)
+	}
+	return reqs, nil
+}
+
 func (p *pageImpl) Mouse() Mouse {
 	return p.mouse
 }

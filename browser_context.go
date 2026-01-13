@@ -91,7 +91,7 @@ func (b *browserContextImpl) NewCDPSession(page interface{}) (CDPSession, error)
 		return nil, err
 	}
 
-	cdpSession := fromChannel(channel).(*cdpSessionImpl)
+	cdpSession := fromChannelWithConnection(channel, b.connection).(*cdpSessionImpl)
 
 	return cdpSession, nil
 }
@@ -104,7 +104,7 @@ func (b *browserContextImpl) NewPage() (Page, error) {
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(channel).(*pageImpl), nil
+	return fromChannelWithConnection(channel, b.connection).(*pageImpl), nil
 }
 
 func (b *browserContextImpl) Cookies(urls ...string) ([]Cookie, error) {
@@ -438,7 +438,7 @@ func (b *browserContextImpl) Close(options ...BrowserContextCloseOptions) error 
 			if err != nil {
 				return nil, err
 			}
-			artifact := fromChannel(response).(*artifactImpl)
+			artifact := fromChannelWithConnection(response, b.connection).(*artifactImpl)
 			// Server side will compress artifact if content is attach or if file is .zip.
 			needCompressed := strings.HasSuffix(strings.ToLower(harMetaData.Path), ".zip")
 			if !needCompressed && harMetaData.Content == HarContentPolicyAttach {
@@ -644,7 +644,7 @@ func (b *browserContextImpl) pause() <-chan error {
 
 func (b *browserContextImpl) onBackgroundPage(ev map[string]interface{}) {
 	b.Lock()
-	p := fromChannel(ev["page"]).(*pageImpl)
+	p := fromChannelWithConnection(ev["page"], b.connection).(*pageImpl)
 	p.browserContext = b
 	b.backgroundPages = append(b.backgroundPages, p)
 	b.Unlock()
@@ -662,15 +662,39 @@ func (b *browserContextImpl) setOptions(options *BrowserNewContextOptions, trace
 		options = &BrowserNewContextOptions{}
 	}
 	b.options = options
-	if b.options != nil && b.options.RecordHarPath != nil {
-		b.harRecorders[""] = harRecordingMetadata{
-			Path:    *b.options.RecordHarPath,
-			Content: b.options.RecordHarContent,
-		}
-	}
 	if tracesDir != nil {
 		b.tracing.tracesDir = *tracesDir
 	}
+}
+
+// initializeHarFromOptions starts HAR recording if RecordHarPath is set in options.
+// This must be called after context creation to properly register the HAR recorder on the server.
+func (b *browserContextImpl) initializeHarFromOptions() error {
+	if b.options == nil || b.options.RecordHarPath == nil {
+		return nil
+	}
+	path := *b.options.RecordHarPath
+	// Determine default content policy based on file extension
+	var content *HarContentPolicy
+	if strings.HasSuffix(strings.ToLower(path), ".zip") {
+		content = HarContentPolicyAttach
+	} else {
+		content = HarContentPolicyEmbed
+	}
+	if b.options.RecordHarContent != nil {
+		content = b.options.RecordHarContent
+	} else if b.options.RecordHarOmitContent != nil && *b.options.RecordHarOmitContent {
+		content = HarContentPolicyOmit
+	}
+	mode := HarModeFull
+	if b.options.RecordHarMode != nil {
+		mode = b.options.RecordHarMode
+	}
+	return b.recordIntoHar(path, browserContextRecordIntoHarOptions{
+		URL:           b.options.RecordHarURLFilter,
+		UpdateContent: content,
+		UpdateMode:    mode,
+	})
 }
 
 func (b *browserContextImpl) BackgroundPages() []Page {
@@ -784,33 +808,49 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 	}
 	bt.createChannelOwner(bt, parent, objectType, guid, initializer)
 	if parent.objectType == "Browser" {
-		bt.browser = fromChannel(parent.channel).(*browserImpl)
+		bt.browser = fromChannelWithConnection(parent.channel, bt.connection).(*browserImpl)
 		bt.browser.contexts = append(bt.browser.contexts, bt)
 	}
-	bt.tracing = fromChannel(initializer["tracing"]).(*tracingImpl)
-	bt.request = fromChannel(initializer["requestContext"]).(*apiRequestContextImpl)
+	bt.tracing = fromChannelWithConnection(initializer["tracing"], bt.connection).(*tracingImpl)
+	bt.request = fromChannelWithConnection(initializer["requestContext"], bt.connection).(*apiRequestContextImpl)
 	bt.clock = newClock(bt)
+
+	// Register this context with the selectors manager for custom selector engines
+	if bt.browser != nil && bt.browser.browserType != nil {
+		if browserType, ok := bt.browser.browserType.(*browserTypeImpl); ok && browserType.playwright != nil {
+			browserType.playwright.Selectors.(*selectorsImpl).addContext(bt)
+		}
+	}
+
 	bt.channel.On("bindingCall", func(params map[string]interface{}) {
-		bt.onBinding(fromChannel(params["binding"]).(*bindingCallImpl))
+		bt.onBinding(fromChannelWithConnection(params["binding"], bt.connection).(*bindingCallImpl))
 	})
 
-	bt.channel.On("close", bt.onClose)
+	bt.channel.On("close", func() {
+		// Unregister this context from the selectors manager
+		if bt.browser != nil && bt.browser.browserType != nil {
+			if browserType, ok := bt.browser.browserType.(*browserTypeImpl); ok && browserType.playwright != nil {
+				browserType.playwright.Selectors.(*selectorsImpl).removeContext(bt)
+			}
+		}
+		bt.onClose()
+	})
 	bt.channel.On("page", func(payload map[string]interface{}) {
-		bt.onPage(fromChannel(payload["page"]).(*pageImpl))
+		bt.onPage(fromChannelWithConnection(payload["page"], bt.connection).(*pageImpl))
 	})
 	bt.channel.On("route", func(params map[string]interface{}) {
 		bt.channel.CreateTask(func() {
-			bt.onRoute(fromChannel(params["route"]).(*routeImpl))
+			bt.onRoute(fromChannelWithConnection(params["route"], bt.connection).(*routeImpl))
 		})
 	})
 	bt.channel.On("webSocketRoute", func(params map[string]interface{}) {
 		bt.channel.CreateTask(func() {
-			bt.onWebSocketRoute(fromChannel(params["webSocketRoute"]).(*webSocketRouteImpl))
+			bt.onWebSocketRoute(fromChannelWithConnection(params["webSocketRoute"], bt.connection).(*webSocketRouteImpl))
 		})
 	})
 	bt.channel.On("backgroundPage", bt.onBackgroundPage)
 	bt.channel.On("serviceWorker", func(params map[string]interface{}) {
-		bt.onServiceWorker(fromChannel(params["worker"]).(*workerImpl))
+		bt.onServiceWorker(fromChannelWithConnection(params["worker"], bt.connection).(*workerImpl))
 	})
 	bt.channel.On("console", func(ev map[string]interface{}) {
 		message := newConsoleMessage(ev)
@@ -820,7 +860,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 		}
 	})
 	bt.channel.On("dialog", func(params map[string]interface{}) {
-		dialog := fromChannel(params["dialog"]).(*dialogImpl)
+		dialog := fromChannelWithConnection(params["dialog"], bt.connection).(*dialogImpl)
 		go func() {
 			hasListeners := bt.Emit("dialog", dialog)
 			page := dialog.page
@@ -857,7 +897,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 		},
 	)
 	bt.channel.On("request", func(ev map[string]interface{}) {
-		request := fromChannel(ev["request"]).(*requestImpl)
+		request := fromChannelWithConnection(ev["request"], bt.connection).(*requestImpl)
 		page := fromNullableChannel(ev["page"])
 		bt.Emit("request", request)
 		if page != nil {
@@ -865,7 +905,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 		}
 	})
 	bt.channel.On("requestFailed", func(ev map[string]interface{}) {
-		request := fromChannel(ev["request"]).(*requestImpl)
+		request := fromChannelWithConnection(ev["request"], bt.connection).(*requestImpl)
 		failureText := ev["failureText"]
 		if failureText != nil {
 			request.failureText = failureText.(string)
@@ -879,7 +919,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 	})
 
 	bt.channel.On("requestFinished", func(ev map[string]interface{}) {
-		request := fromChannel(ev["request"]).(*requestImpl)
+		request := fromChannelWithConnection(ev["request"], bt.connection).(*requestImpl)
 		response := fromNullableChannel(ev["response"])
 		page := fromNullableChannel(ev["page"])
 		request.setResponseEndTiming(ev["responseEndTiming"].(float64))
@@ -892,7 +932,7 @@ func newBrowserContext(parent *channelOwner, objectType string, guid string, ini
 		}
 	})
 	bt.channel.On("response", func(ev map[string]interface{}) {
-		response := fromChannel(ev["response"]).(*responseImpl)
+		response := fromChannelWithConnection(ev["response"], bt.connection).(*responseImpl)
 		page := fromNullableChannel(ev["page"])
 		bt.Emit("response", response)
 		if page != nil {

@@ -93,6 +93,9 @@ func (b *browserImpl) NewContext(options ...BrowserNewContextOptions) (BrowserCo
 	context := fromChannel(channel).(*browserContextImpl)
 	context.browser = b
 	b.browserType.(*browserTypeImpl).didCreateContext(context, &option, nil)
+	if err := context.initializeHarFromOptions(); err != nil {
+		return nil, err
+	}
 	return context, nil
 }
 

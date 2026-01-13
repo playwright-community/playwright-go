@@ -1,8 +1,9 @@
 package playwright
 
 type consoleMessageImpl struct {
-	event map[string]interface{}
-	page  Page
+	event  map[string]interface{}
+	page   Page
+	worker Worker
 }
 
 func (c *consoleMessageImpl) Type() string {
@@ -36,12 +37,20 @@ func (c *consoleMessageImpl) Page() Page {
 	return c.page
 }
 
+func (c *consoleMessageImpl) Worker() (Worker, error) {
+	return c.worker, nil
+}
+
 func newConsoleMessage(event map[string]interface{}) *consoleMessageImpl {
 	bt := &consoleMessageImpl{}
 	bt.event = event
 	page := fromNullableChannel(event["page"])
 	if page != nil {
 		bt.page = page.(*pageImpl)
+	}
+	worker := fromNullableChannel(event["worker"])
+	if worker != nil {
+		bt.worker = worker.(*workerImpl)
 	}
 	return bt
 }
