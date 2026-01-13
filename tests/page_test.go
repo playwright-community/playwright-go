@@ -1339,7 +1339,8 @@ func TestPageRequests(t *testing.T) {
 	for i := 0; i < 99; i++ {
 		path := fmt.Sprintf("/fetch%d", i)
 		server.SetRoute(path, func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("response"))
+			_, err := w.Write([]byte("response"))
+			require.NoError(t, err)
 		})
 	}
 
