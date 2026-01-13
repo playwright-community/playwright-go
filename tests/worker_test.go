@@ -147,3 +147,73 @@ func TestWorkerShouldClearUponCrossProcessNavigation(t *testing.T) {
 	require.True(t, destroyed)
 	require.Equal(t, 0, len(page.Workers()))
 }
+
+// TestConsoleMessageWorker verifies that ConsoleMessage.Worker() returns the worker
+// Based on upstream test: playwright/tests/page/workers.spec.ts
+func TestConsoleMessageWorker(t *testing.T) {
+	BeforeEach(t)
+
+	// Create a worker and capture console message from it
+	workerChan := make(chan playwright.Worker, 1)
+	page.Once("worker", func(worker playwright.Worker) {
+		workerChan <- worker
+	})
+
+	consoleChan := make(chan playwright.ConsoleMessage, 1)
+	page.Once("console", func(message playwright.ConsoleMessage) {
+		consoleChan <- message
+	})
+
+	// Create a worker that logs a message
+	_, err := page.Evaluate(`() => {
+		const workerCode = 'console.log("hello from worker")';
+		const blob = new Blob([workerCode], { type: 'application/javascript' });
+		const worker = new Worker(URL.createObjectURL(blob));
+	}`)
+	require.NoError(t, err)
+
+	// Wait for worker creation
+	worker := <-workerChan
+	require.NotNil(t, worker)
+
+	// Wait for console message
+	message := <-consoleChan
+	require.NotNil(t, message)
+
+	// Verify the message is from the worker
+	require.Equal(t, "hello from worker", message.Text())
+
+	msgWorker, err := message.Worker()
+	require.NoError(t, err)
+	require.Equal(t, worker, msgWorker, "console message should reference the worker")
+
+	// Worker console messages also have a page reference (they're emitted to both)
+	msgPage := message.Page()
+	require.Equal(t, page, msgPage, "worker console messages are also associated with the page")
+}
+
+// TestConsoleMessageWorkerNil verifies that page console messages have nil worker
+func TestConsoleMessageWorkerNil(t *testing.T) {
+	BeforeEach(t)
+
+	consoleChan := make(chan playwright.ConsoleMessage, 1)
+	page.Once("console", func(message playwright.ConsoleMessage) {
+		consoleChan <- message
+	})
+
+	_, err := page.Evaluate(`() => console.log('hello from page')`)
+	require.NoError(t, err)
+
+	message := <-consoleChan
+	require.NotNil(t, message)
+	require.Equal(t, "hello from page", message.Text())
+
+	// Page console messages should not have a worker
+	msgWorker, err := message.Worker()
+	require.NoError(t, err)
+	require.Nil(t, msgWorker, "page console messages should not have a worker")
+
+	// But should have a page
+	msgPage := message.Page()
+	require.Equal(t, page, msgPage)
+}

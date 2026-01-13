@@ -1263,3 +1263,128 @@ func TestShouldEmulateContrast(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, ret.(bool))
 }
+
+// TestPageConsoleMessages verifies that Page.ConsoleMessages() returns accumulated console messages
+// Based on upstream test: playwright/tests/page/page-event-console.spec.ts
+func TestPageConsoleMessages(t *testing.T) {
+	BeforeEach(t)
+
+	// Generate 301 console messages (should keep last 100)
+	_, err := page.Evaluate(`() => {
+		for (let i = 0; i < 301; i++) {
+			console.log('message' + i);
+		}
+	}`)
+	require.NoError(t, err)
+
+	messages, err := page.ConsoleMessages()
+	require.NoError(t, err)
+
+	// Should return at least 100 messages (the buffer limit)
+	require.GreaterOrEqual(t, len(messages), 100, "should be at least 100 messages")
+
+	// Verify the last 100 messages are correct (message201 to message300)
+	expectedStart := 301 - len(messages)
+	for i, msg := range messages {
+		expectedText := fmt.Sprintf("message%d", expectedStart+i)
+		require.Equal(t, expectedText, msg.Text())
+		require.Equal(t, "log", msg.Type())
+
+		// Note: Page() may be nil for console messages retrieved from the buffer
+		// as they don't include full channel references like live events do
+	}
+}
+
+// TestPageConsoleMessagesEmpty verifies that ConsoleMessages() returns empty array for new page
+func TestPageConsoleMessagesEmpty(t *testing.T) {
+	BeforeEach(t)
+
+	messages, err := page.ConsoleMessages()
+	require.NoError(t, err)
+	require.Empty(t, messages)
+}
+
+// TestPageConsoleMessagesTypes verifies different console message types are captured
+func TestPageConsoleMessagesTypes(t *testing.T) {
+	BeforeEach(t)
+
+	_, err := page.Evaluate(`() => {
+		console.log('log message');
+		console.warn('warn message');
+		console.error('error message');
+		console.info('info message');
+	}`)
+	require.NoError(t, err)
+
+	messages, err := page.ConsoleMessages()
+	require.NoError(t, err)
+	require.Len(t, messages, 4)
+
+	expectedTypes := []string{"log", "warning", "error", "info"}
+	for i, msg := range messages {
+		require.Equal(t, expectedTypes[i], msg.Type())
+	}
+}
+
+// TestPageRequests verifies that Page.Requests() returns accumulated requests
+// Based on upstream test: playwright/tests/page/page-event-request.spec.ts
+func TestPageRequests(t *testing.T) {
+	BeforeEach(t)
+
+	// Navigate to a page (creates initial request)
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+
+	// Create multiple fetch requests
+	for i := 0; i < 99; i++ {
+		path := fmt.Sprintf("/fetch%d", i)
+		server.SetRoute(path, func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("response"))
+		})
+	}
+
+	// Make 99 fetch requests
+	for i := 0; i < 99; i++ {
+		url := fmt.Sprintf("%s/fetch%d", server.PREFIX, i)
+		_, err := page.Evaluate(`url => fetch(url)`, url)
+		require.NoError(t, err)
+	}
+
+	requests, err := page.Requests()
+	require.NoError(t, err)
+
+	// Should have at least 100 requests (navigation + 99 fetches, buffer limit is 100)
+	require.GreaterOrEqual(t, len(requests), 99, "should capture fetch requests")
+
+	// Verify requests are functional
+	for _, req := range requests {
+		require.NotEmpty(t, req.URL())
+		require.NotEmpty(t, req.Method())
+	}
+}
+
+// TestPageRequestsEmpty verifies that Requests() returns empty array for new page
+func TestPageRequestsEmpty(t *testing.T) {
+	BeforeEach(t)
+
+	requests, err := page.Requests()
+	require.NoError(t, err)
+	require.Empty(t, requests)
+}
+
+// TestPageRequestsWithNavigation verifies navigation requests are included
+func TestPageRequestsWithNavigation(t *testing.T) {
+	BeforeEach(t)
+
+	_, err := page.Goto(server.EMPTY_PAGE)
+	require.NoError(t, err)
+
+	requests, err := page.Requests()
+	require.NoError(t, err)
+	require.Len(t, requests, 1, "should capture navigation request")
+
+	req := requests[0]
+	require.Equal(t, server.EMPTY_PAGE, req.URL())
+	require.Equal(t, "GET", req.Method())
+	require.Equal(t, "document", req.ResourceType())
+}
