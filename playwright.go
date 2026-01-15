@@ -30,6 +30,16 @@ func (p *Playwright) Stop() error {
 	return p.connection.Stop()
 }
 
+// Pid returns the process ID of the Playwright driver process, or 0 if not available
+func (p *Playwright) Pid() int {
+	if pt, ok := p.connection.transport.(*pipeTransport); ok {
+		if pt.process != nil {
+			return pt.process.Pid
+		}
+	}
+	return 0
+}
+
 func (p *Playwright) setSelectors(selectors Selectors) {
 	// Selectors has been moved to client-side only in Playwright v1.57+
 	if p.initializer["selectors"] != nil {
