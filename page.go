@@ -7,6 +7,7 @@ import (
 	"os"
 	"slices"
 	"sync"
+	"sync/atomic"
 
 	"github.com/playwright-community/playwright-go/internal/safe"
 )
@@ -30,7 +31,7 @@ type pageImpl struct {
 	ownedContext    BrowserContext
 	bindings        *safe.SyncMap[string, BindingCallFunction]
 	closeReason     *string
-	closeWasCalled  bool
+	closeWasCalled  atomic.Bool
 	harRouters      []*harRouter
 	locatorHandlers map[float64]*locatorHandlerEntry
 }
@@ -125,7 +126,7 @@ func (p *pageImpl) Close(options ...PageCloseOptions) error {
 	if len(options) == 1 {
 		p.closeReason = options[0].Reason
 	}
-	p.closeWasCalled = true
+	p.closeWasCalled.Store(true)
 	_, err := p.channel.Send("close", options)
 	if err == nil && p.ownedContext != nil {
 		err = p.ownedContext.Close()
@@ -746,6 +747,32 @@ func (p *pageImpl) Keyboard() Keyboard {
 	return p.keyboard
 }
 
+func (p *pageImpl) ConsoleMessages() ([]ConsoleMessage, error) {
+	result, err := p.channel.Send("consoleMessages", nil)
+	if err != nil {
+		return nil, err
+	}
+	messages := result.([]interface{})
+	consoleMessages := make([]ConsoleMessage, len(messages))
+	for i, m := range messages {
+		consoleMessages[i] = newConsoleMessage(m.(map[string]interface{}))
+	}
+	return consoleMessages, nil
+}
+
+func (p *pageImpl) Requests() ([]Request, error) {
+	result, err := p.channel.Send("requests", nil)
+	if err != nil {
+		return nil, err
+	}
+	requests := result.([]interface{})
+	reqs := make([]Request, len(requests))
+	for i, r := range requests {
+		reqs[i] = fromChannel(r).(*requestImpl)
+	}
+	return reqs, nil
+}
+
 func (p *pageImpl) Mouse() Mouse {
 	return p.mouse
 }
@@ -942,7 +969,7 @@ func (p *pageImpl) onRoute(route *routeImpl) {
 	url := route.Request().URL()
 	for _, handlerEntry := range routes {
 		// If the page was closed we stall all requests right away.
-		if p.closeWasCalled || p.browserContext.closeWasCalled {
+		if p.closeWasCalled.Load() || p.browserContext.closeWasCalled.Load() {
 			return
 		}
 		if !handlerEntry.Matches(url) {

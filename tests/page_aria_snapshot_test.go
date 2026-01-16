@@ -100,20 +100,7 @@ func TestShouldSnapshotComplex(t *testing.T) {
 }
 
 func TestShouldSnapshotWithRef(t *testing.T) {
-	BeforeEach(t)
-
-	require.NoError(t, page.SetContent(`<ul><li><a href="about:blank">link</a></li></ul>`))
-	expected := Unshift(`
-	- list [ref=s1e3]:
-		- listitem [ref=s1e4]:
-			- link "link" [ref=s1e5]:
-				- /url: about:blank
-	`)
-	ariaSnapshot, err := page.Locator("body").AriaSnapshot(playwright.LocatorAriaSnapshotOptions{
-		Ref: playwright.Bool(true),
-	})
-	require.NoError(t, err)
-	require.Equal(t, expected, ariaSnapshot)
+	t.Skip("the Ref option was removed in Playwright v1.53")
 }
 
 func TestShouldSnapshotWithUnexpectedChildrenEqual(t *testing.T) {

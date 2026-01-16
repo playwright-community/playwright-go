@@ -179,15 +179,15 @@ func TestBrowserContextAddCookies(t *testing.T) {
 
 	require.Equal(t, []playwright.Cookie{
 		{
-			Name:    "password",
-			Value:   "123456",
-			Domain:  "127.0.0.1",
-			Path:    "/",
-			Expires: -1,
-
-			HttpOnly: false,
-			Secure:   false,
-			SameSite: sameSite,
+			Name:         "password",
+			Value:        "123456",
+			Domain:       "127.0.0.1",
+			Path:         "/",
+			Expires:      -1,
+			HttpOnly:     false,
+			Secure:       false,
+			SameSite:     sameSite,
+			PartitionKey: playwright.String(""),
 		},
 	}, cookies)
 
@@ -281,58 +281,8 @@ func TestBrowserContextUnrouteShouldWork(t *testing.T) {
 }
 
 func TestBrowserContextShouldReturnBackgroundPage(t *testing.T) {
-	BeforeEach(t)
-
-	if !isChromium {
-		t.Skip()
-	}
-	if runtime.GOOS == "windows" {
-		t.Skip("flaky on windows")
-	}
-	extensionPath := Asset("simple-extension")
-	context, err := browserType.LaunchPersistentContext(
-		t.TempDir(),
-		playwright.BrowserTypeLaunchPersistentContextOptions{
-			Headless: playwright.Bool(false),
-			Args: []string{
-				fmt.Sprintf("--disable-extensions-except=%s", extensionPath),
-				fmt.Sprintf("--load-extension=%s", extensionPath),
-			},
-		},
-	)
-	require.NoError(t, err)
-	var page playwright.Page
-	if len(context.BackgroundPages()) == 1 {
-		page = context.BackgroundPages()[0]
-	} else {
-		ret, err := context.WaitForEvent("backgroundPage", playwright.BrowserContextWaitForEventOptions{
-			Timeout: playwright.Float(1000),
-		})
-		if err != nil {
-			// probably missing event
-			if len(context.BackgroundPages()) == 1 {
-				page = context.BackgroundPages()[0]
-			} else {
-				t.Fatal(err)
-			}
-		} else {
-			page = ret.(playwright.Page)
-		}
-	}
-	require.NotNil(t, page)
-	contains := func(pages []playwright.Page, page playwright.Page) bool {
-		for _, p := range pages {
-			if p == page {
-				return true
-			}
-		}
-		return false
-	}
-	require.False(t, contains(context.Pages(), page))
-	require.True(t, contains(context.BackgroundPages(), page))
-	context.Close()
-	require.Len(t, context.BackgroundPages(), 0)
-	require.Len(t, context.Pages(), 0)
+	// Background pages have been removed from Chromium together with Manifest V2 extensions
+	t.Skip("Background pages are deprecated - Manifest V2 extensions no longer supported in Chromium")
 }
 
 func TestPageEventShouldHaveURL(t *testing.T) {

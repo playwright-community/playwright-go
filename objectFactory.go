@@ -1,13 +1,24 @@
 package playwright
 
+// dummyObject is a placeholder for unimplemented protocol objects (Android, Electron, etc.)
+type dummyObject struct {
+	channelOwner
+}
+
+func newDummyObject(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *dummyObject {
+	d := &dummyObject{}
+	d.createChannelOwner(d, parent, objectType, guid, initializer)
+	return d
+}
+
 func createObjectFactory(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) interface{} {
 	switch objectType {
 	case "Android":
-		return nil
+		return newDummyObject(parent, objectType, guid, initializer)
 	case "AndroidSocket":
-		return nil
+		return newDummyObject(parent, objectType, guid, initializer)
 	case "AndroidDevice":
-		return nil
+		return newDummyObject(parent, objectType, guid, initializer)
 	case "APIRequestContext":
 		return newAPIRequestContext(parent, objectType, guid, initializer)
 	case "Artifact":
@@ -25,9 +36,9 @@ func createObjectFactory(parent *channelOwner, objectType string, guid string, i
 	case "Dialog":
 		return newDialog(parent, objectType, guid, initializer)
 	case "Electron":
-		return nil
+		return newDummyObject(parent, objectType, guid, initializer)
 	case "ElectronApplication":
-		return nil
+		return newDummyObject(parent, objectType, guid, initializer)
 	case "ElementHandle":
 		return newElementHandle(parent, objectType, guid, initializer)
 	case "Frame":

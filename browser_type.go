@@ -19,6 +19,10 @@ func (b *browserTypeImpl) ExecutablePath() string {
 
 func (b *browserTypeImpl) Launch(options ...BrowserTypeLaunchOptions) (Browser, error) {
 	overrides := map[string]interface{}{}
+	// timeout is required in Playwright v1.57+ protocol
+	if len(options) == 0 || options[0].Timeout == nil {
+		overrides["timeout"] = float64(30000) // default 30s
+	}
 	if len(options) == 1 && options[0].Env != nil {
 		overrides["env"] = serializeMapToNameAndValue(options[0].Env)
 		options[0].Env = nil
@@ -35,6 +39,10 @@ func (b *browserTypeImpl) Launch(options ...BrowserTypeLaunchOptions) (Browser, 
 func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ...BrowserTypeLaunchPersistentContextOptions) (BrowserContext, error) {
 	overrides := map[string]interface{}{
 		"userDataDir": userDataDir,
+	}
+	// timeout is required in Playwright v1.57+ protocol
+	if len(options) == 0 || options[0].Timeout == nil {
+		overrides["timeout"] = float64(30000) // default 30s
 	}
 	option := &BrowserNewContextOptions{}
 	var tracesDir *string = nil
@@ -87,12 +95,15 @@ func (b *browserTypeImpl) LaunchPersistentContext(userDataDir string, options ..
 			options[0].RecordHarOmitContent = nil
 		}
 	}
-	channel, err := b.channel.Send("launchPersistentContext", options, overrides)
+	response, err := b.channel.SendReturnAsDict("launchPersistentContext", options, overrides)
 	if err != nil {
 		return nil, err
 	}
-	context := fromChannel(channel).(*browserContextImpl)
+	context := fromChannel(response["context"]).(*browserContextImpl)
 	b.didCreateContext(context, option, tracesDir)
+	if err := context.initializeHarFromOptions(); err != nil {
+		return nil, err
+	}
 	return context, nil
 }
 
@@ -100,8 +111,13 @@ func (b *browserTypeImpl) Connect(wsEndpoint string, options ...BrowserTypeConne
 	overrides := map[string]interface{}{
 		"wsEndpoint": wsEndpoint,
 		"headers": map[string]string{
-			"x-playwright-browser": b.Name(),
+			"x-playwright-browser":        b.Name(),
+			"x-playwright-launch-options": "{}",
 		},
+	}
+	// timeout is required in Playwright v1.57+ protocol
+	if len(options) == 0 || options[0].Timeout == nil {
+		overrides["timeout"] = float64(0) // default no timeout
 	}
 	if len(options) == 1 {
 		if options[0].Headers != nil {
@@ -146,6 +162,10 @@ func (b *browserTypeImpl) Connect(wsEndpoint string, options ...BrowserTypeConne
 func (b *browserTypeImpl) ConnectOverCDP(endpointURL string, options ...BrowserTypeConnectOverCDPOptions) (Browser, error) {
 	overrides := map[string]interface{}{
 		"endpointURL": endpointURL,
+	}
+	// timeout is required in Playwright v1.57+ protocol
+	if len(options) == 0 || options[0].Timeout == nil {
+		overrides["timeout"] = float64(30000) // default 30s
 	}
 	if len(options) == 1 {
 		if options[0].Headers != nil {

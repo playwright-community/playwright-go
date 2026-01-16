@@ -41,13 +41,20 @@ func (r *apiRequestImpl) NewContext(options ...APIRequestNewContextOptions) (API
 			options[0].StorageState = storageState
 			options[0].StorageStatePath = nil
 		}
+		if options[0].Timeout != nil {
+			overrides["timeout"] = options[0].Timeout
+		}
 	}
 
 	channel, err := r.channel.Send("newRequest", options, overrides)
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(channel).(*apiRequestContextImpl), nil
+	ctx := fromChannel(channel).(*apiRequestContextImpl)
+	if len(options) == 1 && options[0].Timeout != nil {
+		ctx.defaultTimeout = options[0].Timeout
+	}
+	return ctx, nil
 }
 
 func newApiRequestImpl(pw *Playwright) *apiRequestImpl {
@@ -56,8 +63,9 @@ func newApiRequestImpl(pw *Playwright) *apiRequestImpl {
 
 type apiRequestContextImpl struct {
 	channelOwner
-	tracing     *tracingImpl
-	closeReason *string
+	tracing        *tracingImpl
+	closeReason    *string
+	defaultTimeout *float64
 }
 
 func (r *apiRequestContextImpl) Dispose(options ...APIRequestContextDisposeOptions) error {
@@ -207,6 +215,10 @@ func (r *apiRequestContextImpl) innerFetch(url string, request Request, options 
 			overrides["params"] = serializeMapToNameValue(options[0].Params)
 			options[0].Params = nil
 		}
+		// Use context-level timeout as default if no per-request timeout specified
+		if options[0].Timeout == nil && r.defaultTimeout != nil {
+			overrides["timeout"] = *r.defaultTimeout
+		}
 	}
 
 	response, err := r.channel.Send("fetch", options, overrides)
@@ -312,7 +324,9 @@ func (r *apiRequestContextImpl) StorageState(path ...string) (*StorageState, err
 func newAPIRequestContext(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *apiRequestContextImpl {
 	rc := &apiRequestContextImpl{}
 	rc.createChannelOwner(rc, parent, objectType, guid, initializer)
-	rc.tracing = fromChannel(initializer["tracing"]).(*tracingImpl)
+	if tracingValue := initializer["tracing"]; tracingValue != nil {
+		rc.tracing = fromNullableChannel(tracingValue).(*tracingImpl)
+	}
 	return rc
 }
 
