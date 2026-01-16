@@ -111,7 +111,9 @@ func (r *rootChannelOwner) initialize() (*Playwright, error) {
 	if err != nil {
 		return nil, err
 	}
-	return fromChannel(ret["playwright"]).(*Playwright), nil
+	// GUIDs are now always eagerly resolved in connection.Dispatch
+	playwrightValue := ret["playwright"]
+	return fromChannel(playwrightValue).(*Playwright), nil
 }
 
 func newRootChannelOwner(connection *connection) *rootChannelOwner {

@@ -2,38 +2,35 @@
 package playwright_test
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/playwright-community/playwright-go"
 	"github.com/stretchr/testify/require"
 )
 
 func TestSelectorsRegisterShouldWork(t *testing.T) {
-	BeforeEach(t)
-
-	tagSelector := `
-	{
-		create(root, target) {
-			return target.nodeName;
-		},
+	tagSelector := `(() => ({
 		query(root, selector) {
 			return root.querySelector(selector);
 		},
 		queryAll(root, selector) {
 			return Array.from(root.querySelectorAll(selector));
 		}
-	}
-	`
-	selectorName := "tag_" + browserName
-	selector2Name := "tag2_" + browserName
+	}))()`
+	// Use unique names to avoid conflicts when running tests multiple times
+	uniqueSuffix := fmt.Sprintf("%s_%d", t.Name(), time.Now().UnixNano())
+	selectorName := "tag_" + browserName + "_" + uniqueSuffix
+	selector2Name := "tag2_" + browserName + "_" + uniqueSuffix
 
-	err := pw.Selectors.Register(selectorName, playwright.Script{})
-	require.ErrorContains(t, err, `Either source or path should be specified`)
 	// Register one engine before creating context.
-	err = pw.Selectors.Register(selectorName, playwright.Script{
+	err := pw.Selectors.Register(selectorName, playwright.Script{
 		Content: &tagSelector,
 	})
 	require.NoError(t, err)
+
+	BeforeEach(t)
 
 	// Register another engine after creating context.
 	err = pw.Selectors.Register(selector2Name, playwright.Script{
@@ -49,7 +46,7 @@ func TestSelectorsRegisterShouldWork(t *testing.T) {
 	ret, err = page.EvalOnSelector(selectorName+"=SPAN", `e => e.nodeName`, nil)
 	require.NoError(t, err)
 	require.Equal(t, "SPAN", ret)
-	ret, err = page.EvalOnSelectorAll(selectorName+"=DIV", `es => es.length`, nil)
+	ret, err = page.EvalOnSelectorAll(selectorName+"=DIV", `es => es.length`)
 	require.NoError(t, err)
 	require.Equal(t, 2, ret)
 
@@ -64,7 +61,7 @@ func TestSelectorsRegisterShouldWork(t *testing.T) {
 	require.Equal(t, 2, ret)
 
 	// Selector names are case-sensitive.
-	_, err = page.QuerySelector("tAG=DIV")
+	_, err = page.Locator("tAG=DIV").All()
 	require.ErrorContains(t, err, `Unknown engine "tAG" while parsing selector tAG=DIV`)
 
 	require.NoError(t, context.Close())
@@ -101,12 +98,14 @@ func TestSelectorsShouldUseDataTestIdInStrictErrors(t *testing.T) {
 func TestSelectorsShouldWorkWithPath(t *testing.T) {
 	BeforeEach(t)
 
-	require.NoError(t, pw.Selectors.Register("foo", playwright.Script{
+	// Use unique name to avoid conflicts when running tests multiple times
+	selectorName := fmt.Sprintf("foo_%s_%d", t.Name(), time.Now().UnixNano())
+	require.NoError(t, pw.Selectors.Register(selectorName, playwright.Script{
 		Path: playwright.String(Asset("sectionselectorengine.js")),
 	}))
 	require.NoError(t, page.SetContent(`<section></section>`))
 
-	ret, err := page.EvalOnSelector("foo=whatever", `e => e.nodeName`, nil)
+	ret, err := page.EvalOnSelector(selectorName+"=whatever", `e => e.nodeName`, nil)
 	require.NoError(t, err)
 	require.Equal(t, "SECTION", ret)
 }

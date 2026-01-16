@@ -20,20 +20,20 @@ BROWSER=chromium HEADLESS=1 go test -v --race ./...
 ### Roll
 
 1. Find out to which upstream version you want to roll, and change the value of `playwrightCliVersion` in the **run.go** to the new version.
-1. Download current version of Playwright driver `go run scripts/install-browsers/main.go`
-1. Apply patch `bash scripts/apply-patch.sh`
-1. Fix merge conflicts if any, otherwise ignore this step. Once you are happy you can commit the changes `cd playwright; git commit -am "apply patch" && cd ..`
-1. Regenerate a new patch `bash scripts/update-patch.sh`
-1. Generate go code `go generate ./...`
+2. Download current version of Playwright driver `go run scripts/install-browsers/main.go`
+3. Apply patch `bash scripts/apply-patch.sh`
+4. Fix merge conflicts if any, otherwise ignore this step. Once you are happy you can commit the changes `cd playwright; git commit -am "apply patch" && cd ..`
+5. Regenerate a new patch `bash scripts/update-patch.sh`
+6. Generate go code `go generate ./...`
 
 To adapt to the new version of Playwright's protocol and feature updates, you may need to modify the patch. Refer to the following steps:
 
 1. Apply patch `bash scripts/apply-patch.sh`
-1. `cd playwright`
-1. Revert the patch`git reset HEAD~1`
-1. Modify the files under `docs/src/api`, etc. as needed. Available references:
+2. `cd playwright`
+3. Revert the patch`git reset HEAD~1`
+4. Modify the files under `docs/src/api`, etc. as needed. Available references:
     - Protocol `packages/protocol/src/protocol.yml`
     - [Playwright python](https://github.com/microsoft/playwright-python)
-1. Commit the changes `git commit -am "apply patch"`
-1. Regenerate a new patch `bash scripts/update-patch.sh`
-1. Generate go code `go generate ./...`.
+5. Commit the changes `git commit -am "apply patch"`
+6. Regenerate a new patch `bash scripts/update-patch.sh`
+7. Generate go code `go generate ./...`.

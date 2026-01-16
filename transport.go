@@ -21,6 +21,7 @@ type pipeTransport struct {
 	bufReader *bufio.Reader
 	closed    chan struct{}
 	onClose   func() error
+	process   *os.Process
 }
 
 func (t *pipeTransport) Poll() (*message, error) {
@@ -136,6 +137,8 @@ func newPipeTransport(driver *PlaywrightDriver, stderr io.Writer) (transport, er
 	if err := cmd.Start(); err != nil {
 		return nil, fmt.Errorf("could not start driver: %w", err)
 	}
+
+	t.process = cmd.Process
 
 	return t, nil
 }

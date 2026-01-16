@@ -128,7 +128,7 @@ func TestShoulSupportGlobalTimeoutOption(t *testing.T) {
 		time.Sleep(200 * time.Millisecond)
 	})
 	_, err = request.Get(server.PREFIX + "/empty.html")
-	require.Contains(t, err.Error(), `Request timed out after`)
+	require.ErrorContains(t, err, `Timeout 100ms exceeded`)
 }
 
 func TestShouldPropagateExtraHttpHeadersWithRedirects(t *testing.T) {
@@ -261,7 +261,7 @@ func TestStorageStateShouldRoundTripThroughFile(t *testing.T) {
 	BeforeEach(t)
 
 	storageState := &playwright.StorageState{
-		Cookies: []playwright.Cookie{
+		Cookies: []playwright.StorageStateCookie{
 			{
 				Name:     "a",
 				Value:    "b",

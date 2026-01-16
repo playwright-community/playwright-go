@@ -33,7 +33,7 @@ func (j *jsonPipe) Poll() (*message, error) {
 
 func newJsonPipe(parent *channelOwner, objectType string, guid string, initializer map[string]interface{}) *jsonPipe {
 	j := &jsonPipe{
-		msgChan: make(chan *message, 2),
+		msgChan: make(chan *message, 10),
 	}
 	j.createChannelOwner(j, parent, objectType, guid, initializer)
 	j.channel.On("message", func(ev map[string]interface{}) {
@@ -54,6 +54,12 @@ func newJsonPipe(parent *channelOwner, objectType string, guid string, initializ
 				},
 			}
 		}
+		// Send directly to maintain message ordering - the channel buffer prevents blocking
+		// Previously used a goroutine which could cause out-of-order delivery
+		defer func() {
+			// Recover from panic if channel is closed
+			_ = recover()
+		}()
 		j.msgChan <- &msg
 	})
 	j.channel.Once("closed", func() {

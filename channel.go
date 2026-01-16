@@ -38,15 +38,31 @@ func (c *channel) CreateTask(fn func()) {
 
 func (c *channel) Send(method string, options ...interface{}) (interface{}, error) {
 	return c.connection.WrapAPICall(func() (interface{}, error) {
-		return c.innerSend(method, options...).GetResultValue()
+		result, err := c.innerSend(method, options...).GetResultValue()
+		if err != nil {
+			return nil, err
+		}
+		// GUIDs are now always eagerly resolved in connection.Dispatch
+		return result, nil
 	}, c.owner.isInternalType)
 }
 
 func (c *channel) SendReturnAsDict(method string, options ...interface{}) (map[string]interface{}, error) {
 	ret, err := c.connection.WrapAPICall(func() (interface{}, error) {
-		return c.innerSend(method, options...).GetResult()
+		result, err := c.innerSend(method, options...).GetResult()
+		if err != nil {
+			return nil, err
+		}
+		// GUIDs are now always eagerly resolved in connection.Dispatch
+		return result, nil
 	}, c.owner.isInternalType)
-	return ret.(map[string]interface{}), err
+	if err != nil {
+		return nil, err
+	}
+	if ret == nil {
+		return make(map[string]interface{}), nil
+	}
+	return ret.(map[string]interface{}), nil
 }
 
 func (c *channel) innerSend(method string, options ...interface{}) *protocolCallback {

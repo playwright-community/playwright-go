@@ -100,15 +100,27 @@ func (c *connection) Dispatch(msg *message) {
 		if msg.Error != nil {
 			cb.SetError(parseError(msg.Error.Error))
 		} else {
-			cb.SetResult(c.replaceGuidsWithChannels(msg.Result).(map[string]interface{}))
+			// Always resolve GUIDs in responses, regardless of connection type
+			// The protocol guarantees that __create__ events arrive before responses that reference those objects
+			result, err := c.replaceGuidsWithChannels(msg.Result)
+			if err != nil {
+				cb.SetError(fmt.Errorf("failed to resolve response objects: %w", err))
+			} else {
+				cb.SetResult(result.(map[string]interface{}))
+			}
 		}
 		return
 	}
 	object, _ := c.objects.Load(msg.GUID)
 	if method == "__create__" {
-		c.createRemoteObject(
+		_, err := c.createRemoteObject(
 			object, msg.Params["type"].(string), msg.Params["guid"].(string), msg.Params["initializer"],
 		)
+		if err != nil {
+			// Critical: object creation failure indicates corrupted protocol state
+			// Close connection to prevent cascade failures
+			c.cleanup(err)
+		}
 		return
 	}
 	if object == nil {
@@ -134,7 +146,15 @@ func (c *connection) Dispatch(msg *message) {
 	if object.objectType == "JsonPipe" {
 		object.channel.Emit(method, msg.Params)
 	} else {
-		object.channel.Emit(method, c.replaceGuidsWithChannels(msg.Params))
+		// Always resolve GUIDs in events, regardless of connection type
+		// The protocol guarantees that __create__ events arrive before events that reference those objects
+		params, err := c.replaceGuidsWithChannels(msg.Params)
+		if err != nil {
+			// Event parameters contain invalid references - connection is corrupted
+			c.cleanup(fmt.Errorf("failed to resolve event parameters for %s: %w", method, err))
+			return
+		}
+		object.channel.Emit(method, params)
 	}
 }
 
@@ -142,10 +162,13 @@ func (c *connection) LocalUtils() *localUtilsImpl {
 	return c.localUtils
 }
 
-func (c *connection) createRemoteObject(parent *channelOwner, objectType string, guid string, initializer interface{}) interface{} {
-	initializer = c.replaceGuidsWithChannels(initializer)
-	result := createObjectFactory(parent, objectType, guid, initializer.(map[string]interface{}))
-	return result
+func (c *connection) createRemoteObject(parent *channelOwner, objectType string, guid string, initializer interface{}) (interface{}, error) {
+	resolved, err := c.replaceGuidsWithChannels(initializer)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve initializer for %s (guid=%s): %w", objectType, guid, err)
+	}
+	result := createObjectFactory(parent, objectType, guid, resolved.(map[string]interface{}))
+	return result, nil
 }
 
 func (c *connection) WrapAPICall(cb func() (interface{}, error), isInternal bool) (interface{}, error) {
@@ -156,31 +179,48 @@ func (c *connection) WrapAPICall(cb func() (interface{}, error), isInternal bool
 	return cb()
 }
 
-func (c *connection) replaceGuidsWithChannels(payload interface{}) interface{} {
+func (c *connection) replaceGuidsWithChannels(payload interface{}) (interface{}, error) {
 	if payload == nil {
-		return nil
+		return nil, nil
 	}
 	v := reflect.ValueOf(payload)
 	if v.Kind() == reflect.Slice {
 		listV := payload.([]interface{})
 		for i := 0; i < len(listV); i++ {
-			listV[i] = c.replaceGuidsWithChannels(listV[i])
+			resolved, err := c.replaceGuidsWithChannels(listV[i])
+			if err != nil {
+				return nil, fmt.Errorf("failed to resolve slice element at index %d: %w", i, err)
+			}
+			listV[i] = resolved
 		}
-		return listV
+		return listV, nil
 	}
 	if v.Kind() == reflect.Map {
 		mapV := payload.(map[string]interface{})
+		// Check if this map represents an object reference (has "guid" field)
 		if guid, hasGUID := mapV["guid"]; hasGUID {
-			if channelOwner, ok := c.objects.Load(guid.(string)); ok {
-				return channelOwner.channel
+			guidStr, ok := guid.(string)
+			if !ok {
+				return nil, fmt.Errorf("guid field is not a string: %T", guid)
 			}
+			// Try to load the object from connection's objects map
+			if channelOwner, ok := c.objects.Load(guidStr); ok {
+				return channelOwner.channel, nil
+			}
+			// Object not found - this indicates a protocol error or message ordering issue
+			return nil, fmt.Errorf("object with guid %s was not bound in the connection", guidStr)
 		}
+		// Recursively process all values in the map
 		for key := range mapV {
-			mapV[key] = c.replaceGuidsWithChannels(mapV[key])
+			resolved, err := c.replaceGuidsWithChannels(mapV[key])
+			if err != nil {
+				return nil, fmt.Errorf("failed to resolve map key '%s': %w", key, err)
+			}
+			mapV[key] = resolved
 		}
-		return mapV
+		return mapV, nil
 	}
-	return payload
+	return payload, nil
 }
 
 func (c *connection) sendMessageToServer(object *channelOwner, method string, params interface{}, noReply bool) (cb *protocolCallback) {
@@ -314,7 +354,20 @@ func newConnection(transport transport, localUtils ...*localUtilsImpl) *connecti
 }
 
 func fromChannel(v interface{}) interface{} {
-	return v.(*channel).object
+	if ch, ok := v.(*channel); ok {
+		return ch.object
+	}
+	panic(fmt.Sprintf("fromChannel: expected *channel, got %T", v))
+}
+
+// fromChannelWithConnection resolves a value to a channel object
+// With the protocol fix, GUIDs are always eagerly resolved, so this behaves identically to fromChannel
+// The conn parameter is kept for API compatibility but is no longer used
+func fromChannelWithConnection(v interface{}, conn *connection) interface{} {
+	if ch, ok := v.(*channel); ok {
+		return ch.object
+	}
+	panic(fmt.Sprintf("fromChannelWithConnection: expected *channel, got %T: %+v", v, v))
 }
 
 func fromNullableChannel(v interface{}) interface{} {
@@ -337,7 +390,9 @@ func (pc *protocolCallback) setResultOnce(result map[string]interface{}, err err
 	pc.once.Do(func() {
 		pc.value = result
 		pc.err = err
-		close(pc.done)
+		if pc.done != nil {
+			close(pc.done)
+		}
 	})
 }
 

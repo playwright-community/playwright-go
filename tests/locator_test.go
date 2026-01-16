@@ -721,3 +721,82 @@ func TestLocatorShouldSupportFilterVisible(t *testing.T) {
 		Visible: playwright.Bool(false),
 	}).GetByText("data1")).ToHaveText("Hidden data1"))
 }
+
+// TestLocatorDescribe verifies that Locator.Describe() sets a description
+// Based on upstream test: playwright/tests/page/locator-convenience.spec.ts
+func TestLocatorDescribe(t *testing.T) {
+	BeforeEach(t)
+
+	require.NoError(t, page.SetContent(`<button>Submit</button>`))
+
+	locator := page.Locator("button")
+
+	// Locator without description should return empty string
+	desc, err := locator.Description()
+	require.NoError(t, err)
+	require.Empty(t, desc, "description should be empty for locator without description")
+
+	// Set description
+	describedLocator := locator.Describe("Submit button")
+	desc, err = describedLocator.Description()
+	require.NoError(t, err)
+	require.Equal(t, "Submit button", desc)
+
+	// Original locator should still have no description
+	desc, err = locator.Description()
+	require.NoError(t, err)
+	require.Empty(t, desc, "original locator should remain unchanged")
+}
+
+// TestLocatorDescribeSpecialCharacters verifies descriptions with special characters
+func TestLocatorDescribeSpecialCharacters(t *testing.T) {
+	BeforeEach(t)
+
+	require.NoError(t, page.SetContent(`<div>Test</div>`))
+
+	locator := page.Locator("div").Describe(`Button with "quotes" and 'apostrophes'`)
+	desc, err := locator.Description()
+	require.NoError(t, err)
+	require.Equal(t, `Button with "quotes" and 'apostrophes'`, desc)
+}
+
+// TestLocatorDescribeChained verifies descriptions work with chained locators
+func TestLocatorDescribeChained(t *testing.T) {
+	BeforeEach(t)
+
+	require.NoError(t, page.SetContent(`
+		<form>
+			<input type="text" />
+		</form>
+	`))
+
+	locator := page.Locator("form").Locator("input").Describe("Form input field")
+	desc, err := locator.Description()
+	require.NoError(t, err)
+	require.Equal(t, "Form input field", desc)
+}
+
+// TestLocatorDescribeMultipleCalls verifies multiple describe calls override each other
+func TestLocatorDescribeMultipleCalls(t *testing.T) {
+	BeforeEach(t)
+
+	require.NoError(t, page.SetContent(`<button><span>Click me</span></button>`))
+
+	// First description
+	locator1 := page.Locator("button").Describe("First description")
+	desc, err := locator1.Description()
+	require.NoError(t, err)
+	require.Equal(t, "First description", desc)
+
+	// Second description on chained locator
+	locator2 := locator1.Locator("span").Describe("Second description")
+	desc, err = locator2.Description()
+	require.NoError(t, err)
+	require.Equal(t, "Second description", desc)
+
+	// Chained locator without describe should have no description
+	locator3 := locator2.Locator("span")
+	desc, err = locator3.Description()
+	require.NoError(t, err)
+	require.Empty(t, desc, "chained locator without describe should have empty description")
+}

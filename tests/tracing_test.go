@@ -7,6 +7,7 @@ import (
 	"io"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/playwright-community/playwright-go"
@@ -163,6 +164,59 @@ func TestShouldShowTracingGroupInActionList(t *testing.T) {
 		}, actions)
 }
 
+// mapInternalAPIToPublic maps internal Playwright class.method names to public API names
+func mapInternalAPIToPublic(class, method string) string {
+	// Map internal classes to public API classes
+	classMethodKey := class + "." + method
+
+	// Common Frame methods that should map to Page
+	frameToPageMethods := map[string]bool{
+		"goto": true, "reload": true, "goBack": true, "goForward": true,
+		"setContent": true, "waitForNavigation": true, "waitForURL": true,
+		"waitForLoadState": true, "screenshot": true, "pdf": true,
+		"close": true, "pause": true,
+	}
+
+	// Frame selector/locator methods that should map to Locator
+	frameLocatorMethods := map[string]bool{
+		"click": true, "dblclick": true, "fill": true, "press": true,
+		"type": true, "hover": true, "check": true, "uncheck": true,
+		"selectOption": true, "setInputFiles": true, "focus": true,
+		"blur": true, "tap": true, "dispatchEvent": true, "evaluate": true,
+		"isVisible": true, "isHidden": true, "isEnabled": true, "isDisabled": true,
+		"isChecked": true, "isEditable": true, "textContent": true,
+		"innerText": true, "innerHTML": true, "getAttribute": true,
+	}
+
+	if class == "Frame" {
+		if frameToPageMethods[method] {
+			class = "Page"
+		} else if frameLocatorMethods[method] {
+			class = "Locator"
+		}
+	}
+
+	// Special case mappings
+	specialMappings := map[string]string{
+		"BrowserContext.newPage": "BrowserContext.NewPage",
+		"Page.waitForTimeout":    "Page.WaitForTimeout",
+	}
+
+	// Convert method to title case (first letter uppercase)
+	titleCaseMethod := strings.ToUpper(method[:1]) + method[1:]
+	apiName := class + "." + titleCaseMethod
+
+	// Check for special mappings
+	if mapped, ok := specialMappings[classMethodKey]; ok {
+		return mapped
+	}
+	if mapped, ok := specialMappings[apiName]; ok {
+		return mapped
+	}
+
+	return apiName
+}
+
 func parseTrace(t *testing.T, tracePath string) (files map[string][]byte, events []interface{}) {
 	t.Helper()
 	// read and unzip trace
@@ -193,9 +247,23 @@ func parseTrace(t *testing.T, tracePath string) (files map[string][]byte, events
 				var event map[string]interface{}
 				err := json.Unmarshal(line, &event)
 				require.NoError(t, err)
-				switch event["type"].(string) {
+				eventType, _ := event["type"].(string)
+
+				switch eventType {
 				case "before":
 					event["type"] = "action"
+					// Compute apiName from class and method for regular actions
+					// For tracing groups, use the title field
+					class, _ := event["class"].(string)
+					method, _ := event["method"].(string)
+					title, hasTitle := event["title"].(string)
+
+					if method == "tracingGroup" && hasTitle {
+						event["apiName"] = title
+					} else if class != "" && method != "" {
+						event["apiName"] = mapInternalAPIToPublic(class, method)
+					}
+
 					actionMap[event["callId"].(string)] = event
 					events = append(events, event)
 				case "input":
@@ -233,7 +301,9 @@ func getTraceActions(events []interface{}) []string {
 	})
 	for _, e := range actionEvents {
 		event := e.(map[string]interface{})
-		actions = append(actions, event["apiName"].(string))
+		if apiName, ok := event["apiName"].(string); ok {
+			actions = append(actions, apiName)
+		}
 	}
 	return actions
 }

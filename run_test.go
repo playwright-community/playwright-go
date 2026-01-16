@@ -11,7 +11,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/mitchellh/go-ps"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -150,7 +149,12 @@ func TestShouldNotHangWhenPlaywrightUnexpectedExit(t *testing.T) {
 	context, err := browser.NewContext()
 	require.NoError(t, err)
 
-	err = killPlaywrightProcess()
+	// Get the process ID directly from Playwright
+	pid := pw.Pid()
+	require.NotZero(t, pid, "Playwright process PID should not be zero")
+
+	// Kill the process
+	err = killProcessByPid(pid)
 	require.NoError(t, err)
 
 	_, err = context.NewPage()
@@ -170,25 +174,6 @@ func TestGetNodeExecutable(t *testing.T) {
 
 	executable = getNodeExecutable("testDirectory")
 	assert.Contains(t, executable, "testDirectory")
-}
-
-// find and kill playwright process
-func killPlaywrightProcess() error {
-	all, err := ps.Processes()
-	if err != nil {
-		return err
-	}
-	for _, process := range all {
-		if process.Executable() == "node" || process.Executable() == "node.exe" {
-			if process.PPid() == os.Getpid() {
-				if err := killProcessByPid(process.Pid()); err != nil {
-					return err
-				}
-				return nil
-			}
-		}
-	}
-	return fmt.Errorf("playwright process not found")
 }
 
 func killProcessByPid(pid int) error {

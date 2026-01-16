@@ -61,15 +61,21 @@ func transformStructIntoMapIfNeeded(inStruct interface{}) map[string]interface{}
 		// Merge into the base map by the JSON struct tag
 		for i := 0; i < v.NumField(); i++ {
 			fi := typ.Field(i)
+			tagv := fi.Tag.Get("json")
+			key := strings.Split(tagv, ",")[0]
+			if key == "" {
+				key = fi.Name
+			}
+			// Special handling for timeout field: provide default value when nil
+			// This is required in Playwright v1.57+ protocol where timeout is no longer optional
+			if key == "timeout" && skipFieldSerialization(v.Field(i)) {
+				out[key] = float64(30000) // default 30s
+				continue
+			}
 			// Skip the values when the field is a pointer (like *string) and nil.
 			if fi.IsExported() && !skipFieldSerialization(v.Field(i)) {
 				// We use the JSON struct fields for getting the original names
 				// out of the field.
-				tagv := fi.Tag.Get("json")
-				key := strings.Split(tagv, ",")[0]
-				if key == "" {
-					key = fi.Name
-				}
 				out[key] = transformStructValues(v.Field(i).Interface())
 			}
 		}
@@ -110,6 +116,16 @@ func transformOptions(options ...interface{}) map[string]interface{} {
 	v := reflect.ValueOf(option)
 	if v.Kind() == reflect.Slice {
 		if v.Len() == 0 {
+			// Check if the slice element type has a Timeout field and add default if so
+			// This is required in Playwright v1.57+ protocol where timeout is no longer optional
+			elemType := v.Type().Elem()
+			if elemType.Kind() == reflect.Struct {
+				if _, hasTimeout := elemType.FieldByName("Timeout"); hasTimeout {
+					if base["timeout"] == nil {
+						base["timeout"] = float64(30000) // default 30s
+					}
+				}
+			}
 			return base
 		}
 		option = v.Index(0).Interface()

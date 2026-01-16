@@ -72,12 +72,20 @@ func main() {
 
 	// Filter for active entries. There should be 0, because we have completed the entry already
 	assertErrorToNilf("could not click: %v", page.Locator("text=Active").Click())
+	// Wait is necessary because headless is too fast
+	assertErrorToNilf("could not wait for selector state: %v", page.Locator("ul.todo-list > li").WaitFor(playwright.LocatorWaitForOptions{
+		State: playwright.WaitForSelectorStateDetached,
+	}))
 	assertCountOfTodos(0)
 
 	// If we filter now for completed entries, there should be 1
 	assertErrorToNilf("could not click: %v", page.GetByRole("link", playwright.PageGetByRoleOptions{
 		Name: "Completed",
 	}).Click())
+	// Wait is necessary because headless is too fast
+	assertErrorToNilf("could not wait for selector state: %v", page.Locator("ul.todo-list > li").WaitFor(playwright.LocatorWaitForOptions{
+		State: playwright.WaitForSelectorStateVisible,
+	}))
 	assertCountOfTodos(1)
 
 	// Clear the list of completed entries, then it should be again 0
