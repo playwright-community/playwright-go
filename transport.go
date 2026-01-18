@@ -41,13 +41,25 @@ func (t *pipeTransport) Poll() (*message, error) {
 		return nil, fmt.Errorf("could not read protocol data: %w", err)
 	}
 
+	// Ensure data buffer is cleared after use - fixes memory dump visibility issue
+	defer func() {
+		// Clear sensitive JSON data from memory to prevent memory dump exposure
+		for i := range data {
+			data[i] = 0
+		}
+		data = nil
+	}()
+
 	msg := &message{}
 	if err := json.Unmarshal(data, &msg); err != nil {
 		return nil, fmt.Errorf("could not decode json: %w", err)
 	}
 	if os.Getenv("DEBUGP") != "" {
-		fmt.Fprintf(os.Stdout, "\x1b[33mRECV>\x1b[0m\n%s\n", data)
+		// Only show message metadata in debug, not content
+		fmt.Fprintf(os.Stdout, "\x1b[33mRECV>\x1b[0m Message ID: %d, Method: %s, GUID: %s\n",
+			msg.ID, msg.Method, msg.GUID)
 	}
+	// Only log metadata, not message content
 	return msg, nil
 }
 
@@ -70,13 +82,42 @@ func (t *pipeTransport) Send(msg map[string]interface{}) error {
 	if err != nil {
 		return fmt.Errorf("pipeTransport: could not marshal json: %w", err)
 	}
+
+	// Ensure msgBytes is cleared after use - fixes memory dump visibility issue
+	defer func() {
+		// Clear sensitive JSON data from memory to prevent memory dump exposure
+		for i := range msgBytes {
+			msgBytes[i] = 0
+		}
+		msgBytes = nil
+	}()
+
 	if os.Getenv("DEBUGP") != "" {
-		fmt.Fprintf(os.Stdout, "\x1b[32mSEND>\x1b[0m\n%s\n", msgBytes)
+		fmt.Fprintf(os.Stderr, "\x1b[32mSEND>\x1b[0m\n[JSON DATA REDACTED FOR SECURITY]\n")
 	}
 
 	lengthPadding := make([]byte, 4)
 	binary.LittleEndian.PutUint32(lengthPadding, uint32(len(msgBytes)))
-	if _, err = t.writer.Write(append(lengthPadding, msgBytes...)); err != nil {
+
+	// Create secure write buffer to avoid keeping msgBytes in append result
+	writeBuffer := make([]byte, 4+len(msgBytes))
+	copy(writeBuffer, lengthPadding)
+	copy(writeBuffer[4:], msgBytes)
+
+	// Clear intermediate buffers
+	for i := range lengthPadding {
+		lengthPadding[i] = 0
+	}
+
+	defer func() {
+		// Clear write buffer to prevent memory dump exposure
+		for i := range writeBuffer {
+			writeBuffer[i] = 0
+		}
+		writeBuffer = nil
+	}()
+
+	if _, err = t.writer.Write(writeBuffer); err != nil {
 		return err
 	}
 	return nil
