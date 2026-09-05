@@ -1,7 +1,6 @@
 package playwright
 
 import (
-	"context"
 	"fmt"
 	"reflect"
 	"sync"
@@ -17,6 +16,9 @@ type (
 		listeners []eventListener
 		errChan   chan error
 		waitFunc  func() (any, error)
+		// stopTimeout stops the timeout timer WaitForEvent armed; nil before
+		// WaitForEvent or when no timeout was set.
+		stopTimeout func()
 	}
 	eventListener struct {
 		emitter EventEmitter
@@ -81,19 +83,12 @@ func (w *waiter) WaitForEvent(emitter EventEmitter, event string, predicate any)
 	}
 	evChan := make(chan any, 1)
 	handler := w.createHandler(evChan, predicate)
-	ctx, cancel := context.WithCancel(context.Background())
 	if w.timeout != 0 {
 		timeout := w.timeout
-		go func() {
-			select {
-			case <-time.After(time.Duration(timeout) * time.Millisecond):
-				err := fmt.Errorf("%w:Timeout %.2fms exceeded.", ErrTimeout, timeout)
-				w.reject(err)
-				return
-			case <-ctx.Done():
-				return
-			}
-		}()
+		timer := time.AfterFunc(time.Duration(timeout)*time.Millisecond, func() {
+			w.reject(fmt.Errorf("%w:Timeout %.2fms exceeded.", ErrTimeout, timeout))
+		})
+		w.stopTimeout = func() { timer.Stop() }
 	}
 
 	emitter.On(event, handler)
@@ -110,23 +105,35 @@ func (w *waiter) WaitForEvent(emitter EventEmitter, event string, predicate any)
 		)
 		select {
 		case err = <-w.errChan:
-			break
 		case val = <-evChan:
-			break
 		}
-		cancel()
-		w.mu.Lock()
-		defer w.mu.Unlock()
-		for _, l := range w.listeners {
-			l.emitter.RemoveListener(l.event, l.handler)
-		}
-		close(evChan)
+		// evChan is deliberately left open: a handler that passed its
+		// fulfilled check before the timeout fired may still send into it.
+		w.dispose()
 		if err != nil {
 			return nil, err
 		}
 		return val, nil
 	}
 	return w
+}
+
+// dispose releases the waiter: it marks it fulfilled so a handler still
+// running on the dispatch goroutine drops its event, stops the timeout and
+// removes every listener. Wait calls it once the wait has resolved; a caller
+// whose condition was met after subscribing but before waiting calls it
+// directly and must not Wait afterward. Mirrors upstream's Waiter.dispose().
+func (w *waiter) dispose() {
+	w.fulfilled.Store(true)
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if w.stopTimeout != nil {
+		w.stopTimeout()
+	}
+	for _, l := range w.listeners {
+		l.emitter.RemoveListener(l.event, l.handler)
+	}
+	w.listeners = nil
 }
 
 // Wait waits for the waiter to return. It needs to call WaitForEvent once first.
@@ -233,8 +240,14 @@ func callPredicate(predicate any, ev []any) (matches bool, err error) {
 	return v.Call([]reflect.Value{arg})[0].Bool(), nil
 }
 
+// reject records the first failure. Later ones (a timeout racing an event, or
+// two rejection events in flight at once) are dropped: errChan also has to
+// hold a callback error, and a second rejection would fill it and block that
+// send forever.
 func (w *waiter) reject(err error) {
-	w.fulfilled.Store(true)
+	if w.fulfilled.Swap(true) {
+		return
+	}
 	w.errChan <- err
 }
 

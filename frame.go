@@ -148,10 +148,10 @@ func (f *frameImpl) WaitForLoadState(options ...FrameWaitForLoadStateOptions) er
 	if option.State == nil {
 		option.State = LoadStateLoad
 	}
-	return f.waitForLoadStateImpl(string(*option.State), option.Timeout, nil)
+	return f.waitForLoadStateImpl(string(*option.State), option.Timeout)
 }
 
-func (f *frameImpl) waitForLoadStateImpl(state string, timeout *float64, cb func() error) error {
+func (f *frameImpl) waitForLoadStateImpl(state string, timeout *float64) error {
 	if f.loadStates.ContainsOne(state) {
 		return nil
 	}
@@ -163,13 +163,14 @@ func (f *frameImpl) waitForLoadStateImpl(state string, timeout *float64, cb func
 		gotState := payload.(string)
 		return gotState == state
 	})
-	if cb == nil {
-		_, err := waiter.Wait()
-		return err
-	} else {
-		_, err := waiter.RunAndWait(cb)
-		return err
+	// Re-check after subscribing: a "loadstate" dispatched between the check
+	// above and the subscription reached no listener and is never replayed.
+	if f.loadStates.ContainsOne(state) {
+		waiter.dispose()
+		return nil
 	}
+	_, err = waiter.Wait()
+	return err
 }
 
 func (f *frameImpl) WaitForURL(url any, options ...FrameWaitForURLOptions) error {
@@ -188,20 +189,33 @@ func (f *frameImpl) WaitForURL(url any, options ...FrameWaitForURLOptions) error
 				timeout = options[0].Timeout
 			}
 		}
-		return f.waitForLoadStateImpl(state, timeout, nil)
+		return f.waitForLoadStateImpl(state, timeout)
 	}
 	navigationOptions := FrameExpectNavigationOptions{URL: url}
 	if len(options) > 0 {
 		navigationOptions.Timeout = options[0].Timeout
 		navigationOptions.WaitUntil = options[0].WaitUntil
 	}
-	if _, err := f.ExpectNavigation(nil, navigationOptions); err != nil {
+	if _, err := f.expectNavigation(nil, true, navigationOptions); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (f *frameImpl) ExpectNavigation(cb func() error, options ...FrameExpectNavigationOptions) (Response, error) {
+	return f.expectNavigation(cb, false, options...)
+}
+
+// expectNavigation is ExpectNavigation with one extra knob for WaitForURL.
+// With acceptCurrentURL the frame's URL is compared against options.URL once
+// the "navigated" listener is attached; a match means the commit was recorded
+// before the subscription, so the navigation event is skipped, only the load
+// state is awaited and no Response is returned (the event that carried the
+// request is the one that was missed). ExpectNavigation itself must not do
+// this: its contract is to wait for a new navigation, so a reload of the
+// current URL has to be observed rather than short-circuited. Only meaningful
+// with a nil cb; there is no action to run when the navigation has happened.
+func (f *frameImpl) expectNavigation(cb func() error, acceptCurrentURL bool, options ...FrameExpectNavigationOptions) (Response, error) {
 	if f.page == nil {
 		return nil, errors.New("frame is detached")
 	}
@@ -241,15 +255,20 @@ func (f *frameImpl) ExpectNavigation(cb func() error, options ...FrameExpectNavi
 		return nil, err
 	}
 
-	eventData, err := waiter.WaitForEvent(f, "navigated", predicate).RunAndWait(cb)
-	if err != nil || eventData == nil {
-		return nil, err
-	}
-
-	event := eventData.(map[string]any)
-	if errVal, ok := event["error"]; ok {
-		// Any failed navigation results in a rejection.
-		return nil, errors.New(errVal.(string))
+	waiter.WaitForEvent(f, "navigated", predicate)
+	var event map[string]any
+	if acceptCurrentURL && matcher != nil && matcher.Matches(f.URL()) {
+		waiter.dispose()
+	} else {
+		eventData, waitErr := waiter.RunAndWait(cb)
+		if waitErr != nil || eventData == nil {
+			return nil, waitErr
+		}
+		event = eventData.(map[string]any)
+		if errVal, ok := event["error"]; ok {
+			// Any failed navigation results in a rejection.
+			return nil, errors.New(errVal.(string))
+		}
 	}
 
 	remaining := option.Timeout
@@ -262,10 +281,10 @@ func (f *frameImpl) ExpectNavigation(cb func() error, options ...FrameExpectNavi
 		}
 		remaining = Float(ms)
 	}
-	if err = f.waitForLoadStateImpl(string(*option.WaitUntil), remaining, nil); err != nil {
+	if err = f.waitForLoadStateImpl(string(*option.WaitUntil), remaining); err != nil {
 		return nil, err
 	}
-	if event["newDocument"] != nil && event["newDocument"].(map[string]any)["request"] != nil {
+	if event != nil && event["newDocument"] != nil && event["newDocument"].(map[string]any)["request"] != nil {
 		request := fromChannel(event["newDocument"].(map[string]any)["request"]).(*requestImpl)
 		// The response lives on the final request after following any redirects.
 		return request.finalRequest().Response()
@@ -283,12 +302,6 @@ func (f *frameImpl) setNavigationWaiter(timeout *float64) (*waiter, error) {
 	} else {
 		waiter.WithTimeout(f.page.timeoutSettings.NavigationTimeout())
 	}
-	// If the page is already closed, fail immediately rather than waiting for the
-	// (already-fired) close event or the navigation timeout, matching upstream's
-	// rejectImmediately guard.
-	if f.page.IsClosed() {
-		waiter.reject(f.page.closeErrorWithReason())
-	}
 	waiter.RejectOnEvent(f.page, "close", f.page.closeErrorWithReason())
 	waiter.RejectOnEvent(f.page, "crash", fmt.Errorf("Navigation failed because page crashed!"))
 	waiter.RejectOnEvent(f.page, "framedetached", fmt.Errorf("Navigating frame was detached!"), func(payload any) bool {
@@ -298,6 +311,14 @@ func (f *frameImpl) setNavigationWaiter(timeout *float64) (*waiter, error) {
 		}
 		return false
 	})
+	// If the page is already closed, fail immediately rather than waiting for
+	// the navigation timeout, matching upstream's rejectImmediately guard. The
+	// check comes after the subscription: a close dispatched in between would
+	// otherwise reach no listener and never be replayed. reject drops the
+	// duplicate when the listener saw it first.
+	if f.page.IsClosed() {
+		waiter.reject(f.page.closeErrorWithReason())
+	}
 	return waiter, nil
 }
 
