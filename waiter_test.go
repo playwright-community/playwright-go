@@ -277,3 +277,32 @@ func TestWaiterHasNotDeadlockForErrChanCapBiggerThan1AndCallbackErr(t *testing.T
 	err2 := <-callbackErrCh
 	require.ErrorIs(t, err2, ErrTimeout)
 }
+
+// dispose is for the caller that subscribed and then found its condition
+// already met: it must take every listener back and leave nothing that a
+// later event could reach.
+func TestWaiterDisposeRemovesEveryListener(t *testing.T) {
+	const timeout = 50.0
+	emitter := &eventEmitter{}
+	rejecter := &eventEmitter{}
+	waiter := newWaiter().WithTimeout(timeout)
+	waiter.RejectOnEvent(rejecter, testEventNameReject, errors.New("rejected"))
+	waiter.WaitForEvent(emitter, testEventNameFoobar, nil)
+	require.Equal(t, 1, emitter.ListenerCount(testEventNameFoobar))
+	require.Equal(t, 1, rejecter.ListenerCount(testEventNameReject))
+
+	waiter.dispose()
+
+	require.Zero(t, emitter.ListenerCount(testEventNameFoobar))
+	require.Zero(t, rejecter.ListenerCount(testEventNameReject))
+	require.False(t, emitter.Emit(testEventNameFoobar, testEventPayload))
+	require.False(t, rejecter.Emit(testEventNameReject))
+	// The timeout was stopped: nothing reaches errChan, even well past its
+	// deadline. Real time has to pass here; testing/synctest would make this
+	// exact but needs go 1.25 in go.mod.
+	select {
+	case err := <-waiter.errChan:
+		t.Fatalf("disposed waiter still produced %v", err)
+	case <-time.After(3 * timeout * time.Millisecond):
+	}
+}
